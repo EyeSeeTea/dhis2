@@ -12,18 +12,19 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="key" value="healthItems"/>
   </bean>
   
-  <bean id="rssHivAidsContentProvider" 
-    class="org.hisp.dhis.dashboard.provider.RssContentProvider">
-    <property name="url" value="http://health.yahoo.com/news/rss/hiv_aids"/>
-    <property name="key" value="hivAidsItems"/>
-  </bean>
-  
   <bean id="reportContentProvider" 
     class="org.hisp.dhis.dashboard.provider.ReportContentProvider">
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
     <property name="userStore" ref="org.hisp.dhis.user.UserStore"/>
     <property name="reportManager" ref="org.hisp.dhis.report.ReportManager"/>
     <property name="key" value="reports"/>
+  </bean>
+  
+  <bean id="documentContentProvider" 
+    class="org.hisp.dhis.dashboard.provider.DocumentContentProvider">
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
+    <property name="userStore" ref="org.hisp.dhis.user.UserStore"/>
+    <property name="key" value="documents"/>
   </bean>
   
   <bean id="dataMartExportContentProvider"
@@ -50,7 +51,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <entry>
           <key><value>report</value></key>
           <ref local="reportContentProvider"/>
-        </entry>
+        </entry>    
+        <!-- <entry>
+          <key><value>document</value></key>
+          <ref local="documentContentProvider"/>
+        </entry> -->
         <entry>
           <key><value>data_mart_export</value></key>
           <ref local="dataMartExportContentProvider"/>
@@ -62,10 +67,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <entry>
           <key><value>rss_health</value></key>
           <ref local="rssHealthContentProvider"/>
-        </entry>
-        <entry>
-          <key><value>rss_hiv_aids</value></key>
-          <ref local="rssHivAidsContentProvider"/>
         </entry>
       </map>
     </property>

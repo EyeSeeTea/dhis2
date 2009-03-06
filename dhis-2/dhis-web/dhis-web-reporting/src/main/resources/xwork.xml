@@ -9,6 +9,44 @@
       <result name="success" type="redirect">displayViewReportFormVerifyConfiguration.action</result>
     </action>
     
+    <!-- Document -->
+    
+    <action name="saveDocument" class="org.hisp.dhis.reporting.document.action.SaveDocumentAction">
+      <result name="success" type="redirect">displayViewDocumentForm.action</result>      
+      <interceptor-ref name="fileUploadStack"/>
+      <param name="requiredAuthorities">F_DOCUMENT_ADD</param>
+    </action>
+    
+    <action name="removeDocument" class="org.hisp.dhis.reporting.document.action.RemoveDocumentAction">
+      <result name="success" type="redirect">displayViewDocumentForm.action</result>
+      <param name="requiredAuthorities">F_DOCUMENT_DELETE</param>
+    </action>
+    
+    <action name="displayViewDocumentForm" class="org.hisp.dhis.reporting.document.action.GetAllDocumentsAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-reporting/viewDocumentForm.vm</param>
+      <param name="menu">/dhis-web-reporting/menu.vm</param>
+      <param name="javascripts">javascript/document.js</param>
+    </action>
+    
+    <action name="displayAddDocumentForm" class="org.hisp.dhis.reporting.action.NoAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-reporting/addDocumentForm.vm</param>
+      <param name="menu">/dhis-web-reporting/menu.vm</param>
+      <param name="javascripts">javascript/document.js</param>
+    </action>
+    
+    <action name="validateDocument" class="org.hisp.dhis.reporting.document.action.ValidateDocumentAction">
+      <result name="success" type="velocity-xml">/dhis-web-reporting/responseSuccess.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-reporting/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="addDocumentToDashboard" class="org.hisp.dhis.reporting.document.action.AddDocumentToDashboardAction">
+      <result name="success" type="velocity-xml">/dhis-web-reporting/responseSuccess.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
     <!-- Chart -->
     
     <action name="createChart" class="org.hisp.dhis.reporting.chart.action.CreateChartAction">
