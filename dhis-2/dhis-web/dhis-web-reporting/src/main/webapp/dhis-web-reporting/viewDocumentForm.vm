@@ -23,7 +23,14 @@
                 #foreach ( $document in $documents )
                 <tr>
                     <td#alternate( $mark )>$encoder.htmlEncode( $document.name )</td>
-                    <td style="text-align:center"#alternate( $mark )><a href="$document.url" title="$i18n.getString( 'view_report' )"><img src="../images/view_report.png" alt="$i18n.getString( 'view_report' )"></a></td>
+                    <td style="text-align:center"#alternate( $mark )>
+                    	#if ( $document.external )
+                    	   <a href="$document.url" title="$i18n.getString( 'view_report' )">
+                    	#else
+                    	   <a href="javascript:window.location.href='loadDocument.action?id=$document.id'" title="$i18n.getString( 'view_report' )">
+                    	#end
+                    	<img src="../images/view_report.png" alt="$i18n.getString( 'view_report' )"></a>
+                    </td>
                     <td style="text-align:center"#alternate( $mark )><a href="javascript:addDocumentToDashboard( '$document.id' )" title="$i18n.getString( 'add_to_dashboard' )"><img src="../images/add_to_dashboard.png" alt="$i18n.getString( 'add_to_dashboard' )"></a></td>
                     <td style="text-align:center"#alternate( $mark )><a href="javascript:removeDocument( '$encoder.htmlEncode( $document.id )' )" title="$i18n.getString( 'remove_report' )"><img src="../images/delete.png" alt="$i18n.getString( 'remove_report' )"></a></td>
                 </tr>

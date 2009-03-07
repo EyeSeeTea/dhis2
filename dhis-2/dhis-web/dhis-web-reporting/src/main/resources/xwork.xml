@@ -47,6 +47,15 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     
+    <action name="loadDocument" class="org.hisp.dhis.reporting.document.action.LoadDocumentFromFileSystemAction">
+      <result name="success" type="stream">
+        <param name="contentType">application/file</param>
+        <param name="inputName">inputStream</param>
+        <param name="contentDisposition">filename="${fileName}"</param>
+        <param name="bufferSize">10240</param>
+      </result>
+    </action>
+    
     <!-- Chart -->
     
     <action name="createChart" class="org.hisp.dhis.reporting.chart.action.CreateChartAction">
@@ -68,7 +77,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reporting/addChartForm.vm</param>
       <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="javascripts">../dhis-web-commons/lists/lists.js,javascript/lists.js,javascript/chart.js</param>
+      <param name="javascripts">javascript/lists.js,javascript/chart.js</param>
       <param name="requiredAuthorities">F_CHART_ADD</param>      
     </action>
     
@@ -104,7 +113,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reporting/addReportForm.vm</param>
       <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="javascripts">../dhis-web-commons/lists/lists.js,javascript/report.js</param>
+      <param name="javascripts">javascript/report.js</param>
       <param name="requiredAuthorities">F_REPORT_ADD</param> 	  
     </action>
     
@@ -188,7 +197,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reporting/inputReportParamsForm.vm</param>
       <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="javascripts">../dhis-web-commons/lists/lists.js,javascript/report.js,javascript/table.js,javascript/reportParams.js</param>
+      <param name="javascripts">javascript/report.js,javascript/table.js,javascript/reportParams.js</param>
       <param name="requiredAuthorities">F_REPORT_VIEW</param>
     </action>
     
@@ -196,7 +205,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reporting/addTableForm.vm</param>
       <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="javascripts">../dhis-web-commons/lists/lists.js,javascript/table.js,javascript/lists.js</param>
+      <param name="javascripts">javascript/table.js,javascript/lists.js</param>
       <param name="requiredAuthorities">F_REPORTTABLE_ADD</param>
     </action>
     
@@ -252,7 +261,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reporting/viewDataCompletenessForm.vm</param>
       <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="javascripts">../dhis-web-commons/lists/lists.js,../dhis-web-commons/oust/oust.js,javascript/dataCompleteness.js</param>
+      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/dataCompleteness.js</param>
     </action>
     
     <action name="getDataCompleteness" class="org.hisp.dhis.reporting.completeness.action.GetDataCompletenessAction">

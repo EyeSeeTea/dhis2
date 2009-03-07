@@ -1,21 +1,16 @@
 package org.hisp.dhis.reporting.document.action;
 
-import java.io.File;
+import java.io.InputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.document.DocumentService;
 import org.hisp.dhis.external.location.LocationManager;
-import org.hisp.dhis.external.location.LocationManagerException;
 
 import com.opensymphony.xwork.Action;
 
-public class RemoveDocumentAction
+public class LoadDocumentFromFileSystemAction
     implements Action
 {
-    private static final Log log = LogFactory.getLog( RemoveDocumentAction.class );
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -32,10 +27,10 @@ public class RemoveDocumentAction
     public void setDocumentService( DocumentService documentService )
     {
         this.documentService = documentService;
-    }
-    
+    }   
+
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Output
     // -------------------------------------------------------------------------
 
     private Integer id;
@@ -43,41 +38,38 @@ public class RemoveDocumentAction
     public void setId( Integer id )
     {
         this.id = id;
-    }
+    }   
+    
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
+    private InputStream inputStream;
+
+    public InputStream getInputStream()
+    {
+        return inputStream;
+    }
+    
+    private String fileName;
+
+    public String getFileName()
+    {
+        return fileName;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        if ( id != null )
-        {
-            Document document = documentService.getDocument( id );
-            
-            if ( !document.isExternal() )
-            {
-                try
-                {
-                    File file = locationManager.getFileForReading( document.getUrl(), DocumentService.DIR );
-                    
-                    if ( file.delete() )
-                    {
-                        log.info( "Document " + document.getUrl() + " successfully deleted" );
-                    }
-                    else
-                    {
-                        log.warn( "Document " + document.getUrl() + " could not be deleted" );
-                    }
-                }
-                catch ( LocationManagerException ex )
-                {
-                    log.warn( "An error occured while deleting " + document.getUrl() );
-                }
-            }
-            
-            documentService.deleteDocument( document );
-        }
+        Document document = documentService.getDocument( id );
+        
+        inputStream = locationManager.getInputStream( document.getUrl(), DocumentService.DIR );
+        
+        fileName = document.getUrl();
         
         return SUCCESS;
     }

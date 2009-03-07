@@ -52,10 +52,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
           <key><value>report</value></key>
           <ref local="reportContentProvider"/>
         </entry>    
-        <!-- <entry>
+        <entry>
           <key><value>document</value></key>
           <ref local="documentContentProvider"/>
-        </entry> -->
+        </entry>
         <entry>
           <key><value>data_mart_export</value></key>
           <ref local="dataMartExportContentProvider"/>
@@ -121,6 +121,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
     <property name="userStore" ref="org.hisp.dhis.user.UserStore"/>
     <property name="olapURLService" ref="org.hisp.dhis.olap.OlapURLService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.dashboard.action.RemoveDocumentAction"
+    class="org.hisp.dhis.dashboard.action.RemoveDocumentAction"
+    scope="prototype">
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
+    <property name="userStore" ref="org.hisp.dhis.user.UserStore"/>
+    <property name="documentService" ref="org.hisp.dhis.document.DocumentService"/>
   </bean>
   
 </beans>

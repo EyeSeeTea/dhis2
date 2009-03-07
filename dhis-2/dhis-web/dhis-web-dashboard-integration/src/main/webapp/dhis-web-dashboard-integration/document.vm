@@ -6,7 +6,12 @@
     #foreach ( $document in $documents )
     <tr>
         <td>
-            <a href="$document.url">$document.name</a>
+            #if ( $document.external )
+                <a href="$document.url">
+            #else
+                <a href="javascript:window.location.href='../dhis-web-reporting/loadDocument.action?id=$document.id'">
+            #end
+            $document.name</a>
         </td>
         <td style="width:16px">
             <a href="javascript:window.location.href='removeDocument.action?id=$document.id'" title="$i18n.getString( 'remove' )">

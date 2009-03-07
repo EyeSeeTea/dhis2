@@ -48,3 +48,19 @@ function addDocumentToDashboard( id )
         request.send( "addDocumentToDashboard.action?id=" + id );
     }
 }
+
+function toggleExternal()
+{
+    var external = getListValue( "external" );
+    
+    if ( external == "true" )
+    {
+        document.getElementById( "fileDiv" ).style.display = "none";
+        document.getElementById( "urlDiv" ).style.display = "block";
+    }
+    else
+    {
+        document.getElementById( "fileDiv" ).style.display = "block";
+        document.getElementById( "urlDiv" ).style.display = "none";
+    }
+}

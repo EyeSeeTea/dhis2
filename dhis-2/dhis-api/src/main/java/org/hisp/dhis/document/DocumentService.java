@@ -5,6 +5,7 @@ import java.util.Collection;
 public interface DocumentService
 {
     String ID = DocumentService.class.getName();
+    String DIR = "documents";
     
     int saveDocument( Document document );
     

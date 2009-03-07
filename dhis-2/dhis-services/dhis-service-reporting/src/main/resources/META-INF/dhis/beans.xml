@@ -324,6 +324,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <value>.*\.ReportTableService\.delete.*</value>
         <value>.*\.ReportStore\.delete.*</value>
         <value>.*\.ChartService\.delete.*</value>
+        <value>.*\.DocumentService\.delete.*</value>
       </list>
     </property>
   </bean>

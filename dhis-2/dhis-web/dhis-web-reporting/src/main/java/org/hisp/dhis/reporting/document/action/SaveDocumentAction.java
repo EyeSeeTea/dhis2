@@ -15,7 +15,7 @@ public class SaveDocumentAction
 {
     private static final Log log = LogFactory.getLog( SaveDocumentAction.class );
     
-    private static final String DOCUMENTS_DIR = "documents";
+    private static final String HTTP_PREFIX = "http://";
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -92,7 +92,7 @@ public class SaveDocumentAction
         {
             log.info( "Uploading file: '" + fileName + "', content-type: '" + contentType + "'" );
             
-            File destination = locationManager.getFileForWriting( fileName, DOCUMENTS_DIR );
+            File destination = locationManager.getFileForWriting( fileName, DocumentService.DIR );
                 
             boolean fileMoved = file.renameTo( destination );
             
@@ -102,6 +102,13 @@ public class SaveDocumentAction
             }
             
             url = fileName;
+        }
+        else
+        {
+            if ( !url.startsWith( HTTP_PREFIX ) )
+            {
+                url = HTTP_PREFIX + url;
+            }
         }
         
         log.info( "Document name: '" + name + "', url: '" + url + "', external: '" + external + "'" );

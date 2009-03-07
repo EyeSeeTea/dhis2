@@ -25,9 +25,20 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.document.DocumentService"/>
   </bean>
   
+  <bean id="org.hisp.dhis.reporting.document.action.LoadDocumentFromFileSystemAction"
+    class="org.hisp.dhis.reporting.document.action.LoadDocumentFromFileSystemAction"
+    scope="prototype">
+    <property name="locationManager"
+      ref="org.hisp.dhis.external.location.LocationManager"/>
+    <property name="documentService"
+      ref="org.hisp.dhis.document.DocumentService"/>      
+  </bean>
+  
   <bean id="org.hisp.dhis.reporting.document.action.RemoveDocumentAction"
     class="org.hisp.dhis.reporting.document.action.RemoveDocumentAction"
     scope="prototype">
+    <property name="locationManager"
+      ref="org.hisp.dhis.external.location.LocationManager"/>
     <property name="documentService"
       ref="org.hisp.dhis.document.DocumentService"/>
   </bean>
