@@ -674,6 +674,7 @@
     
     <request>
       <name>updateOrganisationUnitGeoCode</name>
+      <type>void</type>
       <bean>org.hisp.dhis.webservice.adapter.organisationunit.OrganisationUnitServiceAdapter</bean>
       <method>updateOrganisationUnitGeoCode</method>
       <parameters>
