@@ -105,7 +105,7 @@ public class GetDataElementListAction
     // Output
     // -------------------------------------------------------------------------
 
-    private List<DataElement> dataElements = new ArrayList<DataElement>();
+    private List<DataElement> dataElements;
 
     public List<DataElement> getDataElements()
     {

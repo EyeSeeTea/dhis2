@@ -25,7 +25,7 @@
     </action>
     
     <action name="showSortDataElementForm"
-      class="org.hisp.dhis.dd.action.dataelement.GetDataElementListAction">
+      class="org.hisp.dhis.dd.action.dataelement.GetDataElementListSortOrderAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-datadictionary/sortDataElementForm.vm</param>
     </action>
@@ -375,7 +375,7 @@
     </action>
     
     <action name="showSortIndicatorForm"
-      class="org.hisp.dhis.dd.action.indicator.GetIndicatorListAction">
+      class="org.hisp.dhis.dd.action.indicator.GetIndicatorListSortOrderAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-datadictionary/sortIndicatorForm.vm</param>
     </action>
