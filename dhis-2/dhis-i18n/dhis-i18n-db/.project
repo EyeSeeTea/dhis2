@@ -1,0 +1,23 @@
+<projectDescription>
+  <name>dhis-i18n-db</name>
+  <comment>The District Health Information System deals with registering,
+    aggregating and reporting statistical health data. The goal is to allow users to analyze
+    and use this data to guide local action. The system is based around an goals of empowering
+    users, by allowing them to decide what to register and report data for.</comment>
+  <projects>
+    <project>dhis-api</project>
+    <project>dhis-i18n-translationstore-hibernate</project>
+    <project>dhis-support-external</project>
+    <project>dhis-support-hibernate</project>
+    <project>dhis-support-test</project>
+    <project>dhis-support-transaction</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
+</projectDescription>
