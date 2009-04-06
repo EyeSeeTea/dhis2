@@ -44,9 +44,10 @@ public class AggregatedMapValueRowMapper
     {
         final AggregatedMapValue value = new AggregatedMapValue();
         
-        value.setGeoCode( resultSet.getString( 1 ) );
-        value.setOrganisationUnitName( resultSet.getString( 2 ) );
-        value.setValue( resultSet.getDouble( 3 ) );
+        value.setOrganisationUnitId( resultSet.getInt( 1 ) );
+        value.setGeoCode( resultSet.getString( 2 ) );
+        value.setOrganisationUnitName( resultSet.getString( 3 ) );
+        value.setValue( resultSet.getDouble( 4 ) );
         
         return value;
     }
