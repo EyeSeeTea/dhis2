@@ -1,3 +1,5 @@
+package org.hisp.dhis.customvalue.hibernate;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.customvalue.hibernate;
 
 import java.util.Collection;
 
@@ -41,12 +42,13 @@ import org.hisp.dhis.hibernate.HibernateSessionManager;
 
 /**
  * @author Latifov Murodillo Abdusamadovich
- *
+ * 
  * @version $Id$
  */
-public class HibernateCustomValueStore implements CustomValueStore{
-    
-	// -------------------------------------------------------------------------
+public class HibernateCustomValueStore
+    implements CustomValueStore
+{
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
@@ -56,73 +58,74 @@ public class HibernateCustomValueStore implements CustomValueStore{
     {
         this.sessionManager = sessionManager;
     }
-    
-	public int addCustomValue(CustomValue customValue) 
-	{
+
+    public int addCustomValue( CustomValue customValue )
+    {
         Session session = sessionManager.getCurrentSession();
 
-         Integer id = (Integer) session.save( customValue );
-         
-         return id;
-	}
+        Integer id = (Integer) session.save( customValue );
 
-	public void deleteCustomValue(CustomValue customValue) 
-	{
+        return id;
+    }
+
+    public void deleteCustomValue( CustomValue customValue )
+    {
         Session session = sessionManager.getCurrentSession();
 
         session.delete( customValue );
-	}
+    }
 
-	public Collection<CustomValue> getCustomValuesByDataSet(DataSet dataSet) 
-	{
+    @SuppressWarnings( "unchecked" )
+    public Collection<CustomValue> getCustomValuesByDataSet( DataSet dataSet )
+    {
         Session session = sessionManager.getCurrentSession();
-        
+
         Criteria criteria = session.createCriteria( CustomValue.class );
         criteria.add( Restrictions.eq( "dataSet", dataSet ) );
-        
-        return criteria.list();
-	}
 
-	public Collection<CustomValue> getCustomValuesByCategoryCombo(
-			DataElementCategoryCombo categoryCombo) 
-	{
+        return criteria.list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<CustomValue> getCustomValuesByCategoryCombo( DataElementCategoryCombo categoryCombo )
+    {
         Session session = sessionManager.getCurrentSession();
-        
+
         Criteria criteria = session.createCriteria( CustomValue.class );
         criteria.add( Restrictions.eq( "optionCombo", categoryCombo ) );
-        
-        return criteria.list();	
+
+        return criteria.list();
     }
 
-	public Collection<CustomValue> getCustomValuesByDataElement(
-			DataElement dataElement) 
-	{
+    @SuppressWarnings( "unchecked" )
+    public Collection<CustomValue> getCustomValuesByDataElement( DataElement dataElement )
+    {
         Session session = sessionManager.getCurrentSession();
-        
+
         Criteria criteria = session.createCriteria( CustomValue.class );
         criteria.add( Restrictions.eq( "dataElement", dataElement ) );
-        
-        return criteria.list();		
+
+        return criteria.list();
     }
 
-	public CustomValue getCustomValuesById(Integer id) 
-	{
+    public CustomValue getCustomValuesById( Integer id )
+    {
         Session session = sessionManager.getCurrentSession();
 
         return (CustomValue) session.get( CustomValue.class, id );
-	}
+    }
 
-	public Collection<CustomValue> getCustomValues(DataSet dataSet,
-			DataElement dataElement, DataElementCategoryOptionCombo dataElementCategoryOptionCombo) 
-	{
+    @SuppressWarnings( "unchecked" )
+    public Collection<CustomValue> getCustomValues( DataSet dataSet, DataElement dataElement,
+        DataElementCategoryOptionCombo dataElementCategoryOptionCombo )
+    {
         Session session = sessionManager.getCurrentSession();
-        
+
         Criteria criteria = session.createCriteria( CustomValue.class );
         criteria.add( Restrictions.eq( "dataSet", dataSet ) );
         criteria.add( Restrictions.eq( "dataElement", dataElement ) );
         criteria.add( Restrictions.eq( "optionCombo", dataElementCategoryOptionCombo ) );
-        
-        return criteria.list();	
-	}
 
+        return criteria.list();
+    }
 }

@@ -1,3 +1,5 @@
+package org.hisp.dhis.customvalue;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.customvalue;
 
 import java.util.Collection;
 
@@ -32,65 +33,63 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
 
 /**
  * @author Latifov Murodillo Abdusamadovich
- *
+ * 
  * @version $Id$
  */
-public interface CustomValueService 
+public interface CustomValueService
 {
+    String ID = CustomValue.class.getName();
 
-	String ID = CustomValue.class.getName();
-	
     /**
      * 
      * @param customValue
      * @return The generated unique identifier for this CustomValue.
      */
-    int addCustomValue(CustomValue customValue);
-    
+    int addCustomValue( CustomValue customValue );
+
     /**
      * Deletes a CustomValue.
      * 
      * @param customValue. The CustomValue to delete.
      */
     void deleteCustomValue( CustomValue customValue );
-    
+
     /**
      * Get all CustomValues by DataSet.
      * 
      * @return A collection containing all CustomValues.
      */
-    Collection<CustomValue> getCustomValuesByDataSet (DataSet dataSet);
+    Collection<CustomValue> getCustomValuesByDataSet( DataSet dataSet );
 
     /**
      * Get all CustomValues by DataElement.
      * 
      * @return A collection containing all CustomValues.
      */
-    Collection<CustomValue> getCustomValuesByDataElement (DataElement dataElement);
-    
+    Collection<CustomValue> getCustomValuesByDataElement( DataElement dataElement );
+
     /**
      * Get all CustomValues by DataElementCategoryCombo.
      * 
      * @return A collection containing all CustomValues.
      */
-    Collection<CustomValue> getCustomValuesByCategoryCombo (DataElementCategoryCombo categoryCombo);
-    
+    Collection<CustomValue> getCustomValuesByCategoryCombo( DataElementCategoryCombo categoryCombo );
+
     /**
      * Get all CustomValues by DataSet, DataElement, DataElementCategoryCombo.
      * 
      * @return A collection containing all CustomValues.
      */
-    Collection<CustomValue> getCustomValues (DataSet dataSet, DataElement dataElement,
-    		DataElementCategoryOptionCombo dataElementCategoryOptionCombo);
-    
+    Collection<CustomValue> getCustomValues( DataSet dataSet, DataElement dataElement,
+        DataElementCategoryOptionCombo dataElementCategoryOptionCombo );
+
     /**
      * Get CustomValue by Id.
      * 
      * @return CustomValue object.
      */
-    CustomValue getCustomValuesById (Integer id);
+    CustomValue getCustomValuesById( Integer id );
 }

@@ -1,3 +1,5 @@
+package org.hisp.dhis.dataset.action.dataentryform;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,10 +26,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.dataset.action.dataentryform;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,84 +44,90 @@ import com.opensymphony.xwork.Action;
 
 /**
  * @author Latifov Murodillo Abdusamadovich
- *
+ * 
  * @version $Id$
  */
-public class GetCustomValuesAction implements Action
+public class GetCustomValuesAction
+    implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
-	private DataSetService dataSetService;
+
+    private DataSetService dataSetService;
 
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
     }
-    
+
     private DataElementService dataElementService;
 
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
     }
-    
+
     private DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
 
     public void setDataElementCategoryOptionComboService( DataElementCategoryOptionComboService dataElementCategoryOptionComboService )
     {
         this.dataElementCategoryOptionComboService = dataElementCategoryOptionComboService;
     }
-    
+
     private CustomValueService customValueService;
 
     public void setCustomValueService( CustomValueService customValueService )
     {
         this.customValueService = customValueService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
 
     private int customValueId;
 
-	public int getCustomValueId() {
-		return customValueId;
-	}
+    public int getCustomValueId()
+    {
+        return customValueId;
+    }
 
-	public void setCustomValueId(int customValueId) {
-		this.customValueId = customValueId;
-	}
+    public void setCustomValueId( int customValueId )
+    {
+        this.customValueId = customValueId;
+    }
 
-	private int dataElementId;
+    private int dataElementId;
 
     public void setDataElementId( int dataElementId )
     {
         this.dataElementId = dataElementId;
     }
-    
+
     private int dataSetId;
-    
-	public void setDataSetId(int dataSetId) {
-		this.dataSetId = dataSetId;
-	}
 
-	public int getDataSetId() {
-		return dataSetId;
-	}
+    public void setDataSetId( int dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
 
-	private int categoryOptionComboId;
-	
-	public int getCategoryOptionComboId() {
-		return categoryOptionComboId;
-	}
+    public int getDataSetId()
+    {
+        return dataSetId;
+    }
 
-	public void setCategoryOptionComboId(int categoryOptionComboId) {
-		this.categoryOptionComboId = categoryOptionComboId;
-	}
+    private int categoryOptionComboId;
+
+    public int getCategoryOptionComboId()
+    {
+        return categoryOptionComboId;
+    }
+
+    public void setCategoryOptionComboId( int categoryOptionComboId )
+    {
+        this.categoryOptionComboId = categoryOptionComboId;
+    }
 
     private List<String> customValueIds;
 
@@ -136,78 +142,86 @@ public class GetCustomValuesAction implements Action
     {
         return customValueNames;
     }
-    
+
     private String operation;
-    
-	public String getOperation() {
-		return operation;
-	}
 
-	public void setOperation(String operation) {
-		this.operation = operation;
-	}
-	
-	private String value;
+    public String getOperation()
+    {
+        return operation;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public void setOperation( String operation )
+    {
+        this.operation = operation;
+    }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+    private String value;
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
+    }
+
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
 
-	public String execute() throws Exception {
-		customValueIds = new ArrayList<String>();
+    public String execute()
+        throws Exception
+    {
+        customValueIds = new ArrayList<String>();
         customValueNames = new ArrayList<String>();
 
-        DataSet dataSet = dataSetService.getDataSet(dataSetId);
-        DataElement dataElement = dataElementService.getDataElement(dataElementId);
-        DataElementCategoryOptionCombo dataElementCategoryOptionCombo = 
-        	dataElementCategoryOptionComboService.getDataElementCategoryOptionCombo(categoryOptionComboId);
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+        DataElement dataElement = dataElementService.getDataElement( dataElementId );
+        DataElementCategoryOptionCombo dataElementCategoryOptionCombo = dataElementCategoryOptionComboService
+            .getDataElementCategoryOptionCombo( categoryOptionComboId );
 
         CustomValue customValue = new CustomValue();
-        customValue.setDataSet(dataSet);
-        customValue.setDataElement(dataElement);
-        customValue.setOptionCombo(dataElementCategoryOptionCombo);
+        customValue.setDataSet( dataSet );
+        customValue.setDataElement( dataElement );
+        customValue.setOptionCombo( dataElementCategoryOptionCombo );
 
-        if(operation.equalsIgnoreCase("add"))
+        if ( operation.equalsIgnoreCase( "add" ) )
         {
-            customValue.setCustomValue(value);
-            
-            customValueService.addCustomValue(customValue);
-            
-            //somehow adding occurs after return SUCCESS. Need to add manually new CustomValue
-        	customValueIds.add(String.valueOf(customValue.getId()));
-    		customValueNames.add(customValue.getCustomValue());
-        }
-        	
-        if(operation.equalsIgnoreCase("delete"))
-        {     
-        	customValue = customValueService.getCustomValuesById(customValueId);
-            customValueService.deleteCustomValue(customValue);        	
-        }
-        
-        List<CustomValue> customValues = new ArrayList<CustomValue>(
-        		customValueService.getCustomValues(dataSet, dataElement, dataElementCategoryOptionCombo) );
+            customValue.setCustomValue( value );
 
-            Iterator<CustomValue> customValueIterator = customValues.iterator();
-            
-            while ( customValueIterator.hasNext() )
-            {
-            	CustomValue customVal = customValueIterator.next();	
+            customValueService.addCustomValue( customValue );
 
-            	customValueIds.add(String.valueOf(customVal.getId()));
-        		customValueNames.add(customVal.getCustomValue());
-            }
-            if(operation.equalsIgnoreCase("delete"))
-            {
-            	customValueIds.remove(String.valueOf(customValue.getId()));
-            	customValueNames.remove(customValue.getCustomValue());
-            }
+            // somehow adding occurs after return SUCCESS. Need to add manually
+            // new CustomValue
+            customValueIds.add( String.valueOf( customValue.getId() ) );
+            customValueNames.add( customValue.getCustomValue() );
+        }
+
+        if ( operation.equalsIgnoreCase( "delete" ) )
+        {
+            customValue = customValueService.getCustomValuesById( customValueId );
+            customValueService.deleteCustomValue( customValue );
+        }
+
+        List<CustomValue> customValues = new ArrayList<CustomValue>( customValueService.getCustomValues( dataSet,
+            dataElement, dataElementCategoryOptionCombo ) );
+
+        Iterator<CustomValue> customValueIterator = customValues.iterator();
+
+        while ( customValueIterator.hasNext() )
+        {
+            CustomValue customVal = customValueIterator.next();
+
+            customValueIds.add( String.valueOf( customVal.getId() ) );
+            customValueNames.add( customVal.getCustomValue() );
+        }
+        if ( operation.equalsIgnoreCase( "delete" ) )
+        {
+            customValueIds.remove( String.valueOf( customValue.getId() ) );
+            customValueNames.remove( customValue.getCustomValue() );
+        }
         return SUCCESS;
-	}
+    }
 }

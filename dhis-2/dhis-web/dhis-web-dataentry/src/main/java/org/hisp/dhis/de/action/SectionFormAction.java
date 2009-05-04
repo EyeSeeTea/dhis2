@@ -65,16 +65,19 @@ public class SectionFormAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-	
-	private CustomValueService customValueService;
-	
-    public CustomValueService getCustomValueService() {
-		return customValueService;
-	}
 
-	public void setCustomValueService(CustomValueService customValueService) {
-		this.customValueService = customValueService;
-	}
+    private CustomValueService customValueService;
+
+    public CustomValueService getCustomValueService()
+    {
+        return customValueService;
+    }
+
+    public void setCustomValueService( CustomValueService customValueService )
+    {
+        this.customValueService = customValueService;
+    }
+
     private SectionService sectionService;
 
     private DataValueService dataValueService;
@@ -134,7 +137,7 @@ public class SectionFormAction
     {
         return customValues;
     }
-    
+
     private List<Section> sections;
 
     public List<Section> getSections()
@@ -223,8 +226,8 @@ public class SectionFormAction
 
         DataSet dataSet = selectedStateManager.getSelectedDataSet();
 
-        customValues = (List<CustomValue>) customValueService.getCustomValuesByDataSet(dataSet);
-        
+        customValues = (List<CustomValue>) customValueService.getCustomValuesByDataSet( dataSet );
+
         Period period = selectedStateManager.getSelectedPeriod();
 
         Collection<DataElement> dataElements = dataSet.getDataElements();

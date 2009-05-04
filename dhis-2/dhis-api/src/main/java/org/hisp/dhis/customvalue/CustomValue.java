@@ -1,3 +1,5 @@
+package org.hisp.dhis.customvalue;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,173 +26,180 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.customvalue;
 
 import java.io.Serializable;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.source.Source;
 
 /**
  * @author Latifov Murodillo Abdusamadovich
- *
+ * 
  * @version $Id$
  */
-public class CustomValue implements Serializable
+public class CustomValue
+    implements Serializable
 {
-	
-	/**
+    /**
      * The unique identifier for this CustomValue
      */
     private int id;
-    
-	/**
-	 * Dataset object value to be assigned to
-	 */
-    private DataSet dataSet;
-    
+
     /**
-	 * DataElement object value to be assigned to
-	 */
-	private DataElement dataElement;
-	
-	/**
-	 * DataElementCategoryOptionCombo object value to be assigned to
-	 */
+     * Dataset object value to be assigned to
+     */
+    private DataSet dataSet;
+
+    /**
+     * DataElement object value to be assigned to
+     */
+    private DataElement dataElement;
+
+    /**
+     * DataElementCategoryOptionCombo object value to be assigned to
+     */
     private DataElementCategoryOptionCombo optionCombo;
-    
+
     /**
      * Custom value
      */
     private String customValue;
 
-	public CustomValue() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+    public CustomValue()
+    {
+    }
 
     /**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+     * @return the id
+     */
+    public int getId()
+    {
+        return id;
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	/**
-	 * @return the dataSet
-	 */
-	public DataSet getDataSet() {
-		return dataSet;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId( int id )
+    {
+        this.id = id;
+    }
 
-	/**
-	 * @param dataSet the dataSet to set
-	 */
-	public void setDataSet(DataSet dataSet) {
-		this.dataSet = dataSet;
-	}
+    /**
+     * @return the dataSet
+     */
+    public DataSet getDataSet()
+    {
+        return dataSet;
+    }
 
-	/**
-	 * @return the dataElement
-	 */
-	public DataElement getDataElement() {
-		return dataElement;
-	}
+    /**
+     * @param dataSet the dataSet to set
+     */
+    public void setDataSet( DataSet dataSet )
+    {
+        this.dataSet = dataSet;
+    }
 
-	/**
-	 * @param dataElement the dataElement to set
-	 */
-	public void setDataElement(DataElement dataElement) {
-		this.dataElement = dataElement;
-	}
+    /**
+     * @return the dataElement
+     */
+    public DataElement getDataElement()
+    {
+        return dataElement;
+    }
 
-	/**
-	 * @return the optionCombo
-	 */
-	public DataElementCategoryOptionCombo getOptionCombo() {
-		return optionCombo;
-	}
+    /**
+     * @param dataElement the dataElement to set
+     */
+    public void setDataElement( DataElement dataElement )
+    {
+        this.dataElement = dataElement;
+    }
 
-	/**
-	 * @param optionCombo the optionCombo to set
-	 */
-	public void setOptionCombo(DataElementCategoryOptionCombo optionCombo) {
-		this.optionCombo = optionCombo;
-	}
+    /**
+     * @return the optionCombo
+     */
+    public DataElementCategoryOptionCombo getOptionCombo()
+    {
+        return optionCombo;
+    }
 
-	/**
-	 * @return the customValue
-	 */
-	public String getCustomValue() {
-		return customValue;
-	}
+    /**
+     * @param optionCombo the optionCombo to set
+     */
+    public void setOptionCombo( DataElementCategoryOptionCombo optionCombo )
+    {
+        this.optionCombo = optionCombo;
+    }
 
-	/**
-	 * @param customValue the customValue to set
-	 */
-	public void setCustomValue(String customValue) {
-		this.customValue = customValue;
-	}
+    /**
+     * @return the customValue
+     */
+    public String getCustomValue()
+    {
+        return customValue;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((customValue == null) ? 0 : customValue.hashCode());
-		result = prime * result
-				+ ((dataElement == null) ? 0 : dataElement.hashCode());
-		result = prime * result + ((dataSet == null) ? 0 : dataSet.hashCode());
-		result = prime * result
-				+ ((optionCombo == null) ? 0 : optionCombo.hashCode());
-		return result;
-	}
+    /**
+     * @param customValue the customValue to set
+     */
+    public void setCustomValue( String customValue )
+    {
+        this.customValue = customValue;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		CustomValue other = (CustomValue) obj;
-		if (customValue == null) {
-			if (other.customValue != null)
-				return false;
-		} else if (!customValue.equals(other.customValue))
-			return false;
-		if (dataElement == null) {
-			if (other.dataElement != null)
-				return false;
-		} else if (!dataElement.equals(other.dataElement))
-			return false;
-		if (dataSet == null) {
-			if (other.dataSet != null)
-				return false;
-		} else if (!dataSet.equals(other.dataSet))
-			return false;
-		if (optionCombo == null) {
-			if (other.optionCombo != null)
-				return false;
-		} else if (!optionCombo.equals(other.optionCombo))
-			return false;
-		return true;
-	}
-    
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((customValue == null) ? 0 : customValue.hashCode());
+        result = prime * result + ((dataElement == null) ? 0 : dataElement.hashCode());
+        result = prime * result + ((dataSet == null) ? 0 : dataSet.hashCode());
+        result = prime * result + ((optionCombo == null) ? 0 : optionCombo.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        CustomValue other = (CustomValue) obj;
+        if ( customValue == null )
+        {
+            if ( other.customValue != null )
+                return false;
+        }
+        else if ( !customValue.equals( other.customValue ) )
+            return false;
+        if ( dataElement == null )
+        {
+            if ( other.dataElement != null )
+                return false;
+        }
+        else if ( !dataElement.equals( other.dataElement ) )
+            return false;
+        if ( dataSet == null )
+        {
+            if ( other.dataSet != null )
+                return false;
+        }
+        else if ( !dataSet.equals( other.dataSet ) )
+            return false;
+        if ( optionCombo == null )
+        {
+            if ( other.optionCombo != null )
+                return false;
+        }
+        else if ( !optionCombo.equals( other.optionCombo ) )
+            return false;
+        return true;
+    }
 }

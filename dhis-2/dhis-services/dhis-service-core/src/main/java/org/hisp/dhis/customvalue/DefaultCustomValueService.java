@@ -1,3 +1,5 @@
+package org.hisp.dhis.customvalue;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -25,80 +27,77 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.customvalue;
-
 import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementStore;
 import org.hisp.dhis.dataset.DataSet;
 
 /**
  * @author Latifov Murodillo Abdusamadovich
- *
+ * 
  * @version $Id$
  */
-public class DefaultCustomValueService implements CustomValueService{
-
+public class DefaultCustomValueService
+    implements CustomValueService
+{
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     private CustomValueStore customValueStore;
-    
-	public CustomValueStore getCustomValueStore() {
-		return customValueStore;
-	}
 
-	public void setCustomValueStore(CustomValueStore customValueStore) {
-		this.customValueStore = customValueStore;
-	}
+    public CustomValueStore getCustomValueStore()
+    {
+        return customValueStore;
+    }
 
-	public int addCustomValue(CustomValue customValue) 
-	{
-        int id = customValueStore.addCustomValue(customValue);
+    public void setCustomValueStore( CustomValueStore customValueStore )
+    {
+        this.customValueStore = customValueStore;
+    }
+
+    public int addCustomValue( CustomValue customValue )
+    {
+        int id = customValueStore.addCustomValue( customValue );
 
         return id;
-	}
+    }
 
-	public void deleteCustomValue(CustomValue customValue) 
-	{
-		customValueStore.deleteCustomValue(customValue);
-	}
+    public void deleteCustomValue( CustomValue customValue )
+    {
+        customValueStore.deleteCustomValue( customValue );
+    }
 
-	public Collection<CustomValue> getCustomValues(DataSet dataSet) 
-	{
-		return customValueStore.getCustomValuesByDataSet(dataSet);
-	}
+    public Collection<CustomValue> getCustomValues( DataSet dataSet )
+    {
+        return customValueStore.getCustomValuesByDataSet( dataSet );
+    }
 
-	public Collection<CustomValue> getCustomValuesByCategoryCombo(
-			DataElementCategoryCombo categoryCombo) 
-	{
-		return customValueStore.getCustomValuesByCategoryCombo(categoryCombo);
-	}
+    public Collection<CustomValue> getCustomValuesByCategoryCombo( DataElementCategoryCombo categoryCombo )
+    {
+        return customValueStore.getCustomValuesByCategoryCombo( categoryCombo );
+    }
 
-	public Collection<CustomValue> getCustomValuesByDataElement(
-			DataElement dataElement)
-	{
-		return customValueStore.getCustomValuesByDataElement(dataElement);
-	}
+    public Collection<CustomValue> getCustomValuesByDataElement( DataElement dataElement )
+    {
+        return customValueStore.getCustomValuesByDataElement( dataElement );
+    }
 
-	public Collection<CustomValue> getCustomValuesByDataSet(DataSet dataSet) 
-	{
-		return customValueStore.getCustomValuesByDataSet(dataSet);
-	}
+    public Collection<CustomValue> getCustomValuesByDataSet( DataSet dataSet )
+    {
+        return customValueStore.getCustomValuesByDataSet( dataSet );
+    }
 
-	public CustomValue getCustomValuesById(Integer id) 
-	{
-		return customValueStore.getCustomValuesById(id);
-	}
+    public CustomValue getCustomValuesById( Integer id )
+    {
+        return customValueStore.getCustomValuesById( id );
+    }
 
-	public Collection<CustomValue> getCustomValues(DataSet dataSet,
-			DataElement dataElement, DataElementCategoryOptionCombo dataElementCategoryOptionCombo) 
-	{
-		return customValueStore.getCustomValues(dataSet, dataElement, dataElementCategoryOptionCombo);
-	}
-
+    public Collection<CustomValue> getCustomValues( DataSet dataSet, DataElement dataElement,
+        DataElementCategoryOptionCombo dataElementCategoryOptionCombo )
+    {
+        return customValueStore.getCustomValues( dataSet, dataElement, dataElementCategoryOptionCombo );
+    }
 }
