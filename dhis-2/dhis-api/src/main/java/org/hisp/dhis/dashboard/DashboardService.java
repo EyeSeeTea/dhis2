@@ -1,4 +1,4 @@
-package org.hisp.dhis.user;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,44 +27,17 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class UserCredentialsDeletionHandler
-    extends DeletionHandler
+public interface DashboardService
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private UserStore userStore;
-
-    public void setUserStore( UserStore userStore )
-    {
-        this.userStore = userStore;
-    }
-
-    // -------------------------------------------------------------------------
-    // DeletionHandler implementation
-    // -------------------------------------------------------------------------
-
-    public String getClassName()
-    {
-        return UserCredentials.class.getSimpleName();
-    }
-
-    @Override
-    public void deleteUserAuthorityGroup( UserAuthorityGroup authorityGroup )
-    {
-        for ( UserCredentials credentials : userStore.getAllUserCredentials() )
-        {
-            if ( credentials.getUserAuthorityGroups().remove( authorityGroup ) )
-            {
-                userStore.updateUserCredentials( credentials );
-            }
-        }
-    }
+    final String ID = DashboardService.class.getName();
+    
+    void saveDashboardContent( DashboardContent dashboardContent );
+        
+    DashboardContent getDashboardContent( User user );
 }

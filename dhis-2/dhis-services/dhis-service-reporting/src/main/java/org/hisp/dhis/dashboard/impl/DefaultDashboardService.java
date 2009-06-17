@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.provider;
+package org.hisp.dhis.dashboard.impl;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,71 +27,42 @@ package org.hisp.dhis.dashboard.provider;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.hisp.dhis.dashboard.DashboardContent;
 import org.hisp.dhis.dashboard.DashboardService;
-import org.hisp.dhis.olap.OlapURL;
-import org.hisp.dhis.olap.comparator.OlapURLNameComparator;
-import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.dashboard.DashboardStore;
 import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class OlapUrlContentProvider
-    implements ContentProvider
+public class DefaultDashboardService
+    implements DashboardService
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private CurrentUserService currentUserService;
+    private DashboardStore dashboardStore;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
+    public void setDashboardStore( DashboardStore dashboardStore )
     {
-        this.currentUserService = currentUserService;
-    }
-
-    private DashboardService dashboardService;
-
-    public void setDashboardService( DashboardService dashboardService )
-    {
-        this.dashboardService = dashboardService;
-    }
-    
-    private String key;
-    
-    public void setKey( String key )
-    {
-        this.key = key;
+        this.dashboardStore = dashboardStore;
     }
 
     // -------------------------------------------------------------------------
-    // ContentProvider implementation
+    // DashboardService implementation
     // -------------------------------------------------------------------------
-
-    public Map<String, Object> provide()
+    
+    public void saveDashboardContent( DashboardContent dashboardContent )
     {
-        Map<String, Object> content = new HashMap<String, Object>();
-
-        User user = currentUserService.getCurrentUser();
+        dashboardStore.saveDashboardContent( dashboardContent );
+    }
+    
+    public DashboardContent getDashboardContent( User user )
+    {
+        DashboardContent content = dashboardStore.getDashboardContent( user );
         
-        if ( user != null )
-        {
-            DashboardContent dashboardContent = dashboardService.getDashboardContent( user );
-            
-            List<OlapURL> urls = dashboardContent.getOlapUrls();
-            
-            Collections.sort( urls, new OlapURLNameComparator() );
-            
-            content.put( key, urls );
-        }
-        
-        return content;
+        return content != null ? content : new DashboardContent( user );        
     }
 }

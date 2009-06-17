@@ -40,12 +40,20 @@ import org.hisp.dhis.design.DesignStore;
 public class HibernateDesignStore
     implements DesignStore
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
     private SessionFactory sessionFactory;
 
     public void setSessionFactory( SessionFactory sessionFactory )
     {
         this.sessionFactory = sessionFactory;
     }
+
+    // -------------------------------------------------------------------------
+    // DesignStore implementation
+    // -------------------------------------------------------------------------
 
     public int saveDesign( Design design )
     {

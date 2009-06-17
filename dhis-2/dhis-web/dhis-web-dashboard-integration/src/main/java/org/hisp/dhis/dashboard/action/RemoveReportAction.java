@@ -27,12 +27,12 @@ package org.hisp.dhis.dashboard.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dashboard.DashboardContent;
+import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.report.ReportStore;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserCredentials;
-import org.hisp.dhis.user.UserStore;
 
 import com.opensymphony.xwork.Action;
 
@@ -54,13 +54,13 @@ public class RemoveReportAction
         this.currentUserService = currentUserService;
     }
 
-    private UserStore userStore;
+    private DashboardService dashboardService;
 
-    public void setUserStore( UserStore userStore )
+    public void setDashboardService( DashboardService dashboardService )
     {
-        this.userStore = userStore;
+        this.dashboardService = dashboardService;
     }
-
+    
     private ReportStore reportStore;
 
     public void setReportStore( ReportStore reportStore )
@@ -89,13 +89,13 @@ public class RemoveReportAction
         
         if ( user != null )
         {
-            UserCredentials credentials = userStore.getUserCredentials( user );
+            DashboardContent content = dashboardService.getDashboardContent( user );
             
             Report report = reportStore.getReport( id );
             
-            if ( credentials.getDashboardReports().remove( report ) )
+            if ( content.getReports().remove( report ) )
             {
-                userStore.updateUserCredentials( credentials );
+                dashboardService.saveDashboardContent( content );
             }            
         }
         

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.provider;
+package org.hisp.dhis.dashboard.hibernate;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,71 +27,45 @@ package org.hisp.dhis.dashboard.provider;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.dashboard.DashboardContent;
-import org.hisp.dhis.dashboard.DashboardService;
-import org.hisp.dhis.olap.OlapURL;
-import org.hisp.dhis.olap.comparator.OlapURLNameComparator;
-import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.dashboard.DashboardStore;
 import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class OlapUrlContentProvider
-    implements ContentProvider
+public class HibernateDashboardStore
+    implements DashboardStore
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private CurrentUserService currentUserService;
+    private SessionFactory sessionFactory;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.currentUserService = currentUserService;
-    }
-
-    private DashboardService dashboardService;
-
-    public void setDashboardService( DashboardService dashboardService )
-    {
-        this.dashboardService = dashboardService;
-    }
-    
-    private String key;
-    
-    public void setKey( String key )
-    {
-        this.key = key;
+        this.sessionFactory = sessionFactory;
     }
 
     // -------------------------------------------------------------------------
-    // ContentProvider implementation
+    // DashboardStore implementation
     // -------------------------------------------------------------------------
 
-    public Map<String, Object> provide()
+    public void saveDashboardContent( DashboardContent dashboardContent )
     {
-        Map<String, Object> content = new HashMap<String, Object>();
+        sessionFactory.getCurrentSession().saveOrUpdate( dashboardContent );
+    }
 
-        User user = currentUserService.getCurrentUser();
-        
-        if ( user != null )
-        {
-            DashboardContent dashboardContent = dashboardService.getDashboardContent( user );
-            
-            List<OlapURL> urls = dashboardContent.getOlapUrls();
-            
-            Collections.sort( urls, new OlapURLNameComparator() );
-            
-            content.put( key, urls );
-        }
-        
-        return content;
+    public DashboardContent getDashboardContent( User user )
+    {
+        return (DashboardContent) sessionFactory.getCurrentSession().get( DashboardContent.class, user.getId() );
+    }
+
+    public void deleteDashboardContent( DashboardContent dashboardContent )
+    {
+        sessionFactory.getCurrentSession().delete( dashboardContent );        
     }
 }

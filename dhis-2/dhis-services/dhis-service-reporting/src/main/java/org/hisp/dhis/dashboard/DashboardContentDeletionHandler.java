@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.provider;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,71 +27,63 @@ package org.hisp.dhis.dashboard.provider;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.hisp.dhis.dashboard.DashboardContent;
-import org.hisp.dhis.dashboard.DashboardService;
+import org.hisp.dhis.datamart.DataMartExport;
+import org.hisp.dhis.document.Document;
+import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.olap.OlapURL;
-import org.hisp.dhis.olap.comparator.OlapURLNameComparator;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class OlapUrlContentProvider
-    implements ContentProvider
+public class DashboardContentDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
+    public String getClassName()
     {
-        this.currentUserService = currentUserService;
-    }
-
-    private DashboardService dashboardService;
-
-    public void setDashboardService( DashboardService dashboardService )
-    {
-        this.dashboardService = dashboardService;
+        return DashboardContent.class.getSimpleName();
     }
     
-    private String key;
-    
-    public void setKey( String key )
+    @Override
+    public void deleteReport( Report report )
     {
-        this.key = key;
+        
     }
-
-    // -------------------------------------------------------------------------
-    // ContentProvider implementation
-    // -------------------------------------------------------------------------
-
-    public Map<String, Object> provide()
+    
+    @Override
+    public void deleteOlapURL( OlapURL olapURL )
     {
-        Map<String, Object> content = new HashMap<String, Object>();
-
-        User user = currentUserService.getCurrentUser();
         
-        if ( user != null )
-        {
-            DashboardContent dashboardContent = dashboardService.getDashboardContent( user );
-            
-            List<OlapURL> urls = dashboardContent.getOlapUrls();
-            
-            Collections.sort( urls, new OlapURLNameComparator() );
-            
-            content.put( key, urls );
-        }
+    }
+    
+    @Override
+    public void deleteDataMartExport( DataMartExport dataMartExport )
+    {
         
-        return content;
+    }
+    
+    @Override
+    public void deleteDocument( Document document )
+    {
+        
+    }
+    
+    @Override
+    public void deleteReportTable( ReportTable reportTable )
+    {
+        
+    }
+    
+    @Override
+    public void deleteMapView( MapView mapView )
+    {
+        
     }
 }
