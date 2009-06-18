@@ -1,4 +1,4 @@
-package org.hisp.dhis.transaction;
+package org.hisp.dhis.translation;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,22 +27,31 @@ package org.hisp.dhis.transaction;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Locale;
+import java.util.Collection;
+
 /**
- * @author Trygve Laugst&oslash;l
- * @version $Id: TransactionManager.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Oyvind Brucker
  */
-public interface TransactionManager
+public interface TranslationStore
 {
-    String ID = TransactionManager.class.getName();
+    String ID = TranslationStore.class.getName();
 
-    /**
-     * Same as enter( TransactionType.READ_ONLY );
-     */
-    void enter();
-    
-    void enter( TransactionType transactionType );
+    Translation getTranslation( String className, int id, Locale locale, String property );
 
-    void leave();
+    Collection<Translation> getTranslations( String className, int id, Locale locale );
 
-    void abort();
+    Collection<Translation> getTranslations( String className, Locale locale );
+
+    Collection<Translation> getAllTranslations();
+
+    void addTranslation( Translation translation );
+
+    void updateTranslation( Translation translation );
+
+    void deleteTranslation( Translation translation );
+
+    Collection<Locale> getAvailableLocales();
+
+    void deleteTranslations( String className, int id );
 }

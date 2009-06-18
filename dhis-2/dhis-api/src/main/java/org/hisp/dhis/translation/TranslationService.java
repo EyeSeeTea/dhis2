@@ -1,4 +1,4 @@
-package org.hisp.dhis.transaction;
+package org.hisp.dhis.translation;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,11 +27,32 @@ package org.hisp.dhis.transaction;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import java.util.Locale;
+
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: TransactionType.java 3331 2007-06-01 07:29:02Z torgeilo $
+ * @author Lars Helge Overland
+ * @version $Id$
  */
-public enum TransactionType
+public interface TranslationService
 {
-    READ_WRITE, READ_ONLY
+    String ID = TranslationService.class.getName();
+    
+    Translation getTranslation( String className, int id, Locale locale, String property );
+
+    Collection<Translation> getTranslations( String className, int id, Locale locale );
+
+    Collection<Translation> getTranslations( String className, Locale locale );
+
+    Collection<Translation> getAllTranslations();
+
+    void addTranslation( Translation translation );
+
+    void updateTranslation( Translation translation );
+
+    void deleteTranslation( Translation translation );
+
+    Collection<Locale> getAvailableLocales();
+
+    void deleteTranslations( String className, int id );
 }
