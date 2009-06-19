@@ -1,4 +1,4 @@
-package org.hisp.dhis.design.hibernate;
+package org.hisp.dhis.report;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -29,55 +29,41 @@ package org.hisp.dhis.design.hibernate;
 
 import java.util.Collection;
 
-import org.hibernate.SessionFactory;
-import org.hisp.dhis.design.Design;
-import org.hisp.dhis.design.DesignStore;
-
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class HibernateDesignStore
-    implements DesignStore
+public interface ReportService
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
-    // -------------------------------------------------------------------------
-    // DesignStore implementation
-    // -------------------------------------------------------------------------
-
-    public int saveDesign( Design design )
-    {
-        return (Integer) sessionFactory.getCurrentSession().save( design );
-    }
+    final String ID = ReportService.class.getName();
     
-    public void updateDesign( Design design )
-    {
-        sessionFactory.getCurrentSession().update( design );
-    }
+    /**
+     * Saves a Report.
+     * 
+     * @param report the Report to save.
+     * @return the generated identifier.
+     */
+    int saveReport( Report report );
     
-    public Design getDesign( int id )
-    {
-        return (Design) sessionFactory.getCurrentSession().get( Design.class, id );
-    }
+    /**
+     * Retrieves the Report with the given identifier.
+     * 
+     * @param id the identifier of the Report to retrieve.
+     * @return the Report.
+     */
+    Report getReport( int id );
     
-    public void deleteDesign( Design design )
-    {
-        sessionFactory.getCurrentSession().delete( design );
-    }
+    /**
+     * Deletes a Report.
+     * 
+     * @param report the Report to delete.
+     */
+    void deleteReport( Report report );
     
-    @SuppressWarnings( "unchecked" )
-    public Collection<Design> getAllDesigns()
-    {
-        return sessionFactory.getCurrentSession().createCriteria( Design.class ).list();
-    }
+    /**
+     * Retrieves all Reports.
+     * 
+     * @return a Collection of Reports.
+     */
+    Collection<Report> getAllReports();
 }

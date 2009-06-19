@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.hibernate;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,45 +27,17 @@ package org.hisp.dhis.dashboard.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.SessionFactory;
-import org.hisp.dhis.dashboard.DashboardContent;
-import org.hisp.dhis.dashboard.DashboardStore;
+import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class HibernateDashboardStore
-    implements DashboardStore
+public interface DashboardContentStore
+    extends GenericStore<DashboardContent>
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
-    // -------------------------------------------------------------------------
-    // DashboardStore implementation
-    // -------------------------------------------------------------------------
-
-    public void saveDashboardContent( DashboardContent dashboardContent )
-    {
-        sessionFactory.getCurrentSession().saveOrUpdate( dashboardContent );
-    }
-
-    public DashboardContent getDashboardContent( User user )
-    {
-        return (DashboardContent) sessionFactory.getCurrentSession().get( DashboardContent.class, user.getId() );
-    }
-
-    public void deleteDashboardContent( DashboardContent dashboardContent )
-    {
-        sessionFactory.getCurrentSession().delete( dashboardContent );        
-    }
+    final String ID = DashboardContentStore.class.getName();
+    
+    DashboardContent get( User user );
 }

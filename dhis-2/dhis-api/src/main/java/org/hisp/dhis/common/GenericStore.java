@@ -1,4 +1,4 @@
-package org.hisp.dhis.design;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -33,17 +33,59 @@ import java.util.Collection;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public interface DesignStore
+public interface GenericStore<T>
 {
-    final String ID = DesignStore.class.getName();
+    /**
+     * Saves the given object instance.
+     * 
+     * @param object the object instance.
+     * @return the generated identifier.
+     */
+    int save( T object );
     
-    int saveDesign( Design design );
+    /**
+     * Updates the given object instance.
+     * 
+     * @param object the object instance.
+     */
+    void update( T object );
     
-    void updateDesign( Design design );
+    /**
+     * Saves or updates the given object instance depending on the object's
+     * persistent state.
+     * 
+     * @param object the object instance.
+     */
+    void saveOrUpdate( T object );
     
-    Design getDesign( int id );
+    /**
+     * Retrieves the object with the given identifier. This method will first
+     * look in the current Session, then hit the database if not existing.
+     * 
+     * @param id the object identifier.
+     * @return the object identified by the given identifier.
+     */
+    T get( int id );
     
-    void deleteDesign( Design design );
+    /**
+     * Retrieves the object with the given identifier, assuming it exists.
+     * 
+     * @param id the object identifier.
+     * @return the object identified by the given identifier or a generated proxy.
+     */
+    T load( int id );
     
-    Collection<Design> getAllDesigns();
+    /**
+     * Retrieves a Collection of all objects.
+     * 
+     * @return a Collection of all objects.
+     */
+    Collection<T> getAll();
+    
+    /**
+     * Removes the given object instance.
+     * 
+     * @param object the object instance to delete.
+     */
+    void delete( T object );
 }

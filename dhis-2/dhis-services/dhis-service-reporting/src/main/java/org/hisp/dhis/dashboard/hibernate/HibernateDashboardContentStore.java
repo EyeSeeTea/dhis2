@@ -1,5 +1,4 @@
-package org.hisp.dhis.report;
-
+package org.hisp.dhis.dashboard.hibernate;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -28,43 +27,20 @@ package org.hisp.dhis.report;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import org.hisp.dhis.dashboard.DashboardContent;
+import org.hisp.dhis.dashboard.DashboardContentStore;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public interface ReportStore
-{
-    String ID = ReportStore.class.getName();
-    
-    /**
-     * Saves a Report.
-     * 
-     * @param report the Report to save.
-     * @return the generated identifier.
-     */
-    int saveReport( Report report );
-    
-    /**
-     * Retrieves the Report with the given identifier.
-     * 
-     * @param id the identifier of the Report to retrieve.
-     * @return the Report.
-     */
-    Report getReport( int id );
-    
-    /**
-     * Deletes a Report.
-     * 
-     * @param report the Report to delete.
-     */
-    void deleteReport( Report report );
-    
-    /**
-     * Retrieves all Reports.
-     * 
-     * @return a Collection of Reports.
-     */
-    Collection<Report> getAllReports();
+public class HibernateDashboardContentStore
+    extends HibernateGenericStore<DashboardContent> implements DashboardContentStore
+{    
+    public DashboardContent get( User user )
+    {
+        return (DashboardContent) sessionFactory.getCurrentSession().get( DashboardContent.class, user.getId() );
+    }
 }
