@@ -59,28 +59,38 @@ public class OrganisationUnitGroupBatchHandler
         this.tableName = "orgunitgroup";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "orgunitgroupid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "orgunitgroupid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "orgunitgroupid" );
+    }
+    
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         OrganisationUnitGroup group = (OrganisationUnitGroup) object;
-
-        statementBuilder.setIdentifierColumnName( "orgunitgroupid" );
-        statementBuilder.setIdentifierColumnValue( group.getId() );
         
-        addColumns();
+        statementBuilder.setIdentifierValue( group.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "uuid" );
+        statementBuilder.setColumn( "name" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        OrganisationUnitGroup group = (OrganisationUnitGroup) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( group.getUuid() );
+        statementBuilder.setString( group.getName() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -97,19 +107,5 @@ public class OrganisationUnitGroupBatchHandler
         fieldMap.put( "name", group.getName() );
         
         return statementBuilder.getValueStatement( tableName, "orgunitgroupid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "uuid" );
-        statementBuilder.setColumn( "name" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        OrganisationUnitGroup group = (OrganisationUnitGroup) object;
-        
-        statementBuilder.setString( group.getUuid() );
-        statementBuilder.setString( group.getName() );
     }
 }

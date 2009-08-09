@@ -75,8 +75,6 @@ public class DataValueConverter
     // Properties
     // -------------------------------------------------------------------------
 
-    private DataMartStore dataMartStore;
-    
     private StatementManager statementManager;
     
     private PeriodService periodService;
@@ -108,6 +106,7 @@ public class DataValueConverter
     public DataValueConverter( BatchHandler batchHandler,
         BatchHandler importDataValueBatchHandler,
         DataValueService dataValueService,
+        DataMartStore dataMartStore,
         ImportObjectService importObjectService,
         ImportParams params,
         Map<Object, Integer> dataElementMapping,
@@ -118,6 +117,7 @@ public class DataValueConverter
         this.batchHandler = batchHandler;
         this.importDataValueBatchHandler = importDataValueBatchHandler;
         this.dataValueService = dataValueService;
+        this.dataMartStore = dataMartStore;
         this.importObjectService = importObjectService;
         this.params = params;
         this.dataElementMapping = dataElementMapping;

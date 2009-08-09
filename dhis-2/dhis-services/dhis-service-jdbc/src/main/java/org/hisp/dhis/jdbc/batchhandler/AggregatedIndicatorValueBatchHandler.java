@@ -60,42 +60,8 @@ public class AggregatedIndicatorValueBatchHandler
     {
         this.tableName = "aggregatedindicatorvalue";
     }
-    
-    protected void openSqlStatement()
-    {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
-    }
-    
-    protected String getUpdateSqlStatement( Object object )
-    {
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
-    }
-    
-    protected String getIdentifierStatement( Object objectName )
-    {
-        throw new UnsupportedOperationException( "AggregatedIndicatorValue has no single unique identifier" );
-    }
 
-    protected String getUniquenessStatement( Object object )
-    {
-        AggregatedIndicatorValue value = (AggregatedIndicatorValue) object;
-        
-        Map<String, String> fieldMap = new HashMap<String, String>();
-        
-        fieldMap.put( "indicatorid", String.valueOf( value.getIndicatorId() ) );
-        fieldMap.put( "periodid", String.valueOf( value.getPeriodId() ) );
-        fieldMap.put( "organisationunitid", String.valueOf( value.getOrganisationUnitId() ) );
-        
-        return statementBuilder.getValueStatement( tableName, "indicatorid", fieldMap, true );
-    }
-    
-    protected void addColumns()
+    protected void setColumns()
     {
         statementBuilder.setColumn( "indicatorid" );
         statementBuilder.setColumn( "periodid" );
@@ -109,7 +75,7 @@ public class AggregatedIndicatorValueBatchHandler
         statementBuilder.setColumn( "denominatorvalue" );
     }
 
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         AggregatedIndicatorValue value = (AggregatedIndicatorValue) object;
         
@@ -123,5 +89,23 @@ public class AggregatedIndicatorValueBatchHandler
         statementBuilder.setDouble( value.getValue() );
         statementBuilder.setDouble( value.getNumeratorValue() );
         statementBuilder.setDouble( value.getDenominatorValue() );
+    }
+        
+    protected String getIdentifierStatement( Object objectName )
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    protected String getUniquenessStatement( Object object )
+    {
+        AggregatedIndicatorValue value = (AggregatedIndicatorValue) object;
+        
+        Map<String, String> fieldMap = new HashMap<String, String>();
+        
+        fieldMap.put( "indicatorid", String.valueOf( value.getIndicatorId() ) );
+        fieldMap.put( "periodid", String.valueOf( value.getPeriodId() ) );
+        fieldMap.put( "organisationunitid", String.valueOf( value.getOrganisationUnitId() ) );
+        
+        return statementBuilder.getValueStatement( tableName, "indicatorid", fieldMap, true );
     }
 }

@@ -58,29 +58,37 @@ public class DataElementCategoryComboBatchHandler
     {
         this.tableName = "categorycombo";
     }
-    
-    protected void openSqlStatement()
+
+    @Override
+    protected void setAutoIncrementColumn()
+    {   
+        statementBuilder.setAutoIncrementColumn( "categorycomboid" );
+    }
+
+    @Override
+    protected void setIdentifierColumns()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "categorycomboid" );
+        statementBuilder.setIdentifierColumn( "categorycomboid" );
+    }
+
+    @Override
+    protected void setIdentifierColumnValues( Object object )
+    {   
+        DataElementCategoryCombo categoryCombo = (DataElementCategoryCombo) object;
         
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setIdentifierValue( categoryCombo.getId() );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "name" );
+    }
+    
+    protected void setValues( Object object )
     {
         DataElementCategoryCombo categoryCombo = (DataElementCategoryCombo) object;
         
-        statementBuilder.setIdentifierColumnName( "categorycomboid" );
-        statementBuilder.setIdentifierColumnValue( categoryCombo.getId() );
-        
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( categoryCombo.getName() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -98,16 +106,4 @@ public class DataElementCategoryComboBatchHandler
         
         return statementBuilder.getValueStatement( tableName, "categorycomboid", fieldMap, false );
     }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "name" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataElementCategoryCombo categoryCombo = (DataElementCategoryCombo) object;
-        
-        statementBuilder.setString( categoryCombo.getName() );
-    }   
 }

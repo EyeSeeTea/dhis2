@@ -61,25 +61,37 @@ public class ImportDataValueBatchHandler
         this.tableName = "importdatavalue";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "dataelementid" );
+        statementBuilder.setColumn( "categoryoptioncomboid" );
+        statementBuilder.setColumn( "periodid" );
+        statementBuilder.setColumn( "sourceid" );
+        statementBuilder.setColumn( "value" );
+        statementBuilder.setColumn( "storedby" );
+        statementBuilder.setColumn( "lastupdated" );
+        statementBuilder.setColumn( "comment" );
+        statementBuilder.setColumn( "status" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setValues( Object object )
     {
-        addColumns();
+        ImportDataValue value = (ImportDataValue) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( value.getDataElementId() );
+        statementBuilder.setInt( value.getCategoryOptionComboId() );
+        statementBuilder.setInt( value.getPeriodId() );
+        statementBuilder.setInt( value.getSourceId() );
+        statementBuilder.setString( value.getValue() );
+        statementBuilder.setString( value.getStoredBy() );
+        statementBuilder.setDate( value.getTimestamp() );
+        statementBuilder.setString( value.getComment() );
+        statementBuilder.setString( value.getStatus() );
     }
     
     protected String getIdentifierStatement( Object objectName )
     {
-        throw new UnsupportedOperationException( "ImportDataValue has no single unique identifier" );
+        throw new UnsupportedOperationException();
     }
     
     protected String getUniquenessStatement( Object object )
@@ -94,33 +106,5 @@ public class ImportDataValueBatchHandler
         fieldMap.put( "sourceid", String.valueOf( importDataValue.getSourceId() ) );
         
         return statementBuilder.getValueStatement( tableName, "dataelementid", fieldMap, true );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "dataelementid" );
-        statementBuilder.setColumn( "categoryoptioncomboid" );
-        statementBuilder.setColumn( "periodid" );
-        statementBuilder.setColumn( "sourceid" );
-        statementBuilder.setColumn( "value" );
-        statementBuilder.setColumn( "storedby" );
-        statementBuilder.setColumn( "lastupdated" );
-        statementBuilder.setColumn( "comment" );
-        statementBuilder.setColumn( "status" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        ImportDataValue value = (ImportDataValue) object;
-        
-        statementBuilder.setInt( value.getDataElementId() );
-        statementBuilder.setInt( value.getCategoryOptionComboId() );
-        statementBuilder.setInt( value.getPeriodId() );
-        statementBuilder.setInt( value.getSourceId() );
-        statementBuilder.setString( value.getValue() );
-        statementBuilder.setString( value.getStoredBy() );
-        statementBuilder.setDate( value.getTimestamp() );
-        statementBuilder.setString( value.getComment() );
-        statementBuilder.setString( value.getStatus() );
     }
 }

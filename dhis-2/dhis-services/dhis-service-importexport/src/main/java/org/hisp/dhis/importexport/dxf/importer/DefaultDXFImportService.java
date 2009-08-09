@@ -43,6 +43,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.expression.ExpressionService;
@@ -270,6 +271,13 @@ public class DefaultDXFImportService
     public void setDataValueService( DataValueService dataValueService )
     {
         this.dataValueService = dataValueService;
+    }
+
+    private DataMartStore dataMartStore;
+
+    public void setDataMartStore( DataMartStore dataMartStore )
+    {
+        this.dataMartStore = dataMartStore;
     }
     
     private BatchHandlerFactory batchHandlerFactory;
@@ -1070,6 +1078,7 @@ public class DefaultDXFImportService
                     XMLConverter converter = new DataValueConverter( batchHandler, 
                         importDataValueBatchHandler,                    
                         dataValueService,
+                        dataMartStore,
                         importObjectService,
                         params,
                         objectMappingGenerator.getDataElementMapping( params.skipMapping() ),

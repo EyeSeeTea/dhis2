@@ -61,25 +61,27 @@ public class CompleteDataSetRegistrationBatchHandler
         this.tableName = "completedatasetregistration";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "datasetid" );
+        statementBuilder.setColumn( "periodid" );
+        statementBuilder.setColumn( "sourceid" );
+        statementBuilder.setColumn( "date" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setValues( Object object )
     {
-        addColumns();
+        CompleteDataSetRegistration registration = (CompleteDataSetRegistration) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( registration.getDataSet().getId() );
+        statementBuilder.setInt( registration.getPeriod().getId() );
+        statementBuilder.setInt( registration.getSource().getId() );
+        statementBuilder.setDate( registration.getDate() );
     }
     
     protected String getIdentifierStatement( Object objectName )
     {
-        throw new UnsupportedOperationException( "sourceid has no single unique identifier" );
+        throw new UnsupportedOperationException();
     }
     
     protected String getUniquenessStatement( Object object )
@@ -93,23 +95,5 @@ public class CompleteDataSetRegistrationBatchHandler
         fieldMap.put( "sourceid", String.valueOf( registration.getSource().getId() ) );
         
         return statementBuilder.getValueStatement( tableName, "datasetid", fieldMap, true );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "datasetid" );
-        statementBuilder.setColumn( "periodid" );
-        statementBuilder.setColumn( "sourceid" );
-        statementBuilder.setColumn( "date" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        CompleteDataSetRegistration registration = (CompleteDataSetRegistration) object;
-        
-        statementBuilder.setInt( registration.getDataSet().getId() );
-        statementBuilder.setInt( registration.getPeriod().getId() );
-        statementBuilder.setInt( registration.getSource().getId() );
-        statementBuilder.setDate( registration.getDate() );
     }
 }

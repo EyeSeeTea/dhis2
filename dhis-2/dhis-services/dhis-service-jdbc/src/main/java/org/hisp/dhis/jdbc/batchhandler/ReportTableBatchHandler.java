@@ -59,47 +59,27 @@ public class ReportTableBatchHandler
         this.tableName = "reporttable";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "reporttableid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "reporttableid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
     {
-        ReportTable reportTable = (ReportTable) object;
-        
-        statementBuilder.setIdentifierColumnName( "reporttableid" );
-        statementBuilder.setIdentifierColumnValue( reportTable.getId() );
-        
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setIdentifierColumn( "reporttableid" );
     }
     
-    protected String getIdentifierStatement( Object objectName )
-    {
-        return statementBuilder.getValueStatement( tableName, "reporttableid", "name", String.valueOf( objectName ) );
-    }
-    
-    protected String getUniquenessStatement( Object object )
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         ReportTable reportTable = (ReportTable) object;
         
-        Map<String, String> fieldMap = new HashMap<String, String>();
-        
-        fieldMap.put( "name", reportTable.getName() );
-        
-        return statementBuilder.getValueStatement( tableName, "reporttableid", fieldMap, false );
+        statementBuilder.setIdentifierValue( reportTable.getId() );
     }
     
-    protected void addColumns()
+    protected void setColumns()
     {
         statementBuilder.setColumn( "name" );
         statementBuilder.setColumn( "tablename" );
@@ -130,7 +110,7 @@ public class ReportTableBatchHandler
         statementBuilder.setColumn( "paramorganisationunit" );
     }
     
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         ReportTable reportTable = (ReportTable) object;
         
@@ -162,4 +142,20 @@ public class ReportTableBatchHandler
         statementBuilder.setBoolean( reportTable.getReportParams().isParamParentOrganisationUnit() );
         statementBuilder.setBoolean( reportTable.getReportParams().isParamOrganisationUnit() );        
     }
+    
+    protected String getIdentifierStatement( Object objectName )
+    {
+        return statementBuilder.getValueStatement( tableName, "reporttableid", "name", String.valueOf( objectName ) );
+    }
+    
+    protected String getUniquenessStatement( Object object )
+    {
+        ReportTable reportTable = (ReportTable) object;
+        
+        Map<String, String> fieldMap = new HashMap<String, String>();
+        
+        fieldMap.put( "name", reportTable.getName() );
+        
+        return statementBuilder.getValueStatement( tableName, "reporttableid", fieldMap, false );
+    }    
 }

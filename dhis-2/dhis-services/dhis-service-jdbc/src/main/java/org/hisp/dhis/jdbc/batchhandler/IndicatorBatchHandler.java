@@ -59,50 +59,27 @@ public class IndicatorBatchHandler
         this.tableName = "indicator";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "indicatorid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
-    }
-    
-    protected String getUpdateSqlStatement( Object object )
-    {
-        Indicator indicator = (Indicator) object;
-        
-        statementBuilder.setIdentifierColumnName( "indicatorid" );
-        statementBuilder.setIdentifierColumnValue( indicator.getId() );
-        
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
-    }
-    
-    protected String getIdentifierStatement( Object objectName )
-    {
-        return statementBuilder.getValueStatement( tableName, "indicatorid", "name", String.valueOf( objectName ) );
+        statementBuilder.setAutoIncrementColumn( "indicatorid" );
     }    
 
-    protected String getUniquenessStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "indicatorid" );
+    }
+    
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         Indicator indicator = (Indicator) object;
         
-        Map<String, String> fieldMap = new HashMap<String, String>();
-        
-        fieldMap.put( "name", indicator.getName() );
-        fieldMap.put( "shortname", indicator.getShortName() );
-        fieldMap.put( "code", indicator.getCode() );
-        fieldMap.put( "alternativename", indicator.getAlternativeName() );
-        
-        return statementBuilder.getValueStatement( tableName, "indicatorid", fieldMap, false );
+        statementBuilder.setIdentifierValue( indicator.getId() );
     }
     
-    protected void addColumns()
+    protected void setColumns()
     {
         statementBuilder.setColumn( "uuid" );
         statementBuilder.setColumn( "name" );
@@ -121,7 +98,7 @@ public class IndicatorBatchHandler
         statementBuilder.setColumn( "extendeddataelementid" );
     }
     
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         Indicator indicator = (Indicator) object;
         
@@ -140,5 +117,24 @@ public class IndicatorBatchHandler
         statementBuilder.setString( indicator.getDenominatorDescription() );
         statementBuilder.setString( indicator.getDenominatorAggregationOperator() );
         statementBuilder.setInt( indicator.getExtended() != null ? indicator.getExtended().getId() : null );
+    }
+    
+    protected String getIdentifierStatement( Object objectName )
+    {
+        return statementBuilder.getValueStatement( tableName, "indicatorid", "name", String.valueOf( objectName ) );
+    }
+
+    protected String getUniquenessStatement( Object object )
+    {
+        Indicator indicator = (Indicator) object;
+        
+        Map<String, String> fieldMap = new HashMap<String, String>();
+        
+        fieldMap.put( "name", indicator.getName() );
+        fieldMap.put( "shortname", indicator.getShortName() );
+        fieldMap.put( "code", indicator.getCode() );
+        fieldMap.put( "alternativename", indicator.getAlternativeName() );
+        
+        return statementBuilder.getValueStatement( tableName, "indicatorid", fieldMap, false );
     }
 }

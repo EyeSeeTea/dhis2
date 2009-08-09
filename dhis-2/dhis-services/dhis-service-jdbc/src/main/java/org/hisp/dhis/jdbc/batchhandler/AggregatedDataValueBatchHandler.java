@@ -55,31 +55,39 @@ public class AggregatedDataValueBatchHandler
     // -------------------------------------------------------------------------
     // AbstractBatchHandler implementation
     // -------------------------------------------------------------------------
-
+    
     protected void setTableName()
     {
         this.tableName = "aggregateddatavalue";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "dataelementid" );
+        statementBuilder.setColumn( "categoryoptioncomboid" );
+        statementBuilder.setColumn( "periodid" );
+        statementBuilder.setColumn( "periodtypeid" );
+        statementBuilder.setColumn( "organisationunitid" );
+        statementBuilder.setColumn( "level" );
+        statementBuilder.setColumn( "value" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setValues( Object object )
     {
-        addColumns();
+        AggregatedDataValue value = (AggregatedDataValue) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( value.getDataElementId() );
+        statementBuilder.setInt( value.getCategoryOptionComboId() );
+        statementBuilder.setInt( value.getPeriodId() );
+        statementBuilder.setInt( value.getPeriodTypeId() );
+        statementBuilder.setInt( value.getOrganisationUnitId() );
+        statementBuilder.setInt( value.getLevel() );
+        statementBuilder.setDouble( value.getValue() );
     }
     
     protected String getIdentifierStatement( Object objectName )
     {
-        throw new UnsupportedOperationException( "AggregatedDataValue has no single unique identifier" );
+        throw new UnsupportedOperationException();
     }
     
     protected String getUniquenessStatement( Object object )
@@ -93,29 +101,5 @@ public class AggregatedDataValueBatchHandler
         fieldMap.put( "organisationunitid", String.valueOf( value.getOrganisationUnitId() ) );
         
         return statementBuilder.getValueStatement( tableName, "dataelementid", fieldMap, true );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "dataelementid" );
-        statementBuilder.setColumn( "categoryoptioncomboid" );
-        statementBuilder.setColumn( "periodid" );
-        statementBuilder.setColumn( "periodtypeid" );
-        statementBuilder.setColumn( "organisationunitid" );
-        statementBuilder.setColumn( "level" );
-        statementBuilder.setColumn( "value" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        AggregatedDataValue value = (AggregatedDataValue) object;
-        
-        statementBuilder.setInt( value.getDataElementId() );
-        statementBuilder.setInt( value.getCategoryOptionComboId() );
-        statementBuilder.setInt( value.getPeriodId() );
-        statementBuilder.setInt( value.getPeriodTypeId() );
-        statementBuilder.setInt( value.getOrganisationUnitId() );
-        statementBuilder.setInt( value.getLevel() );
-        statementBuilder.setDouble( value.getValue() );
-    }
+    }    
 }

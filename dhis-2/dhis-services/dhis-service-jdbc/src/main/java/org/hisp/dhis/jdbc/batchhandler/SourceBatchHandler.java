@@ -54,20 +54,23 @@ public class SourceBatchHandler
     {
         this.tableName = "source";
     }
-    
-    protected void openSqlStatement()
-    {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "sourceid" );
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
-    }
 
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        return null; // Not in use
+        statementBuilder.setAutoIncrementColumn( "sourceid" );
     }
     
+    protected void setColumns()
+    {
+        // Nothing to add
+    }
+    
+    protected void setValues( Object object )
+    {
+        // Nothing to add
+    }
+        
     protected String getUniquenessStatement( Object object )
     {
         return null; // Not in use
@@ -76,15 +79,5 @@ public class SourceBatchHandler
     protected String getIdentifierStatement( Object objectName )
     {
         return statementBuilder.getValueStatement( tableName, "sourceid", "sourceid", Integer.valueOf( String.valueOf( objectName ) ) );
-    }
-    
-    protected void addColumns()
-    {
-        // Nothing to add
-    }
-    
-    protected void addValues( Object object )
-    {
-        // Nothing to add
     }
 }

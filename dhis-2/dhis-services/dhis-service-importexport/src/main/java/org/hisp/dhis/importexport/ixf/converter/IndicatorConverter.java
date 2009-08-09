@@ -40,6 +40,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.ExportParams;
@@ -78,6 +79,8 @@ public class IndicatorConverter
     
     private OrganisationUnitService organisationUnitService;
 
+    private DataMartStore dataMartStore;
+    
     private DataElementCategoryCombo categoryCombo;
     
     private BatchHandler dataValueBatchHandler;
@@ -114,6 +117,7 @@ public class IndicatorConverter
     public IndicatorConverter( BatchHandler batchHandler,
         DataElementService dataElementService, 
         ImportObjectService importObjectService,
+        DataMartStore dataMartStore,
         DataElementCategoryCombo categoryCombo,
         BatchHandler dataValueBatchHandler,
         DataElementCategoryOptionCombo categoryOptionCombo,
@@ -123,6 +127,7 @@ public class IndicatorConverter
         this.batchHandler = batchHandler;
         this.dataElementService = dataElementService;
         this.importObjectService = importObjectService;
+        this.dataMartStore = dataMartStore;
         this.categoryCombo = categoryCombo;
         this.dataValueBatchHandler = dataValueBatchHandler;
         this.categoryOptionCombo = categoryOptionCombo;
@@ -215,6 +220,7 @@ public class IndicatorConverter
             
             dataConverter = new DataConverter( dataValueBatchHandler, 
                 importObjectService,
+                dataMartStore,
                 params,
                 element,
                 categoryOptionCombo,

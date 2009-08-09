@@ -58,29 +58,39 @@ public class IndicatorTypeBatchHandler
     {
         this.tableName = "indicatortype";
     }
-    
-    protected void openSqlStatement()
+
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "indicatortypeid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "indicatortypeid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "indicatortypeid" );
+    }
+
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         IndicatorType type = (IndicatorType) object;
-
-        statementBuilder.setIdentifierColumnName( "indicatortypeid" );
-        statementBuilder.setIdentifierColumnValue( type.getId() );
         
-        addColumns();
+        statementBuilder.setIdentifierValue( type.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "name" );
+        statementBuilder.setColumn( "indicatorfactor" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        IndicatorType type = (IndicatorType) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( type.getName() );
+        statementBuilder.setInt( type.getFactor() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -97,19 +107,5 @@ public class IndicatorTypeBatchHandler
         fieldMap.put( "name", type.getName() );
         
         return statementBuilder.getValueStatement( tableName, "indicatortypeid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "name" );
-        statementBuilder.setColumn( "indicatorfactor" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        IndicatorType type = (IndicatorType) object;
-        
-        statementBuilder.setString( type.getName() );
-        statementBuilder.setInt( type.getFactor() );
     }
 }

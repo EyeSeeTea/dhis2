@@ -59,30 +59,40 @@ public class DataElementGroupBatchHandler
         this.tableName = "dataelementgroup";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "dataelementgroupid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "dataelementgroupid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "dataelementgroupid" );
+    }
+    
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         DataElementGroup group = (DataElementGroup) object;
         
-        statementBuilder.setIdentifierColumnName( "dataelementgroupid" );
-        statementBuilder.setIdentifierColumnValue( group.getId() );
-        
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setIdentifierValue( group.getId() );
     }
     
+    protected void setColumns()
+    {   
+        statementBuilder.setColumn( "uuid" );
+        statementBuilder.setColumn( "name" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        DataElementGroup group = (DataElementGroup) object;
+        
+        statementBuilder.setString( group.getUuid() );
+        statementBuilder.setString( group.getName() );        
+    }
+        
     protected String getIdentifierStatement( Object objectName )
     {
         return statementBuilder.getValueStatement( tableName, "dataelementgroupid", "name", String.valueOf( objectName ) );
@@ -97,19 +107,5 @@ public class DataElementGroupBatchHandler
         fieldMap.put( "name", group.getName() );
         
         return statementBuilder.getValueStatement( tableName, "dataelementgroupid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {   
-        statementBuilder.setColumn( "uuid" );
-        statementBuilder.setColumn( "name" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataElementGroup group = (DataElementGroup) object;
-        
-        statementBuilder.setString( group.getUuid() );
-        statementBuilder.setString( group.getName() );        
     }
 }

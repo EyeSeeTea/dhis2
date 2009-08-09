@@ -61,30 +61,26 @@ public class DataDictionaryDataElementBatchHandler
         this.tableName = "datadictionarydataelements";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "datadictionaryid" );
+        statementBuilder.setColumn( "dataelementid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setValues( Object object )
     {
-        addColumns();
+        GroupMemberAssociation association = (GroupMemberAssociation) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( association.getGroupId() );
+        statementBuilder.setInt( association.getMemberId() );
     }
     
     protected String getIdentifierStatement( Object objectName )
     {
         GroupMemberAssociation association = (GroupMemberAssociation) objectName;
         
-        String sql = statementBuilder.getValueStatement( tableName, "datadictionaryid", "dataelementid", 
+        return statementBuilder.getValueStatement( tableName, "datadictionaryid", "dataelementid", 
             "datadictionaryid", String.valueOf( association.getGroupId() ), "dataelementid", String.valueOf( association.getMemberId() ) );
-        
-        return sql;
     }
     
     protected String getUniquenessStatement( Object object )
@@ -98,18 +94,4 @@ public class DataDictionaryDataElementBatchHandler
         
         return statementBuilder.getValueStatement( tableName, "datadictionaryid", fieldMap, true );
     }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "datadictionaryid" );
-        statementBuilder.setColumn( "dataelementid" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        GroupMemberAssociation association = (GroupMemberAssociation) object;
-        
-        statementBuilder.setInt( association.getGroupId() );
-        statementBuilder.setInt( association.getMemberId() );
-    }       
 }

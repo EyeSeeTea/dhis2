@@ -59,28 +59,40 @@ public class DataDictionaryBatchHandler
         this.tableName = "datadictionary";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "datadictionaryid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "datadictionaryid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "datadictionaryid" );
+    }
+    
+    @Override
+    protected void setIdentifierColumnValues( Object object )
+    {
+        DataDictionary dataDictionary = (DataDictionary) object;
+                
+        statementBuilder.setIdentifierValue( dataDictionary.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "name" );
+        statementBuilder.setColumn( "description" );
+        statementBuilder.setColumn( "region" );
+    }
+    
+    protected void setValues( Object object )
     {
         DataDictionary dataDictionary = (DataDictionary) object;
         
-        statementBuilder.setIdentifierColumnName( "datadictionaryid" );
-        statementBuilder.setIdentifierColumnValue( dataDictionary.getId() );
-        
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( dataDictionary.getName() );
+        statementBuilder.setString( dataDictionary.getDescription() );
+        statementBuilder.setString( dataDictionary.getRegion() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -97,21 +109,5 @@ public class DataDictionaryBatchHandler
         fieldMap.put( "name", dataDictionary.getName() );
         
         return statementBuilder.getValueStatement( tableName, "datadictionaryid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "name" );
-        statementBuilder.setColumn( "description" );
-        statementBuilder.setColumn( "region" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataDictionary dataDictionary = (DataDictionary) object;
-        
-        statementBuilder.setString( dataDictionary.getName() );
-        statementBuilder.setString( dataDictionary.getDescription() );
-        statementBuilder.setString( dataDictionary.getRegion() );
     }
 }

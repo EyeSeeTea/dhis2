@@ -58,53 +58,33 @@ public class CategoryComboCategoryAssociationBatchHandler
         this.tableName = "categorycombos_categories";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "categorycomboid" );
+        statementBuilder.setColumn( "categoryid" );
     }
-
-    protected String getUpdateSqlStatement( Object object )
+    
+    protected void setValues( Object object )
     {
-        addColumns();
+        GroupMemberAssociation association = (GroupMemberAssociation) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( association.getGroupId() );
+        statementBuilder.setInt( association.getMemberId() );
     }
     
     protected String getIdentifierStatement( Object objectName )
     {
         GroupMemberAssociation association = (GroupMemberAssociation) objectName;
         
-        String sql = statementBuilder.getValueStatement( tableName, "categorycomboid", "categoryid", 
+        return statementBuilder.getValueStatement( tableName, "categorycomboid", "categoryid", 
             "categorycomboid", association.getGroupId(), "categoryid", association.getMemberId() );
-        
-        return sql;
     }
     
     protected String getUniquenessStatement( Object object )
     {
         GroupMemberAssociation association = (GroupMemberAssociation) object;
 
-        String sql = statementBuilder.getValueStatement( tableName, "categorycomboid", "categoryid", 
+        return statementBuilder.getValueStatement( tableName, "categorycomboid", "categoryid", 
             "categorycomboid", association.getGroupId(), "categoryid", association.getMemberId() );
-        
-        return sql;
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "categorycomboid" );
-        statementBuilder.setColumn( "categoryid" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        GroupMemberAssociation association = (GroupMemberAssociation) object;
-        
-        statementBuilder.setInt( association.getGroupId() );
-        statementBuilder.setInt( association.getMemberId() );
     }
 }

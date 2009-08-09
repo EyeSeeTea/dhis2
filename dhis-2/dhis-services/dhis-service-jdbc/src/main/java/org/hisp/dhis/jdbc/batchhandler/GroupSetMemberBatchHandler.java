@@ -58,53 +58,33 @@ public class GroupSetMemberBatchHandler
         this.tableName = "orgunitgroupsetmembers";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "orgunitgroupsetid" );
+        statementBuilder.setColumn( "orgunitgroupid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setValues( Object object )
     {
-        addColumns();
+        GroupMemberAssociation association = (GroupMemberAssociation) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( association.getGroupId() );
+        statementBuilder.setInt( association.getMemberId() );
     }
     
     protected String getIdentifierStatement( Object objectName )
     {
         GroupMemberAssociation association = (GroupMemberAssociation) objectName;
         
-        String sql = statementBuilder.getValueStatement( tableName, "orgunitgroupsetid", "orgunitgroupid", 
+        return statementBuilder.getValueStatement( tableName, "orgunitgroupsetid", "orgunitgroupid", 
             "orgunitgroupsetid", association.getGroupId(), "orgunitgroupid", association.getMemberId() );
-        
-        return sql;
     }
 
     protected String getUniquenessStatement( Object object )
     {
         GroupMemberAssociation association = (GroupMemberAssociation) object;
 
-        String sql = statementBuilder.getValueStatement( tableName, "orgunitgroupsetid", "orgunitgroupid", 
+        return statementBuilder.getValueStatement( tableName, "orgunitgroupsetid", "orgunitgroupid", 
             "orgunitgroupsetid", association.getGroupId(), "orgunitgroupid", association.getMemberId() );
-        
-        return sql;
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "orgunitgroupsetid" );
-        statementBuilder.setColumn( "orgunitgroupid" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        GroupMemberAssociation association = (GroupMemberAssociation) object;
-        
-        statementBuilder.setInt( association.getGroupId() );
-        statementBuilder.setInt( association.getMemberId() );
     }
 }

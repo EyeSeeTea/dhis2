@@ -59,33 +59,19 @@ public class DataValueCrossTabBatchHandler
         this.tableName = "datavaluecrosstab";
     }
     
-    protected void openSqlStatement()
-    {        
-        sqlBuffer.append( statementBuilder.getNoColumnInsertStatementOpening( tableName ) );
-    }
-    
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected String getInsertStatementOpening()
     {
-        return null; // Not in use
+        return statementBuilder.getNoColumnInsertStatementOpening( tableName );
     }
     
-    protected String getIdentifierStatement( Object objectName )
-    {
-        throw new UnsupportedOperationException( "CrossTabDataValue has no single unique identifier" );
-    }
-    
-    protected String getUniquenessStatement( Object object )
-    {
-        return null; // Not in use
-    }
-    
-    protected void addColumns()
+    protected void setColumns()
     {
         // Not in use
     }
     
     @SuppressWarnings( "unchecked" )
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         List<String> values = (List<String>) object;
         
@@ -93,5 +79,15 @@ public class DataValueCrossTabBatchHandler
         {
             statementBuilder.setString( value );
         }
+    }
+    
+    protected String getIdentifierStatement( Object objectName )
+    {
+        throw new UnsupportedOperationException();
+    }
+    
+    protected String getUniquenessStatement( Object object )
+    {
+        throw new UnsupportedOperationException();
     }
 }

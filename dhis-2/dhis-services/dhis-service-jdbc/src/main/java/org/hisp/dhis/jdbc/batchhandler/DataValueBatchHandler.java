@@ -61,25 +61,35 @@ public class DataValueBatchHandler
         this.tableName = "datavalue";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "dataelementid" );
+        statementBuilder.setColumn( "periodid" );
+        statementBuilder.setColumn( "sourceid" );
+        statementBuilder.setColumn( "value" );
+        statementBuilder.setColumn( "storedby" );
+        statementBuilder.setColumn( "lastupdated" );
+        statementBuilder.setColumn( "comment" );
+        statementBuilder.setColumn( "categoryoptioncomboid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setValues( Object object )
     {
-        addColumns();
+        final DataValue value = (DataValue) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( value.getDataElement().getId() );
+        statementBuilder.setInt( value.getPeriod().getId() );
+        statementBuilder.setInt( value.getSource().getId() );
+        statementBuilder.setString( value.getValue() );
+        statementBuilder.setString( value.getStoredBy() );
+        statementBuilder.setDate( value.getTimestamp() );
+        statementBuilder.setString( value.getComment() );
+        statementBuilder.setInt( value.getOptionCombo().getId() );
     }
     
     protected String getIdentifierStatement( Object objectName )
     {
-        throw new UnsupportedOperationException( "DataValue has no single unique identifier" );
+        throw new UnsupportedOperationException();
     }
 
     protected String getUniquenessStatement( Object object )
@@ -94,31 +104,5 @@ public class DataValueBatchHandler
         fieldMap.put( "sourceid", value.getSource().getId() );
         
         return statementBuilder.getIntegerValueStatement( tableName, "dataelementid", fieldMap, true );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "dataelementid" );
-        statementBuilder.setColumn( "periodid" );
-        statementBuilder.setColumn( "sourceid" );
-        statementBuilder.setColumn( "value" );
-        statementBuilder.setColumn( "storedby" );
-        statementBuilder.setColumn( "lastupdated" );
-        statementBuilder.setColumn( "comment" );
-        statementBuilder.setColumn( "categoryoptioncomboid" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataValue value = (DataValue) object;
-        
-        statementBuilder.setInt( value.getDataElement().getId() );
-        statementBuilder.setInt( value.getPeriod().getId() );
-        statementBuilder.setInt( value.getSource().getId() );
-        statementBuilder.setString( value.getValue() );
-        statementBuilder.setString( value.getStoredBy() );
-        statementBuilder.setDate( value.getTimestamp() );
-        statementBuilder.setString( value.getComment() );
-        statementBuilder.setInt( value.getOptionCombo().getId() );
-    }   
+    } 
 }

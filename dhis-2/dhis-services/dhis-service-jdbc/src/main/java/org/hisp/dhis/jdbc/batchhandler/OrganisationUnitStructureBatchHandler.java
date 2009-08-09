@@ -58,42 +58,27 @@ public class OrganisationUnitStructureBatchHandler
         this.tableName = "orgunitstructure";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "orgunitstructureid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "orgunitstructureid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
     {
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setIdentifierColumn( "orgunitstructureid" );
     }
     
-    protected String getIdentifierStatement( Object objectName )
-    {
-        return statementBuilder.getValueStatement( tableName, "orgunitstructureid", "organisationunitid", String.valueOf( objectName ) );
-    }
-    
-    protected String getUniquenessStatement( Object object )
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         OrganisationUnitStructure structure = (OrganisationUnitStructure) object;
         
-        Map<String, String> fieldMap = new HashMap<String, String>();
-        
-        fieldMap.put( "organisationUnitId", String.valueOf( structure.getOrganisationUnitId() ) );
-        
-        return statementBuilder.getValueStatement( tableName, "orgunitstructureid", fieldMap, false );
+        statementBuilder.setIdentifierValue( structure.getId() );
     }
     
-    protected void addColumns()
+    protected void setColumns()
     {
         statementBuilder.setColumn( "organisationunitid" );
         statementBuilder.setColumn( "level" );
@@ -117,7 +102,7 @@ public class OrganisationUnitStructureBatchHandler
         statementBuilder.setColumn( "geolevel8" );
     }
     
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         OrganisationUnitStructure structure = (OrganisationUnitStructure) object;
         
@@ -141,5 +126,21 @@ public class OrganisationUnitStructureBatchHandler
         statementBuilder.setString( structure.getGeoCodeLevel6() );
         statementBuilder.setString( structure.getGeoCodeLevel7() );
         statementBuilder.setString( structure.getGeoCodeLevel8() );
+    }
+    
+    protected String getIdentifierStatement( Object objectName )
+    {
+        return statementBuilder.getValueStatement( tableName, "orgunitstructureid", "organisationunitid", String.valueOf( objectName ) );
+    }
+    
+    protected String getUniquenessStatement( Object object )
+    {
+        OrganisationUnitStructure structure = (OrganisationUnitStructure) object;
+        
+        Map<String, String> fieldMap = new HashMap<String, String>();
+        
+        fieldMap.put( "organisationUnitId", String.valueOf( structure.getOrganisationUnitId() ) );
+        
+        return statementBuilder.getValueStatement( tableName, "orgunitstructureid", fieldMap, false );
     }
 }

@@ -58,29 +58,57 @@ public class DataElementBatchHandler
     {
         this.tableName = "dataelement";
     }
-    
-    protected void openSqlStatement()
+
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "dataelementid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "dataelementid" );
     }
-    
-    protected String getUpdateSqlStatement( Object object )
+
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "dataelementid" );
+    }
+
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         DataElement dataElement = (DataElement) object;
         
-        statementBuilder.setIdentifierColumnName( "dataelementid" );
-        statementBuilder.setIdentifierColumnValue( dataElement.getId() );
+        statementBuilder.setIdentifierValue( dataElement.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "uuid" );
+        statementBuilder.setColumn( "name" );
+        statementBuilder.setColumn( "alternativename" );
+        statementBuilder.setColumn( "shortname" );
+        statementBuilder.setColumn( "code" );
+        statementBuilder.setColumn( "description" );
+        statementBuilder.setColumn( "active" );
+        statementBuilder.setColumn( "valuetype" );
+        statementBuilder.setColumn( "aggregationtype" );
+        statementBuilder.setColumn( "extendeddataelementid" );
+        statementBuilder.setColumn( "categorycomboid" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        DataElement dataElement = (DataElement) object;
         
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( dataElement.getUuid() );
+        statementBuilder.setString( dataElement.getName() );
+        statementBuilder.setString( dataElement.getAlternativeName() );
+        statementBuilder.setString( dataElement.getShortName() );
+        statementBuilder.setString( dataElement.getCode() );
+        statementBuilder.setString( dataElement.getDescription() );
+        statementBuilder.setBoolean( dataElement.isActive() );
+        statementBuilder.setString( dataElement.getType() );
+        statementBuilder.setString( dataElement.getAggregationOperator() );
+        statementBuilder.setInt( dataElement.getExtended() != null ? dataElement.getExtended().getId() : null );
+        statementBuilder.setInt( dataElement.getCategoryCombo().getId() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -100,37 +128,5 @@ public class DataElementBatchHandler
         fieldMap.put( "alternativename", dataElement.getAlternativeName() );
         
         return statementBuilder.getValueStatement( tableName, "dataelementid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "uuid" );
-        statementBuilder.setColumn( "name" );
-        statementBuilder.setColumn( "alternativename" );
-        statementBuilder.setColumn( "shortname" );
-        statementBuilder.setColumn( "code" );
-        statementBuilder.setColumn( "description" );
-        statementBuilder.setColumn( "active" );
-        statementBuilder.setColumn( "valuetype" );
-        statementBuilder.setColumn( "aggregationtype" );
-        statementBuilder.setColumn( "extendeddataelementid" );
-        statementBuilder.setColumn( "categorycomboid" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataElement dataElement = (DataElement) object;
-        
-        statementBuilder.setString( dataElement.getUuid() );
-        statementBuilder.setString( dataElement.getName() );
-        statementBuilder.setString( dataElement.getAlternativeName() );
-        statementBuilder.setString( dataElement.getShortName() );
-        statementBuilder.setString( dataElement.getCode() );
-        statementBuilder.setString( dataElement.getDescription() );
-        statementBuilder.setBoolean( dataElement.isActive() );
-        statementBuilder.setString( dataElement.getType() );
-        statementBuilder.setString( dataElement.getAggregationOperator() );
-        statementBuilder.setInt( dataElement.getExtended() != null ? dataElement.getExtended().getId() : null );
-        statementBuilder.setInt( dataElement.getCategoryCombo().getId() );
     }
 }

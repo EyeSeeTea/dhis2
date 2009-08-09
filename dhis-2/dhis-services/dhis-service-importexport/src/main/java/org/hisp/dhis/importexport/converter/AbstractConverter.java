@@ -107,7 +107,7 @@ public abstract class AbstractConverter<T>
                         importMatching( object, match );
                     }
                 }
-                else if ( params.isPreview() ) // Preview object. Datavalue cannot be match in preview.
+                else if ( params.isPreview() ) // Preview object. DataValue cannot be match in preview.
                 {
                     ImportObjectStatus status = isIdentical( object, match ) ? MATCH : UPDATE;
                         

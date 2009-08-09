@@ -58,48 +58,35 @@ public class GroupSetStructureBatchHandler
         this.tableName = "orgunitgroupsetstructure";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "orgunitgroupsetstructureid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "orgunitgroupsetstructureid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
-    {
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
-    }
-    
-    protected String getIdentifierStatement( Object objectName )
-    {
-        return null; // Not in use
-    }
-    
-    protected String getUniquenessStatement( Object object )
-    {
-        return null; // Not in use
-    }
-    
-    protected void addColumns()
+    protected void setColumns()
     {
         statementBuilder.setColumn( "organisationunitid" );
         statementBuilder.setColumn( "orgunitgroupid" );
         statementBuilder.setColumn( "orgunitgroupsetid" );
     }
     
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         GroupSetStructure structure = (GroupSetStructure) object;
         
         statementBuilder.setInt( structure.getOrganisationUnitId() );
         statementBuilder.setInt( structure.getGroupId() );
         statementBuilder.setInt( structure.getGroupSetId() );
+    }
+    
+    protected String getIdentifierStatement( Object objectName )
+    {
+        throw new UnsupportedOperationException();
+    }
+    
+    protected String getUniquenessStatement( Object object )
+    {
+        throw new UnsupportedOperationException();
     }
 }

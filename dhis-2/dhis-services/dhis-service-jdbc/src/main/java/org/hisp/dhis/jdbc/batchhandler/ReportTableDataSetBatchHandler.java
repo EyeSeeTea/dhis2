@@ -58,55 +58,35 @@ public class ReportTableDataSetBatchHandler
         this.tableName = "reporttable_datasets";
     }
     
-    protected void openSqlStatement()
-    {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
-    }
-    
-    protected String getUpdateSqlStatement( Object object )
-    {
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
-    }
-    
-    protected String getIdentifierStatement( Object objectName )
-    {
-        GroupMemberAssociation association = (GroupMemberAssociation) objectName;
-        
-        String sql = statementBuilder.getValueStatement( tableName, "reporttableid", "datasetid", 
-            "reporttableid", association.getGroupId(), "datasetid", association.getMemberId() );
-        
-        return sql;
-    }
-    
-    protected String getUniquenessStatement( Object object )
-    {
-        GroupMemberAssociation association = (GroupMemberAssociation) object;
-
-        String sql = statementBuilder.getValueStatement( tableName, "reporttableid", "datasetid", 
-            "reporttableid", association.getGroupId(), "datasetid", association.getMemberId() );
-        
-        return sql;
-    }
-    
-    protected void addColumns()
+    protected void setColumns()
     {
         statementBuilder.setColumn( "reporttableid" );
         statementBuilder.setColumn( "datasetid" );
         statementBuilder.setColumn( "sort_order" );
     }
     
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         GroupMemberAssociation association = (GroupMemberAssociation) object;
         
         statementBuilder.setInt( association.getGroupId() );
         statementBuilder.setInt( association.getMemberId() );
         statementBuilder.setInt( association.getSortOrder() );
-    }       
+    }
+    
+    protected String getIdentifierStatement( Object objectName )
+    {
+        GroupMemberAssociation association = (GroupMemberAssociation) objectName;
+        
+        return statementBuilder.getValueStatement( tableName, "reporttableid", "datasetid", 
+            "reporttableid", association.getGroupId(), "datasetid", association.getMemberId() );
+    }
+    
+    protected String getUniquenessStatement( Object object )
+    {
+        GroupMemberAssociation association = (GroupMemberAssociation) object;
+
+        return statementBuilder.getValueStatement( tableName, "reporttableid", "datasetid", 
+            "reporttableid", association.getGroupId(), "datasetid", association.getMemberId() );
+    }     
 }

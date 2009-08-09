@@ -59,28 +59,42 @@ public class DataSetBatchHandler
         this.tableName = "dataset";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "datasetid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "datasetid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "datasetid" );
+    }
+    
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         DataSet dataSet = (DataSet) object;
-
-        statementBuilder.setIdentifierColumnName( "datasetid" );
-        statementBuilder.setIdentifierColumnValue( dataSet.getId() );
-                
-        addColumns();
         
-        addValues( object );
+        statementBuilder.setIdentifierValue( dataSet.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "name" );
+        statementBuilder.setColumn( "shortName" );
+        statementBuilder.setColumn( "code" );
+        statementBuilder.setColumn( "periodtypeid" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        DataSet dataSet = (DataSet) object;
         
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( dataSet.getName() );
+        statementBuilder.setString( dataSet.getShortName() );
+        statementBuilder.setString( dataSet.getCode() );
+        statementBuilder.setInt( dataSet.getPeriodType().getId() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -97,23 +111,5 @@ public class DataSetBatchHandler
         fieldMap.put( "name", dataSet.getName() );
         
         return statementBuilder.getValueStatement( tableName, "datasetid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "name" );
-        statementBuilder.setColumn( "shortName" );
-        statementBuilder.setColumn( "code" );
-        statementBuilder.setColumn( "periodtypeid" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataSet dataSet = (DataSet) object;
-        
-        statementBuilder.setString( dataSet.getName() );
-        statementBuilder.setString( dataSet.getShortName() );
-        statementBuilder.setString( dataSet.getCode() );
-        statementBuilder.setInt( dataSet.getPeriodType().getId() );
     }
 }

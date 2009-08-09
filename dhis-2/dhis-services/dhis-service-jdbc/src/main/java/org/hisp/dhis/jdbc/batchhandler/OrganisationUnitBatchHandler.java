@@ -61,25 +61,54 @@ public class OrganisationUnitBatchHandler
         this.tableName = "organisationunit";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setIdentifierColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setIdentifierColumn( "organisationunitid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         OrganisationUnit unit = (OrganisationUnit) object;
-
-        statementBuilder.setIdentifierColumnName( "organisationunitid" );
-        statementBuilder.setIdentifierColumnValue( unit.getId() );
-                
-        addColumns();
         
-        addValues( object );
+        statementBuilder.setIdentifierValue( unit.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "organisationunitid" );
+        statementBuilder.setColumn( "uuid" );
+        statementBuilder.setColumn( "name" );
+        statementBuilder.setColumn( "parentid" );
+        statementBuilder.setColumn( "shortname" );
+        statementBuilder.setColumn( "code" );
+        statementBuilder.setColumn( "openingdate" );
+        statementBuilder.setColumn( "closeddate" );
+        statementBuilder.setColumn( "active" );
+        statementBuilder.setColumn( "comment" );
+        statementBuilder.setColumn( "geocode" );
+        statementBuilder.setColumn( "latitude" );
+        statementBuilder.setColumn( "longitude" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        OrganisationUnit unit = (OrganisationUnit) object;
         
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( unit.getId() );
+        statementBuilder.setString( unit.getUuid() );
+        statementBuilder.setString( unit.getName() );        
+        statementBuilder.setInt( unit.getParent() != null ? unit.getParent().getId() : null );
+        statementBuilder.setString( unit.getShortName() );
+        statementBuilder.setString( unit.getCode() );
+        statementBuilder.setDate( unit.getOpeningDate() );
+        statementBuilder.setDate( unit.getClosedDate() );
+        statementBuilder.setBoolean( unit.isActive() );
+        statementBuilder.setString( unit.getComment() );
+        statementBuilder.setString( unit.getGeoCode() );
+        statementBuilder.setString( unit.getLatitude() );
+        statementBuilder.setString( unit.getLongitude() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -98,41 +127,5 @@ public class OrganisationUnitBatchHandler
         fieldMap.put( "code", unit.getCode() );
         
         return statementBuilder.getValueStatement( tableName, "organisationunitid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "organisationunitid" );
-        statementBuilder.setColumn( "uuid" );
-        statementBuilder.setColumn( "name" );
-        statementBuilder.setColumn( "parentid" );
-        statementBuilder.setColumn( "shortname" );
-        statementBuilder.setColumn( "code" );
-        statementBuilder.setColumn( "openingdate" );
-        statementBuilder.setColumn( "closeddate" );
-        statementBuilder.setColumn( "active" );
-        statementBuilder.setColumn( "comment" );
-        statementBuilder.setColumn( "geocode" );
-        statementBuilder.setColumn( "latitude" );
-        statementBuilder.setColumn( "longitude" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        OrganisationUnit unit = (OrganisationUnit) object;
-        
-        statementBuilder.setInt( unit.getId() );
-        statementBuilder.setString( unit.getUuid() );
-        statementBuilder.setString( unit.getName() );        
-        statementBuilder.setInt( unit.getParent() != null ? unit.getParent().getId() : null );
-        statementBuilder.setString( unit.getShortName() );
-        statementBuilder.setString( unit.getCode() );
-        statementBuilder.setDate( unit.getOpeningDate() );
-        statementBuilder.setDate( unit.getClosedDate() );
-        statementBuilder.setBoolean( unit.isActive() );
-        statementBuilder.setString( unit.getComment() );
-        statementBuilder.setString( unit.getGeoCode() );
-        statementBuilder.setString( unit.getLatitude() );
-        statementBuilder.setString( unit.getLongitude() );
     }
 }

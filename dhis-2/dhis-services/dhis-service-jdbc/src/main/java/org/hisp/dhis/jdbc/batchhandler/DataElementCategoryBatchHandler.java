@@ -58,31 +58,39 @@ public class DataElementCategoryBatchHandler
     {
         this.tableName = "dataelementcategory";
     }
-    
-    protected void openSqlStatement()
+
+    @Override
+    protected void setAutoIncrementColumn()
+    {   
+        statementBuilder.setAutoIncrementColumn( "categoryid" );
+    }
+
+    @Override
+    protected void setIdentifierColumns()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "categoryid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setIdentifierColumn( "categoryid" );
+    }
+
+    @Override
+    protected void setIdentifierColumnValues( Object object )
+    {
+        DataElementCategory category = (DataElementCategory) object;
+                
+        statementBuilder.setIdentifierValue( category.getId() );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "name" );
+    }
+    
+    protected void setValues( Object object )
     {
         DataElementCategory category = (DataElementCategory) object;
         
-        statementBuilder.setIdentifierColumnName( "categoryid" );
-        statementBuilder.setIdentifierColumnValue( category.getId() );
-        
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( category.getName() );
     }
-    
+
     protected String getIdentifierStatement( Object objectName )
     {
         return statementBuilder.getValueStatement( tableName, "categoryid", "name", String.valueOf( objectName ) );
@@ -97,17 +105,5 @@ public class DataElementCategoryBatchHandler
         fieldMap.put( "name", category.getName() );
         
         return statementBuilder.getValueStatement( tableName, "categoryid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "name" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataElementCategory category = (DataElementCategory) object;
-        
-        statementBuilder.setString( category.getName() );
     }
 }

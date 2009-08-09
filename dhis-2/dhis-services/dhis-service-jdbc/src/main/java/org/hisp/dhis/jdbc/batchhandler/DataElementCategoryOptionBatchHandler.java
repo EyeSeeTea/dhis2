@@ -58,31 +58,41 @@ public class DataElementCategoryOptionBatchHandler
     {
         this.tableName = "dataelementcategoryoption";
     }
-    
-    protected void openSqlStatement()
-    {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "categoryoptionid" );
 
-        addColumns();
+    @Override
+    protected void setAutoIncrementColumn()
+    {   
+        statementBuilder.setAutoIncrementColumn( "categoryoptionid" );
+    }
+
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "categoryoptionid" );
+    }
+
+    @Override
+    protected void setIdentifierColumnValues( Object object )
+    {   
+        DataElementCategoryOption categoryOption = (DataElementCategoryOption) object;
         
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setIdentifierValue( categoryOption.getId() );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "name" );
+        statementBuilder.setColumn( "uuid" );
+    }
+    
+    protected void setValues( Object object )
     {
         DataElementCategoryOption categoryOption = (DataElementCategoryOption) object;
         
-        statementBuilder.setIdentifierColumnName( "categoryoptionid" );
-        statementBuilder.setIdentifierColumnValue( categoryOption.getId() );
-
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( categoryOption.getName() );
+        statementBuilder.setString( categoryOption.getUuid() );
     }
-    
+        
     protected String getIdentifierStatement( Object objectName )
     {
         return statementBuilder.getValueStatement( tableName, "categoryoptionid", "name", String.valueOf( objectName ) );
@@ -97,19 +107,5 @@ public class DataElementCategoryOptionBatchHandler
         fieldMap.put( "name", categoryOption.getName() );
         
         return statementBuilder.getValueStatement( tableName, "categoryoptionid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "name" );
-        statementBuilder.setColumn( "uuid" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataElementCategoryOption categoryOption = (DataElementCategoryOption) object;
-        
-        statementBuilder.setString( categoryOption.getName() );
-        statementBuilder.setString( categoryOption.getUuid() );
     }   
 }

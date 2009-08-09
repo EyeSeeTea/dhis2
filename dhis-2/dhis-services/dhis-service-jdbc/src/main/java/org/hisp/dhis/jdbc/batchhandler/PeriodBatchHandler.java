@@ -58,28 +58,40 @@ public class PeriodBatchHandler
         this.tableName = "period";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "periodid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "periodid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "periodid" );
+    }
+    
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         Period period = (Period) object;
 
-        statementBuilder.setIdentifierColumnName( "periodid" );
-        statementBuilder.setIdentifierColumnValue( period.getId() );
+        statementBuilder.setIdentifierValue( period.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "periodtypeid" );
+        statementBuilder.setColumn( "startdate" );
+        statementBuilder.setColumn( "enddate" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        Period period = (Period) object;
         
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( period.getPeriodType().getId() );
+        statementBuilder.setDate( period.getStartDate() );
+        statementBuilder.setDate( period.getEndDate() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -100,21 +112,5 @@ public class PeriodBatchHandler
             "SELECT periodid FROM period WHERE periodtypeid=" + period.getPeriodType().getId() + " " + 
             "AND startdate='" + getSqlDateString( period.getStartDate() ) + "' " +
             "AND enddate='" + getSqlDateString( period.getEndDate() ) + "'";
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "periodtypeid" );
-        statementBuilder.setColumn( "startdate" );
-        statementBuilder.setColumn( "enddate" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        Period period = (Period) object;
-        
-        statementBuilder.setInt( period.getPeriodType().getId() );
-        statementBuilder.setDate( period.getStartDate() );
-        statementBuilder.setDate( period.getEndDate() );
     }
 }

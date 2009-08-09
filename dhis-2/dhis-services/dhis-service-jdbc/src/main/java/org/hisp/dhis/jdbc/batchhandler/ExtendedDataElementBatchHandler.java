@@ -61,51 +61,28 @@ public class ExtendedDataElementBatchHandler
     {
         this.tableName = "extendeddataelement";
     }
-    
-    protected void openSqlStatement()
+
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "extendeddataelementid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "extendeddataelementid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "extendeddataelementid" );
+    }
+
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         ExtendedDataElement dataElement = (ExtendedDataElement) object;
         
-        statementBuilder.setIdentifierColumnName( "extendeddataelementid" );
-        statementBuilder.setIdentifierColumnValue( dataElement.getId() );
-        
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
-    }
-
-    protected String getIdentifierStatement( Object objectName )
-    {
-        return statementBuilder.getValueStatement( "dataelement", "dataelementid", "name", String.valueOf( objectName ) );
+        statementBuilder.setIdentifierValue( dataElement.getId() );
     }
     
-    protected String getUniquenessStatement( Object object )
-    {
-        DataElement dataElement = (DataElement) object;
-        
-        Map<String, String> map = new HashMap<String, String>();
-        
-        map.put( "name", dataElement.getName() );
-        map.put( "shortname", dataElement.getShortName() );
-        map.put( "code", dataElement.getCode() );
-        map.put( "alternativename", dataElement.getAlternativeName() );
-        
-        return statementBuilder.getValueStatement( "dataelement", "dataelementid", map, false );
-    }
-    
-    protected void addColumns()
+    protected void setColumns()
     {
         statementBuilder.setColumn( "mnemonic" );
         statementBuilder.setColumn( "version" );
@@ -143,7 +120,7 @@ public class ExtendedDataElementBatchHandler
         statementBuilder.setColumn( "lastUpdated" );
     }
     
-    protected void addValues( Object object )
+    protected void setValues( Object object )
     {
         ExtendedDataElement element = (ExtendedDataElement) object;
         
@@ -181,5 +158,24 @@ public class ExtendedDataElementBatchHandler
         statementBuilder.setString( element.getComment() );
         statementBuilder.setDate( element.getSaved() );
         statementBuilder.setDate( element.getLastUpdated() );
-    }        
+    }
+    
+    protected String getIdentifierStatement( Object objectName )
+    {
+        return statementBuilder.getValueStatement( "dataelement", "dataelementid", "name", String.valueOf( objectName ) );
+    }
+    
+    protected String getUniquenessStatement( Object object )
+    {
+        DataElement dataElement = (DataElement) object;
+        
+        Map<String, String> map = new HashMap<String, String>();
+        
+        map.put( "name", dataElement.getName() );
+        map.put( "shortname", dataElement.getShortName() );
+        map.put( "code", dataElement.getCode() );
+        map.put( "alternativename", dataElement.getAlternativeName() );
+        
+        return statementBuilder.getValueStatement( "dataelement", "dataelementid", map, false );
+    }     
 }

@@ -59,28 +59,38 @@ public class IndicatorGroupBatchHandler
         this.tableName = "indicatorgroup";
     }
     
-    protected void openSqlStatement()
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "indicatorgroupid" );
-        
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setAutoIncrementColumn( "indicatorgroupid" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setIdentifierColumns()
+    {
+        statementBuilder.setIdentifierColumn( "indicatorgroupid" );
+    }
+    
+    @Override
+    protected void setIdentifierColumnValues( Object object )
     {
         IndicatorGroup group = (IndicatorGroup) object;
 
-        statementBuilder.setIdentifierColumnName( "indicatorgroupid" );
-        statementBuilder.setIdentifierColumnValue( group.getId() );
+        statementBuilder.setIdentifierValue( group.getId() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "uuid" );
+        statementBuilder.setColumn( "name" );
+    }
+    
+    protected void setValues( Object object )
+    {
+        IndicatorGroup group = (IndicatorGroup) object;
         
-        addColumns();
-        
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setString( group.getUuid() );
+        statementBuilder.setString( group.getName() );
     }
     
     protected String getIdentifierStatement( Object objectName )
@@ -97,19 +107,5 @@ public class IndicatorGroupBatchHandler
         fieldMap.put( "name", group.getName() );
         
         return statementBuilder.getValueStatement( tableName, "indicatorgroupid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "uuid" );
-        statementBuilder.setColumn( "name" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        IndicatorGroup group = (IndicatorGroup) object;
-        
-        statementBuilder.setString( group.getUuid() );
-        statementBuilder.setString( group.getName() );
     }
 }

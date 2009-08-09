@@ -61,25 +61,39 @@ public class DataSetCompletenessResultBatchHandler
         this.tableName = "aggregateddatasetcompleteness";
     }
     
-    protected void openSqlStatement()
+    protected void setColumns()
     {
-        addColumns();
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setColumn( "datasetid" );
+        statementBuilder.setColumn( "periodid" );
+        statementBuilder.setColumn( "periodname" );
+        statementBuilder.setColumn( "organisationunitid" );
+        statementBuilder.setColumn( "reporttableid" );
+        statementBuilder.setColumn( "sources" );
+        statementBuilder.setColumn( "registrations" );
+        statementBuilder.setColumn( "registrationsOnTime" );
+        statementBuilder.setColumn( "value" );
+        statementBuilder.setColumn( "valueOnTime" );
     }
     
-    protected String getUpdateSqlStatement( Object object )
+    protected void setValues( Object object )
     {
-        addColumns();
+        DataSetCompletenessResult result = (DataSetCompletenessResult) object;
         
-        addValues( object );
-        
-        return statementBuilder.getUpdateStatement( tableName );
+        statementBuilder.setInt( result.getDataSetId() );
+        statementBuilder.setInt( result.getPeriodId() );
+        statementBuilder.setString( result.getPeriodName() );
+        statementBuilder.setInt( result.getOrganisationUnitId() );
+        statementBuilder.setInt( result.getReportTableId() );
+        statementBuilder.setInt( result.getSources() );
+        statementBuilder.setInt( result.getRegistrations() );
+        statementBuilder.setInt( result.getRegistrationsOnTime() );
+        statementBuilder.setDouble( result.getPercentage() );
+        statementBuilder.setDouble( result.getPercentageOnTime() );
     }
-    
+        
     protected String getIdentifierStatement( Object objectName )
     {
-        throw new UnsupportedOperationException( "DataSetCompleteness has no single unique identifier" );
+        throw new UnsupportedOperationException();
     }
     
     protected String getUniquenessStatement( Object object )
@@ -94,35 +108,5 @@ public class DataSetCompletenessResultBatchHandler
         fieldMap.put( "reporttableid", String.valueOf( result.getReportTableId() ) );
         
         return statementBuilder.getValueStatement( tableName, "datasetid", fieldMap, false );
-    }
-    
-    protected void addColumns()
-    {
-        statementBuilder.setColumn( "datasetid" );
-        statementBuilder.setColumn( "periodid" );
-        statementBuilder.setColumn( "periodname" );
-        statementBuilder.setColumn( "organisationunitid" );
-        statementBuilder.setColumn( "reporttableid" );
-        statementBuilder.setColumn( "sources" );
-        statementBuilder.setColumn( "registrations" );
-        statementBuilder.setColumn( "registrationsOnTime" );
-        statementBuilder.setColumn( "value" );
-        statementBuilder.setColumn( "valueOnTime" );
-    }
-    
-    protected void addValues( Object object )
-    {
-        DataSetCompletenessResult result = (DataSetCompletenessResult) object;
-        
-        statementBuilder.setInt( result.getDataSetId() );
-        statementBuilder.setInt( result.getPeriodId() );
-        statementBuilder.setString( result.getPeriodName() );
-        statementBuilder.setInt( result.getOrganisationUnitId() );
-        statementBuilder.setInt( result.getReportTableId() );
-        statementBuilder.setInt( result.getSources() );
-        statementBuilder.setInt( result.getRegistrations() );
-        statementBuilder.setInt( result.getRegistrationsOnTime() );
-        statementBuilder.setDouble( result.getPercentage() );
-        statementBuilder.setDouble( result.getPercentageOnTime() );
     }
 }
