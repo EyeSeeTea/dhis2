@@ -29,13 +29,14 @@ package org.hisp.dhis.jdbc.batchhandler;
 
 import org.amplecode.quick.JdbcConfiguration;
 import org.amplecode.quick.batchhandler.AbstractBatchHandler;
+import org.hisp.dhis.source.Source;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: SourceBatchHandler.java 5062 2008-05-01 18:10:35Z larshelg $
  */
 public class SourceBatchHandler
-    extends AbstractBatchHandler
+    extends AbstractBatchHandler<Source>
 {
     // -------------------------------------------------------------------------
     // Constructor
@@ -43,7 +44,7 @@ public class SourceBatchHandler
  
     public SourceBatchHandler( JdbcConfiguration configuration )
     {
-        super( configuration );
+        super( configuration, false, false );
     }
 
     // -------------------------------------------------------------------------
@@ -52,38 +53,31 @@ public class SourceBatchHandler
 
     protected void setTableName()
     {
-        this.tableName = "source";
-    }
-    
-    protected void openSqlStatement()
-    {
-        statementBuilder.setAutoIncrementColumnIndex( 0 );
-        statementBuilder.setAutoIncrementColumnName( "sourceid" );
-        
-        sqlBuffer.append( statementBuilder.getInsertStatementOpening( tableName ) );
+        statementBuilder.setTableName( "source" );
     }
 
-    protected String getUpdateSqlStatement( Object object )
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        return null; // Not in use
+        statementBuilder.setAutoIncrementColumn( "sourceid" );
     }
     
-    protected String getUniquenessStatement( Object object )
+    protected void setUniqueColumns()
     {
-        return null; // Not in use
+        statementBuilder.setUniqueColumn( "sourceid" );
     }
     
-    protected String getIdentifierStatement( Object objectName )
+    protected void setUniqueValues( Source source )
     {
-        return statementBuilder.getValueStatement( tableName, "sourceid", "sourceid", Integer.valueOf( String.valueOf( objectName ) ) );
+        statementBuilder.setUniqueValue( source.getId() );
     }
     
-    protected void addColumns()
+    protected void setColumns()
     {
         // Nothing to add
     }
     
-    protected void addValues( Object object )
+    protected void setValues( Source source )
     {
         // Nothing to add
     }
