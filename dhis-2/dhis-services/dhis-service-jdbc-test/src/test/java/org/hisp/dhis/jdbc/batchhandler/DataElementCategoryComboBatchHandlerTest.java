@@ -50,7 +50,7 @@ public class DataElementCategoryComboBatchHandlerTest
 {
     private BatchHandlerFactory batchHandlerFactory;
     
-    private BatchHandler batchHandler;
+    private BatchHandler<DataElementCategoryCombo> batchHandler;
     
     private DataElementCategoryCombo categoryComboA;
     private DataElementCategoryCombo categoryComboB;
@@ -71,9 +71,9 @@ public class DataElementCategoryComboBatchHandlerTest
 
         batchHandler.init();
         
-        categoryComboA = new DataElementCategoryCombo( "categoryComboA" );
-        categoryComboB = new DataElementCategoryCombo( "categoryComboB" );
-        categoryComboC = new DataElementCategoryCombo( "categoryComboC" );
+        categoryComboA = new DataElementCategoryCombo( "CategoryComboA" );
+        categoryComboB = new DataElementCategoryCombo( "CategoryComboB" );
+        categoryComboC = new DataElementCategoryCombo( "CategoryComboC" );
     }
 
     @Override
@@ -123,8 +123,9 @@ public class DataElementCategoryComboBatchHandlerTest
     @Test
     public void testUpdateObject()
     {
-        int id = categoryComboService.addDataElementCategoryCombo( categoryComboA );
+        int id = batchHandler.insertObject( categoryComboA, true );
         
+        categoryComboA.setId( id );
         categoryComboA.setName( "UpdatedName" );
         
         batchHandler.updateObject( categoryComboA );
@@ -137,7 +138,7 @@ public class DataElementCategoryComboBatchHandlerTest
     {
         int referenceId = categoryComboService.addDataElementCategoryCombo( categoryComboA );
         
-        int retrievedId = batchHandler.getObjectIdentifier( "categoryComboA" );
+        int retrievedId = batchHandler.getObjectIdentifier( "CategoryComboA" );
         
         assertEquals( referenceId, retrievedId );
     }

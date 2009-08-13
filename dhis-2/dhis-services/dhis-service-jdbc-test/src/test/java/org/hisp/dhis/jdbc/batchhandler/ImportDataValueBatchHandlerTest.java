@@ -27,35 +27,37 @@ package org.hisp.dhis.jdbc.batchhandler;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 
 import java.util.Collection;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.DhisTest;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
+import org.hisp.dhis.importexport.ImportDataValue;
+import org.hisp.dhis.importexport.ImportDataValueService;
+import org.hisp.dhis.importexport.ImportObjectStatus;
 import org.junit.Test;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
+ * @version $Id: GroupSetBatchHandlerTest.java 4949 2008-04-21 07:59:54Z larshelg $
  */
-public class DataDictionaryBatchHandlerTest
+public class ImportDataValueBatchHandlerTest
     extends DhisTest
 {
+    private ImportDataValueService importDataValueService;
+    
     private BatchHandlerFactory batchHandlerFactory;
     
-    private BatchHandler<DataDictionary> batchHandler;
+    private BatchHandler<ImportDataValue> batchHandler;
     
-    private DataDictionary dataDictionaryA;
-    private DataDictionary dataDictionaryB;
-    private DataDictionary dataDictionaryC;    
-
+    private ImportObjectStatus status;
+    
+    private ImportDataValue valueA;
+    private ImportDataValue valueB;
+    private ImportDataValue valueC;
+    
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -63,17 +65,19 @@ public class DataDictionaryBatchHandlerTest
     @Override
     public void setUpTest()
     {
-        dataDictionaryService = (DataDictionaryService) getBean( DataDictionaryService.ID );
-        
+        importDataValueService = (ImportDataValueService) getBean( ImportDataValueService.ID );
+
         batchHandlerFactory = (BatchHandlerFactory) getBean( "batchHandlerFactory" );
         
-        batchHandler = batchHandlerFactory.createBatchHandler( DataDictionaryBatchHandler.class );
+        batchHandler = batchHandlerFactory.createBatchHandler( ImportDataValueBatchHandler.class );
 
         batchHandler.init();
         
-        dataDictionaryA = createDataDictionary( 'A' );
-        dataDictionaryB = createDataDictionary( 'B' );
-        dataDictionaryC = createDataDictionary( 'C' );
+        status = ImportObjectStatus.NEW;
+        
+        valueA = createImportDataValue( 1, 1, 1, 1, status );
+        valueB = createImportDataValue( 2, 2, 2, 2, status );
+        valueC = createImportDataValue( 3, 3, 3, 3, status );
     }
 
     @Override
@@ -91,65 +95,56 @@ public class DataDictionaryBatchHandlerTest
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
-    
+
     @Test
     public void testAddObject()
     {
-        batchHandler.addObject( dataDictionaryA );
-        batchHandler.addObject( dataDictionaryB );
-        batchHandler.addObject( dataDictionaryC );
+        batchHandler.addObject( valueA );
+        batchHandler.addObject( valueB );
+        batchHandler.addObject( valueC );
         
         batchHandler.flush();
         
-        Collection<DataDictionary> dataDictionaries = dataDictionaryService.getAllDataDictionaries();
+        Collection<ImportDataValue> values = importDataValueService.getImportDataValues( status );
         
-        assertTrue( dataDictionaries.contains( dataDictionaryA ) );
-        assertTrue( dataDictionaries.contains( dataDictionaryB ) );
-        assertTrue( dataDictionaries.contains( dataDictionaryC ) );
+        assertTrue( values.contains( valueA ) );
+        assertTrue( values.contains( valueB ) );
+        assertTrue( values.contains( valueC ) );
     }
-
+    
     @Test
     public void testInsertObject()
     {
-        int idA = batchHandler.insertObject( dataDictionaryA, true );
-        int idB = batchHandler.insertObject( dataDictionaryB, true );
-        int idC = batchHandler.insertObject( dataDictionaryC, true );
+        batchHandler.insertObject( valueA, false );
+        batchHandler.insertObject( valueB, false );
+        batchHandler.insertObject( valueC, false );
         
-        assertNotNull( dataDictionaryService.getDataDictionary( idA ) );
-        assertNotNull( dataDictionaryService.getDataDictionary( idB ) );
-        assertNotNull( dataDictionaryService.getDataDictionary( idC ) );
+        Collection<ImportDataValue> values = importDataValueService.getImportDataValues( status );
+        
+        assertTrue( values.contains( valueA ) );
+        assertTrue( values.contains( valueB ) );
+        assertTrue( values.contains( valueC ) );        
     }
-
+    
     @Test
     public void testUpdateObject()
     {
-        int id = batchHandler.insertObject( dataDictionaryA, true );
+        batchHandler.insertObject( valueA, false );
         
-        dataDictionaryA.setId( id );
-        dataDictionaryA.setName( "UpdatedName" );
+        valueA.setValue( String.valueOf( 20 ) );
         
-        batchHandler.updateObject( dataDictionaryA );
+        batchHandler.updateObject( valueA );
         
-        assertEquals( "UpdatedName", dataDictionaryService.getDataDictionary( id ).getName() );
-    }
-
-    @Test
-    public void testGetObjectIdentifier()
-    {
-        int referenceId = dataDictionaryService.saveDataDictionary( dataDictionaryA );
-        
-        int retrievedId = batchHandler.getObjectIdentifier( "DataDictionaryA" );
-        
-        assertEquals( referenceId, retrievedId );
+        assertEquals( String.valueOf( 20 ), importDataValueService.getImportDataValues( status ).iterator().next().getValue() );
     }
 
     @Test
     public void testObjectExists()
     {
-        dataDictionaryService.saveDataDictionary( dataDictionaryA );
+        importDataValueService.addImportDataValue( valueA );
         
-        assertTrue( batchHandler.objectExists( dataDictionaryA ) );
+        assertTrue( batchHandler.objectExists( valueA ) );
         
-        assertFalse( batchHandler.objectExists( dataDictionaryB ) );
-    }
+        assertFalse( batchHandler.objectExists( valueB ) );
+    }    
 }

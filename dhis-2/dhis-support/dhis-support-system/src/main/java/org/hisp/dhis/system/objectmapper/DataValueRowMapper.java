@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.system.objectmapper;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,52 +27,41 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.amplecode.quick.BatchHandler;
-import org.hisp.dhis.importexport.GroupMemberAssociation;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractOrganisationUnitRelationshipConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ * @version $Id$
  */
-public class AbstractOrganisationUnitRelationshipConverter
-    extends AbstractConverter<GroupMemberAssociation>
+public class DataValueRowMapper
+    implements RowMapper<DataValue>
 {
-    protected OrganisationUnitService organisationUnitService;
-    
-    protected BatchHandler<OrganisationUnit> organisationUnitBatchHandler;
-
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
-
-    protected void importUnique( GroupMemberAssociation object )
+    public DataValue mapRow( ResultSet resultSet )
+        throws SQLException
     {
-        OrganisationUnit child = organisationUnitService.getOrganisationUnit( object.getMemberId() );
+        final DataValue dataValue = new DataValue();
         
-        OrganisationUnit parent = new OrganisationUnit();
+        dataValue.setDataElement( new DataElement() );
+        dataValue.setOptionCombo( new DataElementCategoryOptionCombo() );
+        dataValue.setSource( new OrganisationUnit() );
+        dataValue.setPeriod( new Period() );
         
-        parent.setId( object.getGroupId() );
+        dataValue.getDataElement().setId( resultSet.getInt( 1 ) );
+        dataValue.getPeriod().setId( resultSet.getInt( 2 ) );
+        dataValue.getSource().setId( resultSet.getInt( 3 ) );
+        dataValue.getOptionCombo().setId( resultSet.getInt( 4 ) );
+        dataValue.setValue( resultSet.getString( 5 ) );
+        dataValue.setStoredBy( resultSet.getString( 6 ) );
+        dataValue.setTimestamp( resultSet.getDate( 7 ) );
+        dataValue.setComment( resultSet.getString( 8 ) );
         
-        child.setParent( parent );
-        
-        organisationUnitBatchHandler.updateObject( child );
-    }
-
-    protected void importMatching( GroupMemberAssociation object, GroupMemberAssociation match )
-    {
-        // Not in use
-    }
-    
-    protected GroupMemberAssociation getMatching( GroupMemberAssociation object )
-    {
-        return null;
-    }
-    
-    protected boolean isIdentical( GroupMemberAssociation object, GroupMemberAssociation existing )
-    {
-        return true;
+        return dataValue;
     }
 }
-
