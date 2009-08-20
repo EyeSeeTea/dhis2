@@ -1,4 +1,4 @@
-package org.hisp.dhis.webwork.interceptor;
+package org.hisp.dhis.interceptor;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -30,33 +30,35 @@ package org.hisp.dhis.webwork.interceptor;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hisp.dhis.options.style.StyleManager;
+import ognl.NoSuchPropertyException;
+import ognl.Ognl;
 
-import com.opensymphony.xwork.ActionInvocation;
-import com.opensymphony.xwork.interceptor.Interceptor;
+import org.hisp.dhis.options.datadictionary.DataDictionaryModeManager;
+
+import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.Interceptor;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class WebWorkStyleInterceptor
+public class DataDictionaryModeInterceptor
     implements Interceptor
 {
-    private static final String KEY_STYLE = "stylesheet";
-    private static final String KEY_STYLE_DIRECTORY = "stylesheetDirectory";
-    
+    private static final String KEY_DATA_DICTIONARY_MODE = "dataDictionaryMode";
     
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private StyleManager styleManager;
+    private DataDictionaryModeManager dataDictionaryModeManager;
 
-    public void setStyleManager( StyleManager styleManager )
+    public void setDataDictionaryModeManager( DataDictionaryModeManager dataDictionaryModeManager )
     {
-        this.styleManager = styleManager;
+        this.dataDictionaryModeManager = dataDictionaryModeManager;
     }
-
+    
     // -------------------------------------------------------------------------
     // AroundInterceptor implementation
     // -------------------------------------------------------------------------
@@ -76,16 +78,34 @@ public class WebWorkStyleInterceptor
     public String intercept( ActionInvocation invocation )
         throws Exception
     {
-        Map<String, Object> map = new HashMap<String, Object>( 2 );
+        Action action = (Action) invocation.getAction();
         
-        String style = styleManager.getCurrentStyle();
-        String styleDirectory = styleManager.getCurrentStyleDirectory();
+        String currentMode = dataDictionaryModeManager.getCurrentDataDictionaryMode();
         
-        map.put( KEY_STYLE, style );
-        map.put( KEY_STYLE_DIRECTORY, styleDirectory );
+        // ---------------------------------------------------------------------
+        // Make the objects available for web templates
+        // ---------------------------------------------------------------------
         
-        invocation.getStack().push( map );
+        Map<String, Object> templateMap = new HashMap<String, Object>( 1 );
         
-        return invocation.invoke();        
-    }
+        templateMap.put( KEY_DATA_DICTIONARY_MODE, currentMode );
+        
+        invocation.getStack().push( templateMap );
+        
+        // ---------------------------------------------------------------------
+        // Set the objects in the action class if the properties exist
+        // ---------------------------------------------------------------------
+
+        Map<?, ?> contextMap = invocation.getInvocationContext().getContextMap();
+        
+        try
+        {
+            Ognl.setValue( KEY_DATA_DICTIONARY_MODE, contextMap, action, currentMode );
+        }
+        catch ( NoSuchPropertyException e )
+        {
+        }
+        
+        return invocation.invoke();
+    }   
 }

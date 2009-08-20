@@ -1,4 +1,4 @@
-package org.hisp.dhis.webwork.interceptor;
+package org.hisp.dhis.interceptor;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,97 +27,64 @@ package org.hisp.dhis.webwork.interceptor;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.options.SystemSettingManager.KEY_APPLICATION_TITLE;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_FLAG;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_FORUM_INTEGRATION;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_START_MODULE;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_ZERO_VALUE_SAVE_MODE;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import ognl.NoSuchPropertyException;
-import ognl.Ognl;
+import org.hisp.dhis.options.SystemSettingManager;
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.i18n.I18nManager;
-
-import com.opensymphony.xwork.Action;
-import com.opensymphony.xwork.ActionInvocation;
-import com.opensymphony.xwork.interceptor.Interceptor;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.Interceptor;
 
 /**
- * @author Nguyen Dang Quang
- * @version $Id: WebWorkI18nInterceptor.java 6335 2008-11-20 11:11:26Z larshelg $
+ * @author Lars Helge Overland
+ * @version $Id$
  */
-public class WebWorkI18nInterceptor
+public class SystemSettingInterceptor
     implements Interceptor
 {
-    private static final String KEY_I18N = "i18n";
-
-    private static final String KEY_I18N_FORMAT = "format";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nManager i18nManager;
+    private SystemSettingManager systemSettingManager;
 
-    public void setI18nManager( I18nManager manager )
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
-        i18nManager = manager;
+        this.systemSettingManager = systemSettingManager;
     }
-
+    
     // -------------------------------------------------------------------------
     // AroundInterceptor implementation
     // -------------------------------------------------------------------------
 
     public void destroy()
-    {
-        // TODO Auto-generated method stub
-        
+    {        
     }
 
     public void init()
     {
-        // TODO Auto-generated method stub
-        
     }
 
     public String intercept( ActionInvocation invocation )
         throws Exception
     {
-        Action action = (Action) invocation.getAction();
-
-        I18n i18n = i18nManager.getI18n( action.getClass() );
-        I18nFormat i18nFormat = i18nManager.getI18nFormat();
-
-        // ---------------------------------------------------------------------
-        // Make the objects available for web templates
-        // ---------------------------------------------------------------------
-
-        Map<String, Object> i18nMap = new HashMap<String, Object>( 2 );
-        i18nMap.put( KEY_I18N, i18n );
-        i18nMap.put( KEY_I18N_FORMAT, i18nFormat );
-
-        invocation.getStack().push( i18nMap );
-
-        // ---------------------------------------------------------------------
-        // Set the objects in the action class if the properties exist
-        // ---------------------------------------------------------------------
-
-        Map<?, ?> contextMap = invocation.getInvocationContext().getContextMap();
-
-        try
-        {
-            Ognl.setValue( KEY_I18N, contextMap, action, i18n );
-        }
-        catch ( NoSuchPropertyException e )
-        {
-        }
-
-        try
-        {
-            Ognl.setValue( KEY_I18N_FORMAT, contextMap, action, i18nFormat );
-        }
-        catch ( NoSuchPropertyException e )
-        {
-        }
+        Map<String, Object> map = new HashMap<String, Object>( 2 );
+        
+        map.put( KEY_APPLICATION_TITLE, systemSettingManager.getSystemSetting( KEY_APPLICATION_TITLE ) );
+        map.put( KEY_FLAG, systemSettingManager.getSystemSetting( KEY_FLAG ) );
+        map.put( KEY_START_MODULE, systemSettingManager.getSystemSetting( KEY_START_MODULE ) );
+        map.put( KEY_ZERO_VALUE_SAVE_MODE, systemSettingManager.getSystemSetting( KEY_ZERO_VALUE_SAVE_MODE ) );
+        map.put( KEY_FORUM_INTEGRATION, systemSettingManager.getSystemSetting( KEY_FORUM_INTEGRATION ) );
+        map.put( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, systemSettingManager.getSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART ) );
+        
+        invocation.getStack().push( map );
         
         return invocation.invoke();
     }

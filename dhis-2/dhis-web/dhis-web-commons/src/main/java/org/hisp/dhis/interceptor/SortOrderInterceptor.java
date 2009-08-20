@@ -1,4 +1,4 @@
-package org.hisp.dhis.webwork.interceptor;
+package org.hisp.dhis.interceptor;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,36 +27,43 @@ package org.hisp.dhis.webwork.interceptor;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Comparator;
 import java.util.Map;
 
 import ognl.NoSuchPropertyException;
 import ognl.Ognl;
 
-import org.hisp.dhis.options.displayproperty.DefaultDisplayPropertyHandler;
-import org.hisp.dhis.options.displayproperty.DisplayPropertyManager;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.options.sortorder.SortOrderManager;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
-import com.opensymphony.xwork.Action;
-import com.opensymphony.xwork.ActionInvocation;
-import com.opensymphony.xwork.interceptor.Interceptor;
+import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.Interceptor;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: WebWorkDisplayPropertyInterceptor.java 6335 2008-11-20 11:11:26Z larshelg $
+ * @version $Id: WebWorkSortOrderInterceptor.java 6335 2008-11-20 11:11:26Z larshelg $
  */
-public class WebWorkDisplayPropertyInterceptor
+public class SortOrderInterceptor
     implements Interceptor
 {
-    private static final String KEY_DISPLAY_PROPERTY_HANDLER = "displayPropertyHandler";
+    private static final String KEY_DATAELEMENT_COMPARATOR = "dataElementComparator";
+    private static final String KEY_INDICATOR_COMPARATOR = "indicatorComparator";    
+    private static final String KEY_ORGANISATIONUNIT_COMPARATOR = "organisationUnitComparator";
+    private static final String KEY_DATASET_COMPARATOR = "dataSetComparator";
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DisplayPropertyManager displayPropertyManager;
+    private SortOrderManager sortOrderManager;
 
-    public void setDisplayPropertyManager( DisplayPropertyManager displayPropertyManager )
+    public void setSortOrderManager( SortOrderManager sortOrderManager )
     {
-        this.displayPropertyManager = displayPropertyManager;
+        this.sortOrderManager = sortOrderManager;
     }
 
     // -------------------------------------------------------------------------
@@ -74,14 +81,41 @@ public class WebWorkDisplayPropertyInterceptor
     public String intercept( ActionInvocation actionInvocation )
         throws Exception
     {
-        DefaultDisplayPropertyHandler handler = displayPropertyManager.getDisplayPropertyHandler();
-
+        Comparator<DataElement> dataElementComparator = sortOrderManager.getCurrentDataElementSortOrderComparator();
+        Comparator<Indicator> indicatorComparator = sortOrderManager.getCurrentIndicatorSortOrderComparator();        
+        Comparator<OrganisationUnit> organisationUnitComparator = sortOrderManager.getCurrentOrganisationUnitSortOrderComparator();
+        Comparator<DataSet> dataSetComparator = sortOrderManager.getCurrentDataSetSortOrderComparator();        
+        
         Action action = (Action) actionInvocation.getAction();
         Map<?, ?> contextMap = actionInvocation.getInvocationContext().getContextMap();
 
         try
         {
-            Ognl.setValue( KEY_DISPLAY_PROPERTY_HANDLER, contextMap, action, handler );
+            Ognl.setValue( KEY_DATAELEMENT_COMPARATOR, contextMap, action, dataElementComparator );
+        }
+        catch ( NoSuchPropertyException e )
+        {
+        }
+                
+        try
+        {
+            Ognl.setValue( KEY_INDICATOR_COMPARATOR, contextMap, action, indicatorComparator );
+        }
+        catch ( NoSuchPropertyException e )
+        {
+        }
+
+        try
+        {
+            Ognl.setValue( KEY_ORGANISATIONUNIT_COMPARATOR, contextMap, action, organisationUnitComparator );
+        }
+        catch ( NoSuchPropertyException e )
+        {
+        }
+
+        try
+        {
+            Ognl.setValue( KEY_DATASET_COMPARATOR, contextMap, action, dataSetComparator );
         }
         catch ( NoSuchPropertyException e )
         {

@@ -1,4 +1,4 @@
-package org.hisp.dhis.webwork.interceptor;
+package org.hisp.dhis.interceptor;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,49 +27,50 @@ package org.hisp.dhis.webwork.interceptor;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.options.SystemSettingManager.KEY_APPLICATION_TITLE;
-import static org.hisp.dhis.options.SystemSettingManager.KEY_FLAG;
-import static org.hisp.dhis.options.SystemSettingManager.KEY_FORUM_INTEGRATION;
-import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
-import static org.hisp.dhis.options.SystemSettingManager.KEY_START_MODULE;
-import static org.hisp.dhis.options.SystemSettingManager.KEY_ZERO_VALUE_SAVE_MODE;
-
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hisp.dhis.options.SystemSettingManager;
+import org.hisp.dhis.options.style.StyleManager;
 
-import com.opensymphony.xwork.ActionInvocation;
-import com.opensymphony.xwork.interceptor.Interceptor;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.Interceptor;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class WebWorkSystemSettingInterceptor
+public class StyleInterceptor
     implements Interceptor
 {
+    private static final String KEY_STYLE = "stylesheet";
+    private static final String KEY_STYLE_DIRECTORY = "stylesheetDirectory";
+    
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SystemSettingManager systemSettingManager;
+    private StyleManager styleManager;
 
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    public void setStyleManager( StyleManager styleManager )
     {
-        this.systemSettingManager = systemSettingManager;
+        this.styleManager = styleManager;
     }
-    
+
     // -------------------------------------------------------------------------
     // AroundInterceptor implementation
     // -------------------------------------------------------------------------
 
     public void destroy()
-    {        
+    {
+        // TODO Auto-generated method stub
+        
     }
 
     public void init()
     {
+        // TODO Auto-generated method stub
+        
     }
 
     public String intercept( ActionInvocation invocation )
@@ -77,15 +78,14 @@ public class WebWorkSystemSettingInterceptor
     {
         Map<String, Object> map = new HashMap<String, Object>( 2 );
         
-        map.put( KEY_APPLICATION_TITLE, systemSettingManager.getSystemSetting( KEY_APPLICATION_TITLE ) );
-        map.put( KEY_FLAG, systemSettingManager.getSystemSetting( KEY_FLAG ) );
-        map.put( KEY_START_MODULE, systemSettingManager.getSystemSetting( KEY_START_MODULE ) );
-        map.put( KEY_ZERO_VALUE_SAVE_MODE, systemSettingManager.getSystemSetting( KEY_ZERO_VALUE_SAVE_MODE ) );
-        map.put( KEY_FORUM_INTEGRATION, systemSettingManager.getSystemSetting( KEY_FORUM_INTEGRATION ) );
-        map.put( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, systemSettingManager.getSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART ) );
+        String style = styleManager.getCurrentStyle();
+        String styleDirectory = styleManager.getCurrentStyleDirectory();
+        
+        map.put( KEY_STYLE, style );
+        map.put( KEY_STYLE_DIRECTORY, styleDirectory );
         
         invocation.getStack().push( map );
         
-        return invocation.invoke();
+        return invocation.invoke();        
     }
 }
