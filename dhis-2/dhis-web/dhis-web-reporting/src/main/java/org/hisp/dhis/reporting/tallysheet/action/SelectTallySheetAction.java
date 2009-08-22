@@ -27,109 +27,55 @@ package org.hisp.dhis.reporting.tallysheet.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.tallysheet.TallySheet;
-import org.hisp.dhis.tallysheet.TallySheetPdfService;
-import org.hisp.dhis.tallysheet.TallySheetTuple;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
 
 import com.opensymphony.xwork2.Action;
-import com.opensymphony.xwork2.ActionContext;
 
 /**
  * @author Haavard Tegelsrud, Oddmund Stroemme, Joergen Froeysadal, Ruben Wangberg
  * @version $Id$
  */
-public class TallySheetGenerateAction
+public class SelectTallySheetAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Input
+    // Parameters
     // -------------------------------------------------------------------------
 
-    private int[] rows;
+    private List<DataSet> dataSets = new ArrayList<DataSet>();
 
-    public void setRows( int[] rows )
+    public Collection<DataSet> getDataSets()
     {
-        this.rows = rows;
-    }
-
-    private boolean[] checked;
-
-    public void setChecked( boolean[] checked )
-    {
-        this.checked = checked;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private String fileName;
-
-    public String getFileName()
-    {
-        return fileName;
-    }
-
-    private InputStream inputStream;
-
-    public InputStream getInputStream()
-    {
-        return inputStream;
-    }
+        return dataSets;
+    }    
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private DataSetService dataSetService;
 
-    private TallySheetPdfService tallySheetPdfService;
-
-    public void setTallySheetPdfService( TallySheetPdfService tallySheetPdfService )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.tallySheetPdfService = tallySheetPdfService;
+        this.dataSetService = dataSetService;
     }
 
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-        
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
-    private TallySheet tallySheet;
-
-    private List<TallySheetTuple> tallySheetTuples;
-
+    
     public String execute()
         throws Exception
     {
-        tallySheet = (TallySheet) ActionContext.getContext().getSession().get( TallySheet.KEY_TALLY_SHEET );
-        
-        tallySheetTuples = tallySheet.getTallySheetTuples();
-
-        for ( int i = 0; i < checked.length; i++ )
-        {
-            TallySheetTuple tallySheetTuple = tallySheetTuples.get( i );
-            tallySheetTuple.setChecked( checked[i] );
-            tallySheetTuple.setNumberOfRows( rows[i] );
-        }
-
-        Date today = new java.util.Date();
-        DateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
-        String timestamp = dateFormat.format( today );
-
-        fileName = timestamp + "_" + tallySheet.getTallySheetName() + ".pdf";
-        inputStream = tallySheetPdfService.createTallySheetPdf( tallySheet, i18n );
+        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
+        Collections.sort( dataSets, new DataSetNameComparator() );
 
         return SUCCESS;
     }
