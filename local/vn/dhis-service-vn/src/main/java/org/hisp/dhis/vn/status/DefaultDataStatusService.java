@@ -1,4 +1,4 @@
-package org.hisp.dhis.status;
+package org.hisp.dhis.vn.status;
 
 import java.util.Collection;
 
@@ -55,6 +55,11 @@ public class DefaultDataStatusService
     // Implement
     // -------------------------------------------------
 
+    public int save( DataStatus dataStatus )
+    {
+        return dataStatusStore.save( dataStatus );
+    }
+
     public void delete( int id )
     {
         dataStatusStore.delete( id );
@@ -63,11 +68,6 @@ public class DefaultDataStatusService
     public DataStatus get( int id )
     {      
         return dataStatusStore.get( id );
-    }
-
-    public void save( DataStatus dataStatus )
-    {
-        dataStatusStore.save( dataStatus );
     }
 
     public void update( DataStatus dataStatus )
