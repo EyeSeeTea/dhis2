@@ -28,10 +28,12 @@ package org.hisp.dhis.mapping.action;
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -52,7 +54,7 @@ public class GetAllIndicatorGroupsAction
     {
         this.indicatorService = indicatorService;
     }
-
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -62,7 +64,7 @@ public class GetAllIndicatorGroupsAction
     public List<IndicatorGroup> getObject()
     {
         return object;
-    }
+    }    
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -72,6 +74,8 @@ public class GetAllIndicatorGroupsAction
         throws Exception
     {
         object = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
+        
+        Collections.sort( object, new IndicatorGroupNameComparator() );
         
         return SUCCESS;
     }    

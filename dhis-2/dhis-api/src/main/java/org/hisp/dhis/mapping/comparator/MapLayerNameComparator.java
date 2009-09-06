@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.action;
+package org.hisp.dhis.mapping.comparator;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,56 +27,19 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
 
-import org.hisp.dhis.mapping.MapView;
-import org.hisp.dhis.mapping.MappingService;
-import org.hisp.dhis.mapping.comparator.MapViewNameComparator;
-
-import com.opensymphony.xwork2.Action;
-
-import java.util.Collections;
+import org.hisp.dhis.mapping.MapLayer;
 
 /**
- * @author Jan Henrik Overland
+ * @author Lars Helge Overland
  * @version $Id$
  */
-public class GetAllMapViewsAction
-    implements Action
+public class MapLayerNameComparator
+    implements Comparator<MapLayer>
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private MappingService mappingService;
-
-    public void setMappingService( MappingService mappingService )
+    public int compare( MapLayer mapLayer0, MapLayer mapLayer1 )
     {
-        this.mappingService = mappingService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private List<MapView> object;
-
-    public List<MapView> getObject()
-    {
-        return object;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-    {
-        object = new ArrayList<MapView>( mappingService.getAllMapViews() );
-        
-        Collections.sort( object, new MapViewNameComparator() );
-        
-        return SUCCESS;
+        return mapLayer0.getName().compareTo( mapLayer1.getName() );
     }
 }
