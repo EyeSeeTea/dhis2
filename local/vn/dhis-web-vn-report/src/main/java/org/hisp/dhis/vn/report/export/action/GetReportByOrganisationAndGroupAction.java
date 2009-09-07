@@ -24,13 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.vn.report.action;
+package org.hisp.dhis.vn.report.export.action;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.system.util.CodecUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.vn.report.ReportExcelInterface;
 import org.hisp.dhis.vn.report.ReportExcelService;
@@ -42,31 +44,35 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class ListReportAction
+
+public class GetReportByOrganisationAndGroupAction
     implements Action
 {
 
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
+    private OrganisationUnitSelectionManager organisationUnitSelectionManager;
 
     private ReportExcelService reportService;
 
     private CurrentUserService currentUserService;
 
     // -------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------
 
     private List<ReportExcelInterface> reports;
+
+    private String group;
 
     // -------------------------------------------
     // Getter & Setter
     // -------------------------------------------
 
-    public void setReportService( ReportExcelService reportService )
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        this.reportService = reportService;
+        this.currentUserService = currentUserService;
     }
 
     public List<ReportExcelInterface> getReports()
@@ -74,19 +80,37 @@ public class ListReportAction
         return reports;
     }
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
+    public void setGroup( String group )
     {
-        this.currentUserService = currentUserService;
+        this.group = group;
     }
 
-    // -------------------------------------------------------------------------
+    public void setOrganisationUnitSelectionManager( OrganisationUnitSelectionManager organisationUnitSelectionManager )
+    {
+        this.organisationUnitSelectionManager = organisationUnitSelectionManager;
+    }
+
+    public void setReportService( ReportExcelService reportService )
+    {
+        this.reportService = reportService;
+    }
 
     public String execute()
         throws Exception
     {
-        reports = new ArrayList<ReportExcelInterface>( reportService.getALLReport() );
+        if ( organisationUnitSelectionManager.getSelectedOrganisationUnit() != null )
+        {
 
-        Collections.sort( reports, new ReportNameComparator() );
+            reports = new ArrayList<ReportExcelInterface>( reportService.getReports( currentUserService
+                .getCurrentUser(), currentUserService.currentUserIsSuper(), CodecUtils.unescape( group ) ) );
+
+            Collection<ReportExcelInterface> reportAssociation = reportService
+                .getReportsByOrganisationUnit( organisationUnitSelectionManager.getSelectedOrganisationUnit() );
+
+            reports.retainAll( reportAssociation );
+
+            Collections.sort( reports, new ReportNameComparator() );
+        }
 
         return SUCCESS;
     }

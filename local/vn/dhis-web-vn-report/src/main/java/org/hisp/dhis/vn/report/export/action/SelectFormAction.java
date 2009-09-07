@@ -27,22 +27,18 @@
 package org.hisp.dhis.vn.report.export.action;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.comparator.PeriodComparator;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.UserStore;
-import org.hisp.dhis.vn.report.ReportExcelInterface;
 import org.hisp.dhis.vn.report.ReportExcelService;
-import org.hisp.dhis.vn.report.comparator.ReportNameComparator;
 import org.hisp.dhis.vn.report.state.SelectionManager;
 import org.hisp.dhis.vn.report.utils.DateUtils;
 
@@ -67,26 +63,27 @@ public class SelectFormAction
 
     private SelectionManager selectionManager;
 
-    private CurrentUserService currentUserService;
-
     // -------------------------------------------
     // Input & Output
-    // -------------------------------------------
-
-    private List<ReportExcelInterface> reports;
+    // -------------------------------------------    
 
     private List<Period> periods;
 
     private OrganisationUnit organisationUnit;
+    
+    private List<String> groups;
 
     // -------------------------------------------
     // Getter & Setter
     // -------------------------------------------
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
+
+
+    public List<String> getGroups()
     {
-        this.currentUserService = currentUserService;
+        return groups;
     }
+
 
     public void setPeriodService( PeriodService periodService )
     {
@@ -108,10 +105,7 @@ public class SelectFormAction
         this.organisationUnitSelectionManager = organisationUnitSelectionManager;
     }
 
-    public List<ReportExcelInterface> getReports()
-    {
-        return reports;
-    }
+   
 
     public List<Period> getPeriods()
     {
@@ -131,19 +125,9 @@ public class SelectFormAction
         if ( organisationUnit== null )
         {
             return SUCCESS;
-        }
+        }       
 
-        reports = new ArrayList<ReportExcelInterface>( 
-            reportService.getReports( currentUserService.getCurrentUser(), currentUserService.currentUserIsSuper() ) );
-
-        Collection<ReportExcelInterface> reportAssociation = reportService
-            .getReportsByOrganisationUnit( organisationUnit );
-
-        reports.retainAll( reportAssociation );
-
-        Collections.sort( reports, new ReportNameComparator() );
-
-        PeriodType periodType = periodService.getPeriodTypeByName( "Monthly" );
+        PeriodType periodType = periodService.getPeriodTypeByClass( MonthlyPeriodType.class );
 
         Date firstDateOfThisYear = DateUtils.getFirstDayOfYear( DateUtils.getCurrentYear() );
 
@@ -155,6 +139,10 @@ public class SelectFormAction
         Collections.sort( periods, new PeriodComparator() );
 
         selectionManager.setSeletedYear( DateUtils.getCurrentYear() );
+        
+        groups = new ArrayList<String>( reportService.getReportGroups() );
+
+        Collections.sort( groups );
 
         return SUCCESS;
     }
