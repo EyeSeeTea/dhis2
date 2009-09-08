@@ -90,13 +90,6 @@ public class AddOrUpdateMapLegendSetAction
     {
         this.colorHigh = colorHigh;
     }
-
-    private Collection<String> indicators;
-
-    public void setIndicators( Collection<String> indicators )
-    {
-        this.indicators = indicators;
-    }
     
     // -------------------------------------------------------------------------
     // Action implementation
@@ -104,7 +97,7 @@ public class AddOrUpdateMapLegendSetAction
 
     public String execute()
     {
-        mappingService.addOrUpdateMapLegendSet( name, method, classes, colorLow, colorHigh, new HashSet<String>(indicators) );
+        mappingService.addOrUpdateMapLegendSet( name, method, classes, colorLow, colorHigh );
         
         return SUCCESS;
     }
