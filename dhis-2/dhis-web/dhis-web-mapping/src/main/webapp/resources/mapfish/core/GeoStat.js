@@ -482,10 +482,6 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
             for (var i = 0; i < bounds.length; i++)
             {
 				bounds[i] = parseFloat(bounds[i]);
-				if (!this.isNumber(parseFloat(bounds[i]))) {
-					alert("ikke numeric");
-				}
-					
                 
                 if (bounds[i] < this.minVal || bounds[i] > this.maxVal)
                 {
