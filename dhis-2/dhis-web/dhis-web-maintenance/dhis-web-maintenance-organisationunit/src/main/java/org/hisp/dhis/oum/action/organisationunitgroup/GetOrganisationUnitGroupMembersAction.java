@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.dataelementgroup;
+package org.hisp.dhis.oum.action.organisationunitgroup;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -32,40 +32,48 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: GetDataElementGroupMembersAction.java 6475 2008-11-25 15:42:55Z larshelg $
+ * @author Lars Helge Overland
+ * @version $Id$
  */
-public class GetDataElementGroupMembersAction
+public class GetOrganisationUnitGroupMembersAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
+    private OrganisationUnitService organisationUnitService;
+    
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
-        this.dataElementService = dataElementService;
+        this.organisationUnitService = organisationUnitService;
+    }
+
+    private OrganisationUnitGroupService organisationUnitGroupService;
+
+    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
+    {
+        this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
     // -------------------------------------------------------------------------
     // Comparator
     // -------------------------------------------------------------------------
 
-    private Comparator<DataElement> dataElementComparator;
+    private Comparator<OrganisationUnit> organisationUnitComparator;
 
-    public void setDataElementComparator( Comparator<DataElement> dataElementComparator )
+    public void setOrganisationUnitComparator( Comparator<OrganisationUnit> organisationUnitComparator )
     {
-        this.dataElementComparator = dataElementComparator;
+        this.organisationUnitComparator = organisationUnitComparator;
     }
 
     // -------------------------------------------------------------------------
@@ -85,6 +93,11 @@ public class GetDataElementGroupMembersAction
 
     private Integer id;
 
+    public Integer getId()
+    {
+        return id;
+    }
+
     public void setId( Integer id )
     {
         this.id = id;
@@ -94,18 +107,25 @@ public class GetDataElementGroupMembersAction
     // Output
     // -------------------------------------------------------------------------
 
-    private List<DataElement> groupMembers = new ArrayList<DataElement>();
+    private List<OrganisationUnit> groupMembers = new ArrayList<OrganisationUnit>();
 
-    public List<DataElement> getGroupMembers()
+    public List<OrganisationUnit> getGroupMembers()
     {
         return groupMembers;
     }
 
-    private List<DataElement> availableDataElements = new ArrayList<DataElement>();
+    private List<OrganisationUnit> availableOrganisationUnits = new ArrayList<OrganisationUnit>();
 
-    public List<DataElement> getAvailableDataElements()
+    public List<OrganisationUnit> getAvailableOrganisationUnits()
     {
-        return availableDataElements;
+        return availableOrganisationUnits;
+    }
+    
+    private OrganisationUnitGroup organisationUnitGroup;
+
+    public OrganisationUnitGroup getOrganisationUnitGroup()
+    {
+        return organisationUnitGroup;
     }
 
     // -------------------------------------------------------------------------
@@ -120,27 +140,23 @@ public class GetDataElementGroupMembersAction
 
         if ( id != null )
         {
-            DataElementGroup group = dataElementService.getDataElementGroup( id );
-
-            groupMembers = new ArrayList<DataElement>( group.getMembers() );
-
-            Collections.sort( groupMembers, dataElementComparator );
+            organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( id );
+            
+            groupMembers = new ArrayList<OrganisationUnit>( organisationUnitGroup.getMembers() );
+            
+            Collections.sort( groupMembers, organisationUnitComparator );
             
             displayPropertyHandler.handle( groupMembers );
         }
-
-        // ---------------------------------------------------------------------
-        // Get available elements
-        // ---------------------------------------------------------------------
-
-        availableDataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
-
-        availableDataElements.removeAll( groupMembers );
-
-        Collections.sort( availableDataElements, dataElementComparator );
         
-        displayPropertyHandler.handle( availableDataElements );
-
+        availableOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnits() );
+        
+        availableOrganisationUnits.removeAll( groupMembers );
+        
+        Collections.sort( availableOrganisationUnits, organisationUnitComparator );
+        
+        displayPropertyHandler.handle( availableOrganisationUnits );
+        
         return SUCCESS;
     }
 }
