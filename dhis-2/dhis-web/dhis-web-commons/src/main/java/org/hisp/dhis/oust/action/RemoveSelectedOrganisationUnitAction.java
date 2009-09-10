@@ -98,8 +98,8 @@ public class RemoveSelectedOrganisationUnitAction
                 throw new RuntimeException( "OrganisationUnit with id " + id + " doesn't exist" );
             }
 
-            selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();
-            selectedUnits.remove( unit );
+            selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();            
+            selectedUnits.remove( unit );           
             selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
         }
         catch ( Exception e )
