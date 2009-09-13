@@ -10,3 +10,4 @@ target/**
 *.settings
 .metadata
 build.sh
+target

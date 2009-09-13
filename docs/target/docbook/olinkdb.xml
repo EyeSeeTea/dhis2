@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE targetset SYSTEM "http://docbook.sourceforge.net/release/xsl/current/common/targetdatabase.dtd" >
+<targetset>
+  <sitemap>
+    <dir name="root">
+      <document targetdoc="dhis2_gis_user_manual_en.xml" baseuri="dhis2_gis_user_manual_en.html"><xi:include xmlns:xi="http://www.w3.org/2003/XInclude" href="dhis2_gis_user_manual_en.xml.db"/></document>
+      <document targetdoc="dhis2_user_man_mod1.xml" baseuri="dhis2_user_man_mod1.html"><xi:include xmlns:xi="http://www.w3.org/2003/XInclude" href="dhis2_user_man_mod1.xml.db"/></document>
+    </dir>
+  </sitemap>
+</targetset>
