@@ -27,75 +27,59 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_GIS_LONGITUDE;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_GIS_LATITUDE;
 
-import org.hisp.dhis.aggregation.AggregatedMapValue;
-import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.options.SystemSettingManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetMapValuesAction
+public class GetBaseCoordinateAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
     
-    private MappingService mappingService;
+    private SystemSettingManager systemSettingManager;
 
-    public void setMappingService( MappingService mappingService )
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
-        this.mappingService = mappingService;
+        this.systemSettingManager = systemSettingManager;
     }
-
+    
     // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private int indicatorId;
-
-    public void setIndicatorId( int indicatorId )
-    {
-        this.indicatorId = indicatorId;
-    }
-
-    private int periodId;
-
-    public void setPeriodId( int periodId )
-    {
-        this.periodId = periodId;
-    }
-
-    private String mapLayerPath;    
-
-    public void setMapLayerPath( String mapLayerPath )
-    {
-        this.mapLayerPath = mapLayerPath;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private Collection<AggregatedMapValue> object;
-
-    public Collection<AggregatedMapValue> getObject()
-    {
-        return object;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implemenation
+    // Output
     // -------------------------------------------------------------------------
     
+    private String longitude;
+    
+    public String getLongitude()
+    {
+        return longitude;
+    }
+
+    private String latitude;
+
+    public String getLatitude()
+    {
+        return latitude;
+    }    
+    
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedMapValues( indicatorId, periodId, mapLayerPath );
+        longitude = (String) systemSettingManager.getSystemSetting( KEY_GIS_LONGITUDE, "0" );
+        
+        latitude = (String) systemSettingManager.getSystemSetting( KEY_GIS_LATITUDE, "0" );
         
         return SUCCESS;
     }

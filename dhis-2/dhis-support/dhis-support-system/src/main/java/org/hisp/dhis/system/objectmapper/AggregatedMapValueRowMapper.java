@@ -47,6 +47,9 @@ public class AggregatedMapValueRowMapper
         value.setOrganisationUnitId( resultSet.getInt( 1 ) );
         value.setOrganisationUnitName( resultSet.getString( 2 ) );
         value.setValue( resultSet.getDouble( 3 ) );
+        value.setNumeratorValue( resultSet.getDouble( 4 ) );
+        value.setDenominatorValue( resultSet.getDouble( 5 ) );
+        value.setFactor( resultSet.getDouble( 6 ) );
         
         return value;
     }
