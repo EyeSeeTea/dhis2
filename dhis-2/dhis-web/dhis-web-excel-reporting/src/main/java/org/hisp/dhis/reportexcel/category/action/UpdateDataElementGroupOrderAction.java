@@ -85,6 +85,16 @@ public class UpdateDataElementGroupOrderAction
         this.dataElementIds = dataElementIds;
     }
 
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    public Integer getId()
+    {
+        return id;
+    }
+
     public String execute()
         throws Exception
     {
@@ -95,14 +105,14 @@ public class UpdateDataElementGroupOrderAction
         for ( String id : dataElementIds )
         {
 
-            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );          
+            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );
 
             dataElements.add( dataElement );
 
         }
-        
-        dataElementGroupOrder.setDataElements( dataElements );       
-        
+
+        dataElementGroupOrder.setDataElements( dataElements );
+
         dataElementGroupOrder.setName( name );
 
         reportService.updateDataElementGroupOrder( dataElementGroupOrder );
