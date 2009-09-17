@@ -24,105 +24,82 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel;
+package org.hisp.dhis.reportexcel.export.action;
 
-import java.io.File;
-import java.util.List;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.reportexcel.ReportExcel;
+import org.hisp.dhis.reportexcel.ReportExcelService;
 
-import org.hisp.dhis.external.location.LocationManager;
-import org.hisp.dhis.external.location.LocationManagerException;
-import org.hisp.dhis.options.SystemSettingManager;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
  * @version $Id$
  */
-
-public class DefaultReportLocationManager
-    implements ReportLocationManager
+public class GenerateReportExcelFlowAction
+    implements Action
 {
-    private File REPORT;
-
-    private File REPORT_TEMP;
 
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
-    private LocationManager locationManager;
+    private ReportExcelService reportService;
 
-    private SystemSettingManager systemSettingManager;
+    private PeriodService periodService;
 
-    // -------------------------------------------
-    // Setter
-    // -------------------------------------------
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
-
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
+    private SelectionManager selectionManager;
 
     // -------------------------------------------
-    // Init
+    // Input & Output
     // -------------------------------------------
 
-    void init()
-    {
-        try
-        {
-            REPORT = new File( locationManager.getExternalDirectory(), REPORT_DIR );
-            REPORT.mkdir();
-            REPORT_TEMP = new File( REPORT, REPORT_TEMP_DIR );
-            REPORT_TEMP.mkdir();
+    private Integer reportId;
 
-        }
-        catch ( LocationManagerException e )
-        {
-            e.printStackTrace();
-        }
-
-    }
+    private Integer periodId;
 
     // -------------------------------------------
-    // Impletemented
+    // Getter & Setter
     // -------------------------------------------
 
-    public List<File> getListFileInOrganisationDirectory( OrganisationUnit arg0 )
+    public void setReportId( Integer reportId )
     {
-        return null;
+        this.reportId = reportId;
     }
 
-    public File getOrganisationDirectory( OrganisationUnit organisationUnit )
+    public void setSelectionManager( SelectionManager selectionManager )
     {
-        File dir = new File( REPORT, String.valueOf( organisationUnit.getId() ) );
-        if ( !dir.exists() )
-        {
-            dir.mkdir();
-        }
-        return dir;
-        
+        this.selectionManager = selectionManager;
     }
 
-    public File getReportExcelDirectory()
+    public void setPeriodService( PeriodService periodService )
     {
-        return this.REPORT;
+        this.periodService = periodService;
     }
 
-    public File getReportExcelTempDirectory()
+    public void setPeriodId( Integer periodId )
     {
-        return this.REPORT_TEMP;
+        this.periodId = periodId;
     }
 
-    public File getReportExcelTemplateDirectory()
+    public void setReportService( ReportExcelService reportService )
     {
-        return new File( (String) systemSettingManager
-            .getSystemSetting( SystemSettingManager.KEY_REPORT_TEMPLATE_DIRECTORY ) );
+        this.reportService = reportService;
+    }
+
+    public String execute()
+        throws Exception
+    {
+        ReportExcel reportExcel = reportService.getReportExcel( reportId );
+
+        Period period = periodService.getPeriod( periodId );
+
+        selectionManager.setSelectedPeriod( period );
+
+        selectionManager.setSelectedReportExcelId( reportId );
+
+        return reportExcel.getReportType();
     }
 
 }

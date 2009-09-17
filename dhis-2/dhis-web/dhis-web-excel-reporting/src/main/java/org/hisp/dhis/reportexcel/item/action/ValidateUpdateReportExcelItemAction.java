@@ -107,8 +107,9 @@ public class ValidateUpdateReportExcelItemAction
             message = i18n.getString( "name_is_null" );
             return ERROR;
         }
-        ReportExcelItem reportItem = reportService.getReportExcelItem( name );
         ReportExcel reportExcel = reportService.getReportExcel( reportId );
+        
+        ReportExcelItem reportItem = reportExcel.getReportExcelItem( name );        
 
         ReportExcelItem temp = reportService.getReportExcelItem( reportItemId );
 
