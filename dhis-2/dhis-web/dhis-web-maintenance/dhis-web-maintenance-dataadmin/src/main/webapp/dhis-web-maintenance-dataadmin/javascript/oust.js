@@ -113,6 +113,7 @@ function SelectionTree(){
         var treeTag = document.getElementById( 'selectionTree' );  
         setLoadingMessage( treeTag );
         var children = treeTag.getElementsByTagName( 'ul' );
+        
         if ( children.length > 0 )
         {
             treeTag.removeChild( children[0] );
@@ -169,7 +170,7 @@ function SelectionTree(){
         }
         
         clearLoadingMessage( treeTag );
-        
+        enableLockOptionButtons();
     }
 
     function createChildren( parentTag, parentElement ){
@@ -234,7 +235,7 @@ function SelectionTree(){
 				}
 				else{
 					toggleTag.appendChild( toggleImg );
-				}				
+			}				
     }
 
     function setVisible( tag, visible ){

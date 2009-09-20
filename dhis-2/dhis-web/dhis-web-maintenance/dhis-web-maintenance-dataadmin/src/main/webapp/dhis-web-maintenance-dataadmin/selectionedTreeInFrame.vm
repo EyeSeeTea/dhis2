@@ -41,10 +41,11 @@
                       selectionTreeSelection.setOnSelectFunction( treeClicked );
                       selectionTreeSelection.setListenerFunction( selectCompleted );
                       selectionTree.buildSelectionTree();
+					  
                 </script>  			
                 <script type="text/javascript">
                       var i18n_loading = '$encoder.jsEncode( $i18n.getString( "loading" ) )';
-                </script>
+		        </script>
 				
             </td>
         </tr>
@@ -54,7 +55,7 @@
         <tr>        
             <td>
                 <input type="button" id="submitButton" value="$i18n.getString( 'save' )" style="width:15em"  onclick="parent.updateDataSetsOrgunitwise()">									
-			    <input type="button" id="submitButton5" value="$i18n.getString( 'cancel' )" style="width:15em"  onclick="parent.cancilSelection()">                                  
+			    <input type="button" id="submitButton5" value="$i18n.getString( 'cancel' )" style="width:15em"  onclick="parent.cancilSelection()">                                 
             </td>
             <td colspan="2"></td>
         </tr>    

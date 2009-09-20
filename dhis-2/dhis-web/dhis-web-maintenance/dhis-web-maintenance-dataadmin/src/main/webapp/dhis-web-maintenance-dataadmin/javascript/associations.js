@@ -36,6 +36,6 @@ function selectCompleted( selectedUnits )
     {
         hideMessage();
         
-        document.getElementById( "submitButton" ).disabled = false;
+       document.getElementById( "submitButton" ).disabled = false;
     }
 }
