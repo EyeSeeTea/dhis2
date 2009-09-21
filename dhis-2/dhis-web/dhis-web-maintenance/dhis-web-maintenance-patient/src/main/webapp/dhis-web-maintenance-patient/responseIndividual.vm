@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<patient>
+  <firstName>$encoder.xmlEncode( $patient.firstName )</firstName>
+  <middleName>$encoder.xmlEncode( $patient.middleName )</middleName>
+  <lastName>$encoder.xmlEncode( $patient.lastName )</lastName>    
+</patient>
+
+<patientIdentifier>
+	<identifier>$!encoder.xmlEncode( $patientIdentifier.identifier )</identifier>
+</patientIdentifier>
+
+<patientAddress>
+	<house>$!encoder.xmlEncode( $patientAddress.house.name )</house>
+</patientAddress>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<houseHold>
+  <id>$houseHold.id</id>
+  <houseNumber>$encoder.xmlEncode( $houseHold.houseNumber )</houseNumber>
+  <registeringUnit>$i18n.getString( $houseHold.registeringUnit.shortName )</registeringUnit>
+  <address>$i18n.getString( $houseHold.address )</address>
+  <landMark>$i18n.getString( $houseHold.landMark )</landMark>
+  <memberCount>$houseHoldMembers.size()</memberCount>
+</houseHold>

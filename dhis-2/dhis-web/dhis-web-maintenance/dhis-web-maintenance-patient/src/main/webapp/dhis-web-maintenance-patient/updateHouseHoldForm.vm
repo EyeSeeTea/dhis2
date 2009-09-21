@@ -1,0 +1,88 @@
+
+<h3>$i18n.getString( "update_house_hold" )</h3>
+
+<form id="updateHouseHoldForm" name="updateHouseHoldForm" action="updateHouseHold.action" method="post" onsubmit="submitForm(); return validateUpdateHouseHold()">
+
+<div style="display:inline">
+  <input type="hidden" id="id" name="id" value="$houseHold.id">
+</div>
+  
+  <table id="detailsList">
+    <thead>
+      <tr>
+        <th colspan="2">$i18n.getString( "house_hold_details" )</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+		<td><label for="houseNumber">$i18n.getString( "house_number" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" readonly="readonly" id="houseNumber" name="houseNumber" value="$encoder.htmlEncode( $houseHold.houseNumber )" style="width:30em"></td>
+	  </tr>	  
+      <tr>
+		<td><label for="address">$i18n.getString( "address" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="address" name="address" maxlength="30" value="$encoder.htmlEncode( $houseHold.address )" style="width:30em"></td>
+	  </tr>
+	  <tr>
+		<td><label for="landMark">$i18n.getString( "land_mark" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="landMark" name="landMark" maxlength="30" value="$encoder.htmlEncode( $houseHold.landMark )" style="width:30em"></td>
+	  </tr>   
+      <tr>
+      	<td colspan="2" style="height:15px"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table id="houseHoldMembersArea">
+    
+    <thead>
+      <tr>        
+		<th>$i18n.getString( "not_members" )</th>
+		<th></th>
+		<th>$i18n.getString( "members" )</th>
+      </tr>
+    </thead>
+  
+    <tbody>   
+     <tr>
+     	<td><input type="text" id="searchText" name="searchText" maxlength="30" style="width:20em"><input type="button" value="$i18n.getString( "search" )" style="width:10em" onclick="searchHouseHoldMembers()"></td>
+        <td></td>        
+        <td></td>
+      </tr>	   
+      <tr> 
+      	<td>
+        	<select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
+        		#foreach ( $member in $members )
+              		<option value="$member.patientId">$encoder.htmlEncode( $member.givenName )  $encoder.htmlEncode( $member.middleName )   $encoder.htmlEncode( $member.familyName )</option>
+            	#end            	
+          	</select>
+        </td>
+        <td valign="top" align="center">		 
+        	<input type="button" value="&gt;" onclick="move( 'availableList' )"><br> <br>	
+		  	<input type="button" value="&lt;" onclick="move ( 'selectedList' )">             
+		<td>
+        	<select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">
+        		#foreach ( $houseHoldMember in $houseHoldMembers )
+              		<option value="$houseHoldMember.patientId">$encoder.htmlEncode( $houseHoldMember.givenName )  $encoder.htmlEncode( $houseHoldMember.middleName )   $encoder.htmlEncode( $houseHoldMember.familyName )</option>
+            	#end
+          	</select>
+        </td>                
+      </tr>
+    </tbody>
+  </table>
+
+<p>
+	<input type="submit" value="$i18n.getString( "update" )" style="width:10em">
+	<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='household.action'" style="width:10em">
+</p>
+
+</form> 	
+
+<span id="message"></span>
+
+<script type="text/javascript">
+	
+	var addressField = document.getElementById( 'address' );
+	addressField.select();
+	addressField.focus();
+
+</script>				

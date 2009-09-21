@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="org.hisp.dhis.household.HouseHold" table="household">
+       
+    <id name="id" column="householdid">
+      <generator class="native"/>
+    </id>    
+    
+    <property name="houseNumber" type="java.lang.String" length="31" not-null="true"/>
+    
+    <property name="visitingOrder" column="visitingorder"/>
+    
+    <property name="address" column="address"/>
+    
+    <property name="landMark" column="landmark"/>
+    
+    <many-to-one name="reportingUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"
+      not-null="true" foreign-key="fk_household_organisationunitid"/>   
+    
+    <!-- Associations -->
+
+		<!-- bi-directional one-to-many association to Patient -->
+		<set name="members" lazy="false" inverse="true" cascade="all-delete-orphan" table="patient">
+			<key not-null="true" column="householdid" />
+			<one-to-many class="org.hisp.dhis.patient.Patient" />
+		</set>       
+    
+  </class>
+</hibernate-mapping>

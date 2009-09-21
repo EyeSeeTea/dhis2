@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<members>
+#foreach ( $member in $members )
+	<member>
+		<id>$member.patientId</id>
+		<givenName>$encoder.xmlEncode( $member.givenName )</givenName>
+		<middleName>$encoder.xmlEncode( $member.middleName )</middleName>
+		<familyName>$encoder.xmlEncode( $member.familyName )</familyName>		
+	</member>
+#end
+</members>
