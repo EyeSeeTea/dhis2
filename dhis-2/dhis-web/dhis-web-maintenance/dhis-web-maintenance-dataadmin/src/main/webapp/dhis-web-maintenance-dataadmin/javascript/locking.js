@@ -70,9 +70,11 @@ function updateDataSets() {
      }
 }
 
-function LoadOrgUnitTree() {   
-	 desableLockOptionButtons();    
-     var periodList = document.getElementById( "periodId" );
+function LoadOrgUnitTree(){
+	 Reload();
+     desableLockGeneralComponenets(); 
+	 desableLockOptionButtons();
+	 var periodList = document.getElementById( "periodId" );
      var periodId = periodList.options[ periodList.selectedIndex ].value;
      var lockedDataSetList = document.getElementById('lockedDataSets');
      var selectedLockedDataSetId = lockedDataSetList.options[ lockedDataSetList.selectedIndex ].value;
@@ -85,14 +87,47 @@ function LoadEmptyOrgUnitTree(){
      iframeForOUTree.location.href='emptyOrgunitSetupAssociationsTree.action';		 
 }
 
+function clearFrame(){
+	x = window.frames["iframeForOUTree"];
+	//x.document.open();
+	x.document.close(); 
+}
+
+function Reload() {
+	var f = document.getElementById('iframeForOUTree');
+	f.contentWindow.location.reload(true);
+}
+
+function enableLockGeneralComponenets(){
+    parent.document.getElementById( "periodTypeId" ).disabled = false;
+	parent.document.getElementById( "periodId" ).disabled = false;
+	parent.document.getElementById( "unlockedDataSets" ).disabled = false;
+	parent.document.getElementById( "lockedDataSets" ).disabled = false;
+	parent.document.getElementById( "button5" ).disabled = false;
+	parent.document.getElementById( "button6" ).disabled = false;
+	parent.document.getElementById( "button7" ).disabled = false;
+	parent.document.getElementById( "button8" ).disabled = false;	
+}
+
+function desableLockGeneralComponenets(){
+	parent.document.getElementById( "periodTypeId" ).disabled = true;
+	parent.document.getElementById( "periodId" ).disabled = true;
+	parent.document.getElementById( "unlockedDataSets" ).disabled = true;
+	parent.document.getElementById( "lockedDataSets" ).disabled = true;
+	parent.document.getElementById( "button5" ).disabled = true;
+	parent.document.getElementById( "button6" ).disabled = true;
+	parent.document.getElementById( "button7" ).disabled = true;
+	parent.document.getElementById( "button8" ).disabled = true;
+}
+
 function enableLockOptionButtons(){
-	 parent.document.getElementById( "submitButton1" ).disabled = false;
-	 parent.document.getElementById( "submitButton2" ).disabled = false;
-	 parent.document.getElementById( "submitButton3" ).disabled = false;
-     parent.document.getElementById( "submitButton4" ).disabled = false; 
-	 parent.document.getElementById( "levelList" ).disabled = false;
-	//document.getElementById( "submitButton" ).disabled = false;
-    //document.getElementById( "submitButton5" ).disabled = false;
+	parent.document.getElementById( "submitButton1" ).disabled = false;
+	parent.document.getElementById( "submitButton2" ).disabled = false;
+	parent.document.getElementById( "submitButton3" ).disabled = false;
+    parent.document.getElementById( "submitButton4" ).disabled = false; 
+	parent.document.getElementById( "levelList" ).disabled = false;
+	parent.document.getElementById( "submitButton9" ).disabled = false;
+	parent.document.getElementById( "submitButton" ).disabled = false;
 }
 		
 function desableLockOptionButtons(){
@@ -101,8 +136,8 @@ function desableLockOptionButtons(){
     parent.document.getElementById( "submitButton3" ).disabled = true;
 	parent.document.getElementById( "submitButton4" ).disabled = true; 
 	parent.document.getElementById( "levelList" ).disabled = true;
-	//document.getElementById( "submitButton" ).disabled = true;
-	//document.getElementById( "submitButton5" ).disabled = true; 
+	//parent.document.getElementById( "submitButton9" ).disabled = true;
+	parent.document.getElementById( "submitButton" ).disabled = true; 
 }
 		
 function desableLockOptionButtonsForApplyLockOnAll(){
@@ -110,8 +145,8 @@ function desableLockOptionButtonsForApplyLockOnAll(){
 	parent.document.getElementById( "submitButton3" ).disabled = true;
 	parent.document.getElementById( "submitButton4" ).disabled = true; 
 	parent.document.getElementById( "levelList" ).disabled = true;
-    //document.getElementById( "submitButton" ).disabled = true;
-	//document.getElementById( "submitButton5" ).disabled = true; 
+    //parent.document.getElementById( "submitButton9" ).disabled = true;
+	parent.document.getElementById( "submitButton" ).disabled = true; 
 }
 		
 function desableLockOptionButtonsForRemoveAllLocks(){
@@ -119,8 +154,8 @@ function desableLockOptionButtonsForRemoveAllLocks(){
 	parent.document.getElementById( "submitButton3" ).disabled = true;
 	parent.document.getElementById( "submitButton4" ).disabled = true; 
     parent.document.getElementById( "levelList" ).disabled = true;
-	//document.getElementById( "submitButton" ).disabled = true;
-	//document.getElementById( "submitButton5" ).disabled = true; 
+	//parent.document.getElementById( "submitButton9" ).disabled = true;
+	parent.document.getElementById( "submitButton" ).disabled = true; 
 }
 		
 function desableLockOptionButtonsForLockAtLevel(){
@@ -128,8 +163,8 @@ function desableLockOptionButtonsForLockAtLevel(){
 	parent.document.getElementById( "submitButton2" ).disabled = true;
 	parent.document.getElementById( "submitButton4" ).disabled = true; 
 	parent.document.getElementById( "levelList" ).disabled = true;
-	//document.getElementById( "submitButton" ).disabled = true;
-	//document.getElementById( "submitButton5" ).disabled = true; 
+	//parent.document.getElementById( "submitButton9" ).disabled = true;
+	parent.document.getElementById( "submitButton" ).disabled = true; 
 }
 		
 function desableLockOptionButtonsForUnlockAtLevel(){
@@ -137,19 +172,23 @@ function desableLockOptionButtonsForUnlockAtLevel(){
 	parent.document.getElementById( "submitButton2" ).disabled = true;
 	parent.document.getElementById( "submitButton3" ).disabled = true;
 	parent.document.getElementById( "levelList" ).disabled = true;
-	//document.getElementById( "submitButton" ).disabled = true;
-	//document.getElementById( "submitButton5" ).disabled = true; 
+	//parent.document.getElementById( "submitButton9" ).disabled = true;
+	parent.document.getElementById( "submitButton" ).disabled = true; 
 }
     
 function ApplyAll(){
-     desableLockOptionButtonsForApplyLockOnAll();
+	 desableLockGeneralComponenets();
+	 desableLockOptionButtons();
+     //desableLockOptionButtonsForApplyLockOnAll();
      var lockedDataSetList = document.getElementById('lockedDataSets');
      var selectedLockedDataSetId = lockedDataSetList.options[ lockedDataSetList.selectedIndex ].value;           
      iframeForOUTree.location.href ='selectAll.action?selectedLockedDataSetId=' + selectedLockedDataSetId;
 }
     
 function RemoveAll(){
-	 desableLockOptionButtonsForRemoveAllLocks();       
+	 desableLockGeneralComponenets();
+	 desableLockOptionButtons();
+	 //desableLockOptionButtonsForRemoveAllLocks();       
      var periodList = document.getElementById( "periodId" );
      var periodId = periodList.options[ periodList.selectedIndex ].value;
      var lockedDataSetList = document.getElementById('lockedDataSets');
@@ -158,7 +197,9 @@ function RemoveAll(){
 }
     
 function lockAllAtLevel(){
-	 desableLockOptionButtonsForLockAtLevel();
+	 desableLockGeneralComponenets();
+	 desableLockOptionButtons();
+	 //desableLockOptionButtonsForLockAtLevel();
      var periodList = document.getElementById( "periodId" );
      var periodId = periodList.options[ periodList.selectedIndex ].value;
      var list = document.getElementById( 'levelList' );         
@@ -169,7 +210,9 @@ function lockAllAtLevel(){
 }
 
 function unLockAllAtLevel(){
-     desableLockOptionButtonsForUnlockAtLevel();
+     desableLockGeneralComponenets();
+	 desableLockOptionButtons();
+     //desableLockOptionButtonsForUnlockAtLevel();
      var periodList = document.getElementById( "periodId" );
      var periodId = periodList.options[ periodList.selectedIndex ].value;
      var list = document.getElementById( 'levelList' );         

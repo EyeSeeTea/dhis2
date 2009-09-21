@@ -14,7 +14,7 @@
     
     <!-- Locking -->
 	  
-	 <action name="emptyOrgunitSetupAssociationsTree"
+	<action name="emptyOrgunitSetupAssociationsTree"
       class="org.hisp.dhis.commons.action.NoAction">
       <result name="success" type="velocity">
         /dhis-web-maintenance-dataadmin/noResponseInFrame.vm</result>

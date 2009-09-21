@@ -34,7 +34,7 @@ function SelectionTreeSelection()
     {
         multipleSelectionAllowed = allowed;
     };
-
+	
     this.select = function( unitId ){
         if ( onSelectFunction ){
             onSelectFunction();
@@ -60,7 +60,7 @@ function SelectionTreeSelection()
         }
         else
         {    
-        	  request.send( selectionTreePath + 'noactionfordatalocking.action?' );       
+        	request.send( selectionTreePath + 'noactionfordatalocking.action?' );       
             linkTags[0].className = '';          
         }
     };
@@ -89,7 +89,7 @@ function SelectionTreeSelection()
 // Subtree
 // -----------------------------------------------------------------------------
 
-function SelectionTree(){
+function SelectionTree(){	
     this.toggle = function( unitId ){
         var parentTag = document.getElementById( getTagId( unitId ));
         var children = parentTag.getElementsByTagName( 'ul' );
@@ -170,7 +170,9 @@ function SelectionTree(){
         }
         
         clearLoadingMessage( treeTag );
+		enableLockGeneralComponenets();
         enableLockOptionButtons();
+		saveEnable();
     }
 
     function createChildren( parentTag, parentElement ){
