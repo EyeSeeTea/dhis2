@@ -7,8 +7,84 @@
   <include file="dhis-web-commons.xml"/>
   
   <package name="dhis-web-maintenance-patient" extends="dhis-web-commons" namespace="/dhis-web-maintenance-patient">
+	  
+	<action name="index" class="org.hisp.dhis.patient.action.NoAction">      
+      <result name="success" type="velocity">/main.vm</result>     
+      <param name="page">/dhis-web-maintenance-patient/index.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param> 
+    </action>	  
     
+  <!-- CHIS HouseHold -->
     
+    <action name="household" class="org.hisp.dhis.patient.action.household.SelectHouseHoldAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="householdform" type="chain">householdform</result>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/selectHouseHold.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js</param>	           
+    </action>
+    
+    <action name="householdform" class="org.hisp.dhis.patient.action.household.GetHouseHoldListAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/houseHold.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>        
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/houseHold.js</param>            
+    </action>
+    
+    <action name="getHouseHold" class="org.hisp.dhis.patient.action.household.GetHouseHoldAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseHouseHold.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>
+    
+    <action name="removeHouseHold" class="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>      
+      <result name="success" type="redirect">household.action</result>      
+      <param name="requiredAuthorities">F_HOUSEHOLD_DELETE</param>      
+    </action>
+    
+    <action name="addHouseHold" class="org.hisp.dhis.patient.action.household.AddHouseHoldAction">
+      <result name="success" type="redirect">household.action</result>
+      <param name="requiredAuthorities">F_HOUSEHOLD_ADD</param>
+    </action>
+    
+    <action name="showAddHouseHoldForm" class="org.hisp.dhis.patient.action.household.ShowAddHouseHoldFormAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/addHouseHoldForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/houseHold.js</param>
+      <param name="requiredAuthorities">F_HOUSEHOLD_ADD</param>      
+    </action>
+    
+    <action name="showUpdateHouseHoldForm" class="org.hisp.dhis.patient.action.household.GetHouseHoldAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/updateHouseHoldForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/houseHold.js</param>
+      <param name="requiredAuthorities">F_HOUSEHOLD_UPDATE</param>      
+    </action>
+    
+    <action name="updateHouseHold" class="org.hisp.dhis.patient.action.household.UpdateHouseHoldAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="redirect">household.action</result>
+      <param name="requiredAuthorities">F_HOUSEHOLD_UPDATE</param>
+    </action>
+    
+    <action name="validateHouseHold" class="org.hisp.dhis.patient.action.household.ValidateHouseHoldAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>    
+    
+    <action name="searchHouseHoldMembers" class="org.hisp.dhis.patient.action.household.SearchHouseHoldMembersAction">      
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseMemberList.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>               
+    </action>   
+	  
         
   </package>
 </struts>

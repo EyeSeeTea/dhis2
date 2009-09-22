@@ -34,16 +34,18 @@ import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class DefaultPatientDataValueService 
-	implements PatientDataValueService 
+@Transactional
+public class DefaultPatientDataValueService
+    implements PatientDataValueService
 {
-	
-	// -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
@@ -53,76 +55,75 @@ public class DefaultPatientDataValueService
     {
         this.patientDataValueStore = patientDataValueStore;
     }
-    
+
     // -------------------------------------------------------------------------
     // PatientDataValue
     // -------------------------------------------------------------------------
-    
-	
-	public void addPatientDataValue( PatientDataValue patientDataValue ) 
-	{
-		if( patientDataValue.getValue() != null )
-		{
-			patientDataValueStore.addPatientDataValue( patientDataValue );
-		}
-	}
 
-	public void deletePatientDataValue( PatientDataValue patientDataValue ) 
-	{
-		patientDataValueStore.deletePatientDataValue( patientDataValue );
-	}
+    public void addPatientDataValue( PatientDataValue patientDataValue )
+    {
+        if ( patientDataValue.getValue() != null )
+        {
+            patientDataValueStore.addPatientDataValue( patientDataValue );
+        }
+    }
 
-	public int deletePatientDataValue( Encounter encounter ) 
-	{
-		return patientDataValueStore.deletePatientDataValue( encounter );
-	}
+    public void deletePatientDataValue( PatientDataValue patientDataValue )
+    {
+        patientDataValueStore.deletePatientDataValue( patientDataValue );
+    }
 
-	public int deletePatientDataValue( DataElement dataElement ) 
-	{
-		return patientDataValueStore.deletePatientDataValue( dataElement );
-	}
+    public int deletePatientDataValue( Encounter encounter )
+    {
+        return patientDataValueStore.deletePatientDataValue( encounter );
+    }
 
-	public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo ) 
-	{
-		return patientDataValueStore.deletePatientDataValue( optionCombo );
-	}
-	
-	public PatientDataValue getPatientDataValue( Encounter encounter,
-			DataElement dataElement, DataElementCategoryOptionCombo optionCombo) 
-	{		
-		return patientDataValueStore.getPatientDataValue( encounter, dataElement, optionCombo );
-	}
+    public int deletePatientDataValue( DataElement dataElement )
+    {
+        return patientDataValueStore.deletePatientDataValue( dataElement );
+    }
 
-	public Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement ) 
-	{
-		return patientDataValueStore.getPatientDataValues( encounter, dataElement );
-	}
+    public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo )
+    {
+        return patientDataValueStore.deletePatientDataValue( optionCombo );
+    }
 
-	public Collection<PatientDataValue> getPatientDataValues( Encounter encounter ) 
-	{
-		return patientDataValueStore.getPatientDataValues( encounter );
-	}
+    public PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo )
+    {
+        return patientDataValueStore.getPatientDataValue( encounter, dataElement, optionCombo );
+    }
 
-	public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo ) 
-	{
-		return patientDataValueStore.getPatientDataValues( optionCombo );
-	}
+    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement )
+    {
+        return patientDataValueStore.getPatientDataValues( encounter, dataElement );
+    }
 
-	public void updatePatientDataValue( PatientDataValue patientDataValue ) 
-	{
-		if( patientDataValue.getValue() == null )
-		{
-			patientDataValueStore.deletePatientDataValue( patientDataValue );			
-		}
-		else
-		{
-			patientDataValueStore.updatePatientDataValue( patientDataValue );
-		}
-	}
+    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter )
+    {
+        return patientDataValueStore.getPatientDataValues( encounter );
+    }
 
-	public Collection<PatientDataValue> getAllPatientDataValues() 
-	{		
-		return patientDataValueStore.getAllPatientDataValues();
-	}
+    public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
+    {
+        return patientDataValueStore.getPatientDataValues( optionCombo );
+    }
+
+    public void updatePatientDataValue( PatientDataValue patientDataValue )
+    {
+        if ( patientDataValue.getValue() == null )
+        {
+            patientDataValueStore.deletePatientDataValue( patientDataValue );
+        }
+        else
+        {
+            patientDataValueStore.updatePatientDataValue( patientDataValue );
+        }
+    }
+
+    public Collection<PatientDataValue> getAllPatientDataValues()
+    {
+        return patientDataValueStore.getAllPatientDataValues();
+    }
 
 }

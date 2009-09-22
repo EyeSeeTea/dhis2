@@ -4,6 +4,79 @@
   xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
+  <!-- HouseHold -->
   
+  <bean id="org.hisp.dhis.patient.action.household.GetHouseHoldListAction"
+    class="org.hisp.dhis.patient.action.household.GetHouseHoldListAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="houseHoldService"
+      ref="org.hisp.dhis.household.HouseHoldService"/>                  
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.household.AddHouseHoldAction"
+    class="org.hisp.dhis.patient.action.household.AddHouseHoldAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>  
+    <property name="houseHoldService"
+      ref="org.hisp.dhis.household.HouseHoldService"/>         
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.household.SelectHouseHoldAction"
+    class="org.hisp.dhis.patient.action.household.SelectHouseHoldAction" 
+    scope="prototype">    
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>           
+  </bean>  
+  
+  <bean id="org.hisp.dhis.patient.action.household.GetHouseHoldAction"
+    class="org.hisp.dhis.patient.action.household.GetHouseHoldAction" 
+    scope="prototype">      
+    <property name="houseHoldService"
+      ref="org.hisp.dhis.household.HouseHoldService"/>         
+  </bean> 
+  
+  <bean id="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction"
+    class="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction" 
+    scope="prototype">      
+    <property name="houseHoldService"
+      ref="org.hisp.dhis.household.HouseHoldService"/>         
+  </bean>  
+	
+  <bean id="org.hisp.dhis.patient.action.household.ShowAddHouseHoldFormAction"
+    class="org.hisp.dhis.patient.action.household.ShowAddHouseHoldFormAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="houseHoldService"
+      ref="org.hisp.dhis.household.HouseHoldService"/>
+  </bean>  	
+
+  <bean id="org.hisp.dhis.patient.action.household.ValidateHouseHoldAction"
+    class="org.hisp.dhis.patient.action.household.ValidateHouseHoldAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.household.UpdateHouseHoldAction"
+    class="org.hisp.dhis.patient.action.household.UpdateHouseHoldAction" 
+    scope="prototype">
+    <property name="houseHoldService"
+      ref="org.hisp.dhis.household.HouseHoldService"/>
+	<property name="patientService"
+      ref="org.hisp.dhis.patient.HouseHoldService"/>
+  </bean> 
+  
+  <bean id="org.hisp.dhis.patient.action.household.SearchHouseHoldMembersAction"
+    class="org.hisp.dhis.patient.action.household.SearchHouseHoldMembersAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="houseHoldService"
+      ref="org.hisp.dhis.household.HouseHoldService"/>
+  </bean>
   
 </beans>

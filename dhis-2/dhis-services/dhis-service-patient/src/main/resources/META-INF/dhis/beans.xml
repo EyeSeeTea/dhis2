@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+	
+	<!-- Store definitions -->
+	
+	<bean id="org.hisp.dhis.activityplan.ActivityPlanStore"
+		class="org.hisp.dhis.activityplan.hibernate.HibernateActivityPlanStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.encounter.EncounterStore"
+		class="org.hisp.dhis.encounter.hibernate.HibernateEncounterStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.household.HouseHoldStore"
+		class="org.hisp.dhis.household.hibernate.HibernateHouseHoldStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patientdatavalue.PatientDataValueStore"
+		class="org.hisp.dhis.patientdatavalue.hibernate.HibernatePatientDataValueStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patient.PatientStore"
+		class="org.hisp.dhis.patient.hibernate.HibernatePatientStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patient.PatientAddressStore"
+		class="org.hisp.dhis.patient.hibernate.HibernatePatientAddressStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patient.PatientIdentifierStore"
+		class="org.hisp.dhis.patient.hibernate.HibernatePatientIdentifierStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<!-- Service definitions -->
+	
+	<bean id="org.hisp.dhis.activityplan.ActivityPlanService"
+		class="org.hisp.dhis.activityplan.DefaultActivityPlanService">
+		<property name="activityPlanStore"
+			ref="org.hisp.dhis.activityplan.ActivityPlanStore"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.encounter.EncounterService"
+		class="org.hisp.dhis.encounter.DefaultEncounterService">
+		<property name="encounterStore"
+			ref="org.hisp.dhis.encounter.EncounterStore"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.household.HouseHoldService"
+		class="org.hisp.dhis.household.DefaultHouseHoldService">
+		<property name="houseHoldStore"
+			ref="org.hisp.dhis.household.HouseHoldStore"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patientdatavalue.PatientDataValueService"
+		class="org.hisp.dhis.patientdatavalue.DefaultPatientDataValueService">
+		<property name="patientDataValueStore"
+			ref="org.hisp.dhis.patientdatavalue.PatientDataValueStore"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patient.PatientService"
+		class="org.hisp.dhis.patient.DefaultPatientService">
+		<property name="patientStore" ref="org.hisp.dhis.patient.PatientStore"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patient.PatientAddressService"
+		class="org.hisp.dhis.patient.DefaultPatientAddressService">
+		<property name="patientAddressStore"
+			ref="org.hisp.dhis.patient.PatientAddressStore"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.patient.PatientIdentifierService"
+		class="org.hisp.dhis.patient.DefaultPatientIdentifierService">
+		<property name="patientIdentifierStore"
+			ref="org.hisp.dhis.patient.PatientIdentifierStore"/>
+	</bean>
+	
+</beans>

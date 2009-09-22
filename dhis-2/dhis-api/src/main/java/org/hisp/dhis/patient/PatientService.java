@@ -33,25 +33,25 @@ import java.util.Date;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientService 
+public interface PatientService
 {
-	String ID = PatientService.class.getName();
-	
-	int addPatient( Patient patient );
-	
-	void deletePatient( Patient patient );
-	
-	void updatePatient( Patient patient );
-	
-	Patient getPatient( int id );
-	
-	Collection<Patient> getAllPatients();
-	
-	Collection<Patient> getAllPatients( Boolean isDead );
-	
-	Collection<Patient> getPatiensByGender( String gender );
-	
-	Collection<Patient> getPatientsByBirthDate( Date birthDate );
-	
-	Collection<Patient> getPatientsByNames( String name );	
+    String ID = PatientService.class.getName();
+
+    int addPatient( Patient patient );
+
+    void deletePatient( Patient patient );
+
+    void updatePatient( Patient patient );
+
+    Patient getPatient( int id );
+
+    Collection<Patient> getAllPatients();
+
+    Collection<Patient> getAllPatients( Boolean isDead );
+
+    Collection<Patient> getPatiensByGender( String gender );
+
+    Collection<Patient> getPatientsByBirthDate( Date birthDate );
+
+    Collection<Patient> getPatientsByNames( String name );
 }

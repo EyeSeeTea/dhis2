@@ -43,73 +43,73 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class HibernatePatientDataValueStore 
-	implements PatientDataValueStore 
+public class HibernatePatientDataValueStore
+    implements PatientDataValueStore
 {
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-	private SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
 
     public void setSessionFactory( SessionFactory sessionFactory )
     {
         this.sessionFactory = sessionFactory;
     }
-    
+
     // -------------------------------------------------------------------------
     // PatientDataValue
     // -------------------------------------------------------------------------
-    
-	public void addPatientDataValue( PatientDataValue patientDataValue ) 
-	{
+
+    public void addPatientDataValue( PatientDataValue patientDataValue )
+    {
         Session session = sessionFactory.getCurrentSession();
 
-        session.save( patientDataValue );        
-	}
+        session.save( patientDataValue );
+    }
 
-	public void deletePatientDataValue( PatientDataValue patientDataValue ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    public void deletePatientDataValue( PatientDataValue patientDataValue )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         session.delete( patientDataValue );
-	}
-	
-	public int deletePatientDataValue( Encounter encounter ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    }
+
+    public int deletePatientDataValue( Encounter encounter )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         Query query = session.createQuery( "delete PatientDataValue where encounter = :encounter" );
         query.setEntity( "encounter", encounter );
 
         return query.executeUpdate();
-	}
+    }
 
-	public int deletePatientDataValue( DataElement dataElement ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    public int deletePatientDataValue( DataElement dataElement )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         Query query = session.createQuery( "delete PatientDataValue where dataElement = :dataElement" );
         query.setEntity( "dataElement", dataElement );
 
         return query.executeUpdate();
-	}
+    }
 
-	public int deletePatientDataValue(  DataElementCategoryOptionCombo optionCombo ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         Query query = session.createQuery( "delete PatientDataValue where optionCombo = :optionCombo" );
         query.setEntity( "optionCombo", optionCombo );
 
         return query.executeUpdate();
-	}
-	
-	public PatientDataValue getPatientDataValue(Encounter encounter,
-			DataElement dataElement, DataElementCategoryOptionCombo optionCombo) 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    }
+
+    public PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientDataValue.class );
         criteria.add( Restrictions.eq( "encounter", encounter ) );
@@ -117,57 +117,57 @@ public class HibernatePatientDataValueStore
         criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );
 
         return (PatientDataValue) criteria.uniqueResult();
-	}
+    }
 
-	@SuppressWarnings( "unchecked" )
-	public Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientDataValue.class );
         criteria.add( Restrictions.eq( "encounter", encounter ) );
         criteria.add( Restrictions.eq( "dataElement", dataElement ) );
 
         return criteria.list();
-	}
+    }
 
-	@SuppressWarnings( "unchecked" )
-	public Collection<PatientDataValue> getPatientDataValues( Encounter encounter ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "encounter", encounter ) );        
-
-        return criteria.list();
-	}
-
-	@SuppressWarnings( "unchecked" )
-	public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );        
+        criteria.add( Restrictions.eq( "encounter", encounter ) );
 
         return criteria.list();
-	}
-	
-	public void updatePatientDataValue( PatientDataValue patientDataValue ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( PatientDataValue.class );
+        criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );
+
+        return criteria.list();
+    }
+
+    public void updatePatientDataValue( PatientDataValue patientDataValue )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         session.update( patientDataValue );
-	}
+    }
 
-	@SuppressWarnings( "unchecked" )
-	public Collection<PatientDataValue> getAllPatientDataValues() 
-	{
-		Session session = sessionFactory.getCurrentSession();
-		
-		Criteria criteria = session.createCriteria( PatientDataValue.class );
-		
-		 return criteria.list();
-	}
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> getAllPatientDataValues()
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( PatientDataValue.class );
+
+        return criteria.list();
+    }
 
 }

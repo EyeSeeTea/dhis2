@@ -36,31 +36,32 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientDataValueService 
+public interface PatientDataValueService
 {
-	
-	String ID = PatientDataValueService.class.getName();
-	
-	void addPatientDataValue( PatientDataValue patientDataValue );
-	
-	void updatePatientDataValue( PatientDataValue patientDataValue );
-	
-	void deletePatientDataValue( PatientDataValue patientDataValue );
-	
-	int deletePatientDataValue( Encounter encounter );
-	
-	int deletePatientDataValue( DataElement dataElement );
-	
-	int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );	
-	
-	PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
-	
-	Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement );
-	
-	Collection<PatientDataValue> getPatientDataValues( Encounter encounter );
-	
-	Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
-	
-	Collection<PatientDataValue> getAllPatientDataValues();
+
+    String ID = PatientDataValueService.class.getName();
+
+    void addPatientDataValue( PatientDataValue patientDataValue );
+
+    void updatePatientDataValue( PatientDataValue patientDataValue );
+
+    void deletePatientDataValue( PatientDataValue patientDataValue );
+
+    int deletePatientDataValue( Encounter encounter );
+
+    int deletePatientDataValue( DataElement dataElement );
+
+    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
+
+    PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo );
+
+    Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement );
+
+    Collection<PatientDataValue> getPatientDataValues( Encounter encounter );
+
+    Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
+
+    Collection<PatientDataValue> getAllPatientDataValues();
 
 }

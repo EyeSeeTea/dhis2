@@ -38,84 +38,109 @@ import org.hisp.dhis.patient.PatientAddressStore;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class HibernatePatientAddressStore implements PatientAddressStore 
+public class HibernatePatientAddressStore
+    implements PatientAddressStore
 {
-	
-	// -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-	private SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
 
     public void setSessionFactory( SessionFactory sessionFactory )
     {
         this.sessionFactory = sessionFactory;
     }
-    
+
     // -------------------------------------------------------------------------
     // PatientAddress
     // -------------------------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressStore#addPatientAddress(org.hisp.dhis.chis.patient.PatientAddress)
-	 */
-	public int addPatientAddress(PatientAddress patientAddress) {
-		// TODO Auto-generated method stub
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		return (Integer) session.save( patientAddress );
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressStore#addPatientAddress(org.
+     * hisp.dhis.chis.patient.PatientAddress)
+     */
+    public int addPatientAddress( PatientAddress patientAddress )
+    {
+        // TODO Auto-generated method stub
 
-	}
+        Session session = sessionFactory.getCurrentSession();
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressStore#deletePatientAddress(org.hisp.dhis.chis.patient.PatientAddress)
-	 */
-	public void deletePatientAddress(PatientAddress patientAddress) {
-		// TODO Auto-generated method stub
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.delete( patientAddress );
+        return (Integer) session.save( patientAddress );
 
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressStore#getPatientAddress(int)
-	 */
-	public PatientAddress getPatientAddress(int id) {
-		// TODO Auto-generated method stub
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		return (PatientAddress) session.get( PatientAddress.class, id );
-		
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressStore#deletePatientAddress(org
+     * .hisp.dhis.chis.patient.PatientAddress)
+     */
+    public void deletePatientAddress( PatientAddress patientAddress )
+    {
+        // TODO Auto-generated method stub
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressStore#getPatientAddress(org.hisp.dhis.chis.patient.Patient)
-	 */
-	public PatientAddress getPatientAddress(Patient patient) {
-		// TODO Auto-generated method stub
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		Criteria criteria = session.createCriteria( PatientAddress.class );
+        Session session = sessionFactory.getCurrentSession();
+
+        session.delete( patientAddress );
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressStore#getPatientAddress(int)
+     */
+    public PatientAddress getPatientAddress( int id )
+    {
+        // TODO Auto-generated method stub
+
+        Session session = sessionFactory.getCurrentSession();
+
+        return (PatientAddress) session.get( PatientAddress.class, id );
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressStore#getPatientAddress(org.
+     * hisp.dhis.chis.patient.Patient)
+     */
+    public PatientAddress getPatientAddress( Patient patient )
+    {
+        // TODO Auto-generated method stub
+
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( PatientAddress.class );
         criteria.add( Restrictions.eq( "patient", patient ) );
         criteria.add( Restrictions.eq( "preferred", true ) );
-        
-		return (PatientAddress) criteria.uniqueResult();
-	}
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressStore#updatePatientAddress(org.hisp.dhis.chis.patient.PatientAddress)
-	 */
-	public void updatePatientAddress(PatientAddress patientAddress) {
-		// TODO Auto-generated method stub
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.update( patientAddress );
-	}
+        return (PatientAddress) criteria.uniqueResult();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressStore#updatePatientAddress(org
+     * .hisp.dhis.chis.patient.PatientAddress)
+     */
+    public void updatePatientAddress( PatientAddress patientAddress )
+    {
+        // TODO Auto-generated method stub
+
+        Session session = sessionFactory.getCurrentSession();
+
+        session.update( patientAddress );
+    }
 
 }

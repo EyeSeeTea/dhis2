@@ -30,33 +30,32 @@ import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
-
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientIdentifierService 
+public interface PatientIdentifierService
 {
-	String ID = PatientIdentifierService.class.getName();
-	
-	int addPatientIdentifier( PatientIdentifier patientIdentifier );
-	
-	void deletePatientIdentifier( PatientIdentifier patientIdentifier );
-	
-	void updatePatientIdentifier( PatientIdentifier patientIdentifier );
-	
-	PatientIdentifier getPatientIdentifier( int id );
-	
-	PatientIdentifier getPatientIdentifier( Patient patient );
-	
-	PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit );
-	
-	Collection<PatientIdentifier> getAllPatientIdentifiers();
-	
-	Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier );
-	
-	Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit );
-	
-	String getNextIdentifierForOrgUnit( OrganisationUnit  orgUnit );
+    String ID = PatientIdentifierService.class.getName();
+
+    int addPatientIdentifier( PatientIdentifier patientIdentifier );
+
+    void deletePatientIdentifier( PatientIdentifier patientIdentifier );
+
+    void updatePatientIdentifier( PatientIdentifier patientIdentifier );
+
+    PatientIdentifier getPatientIdentifier( int id );
+
+    PatientIdentifier getPatientIdentifier( Patient patient );
+
+    PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit );
+
+    Collection<PatientIdentifier> getAllPatientIdentifiers();
+
+    Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier );
+
+    Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit );
+
+    String getNextIdentifierForOrgUnit( OrganisationUnit orgUnit );
 
 }

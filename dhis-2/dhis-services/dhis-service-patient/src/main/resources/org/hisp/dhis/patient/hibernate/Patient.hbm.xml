@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="org.hisp.dhis.patient.Patient" table="patient">
+		
+		<id name="id" column="patientid">
+			<generator class="native"/>
+		</id>
+		
+		<property name="firstName" type="java.lang.String" column="firstname"
+			length="50"/>
+		
+		<property name="middleName" type="java.lang.String" column="middlename"
+			length="50"/>
+		
+		<property name="lastName" type="java.lang.String" column="lastname"
+			length="50"/>
+		
+		<property name="birthDate" type="java.util.Date" column="birthdate"/>
+		
+		<property name="deathDate" type="java.util.Date" column="deathdate"/>
+		
+		<property name="isDead" type="boolean" length="1" column="isdead"
+			not-null="true"/>
+		
+		<property name="gender" column="gender" length="2"/>
+		
+		<!-- Associations -->
+		
+		<!-- bi-directional one-to-many association to PatientAddress -->
+		<set name="addresses" lazy="false" inverse="true"
+			cascade="all-delete-orphan" table="patientaddress">
+			<key not-null="true" column="patientid"/>
+			<one-to-many class="org.hisp.dhis.patient.PatientAddress"/>
+		</set>
+		
+		<!-- bi-directional one-to-many association to PatientIdentifier -->
+		<set name="identifiers" lazy="false" inverse="true"
+			cascade="all-delete-orphan" table="patientidentifier">
+			<key not-null="true" column="patientid"/>
+			<one-to-many class="org.hisp.dhis.patient.PatientIdentifier"/>
+		</set>
+		
+	</class>
+</hibernate-mapping>

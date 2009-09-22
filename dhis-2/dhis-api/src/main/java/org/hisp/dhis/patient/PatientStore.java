@@ -33,26 +33,26 @@ import java.util.Date;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientStore 
+public interface PatientStore
 {
-	String ID = PatientStore.class.getName();
-	
-	int addPatient( Patient patient );
-	
-	void deletePatient( Patient patient );
-	
-	void updatePatient( Patient patient );
-	
-	Patient getPatient( int id );
-	
-	Collection<Patient> getAllPatients();
-	
-	Collection<Patient> getAllPatients( Boolean isDead );
-	
-	Collection<Patient> getPatiensByGender( String gender );
-	
-	Collection<Patient> getPatientsByBirthDate( Date birthDate );
-	
-	Collection<Patient> getPatientsByNames( String name );
+    String ID = PatientStore.class.getName();
+
+    int addPatient( Patient patient );
+
+    void deletePatient( Patient patient );
+
+    void updatePatient( Patient patient );
+
+    Patient getPatient( int id );
+
+    Collection<Patient> getAllPatients();
+
+    Collection<Patient> getAllPatients( Boolean isDead );
+
+    Collection<Patient> getPatiensByGender( String gender );
+
+    Collection<Patient> getPatientsByBirthDate( Date birthDate );
+
+    Collection<Patient> getPatientsByNames( String name );
 
 }

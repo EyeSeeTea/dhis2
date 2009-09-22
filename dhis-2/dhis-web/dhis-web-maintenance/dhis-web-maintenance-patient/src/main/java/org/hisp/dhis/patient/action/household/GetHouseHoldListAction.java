@@ -26,12 +26,12 @@
  */
 package org.hisp.dhis.patient.action.household;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.patient.PatientIdentifier;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.household.HouseHoldService;
 
 import com.opensymphony.xwork2.Action;
@@ -41,49 +41,51 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 public class GetHouseHoldListAction
-	implements Action
+    implements Action
 {
-	
-	// -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------  
 
-	private OrganisationUnitSelectionManager selectionManager;
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
     }
 
-	private HouseHoldService houseHoldService;
-	
-	public void setHouseHoldService( HouseHoldService houseHoldService ) 
-	{
-		this.houseHoldService = houseHoldService;
-	}
-    
+    private HouseHoldService houseHoldService;
+
+    public void setHouseHoldService( HouseHoldService houseHoldService )
+    {
+        this.houseHoldService = houseHoldService;
+    }
+
     // -------------------------------------------------------------------------
     // Output
-    // -------------------------------------------------------------------------    
+    // -------------------------------------------------------------------------
 
-    
-	private Collection<PatientIdentifier> patientIdentifiers = new ArrayList<PatientIdentifier>();
+    private Collection<HouseHold> houseHolds = new ArrayList<HouseHold>();
 
-    public Collection<PatientIdentifier> getPatientIdentifiers()
+    public Collection<HouseHold> getHouseHolds()
     {
-        return patientIdentifiers;
+        return houseHolds;
     }
-    
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-    
-	public String execute()
-		throws Exception
-	{
-	
-		return SUCCESS;
-		
-	}
+
+    public String execute()
+        throws Exception
+    {
+
+        OrganisationUnit registeringUnit = selectionManager.getSelectedOrganisationUnit();
+
+        houseHolds = houseHoldService.getHouseHoldsForOrgUnit( registeringUnit );
+
+        return SUCCESS;
+
+    }
 }

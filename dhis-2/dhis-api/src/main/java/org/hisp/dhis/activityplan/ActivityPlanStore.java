@@ -37,33 +37,33 @@ import org.hisp.dhis.user.User;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface ActivityPlanStore 
+public interface ActivityPlanStore
 {
-	
-	String ID = ActivityPlanStore.class.getName();
-	
-	int addActivityPlan( ActivityPlan activityPlan );
-	
-	void updateActivityPlan( ActivityPlan activityPlan );
-	
-	void deleteActivityPlan( ActivityPlan activityPlan );
-	
-	ActivityPlan getActivityPlan( int id );	
-	
-	Collection<ActivityPlan> getActivityPlans( OrganisationUnit organisationUnit, User hew, Period period );
-	
-	Collection<ActivityPlan> getActivityPlans( User user, Period period );
-	
-	Collection<ActivityPlan> getActivityPlans( User user );
-	
-	Collection<ActivityPlan> getActivityPlansByPeriod( Period period );
-	
-	Collection<ActivityPlan> getActivityPlansByOrgUnit(  OrganisationUnit organsiationUnit );
-	
-	Collection<ActivityPlan> getActivityPlansByOrgUnitAndPeriod(  OrganisationUnit organsiationUnit, Period period );
-	
-	Collection<ActivityPlan> getActivityPlansByEncounters( Collection<Encounter> encounters );
-	
-	Collection<ActivityPlan> getAllActivityPlans();
-	
+
+    String ID = ActivityPlanStore.class.getName();
+
+    int addActivityPlan( ActivityPlan activityPlan );
+
+    void updateActivityPlan( ActivityPlan activityPlan );
+
+    void deleteActivityPlan( ActivityPlan activityPlan );
+
+    ActivityPlan getActivityPlan( int id );
+
+    Collection<ActivityPlan> getActivityPlans( OrganisationUnit organisationUnit, User hew, Period period );
+
+    Collection<ActivityPlan> getActivityPlans( User user, Period period );
+
+    Collection<ActivityPlan> getActivityPlans( User user );
+
+    Collection<ActivityPlan> getActivityPlansByPeriod( Period period );
+
+    Collection<ActivityPlan> getActivityPlansByOrgUnit( OrganisationUnit organsiationUnit );
+
+    Collection<ActivityPlan> getActivityPlansByOrgUnitAndPeriod( OrganisationUnit organsiationUnit, Period period );
+
+    Collection<ActivityPlan> getActivityPlansByEncounters( Collection<Encounter> encounters );
+
+    Collection<ActivityPlan> getAllActivityPlans();
+
 }

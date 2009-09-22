@@ -30,17 +30,17 @@ package org.hisp.dhis.patient;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientAddressService 
+public interface PatientAddressService
 {
-	String ID = PatientAddressService.class.getName();
-	
-	int addPatientAddress( PatientAddress patientAddress );
-	
-	void updatePatientAddress( PatientAddress patientAddress );
-	
-	void deletePatientAddress( PatientAddress patientAddress );
-	
-	PatientAddress getPatientAddress( int id );
-	
-	PatientAddress getPatientAddress( Patient patient );
+    String ID = PatientAddressService.class.getName();
+
+    int addPatientAddress( PatientAddress patientAddress );
+
+    void updatePatientAddress( PatientAddress patientAddress );
+
+    void deletePatientAddress( PatientAddress patientAddress );
+
+    PatientAddress getPatientAddress( int id );
+
+    PatientAddress getPatientAddress( Patient patient );
 }

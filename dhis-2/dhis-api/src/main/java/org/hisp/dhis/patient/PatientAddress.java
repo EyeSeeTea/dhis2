@@ -32,59 +32,62 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class PatientAddress 
+public class PatientAddress
 {
-	private Integer id;
-	
-	private String address1;
-	
-	private String address2;	
-	
-	private String landMark;
-	
-	private String cityVillage;
-	
-	private String stateProvince;
-	
-	private String country;		
-	
-	private String postalCode;	
-	
-	private OrganisationUnit house;
-	
-	private Boolean preferred = false;
-	
-	private Patient patient;
-	
+    private Integer id;
 
-	// -------------------------------------------------------------------------
+    private String address1;
+
+    private String address2;
+
+    private String landMark;
+
+    private String cityVillage;
+
+    private String stateProvince;
+
+    private String country;
+
+    private String postalCode;
+
+    private OrganisationUnit house;
+
+    private Boolean preferred = false;
+
+    private Patient patient;
+
+    // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
-	
-	public PatientAddress() 
-	{	
-	}
 
-	// -------------------------------------------------------------------------
+    public PatientAddress()
+    {
+    }
+
+    // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
     public int hashCode()
     {
         return id.hashCode();
     }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) 
-	{
-		if ( this == obj )
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
         {
             return true;
         }
@@ -102,164 +105,186 @@ public class PatientAddress
         final PatientAddress other = (PatientAddress) obj;
 
         return id.equals( other.getId() );
-	}
-	
-	// -------------------------------------------------------------------------
+    }
+
+    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-	/**
-	 * @return the id
-	 */
-	public Integer getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Integer getId()
+    {
+        return id;
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
 
-	/**
-	 * @return the address1
-	 */
-	public String getAddress1() {
-		return address1;
-	}
+    /**
+     * @return the address1
+     */
+    public String getAddress1()
+    {
+        return address1;
+    }
 
-	/**
-	 * @param address1 the address1 to set
-	 */
-	public void setAddress1(String address1) {
-		this.address1 = address1;
-	}
+    /**
+     * @param address1 the address1 to set
+     */
+    public void setAddress1( String address1 )
+    {
+        this.address1 = address1;
+    }
 
-	/**
-	 * @return the address2
-	 */
-	public String getAddress2() {
-		return address2;
-	}
+    /**
+     * @return the address2
+     */
+    public String getAddress2()
+    {
+        return address2;
+    }
 
-	/**
-	 * @param address2 the address2 to set
-	 */
-	public void setAddress2(String address2) {
-		this.address2 = address2;
-	}
+    /**
+     * @param address2 the address2 to set
+     */
+    public void setAddress2( String address2 )
+    {
+        this.address2 = address2;
+    }
 
-	/**
-	 * @return the countyDistrict
-	 */
-	public String getCityVillage() {
-		return cityVillage;
-	}
+    /**
+     * @return the countyDistrict
+     */
+    public String getCityVillage()
+    {
+        return cityVillage;
+    }
 
-	/**
-	 * @param countyDistrict the countyDistrict to set
-	 */
-	public void setCityVillage(String cityVillage) {
-		this.cityVillage = cityVillage;
-	}
+    /**
+     * @param countyDistrict the countyDistrict to set
+     */
+    public void setCityVillage( String cityVillage )
+    {
+        this.cityVillage = cityVillage;
+    }
 
-	/**
-	 * @return the stateProvince
-	 */
-	public String getStateProvince() {
-		return stateProvince;
-	}
+    /**
+     * @return the stateProvince
+     */
+    public String getStateProvince()
+    {
+        return stateProvince;
+    }
 
-	/**
-	 * @param stateProvince the stateProvince to set
-	 */
-	public void setStateProvince(String stateProvince) {
-		this.stateProvince = stateProvince;
-	}
+    /**
+     * @param stateProvince the stateProvince to set
+     */
+    public void setStateProvince( String stateProvince )
+    {
+        this.stateProvince = stateProvince;
+    }
 
-	/**
-	 * @return the country
-	 */
-	public String getCountry() {
-		return country;
-	}
+    /**
+     * @return the country
+     */
+    public String getCountry()
+    {
+        return country;
+    }
 
-	/**
-	 * @param country the country to set
-	 */
-	public void setCountry(String country) {
-		this.country = country;
-	}
-	
-	/**
-	 * @return the postalCode
-	 */
-	public String getPostalCode() {
-		return postalCode;
-	}
+    /**
+     * @param country the country to set
+     */
+    public void setCountry( String country )
+    {
+        this.country = country;
+    }
 
-	/**
-	 * @param postalCode the postalCode to set
-	 */
-	public void setPostalCode(String postalCode) {
-		this.postalCode = postalCode;
-	}	
+    /**
+     * @return the postalCode
+     */
+    public String getPostalCode()
+    {
+        return postalCode;
+    }
 
-	/**
-	 * @return the house
-	 */
-	public OrganisationUnit getHouse() {
-		return house;
-	}
+    /**
+     * @param postalCode the postalCode to set
+     */
+    public void setPostalCode( String postalCode )
+    {
+        this.postalCode = postalCode;
+    }
 
-	/**
-	 * @param house the house to set
-	 */
-	public void setHouse(OrganisationUnit house) {
-		this.house = house;
-	}
+    /**
+     * @return the house
+     */
+    public OrganisationUnit getHouse()
+    {
+        return house;
+    }
 
-	/**
-	 * @return the preferred
-	 */
-	public Boolean getPreferred() {
-		return preferred;
-	}
+    /**
+     * @param house the house to set
+     */
+    public void setHouse( OrganisationUnit house )
+    {
+        this.house = house;
+    }
 
-	/**
-	 * @param preferred the preferred to set
-	 */
-	public void setPreferred(Boolean preferred) {
-		this.preferred = preferred;
-	}
+    /**
+     * @return the preferred
+     */
+    public Boolean getPreferred()
+    {
+        return preferred;
+    }
 
-	/**
-	 * @return the patient
-	 */
-	public Patient getPatient() {
-		return patient;
-	}
+    /**
+     * @param preferred the preferred to set
+     */
+    public void setPreferred( Boolean preferred )
+    {
+        this.preferred = preferred;
+    }
 
-	/**
-	 * @param patient the patient to set
-	 */
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
+    /**
+     * @return the patient
+     */
+    public Patient getPatient()
+    {
+        return patient;
+    }
 
-	/**
-	 * @param landMark the landMark to set
-	 */
-	public void setLandMark(String landMark) {
-		this.landMark = landMark;
-	}
+    /**
+     * @param patient the patient to set
+     */
+    public void setPatient( Patient patient )
+    {
+        this.patient = patient;
+    }
 
-	/**
-	 * @return the landMark
-	 */
-	public String getLandMark() {
-		return landMark;
-	}
-	
+    /**
+     * @param landMark the landMark to set
+     */
+    public void setLandMark( String landMark )
+    {
+        this.landMark = landMark;
+    }
+
+    /**
+     * @return the landMark
+     */
+    public String getLandMark()
+    {
+        return landMark;
+    }
+
 }

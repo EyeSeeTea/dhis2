@@ -26,15 +26,18 @@
  */
 package org.hisp.dhis.patient;
 
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class DefaultPatientAddressService implements PatientAddressService 
+@Transactional
+public class DefaultPatientAddressService
+    implements PatientAddressService
 {
-	
-	// -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
@@ -49,49 +52,73 @@ public class DefaultPatientAddressService implements PatientAddressService
     // PatientAddress
     // -------------------------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressService#addPatientAddress(org.hisp.dhis.chis.patient.PatientAddress)
-	 */
-	public int addPatientAddress(PatientAddress patientAddress) {
-		// TODO Auto-generated method stub
-		
-		return patientAddressStore.addPatientAddress( patientAddress );
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressService#addPatientAddress(org
+     * .hisp.dhis.chis.patient.PatientAddress)
+     */
+    public int addPatientAddress( PatientAddress patientAddress )
+    {
+        // TODO Auto-generated method stub
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressService#deletePatientAddress(org.hisp.dhis.chis.patient.PatientAddress)
-	 */
-	public void deletePatientAddress(PatientAddress patientAddress) {
-		// TODO Auto-generated method stub
-		
-		patientAddressStore.deletePatientAddress( patientAddress );
-	}
+        return patientAddressStore.addPatientAddress( patientAddress );
+    }
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressService#getPatientAddress(int)
-	 */
-	public PatientAddress getPatientAddress(int id) {
-		// TODO Auto-generated method stub
-		
-		return patientAddressStore.getPatientAddress(id);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressService#deletePatientAddress
+     * (org.hisp.dhis.chis.patient.PatientAddress)
+     */
+    public void deletePatientAddress( PatientAddress patientAddress )
+    {
+        // TODO Auto-generated method stub
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressService#getPatientAddress(org.hisp.dhis.chis.patient.Patient)
-	 */
-	public PatientAddress getPatientAddress(Patient patient ) {
-		// TODO Auto-generated method stub
-		
-		return patientAddressStore.getPatientAddress( patient );
-	}
+        patientAddressStore.deletePatientAddress( patientAddress );
+    }
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.patient.PatientAddressService#updatePatientAddress(org.hisp.dhis.chis.patient.PatientAddress)
-	 */
-	public void updatePatientAddress(PatientAddress patientAddress) {
-		// TODO Auto-generated method stub
-		
-		patientAddressStore.updatePatientAddress( patientAddress );
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressService#getPatientAddress(int)
+     */
+    public PatientAddress getPatientAddress( int id )
+    {
+        // TODO Auto-generated method stub
+
+        return patientAddressStore.getPatientAddress( id );
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressService#getPatientAddress(org
+     * .hisp.dhis.chis.patient.Patient)
+     */
+    public PatientAddress getPatientAddress( Patient patient )
+    {
+        // TODO Auto-generated method stub
+
+        return patientAddressStore.getPatientAddress( patient );
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.PatientAddressService#updatePatientAddress
+     * (org.hisp.dhis.chis.patient.PatientAddress)
+     */
+    public void updatePatientAddress( PatientAddress patientAddress )
+    {
+        // TODO Auto-generated method stub
+
+        patientAddressStore.updatePatientAddress( patientAddress );
+    }
 
 }

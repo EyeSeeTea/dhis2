@@ -27,6 +27,11 @@
 package org.hisp.dhis.patient.action.household;
 
 
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -36,11 +41,64 @@ import com.opensymphony.xwork2.Action;
 public class AddHouseHoldAction
 	implements Action
 {
+	
+	// -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+	
+	private HouseHoldService houseHoldService;	
+	
+	public void setHouseHoldService( HouseHoldService houseHoldService ) 
+	{
+		this.houseHoldService = houseHoldService;
+	}
+
+	private OrganisationUnitSelectionManager selectionManager;
+
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }    
+    
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+	private String landMark;
+	
+	public void setLandMark( String landMark )
+	{
+		this.landMark = landMark;
+	}	
+	
+	private String address;
+	
+	public void setAddress( String address )
+	{
+		this.address = address;
+	}
+	
+	// -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
 	public String execute()
 		throws Exception
 	{
 	
-		return SUCCESS;
+		OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+		
+		String houseNumber = houseHoldService.getNextHouseHoldNumber( organisationUnit );
+		
+		HouseHold houseHold = new HouseHold();
+		houseHold.setHouseNumber(houseNumber);
+		houseHold.setOrganisationUnit( organisationUnit );
+		houseHold.setLandMark(landMark);
+		houseHold.setAddress(address);
+		
+		houseHoldService.addHouseHold(houseHold);		
+	
+		return SUCCESS;	
 		
 	}
 }

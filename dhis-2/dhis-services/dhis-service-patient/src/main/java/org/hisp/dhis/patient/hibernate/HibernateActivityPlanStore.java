@@ -43,11 +43,15 @@ import org.hisp.dhis.user.User;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
+/**
+ * @author abyotag_adm
+ * 
+ */
 public class HibernateActivityPlanStore
-	implements ActivityPlanStore 
+    implements ActivityPlanStore
 {
-	
-	 // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
@@ -57,130 +61,134 @@ public class HibernateActivityPlanStore
     {
         this.sessionFactory = sessionFactory;
     }
-    
+
     // -------------------------------------------------------------------------
     // ActivityPlan
     // -------------------------------------------------------------------------
-	
-	public int addActivityPlan( ActivityPlan activityPlan ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+
+    public int addActivityPlan( ActivityPlan activityPlan )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         return (Integer) session.save( activityPlan );
-	}
-	
-	public void deleteActivityPlan( ActivityPlan activityPlan ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.delete( activityPlan );
-	}
-	
-	public ActivityPlan getActivityPlan( int id ) 
-	{
-		Session session = sessionFactory.getCurrentSession();
+    }
+
+    public void deleteActivityPlan( ActivityPlan activityPlan )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        session.delete( activityPlan );
+    }
+
+    public ActivityPlan getActivityPlan( int id )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         return (ActivityPlan) session.get( ActivityPlan.class, id );
-	}
-	
-	@SuppressWarnings( "unchecked" )
-	public Collection<ActivityPlan> getActivityPlans( OrganisationUnit organisationUnit, User hew, Period period ) 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ActivityPlan> getActivityPlans( OrganisationUnit organisationUnit, User hew, Period period )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( ActivityPlan.class );
-        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );        
+        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
         criteria.add( Restrictions.eq( "hew", hew ) );
         criteria.add( Restrictions.eq( "period", period ) );
 
         return criteria.list();
-	}
+    }
 
-	@SuppressWarnings( "unchecked" )
-	public Collection<ActivityPlan> getActivityPlans( User hew, Period period ) 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    @SuppressWarnings( "unchecked" )
+    public Collection<ActivityPlan> getActivityPlans( User hew, Period period )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
-        Criteria criteria = session.createCriteria( ActivityPlan.class );        
+        Criteria criteria = session.createCriteria( ActivityPlan.class );
         criteria.add( Restrictions.eq( "hew", hew ) );
         criteria.add( Restrictions.eq( "period", period ) );
 
         return criteria.list();
-	}
-	
-	@SuppressWarnings( "unchecked" )
-	public Collection<ActivityPlan> getActivityPlansByPeriod( Period period ) 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    }
 
-        Criteria criteria = session.createCriteria( ActivityPlan.class );        
+    @SuppressWarnings( "unchecked" )
+    public Collection<ActivityPlan> getActivityPlansByPeriod( Period period )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( ActivityPlan.class );
         criteria.add( Restrictions.eq( "period", period ) );
 
         return criteria.list();
-	}
+    }
 
-	@SuppressWarnings( "unchecked" )
-	public Collection<ActivityPlan> getActivityPlansByOrgUnit( OrganisationUnit organisationUnit ) 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    @SuppressWarnings( "unchecked" )
+    public Collection<ActivityPlan> getActivityPlansByOrgUnit( OrganisationUnit organisationUnit )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
-        Criteria criteria = session.createCriteria( ActivityPlan.class );        
+        Criteria criteria = session.createCriteria( ActivityPlan.class );
         criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
 
         return criteria.list();
-	}
+    }
 
-	@SuppressWarnings( "unchecked" )
-	public Collection<ActivityPlan> getActivityPlansByOrgUnitAndPeriod( OrganisationUnit organisationUnit, Period period ) 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    @SuppressWarnings( "unchecked" )
+    public Collection<ActivityPlan> getActivityPlansByOrgUnitAndPeriod( OrganisationUnit organisationUnit, Period period )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
-        Criteria criteria = session.createCriteria( ActivityPlan.class );        
+        Criteria criteria = session.createCriteria( ActivityPlan.class );
         criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
         criteria.add( Restrictions.eq( "period", period ) );
 
         return criteria.list();
-	}
-	
-	@SuppressWarnings( "unchecked" )
-	public Collection<ActivityPlan> getActivityPlans( User hew ) 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    }
 
-        Criteria criteria = session.createCriteria( ActivityPlan.class );        
-        
+    @SuppressWarnings( "unchecked" )
+    public Collection<ActivityPlan> getActivityPlans( User hew )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( ActivityPlan.class );
+
         criteria.add( Restrictions.eq( "hew", hew ) );
-        
+
         return criteria.list();
-	}
+    }
 
-	@SuppressWarnings( "unchecked" )
-	public Collection<ActivityPlan> getAllActivityPlans() 
-	{
-		Session session = sessionFactory.getCurrentSession();      
+    @SuppressWarnings( "unchecked" )
+    public Collection<ActivityPlan> getAllActivityPlans()
+    {
+        Session session = sessionFactory.getCurrentSession();
 
-        Criteria criteria = session.createCriteria( ActivityPlan.class );        
+        Criteria criteria = session.createCriteria( ActivityPlan.class );
         return criteria.list();
-	}
+    }
 
-	public void updateActivityPlan(ActivityPlan activityPlan) 
-	{
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.update( activityPlan );
-	}
+    public void updateActivityPlan( ActivityPlan activityPlan )
+    {
+        Session session = sessionFactory.getCurrentSession();
 
-	/* (non-Javadoc)
-	 * @see org.hisp.dhis.chis.activityplan.ActivityPlanStore#getActivityPlansByEncounters()
-	 */
-	public Collection<ActivityPlan> getActivityPlansByEncounters(Collection<Encounter> encounters ) {
-		// TODO Auto-generated method stub
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		Criteria criteria = session.createCriteria( ActivityPlan.class );
-		criteria.add( Restrictions.in( "encounter",  encounters) );
-		
-		return null;
-	}
+        session.update( activityPlan );
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.hisp.dhis.chis.activityplan.ActivityPlanStore#
+     * getActivityPlansByEncounters()
+     */
+    public Collection<ActivityPlan> getActivityPlansByEncounters( Collection<Encounter> encounters )
+    {
+        // TODO Auto-generated method stub
+
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( ActivityPlan.class );
+        criteria.add( Restrictions.in( "encounter", encounters ) );
+
+        return null;
+    }
 }

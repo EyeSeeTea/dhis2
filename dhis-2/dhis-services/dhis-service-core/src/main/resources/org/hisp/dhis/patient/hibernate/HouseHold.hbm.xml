@@ -17,7 +17,7 @@
     
     <property name="landMark" column="landmark"/>
     
-    <many-to-one name="reportingUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"
+    <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"
       not-null="true" foreign-key="fk_household_organisationunitid"/>   
     
     <!-- Associations -->

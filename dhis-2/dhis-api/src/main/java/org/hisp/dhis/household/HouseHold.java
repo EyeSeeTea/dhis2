@@ -38,12 +38,18 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 public class HouseHold 
 {
 	
-	private String id;
+	public static final int HOUSE_NUMBER_INDEX_LENGTH = 5;
+	
+	public static final String HOUSE_NUMBER_FIRST_INDEX = ".00000";
+	
+	public static final String SEPARATOR = ",";
+	
+	private int id;
 	
 	private String houseNumber;
 	
-	private OrganisationUnit reportingUnit;
-	
+	private OrganisationUnit organisationUnit;	
+
 	private Set<Patient> members;
 	
 	private String address;
@@ -74,7 +80,7 @@ public class HouseHold
 		int result = 1;
 		
 		result = result * prime + houseNumber.hashCode();
-		result = result * prime + reportingUnit.hashCode();
+		result = result * prime + organisationUnit.hashCode();
 		
         return result;
     }
@@ -102,7 +108,7 @@ public class HouseHold
 
         final HouseHold other = (HouseHold) obj;
 
-        return houseNumber.equals( other.getHouseNumber() ) && reportingUnit.equals( other.getReportingUnit() );
+        return houseNumber.equals( other.getHouseNumber() ) && organisationUnit.equals( other.getOrganisationUnit() );
 	}
 
 	// -------------------------------------------------------------------------
@@ -112,14 +118,14 @@ public class HouseHold
 	/**
 	 * @return the id
 	 */
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(String id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -135,20 +141,6 @@ public class HouseHold
 	 */
 	public void setHouseNumber(String houseNumber) {
 		this.houseNumber = houseNumber;
-	}
-
-	/**
-	 * @return the reportingUnit
-	 */
-	public OrganisationUnit getReportingUnit() {
-		return reportingUnit;
-	}
-
-	/**
-	 * @param reportingUnit the reportingUnit to set
-	 */
-	public void setReportingUnit(OrganisationUnit reportingUnit) {
-		this.reportingUnit = reportingUnit;
 	}
 
 	/**
@@ -205,5 +197,20 @@ public class HouseHold
 	 */
 	public void setVisitingOrder(int visitingOrder) {
 		this.visitingOrder = visitingOrder;
+	}
+
+	/**
+	 * @param organisationUnit the organisationUnit to set
+	 */
+	public void setOrganisationUnit(OrganisationUnit organisationUnit) {
+		this.organisationUnit = organisationUnit;
+	}
+
+	/**
+	 * @return the organisationUnit
+	 */
+	public OrganisationUnit getOrganisationUnit() {
+		return organisationUnit;
 	}	
+	
 }

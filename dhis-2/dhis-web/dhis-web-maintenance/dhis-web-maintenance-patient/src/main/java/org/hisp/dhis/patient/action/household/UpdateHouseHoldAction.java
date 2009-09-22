@@ -27,6 +27,14 @@
 package org.hisp.dhis.patient.action.household;
 
 
+import java.util.Collection;
+import java.util.HashSet;
+
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
+
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -36,10 +44,81 @@ import com.opensymphony.xwork2.Action;
 public class UpdateHouseHoldAction
 	implements Action
 {
+	
+	// -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+	
+	private HouseHoldService houseHoldService;	
+	
+	public void setHouseHoldService( HouseHoldService houseHoldService ) 
+	{
+		this.houseHoldService = houseHoldService;
+	}
+	
+	private PatientService patientService;	
+	
+	public void setPatientService( PatientService patientService ) 
+	{
+		this.patientService = patientService;
+	}
+	
+	// -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+	
+	private String landMark;
+	
+	public void setLandMark( String landMark )
+	{
+		this.landMark = landMark;
+	}	
+	
+	private String address;
+	
+	public void setAddress( String address )
+	{
+		this.address = address;
+	}
+	
+	private int id;
+	
+	public void setId( int id )
+	{
+		this.id = id;
+	}
+	
+	private Collection<String> selectedList = new HashSet<String>();
+	
+	public void setSelectedList( Collection<String> selectedList )
+	{
+		this.selectedList = selectedList;
+	}
+	
+	// -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+	
 	public String execute()
 		throws Exception
 	{
 	
+		HouseHold houseHold = houseHoldService.getHouseHold(id);
+
+		houseHold.setLandMark( landMark );
+		houseHold.setAddress( address );
+		
+		for( String id : selectedList )
+		{
+			Patient patient = patientService.getPatient( Integer.parseInt( id ) );
+			
+			houseHold.getMembers().add( patient );
+		}
+		
+		houseHoldService.updateHouseHold( houseHold );
+		
 		return SUCCESS;
 		
 	}

@@ -28,7 +28,6 @@ package org.hisp.dhis.household;
 
 import java.util.Collection;
 
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
@@ -46,11 +45,9 @@ public interface HouseHoldStore
 	
 	void updateHouseHold( HouseHold houseHold );
 	
-	HouseHold getHouseHold( int id );
+	HouseHold getHouseHold( int id );	
 	
-	HouseHold getHouseHoldForAPatient( Patient patient );
-	
-	Collection<HouseHold> getHouseHoldsForAReportingUnit( OrganisationUnit organisationUnit );
+	Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit registeringUnit );
 	
 	Collection<HouseHold> getAllHouseHolds();
 

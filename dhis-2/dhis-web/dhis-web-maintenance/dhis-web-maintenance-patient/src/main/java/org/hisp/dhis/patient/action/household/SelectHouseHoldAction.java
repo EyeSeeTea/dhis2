@@ -26,6 +26,7 @@
  */
 package org.hisp.dhis.patient.action.household;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
@@ -55,6 +56,12 @@ public class SelectHouseHoldAction
     // Input/output
     // -------------------------------------------------------------------------
 
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }   
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -63,14 +70,17 @@ public class SelectHouseHoldAction
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
+        
+    	// ---------------------------------------------------------------------
         // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------                
+        // ---------------------------------------------------------------------     
+    	
+    	organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        if ( selectionManager.getSelectedOrganisationUnit() == null ) 
+        if ( organisationUnit == null ) 
         {        	
             return SUCCESS;
-        }     
+        }         
         
         return HOUSEHOLD_FORM;
     }

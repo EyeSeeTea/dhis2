@@ -13,43 +13,43 @@ import org.hisp.dhis.user.User;
  * @version $Id$
  */
 public class ActivityPlan
-	implements Serializable
+    implements Serializable
 {
-	private int id;
-	
-	private User hew;
-	
-	private OrganisationUnit organisationUnit;
-	
-	private Period period;
-	
-	private Set<Encounter> encounters;
-	
-	// -------------------------------------------------------------------------
+    private int id;
+
+    private User hew;
+
+    private OrganisationUnit organisationUnit;
+
+    private Period period;
+
+    private Set<Encounter> encounters;
+
+    // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
-	
-	public ActivityPlan()
-	{		
-	}	
-	
-	// -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------   
 
-	@Override
+    public ActivityPlan()
+    {
+    }
+
+    // -------------------------------------------------------------------------
+    // hashCode, equals and toString
+    // -------------------------------------------------------------------------
+
+    @Override
     public int hashCode()
     {
-    	int prime = 31;
+        int prime = 31;
         int result = 1;
 
-        result = result * prime + hew.hashCode();        
+        result = result * prime + hew.hashCode();
         result = result * prime + organisationUnit.hashCode();
-        result = result * prime + period.hashCode();        
-        
+        result = result * prime + period.hashCode();
+
         return result;
     }
-    
+
     @Override
     public boolean equals( Object o )
     {
@@ -70,69 +70,68 @@ public class ActivityPlan
 
         final ActivityPlan other = (ActivityPlan) o;
 
-        return hew.equals( other.getHew() ) &&        	
-        	organisationUnit.equals( other.getOrganisationUnit() ) &&
-        	period.equals( other.getPeriod() ) ;
-    }   
+        return hew.equals( other.getHew() ) && organisationUnit.equals( other.getOrganisationUnit() )
+            && period.equals( other.getPeriod() );
+    }
 
-	@Override
+    @Override
     public String toString()
     {
-        return "[" + organisationUnit + ":"  + hew + ":" + period + "]";
+        return "[" + organisationUnit + ":" + hew + ":" + period + "]";
     }
-    
-	// -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-	public User getHew() 
-	{
-		return hew;
-	}
+    public User getHew()
+    {
+        return hew;
+    }
 
-	public void setHew( User hew ) 
-	{
-		this.hew = hew;
-	}
-	
-	public Period getPeriod() 
-	{
-		return period;
-	}
-	
-	public void setPeriod( Period period ) 
-	{
-		this.period = period;
-	}
-	
-	public Set<Encounter> getEncounters() 
-	{
-		return encounters;
-	}
-	
-	public void setEncounters( Set<Encounter> encounters ) 
-	{
-		this.encounters = encounters;
-	}
-	
-	public void setId( int id ) 
-	{
-		this.id = id;
-	}
-	
-	public int getId() 
-	{
-		return id;
-	}
+    public void setHew( User hew )
+    {
+        this.hew = hew;
+    }
 
-	public OrganisationUnit getOrganisationUnit() 
-	{
-		return organisationUnit;
-	}
+    public Period getPeriod()
+    {
+        return period;
+    }
 
-	public void setOrganisationUnit(OrganisationUnit organisationUnit) 
-	{
-		this.organisationUnit = organisationUnit;
-	}	
+    public void setPeriod( Period period )
+    {
+        this.period = period;
+    }
+
+    public Set<Encounter> getEncounters()
+    {
+        return encounters;
+    }
+
+    public void setEncounters( Set<Encounter> encounters )
+    {
+        this.encounters = encounters;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
+    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        this.organisationUnit = organisationUnit;
+    }
 
 }

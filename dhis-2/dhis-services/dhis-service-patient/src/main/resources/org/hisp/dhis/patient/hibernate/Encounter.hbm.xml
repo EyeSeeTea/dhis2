@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="org.hisp.dhis.encounter.Encounter" table="encounter">
+		
+		<id name="id" column="encounterid">
+			<generator class="native"/>
+		</id>
+		
+		<many-to-one name="patient" class="org.hisp.dhis.patient.Patient"
+			column="patientid"/>
+		
+		<many-to-one name="dataSet" class="org.hisp.dhis.dataset.DataSet"
+			column="datasetid"/>
+		
+		<many-to-one name="organisationUnit"
+			class="org.hisp.dhis.organisationunit.OrganisationUnit"
+			column="organisationunitid"/>
+		
+		<property name="encounterDateTime" type="java.util.Date"
+			column="encounterdatetime" not-null="true"/>
+		
+		<property name="isExecuted" type="java.lang.Boolean">
+			<column name="isexecuted" length="1" not-null="true"/>
+		</property>
+		
+	</class>
+</hibernate-mapping>

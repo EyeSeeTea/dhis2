@@ -32,80 +32,91 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class PatientIdentifier 
-{	
-	
-	public static final int IDENTIFIER_INDEX_LENGTH = 5;
-	
-	public static final String FIRST_INDEX = ".00000";
-	
-	private int id;
+public class PatientIdentifier
+{
 
-	private Patient patient;
+    public static final int IDENTIFIER_INDEX_LENGTH = 5;
 
-	private String identifier;
-	
-	private OrganisationUnit organisationUnit;
-	
-	private Boolean preferred = false;
-	
-	// -------------------------------------------------------------------------
+    public static final String FIRST_INDEX = ".00000";
+
+    private int id;
+
+    private Patient patient;
+
+    private String identifier;
+
+    private OrganisationUnit organisationUnit;
+
+    private Boolean preferred = false;
+
+    // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public PatientIdentifier()
     {
-    }   
-    
+    }
+
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
-    // ------------------------------------------------------------------------- 
+    // -------------------------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((identifier == null) ? 0 : identifier.hashCode());
-		result = prime * result + ((organisationUnit == null) ? 0 : organisationUnit.hashCode());
-		result = prime * result + ((patient == null) ? 0 : patient.hashCode());
-		return result;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
+        result = prime * result + ((organisationUnit == null) ? 0 : organisationUnit.hashCode());
+        result = prime * result + ((patient == null) ? 0 : patient.hashCode());
+        return result;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PatientIdentifier other = (PatientIdentifier) obj;
-		if (identifier == null) {
-			if (other.identifier != null)
-				return false;
-		} else if (!identifier.equals(other.identifier))
-			return false;
-		if (organisationUnit == null) {
-			if (other.organisationUnit != null)
-				return false;
-		} else if (!organisationUnit.equals(other.organisationUnit))
-			return false;
-		if (patient == null) {
-			if (other.patient != null)
-				return false;
-		} else if (!patient.equals(other.patient))
-			return false;
-		return true;
-	}    
-	
-	@Override
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        PatientIdentifier other = (PatientIdentifier) obj;
+        if ( identifier == null )
+        {
+            if ( other.identifier != null )
+                return false;
+        }
+        else if ( !identifier.equals( other.identifier ) )
+            return false;
+        if ( organisationUnit == null )
+        {
+            if ( other.organisationUnit != null )
+                return false;
+        }
+        else if ( !organisationUnit.equals( other.organisationUnit ) )
+            return false;
+        if ( patient == null )
+        {
+            if ( other.patient != null )
+                return false;
+        }
+        else if ( !patient.equals( other.patient ) )
+            return false;
+        return true;
+    }
+
+    @Override
     public String toString()
     {
         return "[" + identifier + "]";
@@ -114,69 +125,79 @@ public class PatientIdentifier
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-	
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	/**
-	 * @return the patient
-	 */
-	public Patient getPatient() {
-		return patient;
-	}
+    /**
+     * @return the id
+     */
+    public int getId()
+    {
+        return id;
+    }
 
-	/**
-	 * @param patient the patient to set
-	 */
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
-	
-	/**
-	 * @return the identifier
-	 */
-	public String getIdentifier() {
-		return identifier;
-	}
-	
-	/**
-	 * @param identifier the identifier to set
-	 */
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId( int id )
+    {
+        this.id = id;
+    }
 
-	/**
-	 * @return the preferred
-	 */
-	public Boolean getPreferred() {
-		return preferred;
-	}
+    /**
+     * @return the patient
+     */
+    public Patient getPatient()
+    {
+        return patient;
+    }
 
-	/**
-	 * @param preferred the preferred to set
-	 */
-	public void setPreferred(Boolean preferred) {
-		this.preferred = preferred;
-	}
+    /**
+     * @param patient the patient to set
+     */
+    public void setPatient( Patient patient )
+    {
+        this.patient = patient;
+    }
 
-	public OrganisationUnit getOrganisationUnit() {
-		return organisationUnit;
-	}
+    /**
+     * @return the identifier
+     */
+    public String getIdentifier()
+    {
+        return identifier;
+    }
 
-	public void setOrganisationUnit(OrganisationUnit organisationUnit) {
-		this.organisationUnit = organisationUnit;
-	}	
-	
+    /**
+     * @param identifier the identifier to set
+     */
+    public void setIdentifier( String identifier )
+    {
+        this.identifier = identifier;
+    }
+
+    /**
+     * @return the preferred
+     */
+    public Boolean getPreferred()
+    {
+        return preferred;
+    }
+
+    /**
+     * @param preferred the preferred to set
+     */
+    public void setPreferred( Boolean preferred )
+    {
+        this.preferred = preferred;
+    }
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
+    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        this.organisationUnit = organisationUnit;
+    }
+
 }

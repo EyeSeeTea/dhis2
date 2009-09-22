@@ -27,7 +27,12 @@
 package org.hisp.dhis.patient.action.household;
 
 
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+
 import com.opensymphony.xwork2.Action;
+
+
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -36,11 +41,110 @@ import com.opensymphony.xwork2.Action;
 public class ValidateHouseHoldAction
 	implements Action
 {
+	
+	// -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------  
+
+	private OrganisationUnitSelectionManager selectionManager;
+
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }    
+  
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+	private String landMark;
+	
+	public void setLandMark( String landMark )
+	{
+		this.landMark = landMark;
+	}	
+	
+	private String address;
+	
+	public void setAddress( String address )
+	{
+		this.address = address;
+	}
+	
+	private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+	private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+    
+	// -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+    
 	public String execute()
 		throws Exception
 	{
 	
-		return SUCCESS;
+		if( selectionManager.getSelectedOrganisationUnit() == null )
+		{
+			message = i18n.getString( "please_select_a_registering_unit" );
+			
+			return INPUT;
+		}
+		
+		if( address == null )
+		{
+			message = i18n.getString( "please_specify_an_address" );
+			
+			return INPUT;
+		}
+		
+		else
+		{
+			address = address.trim();
+			
+			if( address.length() == 0 )
+			{
+				message = i18n.getString( "please_specify_an_address" );
+				
+				return INPUT;
+			}
+		}
+		
+		if( landMark == null )
+		{
+			message = i18n.getString( "please_specify_a_landmark" );
+			
+			return INPUT;
+		}
+		
+		else
+		{
+			landMark = landMark.trim();
+			
+			if( landMark.length() == 0 )
+			{
+				message = i18n.getString( "please_specify_a_landmark" );
+				
+				return INPUT;
+			}
+		}
+		
+		// ---------------------------------------------------------------------
+        // Validation success
+        // ---------------------------------------------------------------------
+		
+		message = i18n.getString( "everything_is_ok" );
+		
+        return SUCCESS;	
 		
 	}
 }
