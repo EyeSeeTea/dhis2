@@ -126,7 +126,7 @@ implements Action
         
         @SuppressWarnings("unused")
 		Collection<OrganisationUnit> pathNodesL = findPathNodes( roots, locked );
-
+        
         // ---------------------------------------------------------------------
         // Get the children of the roots
         // ---------------------------------------------------------------------

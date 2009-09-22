@@ -98,11 +98,10 @@ implements Action
                 throw new RuntimeException( "OrganisationUnit with id " + id + " doesn't exist" );
             }
 
-            lockedUnits = new HashSet<OrganisationUnit>( selectionTreeManager.getLockOnSelectedOrganisationUnits() );
+            lockedUnits = new HashSet<OrganisationUnit>( selectionTreeManager.getLockOnSelectedOrganisationUnits().size() );
             lockedUnits = selectionTreeManager.getLockOnSelectedOrganisationUnits();           
             lockedUnits.remove( unit );           
             selectionTreeManager.setLockOnSelectedOrganisationUnits( lockedUnits );
-            //System.out.println("lockedUnits size in RemoveLockSelectedOrganisationUnitAction : " + lockedUnits.size());           
         }
         catch ( Exception e )
         {

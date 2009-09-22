@@ -51,6 +51,8 @@ import com.opensymphony.xwork2.Action;
 public class UnselectLevelAction 
     implements Action
 {
+	private static final int FIRST_LEVEL = 1;
+	
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -147,52 +149,71 @@ public class UnselectLevelAction
 
     public String execute()
     throws Exception
-    {       
-        selectionTreeManager.clearSelectedOrganisationUnits();
+	{
+	    selectionTreeManager.clearSelectedOrganisationUnits();
         selectionTreeManager.clearLockOnSelectedOrganisationUnits();
-        
-        Period period = new Period();       
-        period = periodService.getPeriod(periodId.intValue());
-        
-        DataSet dataSet = new DataSet();        
-        dataSet = dataSetService.getDataSet(selectedLockedDataSetId.intValue());                  
-        
-        DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );      
-        selectionTreeManager.setSelectedOrganisationUnits( convert( dataSet.getSources() ) );
-        
-        if( dataSetLock.getSources() == null )
-        {
-            selectionTreeManager.setSelectedOrganisationUnits( selectionTreeManager.getSelectedOrganisationUnits() );
-            selectionTreeManager.setLockOnSelectedOrganisationUnits( convert( dataSetLock.getSources() ) );
-        }
-        else
-        {  
-            Collection<OrganisationUnit> tt = organisationUnitService.getOrganisationUnitsAtLevel( level );
-            Set<OrganisationUnit> temp = new HashSet<OrganisationUnit>(convert( dataSetLock.getSources() ));            
-            selectionTreeManager.clearSelectedOrganisationUnits();
-            selectionTreeManager.clearLockOnSelectedOrganisationUnits();
-            
-            selectionTreeManager.setSelectedOrganisationUnits( convert( dataSet.getSources() ) );
-            temp.removeAll( tt );
-            selectionTreeManager.setLockOnSelectedOrganisationUnits( temp ) ;
-        }
-        
-        return SUCCESS;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-    
-    private Set<OrganisationUnit> convert( Collection<Source> sources )
-    {
-        Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
-        
-        for ( Source source : sources )
-        {               
-            organisationUnits.add( (OrganisationUnit) source );
-        }       
-        
-        return organisationUnits;
-    }  
+		
+	    Period period = new Period();      
+	    period = periodService.getPeriod(periodId.intValue());
+	   
+	    DataSet dataSet = new DataSet();      
+	    dataSet = dataSetService.getDataSet(selectedLockedDataSetId.intValue());                 
+	    
+	    Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
+	    DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
+	    Set<OrganisationUnit> selectedUnits = new HashSet<OrganisationUnit>(selectionTreeManager.getSelectedOrganisationUnits().size());
+	
+	    for ( OrganisationUnit rootUnit : rootUnits )
+	    {         
+	        selectLevel( rootUnit, FIRST_LEVEL, selectedUnits );        
+	    }
+	               
+	    selectionTreeManager.setSelectedOrganisationUnits( convert( dataSet.getSources() ) );
+	    
+	    if( dataSetLock.getSources() == null )
+	    {
+	        selectionTreeManager.setLockOnSelectedOrganisationUnits( selectedUnits );
+	    }
+	    else
+	    {  
+	        dataSetLock.getSources().addAll( selectedUnits );
+	        selectionTreeManager.setLockOnSelectedOrganisationUnits( convert( dataSetLock.getSources() ) ) ;
+	    }
+	        
+	    return SUCCESS;
+	}
+	
+	// -------------------------------------------------------------------------
+	// Supportive methods
+	// -------------------------------------------------------------------------
+	
+	private Set<OrganisationUnit> convert( Collection<Source> sources )
+	{
+	    Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+	    
+	    for ( Source source : sources )
+	    {               
+	        organisationUnits.add( (OrganisationUnit) source );
+	    }       
+	    
+	    return organisationUnits;
+	}  
+	 
+	private void selectLevel( OrganisationUnit orgUnit, int currentLevel, Collection<OrganisationUnit> selectedUnits )
+	{
+	    if ( currentLevel == level )
+	    {
+	        if( selectionTreeManager.getSelectedOrganisationUnits().contains( orgUnit ))
+	        {
+	            selectedUnits.remove( orgUnit );
+	        }
+	    }
+	    else
+	    {
+	        for ( OrganisationUnit child : orgUnit.getChildren() )
+	        {
+	            selectLevel( child, currentLevel + 1, selectedUnits );
+	        }
+	    }
+	}
 }
