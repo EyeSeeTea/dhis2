@@ -26,7 +26,6 @@
  */
 package org.hisp.dhis.patient.action.household;
 
-
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -34,13 +33,13 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 public class NoAction
-	implements Action
+    implements Action
 {
-	public String execute()
-		throws Exception
-	{
-	
-		return SUCCESS;
-		
-	}
+    public String execute()
+        throws Exception
+    {
+
+        return SUCCESS;
+
+    }
 }

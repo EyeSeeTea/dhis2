@@ -20,11 +20,7 @@
 		<dependency>
 			<groupId>org.hisp.dhis</groupId>
 			<artifactId>dhis-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hisp.dhis</groupId>
-			<artifactId>dhis-service-jdbc</artifactId>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>org.hisp.dhis</groupId>
 			<artifactId>dhis-support-hibernate</artifactId>
@@ -40,26 +36,7 @@
 		<dependency>
 			<groupId>org.hisp.dhis</groupId>
 			<artifactId>dhis-service-user-hibernate</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hisp.dhis</groupId>
-			<artifactId>dhis-i18n-db</artifactId>
-		</dependency>
-		
-		<!-- Other -->
-		
-		<dependency>
-			<groupId>jep</groupId>
-			<artifactId>jep</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-		</dependency>
+		</dependency>	
 		
 	</dependencies>
 </project>

@@ -33,9 +33,9 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.encounter.Encounter;
-import org.hisp.dhis.patientdatavalue.PatientDataValue;
-import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
+import org.hisp.dhis.patient.Encounter;
+import org.hisp.dhis.patient.PatientDataValue;
+import org.hisp.dhis.patient.PatientDataValueStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 

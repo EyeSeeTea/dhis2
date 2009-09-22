@@ -33,9 +33,9 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.encounter.Encounter;
-import org.hisp.dhis.encounter.EncounterStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Encounter;
+import org.hisp.dhis.patient.EncounterStore;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.dataset.DataSet;
 

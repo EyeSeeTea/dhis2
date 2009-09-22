@@ -32,9 +32,6 @@ import java.util.Date;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.encounter.Encounter;
-import org.hisp.dhis.encounter.EncounterService;
-import org.hisp.dhis.encounter.EncounterStore;
 import org.springframework.transaction.annotation.Transactional;
 
 /**

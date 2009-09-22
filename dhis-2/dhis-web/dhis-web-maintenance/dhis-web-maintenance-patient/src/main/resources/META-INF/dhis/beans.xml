@@ -68,15 +68,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.household.HouseHoldService"/>
 	<property name="patientService"
       ref="org.hisp.dhis.patient.HouseHoldService"/>
-  </bean> 
-  
-  <bean id="org.hisp.dhis.patient.action.household.SearchHouseHoldMembersAction"
-    class="org.hisp.dhis.patient.action.household.SearchHouseHoldMembersAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>
-  </bean>
+  </bean>  
   
 </beans>

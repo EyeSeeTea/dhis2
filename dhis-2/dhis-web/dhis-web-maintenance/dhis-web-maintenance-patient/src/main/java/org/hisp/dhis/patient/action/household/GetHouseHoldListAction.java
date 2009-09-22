@@ -31,8 +31,8 @@ import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldService;
+import org.hisp.dhis.patient.HouseHold;
+import org.hisp.dhis.patient.HouseHoldService;
 
 import com.opensymphony.xwork2.Action;
 

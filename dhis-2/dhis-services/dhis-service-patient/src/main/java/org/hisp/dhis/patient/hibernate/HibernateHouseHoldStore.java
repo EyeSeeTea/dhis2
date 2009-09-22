@@ -32,9 +32,9 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.HouseHold;
+import org.hisp.dhis.patient.HouseHoldStore;
 
 /**
  * @author Abyot Asalefew Gizaw

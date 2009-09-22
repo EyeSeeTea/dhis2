@@ -31,9 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldService;
-import org.hisp.dhis.household.HouseHoldStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.springframework.transaction.annotation.Transactional;
 

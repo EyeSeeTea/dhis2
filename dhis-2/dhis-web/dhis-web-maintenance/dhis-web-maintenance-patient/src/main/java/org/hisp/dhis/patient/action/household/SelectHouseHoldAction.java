@@ -35,22 +35,22 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SelectHouseHoldAction 
-	implements Action
+public class SelectHouseHoldAction
+    implements Action
 {
-	
-	private static final String HOUSEHOLD_FORM = "householdform";
+
+    private static final String HOUSEHOLD_FORM = "householdform";
 
     // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
+    // -------------------------------------------------------------------------
 
-	private OrganisationUnitSelectionManager selectionManager;
+    private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
-    }    
+    }
 
     // -------------------------------------------------------------------------
     // Input/output
@@ -61,7 +61,7 @@ public class SelectHouseHoldAction
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
-    }   
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -70,18 +70,18 @@ public class SelectHouseHoldAction
     public String execute()
         throws Exception
     {
-        
-    	// ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------     
-    	
-    	organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        if ( organisationUnit == null ) 
-        {        	
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
+
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        if ( organisationUnit == null )
+        {
             return SUCCESS;
-        }         
-        
+        }
+
         return HOUSEHOLD_FORM;
     }
 }

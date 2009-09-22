@@ -28,10 +28,6 @@ package org.hisp.dhis.patient;
 
 import java.util.Collection;
 
-import org.hisp.dhis.encounter.Encounter;
-import org.hisp.dhis.patientdatavalue.PatientDataValue;
-import org.hisp.dhis.patientdatavalue.PatientDataValueService;
-import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.springframework.transaction.annotation.Transactional;

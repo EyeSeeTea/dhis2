@@ -26,9 +26,8 @@
  */
 package org.hisp.dhis.patient.action.household;
 
-
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldService;
+import org.hisp.dhis.patient.HouseHold;
+import org.hisp.dhis.patient.HouseHoldService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -37,40 +36,40 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 public class RemoveHouseHoldAction
-	implements Action
+    implements Action
 {
-	
-	// -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-	
-	private HouseHoldService houseHoldService;	
-	
-	public void setHouseHoldService( HouseHoldService houseHoldService ) 
-	{
-		this.houseHoldService = houseHoldService;
-	}
-	
-	// -------------------------------------------------------------------------
+
+    private HouseHoldService houseHoldService;
+
+    public void setHouseHoldService( HouseHoldService houseHoldService )
+    {
+        this.houseHoldService = houseHoldService;
+    }
+
+    // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
-	
-	private int id;
-	
-	public void setId( int id )
-	{
-		this.id = id;
-	}
-	
-	public String execute()
-		throws Exception
-	{		
-		
-		HouseHold houseHold = houseHoldService.getHouseHold( id );	
-		
-		houseHoldService.deleteHouseHold( houseHold );
-	
-		return SUCCESS;		
-		
-	}
+
+    private int id;
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public String execute()
+        throws Exception
+    {
+
+        HouseHold houseHold = houseHoldService.getHouseHold( id );
+
+        houseHoldService.deleteHouseHold( houseHold );
+
+        return SUCCESS;
+
+    }
 }

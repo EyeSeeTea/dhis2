@@ -26,9 +26,9 @@
  */
 package org.hisp.dhis.patient.action.household;
 
-import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.patient.HouseHoldService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -36,61 +36,61 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddHouseHoldFormAction 
-	implements Action 
+public class ShowAddHouseHoldFormAction
+    implements Action
 {
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
+    // -------------------------------------------------------------------------
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
+    // -------------------------------------------------------------------------
 
-	private OrganisationUnitSelectionManager selectionManager;
+    private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
-    }     
-    
+    }
+
     private HouseHoldService houseHoldService;
-    
+
     public void setHouseHoldService( HouseHoldService houseHoldService )
     {
-    	this.houseHoldService = houseHoldService;
+        this.houseHoldService = houseHoldService;
     }
 
     // -------------------------------------------------------------------------
     // Input/Output
-    // -------------------------------------------------------------------------    
+    // -------------------------------------------------------------------------
 
     private OrganisationUnit organisationUnit;
 
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
-    }    
-    
-    private String houseNumber;    
-    
-	public String getHouseNumber() 
-	{
-		return houseNumber;
-	}   
+    }
+
+    private String houseNumber;
+
+    public String getHouseNumber()
+    {
+        return houseNumber;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-	public String execute()        
-    {        
-    	
-		organisationUnit = selectionManager.getSelectedOrganisationUnit();
-    	
-    	houseNumber = houseHoldService.getNextHouseHoldNumber( organisationUnit );   	
-    	
-    	return SUCCESS;
-    	
+    public String execute()
+    {
+
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        houseNumber = houseHoldService.getNextHouseHoldNumber( organisationUnit );
+
+        return SUCCESS;
+
     }
 }

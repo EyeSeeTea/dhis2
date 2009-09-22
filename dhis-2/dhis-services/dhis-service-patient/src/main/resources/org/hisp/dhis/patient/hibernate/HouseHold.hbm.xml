@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="org.hisp.dhis.household.HouseHold" table="household">
+	<class name="org.hisp.dhis.patient.HouseHold" table="household">
 		
 		<id name="id" column="householdid">
 			<generator class="native"/>
