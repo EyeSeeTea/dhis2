@@ -24,13 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.patient.action.patient;
 
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAddressService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.i18n.I18nFormat;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,6 +39,7 @@ import com.opensymphony.xwork2.Action;
 public class UpdatePatientAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -58,13 +57,7 @@ public class UpdatePatientAction
     {
         this.patientService = patientService;
     }
-
-    private PatientAddressService patientAddressService;
-
-    public void setPatientAddressService( PatientAddressService patientAddressService )
-    {
-        this.patientAddressService = patientAddressService;
-    }
+   
 
     // -------------------------------------------------------------------------
     // Input - Id
@@ -120,6 +113,7 @@ public class UpdatePatientAction
         this.gender = gender;
     }
 
+    /*
     // -------------------------------------------------------------------------
     // Input - address
     // -------------------------------------------------------------------------
@@ -171,7 +165,7 @@ public class UpdatePatientAction
     public void setPostalCode( String postalCode )
     {
         this.postalCode = postalCode;
-    }
+    }*/
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -180,6 +174,7 @@ public class UpdatePatientAction
     public String execute()
         throws Exception
     {
+
         // ---------------------------------------------------------------------
         // Update patient
         // ---------------------------------------------------------------------

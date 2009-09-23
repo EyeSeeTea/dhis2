@@ -41,8 +41,8 @@
 		<!-- Other -->
 
 		<dependency>
-		  <groupId>jep</groupId>
-		  <artifactId>jep</artifactId>
+		  <groupId>commons-logging</groupId>
+		  <artifactId>commons-logging</artifactId>
 		</dependency>
 		<dependency>
 	      <groupId>commons-collections</groupId>

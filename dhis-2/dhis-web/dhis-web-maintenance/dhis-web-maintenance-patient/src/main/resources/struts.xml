@@ -104,7 +104,7 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>            
     </action>    
         
-    <action name="searchPatient" class="org.hisp.dhis.paient.action.patient.SearchPatientAction">
+    <action name="searchPatient" class="org.hisp.dhis.patient.action.patient.SearchPatientAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/listPatient.vm</param>
@@ -112,19 +112,19 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>            
     </action> 
     
-    <action name="getPatient" class="org.hisp.dhis.paient.action.patient.GetPatientAction">
-      <result name="success" type="velocity-xml">/dhis-web-chis-registration/responsePatient.vm</result>
+    <action name="getPatient" class="org.hisp.dhis.patient.action.patient.GetPatientAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responsePatient.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
     
-    <action name="removePatient" class="org.hisp.dhis.paient.action.patient.RemovePatientAction">
+    <action name="removePatient" class="org.hisp.dhis.patient.action.patient.RemovePatientAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
       <param name="requiredAuthorities">F_PATIENT_DELETE</param>      
     </action>
     
-    <action name="addPatient" class="org.hisp.dhis.paient.action.patient.AddPatientAction">
+    <action name="addPatient" class="org.hisp.dhis.patient.action.patient.AddPatientAction">
       <result name="success" type="redirect">patient.action</result>
       <param name="requiredAuthorities">F_PATIENT_ADD</param>
     </action>
@@ -138,7 +138,7 @@
       <param name="requiredAuthorities">F_PATIENT_ADD</param>      
     </action>           
    
-    <action name="showUpdatePatientForm" class="org.hisp.dhis.paient.action.patient.ShowUpdatePatientFormAction">
+    <action name="showUpdatePatientForm" class="org.hisp.dhis.patient.action.patient.GetPatientAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updatePatientForm.vm</param>
@@ -148,13 +148,13 @@
     </action>
     
     <action name="updatePatient"
-      class="org.hisp.dhis.paient.action.patient.UpdatePatientAction">
+      class="org.hisp.dhis.patient.action.patient.UpdatePatientAction">
       <result name="success" type="redirect">patient.action</result>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>
     </action>
     
     <action name="validatePatient"
-      class="org.hisp.dhis.paient.action.patient.ValidatePatientAction">
+      class="org.hisp.dhis.patient.action.patient.ValidatePatientAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
@@ -162,7 +162,7 @@
     </action>
     
     <action name="validateSearchPatient"
-      class="org.hisp.dhis.paient.action.patient.ValidateSearchPatientAction">
+      class="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>

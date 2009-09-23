@@ -42,7 +42,7 @@ public class RemovePatientAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+                           
     private PatientService patientService;
 
     public void setPatientService( PatientService patientService )

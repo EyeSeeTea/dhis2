@@ -19,7 +19,6 @@
           <col>
           <col>
           <col>
-          <col>
           <col width="20">
           <col width="20">
           <col width="20">
@@ -37,8 +36,7 @@
           <tr>
             <th>$i18n.getString( "first_name" )</th>
             <th>$i18n.getString( "middle_name" )</th>
-            <th>$i18n.getString( "last_name" )</th>
-            <th>$i18n.getString( "age" )</th>
+            <th>$i18n.getString( "last_name" )</th>            
             <th>$i18n.getString( "gender" )</th>
             <th>$i18n.getString( "date_of_birth" )</th>            
             <th colspan="4">$i18n.getString( "operations" )</th>
@@ -50,39 +48,36 @@
           #foreach( $patient in $patients )
           	<tr #alternate( $mark )>
 				<td>			
-					$encoder.htmlEncode( $patient.givenName )
+					$encoder.htmlEncode( $patient.firstName )
 				</td>
 				<td>			
 					$encoder.htmlEncode( $patient.middleName )
 				</td>
 				<td>			
-					$encoder.htmlEncode( $patient.familyName )
-				</td>
-				<td>			
-					$encoder.htmlEncode( $patient.age )
-				</td>
+					$encoder.htmlEncode( $patient.lastName )
+				</td>				
 				<td>			
 					$encoder.htmlEncode( $patient.gender )
 				</td>
 				<td>			
-					$encoder.htmlEncode( $patient.birthdate )
+					$encoder.htmlEncode( $patient.birthDate )
 				</td>
 				
 				<td style="text-align:center"#alternate( $mark )>
-                  ##<a href="showMemberShipForm.action?id=$patient.patientId" title="$i18n.getString( "manage_membership" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_membership" )"></a>
+                  ##<a href="showMemberShipForm.action?id=$patient.id" title="$i18n.getString( "manage_membership" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_membership" )"></a>
                   <a href="#" title="$i18n.getString( "manage_membership" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_membership" )"></a>
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>
-                  <a href="showUpdatePatientForm.action?id=$patient.patientId" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
+                  <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
                 </td>                
  
                 <td style="text-align:center"#alternate( $mark )>
-                  <a href="javascript:removePatient( '$patient.patientId', '$encoder.jsEncode( $patient.givenName )', '$encoder.jsEncode( $patient.familyName )' )" title="$i18n.getString( "remove" )"><img src="../images/delete.png" alt="$i18n.getString( "remove" )"></a>
+                  <a href="javascript:removePatient( '$patient.id', '$encoder.jsEncode( $patient.firstName )', '$encoder.jsEncode( $patient.lastName )' )" title="$i18n.getString( "remove" )"><img src="../images/delete.png" alt="$i18n.getString( "remove" )"></a>
                 </td>            
                 
                 <td style="text-align:center"#alternate( $mark )>
-                  <a href="javascript:showPatientDetails( $patient.patientId )" title="$i18n.getString( "show_details" )"><img src="../images/information.png" alt="$i18n.getString( "show_details" )"></a>
+                  <a href="javascript:showPatientDetails( $patient.id )" title="$i18n.getString( "show_details" )"><img src="../images/information.png" alt="$i18n.getString( "show_details" )"></a>
                 </td>
 				
 			</tr>
@@ -101,13 +96,12 @@
 				<div style="float:right">
 					<a href="javascript:hideDetails()" title="$i18n.getString( "hide_details" )"><img src="../images/close.png" alt="$i18n.getString( "hide_details" )"></a>
 				</div>				
-				<p><label>$i18n.getString( "id" ):</label><br><span id="idField"></span></p>
-				<p><label>$i18n.getString( "house_number" ):</label><br><span id="houseNumberField"></span></p>
-				<p><label>$i18n.getString( "registering_unit" ):</label><br><span id="registeringUnitField"></span></p>
-				<p><label>$i18n.getString( "address" ):</label><br><span id="addressField"></span></p>
-				<p><label>$i18n.getString( "land_mark" ):</label><br><span id="landMarkField"></span></p>
-				<p><label>$i18n.getString( "no_of_house_hold_members" ):</label><br><span id="memberCountField"></span></p>
-			</div>
+				    <p><label>$i18n.getString( "id" ):</label><br><span id="idField"></span></p>
+				    <p><label>$i18n.getString( "firstName" ):</label><br><span id="firstNameField"></span></p>				
+				    <p><label>$i18n.getString( "middleName" ):</label><br><span id="middleNameField"></span></p>
+				    <p><label>$i18n.getString( "lastName" ):</label><br><span id="lastNameField"></span></p>
+				    <p><label>$i18n.getString( "identifier" ):</label><br><span id="identifierField"></span></p>
+			    </div>
 
 		</td>
   </tr>
@@ -116,8 +110,9 @@
 <span id="message"></span>
 
 <script type="text/javascript">
-	var i18n_confirm_death = '$encoder.jsEscape( $i18n.getString( "confirm_death_patient" ) , "'" )';
+	var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete_patient" ) , "'" )';
 	var i18n_adding_patient_failed = '$encoder.jsEscape( $i18n.getString( "adding_patient_failed" ), "'")';
 	var i18n_updating_patient_failed = '$encoder.jsEscape( $i18n.getString( "updating_patient_failed" ), "'")';	
 	var i18n_none = '$encoder.jsEscape( $i18n.getString( "none" ), "'")';
 </script>
+

@@ -61,7 +61,7 @@ function patientReceived( patientElement )
 
 function removePatient( patientId, firstName, lastName )
 {
-    var result = window.confirm( i18n_confirm_death + '\n\n' + lastName + ',' + firstName );
+    var result = window.confirm( i18n_confirm_delete + '\n\n' + lastName + ',' + firstName );
     
     if ( result )
     {
@@ -134,9 +134,7 @@ function searchValidationCompleted( messageElement )
 // -----------------------------------------------------------------------------
 
 function validateAddPatient()
-{	
-	
-	window.alert( 'am called ... validateAddPatient' );
+{
 	
 	var url = 'validatePatient.action?' +
 			'identifier=' + getFieldValue( 'identifier' ) +

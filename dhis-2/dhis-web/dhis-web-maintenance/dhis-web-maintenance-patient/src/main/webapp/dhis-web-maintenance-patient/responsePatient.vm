@@ -9,6 +9,3 @@
 	<identifier>$!encoder.xmlEncode( $patientIdentifier.identifier )</identifier>
 </patientIdentifier>
 
-<patientAddress>
-	<house>$!encoder.xmlEncode( $patientAddress.house.name )</house>
-</patientAddress>

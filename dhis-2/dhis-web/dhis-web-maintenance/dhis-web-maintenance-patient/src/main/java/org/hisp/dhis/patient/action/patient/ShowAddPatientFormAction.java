@@ -64,7 +64,7 @@ public class ShowAddPatientFormAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input/Output
     // -------------------------------------------------------------------------
 
     private PatientIdentifier patientIdentifier;
@@ -82,10 +82,6 @@ public class ShowAddPatientFormAction
     }
 
     // -------------------------------------------------------------------------
-    // Input
-    // --------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
@@ -93,7 +89,7 @@ public class ShowAddPatientFormAction
     {
         OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );        
+        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );
 
         return SUCCESS;
     }

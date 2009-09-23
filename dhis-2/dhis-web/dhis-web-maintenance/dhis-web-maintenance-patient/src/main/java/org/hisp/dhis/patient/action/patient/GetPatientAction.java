@@ -24,10 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.patient.action.patient;
 
-import org.hisp.dhis.patient.PatientAddressService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
 
@@ -40,6 +40,7 @@ import com.opensymphony.xwork2.Action;
 public class GetPatientAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -56,19 +57,33 @@ public class GetPatientAction
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
-    }
+    }    
+   
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
 
-    private PatientAddressService patientAddressService;
+    private int id;
 
-    public void setPatientAddressService( PatientAddressService patientAddressService )
+    public void setId( int id )
     {
-        this.patientAddressService = patientAddressService;
+        this.id = id;
     }
 
-    // -------------------------------------------------------------------------
-    // Input/output
-    // -------------------------------------------------------------------------
+    private Patient patient;
 
+    public Patient getPatient()
+    {
+        return patient;
+    }
+                              
+    private PatientIdentifier patientIdentifier;
+    
+    public PatientIdentifier getPatientIdentifier()
+    {
+        return patientIdentifier;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -76,6 +91,11 @@ public class GetPatientAction
     public String execute()
         throws Exception
     {
+
+        patient = patientService.getPatient( id );  
+        
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
+        
         return SUCCESS;
     }
 }
