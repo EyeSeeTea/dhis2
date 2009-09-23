@@ -1,7 +1,7 @@
 
 <h2>$i18n.getString( "population_register" )&nbsp;</h2>
 <ul>
-	<li><a href="individual.action">$i18n.getString( "individual_register" )&nbsp;</a></li>
+	<li><a href="patient.action">$i18n.getString( "patient_register" )&nbsp;</a></li>
 	<li><a href="household.action">$i18n.getString( "house_hold_register" )&nbsp;</a></li>
 </ul>
 

@@ -26,8 +26,6 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
@@ -37,12 +35,11 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddPatientFormAction
+public class SelectPatientAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+
+    private static final String PATIENT_FORM = "patientform";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -55,46 +52,36 @@ public class ShowAddPatientFormAction
         this.selectionManager = selectionManager;
     }
 
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }
-
     // -------------------------------------------------------------------------
-    // Output
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private PatientIdentifier patientIdentifier;
+    private OrganisationUnit organisationUnit;
 
-    public PatientIdentifier getPatientIdentifier()
+    public OrganisationUnit getOrganisationUnit()
     {
-        return patientIdentifier;
+        return organisationUnit;
     }
-
-    private String identifier;
-
-    public String getIdentifier()
-    {
-        return identifier;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // --------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
 
-        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );        
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        return SUCCESS;
+        if ( organisationUnit == null )
+        {
+            return SUCCESS;
+        }
 
+        return PATIENT_FORM;
     }
+
 }

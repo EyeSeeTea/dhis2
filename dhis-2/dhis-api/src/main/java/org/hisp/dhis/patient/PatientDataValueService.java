@@ -24,23 +24,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient.action.patient;
+package org.hisp.dhis.patient;
 
+import java.util.Collection;
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class NoAction
-	implements Action
+public interface PatientDataValueService
 {
-	public String execute()
-		throws Exception
-	{
-	
-		return SUCCESS;
-		
-	}
+
+    String ID = PatientDataValueService.class.getName();
+
+    void addPatientDataValue( PatientDataValue patientDataValue );
+
+    void updatePatientDataValue( PatientDataValue patientDataValue );
+
+    void deletePatientDataValue( PatientDataValue patientDataValue );
+
+    int deletePatientDataValue( Encounter encounter );
+
+    int deletePatientDataValue( DataElement dataElement );
+
+    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
+
+    PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo );
+
+    Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement );
+
+    Collection<PatientDataValue> getPatientDataValues( Encounter encounter );
+
+    Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
+
+    Collection<PatientDataValue> getAllPatientDataValues();
+
 }

@@ -61,6 +61,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="org.hisp.dhis.patient.PatientService"
 		class="org.hisp.dhis.patient.DefaultPatientService">
 		<property name="patientStore" ref="org.hisp.dhis.patient.PatientStore"/>
+		<property name="patientIdentifierService"
+            ref="org.hisp.dhis.patient.PatientIdentifierService"/>
 	</bean>
 	
 	<bean id="org.hisp.dhis.patient.PatientAddressService"

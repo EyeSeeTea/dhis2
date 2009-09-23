@@ -1,6 +1,6 @@
-<h3>$i18n.getString( "individual_register" )</h3>
+<h3>$i18n.getString( "patient_register" )</h3>
 
-<form id="selectIndividual" name="selectIndividual" method="post" action="individual.action">
+<form id="selectPatient" name="selectPatient" method="post" action="patient.action">
 
 <table>
 	

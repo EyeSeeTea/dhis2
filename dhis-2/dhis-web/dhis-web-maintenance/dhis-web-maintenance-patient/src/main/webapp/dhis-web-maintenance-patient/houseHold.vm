@@ -1,5 +1,5 @@
 
-#parse( "/dhis-web-chis-registration/selectHouseHold.vm" )
+#parse( "/dhis-web-maintenance-patient/selectHouseHold.vm" )
 
 <table class="mainPageTable">
   <tr>

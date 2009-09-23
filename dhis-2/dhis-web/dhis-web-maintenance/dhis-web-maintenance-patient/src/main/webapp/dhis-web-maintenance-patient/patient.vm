@@ -1,7 +1,7 @@
 
-#parse( "/dhis-web-chis-registration/selectIndividual.vm" )
+#parse( "/dhis-web-maintenance-patient/selectPatient.vm" )
 
-<form id="searchIndividualForm" action="searchIndividual.action" method="post" onsubmit="return validateSearchIndividual()">
+<form id="searchPatientForm" action="searchPatient.action" method="post" onsubmit="return validateSearchPatient()">
 
 <table>	
 	<tr>
@@ -30,7 +30,7 @@
 	</tr>
 	<tr>
 		<td>&nbsp;</td>
-		<input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddIndividualForm.action'">
+		<input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddPatientForm.action'">
 	</tr>
   	  	
 </table>

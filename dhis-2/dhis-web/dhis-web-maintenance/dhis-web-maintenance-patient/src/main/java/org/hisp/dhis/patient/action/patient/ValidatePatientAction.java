@@ -30,6 +30,7 @@ import java.util.Date;
 
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -37,58 +38,65 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ValidatePatientAction 
-	implements Action
-{   
+public class ValidatePatientAction
+    implements Action
+{
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------	
-	
-	private I18nFormat format;
-	
-	public void setFormat( I18nFormat format )
+    // -------------------------------------------------------------------------
+
+    private OrganisationUnitSelectionManager selectionManager;
+
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
     {
         this.format = format;
     }
-	
-	// -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Input
-    // -------------------------------------------------------------------------	
-	
-	private String firstName;
-	
-	public void setFirstName( String firstName ) 
-	{
-		this.firstName = firstName;
-	}
-	
-	private String middleName;
-	
-	public void setMiddleName( String middleName )  
-	{
-		this.middleName = middleName;
-	}
-	
-	private String lastName;
-	
-	public void setLastName( String lastName ) 
-	{
-		this.lastName = lastName;
-	}	
+    // -------------------------------------------------------------------------
 
-	private String birthDate;   
+    private String firstName;
 
-	public void setBirthDate( String birthDate ) 
-	{
-		this.birthDate = birthDate;
-	}
-	
-	// -------------------------------------------------------------------------
+    public void setFirstName( String firstName )
+    {
+        this.firstName = firstName;
+    }
+
+    private String middleName;
+
+    public void setMiddleName( String middleName )
+    {
+        this.middleName = middleName;
+    }
+
+    private String lastName;
+
+    public void setLastName( String lastName )
+    {
+        this.lastName = lastName;
+    }
+
+    private String birthDate;
+
+    public void setBirthDate( String birthDate )
+    {
+        this.birthDate = birthDate;
+    }
+
+    // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
-   
-	private String message;
+
+    private String message;
 
     public String getMessage()
     {
@@ -102,68 +110,75 @@ public class ValidatePatientAction
         this.i18n = i18n;
     }
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-	public String execute()       
-    {
-		
-		Date dateOfBirth;
-		
-		if( firstName == null || middleName == null || lastName == null	)
-		{
-			message = i18n.getString( "specfiy_name_s" );
-			
-			return INPUT;
-		}
-		
-		else
-		{
-			firstName = firstName.trim();
-			middleName = middleName.trim();
-			lastName = lastName.trim();
-			
-			if( firstName.length() == 0 || middleName.length() == 0 || lastName.length() == 0 )
-			{
-				message = i18n.getString( "specfiy_name_s" );
-				
-				return INPUT;
-			}			
-		}		
-		
-		if( birthDate == null )
-		{
-			message = i18n.getString( "specify_date_of_birth" );
-			
-			return INPUT;
-		}	
-		
-		birthDate = birthDate.trim();
-		
-		if( birthDate.length() == 0 )
-		{
-			message = i18n.getString( "please_enter_a_valid_birth_date" );
-			
-			return INPUT;
-		}
-		
-		dateOfBirth = format.parseDate( birthDate );
-		
-		if( dateOfBirth == null || dateOfBirth.after( new Date() ) )
-		{
-			message = i18n.getString( "please_enter_a_valid_birth_date" );
-			
-			return INPUT;
-		}		
-		
-		// ---------------------------------------------------------------------
+    public String execute()
+    {        
+
+        Date dateOfBirth;
+        
+        if ( selectionManager.getSelectedOrganisationUnit() == null )
+        {
+            message = i18n.getString( "please_select_a_registering_unit" );
+
+            return INPUT;
+        }
+
+        if ( firstName == null || middleName == null || lastName == null )
+        {
+            message = i18n.getString( "specfiy_name_s" );
+
+            return INPUT;
+        }
+
+        else
+        {
+            firstName = firstName.trim();
+            middleName = middleName.trim();
+            lastName = lastName.trim();
+
+            if ( firstName.length() == 0 || middleName.length() == 0 || lastName.length() == 0 )
+            {
+                message = i18n.getString( "specfiy_name_s" );
+
+                return INPUT;
+            }
+        }
+
+        if ( birthDate == null )
+        {
+            message = i18n.getString( "specify_date_of_birth" );
+
+            return INPUT;
+        }
+
+        birthDate = birthDate.trim();
+
+        if ( birthDate.length() == 0 )
+        {
+            message = i18n.getString( "please_enter_a_valid_birth_date" );
+
+            return INPUT;
+        }
+
+        dateOfBirth = format.parseDate( birthDate );
+
+        if ( dateOfBirth == null || dateOfBirth.after( new Date() ) )
+        {
+            message = i18n.getString( "please_enter_a_valid_birth_date" );
+
+            return INPUT;
+        }
+
+        // ---------------------------------------------------------------------
         // Validation success
         // ---------------------------------------------------------------------
-		
-		message = i18n.getString( "everything_is_ok" );
-		
+
+        message = i18n.getString( "everything_is_ok" );
+
         return SUCCESS;
-        
+
     }
 }

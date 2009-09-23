@@ -26,6 +26,7 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
@@ -34,27 +35,49 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SelectAction 
-	implements Action
+public class ValidateSearchPatientAction
+    implements Action
 {
-	
-	private static final String PATIENT_FORM = "patientform";
 
     // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
+    // -------------------------------------------------------------------------
 
-	private OrganisationUnitSelectionManager selectionManager;
+    private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
-    }    
+    }
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input
     // -------------------------------------------------------------------------
 
+    private String searchText;
+
+    public void setSearchText( String searchText )
+    {
+        this.searchText = searchText;
+    }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -63,15 +86,41 @@ public class SelectAction
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------                
 
-        if ( selectionManager.getSelectedOrganisationUnit() == null ) 
-        {        	
-            return SUCCESS;
-        }     
-        
-        return PATIENT_FORM;
+        if ( selectionManager.getSelectedOrganisationUnit() == null )
+        {
+            message = i18n.getString( "please_select_a_registering_unit" );
+
+            return INPUT;
+        }
+
+        if ( searchText == null )
+        {
+            message = i18n.getString( "specify_a_search_criteria" );
+
+            return INPUT;
+        }
+
+        else
+        {
+            searchText = searchText.trim();
+
+            if ( searchText.length() == 0 )
+            {
+                message = i18n.getString( "specify_a_search_criteria" );
+
+                return INPUT;
+            }
+
+        }
+
+        // ---------------------------------------------------------------------
+        // Validation success
+        // ---------------------------------------------------------------------
+
+        message = i18n.getString( "everything_is_ok" );
+
+        return SUCCESS;
+
     }
 }

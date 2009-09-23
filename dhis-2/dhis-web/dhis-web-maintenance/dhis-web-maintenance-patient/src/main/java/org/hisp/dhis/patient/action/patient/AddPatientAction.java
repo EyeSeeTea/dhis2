@@ -26,62 +26,50 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAddressService;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.i18n.I18nFormat;
 
-
 import com.opensymphony.xwork2.Action;
+
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class AddPatientAction 
-	implements Action 
+public class AddPatientAction
+    implements Action
 {
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------	
-	
-	private I18nFormat format;
-	
-	public void setFormat( I18nFormat format )
+    // -------------------------------------------------------------------------
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
     {
         this.format = format;
-    }  
+    }
 
-	private PatientService patientService;
-	
-	public void setPatientService( PatientService patientService ) 
-	{
-		this.patientService = patientService;
-	}
+    private PatientService patientService;
 
-	private PatientIdentifierService patientIdentifierService;
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
 
-	public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService ) 
-	{
-		this.patientIdentifierService = patientIdentifierService;
-	}
-	
-	private PatientAddressService patientAddressService;
+    private PatientIdentifierService patientIdentifierService;
 
-	public void setPatientAddressService( PatientAddressService patientAddressService ) 
-	{
-		this.patientAddressService = patientAddressService;
-	}
-	
-	private OrganisationUnitSelectionManager selectionManager;
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
+    }
+  
+    private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
@@ -91,140 +79,141 @@ public class AddPatientAction
     // -------------------------------------------------------------------------
     // Input - identifier
     // -------------------------------------------------------------------------
-	
-	private String identifier;
-	
-	public void setIdentifier( String identifier )
-	{
-		this.identifier = identifier;
-	}
-	
-	// -------------------------------------------------------------------------
+
+    private String identifier;
+
+    public void setIdentifier( String identifier )
+    {
+        this.identifier = identifier;
+    }
+
+    // -------------------------------------------------------------------------
     // Input - name
     // -------------------------------------------------------------------------
-	
-	private String firstName;
-	
-	public void setFirstName( String firstName ) 
-	{
-		this.firstName = firstName;
-	}
-	
-	private String middleName;
-	
-	public void setMiddleName( String middleName )  
-	{
-		this.middleName = middleName;
-	}
-	
-	private String lastName;
-	
-	public void setLastName( String lastName ) 
-	{
-		this.lastName = lastName;
-	}	
 
-	// -------------------------------------------------------------------------
+    private String firstName;
+
+    public void setFirstName( String firstName )
+    {
+        this.firstName = firstName;
+    }
+
+    private String middleName;
+
+    public void setMiddleName( String middleName )
+    {
+        this.middleName = middleName;
+    }
+
+    private String lastName;
+
+    public void setLastName( String lastName )
+    {
+        this.lastName = lastName;
+    }
+
+    // -------------------------------------------------------------------------
     // Input - demographics
     // -------------------------------------------------------------------------
-	
-	private String birthDate;   
 
-	public void setBirthDate( String birthDate ) 
-	{
-		this.birthDate = birthDate;
-	}
-	
-	private String gender;
-	
-	public void setGender( String gender )
-	{
-		this.gender = gender;
-	}
-	
+    private String birthDate;
+
+    public void setBirthDate( String birthDate )
+    {
+        this.birthDate = birthDate;
+    }
+
+    private String gender;
+
+    public void setGender( String gender )
+    {
+        this.gender = gender;
+    }
+
+    /*
     // -------------------------------------------------------------------------
     // Input - address
     // -------------------------------------------------------------------------
-	
-	private String address1;
-	
-	public void setAddress1( String address1 )
-	{
-		this.address1 = address1;
-	}
-	
-	private String address2;
-	
-	public void setAddress2( String address2 )
-	{
-		this.address2 = address2;
-	}
-	
-	private String landMark;
-	
-	public void setLandMark( String landMark )
-	{
-		this.landMark = landMark;
-	}
-	
-	private String cityVillage;
-	
-	public void setCityVillage( String cityVillage )
-	{
-		this.cityVillage = cityVillage;
-	}
-	
-	private String stateProvince;
-	
-	public void setStateProvince( String stateProvince )
-	{
-		this.stateProvince = stateProvince;
-	}
-	
-	private String country;
-	
-	public void setCountry( String country )
-	{
-		this.country = country;
-	}
 
-	private String postalCode;
-	
-	public void setPostalCode( String postalCode )
-	{
-		this.postalCode = postalCode;
-	}
-	
+    private String address1;
+
+    public void setAddress1( String address1 )
+    {
+        this.address1 = address1;
+    }
+
+    private String address2;
+
+    public void setAddress2( String address2 )
+    {
+        this.address2 = address2;
+    }
+
+    private String landMark;
+
+    public void setLandMark( String landMark )
+    {
+        this.landMark = landMark;
+    }
+
+    private String cityVillage;
+
+    public void setCityVillage( String cityVillage )
+    {
+        this.cityVillage = cityVillage;
+    }
+
+    private String stateProvince;
+
+    public void setStateProvince( String stateProvince )
+    {
+        this.stateProvince = stateProvince;
+    }
+
+    private String country;
+
+    public void setCountry( String country )
+    {
+        this.country = country;
+    }
+
+    private String postalCode;
+
+    public void setPostalCode( String postalCode )
+    {
+        this.postalCode = postalCode;
+    }*/
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    public String execute()        
+    public String execute()
     {
-    	// ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Prepare values
         // ---------------------------------------------------------------------
-    	
-    	OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
-    	
-    	Patient patient = new Patient();
-    	
-    	patient.setFirstName(firstName);
-    	patient.setMiddleName(middleName);
-    	patient.setLastName(lastName);
-    	patient.setGender(gender);    	
-    	patient.setBirthDate( format.parseDate( birthDate ) );
-    	
-    	patientService.addPatient( patient );
-    	
-    	PatientIdentifier patientIdentifier = new PatientIdentifier();
-    	patientIdentifier.setIdentifier(identifier);
-    	patientIdentifier.setOrganisationUnit(organisationUnit);
-    	patientIdentifier.setPatient( patient );
-    	patientIdentifier.setPreferred( true );
-    	
-    	patientIdentifierService.addPatientIdentifier( patientIdentifier );   	
-    	
+
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        Patient patient = new Patient();
+
+        patient.setFirstName( firstName );
+        patient.setMiddleName( middleName );
+        patient.setLastName( lastName );
+        patient.setGender( gender );
+        patient.setBirthDate( format.parseDate( birthDate ) );
+
+        patientService.addPatient( patient );
+
+        PatientIdentifier patientIdentifier = new PatientIdentifier();
+        patientIdentifier.setIdentifier( identifier );
+        patientIdentifier.setOrganisationUnit( organisationUnit );
+        patientIdentifier.setPatient( patient );
+        patientIdentifier.setPreferred( true );
+
+        patientIdentifierService.addPatientIdentifier( patientIdentifier );
+
         return SUCCESS;
     }
 }

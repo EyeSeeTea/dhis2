@@ -27,33 +27,28 @@
 package org.hisp.dhis.patient;
 
 import java.util.Collection;
-import java.util.Date;
+
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientService
+public interface HouseHoldStore 
 {
-    String ID = PatientService.class.getName();
+	
+	String ID = HouseHoldStore.class.getName();
+	
+	int addHouseHold( HouseHold houseHold );
+	
+	void deleteHouseHold( HouseHold houseHold );
+	
+	void updateHouseHold( HouseHold houseHold );
+	
+	HouseHold getHouseHold( int id );	
+	
+	Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit registeringUnit );
+	
+	Collection<HouseHold> getAllHouseHolds();
 
-    int addPatient( Patient patient );
-
-    void deletePatient( Patient patient );
-
-    void updatePatient( Patient patient );
-
-    Patient getPatient( int id );
-
-    Collection<Patient> getAllPatients();
-
-    Collection<Patient> getAllPatients( Boolean isDead );
-
-    Collection<Patient> getPatiensByGender( String gender );
-
-    Collection<Patient> getPatientsByBirthDate( Date birthDate );
-
-    Collection<Patient> getPatientsByNames( String name );
-    
-    Collection<Patient> getPatients( String searchText );
 }

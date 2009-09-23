@@ -2,8 +2,8 @@
 <houseHold>
   <id>$houseHold.id</id>
   <houseNumber>$encoder.xmlEncode( $houseHold.houseNumber )</houseNumber>
-  <registeringUnit>$i18n.getString( $houseHold.registeringUnit.shortName )</registeringUnit>
+  <registeringUnit>$i18n.getString( $houseHold.organisationUnit.shortName )</registeringUnit>
   <address>$i18n.getString( $houseHold.address )</address>
   <landMark>$i18n.getString( $houseHold.landMark )</landMark>
-  <memberCount>$houseHoldMembers.size()</memberCount>
+  <memberCount>$houseHold.members.size()</memberCount>
 </houseHold>

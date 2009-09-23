@@ -29,31 +29,51 @@ package org.hisp.dhis.patient;
 import java.util.Collection;
 import java.util.Date;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.dataset.DataSet;
+
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientService
+public interface EncounterStore
 {
-    String ID = PatientService.class.getName();
+    String ID = EncounterStore.class.getName();
 
-    int addPatient( Patient patient );
+    int addEncounter( Encounter encounter );
 
-    void deletePatient( Patient patient );
+    void updateEncounter( Encounter encounter );
 
-    void updatePatient( Patient patient );
+    void deleteEncounter( Encounter encounter );
 
-    Patient getPatient( int id );
+    Encounter getEncounter( int id );
 
-    Collection<Patient> getAllPatients();
+    Encounter getEncounter( Date encounterDateTime, Patient patient, OrganisationUnit organisationUnit, DataSet dataSet );
 
-    Collection<Patient> getAllPatients( Boolean isDead );
+    Collection<Encounter> getEncounters( Date encounterDateTime, Patient patient, OrganisationUnit organisationUnit );
 
-    Collection<Patient> getPatiensByGender( String gender );
+    Collection<Encounter> getEncounters( Patient patient, DataSet dataSet );
 
-    Collection<Patient> getPatientsByBirthDate( Date birthDate );
+    Collection<Encounter> getEncounters( Date encounterDateTime, Patient patient );
 
-    Collection<Patient> getPatientsByNames( String name );
-    
-    Collection<Patient> getPatients( String searchText );
+    Collection<Encounter> getEncounters( Date encounterDateTime, DataSet dataSet );
+
+    Collection<Encounter> getEncounters( OrganisationUnit organisationUnit, Patient patient );
+
+    Collection<Encounter> getEncounters( DataSet dataSet, Patient patient );
+
+    Collection<Encounter> getEncounters( DataSet dataSet, OrganisationUnit organisationUnit );
+
+    Collection<Encounter> getEncounters( OrganisationUnit organisationUnit );
+
+    Collection<Encounter> getEncounters( Date encounterDateTime );
+
+    Collection<Encounter> getEncounters( Patient patient );
+
+    Collection<Encounter> getEncounters( DataSet dataSet );
+
+    Collection<Encounter> getEncounters( Boolean isExecuted );
+
+    Collection<Encounter> getAllEncounters();
+
 }

@@ -26,10 +26,12 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.patient.Patient;
 
 import com.opensymphony.xwork2.Action;
 
@@ -37,12 +39,9 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddPatientFormAction
+public class SearchPatientAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -55,46 +54,51 @@ public class ShowAddPatientFormAction
         this.selectionManager = selectionManager;
     }
 
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }
-
     // -------------------------------------------------------------------------
-    // Output
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private PatientIdentifier patientIdentifier;
+    private OrganisationUnit organisationUnit;
 
-    public PatientIdentifier getPatientIdentifier()
+    public OrganisationUnit getOrganisationUnit()
     {
-        return patientIdentifier;
+        return organisationUnit;
     }
 
-    private String identifier;
+    private String searchText;
 
-    public String getIdentifier()
+    public void setSearchText( String searchText )
     {
-        return identifier;
+        this.searchText = searchText;
     }
 
-    // -------------------------------------------------------------------------
-    // Input
-    // --------------------------------------------------------------------------
+    public String getSearchText()
+    {
+        return searchText;
+    }
+
+    private List<Patient> patients = new ArrayList<Patient>();
+
+    public List<Patient> getPatients()
+    {
+        return patients;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
 
-        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );        
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         return SUCCESS;
 
-    }
+    }   
+
 }

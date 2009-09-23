@@ -27,33 +27,40 @@
 package org.hisp.dhis.patient;
 
 import java.util.Collection;
-import java.util.Date;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientService
+public interface PatientDataValueStore
 {
-    String ID = PatientService.class.getName();
 
-    int addPatient( Patient patient );
+    String ID = PatientDataValueStore.class.getName();
 
-    void deletePatient( Patient patient );
+    void addPatientDataValue( PatientDataValue patientDataValue );
 
-    void updatePatient( Patient patient );
+    void updatePatientDataValue( PatientDataValue patientDataValue );
 
-    Patient getPatient( int id );
+    void deletePatientDataValue( PatientDataValue patientDataValue );
 
-    Collection<Patient> getAllPatients();
+    int deletePatientDataValue( Encounter encounter );
 
-    Collection<Patient> getAllPatients( Boolean isDead );
+    int deletePatientDataValue( DataElement dataElement );
 
-    Collection<Patient> getPatiensByGender( String gender );
+    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
 
-    Collection<Patient> getPatientsByBirthDate( Date birthDate );
+    PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo );
 
-    Collection<Patient> getPatientsByNames( String name );
-    
-    Collection<Patient> getPatients( String searchText );
+    Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement );
+
+    Collection<PatientDataValue> getPatientDataValues( Encounter encounter );
+
+    Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
+
+    Collection<PatientDataValue> getAllPatientDataValues();
+
 }

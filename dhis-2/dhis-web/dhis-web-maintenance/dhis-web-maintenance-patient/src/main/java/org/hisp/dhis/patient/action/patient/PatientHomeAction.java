@@ -24,36 +24,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+package org.hisp.dhis.patient.action.patient;
 
-import java.util.Collection;
-import java.util.Date;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientService
+public class PatientHomeAction
+    implements Action
 {
-    String ID = PatientService.class.getName();
 
-    int addPatient( Patient patient );
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    void deletePatient( Patient patient );
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
 
-    void updatePatient( Patient patient );
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-    Patient getPatient( int id );
+    public String execute()
+        throws Exception
+    {
 
-    Collection<Patient> getAllPatients();
+        return SUCCESS;
 
-    Collection<Patient> getAllPatients( Boolean isDead );
-
-    Collection<Patient> getPatiensByGender( String gender );
-
-    Collection<Patient> getPatientsByBirthDate( Date birthDate );
-
-    Collection<Patient> getPatientsByNames( String name );
-    
-    Collection<Patient> getPatients( String searchText );
+    }
 }

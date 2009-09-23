@@ -26,7 +26,6 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
-
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 
@@ -36,25 +35,31 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class RemovePatientAction 
-	implements Action
-{   
+public class RemovePatientAction
+    implements Action
+{
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
-
-	private PatientService patientService;
-	
-	public void setPatientService( PatientService patientService ) 
-	{
-		this.patientService = patientService;
-	}	
-
-    // -------------------------------------------------------------------------
-    // Input/output
     // -------------------------------------------------------------------------
 
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+    private int id;
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -62,7 +67,11 @@ public class RemovePatientAction
 
     public String execute()
         throws Exception
-    {        
+    {
+
+        Patient patient = patientService.getPatient( id );
+        
+        patientService.deletePatient( patient );
         
         return SUCCESS;
     }

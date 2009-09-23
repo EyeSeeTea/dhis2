@@ -24,10 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient.action.patient;
+package org.hisp.dhis.patient.action.household;
 
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.hisp.dhis.patient.HouseHold;
+import org.hisp.dhis.patient.HouseHoldService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
@@ -37,12 +42,9 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddPatientFormAction
+public class SearchHouseHoldMembersAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -55,46 +57,88 @@ public class ShowAddPatientFormAction
         this.selectionManager = selectionManager;
     }
 
-    private PatientIdentifierService patientIdentifierService;
+    private HouseHoldService houseHoldService;
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    public void setHouseHoldService( HouseHoldService houseHoldService )
     {
-        this.patientIdentifierService = patientIdentifierService;
+        this.houseHoldService = houseHoldService;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private PatientIdentifier patientIdentifier;
-
-    public PatientIdentifier getPatientIdentifier()
+    private PatientService patientService;
+    
+    public void setPatientService( PatientService patientService )
     {
-        return patientIdentifier;
+        this.patientService = patientService;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Input/output
+    // -------------------------------------------------------------------------
+
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
     }
 
-    private String identifier;
+    private String searchText;
 
-    public String getIdentifier()
+    public void setSearchText( String searchText )
     {
-        return identifier;
+        this.searchText = searchText;
     }
 
-    // -------------------------------------------------------------------------
-    // Input
-    // --------------------------------------------------------------------------
+    private Collection<Patient> members = new ArrayList<Patient>();
+
+    public Collection<Patient> getMembers()
+    {
+        return members;
+    }
+
+    private int id;
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    private HouseHold houseHold;
+
+    public HouseHold getHouseHold()
+    {
+        return houseHold;
+    }
+
+    public void setHouseHold( HouseHold houseHold )
+    {
+        this.houseHold = houseHold;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
 
-        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );        
+        houseHold = houseHoldService.getHouseHold( id );
 
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        
+        members = patientService.getPatients( searchText );
+        
         return SUCCESS;
 
     }
+    
 }

@@ -125,8 +125,8 @@ public class HibernatePatientIdentifierStore
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientIdentifier.class );
-        criteria.add( Restrictions.eq( "identifier", identifier ) );
-
+        criteria.add( Restrictions.ilike( "identifier", "%" + identifier + "%" ) );     
+        
         return criteria.list();
     }
 

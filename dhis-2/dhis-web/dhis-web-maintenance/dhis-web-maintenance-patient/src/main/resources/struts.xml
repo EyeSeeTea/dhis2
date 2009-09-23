@@ -14,7 +14,7 @@
       <param name="menu">/dhis-web-maintenance-patient/menu.vm</param> 
     </action>	  
     
-  <!-- CHIS HouseHold -->
+    <!-- HouseHold -->
     
     <action name="household" class="org.hisp.dhis.patient.action.household.SelectHouseHoldAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
@@ -85,6 +85,89 @@
       <param name="onExceptionReturn">plainTextError</param>               
     </action>   
 	  
+	<!-- Patient -->	
+    
+    <action name="patient" class="org.hisp.dhis.patient.action.patient.SelectPatientAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="patientform" type="chain">patientform</result>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/selectPatient.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js</param>               
+    </action>
+    
+    <action name="patientform" class="org.hisp.dhis.patient.action.NoAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/patient.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>            
+    </action>    
+        
+    <action name="searchPatient" class="org.hisp.dhis.paient.action.patient.SearchPatientAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/listPatient.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>        
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>            
+    </action> 
+    
+    <action name="getPatient" class="org.hisp.dhis.paient.action.patient.GetPatientAction">
+      <result name="success" type="velocity-xml">/dhis-web-chis-registration/responsePatient.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>
+    
+    <action name="removePatient" class="org.hisp.dhis.paient.action.patient.RemovePatientAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+      <param name="requiredAuthorities">F_PATIENT_DELETE</param>      
+    </action>
+    
+    <action name="addPatient" class="org.hisp.dhis.paient.action.patient.AddPatientAction">
+      <result name="success" type="redirect">patient.action</result>
+      <param name="requiredAuthorities">F_PATIENT_ADD</param>
+    </action>
+    
+    <action name="showAddPatientForm" class="org.hisp.dhis.patient.action.patient.ShowAddPatientFormAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/addPatientForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/patient.js</param>
+      <param name="requiredAuthorities">F_PATIENT_ADD</param>      
+    </action>           
+   
+    <action name="showUpdatePatientForm" class="org.hisp.dhis.paient.action.patient.ShowUpdatePatientFormAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/updatePatientForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/patient.js</param>
+      <param name="requiredAuthorities">F_PATIENT_UPDATE</param>      
+    </action>
+    
+    <action name="updatePatient"
+      class="org.hisp.dhis.paient.action.patient.UpdatePatientAction">
+      <result name="success" type="redirect">patient.action</result>
+      <param name="requiredAuthorities">F_PATIENT_UPDATE</param>
+    </action>
+    
+    <action name="validatePatient"
+      class="org.hisp.dhis.paient.action.patient.ValidatePatientAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="validateSearchPatient"
+      class="org.hisp.dhis.paient.action.patient.ValidateSearchPatientAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>  
         
   </package>
 </struts>

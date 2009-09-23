@@ -2,10 +2,10 @@
 <members>
 #foreach ( $member in $members )
 	<member>
-		<id>$member.patientId</id>
-		<givenName>$encoder.xmlEncode( $member.givenName )</givenName>
+		<id>$member.id</id>
+		<firstName>$encoder.xmlEncode( $member.firstName )</firstName>
 		<middleName>$encoder.xmlEncode( $member.middleName )</middleName>
-		<familyName>$encoder.xmlEncode( $member.familyName )</familyName>		
+		<lastName>$encoder.xmlEncode( $member.lastName )</lastName>		
 	</member>
 #end
 </members>

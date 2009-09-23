@@ -1,7 +1,7 @@
 
 function organisationUnitSelected( orgUnits )
 {	
-    window.location.href = 'individual.action';
+    window.location.href = 'patient.action';
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -10,7 +10,7 @@ selection.setListenerFunction( organisationUnitSelected );
 // View details
 // -----------------------------------------------------------------------------
 
-function showIndividualDetails( patientId )
+function showPatientDetails( patientId )
 {
     var request = new Request();
     request.setResponseTypeXML( 'patient' );
@@ -59,7 +59,7 @@ function patientReceived( patientElement )
 // Remove patient
 // -----------------------------------------------------------------------------
 
-function removeIndividual( patientId, firstName, lastName )
+function removePatient( patientId, firstName, lastName )
 {
     var result = window.confirm( i18n_confirm_death + '\n\n' + lastName + ',' + firstName );
     
@@ -67,19 +67,19 @@ function removeIndividual( patientId, firstName, lastName )
     {
     	var request = new Request();
         request.setResponseTypeXML( 'message' );
-        request.setCallbackSuccess( removeIndividualCompleted );
-        window.location.href = 'removeIndividual.action?id=' + patientId;
+        request.setCallbackSuccess( removePatientCompleted );
+        window.location.href = 'removePatient.action?id=' + patientId;
     }
 }
 
-function removeIndividualCompleted( messageElement )
+function removePatientCompleted( messageElement )
 {
     var type = messageElement.getAttribute( 'type' );
     var message = messageElement.firstChild.nodeValue;
     
     if ( type == 'success' )
     {
-        window.location.href = 'individual.action';
+        window.location.href = 'patient.action';
     }
     else if ( type = 'error' )
     {
@@ -90,13 +90,13 @@ function removeIndividualCompleted( messageElement )
 }
 
 //-----------------------------------------------------------------------------
-// Search Individual
+// Search Patient
 //-----------------------------------------------------------------------------
 
-function validateSearchIndividual()
+function validateSearchPatient()
 {	
 	
-	var url = 'validateSearchIndividual.action?' +
+	var url = 'validateSearchPatient.action?' +
 			'searchText=' + getFieldValue( 'searchText' );	
 	
 	var request = new Request();
@@ -114,7 +114,7 @@ function searchValidationCompleted( messageElement )
 	
 	if ( type == 'success' )
 	{
-		var form = document.getElementById( 'searchIndividualForm' );        
+		var form = document.getElementById( 'searchPatientForm' );        
 		form.submit();
 	}
 	else if ( type == 'error' )
@@ -133,10 +133,12 @@ function searchValidationCompleted( messageElement )
 // Add Patient
 // -----------------------------------------------------------------------------
 
-function validateAddIndividual()
+function validateAddPatient()
 {	
 	
-	var url = 'validateIndividual.action?' +
+	window.alert( 'am called ... validateAddPatient' );
+	
+	var url = 'validatePatient.action?' +
 			'identifier=' + getFieldValue( 'identifier' ) +
 			'&firstName=' + getFieldValue( 'firstName' ) +
 	        '&middleName=' + getFieldValue( 'middleName' ) +
@@ -159,7 +161,7 @@ function addValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-        var form = document.getElementById( 'addIndividualForm' );        
+        var form = document.getElementById( 'addPatientForm' );        
         form.submit();
     }
     else if ( type == 'error' )
@@ -177,9 +179,9 @@ function addValidationCompleted( messageElement )
 // Update Patient
 // -----------------------------------------------------------------------------
 
-function validateUpdateIndividual()
+function validateUpdatePatient()
 {
-    var url = 'validateIndividual.action?' + 
+    var url = 'validatePatient.action?' + 
     		'id=' + getFieldValue( 'id' ) +
     		'&identifier=' + getFieldValue( 'identifier' ) +
     		'&firstName=' + getFieldValue( 'firstName' ) +
@@ -204,7 +206,7 @@ function updateValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-    	var form = document.getElementById( 'updateIndividualForm' );        
+    	var form = document.getElementById( 'updatePatientForm' );        
         form.submit();
     }
     else if ( type == 'error' )

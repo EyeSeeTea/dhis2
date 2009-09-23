@@ -26,6 +26,7 @@
  */
 package org.hisp.dhis.patient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -50,10 +51,17 @@ public class DefaultPatientService
     {
         this.patientStore = patientStore;
     }
+    
+    private PatientIdentifierService patientIdentifierService;    
+    
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
+    }  
 
     // -------------------------------------------------------------------------
     // PatientDataValue
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------   
 
     /*
      * (non-Javadoc)
@@ -166,6 +174,21 @@ public class DefaultPatientService
         // TODO Auto-generated method stub
 
         return patientStore.getAllPatients( isDead );
+    }
+    
+    public Collection<Patient> getPatients( String searchText )
+    {
+        Collection<Patient> result = new ArrayList<Patient>();
+        
+        result.addAll( getPatientsByNames( searchText ) );
+        
+        for( PatientIdentifier patientIdentifier : patientIdentifierService.getPatienIdentifiersByIdentifier( searchText ) )
+        {
+            result.add( patientIdentifier.getPatient() );
+        }       
+        
+        return result;
+        
     }
 
 }

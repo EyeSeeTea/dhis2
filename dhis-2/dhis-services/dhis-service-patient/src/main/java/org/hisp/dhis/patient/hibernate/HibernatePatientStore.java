@@ -175,8 +175,8 @@ public class HibernatePatientStore
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Patient.class );
-        criteria.add( Restrictions.disjunction().add( Restrictions.ilike( "firstName", name + "%" ) ).add(
-            Restrictions.ilike( "middleName", name + "%" ) ).add( Restrictions.ilike( "lastName", name + "%" ) ) );
+        criteria.add( Restrictions.disjunction().add( Restrictions.ilike( "firstName", "%" + name + "%" ) ).add(
+            Restrictions.ilike( "middleName", "%" + name + "%" ) ).add( Restrictions.ilike( "lastName", "%"+ name + "%" ) ) );
 
         return criteria.list();
     }
@@ -195,8 +195,7 @@ public class HibernatePatientStore
         Session session = sessionFactory.getCurrentSession();
 
         session.update( patient );
-
-        session.flush();
+        
     }
 
     @SuppressWarnings( "unchecked" )
