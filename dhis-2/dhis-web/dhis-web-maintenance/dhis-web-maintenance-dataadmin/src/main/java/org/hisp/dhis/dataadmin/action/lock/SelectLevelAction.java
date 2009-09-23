@@ -153,40 +153,43 @@ public class SelectLevelAction
     @SuppressWarnings("unchecked")
 	public String execute()
     throws Exception
-	{      
-	    selectionTreeManager.clearSelectedOrganisationUnits();
+    {
+        selectionTreeManager.clearSelectedOrganisationUnits();
+        selectionTreeManager.clearLockOnSelectedOrganisationUnits();       
+        
+        Period period = new Period();      
+        period = periodService.getPeriod(periodId.intValue());
+       
+        DataSet dataSet = new DataSet();      
+        dataSet = dataSetService.getDataSet(selectedLockedDataSetId.intValue());                 
+        
+        Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
+        selectionTreeManager.setSelectedOrganisationUnits( convert( dataSet.getSources() ) );
+        DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
+        Set<OrganisationUnit> selectedUnits = new HashSet<OrganisationUnit>(selectionTreeManager.getSelectedOrganisationUnits().size());
+    
+        for ( OrganisationUnit rootUnit : rootUnits )
+        {         
+            selectLevel( rootUnit, FIRST_LEVEL, selectedUnits );        
+        }
+                   
         selectionTreeManager.clearLockOnSelectedOrganisationUnits();
-		
-	    Period period = new Period();      
-	    period = periodService.getPeriod(periodId.intValue());
-	   
-	    DataSet dataSet = new DataSet();      
-	    dataSet = dataSetService.getDataSet(selectedLockedDataSetId.intValue());                 
-	    
-	    Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
+        
+        if( dataSetLock.getSources() == null )
+        {  	
+            selectionTreeManager.setLockOnSelectedOrganisationUnits( selectedUnits );
+        }
+        else
+        {  
+            selectedUnits.addAll(( convert( dataSetLock.getSources() )));
+            selectionTreeManager.setLockOnSelectedOrganisationUnits( selectedUnits ) ;
+        }
+    
+        selectLevel = level;
+        
+        return SUCCESS;
+    }
 
-	    DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
-	    Set<OrganisationUnit> selectedUnits = new HashSet<OrganisationUnit>(selectionTreeManager.getSelectedOrganisationUnits().size());
-	
-	    for ( OrganisationUnit rootUnit : rootUnits )
-	    {         
-	        selectLevel( rootUnit, FIRST_LEVEL, selectedUnits );        
-	    }
-	               
-	    selectionTreeManager.setSelectedOrganisationUnits( convert( dataSet.getSources() ) );
-	    
-	    if( dataSetLock.getSources() == null )
-	    {
-	        selectionTreeManager.setLockOnSelectedOrganisationUnits( selectedUnits );
-	    }
-	    else
-	    {  
-	        dataSetLock.getSources().addAll( selectedUnits );
-	        selectionTreeManager.setLockOnSelectedOrganisationUnits( convert( dataSetLock.getSources() ) ) ;
-	    }
-	        
-	    return SUCCESS;
-	}
 
 	// -------------------------------------------------------------------------
 	// Supportive methods

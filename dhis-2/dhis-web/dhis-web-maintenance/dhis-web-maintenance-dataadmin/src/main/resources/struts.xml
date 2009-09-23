@@ -90,6 +90,30 @@
 		  ../dhis-web-commons/util/jquery.js,
 		  ../dhis-web-commons/css/${stylesheetDirectory}/dom.js</param>
     </action>
+	  
+	<action name="getExpandedTreeForLock" class="org.hisp.dhis.dataadmin.action.lock.GetExpandedTreeForLockAction">
+      <result name="success" type="velocity">../dhis-web-commons/ouwt/responseTree.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+	  
+	  <action name="lockorgunit"
+      class="org.hisp.dhis.dataadmin.action.lock.LockSelectedOrganisationUnitAction">
+      <result name="success" type="velocity">../dhis-web-commons/ouwt/responseSelect.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="removelockorgunit"
+      class="org.hisp.dhis.dataadmin.action.lock.RemoveLockSelectedOrganisationUnitAction">
+      <result name="success" type="velocity">
+        ../dhis-web-commons/ouwt/responseSelect.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="noactionfordatalocking"
+      class="org.hisp.dhis.dataadmin.action.lock.NoActionForDataLock">
+      <result name="success" type="velocity">../dhis-web-commons/ouwt/responseSelect.vm</result>   
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
     
     <!-- Maintenance -->
   

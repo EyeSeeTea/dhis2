@@ -130,8 +130,8 @@ function SelectionTree(){
         var request = new Request();
         request.setResponseTypeXML( 'units' );
         request.setCallbackSuccess( treeReceived );
-        //request.send( selectionTreePath + 'getExpandedTree.action' );   
-        request.send( selectionTreePath + 'getExpandedTreeForLock.action' );      
+        request.send( 'getExpandedTreeForLock.action' );   
+           
     };
 
     function processExpand( rootElement ){

@@ -118,49 +118,6 @@ public class SetupAssociationsTreeAction
         return periodId;
     }
    
-    /*private Collection<String> lockedDataSets = new ArrayList<String>();
-
-    public void setLockedDataSets( Collection<String> lockedDataSets )
-    {
-        this.lockedDataSets = lockedDataSets;
-    }
-
-    public Collection<String> getLockedDataSets()
-    {
-        return lockedDataSets;
-    }
-   
-    private Collection<String> unlockedDataSets;
-
-    public void setUnlockedDataSets( Collection<String> unlockedDataSets )
-    {
-        this.unlockedDataSets = unlockedDataSets;
-    }
-
-    public Collection<String> getUnlockedDataSets()
-    {
-        return unlockedDataSets;
-    }
-
-   private DataSet dataSet;
-
-    public DataSet getDataSet()
-    {
-        return dataSet;
-    }
-
-    public void setDataSet( DataSet dataSet )
-    {
-        this.dataSet = dataSet;
-    }
-
-    private Collection<DataSet> dataSets = new ArrayList<DataSet>();
-
-    public Collection<DataSet> getDataSets()
-    {
-        return dataSets;
-    }*/
-
     private String storedBy;
 
     public String getStoredBy()
@@ -183,10 +140,12 @@ public class SetupAssociationsTreeAction
         storedBy = currentUserService.getCurrentUsername();
 
         DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
+        
+        selectionTreeManager.clearSelectedOrganisationUnits();
+        selectionTreeManager.clearLockOnSelectedOrganisationUnits();
+        
         if ( dataSetLock != null )
-        {
-            //selectionTreeManager.clearSelectedOrganisationUnits();
-            //selectionTreeManager.clearLockOnSelectedOrganisationUnits();
+        {           
             selectionTreeManager.setSelectedOrganisationUnits( convert( dataSet.getSources() ) );
             if ( dataSetLock.getSources() != null )
             {
@@ -195,8 +154,6 @@ public class SetupAssociationsTreeAction
         }
         else
         {
-            //selectionTreeManager.clearSelectedOrganisationUnits();
-            //selectionTreeManager.clearLockOnSelectedOrganisationUnits();
             selectionTreeManager.setSelectedOrganisationUnits( convert( dataSet.getSources() ) );
             DataSetLock dataSLock = new DataSetLock( dataSet, period );
             dataSLock.setTimestamp( new Date() );
