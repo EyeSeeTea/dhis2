@@ -31,7 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.encounter.Encounter;
+import org.hisp.dhis.patient.Patient;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -47,18 +47,18 @@ public interface PatientDataValueService
 
     void deletePatientDataValue( PatientDataValue patientDataValue );
 
-    int deletePatientDataValue( Encounter encounter );
+    int deletePatientDataValue( Patient patient );
 
     int deletePatientDataValue( DataElement dataElement );
 
     int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
 
-    PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
+    PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo );
 
-    Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement );
+    Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement );
 
-    Collection<PatientDataValue> getPatientDataValues( Encounter encounter );
+    Collection<PatientDataValue> getPatientDataValues( Patient patient );
 
     Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
 

@@ -33,7 +33,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class PatientAddress
+public class Address
 {
     private Integer id;
 
@@ -61,7 +61,7 @@ public class PatientAddress
     // Constructors
     // -------------------------------------------------------------------------
 
-    public PatientAddress()
+    public Address()
     {
     }
 
@@ -86,12 +86,12 @@ public class PatientAddress
             return false;
         }
 
-        if ( !(obj instanceof PatientAddress) )
+        if ( !(obj instanceof Address) )
         {
             return false;
         }
 
-        final PatientAddress other = (PatientAddress) obj;
+        final Address other = (Address) obj;
 
         return id.equals( other.getId() );
     }

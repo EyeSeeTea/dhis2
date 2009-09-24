@@ -59,7 +59,7 @@ public class Patient
 
     private Set<PatientIdentifier> identifiers;
 
-    private Set<PatientAddress> addresses;
+    private Set<Address> addresses;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -196,12 +196,12 @@ public class Patient
         this.identifiers = identifiers;
     }
 
-    public Set<PatientAddress> getAddresses()
+    public Set<Address> getAddresses()
     {
         return addresses;
     }
 
-    public void setAddresses( Set<PatientAddress> addresses )
+    public void setAddresses( Set<Address> addresses )
     {
         this.addresses = addresses;
     }

@@ -24,67 +24,100 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.patient;
 
-package org.hisp.dhis.patient.hibernate;
-
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAddress;
-import org.hisp.dhis.patient.PatientAddressStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class HibernatePatientAddressStore
-    implements PatientAddressStore
+@Transactional
+public class DefaultAddressService
+    implements AddressService
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SessionFactory sessionFactory;
+    private AddressStore addressStore;
 
-    public void setSessionFactory( SessionFactory sessionFactory )
+    public void setAddressStore( AddressStore addressStore )
     {
-        this.sessionFactory = sessionFactory;
+        this.addressStore = addressStore;
     }
 
     // -------------------------------------------------------------------------
-    // PatientAddress
+    // Address
     // -------------------------------------------------------------------------
 
-    public int addPatientAddress( PatientAddress patientAddress )
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.AddressService#addAddress(org
+     * .hisp.dhis.chis.patient.Address)
+     */
+    public int addAddress( Address address )
     {
-        return (Integer) sessionFactory.getCurrentSession().save( patientAddress );
+        // TODO Auto-generated method stub
+
+        return addressStore.addAddress( address );
     }
 
-    public void deletePatientAddress( PatientAddress patientAddress )
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.AddressService#deleteAddress
+     * (org.hisp.dhis.chis.patient.Address)
+     */
+    public void deleteAddress( Address address )
     {
-        sessionFactory.getCurrentSession().delete( patientAddress );
+        // TODO Auto-generated method stub
+
+        addressStore.deleteAddress( address );
     }
 
-    public PatientAddress getPatientAddress( int id )
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.AddressService#getAddress(int)
+     */
+    public Address getAddress( int id )
     {
-        return (PatientAddress) sessionFactory.getCurrentSession().get( PatientAddress.class, id );
+        // TODO Auto-generated method stub
+
+        return addressStore.getAddress( id );
     }
 
-    public PatientAddress getPatientAddress( Patient patient )
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.AddressService#getAddress(org
+     * .hisp.dhis.chis.patient.Patient)
+     */
+    public Address getAddress( Patient patient )
     {
-        Session session = sessionFactory.getCurrentSession();
+        // TODO Auto-generated method stub
 
-        Criteria criteria = session.createCriteria( PatientAddress.class );
-        criteria.add( Restrictions.eq( "patient", patient ) );
-        criteria.add( Restrictions.eq( "preferred", true ) );
-
-        return (PatientAddress) criteria.uniqueResult();
+        return addressStore.getAddress( patient );
     }
 
-    public void updatePatientAddress( PatientAddress patientAddress )
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hisp.dhis.chis.patient.AddressService#updateAddress
+     * (org.hisp.dhis.chis.patient.Address)
+     */
+    public void updateAddress( Address address )
     {
-        sessionFactory.getCurrentSession().update( patientAddress );
+        // TODO Auto-generated method stub
+
+        addressStore.updateAddress( address );
     }
+
 }

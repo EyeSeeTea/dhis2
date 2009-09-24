@@ -31,7 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.encounter.Encounter;
+import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
@@ -73,9 +73,9 @@ public class DefaultPatientDataValueService
         patientDataValueStore.deletePatientDataValue( patientDataValue );
     }
 
-    public int deletePatientDataValue( Encounter encounter )
+    public int deletePatientDataValue( Patient patient )
     {
-        return patientDataValueStore.deletePatientDataValue( encounter );
+        return patientDataValueStore.deletePatientDataValue( patient );
     }
 
     public int deletePatientDataValue( DataElement dataElement )
@@ -88,19 +88,19 @@ public class DefaultPatientDataValueService
         return patientDataValueStore.deletePatientDataValue( optionCombo );
     }
 
-    public PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
+    public PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
     {
-        return patientDataValueStore.getPatientDataValue( encounter, dataElement, optionCombo );
+        return patientDataValueStore.getPatientDataValue( patient, dataElement, optionCombo );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement )
+    public Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement )
     {
-        return patientDataValueStore.getPatientDataValues( encounter, dataElement );
+        return patientDataValueStore.getPatientDataValues( patient, dataElement );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter )
+    public Collection<PatientDataValue> getPatientDataValues( Patient patient )
     {
-        return patientDataValueStore.getPatientDataValues( encounter );
+        return patientDataValueStore.getPatientDataValues( patient );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )

@@ -2,7 +2,7 @@ package org.hisp.dhis.patientdatavalue;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.encounter.Encounter;
+import org.hisp.dhis.patient.Patient;
 
 import java.io.Serializable;
 
@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class PatientDataValue
     implements Serializable
 {
-    private Encounter encounter;
+    private Patient patient;
 
     private DataElement dataElement;
 
@@ -29,17 +29,17 @@ public class PatientDataValue
     {
     }
 
-    public PatientDataValue( Encounter encounter, DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
+    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
     {
-        this.encounter = encounter;
+        this.patient = patient;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
     }
 
-    public PatientDataValue( Encounter encounter, DataElement dataElement, DataElementCategoryOptionCombo optionCombo,
+    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo,
         String value )
     {
-        this.encounter = encounter;
+        this.patient = patient;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
         this.value = value;
@@ -55,7 +55,7 @@ public class PatientDataValue
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + encounter.hashCode();
+        result = result * prime + patient.hashCode();
         result = result * prime + dataElement.hashCode();
         result = result * prime + optionCombo.hashCode();
 
@@ -82,7 +82,7 @@ public class PatientDataValue
 
         final PatientDataValue other = (PatientDataValue) o;
 
-        return encounter.equals( other.getEncounter() ) && dataElement.equals( other.getDataElement() )
+        return patient.equals( other.getPatient() ) && dataElement.equals( other.getDataElement() )
             && optionCombo.equals( other.getOptionCombo() );
     }
 
@@ -90,14 +90,14 @@ public class PatientDataValue
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public void setEncounter( Encounter encounter )
+    public void setPatient( Patient patient )
     {
-        this.encounter = encounter;
+        this.patient = patient;
     }
 
-    public Encounter getEncounter()
+    public Patient getPatient()
     {
-        return encounter;
+        return patient;
     }
 
     public void setDataElement( DataElement dataElement )

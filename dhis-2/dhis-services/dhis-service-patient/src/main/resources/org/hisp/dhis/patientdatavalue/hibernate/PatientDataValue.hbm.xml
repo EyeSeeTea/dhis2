@@ -7,14 +7,15 @@
     <class name="org.hisp.dhis.patientdatavalue.PatientDataValue" table="patientdatavalue">
     
       <composite-id>            
-          <key-many-to-one name="encounter" class="org.hisp.dhis.encounter.Encounter" 
-              column="encounterid" foreign-key="fk_patientdatavalue_encounterid"/>      
+          <key-many-to-one name="patient" class="org.hisp.dhis.patient.Patient" 
+              column="patientid" foreign-key="fk_patientdatavalue_patientrid"/>      
           <key-many-to-one name="dataElement" class="org.hisp.dhis.dataelement.DataElement"
               column="dataelementid" foreign-key="fk_patientdatavalue_dataelementid"/>      
 	      <key-many-to-one name="optionCombo" class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" 
               column="categoryoptioncomboid" foreign-key="fk_patientdatavalue_categoryoptioncomboid"/>		
       </composite-id>    
     
-    <property name="value"/>    
+    <property name="value"/>  
+        
   </class>
 </hibernate-mapping>

@@ -24,24 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.program;
 
-package org.hisp.dhis.patient;
+import java.util.Collection;
+
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public interface PatientAddressService
+public interface ProgramService
 {
-    String ID = PatientAddressService.class.getName();
 
-    int addPatientAddress( PatientAddress patientAddress );
+    String ID = ProgramService.class.getName();
 
-    void updatePatientAddress( PatientAddress patientAddress );
+    int addProgram( Program program );
 
-    void deletePatientAddress( PatientAddress patientAddress );
+    void deleteProgram( Program program );
 
-    PatientAddress getPatientAddress( int id );
+    void updateProgram( Program program );
 
-    PatientAddress getPatientAddress( Patient patient );
+    Program getProgram( int id );
+
+    Collection<Program> getAllPrograms();
+
+    Collection<Program> getPrograms( OrganisationUnit organisationUnit );
+
+    Collection<Program> getPrograms( DataSet dataSet );
+
+    Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet );
+
 }

@@ -25,32 +25,66 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patient;
+package org.hisp.dhis.patient.hibernate;
 
-import com.opensymphony.xwork2.Action;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.Address;
+import org.hisp.dhis.patient.AddressStore;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class PatientHomeAction
-    implements Action
+public class HibernateAddressStore
+    implements AddressStore
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
+    private SessionFactory sessionFactory;
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        return SUCCESS;
+        this.sessionFactory = sessionFactory;
+    }
+
+    // -------------------------------------------------------------------------
+    // Address
+    // -------------------------------------------------------------------------
+
+    public int addAddress( Address address )
+    {
+        return (Integer) sessionFactory.getCurrentSession().save( address );
+    }
+
+    public void deleteAddress( Address address )
+    {
+        sessionFactory.getCurrentSession().delete( address );
+    }
+
+    public Address getAddress( int id )
+    {
+        return (Address) sessionFactory.getCurrentSession().get( Address.class, id );
+    }
+
+    public Address getAddress( Patient patient )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( Address.class );
+        criteria.add( Restrictions.eq( "patient", patient ) );
+        criteria.add( Restrictions.eq( "preferred", true ) );
+
+        return (Address) criteria.uniqueResult();
+    }
+
+    public void updateAddress( Address address )
+    {
+        sessionFactory.getCurrentSession().update( address );
     }
 }

@@ -36,7 +36,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.encounter.Encounter;
+import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
 
@@ -72,12 +72,12 @@ public class HibernatePatientDataValueStore
         sessionFactory.getCurrentSession().delete( patientDataValue );
     }
 
-    public int deletePatientDataValue( Encounter encounter )
+    public int deletePatientDataValue( Patient patient )
     {
         Session session = sessionFactory.getCurrentSession();
 
-        Query query = session.createQuery( "delete PatientDataValue where encounter = :encounter" );
-        query.setEntity( "encounter", encounter );
+        Query query = session.createQuery( "delete PatientDataValue where patient = :patient" );
+        query.setEntity( "patient", patient );
 
         return query.executeUpdate();
     }
@@ -102,13 +102,13 @@ public class HibernatePatientDataValueStore
         return query.executeUpdate();
     }
 
-    public PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
+    public PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "encounter", encounter ) );
+        criteria.add( Restrictions.eq( "patient", patient ) );
         criteria.add( Restrictions.eq( "dataElement", dataElement ) );
         criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );
 
@@ -116,24 +116,24 @@ public class HibernatePatientDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement )
+    public Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "encounter", encounter ) );
+        criteria.add( Restrictions.eq( "patient", patient ) );
         criteria.add( Restrictions.eq( "dataElement", dataElement ) );
 
         return criteria.list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> getPatientDataValues( Encounter encounter )
+    public Collection<PatientDataValue> getPatientDataValues( Patient patient )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "encounter", encounter ) );
+        criteria.add( Restrictions.eq( "patient", patient ) );
 
         return criteria.list();
     }

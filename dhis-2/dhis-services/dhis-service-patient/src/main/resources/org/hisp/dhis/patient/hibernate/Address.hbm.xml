@@ -4,9 +4,9 @@
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="org.hisp.dhis.patient.PatientAddress" table="patientaddress">
+	<class name="org.hisp.dhis.patient.Address" table="address">
 		
-		<id name="id" column="patientaddressid">
+		<id name="id" column="addressid">
 			<generator class="native"/>
 		</id>
 		

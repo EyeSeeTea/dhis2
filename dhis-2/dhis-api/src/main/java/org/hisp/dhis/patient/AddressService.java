@@ -25,57 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.encounter;
-
-import java.util.Collection;
-import java.util.Date;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
+package org.hisp.dhis.patient;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface EncounterService
+public interface AddressService
 {
-    String ID = EncounterService.class.getName();
+    String ID = AddressService.class.getName();
 
-    int addEncounter( Encounter encounter );
+    int addAddress( Address address );
 
-    void updateEncounter( Encounter encounter );
+    void updateAddress( Address address );
 
-    void deleteEncounter( Encounter encounter );
+    void deleteAddress( Address address );
 
-    Encounter getEncounter( int id );
+    Address getAddress( int id );
 
-    Encounter getEncounter( Date encounterDateTime, Patient patient, OrganisationUnit organisationUnit, DataSet dataSet );
-
-    Collection<Encounter> getEncounters( Date encounterDateTime, Patient patient, OrganisationUnit organisationUnit );
-
-    Collection<Encounter> getEncounters( Patient patient, DataSet dataSet );
-
-    Collection<Encounter> getEncounters( Date encounterDateTime, Patient patient );
-
-    Collection<Encounter> getEncounters( Date encounterDateTime, DataSet dataSet );
-
-    Collection<Encounter> getEncounters( OrganisationUnit organisationUnit, Patient patient );
-
-    Collection<Encounter> getEncounters( DataSet dataSet, Patient patient );
-
-    Collection<Encounter> getEncounters( DataSet dataSet, OrganisationUnit organisationUnit );
-
-    Collection<Encounter> getEncounters( OrganisationUnit organisationUnit );
-
-    Collection<Encounter> getEncounters( Date encounterDateTime );
-
-    Collection<Encounter> getEncounters( Patient patient );
-
-    Collection<Encounter> getEncounters( DataSet dataSet );
-
-    Collection<Encounter> getEncounters( Boolean isExecuted );
-
-    Collection<Encounter> getAllEncounters();
-
+    Address getAddress( Patient patient );
+    
 }

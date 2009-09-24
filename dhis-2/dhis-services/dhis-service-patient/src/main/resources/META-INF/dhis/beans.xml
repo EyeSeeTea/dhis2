@@ -13,8 +13,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
-    <bean id="org.hisp.dhis.patient.PatientAddressStore"
-        class="org.hisp.dhis.patient.hibernate.HibernatePatientAddressStore">
+    <bean id="org.hisp.dhis.patient.AddressStore"
+        class="org.hisp.dhis.patient.hibernate.HibernateAddressStore">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
@@ -48,10 +48,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
             ref="org.hisp.dhis.patient.PatientIdentifierService"/>
 	</bean>
 	
-	<bean id="org.hisp.dhis.patient.PatientAddressService"
-		class="org.hisp.dhis.patient.DefaultPatientAddressService">
-		<property name="patientAddressStore"
-			ref="org.hisp.dhis.patient.PatientAddressStore"/>
+	<bean id="org.hisp.dhis.patient.AddressService"
+		class="org.hisp.dhis.patient.DefaultAddressService">
+		<property name="addressStore"
+			ref="org.hisp.dhis.patient.AddressStore"/>
 	</bean>
 	
 	<bean id="org.hisp.dhis.patient.PatientIdentifierService"

@@ -24,100 +24,137 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+package org.hisp.dhis.program;
 
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Collection;
+
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-@Transactional
-public class DefaultPatientAddressService
-    implements PatientAddressService
+public class DefaultProgramService
+    implements ProgramService
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientAddressStore patientAddressStore;
+    private ProgramStore programStore;
 
-    public void setPatientAddressStore( PatientAddressStore patientAddressStore )
+    /**
+     * @param programStore the programStore to set
+     */
+    public void setProgramStore( ProgramStore programStore )
     {
-        this.patientAddressStore = patientAddressStore;
+        this.programStore = programStore;
     }
 
     // -------------------------------------------------------------------------
-    // PatientAddress
+    // Program
     // -------------------------------------------------------------------------
 
     /*
      * (non-Javadoc)
      * 
      * @see
-     * org.hisp.dhis.chis.patient.PatientAddressService#addPatientAddress(org
-     * .hisp.dhis.chis.patient.PatientAddress)
+     * org.hisp.dhis.program.ProgramService#addProgram(org.hisp.dhis.program
+     * .Program)
      */
-    public int addPatientAddress( PatientAddress patientAddress )
+    public int addProgram( Program program )
     {
         // TODO Auto-generated method stub
-
-        return patientAddressStore.addPatientAddress( patientAddress );
+        return programStore.addProgram( program );
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see
-     * org.hisp.dhis.chis.patient.PatientAddressService#deletePatientAddress
-     * (org.hisp.dhis.chis.patient.PatientAddress)
+     * org.hisp.dhis.program.ProgramService#deleteProgram(org.hisp.dhis.program
+     * .Program)
      */
-    public void deletePatientAddress( PatientAddress patientAddress )
+    public void deleteProgram( Program program )
     {
         // TODO Auto-generated method stub
+        
+        programStore.deleteProgram( program );
 
-        patientAddressStore.deletePatientAddress( patientAddress );
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hisp.dhis.program.ProgramService#getAllPrograms()
+     */
+    public Collection<Program> getAllPrograms()
+    {
+        // TODO Auto-generated method stub
+        return programStore.getAllPrograms();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hisp.dhis.program.ProgramService#getProgram(int)
+     */
+    public Program getProgram( int id )
+    {
+        // TODO Auto-generated method stub
+        return programStore.getProgram( id );
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see
-     * org.hisp.dhis.chis.patient.PatientAddressService#getPatientAddress(int)
+     * org.hisp.dhis.program.ProgramService#getProgram(org.hisp.dhis.dataset
+     * .DataSet)
      */
-    public PatientAddress getPatientAddress( int id )
+    public Collection<Program> getPrograms( DataSet dataSet )
     {
         // TODO Auto-generated method stub
+        return programStore.getPrograms( dataSet );
+    }
 
-        return patientAddressStore.getPatientAddress( id );
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.hisp.dhis.program.ProgramService#getPrograms(org.hisp.dhis.
+     * organisationunit.OrganisationUnit)
+     */
+    public Collection<Program> getPrograms( OrganisationUnit organisationUnit )
+    {
+        // TODO Auto-generated method stub
+        return programStore.getPrograms( organisationUnit );
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.hisp.dhis.program.ProgramService#getPrograms(org.hisp.dhis.
+     * organisationunit.OrganisationUnit, org.hisp.dhis.dataset.DataSet)
+     */
+    public Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet )
+    {
+        // TODO Auto-generated method stub
+        return programStore.getPrograms( organisationUnit, dataSet );
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see
-     * org.hisp.dhis.chis.patient.PatientAddressService#getPatientAddress(org
-     * .hisp.dhis.chis.patient.Patient)
+     * org.hisp.dhis.program.ProgramService#updateProgram(org.hisp.dhis.program
+     * .Program)
      */
-    public PatientAddress getPatientAddress( Patient patient )
+    public void updateProgram( Program program )
     {
         // TODO Auto-generated method stub
-
-        return patientAddressStore.getPatientAddress( patient );
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientAddressService#updatePatientAddress
-     * (org.hisp.dhis.chis.patient.PatientAddress)
-     */
-    public void updatePatientAddress( PatientAddress patientAddress )
-    {
-        // TODO Auto-generated method stub
-
-        patientAddressStore.updatePatientAddress( patientAddress );
+        programStore.updateProgram( program );
     }
 
 }

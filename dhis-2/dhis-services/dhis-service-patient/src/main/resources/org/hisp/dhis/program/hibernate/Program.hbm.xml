@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="org.hisp.dhis.program.Program" table="program">
+    
+    <id name="id" column="programid">
+      <generator class="native"/>
+    </id>
+
+    <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" lazy="false"
+        column="organisationunitid" not-null="true" foreign-key="fk_program_organisationunitid"/>
+    
+    <property name="name" not-null="true" unique="true" length="160"/>
+    
+    <property name="description" type="text"/>    
+    
+    <property name="numberOfDays"/>
+    
+    <set name="dataSets" table="programdatasets">
+      <key column="programid"/>
+      <many-to-many class="org.hisp.dhis.dataset.DataSet" 
+          column="datasetid" foreign-key="fk_program_datasetid"/>
+    </set> 	
+	
+  </class>
+</hibernate-mapping>
