@@ -64,9 +64,12 @@ public class HibernateProgramStore
     public int addProgram( Program program )
     {
 
-        Session session = sessionFactory.getCurrentSession();
+        for( DataSet dataSet : program.getDataSets() )
+        {
+            System.out.println( dataSet.getName() );
+        }
+        return (Integer) sessionFactory.getCurrentSession().save( program );
 
-        return (Integer) session.save( program );
     }
 
     public void deleteProgram( Program program )
@@ -134,6 +137,6 @@ public class HibernateProgramStore
 
         session.update( program );
 
-    } 
+    }
 
 }

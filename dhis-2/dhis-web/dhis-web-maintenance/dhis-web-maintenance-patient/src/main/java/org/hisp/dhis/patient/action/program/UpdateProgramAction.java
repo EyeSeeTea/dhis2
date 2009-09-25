@@ -116,17 +116,17 @@ public class UpdateProgramAction
         program.setDescription( description );
         program.setNumberOfDays( Integer.parseInt( numberOfDays ) );
         
-        List<DataSet> programDataSets = new ArrayList<DataSet>();
+        List<DataSet> dataSets = new ArrayList<DataSet>();        
 
         for ( String id : selectedList )
         {
-            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( id ) );
+            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( id ) );       
 
-            programDataSets.add( dataSet );
+            dataSets.add( dataSet );
             
-        }
+        }       
         
-        program.setDataSets( programDataSets );
+        program.setDataSets( dataSets );
         
         programService.updateProgram( program );
 

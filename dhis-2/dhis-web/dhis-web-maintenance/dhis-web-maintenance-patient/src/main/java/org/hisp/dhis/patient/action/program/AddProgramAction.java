@@ -65,9 +65,9 @@ public class AddProgramAction
     {
         this.selectionManager = selectionManager;
     }
-    
+
     private DataSetService dataSetService;
-    
+
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
@@ -90,14 +90,14 @@ public class AddProgramAction
     {
         this.description = description;
     }
-    
+
     private String numberOfDays;
-    
+
     public void setNumberOfDays( String numberOfDays )
     {
         this.numberOfDays = numberOfDays;
     }
-    
+
     private Collection<String> selectedList = new HashSet<String>();
 
     public void setSelectedList( Collection<String> selectedList )
@@ -112,27 +112,28 @@ public class AddProgramAction
     public String execute()
         throws Exception
     {
-        
+
         OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         Program program = new Program();
-        
+
         program.setName( nameField );
-        program.setOrganisationUnit( organisationUnit );
         program.setDescription( description );
+        program.setOrganisationUnit( organisationUnit );
         program.setNumberOfDays( Integer.parseInt( numberOfDays ) );
-        
-        List<DataSet> programDataSets = new ArrayList<DataSet>();        
+
+        List<DataSet> dataSets = new ArrayList<DataSet>();
 
         for ( String id : selectedList )
         {
-            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( id ) );       
+            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( id ) );
 
-            programDataSets.add( dataSet );
-            
-        }       
-        
-        program.setDataSets( programDataSets );
+            dataSets.add( dataSet );
+
+        }
+
+        program.setDataSets( dataSets );
+
         programService.addProgram( program );
 
         return SUCCESS;

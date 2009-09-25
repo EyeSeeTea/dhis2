@@ -19,7 +19,7 @@
     
     <property name="numberOfDays"/>
     
-    <list name="dataSets" table="program_datasets">
+    <list name="dataSets" table="program_datasets" inverse="false" lazy="false">
       <key column="programid"/>
       <list-index column="sort_order"/>
       <many-to-many class="org.hisp.dhis.dataset.DataSet"
