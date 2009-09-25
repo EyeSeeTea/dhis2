@@ -1,0 +1,79 @@
+
+<h3>$i18n.getString( "update_program" )</h3>
+
+<form id="updateProgramForm" name="updateProgramForm" action="updateProgram.action" method="post" onsubmit="submitForm(); return validateUpdateProgram()">
+
+<div style="display:inline">
+  <input type="hidden" id="id" name="id" value="$program.id">
+</div>
+  
+  <table id="detailsList">
+    <thead>
+      <tr>
+        <th colspan="2">$i18n.getString( "program_details" )</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+		<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="nameField" name="nameField" value="$encoder.htmlEncode( $program.name )" style="width:30em"></td>
+	  </tr>	  
+      <tr>
+		<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="description" name="description" value="$encoder.htmlEncode( $program.description )" style="width:30em"></td>
+	  </tr>
+	  <tr>
+		<td><label">$i18n.getString( "number_of_days" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="numberOfDays" name="numberOfDays" maxlength="30" value="$encoder.htmlEncode( $program.numberOfDays )" style="width:30em"></td>
+	  </tr>   
+      <tr>
+      	<td colspan="2" style="height:15px"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table id="programDataSetsArea">
+    
+    <thead>
+      <tr>        
+		<th>$i18n.getString( "not_in_the_program" )</th>
+		<th></th>
+		<th>$i18n.getString( "in_the_program" )</th>
+      </tr>
+    </thead>
+  
+    <tbody>
+      <tr>
+     	<td>
+            <select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
+                #foreach ( $dataSet in $dataSets )
+                    <option value="$dataSet.id">$encoder.htmlEncode( $dataSet.name )</option>
+                #end                
+            </select>
+        </td>
+        <td valign="top" align="center">            
+            <input type="button" value="&gt;" onclick="move( 'availableList' )"><br>    
+            <input type="button" value="&lt;" onclick="move ( 'selectedList' )"><br><br>
+            <a href="#" onclick="moveUp('selectedList')"><img src="../images/move_up.png" border="0" alt=""></a><br><br>
+            <a href="#" onclick="moveDown('selectedList')"><img src="../images/move_down.png" border="0" alt=""></a>                 
+        <td>
+            <select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">
+                #foreach ( $programDataSet in $program.dataSets )
+                    <option value="$programDataSet.id">$encoder.htmlEncode( $programDataSet.name )</option>
+                #end
+            </select>
+        </td>
+        
+      </tr>
+      
+    </tbody>
+  </table>
+
+<p>
+	<input type="submit" value="$i18n.getString( "update" )" style="width:10em">
+	<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='program.action'" style="width:10em">
+</p>
+
+</form> 	
+
+<span id="message"></span>

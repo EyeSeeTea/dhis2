@@ -106,7 +106,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-	<property name="patientService"
+    <property name="patientService"
       ref="org.hisp.dhis.patient.PatientService"/>
     <property name="patientIdentifierService"
       ref="org.hisp.dhis.patient.PatientIdentifierService"/>          
@@ -134,8 +134,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>           
-  </bean>   
-
+  </bean>
 	        
   <bean id="org.hisp.dhis.patient.action.patient.ValidatePatientAction"
     class="org.hisp.dhis.patient.action.patient.ValidatePatientAction" 
@@ -150,5 +149,75 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
   </bean>	
+  
+  <!-- Program -->
+  
+  <bean id="org.hisp.dhis.patient.action.program.SelectProgramAction"
+    class="org.hisp.dhis.patient.action.program.SelectProgramAction" 
+    scope="prototype">    
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>           
+  </bean> 
+  
+  <bean id="org.hisp.dhis.patient.action.program.AddProgramAction"
+    class="org.hisp.dhis.patient.action.program.AddProgramAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>          
+  </bean> 
+  
+  <bean id="org.hisp.dhis.patient.action.program.GetProgramListAction"
+    class="org.hisp.dhis.patient.action.program.GetProgramListAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>                  
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.GetProgramAction"
+    class="org.hisp.dhis.patient.action.program.GetProgramAction" 
+    scope="prototype">    
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>                  
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.RemoveProgramAction"
+    class="org.hisp.dhis.patient.action.program.RemoveProgramAction" 
+    scope="prototype">    
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>                  
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.ShowAddProgramFormAction"
+    class="org.hisp.dhis.patient.action.program.ShowAddProgramFormAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>          
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>          
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.UpdateProgramAction"
+    class="org.hisp.dhis.patient.action.program.UpdateProgramAction" 
+    scope="prototype">    
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>          
+  </bean> 
+  
+  <bean id="org.hisp.dhis.patient.action.program.ValidateProgramAction"
+    class="org.hisp.dhis.patient.action.program.ValidateProgramAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>              
+  </bean>
   
 </beans>

@@ -6,7 +6,12 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 	
-	<!-- Store definitions -->	
+	<!-- Store definitions -->
+  
+    <bean id="org.hisp.dhis.program.ProgramStore"
+        class="org.hisp.dhis.program.hibernate.HibernateProgramStore">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>	
 	
     <bean id="org.hisp.dhis.patient.PatientStore"
         class="org.hisp.dhis.patient.hibernate.HibernatePatientStore">
@@ -34,6 +39,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 	
 	<!-- Service definitions -->
+  
+  <bean id="org.hisp.dhis.program.ProgramService"
+    class="org.hisp.dhis.program.DefaultProgramService">
+    <property name="programStore" 
+        ref="org.hisp.dhis.program.ProgramStore"/>    
+  </bean>
 	
 	<bean id="org.hisp.dhis.patient.PatientService"
 		class="org.hisp.dhis.patient.DefaultPatientService">

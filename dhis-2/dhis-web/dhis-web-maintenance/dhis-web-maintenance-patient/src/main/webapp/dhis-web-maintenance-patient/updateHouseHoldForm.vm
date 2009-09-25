@@ -52,7 +52,7 @@
       	<td>
         	<select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
         		#foreach ( $member in $members )
-              		<option value="$member.patientId">$encoder.htmlEncode( $member.givenName )  $encoder.htmlEncode( $member.middleName )   $encoder.htmlEncode( $member.familyName )</option>
+              		<option value="$member.id">$encoder.htmlEncode( $member.firstName )  $encoder.htmlEncode( $member.middleName )   $encoder.htmlEncode( $member.lastName )</option>
             	#end            	
           	</select>
         </td>
@@ -62,7 +62,7 @@
 		<td>
         	<select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">
         		#foreach ( $houseHoldMember in $houseHoldMembers )
-              		<option value="$houseHoldMember.patientId">$encoder.htmlEncode( $houseHoldMember.givenName )  $encoder.htmlEncode( $houseHoldMember.middleName )   $encoder.htmlEncode( $houseHoldMember.familyName )</option>
+              		<option value="$houseHoldMember.id">$encoder.htmlEncode( $houseHoldMember.firstName )  $encoder.htmlEncode( $houseHoldMember.middleName )   $encoder.htmlEncode( $houseHoldMember.lastName )</option>
             	#end
           	</select>
         </td>                
