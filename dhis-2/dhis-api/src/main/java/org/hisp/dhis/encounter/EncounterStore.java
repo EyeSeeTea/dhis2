@@ -24,12 +24,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+
+package org.hisp.dhis.encounter;
 
 import java.util.Collection;
 import java.util.Date;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.dataset.DataSet;
 
 /**

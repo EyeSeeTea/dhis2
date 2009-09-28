@@ -24,7 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+
+package org.hisp.dhis.encounter;
 
 import java.util.Collection;
 import java.util.Date;
@@ -32,6 +33,9 @@ import java.util.Date;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.encounter.Encounter;
+import org.hisp.dhis.encounter.EncounterService;
+import org.hisp.dhis.encounter.EncounterStore;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -42,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultEncounterService
     implements EncounterService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------

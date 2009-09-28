@@ -36,7 +36,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  */
 public interface PatientIdentifierStore
 {
-
     String ID = PatientIdentifierStore.class.getName();
 
     int addPatientIdentifier( PatientIdentifier patientIdentifier );

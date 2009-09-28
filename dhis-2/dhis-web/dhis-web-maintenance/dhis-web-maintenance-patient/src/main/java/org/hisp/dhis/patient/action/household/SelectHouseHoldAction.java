@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.household;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -38,7 +39,6 @@ import com.opensymphony.xwork2.Action;
 public class SelectHouseHoldAction
     implements Action
 {
-
     private static final String HOUSEHOLD_FORM = "householdform";
 
     // -------------------------------------------------------------------------
@@ -70,7 +70,6 @@ public class SelectHouseHoldAction
     public String execute()
         throws Exception
     {
-
         // ---------------------------------------------------------------------
         // Validate selected OrganisationUnit
         // ---------------------------------------------------------------------

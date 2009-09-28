@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
 import java.util.Date;
@@ -41,7 +42,6 @@ import com.opensymphony.xwork2.Action;
 public class ValidatePatientAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -179,6 +179,5 @@ public class ValidatePatientAction
         message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
-
     }
 }

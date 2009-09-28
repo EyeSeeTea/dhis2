@@ -24,32 +24,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+
+package org.hisp.dhis.patientdatavalue.hibernate;
 
 import java.util.Collection;
 
+import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.encounter.Encounter;
+import org.hisp.dhis.patientdatavalue.PatientDataValue;
+import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-@Transactional
-public class DefaultPatientDataValueService
-    implements PatientDataValueService
+public class HibernatePatientDataValueStore
+    implements PatientDataValueStore
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientDataValueStore patientDataValueStore;
+    private SessionFactory sessionFactory;
 
-    public void setPatientDataValueStore( PatientDataValueStore patientDataValueStore )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.patientDataValueStore = patientDataValueStore;
+        this.sessionFactory = sessionFactory;
     }
 
     // -------------------------------------------------------------------------
@@ -58,68 +64,103 @@ public class DefaultPatientDataValueService
 
     public void addPatientDataValue( PatientDataValue patientDataValue )
     {
-        if ( patientDataValue.getValue() != null )
-        {
-            patientDataValueStore.addPatientDataValue( patientDataValue );
-        }
+        sessionFactory.getCurrentSession().save( patientDataValue );
     }
 
     public void deletePatientDataValue( PatientDataValue patientDataValue )
     {
-        patientDataValueStore.deletePatientDataValue( patientDataValue );
+        sessionFactory.getCurrentSession().delete( patientDataValue );
     }
 
     public int deletePatientDataValue( Encounter encounter )
     {
-        return patientDataValueStore.deletePatientDataValue( encounter );
+        Session session = sessionFactory.getCurrentSession();
+
+        Query query = session.createQuery( "delete PatientDataValue where encounter = :encounter" );
+        query.setEntity( "encounter", encounter );
+
+        return query.executeUpdate();
     }
 
     public int deletePatientDataValue( DataElement dataElement )
     {
-        return patientDataValueStore.deletePatientDataValue( dataElement );
+        Session session = sessionFactory.getCurrentSession();
+
+        Query query = session.createQuery( "delete PatientDataValue where dataElement = :dataElement" );
+        query.setEntity( "dataElement", dataElement );
+
+        return query.executeUpdate();
     }
 
     public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo )
     {
-        return patientDataValueStore.deletePatientDataValue( optionCombo );
+        Session session = sessionFactory.getCurrentSession();
+
+        Query query = session.createQuery( "delete PatientDataValue where optionCombo = :optionCombo" );
+        query.setEntity( "optionCombo", optionCombo );
+
+        return query.executeUpdate();
     }
 
     public PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo )
     {
-        return patientDataValueStore.getPatientDataValue( encounter, dataElement, optionCombo );
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( PatientDataValue.class );
+        criteria.add( Restrictions.eq( "encounter", encounter ) );
+        criteria.add( Restrictions.eq( "dataElement", dataElement ) );
+        criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );
+
+        return (PatientDataValue) criteria.uniqueResult();
     }
 
+    @SuppressWarnings( "unchecked" )
     public Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement )
     {
-        return patientDataValueStore.getPatientDataValues( encounter, dataElement );
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( PatientDataValue.class );
+        criteria.add( Restrictions.eq( "encounter", encounter ) );
+        criteria.add( Restrictions.eq( "dataElement", dataElement ) );
+
+        return criteria.list();
     }
 
+    @SuppressWarnings( "unchecked" )
     public Collection<PatientDataValue> getPatientDataValues( Encounter encounter )
     {
-        return patientDataValueStore.getPatientDataValues( encounter );
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( PatientDataValue.class );
+        criteria.add( Restrictions.eq( "encounter", encounter ) );
+
+        return criteria.list();
     }
 
+    @SuppressWarnings( "unchecked" )
     public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
     {
-        return patientDataValueStore.getPatientDataValues( optionCombo );
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( PatientDataValue.class );
+        criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );
+
+        return criteria.list();
     }
 
     public void updatePatientDataValue( PatientDataValue patientDataValue )
     {
-        if ( patientDataValue.getValue() == null )
-        {
-            patientDataValueStore.deletePatientDataValue( patientDataValue );
-        }
-        else
-        {
-            patientDataValueStore.updatePatientDataValue( patientDataValue );
-        }
+        sessionFactory.getCurrentSession().update( patientDataValue );
     }
 
+    @SuppressWarnings( "unchecked" )
     public Collection<PatientDataValue> getAllPatientDataValues()
     {
-        return patientDataValueStore.getAllPatientDataValues();
-    }
+        Session session = sessionFactory.getCurrentSession();
 
+        Criteria criteria = session.createCriteria( PatientDataValue.class );
+
+        return criteria.list();
+    }
 }

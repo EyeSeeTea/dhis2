@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -68,23 +69,11 @@ public class PatientAddress
     // hashCode and equals
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
     public int hashCode()
     {
         return id.hashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
     public boolean equals( Object obj )
     {
         if ( this == obj )
@@ -111,180 +100,113 @@ public class PatientAddress
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    /**
-     * @return the id
-     */
     public Integer getId()
     {
         return id;
     }
-
-    /**
-     * @param id the id to set
-     */
+    
     public void setId( Integer id )
     {
         this.id = id;
     }
-
-    /**
-     * @return the address1
-     */
+    
     public String getAddress1()
     {
         return address1;
     }
 
-    /**
-     * @param address1 the address1 to set
-     */
     public void setAddress1( String address1 )
     {
         this.address1 = address1;
     }
 
-    /**
-     * @return the address2
-     */
     public String getAddress2()
     {
         return address2;
     }
-
-    /**
-     * @param address2 the address2 to set
-     */
+    
     public void setAddress2( String address2 )
     {
         this.address2 = address2;
     }
 
-    /**
-     * @return the countyDistrict
-     */
     public String getCityVillage()
     {
         return cityVillage;
     }
 
-    /**
-     * @param countyDistrict the countyDistrict to set
-     */
     public void setCityVillage( String cityVillage )
     {
         this.cityVillage = cityVillage;
     }
 
-    /**
-     * @return the stateProvince
-     */
     public String getStateProvince()
     {
         return stateProvince;
     }
 
-    /**
-     * @param stateProvince the stateProvince to set
-     */
     public void setStateProvince( String stateProvince )
     {
         this.stateProvince = stateProvince;
     }
 
-    /**
-     * @return the country
-     */
     public String getCountry()
     {
         return country;
     }
 
-    /**
-     * @param country the country to set
-     */
     public void setCountry( String country )
     {
         this.country = country;
     }
 
-    /**
-     * @return the postalCode
-     */
     public String getPostalCode()
     {
         return postalCode;
     }
 
-    /**
-     * @param postalCode the postalCode to set
-     */
     public void setPostalCode( String postalCode )
     {
         this.postalCode = postalCode;
     }
 
-    /**
-     * @return the house
-     */
     public OrganisationUnit getHouse()
     {
         return house;
     }
 
-    /**
-     * @param house the house to set
-     */
     public void setHouse( OrganisationUnit house )
     {
         this.house = house;
     }
 
-    /**
-     * @return the preferred
-     */
     public Boolean getPreferred()
     {
         return preferred;
     }
-
-    /**
-     * @param preferred the preferred to set
-     */
+    
     public void setPreferred( Boolean preferred )
     {
         this.preferred = preferred;
     }
 
-    /**
-     * @return the patient
-     */
     public Patient getPatient()
     {
         return patient;
     }
 
-    /**
-     * @param patient the patient to set
-     */
     public void setPatient( Patient patient )
     {
         this.patient = patient;
     }
 
-    /**
-     * @param landMark the landMark to set
-     */
     public void setLandMark( String landMark )
     {
         this.landMark = landMark;
     }
 
-    /**
-     * @return the landMark
-     */
     public String getLandMark()
     {
         return landMark;
     }
-
 }

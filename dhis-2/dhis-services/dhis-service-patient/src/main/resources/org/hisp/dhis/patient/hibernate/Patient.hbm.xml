@@ -10,36 +10,32 @@
 			<generator class="native"/>
 		</id>
 		
-		<property name="firstName" type="java.lang.String" column="firstname"
-			length="50"/>
+		<property name="firstName" column="firstname" length="50"/>
 		
-		<property name="middleName" type="java.lang.String" column="middlename"
-			length="50"/>
+		<property name="middleName" column="middlename"	length="50"/>
 		
-		<property name="lastName" type="java.lang.String" column="lastname"
-			length="50"/>
+		<property name="lastName" column="lastname"	length="50"/>
 		
-		<property name="birthDate" type="java.util.Date" column="birthdate"/>
+		<property name="birthDate" column="birthdate"/>
 		
-		<property name="deathDate" type="java.util.Date" column="deathdate"/>
+		<property name="deathDate" column="deathdate"/>
 		
-		<property name="isDead" type="boolean" length="1" column="isdead"
-			not-null="true"/>
+		<property name="isDead" column="isdead" not-null="true"/>
 		
-		<property name="gender" column="gender" length="2"/>
+		<property name="gender" column="gender" length="5"/>
 		
 		<!-- Associations -->
 		
 		<!-- bi-directional one-to-many association to PatientAddress -->
-		<set name="addresses" lazy="false" inverse="true"
-			cascade="all-delete-orphan" table="patientaddress">
+		
+		<set name="addresses" inverse="true" cascade="all-delete-orphan" table="patientaddress">
 			<key not-null="true" column="patientid"/>
 			<one-to-many class="org.hisp.dhis.patient.PatientAddress"/>
 		</set>
 		
 		<!-- bi-directional one-to-many association to PatientIdentifier -->
-		<set name="identifiers" lazy="false" inverse="true"
-			cascade="all-delete-orphan" table="patientidentifier">
+		
+		<set name="identifiers" inverse="true" cascade="all-delete-orphan" table="patientidentifier">
 			<key not-null="true" column="patientid"/>
 			<one-to-many class="org.hisp.dhis.patient.PatientIdentifier"/>
 		</set>

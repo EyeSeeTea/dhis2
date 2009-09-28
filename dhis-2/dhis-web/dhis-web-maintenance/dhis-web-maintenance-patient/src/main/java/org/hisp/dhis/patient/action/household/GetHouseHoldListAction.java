@@ -24,15 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.household;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.HouseHold;
-import org.hisp.dhis.patient.HouseHoldService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -43,7 +44,6 @@ import com.opensymphony.xwork2.Action;
 public class GetHouseHoldListAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -80,12 +80,10 @@ public class GetHouseHoldListAction
     public String execute()
         throws Exception
     {
-
         OrganisationUnit registeringUnit = selectionManager.getSelectedOrganisationUnit();
 
         houseHolds = houseHoldService.getHouseHoldsForOrgUnit( registeringUnit );
 
         return SUCCESS;
-
     }
 }

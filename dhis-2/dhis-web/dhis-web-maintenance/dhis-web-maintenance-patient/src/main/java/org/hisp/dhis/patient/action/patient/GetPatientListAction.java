@@ -24,11 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.Collection;
 import java.util.ArrayList;
-
+import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
@@ -41,31 +41,31 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class GetPatientListAction 
-	implements Action
-{   
+public class GetPatientListAction
+    implements Action
+{
 
     // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
+    // -------------------------------------------------------------------------
 
-	private OrganisationUnitSelectionManager selectionManager;
+    private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
     }
 
-	private PatientIdentifierService patientIdentifierService;
+    private PatientIdentifierService patientIdentifierService;
 
-	public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService ) 
-	{
-		this.patientIdentifierService = patientIdentifierService;
-	}
-    
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
+    }
+
     // -------------------------------------------------------------------------
     // Output
-    // -------------------------------------------------------------------------    
+    // -------------------------------------------------------------------------
 
     private Collection<PatientIdentifier> patientIdentifiers = new ArrayList<PatientIdentifier>();
 
@@ -73,11 +73,10 @@ public class GetPatientListAction
     {
         return patientIdentifiers;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
-
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -86,14 +85,10 @@ public class GetPatientListAction
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-    	OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();   	
-    	
-    	patientIdentifiers = patientIdentifierService.getPatientIdentifiersByOrgUnit( organisationUnit );        
-    	
+        patientIdentifiers = patientIdentifierService.getPatientIdentifiersByOrgUnit( organisationUnit );
+
         return SUCCESS;
     }
 }

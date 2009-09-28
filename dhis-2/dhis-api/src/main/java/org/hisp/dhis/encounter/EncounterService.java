@@ -24,43 +24,58 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+
+package org.hisp.dhis.encounter;
 
 import java.util.Collection;
+import java.util.Date;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientDataValueStore
+public interface EncounterService
 {
+    String ID = EncounterService.class.getName();
 
-    String ID = PatientDataValueStore.class.getName();
+    int addEncounter( Encounter encounter );
 
-    void addPatientDataValue( PatientDataValue patientDataValue );
+    void updateEncounter( Encounter encounter );
 
-    void updatePatientDataValue( PatientDataValue patientDataValue );
+    void deleteEncounter( Encounter encounter );
 
-    void deletePatientDataValue( PatientDataValue patientDataValue );
+    Encounter getEncounter( int id );
 
-    int deletePatientDataValue( Encounter encounter );
+    Encounter getEncounter( Date encounterDateTime, Patient patient, OrganisationUnit organisationUnit, DataSet dataSet );
 
-    int deletePatientDataValue( DataElement dataElement );
+    Collection<Encounter> getEncounters( Date encounterDateTime, Patient patient, OrganisationUnit organisationUnit );
 
-    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
+    Collection<Encounter> getEncounters( Patient patient, DataSet dataSet );
 
-    PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo );
+    Collection<Encounter> getEncounters( Date encounterDateTime, Patient patient );
 
-    Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement );
+    Collection<Encounter> getEncounters( Date encounterDateTime, DataSet dataSet );
 
-    Collection<PatientDataValue> getPatientDataValues( Encounter encounter );
+    Collection<Encounter> getEncounters( OrganisationUnit organisationUnit, Patient patient );
 
-    Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
+    Collection<Encounter> getEncounters( DataSet dataSet, Patient patient );
 
-    Collection<PatientDataValue> getAllPatientDataValues();
+    Collection<Encounter> getEncounters( DataSet dataSet, OrganisationUnit organisationUnit );
+
+    Collection<Encounter> getEncounters( OrganisationUnit organisationUnit );
+
+    Collection<Encounter> getEncounters( Date encounterDateTime );
+
+    Collection<Encounter> getEncounters( Patient patient );
+
+    Collection<Encounter> getEncounters( DataSet dataSet );
+
+    Collection<Encounter> getEncounters( Boolean isExecuted );
+
+    Collection<Encounter> getAllEncounters();
 
 }

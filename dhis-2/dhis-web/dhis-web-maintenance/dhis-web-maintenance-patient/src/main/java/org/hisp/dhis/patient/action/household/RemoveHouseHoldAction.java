@@ -24,10 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.household;
 
-import org.hisp.dhis.patient.HouseHold;
-import org.hisp.dhis.patient.HouseHoldService;
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -38,7 +39,6 @@ import com.opensymphony.xwork2.Action;
 public class RemoveHouseHoldAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -64,12 +64,10 @@ public class RemoveHouseHoldAction
     public String execute()
         throws Exception
     {
-
         HouseHold houseHold = houseHoldService.getHouseHold( id );
 
         houseHoldService.deleteHouseHold( houseHold );
 
         return SUCCESS;
-
     }
 }

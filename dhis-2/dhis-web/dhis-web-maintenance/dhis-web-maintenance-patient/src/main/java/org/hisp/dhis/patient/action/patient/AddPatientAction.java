@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -43,7 +44,6 @@ import com.opensymphony.xwork2.Action;
 public class AddPatientAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -68,7 +68,7 @@ public class AddPatientAction
     {
         this.patientIdentifierService = patientIdentifierService;
     }
-  
+
     private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
@@ -131,58 +131,41 @@ public class AddPatientAction
     }
 
     /*
-    // -------------------------------------------------------------------------
-    // Input - address
-    // -------------------------------------------------------------------------
-
-    private String address1;
-
-    public void setAddress1( String address1 )
-    {
-        this.address1 = address1;
-    }
-
-    private String address2;
-
-    public void setAddress2( String address2 )
-    {
-        this.address2 = address2;
-    }
-
-    private String landMark;
-
-    public void setLandMark( String landMark )
-    {
-        this.landMark = landMark;
-    }
-
-    private String cityVillage;
-
-    public void setCityVillage( String cityVillage )
-    {
-        this.cityVillage = cityVillage;
-    }
-
-    private String stateProvince;
-
-    public void setStateProvince( String stateProvince )
-    {
-        this.stateProvince = stateProvince;
-    }
-
-    private String country;
-
-    public void setCountry( String country )
-    {
-        this.country = country;
-    }
-
-    private String postalCode;
-
-    public void setPostalCode( String postalCode )
-    {
-        this.postalCode = postalCode;
-    }*/
+     * // -------------------------------------------------------------------------
+     * // Input - address 
+     * // -------------------------------------------------------------------------
+     * 
+     * private String address1;
+     * 
+     * public void setAddress1( String address1 ) { this.address1 = address1; }
+     * 
+     * private String address2;
+     * 
+     * public void setAddress2( String address2 ) { this.address2 = address2; }
+     * 
+     * private String landMark;
+     * 
+     * public void setLandMark( String landMark ) { this.landMark = landMark; }
+     * 
+     * private String cityVillage;
+     * 
+     * public void setCityVillage( String cityVillage ) { this.cityVillage =
+     * cityVillage; }
+     * 
+     * private String stateProvince;
+     * 
+     * public void setStateProvince( String stateProvince ) { this.stateProvince
+     * = stateProvince; }
+     * 
+     * private String country;
+     * 
+     * public void setCountry( String country ) { this.country = country; }
+     * 
+     * private String postalCode;
+     * 
+     * public void setPostalCode( String postalCode ) { this.postalCode =
+     * postalCode; }
+     */
 
     // -------------------------------------------------------------------------
     // Action implementation

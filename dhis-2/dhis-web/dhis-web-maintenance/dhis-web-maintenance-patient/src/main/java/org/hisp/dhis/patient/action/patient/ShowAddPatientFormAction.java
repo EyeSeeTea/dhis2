@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
 import org.hisp.dhis.patient.PatientIdentifier;
@@ -95,6 +96,5 @@ public class ShowAddPatientFormAction
         identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );        
 
         return SUCCESS;
-
     }
 }

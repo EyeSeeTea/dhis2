@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient;
 
 import java.util.ArrayList;
@@ -43,7 +44,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class DefaultPatientIdentifierService
     implements PatientIdentifierService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -59,121 +59,53 @@ public class DefaultPatientIdentifierService
     // PatientIdentifier
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierService#addPatientIdentifier
-     * (org.hisp.dhis.chis.patient.PatientIdentifier)
-     */
     public int addPatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        // TODO Auto-generated method stub
-
         return patientIdentifierStore.addPatientIdentifier( patientIdentifier );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierService#deletePatientIdentifier
-     * (org.hisp.dhis.chis.patient.PatientIdentifier)
-     */
     public void deletePatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        // TODO Auto-generated method stub
-
         patientIdentifierStore.deletePatientIdentifier( patientIdentifier );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierService#getAllPatientIdentifiers
-     * ()
-     */
     public Collection<PatientIdentifier> getAllPatientIdentifiers()
     {
-        // TODO Auto-generated method stub
-
         return patientIdentifierStore.getAllPatientIdentifiers();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.hisp.dhis.chis.patient.PatientIdentifierService#
-     * getPatienIdentifiersByIdentifier(java.lang.String)
-     */
     public Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier )
     {
-        // TODO Auto-generated method stub
-
         return patientIdentifierStore.getPatienIdentifiersByIdentifier( identifier );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierService#getPatientIdentifier
-     * (java.lang.String, org.hisp.dhis.organisationunit.OrganisationUnit)
-     */
     public PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit )
     {
-        // TODO Auto-generated method stub
-
         return patientIdentifierStore.getPatientIdentifier( identifier, organisationUnit );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.hisp.dhis.chis.patient.PatientIdentifierService#
-     * getPatientIdentifiersByOrgUnit
-     * (org.hisp.dhis.organisationunit.OrganisationUnit)
-     */
     public Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit )
     {
-        // TODO Auto-generated method stub
-
         return patientIdentifierStore.getPatientIdentifiersByOrgUnit( organisationUnit );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierService#updatePatientIdentifier
-     * (org.hisp.dhis.chis.patient.PatientIdentifier)
-     */
     public void updatePatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        // TODO Auto-generated method stub
-
         patientIdentifierStore.updatePatientIdentifier( patientIdentifier );
     }
 
     public PatientIdentifier getPatientIdentifier( Patient patient )
     {
-        // TODO Auto-generated method stub
-
         return patientIdentifierStore.getPatientIdentifier( patient );
     }
 
     public PatientIdentifier getPatientIdentifier( int id )
     {
-        // TODO Auto-generated method stub
-
         return patientIdentifierStore.getPatientIdentifier( id );
     }
 
     public String getNextIdentifierForOrgUnit( OrganisationUnit orgUnit )
     {
-        // TODO Auto-generated method stub
-
         Collection<PatientIdentifier> patientIdentifiers = patientIdentifierStore
             .getPatientIdentifiersByOrgUnit( orgUnit );
 
@@ -223,7 +155,5 @@ public class DefaultPatientIdentifierService
         }
 
         return nextIdentifier;
-
     }
-
 }

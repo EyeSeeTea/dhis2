@@ -4,14 +4,13 @@
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="org.hisp.dhis.patient.HouseHold" table="household">
+	<class name="org.hisp.dhis.household.HouseHold" table="household">
 		
 		<id name="id" column="householdid">
 			<generator class="native"/>
 		</id>
 		
-		<property name="houseNumber" type="java.lang.String" length="31"
-			not-null="true"/>
+		<property name="houseNumber" length="31"/>
 		
 		<property name="visitingOrder" column="visitingorder"/>
 		
@@ -19,16 +18,13 @@
 		
 		<property name="landMark" column="landmark"/>
 		
-		<many-to-one name="organisationUnit"
-			class="org.hisp.dhis.organisationunit.OrganisationUnit"
+		<many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit"
 			column="organisationunitid" not-null="true"
 			foreign-key="fk_household_organisationunitid"/>
 		
-		<!-- Associations -->
-		
 		<!-- bi-directional one-to-many association to Patient -->
-		<set name="members" lazy="false" inverse="true" cascade="all-delete-orphan"
-			table="patient">
+		
+		<set name="members" inverse="true" cascade="all-delete-orphan" table="patient">
 			<key not-null="true" column="householdid"/>
 			<one-to-many class="org.hisp.dhis.patient.Patient"/>
 		</set>

@@ -12,7 +12,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
     <property name="houseHoldService"
-      ref="org.hisp.dhis.patient.HouseHoldService"/>                  
+      ref="org.hisp.dhis.household.HouseHoldService"/>                  
   </bean>
   
   <bean id="org.hisp.dhis.patient.action.household.AddHouseHoldAction"
@@ -21,7 +21,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>  
     <property name="houseHoldService"
-      ref="org.hisp.dhis.patient.HouseHoldService"/>         
+      ref="org.hisp.dhis.household.HouseHoldService"/>         
   </bean>
   
   <bean id="org.hisp.dhis.patient.action.household.SelectHouseHoldAction"
@@ -35,14 +35,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.patient.action.household.GetHouseHoldAction" 
     scope="prototype">      
     <property name="houseHoldService"
-      ref="org.hisp.dhis.patient.HouseHoldService"/>         
+      ref="org.hisp.dhis.household.HouseHoldService"/>         
   </bean> 
   
   <bean id="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction"
     class="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction" 
     scope="prototype">      
     <property name="houseHoldService"
-      ref="org.hisp.dhis.patient.HouseHoldService"/>         
+      ref="org.hisp.dhis.household.HouseHoldService"/>         
   </bean>  
 	
   <bean id="org.hisp.dhis.patient.action.household.ShowAddHouseHoldFormAction"
@@ -51,7 +51,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
     <property name="houseHoldService"
-      ref="org.hisp.dhis.patient.HouseHoldService"/>
+      ref="org.hisp.dhis.household.HouseHoldService"/>
   </bean>  	
 
   <bean id="org.hisp.dhis.patient.action.household.ValidateHouseHoldAction"
@@ -65,7 +65,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.patient.action.household.UpdateHouseHoldAction" 
     scope="prototype">
     <property name="houseHoldService"
-      ref="org.hisp.dhis.patient.HouseHoldService"/>
+      ref="org.hisp.dhis.household.HouseHoldService"/>
 	<property name="patientService"
       ref="org.hisp.dhis.patient.PatientService"/>
   </bean>  
@@ -76,7 +76,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
     <property name="houseHoldService"
-      ref="org.hisp.dhis.patient.HouseHoldService"/>
+      ref="org.hisp.dhis.household.HouseHoldService"/>
 	<property name="patientService"
       ref="org.hisp.dhis.patient.PatientService"/>  
   </bean>

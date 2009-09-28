@@ -24,10 +24,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAddressService;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
@@ -38,39 +37,37 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class GetPatientAction 
-	implements Action
-{   
-
+public class GetPatientAction
+    implements Action
+{
     // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
+    // -------------------------------------------------------------------------
 
-	private PatientService patientService;
-	
-	public void setPatientService( PatientService patientService ) 
-	{
-		this.patientService = patientService;
-	}
+    private PatientService patientService;
 
-	private PatientIdentifierService patientIdentifierService;
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
 
-	public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService ) 
-	{
-		this.patientIdentifierService = patientIdentifierService;
-	}
-	
-	private PatientAddressService patientAddressService;
+    private PatientIdentifierService patientIdentifierService;
 
-	public void setPatientAddressService( PatientAddressService patientAddressService ) 
-	{
-		this.patientAddressService = patientAddressService;
-	}       
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
+    }
+
+    private PatientAddressService patientAddressService;
+
+    public void setPatientAddressService( PatientAddressService patientAddressService )
+    {
+        this.patientAddressService = patientAddressService;
+    }
 
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
-
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -78,8 +75,7 @@ public class GetPatientAction
 
     public String execute()
         throws Exception
-    {        
-        
+    {
         return SUCCESS;
     }
 }

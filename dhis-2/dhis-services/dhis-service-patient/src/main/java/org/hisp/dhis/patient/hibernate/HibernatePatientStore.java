@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.hibernate;
 
 import java.util.Collection;
@@ -43,7 +44,6 @@ import org.hisp.dhis.patient.PatientStore;
 public class HibernatePatientStore
     implements PatientStore
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -59,48 +59,19 @@ public class HibernatePatientStore
     // Patient
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientStore#addPatient(org.hisp.dhis.chis
-     * .patient.Patient)
-     */
     public int addPatient( Patient patient )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Integer) session.save( patient );
+        return (Integer) sessionFactory.getCurrentSession().save( patient );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientStore#deletePatient(org.hisp.dhis.chis
-     * .patient.Patient)
-     */
     public void deletePatient( Patient patient )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( patient );
+        sessionFactory.getCurrentSession().delete( patient );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.patient.PatientStore#getAllPatients()
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getAllPatients()
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Patient.class );
@@ -108,16 +79,9 @@ public class HibernatePatientStore
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.patient.PatientStore#getPatiensByGender(int)
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getPatiensByGender( String gender )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Patient.class );
@@ -126,32 +90,16 @@ public class HibernatePatientStore
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.patient.PatientStore#getPatient(int)
-     */
     public Patient getPatient( int id )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         return (Patient) session.get( Patient.class, id );
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientStore#getPatientsByBirthDate(java.util
-     * .Date)
-     */
+    
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getPatientsByBirthDate( Date birthDate )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Patient.class );
@@ -160,49 +108,27 @@ public class HibernatePatientStore
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientStore#getPatientsByNames(java.lang.
-     * String)
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getPatientsByNames( String name )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Patient.class );
         criteria.add( Restrictions.disjunction().add( Restrictions.ilike( "firstName", "%" + name + "%" ) ).add(
-            Restrictions.ilike( "middleName", "%" + name + "%" ) ).add( Restrictions.ilike( "lastName", "%"+ name + "%" ) ) );
+            Restrictions.ilike( "middleName", "%" + name + "%" ) ).add(
+            Restrictions.ilike( "lastName", "%" + name + "%" ) ) );
 
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientStore#updatePatient(org.hisp.dhis.chis
-     * .patient.Patient)
-     */
     public void updatePatient( Patient patient )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( patient );
-        
+        sessionFactory.getCurrentSession().update( patient );
     }
 
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getAllPatients( Boolean isDead )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Patient.class );
@@ -210,5 +136,4 @@ public class HibernatePatientStore
 
         return criteria.list();
     }
-
 }

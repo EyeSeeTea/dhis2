@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -38,7 +39,6 @@ import com.opensymphony.xwork2.Action;
 public class SelectPatientAction
     implements Action
 {
-
     private static final String PATIENT_FORM = "patientform";
 
     // -------------------------------------------------------------------------
@@ -83,5 +83,4 @@ public class SelectPatientAction
 
         return PATIENT_FORM;
     }
-
 }

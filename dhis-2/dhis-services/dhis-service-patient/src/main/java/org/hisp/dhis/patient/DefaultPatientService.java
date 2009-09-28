@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient;
 
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultPatientService
     implements PatientService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -63,116 +63,48 @@ public class DefaultPatientService
     // PatientDataValue
     // -------------------------------------------------------------------------   
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientService#addPatient(org.hisp.dhis.chis
-     * .patient.Patient)
-     */
     public int addPatient( Patient patient )
     {
-        // TODO Auto-generated method stub
-
         return patientStore.addPatient( patient );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientService#deletePatient(org.hisp.dhis
-     * .chis.patient.Patient)
-     */
     public void deletePatient( Patient patient )
     {
-        // TODO Auto-generated method stub
-
         patientStore.deletePatient( patient );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.patient.PatientService#getAllPatients()
-     */
     public Collection<Patient> getAllPatients()
     {
-        // TODO Auto-generated method stub
-
         return patientStore.getAllPatients();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.patient.PatientService#getPatiensByGender(int)
-     */
     public Collection<Patient> getPatiensByGender( String gender )
     {
-        // TODO Auto-generated method stub
-
         return patientStore.getPatiensByGender( gender );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.patient.PatientService#getPatient(int)
-     */
     public Patient getPatient( int id )
     {
-        // TODO Auto-generated method stub
-
         return patientStore.getPatient( id );
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientService#getPatientsByBirthDate(java
-     * .util.Date)
-     */
+    
     public Collection<Patient> getPatientsByBirthDate( Date birthDate )
     {
-        // TODO Auto-generated method stub
-
         return patientStore.getPatientsByBirthDate( birthDate );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientService#getPatientsByNames(java.lang
-     * .String)
-     */
     public Collection<Patient> getPatientsByNames( String name )
     {
-        // TODO Auto-generated method stub
-
         return patientStore.getPatientsByNames( name );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientService#updatePatient(org.hisp.dhis
-     * .chis.patient.Patient)
-     */
     public void updatePatient( Patient patient )
     {
-        // TODO Auto-generated method stub
-
         patientStore.updatePatient( patient );
     }
 
     public Collection<Patient> getAllPatients( Boolean isDead )
     {
-        // TODO Auto-generated method stub
-
         return patientStore.getAllPatients( isDead );
     }
     
@@ -187,8 +119,6 @@ public class DefaultPatientService
             result.add( patientIdentifier.getPatient() );
         }       
         
-        return result;
-        
+        return result;        
     }
-
 }

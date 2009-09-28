@@ -1,7 +1,8 @@
-package org.hisp.dhis.patient;
+package org.hisp.dhis.patientdatavalue;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.encounter.Encounter;
 
 import java.io.Serializable;
 

@@ -24,13 +24,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.household;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.hisp.dhis.patient.HouseHold;
-import org.hisp.dhis.patient.HouseHoldService;
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 
@@ -43,7 +44,6 @@ import com.opensymphony.xwork2.Action;
 public class UpdateHouseHoldAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -101,7 +101,6 @@ public class UpdateHouseHoldAction
     public String execute()
         throws Exception
     {
-
         HouseHold houseHold = houseHoldService.getHouseHold( id );
 
         houseHold.setLandMark( landMark );
@@ -117,6 +116,5 @@ public class UpdateHouseHoldAction
         houseHoldService.updateHouseHold( houseHold );
 
         return SUCCESS;
-
     }
 }

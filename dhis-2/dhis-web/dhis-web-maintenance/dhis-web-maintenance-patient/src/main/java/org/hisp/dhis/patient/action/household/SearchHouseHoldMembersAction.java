@@ -24,15 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.household;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.patient.HouseHold;
-import org.hisp.dhis.patient.HouseHoldService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
@@ -45,7 +46,6 @@ import com.opensymphony.xwork2.Action;
 public class SearchHouseHoldMembersAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -115,11 +115,6 @@ public class SearchHouseHoldMembersAction
         return houseHold;
     }
 
-    public void setHouseHold( HouseHold houseHold )
-    {
-        this.houseHold = houseHold;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -138,7 +133,5 @@ public class SearchHouseHoldMembersAction
         members = patientService.getPatients( searchText );
         
         return SUCCESS;
-
-    }
-    
+    }    
 }

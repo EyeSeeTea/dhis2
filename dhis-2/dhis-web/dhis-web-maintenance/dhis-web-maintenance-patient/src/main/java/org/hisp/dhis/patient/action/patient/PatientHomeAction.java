@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
 import com.opensymphony.xwork2.Action;
@@ -35,7 +36,6 @@ import com.opensymphony.xwork2.Action;
 public class PatientHomeAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -51,8 +51,6 @@ public class PatientHomeAction
     public String execute()
         throws Exception
     {
-
         return SUCCESS;
-
     }
 }

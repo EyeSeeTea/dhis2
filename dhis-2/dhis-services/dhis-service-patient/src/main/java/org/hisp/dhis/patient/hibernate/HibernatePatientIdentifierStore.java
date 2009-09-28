@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.hibernate;
 
 import java.util.Collection;
@@ -44,7 +45,6 @@ import org.hisp.dhis.patient.PatientIdentifierStore;
 public class HibernatePatientIdentifierStore
     implements PatientIdentifierStore
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -60,50 +60,19 @@ public class HibernatePatientIdentifierStore
     // PatientIdentifier
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierStore#addPatientIdentifier
-     * (org.hisp.dhis.chis.patient.PatientIdentifier)
-     */
     public int addPatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Integer) session.save( patientIdentifier );
+        return (Integer) sessionFactory.getCurrentSession().save( patientIdentifier );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierStore#deletePatientIdentifier
-     * (org.hisp.dhis.chis.patient.PatientIdentifier)
-     */
     public void deletePatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( patientIdentifier );
+        sessionFactory.getCurrentSession().delete( patientIdentifier );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierStore#getAllPatientIdentifiers
-     * ()
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<PatientIdentifier> getAllPatientIdentifiers()
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientIdentifier.class );
@@ -111,36 +80,19 @@ public class HibernatePatientIdentifierStore
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.hisp.dhis.chis.patient.PatientIdentifierStore#
-     * getPatienIdentifiersByIdentifier(java.lang.String)
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientIdentifier.class );
-        criteria.add( Restrictions.ilike( "identifier", "%" + identifier + "%" ) );     
-        
+        criteria.add( Restrictions.ilike( "identifier", "%" + identifier + "%" ) );
+
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierStore#getPatientIdentifier
-     * (java.lang.String, org.hisp.dhis.organisationunit.OrganisationUnit)
-     */
     public PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientIdentifier.class );
@@ -150,18 +102,9 @@ public class HibernatePatientIdentifierStore
         return (PatientIdentifier) criteria.uniqueResult();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.hisp.dhis.chis.patient.PatientIdentifierStore#
-     * getPatientIdentifiersByOrgUnit
-     * (org.hisp.dhis.organisationunit.OrganisationUnit)
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientIdentifier.class );
@@ -170,26 +113,13 @@ public class HibernatePatientIdentifierStore
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientIdentifierStore#updatePatientIdentifier
-     * (org.hisp.dhis.chis.patient.PatientIdentifier)
-     */
     public void updatePatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( patientIdentifier );
+        sessionFactory.getCurrentSession().update( patientIdentifier );
     }
 
     public PatientIdentifier getPatientIdentifier( Patient patient )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientIdentifier.class );
@@ -201,25 +131,6 @@ public class HibernatePatientIdentifierStore
 
     public PatientIdentifier getPatientIdentifier( int id )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        return (PatientIdentifier) session.get( PatientIdentifier.class, id );
+        return (PatientIdentifier) sessionFactory.getCurrentSession().get( PatientIdentifier.class, id );
     }
-
-    /*
-     * public PatientIdentifier getPatientIdentifierLastAssigned(Source source)
-     * { // TODO Auto-generated method stub
-     * 
-     * Session session = sessionFactory.getCurrentSession();
-     * 
-     * Criteria criteria = session.createCriteria( PatientIdentifier.class );
-     * criteria.add( Restrictions.eq( "source", source ) ); criteria.add(
-     * Restrictions.eq( "identifier",
-     * Restrictions.sqlRestriction("SELECT MAX(identifier) FROM patientidentifier"
-     * )));
-     * 
-     * return (PatientIdentifier) criteria.uniqueResult(); }
-     */
 }

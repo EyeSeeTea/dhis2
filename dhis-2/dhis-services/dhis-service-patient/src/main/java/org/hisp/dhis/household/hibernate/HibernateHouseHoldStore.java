@@ -24,7 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient.hibernate;
+
+package org.hisp.dhis.household.hibernate;
 
 import java.util.Collection;
 
@@ -32,9 +33,9 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.HouseHold;
-import org.hisp.dhis.patient.HouseHoldStore;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -43,7 +44,6 @@ import org.hisp.dhis.patient.HouseHoldStore;
 public class HibernateHouseHoldStore
     implements HouseHoldStore
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -59,48 +59,24 @@ public class HibernateHouseHoldStore
     // HouseHold
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.household.HouseHoldStore#addHouseHold(org.hisp.dhis
-     * .chis.household.HouseHold)
-     */
     public int addHouseHold( HouseHold houseHold )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Integer) session.save( houseHold );
+        return (Integer) sessionFactory.getCurrentSession().save( houseHold );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.household.HouseHoldStore#deleteHouseHold(org.hisp.
-     * dhis.chis.household.HouseHold)
-     */
+    public void updateHouseHold( HouseHold houseHold )
+    {
+        sessionFactory.getCurrentSession().update( houseHold );
+    }
+
     public void deleteHouseHold( HouseHold houseHold )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( houseHold );
+        sessionFactory.getCurrentSession().delete( houseHold );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.household.HouseHoldStore#getAllHouseHolds()
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<HouseHold> getAllHouseHolds()
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( HouseHold.class );
@@ -108,53 +84,19 @@ public class HibernateHouseHoldStore
         return criteria.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.chis.household.HouseHoldStore#getHouseHold(int)
-     */
     public HouseHold getHouseHold( int id )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        return (HouseHold) session.get( HouseHold.class, id );
+        return (HouseHold) sessionFactory.getCurrentSession().get( HouseHold.class, id );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.household.HouseHoldStore#getHouseHoldsForAReportingUnit
-     * (org.hisp.dhis.organisationunit.OrganisationUnit)
-     */
     @SuppressWarnings( "unchecked" )
     public Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit organisationUnit )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( HouseHold.class );
         criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
 
         return criteria.list();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.household.HouseHoldStore#updateHouseHold(org.hisp.
-     * dhis.chis.household.HouseHold)
-     */
-    public void updateHouseHold( HouseHold houseHold )
-    {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( houseHold );
     }
 }

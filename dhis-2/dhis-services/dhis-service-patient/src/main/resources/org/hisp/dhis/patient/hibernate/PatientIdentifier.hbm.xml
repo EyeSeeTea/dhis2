@@ -4,8 +4,7 @@
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="org.hisp.dhis.patient.PatientIdentifier"
-		table="patientidentifier">
+	<class name="org.hisp.dhis.patient.PatientIdentifier" table="patientidentifier">
 		
 		<id name="id" column="patientidentifierid">
 			<generator class="native"/>
@@ -14,14 +13,12 @@
 		<many-to-one name="patient" class="org.hisp.dhis.patient.Patient"
 			column="patientid" not-null="true"/>
 		
-		<property name="identifier" type="java.lang.String" length="31"
-			not-null="true"/>
+		<property name="identifier" length="31" not-null="true"/>
 		
-		<many-to-one name="organisationUnit"
-			class="org.hisp.dhis.organisationunit.OrganisationUnit"
+		<many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit"
 			column="organisationunitid"/>
 		
-		<property name="preferred" type="boolean" not-null="true"/>
+		<property name="preferred" not-null="true"/>
 		
 	</class>
 </hibernate-mapping>

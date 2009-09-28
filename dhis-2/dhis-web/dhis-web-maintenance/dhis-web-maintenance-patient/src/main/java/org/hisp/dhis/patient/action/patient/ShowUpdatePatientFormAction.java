@@ -24,15 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
-
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -40,29 +40,28 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowUpdatePatientFormAction 
-	implements Action
-{   
-
-	// -------------------------------------------------------------------------
+public class ShowUpdatePatientFormAction
+    implements Action
+{
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------	
+    // -------------------------------------------------------------------------
 
-	private PatientIdentifierService patientIdentifierService;
+    private PatientIdentifierService patientIdentifierService;
 
-	public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService ) 
-	{
-		this.patientIdentifierService = patientIdentifierService;
-	}	
-	
-	private PatientService patientService;
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
+    }
 
-	public void setPatientService( PatientService patientService ) 
-	{
-		this.patientService = patientService;
-	}
-	
-	private OrganisationUnitSelectionManager selectionManager;
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
+
+    private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
@@ -73,52 +72,51 @@ public class ShowUpdatePatientFormAction
     // Input
     // -------------------------------------------------------------------------
 
-	private Integer patientIdentifierId;
+    private Integer patientIdentifierId;
 
     public void setPatientIdentifierId( Integer patientIdentifierId )
     {
         this.patientIdentifierId = patientIdentifierId;
     }
-    
-	private Integer patientId;
+
+    private Integer patientId;
 
     public void setPatientId( Integer patientId )
     {
         this.patientId = patientId;
-    }   
-	
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
     private Patient patient;
-    
+
     public Patient getPatient()
     {
-    	return patient;
+        return patient;
     }
-    
+
     private PatientIdentifier patientIdentifier;
-    
+
     public PatientIdentifier getPatientIdentifier()
     {
-    	return patientIdentifier;
+        return patientIdentifier;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
-    {        
-        
-    	OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
-    	
-    	patientIdentifier = patientIdentifierService.getPatientIdentifier( patientIdentifierId );  
-    	
-    	patient = patientService.getPatient( patientId );   	 	
-    	
-        return SUCCESS;        
+    {
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patientIdentifierId );
+
+        patient = patientService.getPatient( patientId );
+
+        return SUCCESS;
     }
 }

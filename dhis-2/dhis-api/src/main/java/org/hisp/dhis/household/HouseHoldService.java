@@ -24,33 +24,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+
+package org.hisp.dhis.household;
 
 import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
-
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface HouseHoldService 
+public interface HouseHoldService
 {
-	String ID = HouseHoldService.class.getName();
-	
-	int addHouseHold( HouseHold houseHold );
-	
-	void deleteHouseHold( HouseHold houseHold );
-	
-	void updateHouseHold( HouseHold houseHold );	
-	
-	HouseHold getHouseHold( int id );	
-	
-	Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit registeringUnit );
-	
-	Collection<HouseHold> getAllHouseHolds();
-	
-	String getNextHouseHoldNumber( OrganisationUnit organisationUnit );	
+    String ID = HouseHoldService.class.getName();
 
+    int addHouseHold( HouseHold houseHold );
+
+    void deleteHouseHold( HouseHold houseHold );
+
+    void updateHouseHold( HouseHold houseHold );
+
+    HouseHold getHouseHold( int id );
+
+    Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit registeringUnit );
+
+    Collection<HouseHold> getAllHouseHolds();
+
+    String getNextHouseHoldNumber( OrganisationUnit organisationUnit );
 }

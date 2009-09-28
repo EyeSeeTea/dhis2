@@ -54,5 +54,4 @@ public interface PatientStore
     Collection<Patient> getPatientsByBirthDate( Date birthDate );
 
     Collection<Patient> getPatientsByNames( String name );
-
 }

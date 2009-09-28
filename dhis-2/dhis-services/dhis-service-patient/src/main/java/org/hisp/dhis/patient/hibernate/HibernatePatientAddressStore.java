@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.hibernate;
 
 import org.hibernate.Criteria;
@@ -41,7 +42,6 @@ import org.hisp.dhis.patient.PatientAddressStore;
 public class HibernatePatientAddressStore
     implements PatientAddressStore
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -57,67 +57,23 @@ public class HibernatePatientAddressStore
     // PatientAddress
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientAddressStore#addPatientAddress(org.
-     * hisp.dhis.chis.patient.PatientAddress)
-     */
     public int addPatientAddress( PatientAddress patientAddress )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Integer) session.save( patientAddress );
-
+        return (Integer) sessionFactory.getCurrentSession().save( patientAddress );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientAddressStore#deletePatientAddress(org
-     * .hisp.dhis.chis.patient.PatientAddress)
-     */
     public void deletePatientAddress( PatientAddress patientAddress )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( patientAddress );
-
+        sessionFactory.getCurrentSession().delete( patientAddress );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientAddressStore#getPatientAddress(int)
-     */
     public PatientAddress getPatientAddress( int id )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        return (PatientAddress) session.get( PatientAddress.class, id );
-
+        return (PatientAddress) sessionFactory.getCurrentSession().get( PatientAddress.class, id );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientAddressStore#getPatientAddress(org.
-     * hisp.dhis.chis.patient.Patient)
-     */
     public PatientAddress getPatientAddress( Patient patient )
     {
-        // TODO Auto-generated method stub
-
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( PatientAddress.class );
@@ -127,20 +83,8 @@ public class HibernatePatientAddressStore
         return (PatientAddress) criteria.uniqueResult();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.PatientAddressStore#updatePatientAddress(org
-     * .hisp.dhis.chis.patient.PatientAddress)
-     */
     public void updatePatientAddress( PatientAddress patientAddress )
     {
-        // TODO Auto-generated method stub
-
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( patientAddress );
+        sessionFactory.getCurrentSession().update( patientAddress );
     }
-
 }

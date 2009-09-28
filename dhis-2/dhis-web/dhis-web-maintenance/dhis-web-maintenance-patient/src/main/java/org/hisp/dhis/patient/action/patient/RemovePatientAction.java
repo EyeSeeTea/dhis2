@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
 import org.hisp.dhis.patient.Patient;
@@ -38,7 +39,6 @@ import com.opensymphony.xwork2.Action;
 public class RemovePatientAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -49,7 +49,7 @@ public class RemovePatientAction
     {
         this.patientService = patientService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -68,11 +68,10 @@ public class RemovePatientAction
     public String execute()
         throws Exception
     {
-
         Patient patient = patientService.getPatient( id );
-        
+
         patientService.deletePatient( patient );
-        
+
         return SUCCESS;
     }
 }

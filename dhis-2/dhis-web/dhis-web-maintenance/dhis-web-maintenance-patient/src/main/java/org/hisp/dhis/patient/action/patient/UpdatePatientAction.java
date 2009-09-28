@@ -24,13 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
-
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAddressService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.i18n.I18nFormat;
 
 import com.opensymphony.xwork2.Action;
 
@@ -38,142 +38,141 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class UpdatePatientAction 
-	implements Action
-{   
-
-	// -------------------------------------------------------------------------
+public class UpdatePatientAction
+    implements Action
+{
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------  
+    // -------------------------------------------------------------------------
 
-	private I18nFormat format;
-	
-	public void setFormat( I18nFormat format )
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
     {
         this.format = format;
-    }  
+    }
 
-	private PatientService patientService;
-	
-	public void setPatientService( PatientService patientService ) 
-	{
-		this.patientService = patientService;
-	}
-	
-	private PatientAddressService patientAddressService;
+    private PatientService patientService;
 
-	public void setPatientAddressService( PatientAddressService patientAddressService ) 
-	{
-		this.patientAddressService = patientAddressService;
-	}
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
 
-	// -------------------------------------------------------------------------
+    private PatientAddressService patientAddressService;
+
+    public void setPatientAddressService( PatientAddressService patientAddressService )
+    {
+        this.patientAddressService = patientAddressService;
+    }
+
+    // -------------------------------------------------------------------------
     // Input - Id
     // -------------------------------------------------------------------------
-	
+
     private Integer id;
 
     public void setId( Integer id )
     {
         this.id = id;
     }
-	
-	// -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Input - name
     // -------------------------------------------------------------------------
-	
-	private String firstName;
-	
-	public void setFirstName( String firstName ) 
-	{
-		this.firstName = firstName;
-	}
-	
-	private String middleName;
-	
-	public void setMiddleName( String middleName )  
-	{
-		this.middleName = middleName;
-	}
-	
-	private String lastName;
-	
-	public void setLastName( String lastName ) 
-	{
-		this.lastName = lastName;
-	}	
 
-	// -------------------------------------------------------------------------
+    private String firstName;
+
+    public void setFirstName( String firstName )
+    {
+        this.firstName = firstName;
+    }
+
+    private String middleName;
+
+    public void setMiddleName( String middleName )
+    {
+        this.middleName = middleName;
+    }
+
+    private String lastName;
+
+    public void setLastName( String lastName )
+    {
+        this.lastName = lastName;
+    }
+
+    // -------------------------------------------------------------------------
     // Input - demographics
     // -------------------------------------------------------------------------
-	
-	private String birthDate;   
 
-	public void setBirthDate( String birthDate ) 
-	{
-		this.birthDate = birthDate;
-	}
-	
-	private String gender;
-	
-	public void setGender( String gender )
-	{
-		this.gender = gender;
-	}
-	
-	// -------------------------------------------------------------------------
+    private String birthDate;
+
+    public void setBirthDate( String birthDate )
+    {
+        this.birthDate = birthDate;
+    }
+
+    private String gender;
+
+    public void setGender( String gender )
+    {
+        this.gender = gender;
+    }
+
+    // -------------------------------------------------------------------------
     // Input - address
     // -------------------------------------------------------------------------
-	
-	private String address1;
-	
-	public void setAddress1( String address1 )
-	{
-		this.address1 = address1;
-	}
-	
-	private String address2;
-	
-	public void setAddress2( String address2 )
-	{
-		this.address2 = address2;
-	}
-	
-	private String landMark;
-	
-	public void setLandMark( String landMark )
-	{
-		this.landMark = landMark;
-	}
-	
-	private String cityVillage;
-	
-	public void setCityVillage( String cityVillage )
-	{
-		this.cityVillage = cityVillage;
-	}
-	
-	private String stateProvince;
-	
-	public void setStateProvince( String stateProvince )
-	{
-		this.stateProvince = stateProvince;
-	}
-	
-	private String country;
-	
-	public void setCountry( String country )
-	{
-		this.country = country;
-	}
 
-	private String postalCode;
-	
-	public void setPostalCode( String postalCode )
-	{
-		this.postalCode = postalCode;
-	}
-	
+    private String address1;
+
+    public void setAddress1( String address1 )
+    {
+        this.address1 = address1;
+    }
+
+    private String address2;
+
+    public void setAddress2( String address2 )
+    {
+        this.address2 = address2;
+    }
+
+    private String landMark;
+
+    public void setLandMark( String landMark )
+    {
+        this.landMark = landMark;
+    }
+
+    private String cityVillage;
+
+    public void setCityVillage( String cityVillage )
+    {
+        this.cityVillage = cityVillage;
+    }
+
+    private String stateProvince;
+
+    public void setStateProvince( String stateProvince )
+    {
+        this.stateProvince = stateProvince;
+    }
+
+    private String country;
+
+    public void setCountry( String country )
+    {
+        this.country = country;
+    }
+
+    private String postalCode;
+
+    public void setPostalCode( String postalCode )
+    {
+        this.postalCode = postalCode;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -181,20 +180,19 @@ public class UpdatePatientAction
     public String execute()
         throws Exception
     {
-    	
-    	// ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Update patient
         // ---------------------------------------------------------------------
-    	
-    	Patient patient = patientService.getPatient( id );
-    	patient.setFirstName(firstName);
-    	patient.setMiddleName(middleName);
-    	patient.setLastName(lastName);
-    	patient.setGender(gender);    	
-    	patient.setBirthDate( format.parseDate( birthDate ) );
-    	
-    	patientService.updatePatient( patient ); 	
-    	
+
+        Patient patient = patientService.getPatient( id );
+        patient.setFirstName( firstName );
+        patient.setMiddleName( middleName );
+        patient.setLastName( lastName );
+        patient.setGender( gender );
+        patient.setBirthDate( format.parseDate( birthDate ) );
+
+        patientService.updatePatient( patient );
+
         return SUCCESS;
     }
 }

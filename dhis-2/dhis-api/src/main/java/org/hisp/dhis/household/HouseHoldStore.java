@@ -24,43 +24,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
+
+package org.hisp.dhis.household;
 
 import java.util.Collection;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface PatientDataValueService
+public interface HouseHoldStore
 {
+    String ID = HouseHoldStore.class.getName();
 
-    String ID = PatientDataValueService.class.getName();
+    int addHouseHold( HouseHold houseHold );
 
-    void addPatientDataValue( PatientDataValue patientDataValue );
+    void deleteHouseHold( HouseHold houseHold );
 
-    void updatePatientDataValue( PatientDataValue patientDataValue );
+    void updateHouseHold( HouseHold houseHold );
 
-    void deletePatientDataValue( PatientDataValue patientDataValue );
+    HouseHold getHouseHold( int id );
 
-    int deletePatientDataValue( Encounter encounter );
+    Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit registeringUnit );
 
-    int deletePatientDataValue( DataElement dataElement );
-
-    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
-
-    PatientDataValue getPatientDataValue( Encounter encounter, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo );
-
-    Collection<PatientDataValue> getPatientDataValues( Encounter encounter, DataElement dataElement );
-
-    Collection<PatientDataValue> getPatientDataValues( Encounter encounter );
-
-    Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
-
-    Collection<PatientDataValue> getAllPatientDataValues();
-
+    Collection<HouseHold> getAllHouseHolds();
 }
