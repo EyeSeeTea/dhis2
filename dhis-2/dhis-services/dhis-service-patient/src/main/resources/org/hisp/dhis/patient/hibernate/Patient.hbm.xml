@@ -26,7 +26,7 @@
 		
 		<set name="addresses" inverse="true" cascade="all-delete-orphan" table="patient_addresses">
 			<key not-null="true" column="patientid"/>
-			<one-to-many class="org.hisp.dhis.patient.PatientAddress"/>
+			<one-to-many class="org.hisp.dhis.patient.Address"/>
 		</set>
 		
 		<set name="identifiers" inverse="true" cascade="all-delete-orphan" table="patient_identifiers">

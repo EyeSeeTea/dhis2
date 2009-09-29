@@ -22,12 +22,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         class="org.hisp.dhis.patient.hibernate.HibernatePatientIdentifierStore">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    
-	<bean id="org.hisp.dhis.encounter.EncounterStore"
-		class="org.hisp.dhis.encounter.hibernate.HibernateEncounterStore">
-		<property name="sessionFactory" ref="sessionFactory"/>
-	</bean>
-	
+    	
 	<bean id="org.hisp.dhis.household.HouseHoldStore"
 		class="org.hisp.dhis.household.hibernate.HibernateHouseHoldStore">
 		<property name="sessionFactory" ref="sessionFactory"/>
@@ -59,13 +54,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<property name="patientIdentifierStore"
 			ref="org.hisp.dhis.patient.PatientIdentifierStore"/>
 	</bean>
-	
-    <bean id="org.hisp.dhis.encounter.EncounterService"
-        class="org.hisp.dhis.encounter.DefaultEncounterService">
-        <property name="encounterStore"
-            ref="org.hisp.dhis.encounter.EncounterStore"/>
-    </bean>
-    
+	    
     <bean id="org.hisp.dhis.household.HouseHoldService"
         class="org.hisp.dhis.household.DefaultHouseHoldService">
         <property name="houseHoldStore"

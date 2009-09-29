@@ -19,8 +19,7 @@ public class PatientStoreTest
         patientStore = (PatientStore) getBean( PatientStore.ID );
         
         patientA = createPerson( 'A' );
-        patientB = createPerson( 'B' );
-        
+        patientB = createPerson( 'B' );        
     }
     
     protected static Patient createPerson( char uniqueChar )
@@ -36,7 +35,7 @@ public class PatientStoreTest
         return patient;
     }
     
-    //@Test
+    @Test
     public void addGet()
     {
         int idA = patientStore.addPatient( patientA );
