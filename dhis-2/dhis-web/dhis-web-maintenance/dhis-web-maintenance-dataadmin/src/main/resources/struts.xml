@@ -96,7 +96,7 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 	  
-	  <action name="lockorgunit"
+	<action name="lockorgunit"
       class="org.hisp.dhis.dataadmin.action.lock.LockSelectedOrganisationUnitAction">
       <result name="success" type="velocity"> /dhis-web-maintenance-dataadmin/responseSelect.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
@@ -121,7 +121,7 @@
     </action>
 	  
 	<action name="getPeriodsForLock" class="org.hisp.dhis.dataadmin.action.lock.GetPeriodsForLockAction">
-      <result name="success" type="velocity">/dhis-web-commons/ajax/responsePeriod.vm</result>
+      <result name="success" type="velocity"> /dhis-web-maintenance-dataadmin/responsePeriod.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     
