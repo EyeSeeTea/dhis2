@@ -22,7 +22,6 @@
 			column="organisationunitid" not-null="true"
 			foreign-key="fk_household_organisationunitid"/>
 		
-		<!-- bi-directional one-to-many association to Patient -->
         <set name="members" table="household_members">
             <key column="householdid"/>
             <many-to-many class="org.hisp.dhis.patient.Patient" column="patientid" unique="true"/>

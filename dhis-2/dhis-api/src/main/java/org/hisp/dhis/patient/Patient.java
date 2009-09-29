@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hisp.dhis.program.Program;
+
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
@@ -61,6 +63,8 @@ public class Patient
     private Set<PatientIdentifier> identifiers = new HashSet<PatientIdentifier>();
 
     private Set<Address> addresses = new HashSet<Address>();
+    
+    private Set<Program> programs = new HashSet<Program>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -70,6 +74,25 @@ public class Patient
     {
     }
 
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public PatientIdentifier getPreferredPatientIdentifier()
+    {
+        if ( getIdentifiers() != null && getIdentifiers().size() > 0 )
+        {
+            for ( PatientIdentifier patientIdentifier : getIdentifiers() )
+            {
+                if ( patientIdentifier.getPreferred() )
+                {
+                    return patientIdentifier;
+                }
+            }
+        }
+
+        return null;
+    }
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -207,21 +230,13 @@ public class Patient
         this.addresses = addresses;
     }
 
-    public PatientIdentifier getPreferredPatientIdentifier()
+    public Set<Program> getPrograms()
     {
-        if ( getIdentifiers() != null && getIdentifiers().size() > 0 )
-        {
-            for ( PatientIdentifier patientIdentifier : getIdentifiers() )
-            {
-                if ( patientIdentifier.getPreferred() )
-                {
-                    return patientIdentifier;
-                }
-            }
+        return programs;
+    }
 
-            return null;
-        }
-
-        return null;
+    public void setPrograms( Set<Program> programs )
+    {
+        this.programs = programs;
     }
 }
