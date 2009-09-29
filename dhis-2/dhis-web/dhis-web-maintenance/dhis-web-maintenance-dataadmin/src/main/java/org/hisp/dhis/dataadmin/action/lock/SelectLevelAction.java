@@ -104,7 +104,8 @@ public class SelectLevelAction
                              	      	        	
          selectedUnitsForLock.addAll(selectionTreeManager.getLockOnSelectedOrganisationUnits());
          selectionTreeManager.setLockOnSelectedOrganisationUnits( selectedUnitsForLock ) ;
-                  
+                
+         selectLevel = level;
          return SUCCESS;
         }
 

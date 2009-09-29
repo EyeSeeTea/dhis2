@@ -103,7 +103,8 @@ implements Action
 	    selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
 	    locksLeftOnSelectedUnits.removeAll( selectedUnitsForUnLock );
 	    selectionTreeManager.setLockOnSelectedOrganisationUnits( locksLeftOnSelectedUnits );
-	   	    
+	   	
+	    selectLevel = level;
 	    return SUCCESS;
 	}
 		
