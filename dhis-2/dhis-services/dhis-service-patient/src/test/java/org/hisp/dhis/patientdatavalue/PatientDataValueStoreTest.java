@@ -86,11 +86,11 @@ public class PatientDataValueStoreTest
         patientService.addPatient( patientB );
         
         categoryOptionCombo = categoryOptionComboService.getDefaultDataElementCategoryOptionCombo();
-        
-        valueA = new PatientDataValue( patientA, dataElementA, categoryOptionCombo, "10" );
-        valueB = new PatientDataValue( patientA, dataElementB, categoryOptionCombo, "10" );
-        valueC = new PatientDataValue( patientB, dataElementA, categoryOptionCombo, "10" );
-        valueD = new PatientDataValue( patientB, dataElementB, categoryOptionCombo, "10" );
+
+        valueA = new PatientDataValue( patientA, dataElementA, categoryOptionCombo, getDate( 2000, 2, 1 ), "10" );
+        valueB = new PatientDataValue( patientA, dataElementB, categoryOptionCombo, getDate( 2000, 2, 3 ), "10" );
+        valueC = new PatientDataValue( patientB, dataElementA, categoryOptionCombo, getDate( 2000, 2, 7 ), "10" );
+        valueD = new PatientDataValue( patientB, dataElementB, categoryOptionCombo, getDate( 2000, 2, 12 ), "10" );
     }
 
     protected static Patient createPatient( char uniqueChar )

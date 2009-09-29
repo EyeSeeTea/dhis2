@@ -5,6 +5,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.patient.Patient;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -19,6 +20,8 @@ public class PatientDataValue
 
     private DataElementCategoryOptionCombo optionCombo;
 
+    private Date timestamp;
+    
     private String value;
 
     // -------------------------------------------------------------------------
@@ -29,19 +32,20 @@ public class PatientDataValue
     {
     }
 
-    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
+    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date timestamp )
     {
         this.patient = patient;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
+        this.timestamp = timestamp;
     }
 
-    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo,
-        String value )
+    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date timestamp, String value )
     {
         this.patient = patient;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
+        this.timestamp = timestamp;
         this.value = value;
     }
 
@@ -58,6 +62,7 @@ public class PatientDataValue
         result = result * prime + patient.hashCode();
         result = result * prime + dataElement.hashCode();
         result = result * prime + optionCombo.hashCode();
+        result = result * prime + timestamp.hashCode();
 
         return result;
     }
@@ -82,8 +87,8 @@ public class PatientDataValue
 
         final PatientDataValue other = (PatientDataValue) o;
 
-        return patient.equals( other.getPatient() ) && dataElement.equals( other.getDataElement() )
-            && optionCombo.equals( other.getOptionCombo() );
+        return patient.equals( other.patient ) && dataElement.equals( other.dataElement )
+            && optionCombo.equals( other.optionCombo ) && timestamp.equals( other.timestamp );
     }
 
     // -------------------------------------------------------------------------
@@ -120,6 +125,16 @@ public class PatientDataValue
         return optionCombo;
     }
 
+    public Date getTimestamp()
+    {
+        return timestamp;
+    }
+
+    public void setTimestamp( Date timestamp )
+    {
+        this.timestamp = timestamp;
+    }
+
     public void setValue( String value )
     {
         this.value = value;
@@ -129,5 +144,4 @@ public class PatientDataValue
     {
         return value;
     }
-
 }
