@@ -10,10 +10,6 @@
 			<generator class="native"/>
 		</id>
 		
-		<many-to-one name="patient" class="org.hisp.dhis.patient.Patient" column="patientid"/>
-		
-		<many-to-one name="house" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"/>
-		
 		<property name="address1" column="address1"	length="50"/>
 		
 		<property name="address2" column="address2"	length="50"/>
@@ -30,5 +26,7 @@
 		
 		<property name="preferred" column="preferred" not-null="true"/>
 		
+        <many-to-one name="patient" class="org.hisp.dhis.patient.Patient" column="patientid"/>
+        
 	</class>
 </hibernate-mapping>

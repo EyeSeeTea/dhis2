@@ -27,7 +27,6 @@
 
 package org.hisp.dhis.patient;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -50,8 +49,6 @@ public class Address
     private String country;
 
     private String postalCode;
-
-    private OrganisationUnit house;
 
     private Boolean preferred = false;
 
@@ -168,16 +165,6 @@ public class Address
     public void setPostalCode( String postalCode )
     {
         this.postalCode = postalCode;
-    }
-
-    public OrganisationUnit getHouse()
-    {
-        return house;
-    }
-
-    public void setHouse( OrganisationUnit house )
-    {
-        this.house = house;
     }
 
     public Boolean getPreferred()

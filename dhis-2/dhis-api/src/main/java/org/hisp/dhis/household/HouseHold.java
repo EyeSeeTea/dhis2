@@ -27,6 +27,7 @@
 
 package org.hisp.dhis.household;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -50,7 +51,7 @@ public class HouseHold
 
     private OrganisationUnit organisationUnit;
 
-    private Set<Patient> members;
+    private Set<Patient> members = new HashSet<Patient>();
 
     private String address;
 

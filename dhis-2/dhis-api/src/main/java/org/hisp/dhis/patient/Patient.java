@@ -29,6 +29,7 @@ package org.hisp.dhis.patient;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -57,9 +58,9 @@ public class Patient
 
     private Boolean isDead = false;
 
-    private Set<PatientIdentifier> identifiers;
+    private Set<PatientIdentifier> identifiers = new HashSet<PatientIdentifier>();
 
-    private Set<Address> addresses;
+    private Set<Address> addresses = new HashSet<Address>();
 
     // -------------------------------------------------------------------------
     // Constructors

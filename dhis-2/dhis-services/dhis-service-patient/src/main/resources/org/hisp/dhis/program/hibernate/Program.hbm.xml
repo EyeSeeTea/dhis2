@@ -19,11 +19,12 @@
     
     <property name="numberOfDays"/>
     
-    <set name="dataSets" table="programdatasets">
+    <list name="dataSets" table="programdatasets">
       <key column="programid"/>
+      <list-index column="sort_order"/>
       <many-to-many class="org.hisp.dhis.dataset.DataSet" 
           column="datasetid" foreign-key="fk_program_datasetid"/>
-    </set> 	
+    </list> 	
 	
   </class>
 </hibernate-mapping>

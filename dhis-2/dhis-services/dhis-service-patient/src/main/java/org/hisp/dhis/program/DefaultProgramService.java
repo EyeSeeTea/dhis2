@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.program;
 
 import java.util.Collection;
@@ -38,16 +39,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 public class DefaultProgramService
     implements ProgramService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     private ProgramStore programStore;
 
-    /**
-     * @param programStore the programStore to set
-     */
     public void setProgramStore( ProgramStore programStore )
     {
         this.programStore = programStore;
@@ -57,104 +54,43 @@ public class DefaultProgramService
     // Program
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.program.ProgramService#addProgram(org.hisp.dhis.program
-     * .Program)
-     */
     public int addProgram( Program program )
     {
-        // TODO Auto-generated method stub
         return programStore.addProgram( program );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.program.ProgramService#deleteProgram(org.hisp.dhis.program
-     * .Program)
-     */
     public void deleteProgram( Program program )
     {
-        // TODO Auto-generated method stub
-        
         programStore.deleteProgram( program );
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.program.ProgramService#getAllPrograms()
-     */
     public Collection<Program> getAllPrograms()
     {
-        // TODO Auto-generated method stub
         return programStore.getAllPrograms();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hisp.dhis.program.ProgramService#getProgram(int)
-     */
     public Program getProgram( int id )
     {
-        // TODO Auto-generated method stub
         return programStore.getProgram( id );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.program.ProgramService#getProgram(org.hisp.dhis.dataset
-     * .DataSet)
-     */
     public Collection<Program> getPrograms( DataSet dataSet )
     {
-        // TODO Auto-generated method stub
         return programStore.getPrograms( dataSet );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.hisp.dhis.program.ProgramService#getPrograms(org.hisp.dhis.
-     * organisationunit.OrganisationUnit)
-     */
     public Collection<Program> getPrograms( OrganisationUnit organisationUnit )
     {
-        // TODO Auto-generated method stub
         return programStore.getPrograms( organisationUnit );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.hisp.dhis.program.ProgramService#getPrograms(org.hisp.dhis.
-     * organisationunit.OrganisationUnit, org.hisp.dhis.dataset.DataSet)
-     */
     public Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet )
     {
-        // TODO Auto-generated method stub
         return programStore.getPrograms( organisationUnit, dataSet );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.program.ProgramService#updateProgram(org.hisp.dhis.program
-     * .Program)
-     */
     public void updateProgram( Program program )
     {
-        // TODO Auto-generated method stub
         programStore.updateProgram( program );
     }
-
 }

@@ -46,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultHouseHoldService
     implements HouseHoldService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
