@@ -52,11 +52,11 @@ public class PatientStoreTest
     {
         patientStore = (PatientStore) getBean( PatientStore.ID );
         
-        patientA = createPerson( 'A' );
-        patientB = createPerson( 'B' );        
+        patientA = createPatient( 'A' );
+        patientB = createPatient( 'B' );        
     }
     
-    protected static Patient createPerson( char uniqueChar )
+    protected static Patient createPatient( char uniqueChar )
     {
         Patient patient = new Patient();
         
