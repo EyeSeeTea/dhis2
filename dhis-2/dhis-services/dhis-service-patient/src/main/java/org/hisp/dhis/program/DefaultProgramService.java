@@ -31,11 +31,13 @@ import java.util.Collection;
 
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
+@Transactional
 public class DefaultProgramService
     implements ProgramService
 {

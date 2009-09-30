@@ -113,8 +113,8 @@ public class ProgramStoreTest
         assertEquals( programA.getOrganisationUnit(), programStore.getProgram( idA ).getOrganisationUnit() );
         assertEquals( programB.getOrganisationUnit(), programStore.getProgram( idB ).getOrganisationUnit() );
         
-        assertEquals( programA.getDataSets().size(), programStore.getProgram( idA ).getDataSets().size() );
-        assertEquals( programB.getDataSets().size(), programStore.getProgram( idB ).getDataSets().size() );
+        assertEquals( dataSets.size(), programStore.getProgram( idA ).getDataSets().size() );
+        assertEquals( dataSets.size(), programStore.getProgram( idB ).getDataSets().size() );
                 
         assertTrue( programStore.getProgram( idA ).getDataSets().containsAll( dataSets ) );
         assertTrue( programStore.getProgram( idB ).getDataSets().containsAll( dataSets ) );
