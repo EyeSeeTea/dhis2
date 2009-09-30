@@ -14,6 +14,8 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.TextUtils;
 
+// Work in progress!
+
 public class DefaultPatientDataValueAggregationEngine
     implements PatientDataValueAggregationEngine
 {
@@ -47,26 +49,16 @@ public class DefaultPatientDataValueAggregationEngine
      * 
      * dimensions: data element, category option combo, period, organisation unit,
      * 
-     * types:
-     * 
      * process:
      * 
      * get distinct dataelement
      * get patients for organisation unit
      * 
+     * int - sum: ("Number of condoms") 
      * 
-     * int - sum: ("Number of condoms")
+     * int - count: ("Need for referral")
      * 
-     * insert into datavalue (
-     * select dataelementid,  sum( value ) from patientdatavalue
-     * where dataelementid in ( ) and patientid in ( ) 
-     * 
-     * 
-     * int - count:
-     * 
-     * 
-     * bool - sum:
-     * 
+     * bool - sum: ("Baby weight")
      * 
      */
     
@@ -123,7 +115,7 @@ public class DefaultPatientDataValueAggregationEngine
                 "AND datetime > '" + DateUtils.getMediumDateString( period.getStartDate() ) + " " +
                 "AND datetime <= " + DateUtils.getMediumDateString( period.getEndDate() ) + " " +
                 "AND patientid IN (" + TextUtils.getCommaDelimitedString( patients ) + ")";
-        }        
+        }
     }
     
     private Collection<Period> filterPeriods( Collection<Period> periods, PeriodType periodType )

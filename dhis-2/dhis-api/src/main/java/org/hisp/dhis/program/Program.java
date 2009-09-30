@@ -59,23 +59,24 @@ public class Program
         return result;
     }
 
-    public boolean equals( Object obj )
+    public boolean equals( Object object )
     {
-        if ( this == obj )
-            return true;
-        if ( obj == null )
-            return false;
-        if ( getClass() != obj.getClass() )
-            return false;
-        Program other = (Program) obj;
-        if ( name == null )
+        if ( this == object )
         {
-            if ( other.name != null )
-                return false;
+            return true;
         }
-        else if ( !name.equals( other.name ) )
+        if ( object == null )
+        {
             return false;
-        return true;
+        }
+        if ( getClass() != object.getClass() )
+        {
+            return false;
+        }
+        
+        Program other = (Program) object;
+        
+        return name.equals( other.name );
     }
 
     public int getId()

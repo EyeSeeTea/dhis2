@@ -38,7 +38,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  */
 public interface ProgramStore
 {
-    String ID = ProgramService.class.getName();
+    String ID = ProgramStore.class.getName();
 
     int addProgram( Program program );
 
@@ -55,5 +55,4 @@ public interface ProgramStore
     Collection<Program> getPrograms( DataSet dataSet );
 
     Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet );
-
 }

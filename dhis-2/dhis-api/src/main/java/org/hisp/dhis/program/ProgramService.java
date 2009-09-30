@@ -38,7 +38,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  */
 public interface ProgramService
 {
-
     String ID = ProgramService.class.getName();
 
     int addProgram( Program program );
@@ -56,5 +55,4 @@ public interface ProgramService
     Collection<Program> getPrograms( DataSet dataSet );
 
     Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet );
-
 }
