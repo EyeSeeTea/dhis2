@@ -14,6 +14,7 @@ function getPeriods() {
                     $('#periodId').append("<option value="+$(this).find('id').text()+">" +$(this).find('name').text()+ "</option>");
                 });
                 enable( "periodId" );
+                getDataSets();
             }
         });
     }
@@ -71,11 +72,15 @@ function updateDataSets() {
 }
 
 function loadEmptyOrgUnitTree(){  
-	 desableLockComponents(); 
-	 enableParent( "periodTypeId" );
-   enableParent( "periodId" );
-	 enableParent( "unlockedDataSets" );
-   enableParent( "lockedDataSets" );             
+	desableLockComponents(); 
+	enableParent( "periodTypeId" );
+    enableParent( "periodId" );
+	enableParent( "unlockedDataSets" );
+    enableParent( "lockedDataSets" ); 
+    enableParent( "button1" );
+	enableParent( "button2" );
+	enableParent( "button3" );
+  	enableParent( "button4" );            
    iframeForOUTree.location.href='emptyOrgunitSetupAssociationsTree.action';		 
 }
 
