@@ -24,81 +24,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.program;
 
 import java.util.Collection;
 
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
-
-import com.opensymphony.xwork2.Action;
-
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public class GetProgramAction
-    implements Action
+public interface ProgramStageService
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    String ID = ProgramStageService.class.getName();
 
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
+    // -------------------------------------------------------------------------
+    // ProgramStage
+    // -------------------------------------------------------------------------
     
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
-
-    private int id;
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    private Program program;
-
-    public Program getProgram()
-    {
-        return program;
-    }
+    int addProgramStage( ProgramStage programStage );
     
-    private Collection<ProgramStage> programStages;
+    void deleteProgramStage( ProgramStage programStage );
     
-    public Collection<ProgramStage> getProgramStages()
-    {
-        return programStages;
-    }   
+    void updateProgramStage( ProgramStage programStage );
+    
+    ProgramStage getProgramStage( int id );
+    
+    ProgramStage getProgramStage( String name );
+    
+    Collection<ProgramStage> getAllProgramStages();   
 
-    // -------------------------------------------------------------------------
-    // Action
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        program = programService.getProgram( id );
-        
-        programStages = programStageService.getAllProgramStages();
-        
-        programStages.removeAll( program.getProgramStages() );
-
-        return SUCCESS;
-    }
 }

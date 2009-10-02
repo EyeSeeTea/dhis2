@@ -26,7 +26,7 @@
 		
 		<property name="preferred" column="preferred" not-null="true"/>
 		
-        <many-to-one name="patient" class="org.hisp.dhis.patient.Patient" column="patientid"/>
+    <many-to-one name="patient" class="org.hisp.dhis.patient.Patient" column="patientid"/>
         
 	</class>
 </hibernate-mapping>

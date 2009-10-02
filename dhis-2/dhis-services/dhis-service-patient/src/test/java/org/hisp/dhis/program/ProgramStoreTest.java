@@ -27,17 +27,12 @@
 
 package org.hisp.dhis.program;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.MonthlyPeriodType;
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
 
 import static junit.framework.Assert.*;
@@ -51,41 +46,45 @@ public class ProgramStoreTest
 {    
     private ProgramStore programStore;
     
-    private List<DataSet> dataSets = new ArrayList<DataSet>();
+    private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
     
     private OrganisationUnit organisationUnit;
+    
+    ProgramStage programStageA;
+    
+    ProgramStage programStageB;
+    
+    ProgramStage programStageC;
+    
     
     @Override
     public void setUpTest()
     {
-        dataSetService = (DataSetService) getBean( DataSetService.ID );
+        programStageService = (ProgramStageService) getBean( ProgramStageService.ID );
         
-        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
-        
-        periodService = (PeriodService) getBean( PeriodService.ID );
+        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );       
         
         programStore = (ProgramStore) getBean( ProgramStore.ID );
         
         organisationUnit = createOrganisationUnit( 'A' );
         
-        organisationUnitService.addOrganisationUnit( organisationUnit );
+        organisationUnitService.addOrganisationUnit( organisationUnit );              
         
-        PeriodType periodType = periodService.getPeriodTypeByName( MonthlyPeriodType.NAME );
+        programStageA = createProrgamStage( 'A', 1, 1, 10 );       
+        programStageB = createProrgamStage( 'B', 2, 12, 40 );
+        programStageC = createProrgamStage( 'C', 3, 45, 60 );        
+
+        programStageService.addProgramStage( programStageA );
+        programStageService.addProgramStage( programStageB );
+        programStageService.addProgramStage( programStageC );
         
-        DataSet dataSetA = createDataSet( 'A', periodType );
-        DataSet dataSetB = createDataSet( 'B', periodType );
-        DataSet dataSetC = createDataSet( 'C', periodType );
-        
-        dataSetService.addDataSet( dataSetA );
-        dataSetService.addDataSet( dataSetB );
-        dataSetService.addDataSet( dataSetC );
-        
-        dataSets.add( dataSetA );
-        dataSets.add( dataSetB );
-        dataSets.add( dataSetC );        
+        programStages.add( programStageA );
+        programStages.add( programStageB );
+        programStages.add( programStageC );    
+            
     }
     
-    protected static Program createProgram( char uniqueCharacter, List<DataSet> dataSets, OrganisationUnit organisationUnit )
+    protected static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages, OrganisationUnit organisationUnit )
     {
         Program program = new Program();
         
@@ -93,7 +92,7 @@ public class ProgramStoreTest
         program.setDescription( "Description" + uniqueCharacter );
         program.setNumberOfDays( 5 );
         program.setOrganisationUnit( organisationUnit );
-        program.setDataSets( dataSets );
+        program.setProgramStages( programStages );
         
         return program;
     }
@@ -101,8 +100,8 @@ public class ProgramStoreTest
     @Test
     public void addGet()
     {
-        Program programA = createProgram( 'A', dataSets, organisationUnit );
-        Program programB = createProgram( 'B', dataSets, organisationUnit );
+        Program programA = createProgram( 'A', programStages, organisationUnit );
+        Program programB = createProgram( 'B', programStages, organisationUnit );
         
         int idA = programStore.addProgram( programA );
         int idB = programStore.addProgram( programB );
@@ -113,10 +112,11 @@ public class ProgramStoreTest
         assertEquals( programA.getOrganisationUnit(), programStore.getProgram( idA ).getOrganisationUnit() );
         assertEquals( programB.getOrganisationUnit(), programStore.getProgram( idB ).getOrganisationUnit() );
         
-        assertEquals( dataSets.size(), programStore.getProgram( idA ).getDataSets().size() );
-        assertEquals( dataSets.size(), programStore.getProgram( idB ).getDataSets().size() );
+        assertEquals( programStages.size(), programStore.getProgram( idA ).getProgramStages().size() );
+        assertEquals( programStages.size(), programStore.getProgram( idB ).getProgramStages().size() );
                 
-        assertTrue( programStore.getProgram( idA ).getDataSets().containsAll( dataSets ) );
-        assertTrue( programStore.getProgram( idB ).getDataSets().containsAll( dataSets ) );
+        assertTrue( programStore.getProgram( idA ).getProgramStages().containsAll( programStages ) );
+        assertTrue( programStore.getProgram( idB ).getProgramStages().containsAll( programStages ) );
     }    
 }
+

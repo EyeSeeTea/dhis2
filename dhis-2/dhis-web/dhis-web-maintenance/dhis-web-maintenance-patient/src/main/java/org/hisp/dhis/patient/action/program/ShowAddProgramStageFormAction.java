@@ -29,9 +29,10 @@ package org.hisp.dhis.patient.action.program;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 
@@ -41,20 +42,13 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddProgramFormAction
+public class ShowAddProgramStageFormAction
     implements Action
 {
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
 
     private ProgramStageService programStageService;
 
@@ -63,16 +57,16 @@ public class ShowAddProgramFormAction
         this.programStageService = programStageService;
     }
 
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
-
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
 
     private Collection<ProgramStage> programStages;
 
@@ -81,15 +75,23 @@ public class ShowAddProgramFormAction
         return programStages;
     }
 
+    private List<DataElement> dataElements;
+
+    public List<DataElement> getDataElements()
+    {
+        return dataElements;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
+
+        dataElements = new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() );
 
         return SUCCESS;
     }

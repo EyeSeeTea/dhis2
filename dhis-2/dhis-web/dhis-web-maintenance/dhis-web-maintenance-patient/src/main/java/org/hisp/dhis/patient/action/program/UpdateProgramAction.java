@@ -27,15 +27,14 @@
 
 package org.hisp.dhis.patient.action.program;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -57,17 +56,17 @@ public class UpdateProgramAction
         this.programService = programService;
     }
 
-    private DataSetService dataSetService;
+    private ProgramStageService programStageService;
 
-    public void setDataSetService( DataSetService dataSetService )
+    public void setProgramStageService( ProgramStageService programStageService )
     {
-        this.dataSetService = dataSetService;
+        this.programStageService = programStageService;
     }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
-    
+
     private int id;
 
     public void setId( int id )
@@ -112,22 +111,22 @@ public class UpdateProgramAction
     {
         Program program = programService.getProgram( id );
 
-        program.setName( nameField );        
+        program.setName( nameField );
         program.setDescription( description );
         program.setNumberOfDays( Integer.parseInt( numberOfDays ) );
-        
-        List<DataSet> dataSets = new ArrayList<DataSet>();        
+
+        Set<ProgramStage> programStages = new HashSet<ProgramStage>();
 
         for ( String id : selectedList )
         {
-            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( id ) );       
+            ProgramStage programStage = programStageService.getProgramStage( Integer.parseInt( id ) );
 
-            dataSets.add( dataSet );
-            
-        }       
-        
-        program.setDataSets( dataSets );
-        
+            programStages.add( programStage );
+
+        }
+
+        program.setProgramStages( programStages );
+
         programService.updateProgram( program );
 
         return SUCCESS;

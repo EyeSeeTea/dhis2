@@ -1,10 +1,14 @@
-
-function organisationUnitSelected( orgUnits )
-{	
-    window.location.href = 'program.action';
+function isInt( value )
+{
+    var number = new Number( value );
+    
+    if ( isNaN( number ))
+    {   	
+        return false;
+    }
+    
+    return true;
 }
-
-selection.setListenerFunction( organisationUnitSelected );
 
 //-----------------------------------------------------------------------------
 // Move members
@@ -65,74 +69,37 @@ function selectAll( list )
 	}
 }
 
-function moveUp( listId ) 
-{
-
-	  var withInList = document.getElementById( listId ); 
-	  
-	  var index = withInList.selectedIndex;
-	  
-	  if ( index == -1 ) { return; } 
-	  
-	  if( index - 1 < 0 ) { return; }//window.alert( 'Item cant be moved up');        
-	  
-	  var option = new Option( withInList.options[index].text, withInList.options[index].value); 
-	  var temp = new Option( withInList.options[index-1].text, withInList.options[index-1].value);
-	  
-	  withInList.options[index-1] = option;
-	  withInList.options[index-1].selected = true;
-	  withInList.options[index] = temp;
-
-}
-
-function moveDown( listId ) 
-{
-
-	  var withInList = document.getElementById( listId ); 
-	  
-	  var index = withInList.selectedIndex;
-	  
-	  if ( index == -1 ) { return; } 
-	  
-	  if( index + 1 == withInList.options.length ) { return; }//window.alert( 'Item cant be moved down');   
-	    
-	  var option = new Option( withInList.options[index].text, withInList.options[index].value); 
-	  var temp = new Option( withInList.options[index+1].text, withInList.options[index+1].value);
-	  
-	  withInList.options[index+1] = option;
-	  withInList.options[index+1].selected = true;
-	  withInList.options[index] = temp;
-	  
-}
-
 	
 // -----------------------------------------------------------------------------
 // View details
 // -----------------------------------------------------------------------------
 
-function showProgramDetails( programId )
+function showProgramStageDetails( programStageId )
 {
     var request = new Request();
-    request.setResponseTypeXML( 'program' );
-    request.setCallbackSuccess( programReceived );
-    request.send( 'getProgram.action?id=' + programId );
+    request.setResponseTypeXML( 'programStage' );
+    request.setCallbackSuccess( programStageReceived );
+    request.send( 'getProgramStage.action?id=' + programStageId );
 }
 
-function programReceived( programElement )
+function programStageReceived( programStageElement )
 {
-	setFieldValue( 'idField', getElementValue( programElement, 'id' ) );
-	setFieldValue( 'nameField', getElementValue( programElement, 'name' ) );	
-    setFieldValue( 'descriptionField', getElementValue( programElement, 'description' ) );
-    setFieldValue( 'numberOfDaysField', getElementValue( programElement, 'numberOfDays' ) );      
+	setFieldValue( 'idField', getElementValue( programStageElement, 'id' ) );
+	setFieldValue( 'nameField', getElementValue( programStageElement, 'name' ) );	
+    setFieldValue( 'descriptionField', getElementValue( programStageElement, 'description' ) );
+    setFieldValue( 'stageInProgramField', getElementValue( programStageElement, 'stageInProgram' ) );   
+    setFieldValue( 'minDaysFromStartField', getElementValue( programStageElement, 'minDaysFromStart' ) );
+    setFieldValue( 'maxDaysFromStartField', getElementValue( programStageElement, 'maxDaysFromStart' ) );
+    setFieldValue( 'dataElementCountField', getElementValue( programStageElement, 'dataElementCount' ) );   
    
     showDetails();
 }
 
 // -----------------------------------------------------------------------------
-// Remove Program
+// Remove ProgramStage
 // -----------------------------------------------------------------------------
 
-function removeProgram( programId, name )
+function removeProgramStage( programStageId, name )
 {
     var result = window.confirm( i18n_confirm_delete + '\n\n' + name );
     
@@ -140,19 +107,19 @@ function removeProgram( programId, name )
     {
     	var request = new Request();
         request.setResponseTypeXML( 'message' );
-        request.setCallbackSuccess( removeProgramCompleted );
-        window.location.href = 'removeProgram.action?id=' + programId;
+        request.setCallbackSuccess( removeProgramStageCompleted );
+        window.location.href = 'removeProgramStage.action?id=' + programStageId;
     }
 }
 
-function removeProgramCompleted( messageElement )
+function removeProgramStageCompleted( messageElement )
 {
     var type = messageElement.getAttribute( 'type' );
     var message = messageElement.firstChild.nodeValue;
     
     if ( type == 'success' )
     {
-        window.location.href = 'program.action';
+        window.location.href = 'programStage.action';
     }
     else if ( type = 'error' )
     {
@@ -163,23 +130,33 @@ function removeProgramCompleted( messageElement )
 }
 
 // -----------------------------------------------------------------------------
-// Add Program
+// Add ProgramStage
 // -----------------------------------------------------------------------------
 
-function validateAddProgram()
+function validateAddProgramStage()
 {
 	
-	var url = 'validateProgram.action?' +
-			'nameField=' + getFieldValue( 'nameField' ) +			
-	        '&description=' + getFieldValue( 'description' ) +	                
-	        '&numberOfDays=' + getFieldValue( 'numberOfDays' );
+	if( !isInt( getFieldValue( 'stageInProgram' ) ) )//|| !isInt( getFieldValue( 'minDaysFromStart' ) ) || !isInt( getFieldValue( 'maxDaysFromStart' ) ) )
+	{
+		window.alert( i18n_value_must_integer );
+		
+		return false;
+	}	
 	
-	var request = new Request();
-    request.setResponseTypeXML( 'message' );
-    request.setCallbackSuccess( addValidationCompleted );    
-    request.send( url );        
+	var url = 'validateProgramStage.action?' +
+		'nameField=' + getFieldValue( 'nameField' ) +			
+		'&description=' + getFieldValue( 'description' ) +	                
+		'&stageInProgram=' + getFieldValue( 'stageInProgram' ) +
+		'&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' ) +	                
+		'&maxDaysFromStart=' + getFieldValue( 'maxDaysFromStart' );
 
-    return false;
+	var request = new Request();
+		request.setResponseTypeXML( 'message' );
+		request.setCallbackSuccess( addValidationCompleted );    
+		request.send( url );        
+
+	return false;
+    
 }
 
 function addValidationCompleted( messageElement )
@@ -189,12 +166,12 @@ function addValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-        var form = document.getElementById( 'addProgramForm' );        
+        var form = document.getElementById( 'addProgramStageForm' );        
         form.submit();
     }
     else if ( type == 'error' )
     {
-        window.alert( i18n_adding_program_failed + ':' + '\n' + message );
+        window.alert( i18n_adding_program_stage_failed + ':' + '\n' + message );
     }
     else if ( type == 'input' )
     {
@@ -203,17 +180,19 @@ function addValidationCompleted( messageElement )
     }
 }
 // -----------------------------------------------------------------------------
-// Update Program
+// Update ProgramStage
 // -----------------------------------------------------------------------------
 
-function validateUpdateProgram()
+function validateUpdateProgramStage()
 {
 	
-    var url = 'validateProgram.action?' + 
+    var url = 'validateProgramStage.action?' + 
     		'id=' + getFieldValue( 'id' ) +
     		'&nameField=' + getFieldValue( 'nameField' ) +			
 	        '&description=' + getFieldValue( 'description' ) +	                
-	        '&numberOfDays=' + getFieldValue( 'numberOfDays' );
+	        '&stageInProgram=' + getFieldValue( 'stageInProgram' ) +
+	        '&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' ) +	                
+	        '&maxDaysFromStart=' + getFieldValue( 'maxDaysFromStart' );
 	
 	var request = new Request();
     request.setResponseTypeXML( 'message' );
@@ -231,12 +210,12 @@ function updateValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-    	var form = document.getElementById( 'updateProgramForm' );        
+    	var form = document.getElementById( 'updateProgramStageForm' );        
         form.submit();
     }
     else if ( type == 'error' )
     {
-        window.alert( i18n_saving_program_failed + ':' + '\n' + message );
+        window.alert( i18n_updating_program_stage_failed + ':' + '\n' + message );
     }
     else if ( type == 'input' )
     {

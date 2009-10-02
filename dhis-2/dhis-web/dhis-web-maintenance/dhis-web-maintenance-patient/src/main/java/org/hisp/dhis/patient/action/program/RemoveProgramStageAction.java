@@ -27,12 +27,6 @@
 
 package org.hisp.dhis.patient.action.program;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
@@ -41,20 +35,12 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddProgramFormAction
+public class RemoveProgramStageAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
 
     private ProgramStageService programStageService;
 
@@ -67,29 +53,17 @@ public class ShowAddProgramFormAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
+    private int id;
 
-    public OrganisationUnit getOrganisationUnit()
+    public void setId( int id )
     {
-        return organisationUnit;
+        this.id = id;
     }
-
-    private Collection<ProgramStage> programStages;
-
-    public Collection<ProgramStage> getProgramStages()
-    {
-        return programStages;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
+        programStageService.deleteProgramStage( programStageService.getProgramStage( id ) );
 
         return SUCCESS;
     }

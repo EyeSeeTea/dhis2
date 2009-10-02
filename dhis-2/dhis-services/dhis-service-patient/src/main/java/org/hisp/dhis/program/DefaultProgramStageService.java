@@ -24,73 +24,67 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.program;
 
-package org.hisp.dhis.patient.action.program;
-
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.common.GenericNameStore;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
-
-import com.opensymphony.xwork2.Action;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public class ShowAddProgramFormAction
-    implements Action
+@Transactional
+public class DefaultProgramStageService
+    implements ProgramStageService
 {
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private GenericNameStore<ProgramStage> programStageStore;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setProgramStageStore( GenericNameStore<ProgramStage> programStageStore )
     {
-        this.selectionManager = selectionManager;
-    }
-
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
+        this.programStageStore = programStageStore;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
-
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
+    // ProgramStage implementation
+    // -------------------------------------------------------------------------    
+   
+    public int addProgramStage( ProgramStage programStage )
+    {        
+        return programStageStore.save( programStage );
+    }
+    
+    public void deleteProgramStage( ProgramStage programStage )
+    {     
+        programStageStore.delete( programStage );
+    }
+    
+    public Collection<ProgramStage> getAllProgramStages()
+    {     
+        return programStageStore.getAll();
+    }
+    
+    public ProgramStage getProgramStage( int id )
+    {        
+        return programStageStore.get( id );
+    }
+    
+    public ProgramStage getProgramStage( String name )
+    {        
+        return programStageStore.getByName( name );
+    }
+    
+    public void updateProgramStage( ProgramStage programStage )
+    {        
+        programStageStore.update( programStage );
     }
 
-    private Collection<ProgramStage> programStages;
-
-    public Collection<ProgramStage> getProgramStages()
-    {
-        return programStages;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-    {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
-
-        return SUCCESS;
-    }
 }

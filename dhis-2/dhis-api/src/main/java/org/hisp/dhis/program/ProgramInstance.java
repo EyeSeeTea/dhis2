@@ -24,57 +24,52 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.program;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.Date;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class Program
+public class ProgramInstance
+    implements Serializable
 {
+
     private int id;
 
-    private String name;
+    private Date startDate;
 
-    private String description;
+    private Date endDate;
 
-    private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+    private boolean completed = false;
 
-    private int numberOfDays;
+    private Patient patient;
 
-    private OrganisationUnit organisationUnit;
-    
-    private Set<ProgramInstance> programInstances = new HashSet<ProgramInstance>();
+    private Program program;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public Program()
+    public ProgramInstance()
     {
     }
-    
-    public Program( String name, String description )
+
+    public ProgramInstance( Date startDate, Date endDate, Patient patient, Program program )
     {
-        this.name = name;
-        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.patient = patient;
+        this.program = program;
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
+    // hashCode and equals
     // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
 
     @Override
     public boolean equals( Object o )
@@ -89,87 +84,130 @@ public class Program
             return false;
         }
 
-        if ( !(o instanceof Program) )
+        if ( !(o instanceof ProgramInstance) )
         {
             return false;
         }
 
-        final Program other = (Program) o;
+        final ProgramInstance other = (ProgramInstance) o;
 
-        return name.equals( other.getName() );
+        return startDate.equals( other.getStartDate() ) && endDate.equals( other.getEndDate() )
+            && patient.equals( other.getPatient() ) && program.equals( other.getProgram() );
+
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+
+        result = result * prime + startDate.hashCode();
+        result = result * prime + endDate.hashCode();
+        result = result * prime + patient.hashCode();
+        result = result * prime + program.hashCode();
+
+        return result;
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    /**
+     * @return the id
+     */
     public int getId()
     {
         return id;
     }
 
+    /**
+     * @param id the id to set
+     */
     public void setId( int id )
     {
         this.id = id;
     }
 
-    public String getName()
+    /**
+     * @return the startDate
+     */
+    public Date getStartDate()
     {
-        return name;
+        return startDate;
     }
 
-    public void setName( String name )
+    /**
+     * @param startDate the startDate to set
+     */
+    public void setStartDate( Date startDate )
     {
-        this.name = name;
+        this.startDate = startDate;
     }
 
-    public String getDescription()
+    /**
+     * @return the endDate
+     */
+    public Date getEndDate()
     {
-        return description;
+        return endDate;
     }
 
-    public void setDescription( String description )
+    /**
+     * @param endDate the endDate to set
+     */
+    public void setEndDate( Date endDate )
     {
-        this.description = description;
-    }   
-    
-    public Set<ProgramStage> getProgramStages()
-    {
-        return programStages;
-    }
-    
-    public void setProgramStages( Set<ProgramStage> programStages )
-    {
-        this.programStages = programStages;
+        this.endDate = endDate;
     }
 
-    public void setNumberOfDays( int numberOfDays )
+    /**
+     * @return the completed
+     */
+    public boolean isCompleted()
     {
-        this.numberOfDays = numberOfDays;
+        return completed;
     }
 
-    public int getNumberOfDays()
+    /**
+     * @param completed the completed to set
+     */
+    public void setCompleted( boolean completed )
     {
-        return numberOfDays;
+        this.completed = completed;
     }
 
-    public OrganisationUnit getOrganisationUnit()
+    /**
+     * @return the patient
+     */
+    public Patient getPatient()
     {
-        return organisationUnit;
+        return patient;
     }
 
-    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    /**
+     * @param patient the patient to set
+     */
+    public void setPatient( Patient patient )
     {
-        this.organisationUnit = organisationUnit;
+        this.patient = patient;
     }
 
-    public void setProgramInstances( Set<ProgramInstance> programInstances )
+    /**
+     * @return the program
+     */
+    public Program getProgram()
     {
-        this.programInstances = programInstances;
+        return program;
     }
-    
-    public Set<ProgramInstance> getProgramInstances()
+
+    /**
+     * @param program the program to set
+     */
+    public void setProgram( Program program )
     {
-        return programInstances;
+        this.program = program;
     }
+
 }

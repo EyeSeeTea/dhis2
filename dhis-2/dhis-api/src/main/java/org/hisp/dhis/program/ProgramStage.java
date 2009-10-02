@@ -24,46 +24,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.program;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.dataelement.DataElement;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class Program
+public class ProgramStage
+    implements Serializable
 {
+
     private int id;
 
     private String name;
 
     private String description;
 
-    private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+    private int stageInProgram;
 
-    private int numberOfDays;
+    private int minDaysFromStart;
 
-    private OrganisationUnit organisationUnit;
-    
-    private Set<ProgramInstance> programInstances = new HashSet<ProgramInstance>();
+    private int maxDaysFromStart;
+
+    private Set<DataElement> dataElements = new HashSet<DataElement>();
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public Program()
+    public ProgramStage()
     {
     }
-    
-    public Program( String name, String description )
+
+    public ProgramStage( String name )
     {
         this.name = name;
-        this.description = description;
     }
 
     // -------------------------------------------------------------------------
@@ -77,99 +78,149 @@ public class Program
     }
 
     @Override
-    public boolean equals( Object o )
+    public boolean equals( Object object )
     {
-        if ( this == o )
+        if ( this == object )
         {
             return true;
         }
 
-        if ( o == null )
+        if ( object == null )
         {
             return false;
         }
 
-        if ( !(o instanceof Program) )
+        if ( getClass() != object.getClass() )
         {
             return false;
         }
 
-        final Program other = (Program) o;
+        final ProgramStage other = (ProgramStage) object;
 
         return name.equals( other.getName() );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[" + name + "]";
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    /**
+     * @return the id
+     */
     public int getId()
     {
         return id;
     }
 
+    /**
+     * @param id the id to set
+     */
     public void setId( int id )
     {
         this.id = id;
     }
 
+    /**
+     * @return the name
+     */
     public String getName()
     {
         return name;
     }
 
+    /**
+     * @param name the name to set
+     */
     public void setName( String name )
     {
         this.name = name;
     }
 
+    /**
+     * @return the description
+     */
     public String getDescription()
     {
         return description;
     }
 
+    /**
+     * @param description the description to set
+     */
     public void setDescription( String description )
     {
         this.description = description;
+    }
+
+    /**
+     * @return the stageInProgram
+     */
+    public int getStageInProgram()
+    {
+        return stageInProgram;
+    }
+
+    /**
+     * @param stageInProgram the stageInProgram to set
+     */
+    public void setStageInProgram( int stageInProgram )
+    {
+        this.stageInProgram = stageInProgram;
     }   
-    
-    public Set<ProgramStage> getProgramStages()
+
+
+    /**
+     * @return the minDaysFromStart
+     */
+    public int getMinDaysFromStart()
     {
-        return programStages;
-    }
-    
-    public void setProgramStages( Set<ProgramStage> programStages )
-    {
-        this.programStages = programStages;
+        return minDaysFromStart;
     }
 
-    public void setNumberOfDays( int numberOfDays )
+    /**
+     * @param minDaysFromStart the minDaysFromStart to set
+     */
+    public void setMinDaysFromStart( int minDaysFromStart )
     {
-        this.numberOfDays = numberOfDays;
+        this.minDaysFromStart = minDaysFromStart;
     }
 
-    public int getNumberOfDays()
+    /**
+     * @return the maxDaysFromStart
+     */
+    public int getMaxDaysFromStart()
     {
-        return numberOfDays;
+        return maxDaysFromStart;
     }
 
-    public OrganisationUnit getOrganisationUnit()
+    /**
+     * @param maxDaysFromStart the maxDaysFromStart to set
+     */
+    public void setMaxDaysFromStart( int maxDaysFromStart )
     {
-        return organisationUnit;
+        this.maxDaysFromStart = maxDaysFromStart;
+    }    
+
+    /**
+     * @return the dataElements
+     */
+    public Set<DataElement> getDataElements()
+    {
+        return dataElements;
     }
 
-    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    /**
+     * @param dataElements the dataElements to set
+     */
+    public void setDataElements( Set<DataElement> dataElements )
     {
-        this.organisationUnit = organisationUnit;
+        this.dataElements = dataElements;
     }
 
-    public void setProgramInstances( Set<ProgramInstance> programInstances )
-    {
-        this.programInstances = programInstances;
-    }
-    
-    public Set<ProgramInstance> getProgramInstances()
-    {
-        return programInstances;
-    }
 }

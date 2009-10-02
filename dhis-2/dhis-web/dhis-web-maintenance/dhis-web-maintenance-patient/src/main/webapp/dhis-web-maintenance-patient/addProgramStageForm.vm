@@ -1,0 +1,78 @@
+
+<h3>$i18n.getString( "create_new_program_stage" )</h3>
+																		
+<form id="addProgramStageForm" name "addProgramStageForm" action="addProgramStage.action" method="post" onsubmit="submitForm(); return validateAddProgramStage()">
+
+<table>	
+	<tr>
+		<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="nameField" name="nameField"  maxlength="30" style="width:30em"></td>
+	</tr>	
+	
+	<tr>
+		<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="description" name="description" style="width:30em"></td>
+	</tr>
+	
+	<tr>
+		<td><label>$i18n.getString( "stage_in_program" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="stageInProgram" name="stageInProgram" maxlength="30" style="width:30em"></td>
+	</tr>
+	
+	<tr>
+        <td><label>$i18n.getString( "min_days_from_start" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+        <td><input type="text" id="minDaysFromStart" name="minDaysFromStart" maxlength="30" style="width:30em"></td>
+    </tr>
+    
+    <tr>
+        <td><label>$i18n.getString( "max_days_from_start" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+        <td><input type="text" id="maxDaysFromStart" name="maxDaysFromStart" maxlength="30" style="width:30em"></td>
+    </tr>   
+   
+      	  	
+</table>
+
+<table id="programStageMembersArea">
+    <tr><b>$i18n.getString( "data_elements_in_program_stage" )</b></tr>
+    <thead>
+      <tr>        
+        <th>$i18n.getString( "not_in_the_program_stage" )</th>
+        <th></th>
+        <th>$i18n.getString( "in_the_program_stage" )</th>
+      </tr>
+    </thead>
+  
+    <tbody>
+      <tr>
+        <td>
+            <select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
+                #foreach ( $dataElement in $dataElements )
+                    <option value="$dataElement.id">$encoder.htmlEncode( $dataElement.name )</option>
+                #end                
+            </select>
+        </td>
+        <td valign="top" align="center">         
+            <input type="button" value="&gt;" onclick="move( 'availableList' )"><br>    
+            <input type="button" value="&lt;" onclick="move ( 'selectedList' )"><br><br>                    
+        <td>
+            <select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">                
+            </select>
+        </td>
+        
+      </tr>
+      
+    </tbody>
+</table>
+
+<p>
+	<input type="submit" value="$i18n.getString( "add" )" style="width:10em">
+	<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='programStage.action'" style="width:10em">
+</p>
+
+</form> 	
+
+<span id="message"></span>
+
+<script type="text/javascript">     
+    var i18n_value_must_integer = '$encoder.jsEscape( $i18n.getString( "value_must_integer" ) , "'")';   
+</script>

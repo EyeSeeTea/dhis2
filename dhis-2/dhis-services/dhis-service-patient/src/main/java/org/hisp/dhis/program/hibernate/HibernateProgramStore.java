@@ -63,11 +63,7 @@ public class HibernateProgramStore
 
     public int addProgram( Program program )
     {
-
-        for( DataSet dataSet : program.getDataSets() )
-        {
-            System.out.println( dataSet.getName() );
-        }
+        
         return (Integer) sessionFactory.getCurrentSession().save( program );
 
     }

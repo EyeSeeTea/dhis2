@@ -27,11 +27,11 @@
 
 package org.hisp.dhis.patient.action.program;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 
@@ -41,20 +41,12 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddProgramFormAction
+public class GetProgramStageAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
 
     private ProgramStageService programStageService;
 
@@ -62,23 +54,49 @@ public class ShowAddProgramFormAction
     {
         this.programStageService = programStageService;
     }
+    
+    private DataElementService dataElementService;
 
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+    
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
+    private int id;
 
-    public OrganisationUnit getOrganisationUnit()
+    public int getId()
     {
-        return organisationUnit;
+        return id;
     }
 
-    private Collection<ProgramStage> programStages;
-
-    public Collection<ProgramStage> getProgramStages()
+    public void setId( int id )
     {
-        return programStages;
+        this.id = id;
+    }
+
+    private ProgramStage programStage;
+
+    public ProgramStage getProgramStage()
+    {
+        return programStage;
+    }
+
+    private Collection<DataElement> programStageDataElements;
+
+    public Collection<DataElement> getProgramStageDataElements()
+    {
+        return programStageDataElements;
+    }
+    
+    private Collection<DataElement> dataElements;
+
+    public Collection<DataElement> getDataElements()
+    {
+        return dataElements;
     }
 
     // -------------------------------------------------------------------------
@@ -86,10 +104,14 @@ public class ShowAddProgramFormAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
+        programStage = programStageService.getProgramStage( id );
+        
+        programStageDataElements = programStage.getDataElements();
+        
+        dataElements = dataElementService.getAllDataElements();
 
         return SUCCESS;
     }

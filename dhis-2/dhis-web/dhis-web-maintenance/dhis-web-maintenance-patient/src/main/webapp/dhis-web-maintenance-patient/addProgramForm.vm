@@ -21,9 +21,10 @@
   	  	
 </table>
 
-<table id="programDataSetsArea">
+<table id="programEncounterTypesArea">
     
     <thead>
+      <tr><b>$i18n.getString( "program_stages_in_program" )</b></tr>
       <tr>        
         <th>$i18n.getString( "not_in_the_program" )</th>
         <th></th>
@@ -35,8 +36,8 @@
       <tr>
         <td>
             <select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
-                #foreach ( $dataSet in $dataSets )
-                    <option value="$dataSet.id">$encoder.htmlEncode( $dataSet.name )</option>
+                #foreach ( $programStage in $programStages )
+                    <option value="$programStage.id">$encoder.htmlEncode( $programStage.name )</option>
                 #end                
             </select>
         </td>

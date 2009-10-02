@@ -27,6 +27,8 @@
 
 package org.hisp.dhis.patient;
 
+import java.io.Serializable;
+
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
@@ -34,6 +36,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @version $Id$
  */
 public class PatientIdentifier
+    implements Serializable
 {
     public static final int IDENTIFIER_INDEX_LENGTH = 5;
 

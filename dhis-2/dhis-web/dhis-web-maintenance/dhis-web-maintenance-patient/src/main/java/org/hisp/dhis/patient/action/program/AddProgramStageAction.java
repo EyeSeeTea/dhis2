@@ -27,11 +27,12 @@
 
 package org.hisp.dhis.patient.action.program;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 
@@ -41,20 +42,12 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddProgramFormAction
+public class AddProgramStageAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
 
     private ProgramStageService programStageService;
 
@@ -63,22 +56,57 @@ public class ShowAddProgramFormAction
         this.programStageService = programStageService;
     }
 
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
+    private String nameField;
 
-    public OrganisationUnit getOrganisationUnit()
+    public void setNameField( String nameField )
     {
-        return organisationUnit;
+        this.nameField = nameField;
     }
 
-    private Collection<ProgramStage> programStages;
+    private String description;
 
-    public Collection<ProgramStage> getProgramStages()
+    public void setDescription( String description )
     {
-        return programStages;
+        this.description = description;
+    }
+
+    private String stageInProgram;
+
+    public void setStageInProgram( String stageInProgram )
+    {
+        this.stageInProgram = stageInProgram;
+    }
+
+    private String minDaysFromStart;
+
+    public void setMinDaysFromStart( String minDaysFromStart )
+    {
+        this.minDaysFromStart = minDaysFromStart;
+    }
+
+    private String maxDaysFromStart;
+
+    public void setMaxDaysFromStart( String maxDaysFromStart )
+    {
+        this.maxDaysFromStart = maxDaysFromStart;
+    }
+
+    private Collection<String> selectedList = new HashSet<String>();
+
+    public void setSelectedList( Collection<String> selectedList )
+    {
+        this.selectedList = selectedList;
     }
 
     // -------------------------------------------------------------------------
@@ -86,10 +114,29 @@ public class ShowAddProgramFormAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
+        ProgramStage programStage = new ProgramStage();
+
+        programStage.setName( nameField );
+        programStage.setDescription( description );
+        programStage.setStageInProgram( Integer.parseInt( stageInProgram ) );
+        programStage.setMinDaysFromStart( Integer.parseInt( minDaysFromStart ) );
+        programStage.setMaxDaysFromStart( Integer.parseInt( maxDaysFromStart ) );
+
+        Set<DataElement> dataElements = new HashSet<DataElement>();
+
+        for ( String id : selectedList )
+        {
+            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );
+
+            dataElements.add( dataElement );
+        }
+
+        programStage.setDataElements( dataElements );
+
+        programStageService.addProgramStage( programStage );
 
         return SUCCESS;
     }

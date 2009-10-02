@@ -30,8 +30,6 @@ package org.hisp.dhis.patient.action.program;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 
@@ -41,20 +39,12 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddProgramFormAction
+public class GetProgramStageListAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
+    // -------------------------------------------------------------------------   
 
     private ProgramStageService programStageService;
 
@@ -64,17 +54,10 @@ public class ShowAddProgramFormAction
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    private Collection<ProgramStage> programStages;
+    private Collection<ProgramStage> programStages = new ArrayList<ProgramStage>();
 
     public Collection<ProgramStage> getProgramStages()
     {
@@ -86,10 +69,10 @@ public class ShowAddProgramFormAction
     // -------------------------------------------------------------------------
 
     public String execute()
-    {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        throws Exception
+    {        
 
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
+        programStages = programStageService.getAllProgramStages();
 
         return SUCCESS;
     }

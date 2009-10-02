@@ -24,73 +24,64 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.program;
 
-package org.hisp.dhis.patient.action.program;
-
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
-
-import com.opensymphony.xwork2.Action;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public class ShowAddProgramFormAction
-    implements Action
+@Transactional
+public class DefaultProgramInstanceService
+    implements ProgramInstanceService
 {
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private ProgramInstanceStore programInstanceStore;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setProgramInstanceStore( ProgramInstanceStore programInstanceStore )
     {
-        this.selectionManager = selectionManager;
-    }
-
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
+        this.programInstanceStore = programInstanceStore;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // ProgramInstance implementation
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
+    public int addProgramInstance( ProgramInstance programInstance )
     {
-        return organisationUnit;
+        return programInstanceStore.save( programInstance );
     }
 
-    private Collection<ProgramStage> programStages;
-
-    public Collection<ProgramStage> getProgramStages()
+    public void deleteProgramInstance( ProgramInstance programInstance )
     {
-        return programStages;
+        programInstanceStore.delete( programInstance );
     }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    public Collection<ProgramInstance> getAllProgramInstances()
     {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
-
-        return SUCCESS;
+        return programInstanceStore.getAll();
     }
+
+    public ProgramInstance getProgramInstance( int id )
+    {
+        return programInstanceStore.get( id );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( boolean completed )
+    {
+        return programInstanceStore.getProgramInstances( completed );
+    }
+
+    public void updateProgramInstance( ProgramInstance programInstance )
+    {
+        programInstanceStore.update( programInstance );
+    }
+
 }
