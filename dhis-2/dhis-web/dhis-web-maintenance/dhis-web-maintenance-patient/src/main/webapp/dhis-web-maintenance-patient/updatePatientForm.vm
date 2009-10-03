@@ -20,7 +20,7 @@
 	</tr>
 	<tr>
 		<td><label for="firstName">$i18n.getString( "first_name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-		<td><input type="text" id="firstName" name="firstName" value="$encoder.htmlEncode( $patient.givenName )" style="width:30em"></td>
+		<td><input type="text" id="firstName" name="firstName" value="$encoder.htmlEncode( $patient.firstName )" style="width:30em"></td>
 	</tr>
 	<tr>
 		<td><label for="middleName">$i18n.getString( "middle_name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
@@ -28,7 +28,7 @@
 	</tr>
 	<tr>
 		<td><label for="lastName">$i18n.getString( "last_name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-		<td><input type="text" id="lastName" name="lastName" value="$encoder.htmlEncode( $patient.familyName )" style="width:30em"></td>
+		<td><input type="text" id="lastName" name="lastName" value="$encoder.htmlEncode( $patient.lastName )" style="width:30em"></td>
 	</tr>
 	<tr><td>&nbsp;</td></tr>	
 	<tr>
@@ -45,7 +45,7 @@
 	</tr>	
 	<tr>
 		<td><label for="birthDate">$i18n.getString( "date_of_birth" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-		<td><input type="text" id="birthDate" name="birthDate" value="$format.formatDate( $patient.birthdate )" style="width:30em">
+		<td><input type="text" id="birthDate" name="birthDate" value="$format.formatDate( $patient.birthDate )" style="width:30em">
 			<img src="../images/calendar_icon.gif" width="16" height="16" id="getBirthDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "date_of_birth" )"></td>
 	</tr>
 	<script type="text/javascript">

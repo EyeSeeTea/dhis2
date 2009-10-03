@@ -64,8 +64,8 @@
 				</td>
 				
 				<td style="text-align:center"#alternate( $mark )>
-                  ##<a href="showMemberShipForm.action?id=$patient.id" title="$i18n.getString( "manage_membership" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_membership" )"></a>
-                  <a href="#" title="$i18n.getString( "manage_membership" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_membership" )"></a>
+                  ##<a href="showMemberShipForm.action?id=$patient.id" title="$i18n.getString( "manage_program_enrollment" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_program_enrollment" )"></a>
+                  <a href="#" title="$i18n.getString( "manage_program_enrollment" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_program_enrollment" )"></a>
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>
@@ -95,18 +95,20 @@
 			<div id="detailsArea" style="display:none">
 				<div style="float:right">
 					<a href="javascript:hideDetails()" title="$i18n.getString( "hide_details" )"><img src="../images/close.png" alt="$i18n.getString( "hide_details" )"></a>
-				</div>				
-				    <p><label>$i18n.getString( "id" ):</label><br><span id="idField"></span></p>
-				    <p><label>$i18n.getString( "firstName" ):</label><br><span id="firstNameField"></span></p>				
-				    <p><label>$i18n.getString( "middleName" ):</label><br><span id="middleNameField"></span></p>
-				    <p><label>$i18n.getString( "lastName" ):</label><br><span id="lastNameField"></span></p>
+				</div>			    
 				    <p><label>$i18n.getString( "identifier" ):</label><br><span id="identifierField"></span></p>
+				    <p><label>$i18n.getString( "first_name" ):</label><br><span id="firstNameField"></span></p>				
+				    <p><label>$i18n.getString( "middle_name" ):</label><br><span id="middleNameField"></span></p>
+				    <p><label>$i18n.getString( "last_name" ):</label><br><span id="lastNameField"></span></p>
+				    <p><label>$i18n.getString( "gender" ):</label><br><span id="genderField"></span></p>
+				    <p><label>$i18n.getString( "date_of_birth" ):</label><br><span id="birthDateField"></span></p>
+				    <p><label>$i18n.getString( "enrolled_in_program" ):</label><br><span id="enrolledInProgramField"></span></p>
 			    </div>
 
 		</td>
   </tr>
 </table>
-
+   
 <span id="message"></span>
 
 <script type="text/javascript">

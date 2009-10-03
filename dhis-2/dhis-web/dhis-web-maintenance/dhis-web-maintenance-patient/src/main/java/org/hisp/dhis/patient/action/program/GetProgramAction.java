@@ -85,7 +85,7 @@ public class GetProgramAction
     {
         return programStages;
     }   
-
+    
     // -------------------------------------------------------------------------
     // Action
     // -------------------------------------------------------------------------
@@ -93,7 +93,7 @@ public class GetProgramAction
     public String execute()
         throws Exception
     {
-        program = programService.getProgram( id );
+        program = programService.getProgram( id );        
         
         programStages = programStageService.getAllProgramStages();
         

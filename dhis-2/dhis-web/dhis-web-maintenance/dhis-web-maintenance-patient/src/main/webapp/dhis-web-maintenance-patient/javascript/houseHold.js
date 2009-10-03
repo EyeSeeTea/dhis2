@@ -190,9 +190,9 @@ function getMembersReceived( xmlObject )
 	for ( var i = 0; i < members.length; i++ )
 	{
 		var id 		   = members[ i ].getElementsByTagName( "id" )[0].firstChild.nodeValue;
-		var givenName  = members[ i ].getElementsByTagName( "givenName" )[0].firstChild.nodeValue ;
+		var givenName  = members[ i ].getElementsByTagName( "firstName" )[0].firstChild.nodeValue ;
 		var middleName = members[ i ].getElementsByTagName( "middleName" )[0].firstChild.nodeValue ;
-		var familyName = members[ i ].getElementsByTagName( "familyName" )[0].firstChild.nodeValue ;
+		var familyName = members[ i ].getElementsByTagName( "lastName" )[0].firstChild.nodeValue ;
 		
 		var option = document.createElement( "option" );
 		

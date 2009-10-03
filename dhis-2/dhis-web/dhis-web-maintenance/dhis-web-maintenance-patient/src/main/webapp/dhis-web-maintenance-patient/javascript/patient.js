@@ -24,11 +24,12 @@ function patientReceived( patientElement )
 	setFieldValue( 'firstNameField', getElementValue( patientElement, 'firstName' ) );
     setFieldValue( 'middleNameField', getElementValue( patientElement, 'middleName' ) );
     setFieldValue( 'lastNameField', getElementValue( patientElement, 'lastName' ) );
-    setFieldValue( 'gender', getElementValue( patientElement, 'gender' ) );  
-    setFieldValue( 'dateOfBirthField', getElementValue( patientElement, 'dateOfBirth' ) );
+    setFieldValue( 'genderField', getElementValue( patientElement, 'gender' ) );  
+    setFieldValue( 'birthDateField', getElementValue( patientElement, 'birthDate' ) );
+    //setFieldValue( 'enrolledProgramField', getElementValue( patientElement, 'enrolledProgram' ) );
       
     
-    var address1 = getElementValue( patientElement, 'address1');
+    /*var address1 = getElementValue( patientElement, 'address1');
     setFieldValue( 'address1Field', address1 ? address1 : '[' + i18n_none + ']' );
     
     var address2 = getElementValue( patientElement, 'address2');
@@ -50,7 +51,7 @@ function patientReceived( patientElement )
     setFieldValue( 'countryField', country ? country : '[' + i18n_none + ']' );
     
     var postalCode = getElementValue( patientElement, 'postalCode');
-    setFieldValue( 'postalCodeField', postalCode ? postalCode : '[' + i18n_none + ']' );    
+    setFieldValue( 'postalCodeField', postalCode ? postalCode : '[' + i18n_none + ']' );   */ 
    
     showDetails();
 }

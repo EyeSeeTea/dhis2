@@ -123,7 +123,8 @@ function programReceived( programElement )
 	setFieldValue( 'idField', getElementValue( programElement, 'id' ) );
 	setFieldValue( 'nameField', getElementValue( programElement, 'name' ) );	
     setFieldValue( 'descriptionField', getElementValue( programElement, 'description' ) );
-    setFieldValue( 'numberOfDaysField', getElementValue( programElement, 'numberOfDays' ) );      
+    setFieldValue( 'numberOfDaysField', getElementValue( programElement, 'numberOfDays' ) );
+    setFieldValue( 'programStageCountField', getElementValue( programElement, 'programStageCount' ) );
    
     showDetails();
 }
