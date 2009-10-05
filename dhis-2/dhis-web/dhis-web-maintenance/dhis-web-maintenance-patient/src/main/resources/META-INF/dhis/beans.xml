@@ -95,10 +95,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.patient.action.patient.GetPatientAction"
     class="org.hisp.dhis.patient.action.patient.GetPatientAction" 
     scope="prototype">    
-	<property name="patientService"
+    <property name="patientService"
       ref="org.hisp.dhis.patient.PatientService"/>
     <property name="patientIdentifierService"
-      ref="org.hisp.dhis.patient.PatientIdentifierService"/>  
+      ref="org.hisp.dhis.patient.PatientIdentifierService"/> 
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/> 
   </bean>
   
   <bean id="org.hisp.dhis.patient.action.patient.AddPatientAction"
@@ -117,8 +119,25 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">      
     <property name="patientService"
       ref="org.hisp.dhis.patient.PatientService"/>         
-  </bean> 
+  </bean>
   
+  <bean id="org.hisp.dhis.patient.action.patient.UpdatePatientAction"
+    class="org.hisp.dhis.patient.action.patient.UpdatePatientAction" 
+    scope="prototype">      
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>         
+  </bean>
+  
+   <bean id="org.hisp.dhis.patient.action.patient.UpdateProgramEnrollmentAction"
+    class="org.hisp.dhis.patient.action.patient.UpdateProgramEnrollmentAction" 
+    scope="prototype">      
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>         
+    <property name="programInstanceService"
+      ref="org.hisp.dhis.program.ProgramInstanceService"/>
+  </bean>   
     
   <bean id="org.hisp.dhis.patient.action.patient.ShowAddPatientFormAction"
     class="org.hisp.dhis.patient.action.patient.ShowAddPatientFormAction" 
@@ -218,8 +237,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>              
-  </bean>
-  
+  </bean>  
   
   <!-- ProgramStage --> 
   

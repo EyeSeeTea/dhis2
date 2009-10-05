@@ -28,6 +28,7 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
+import org.hisp.dhis.patient.Patient;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -82,6 +83,36 @@ public class DefaultProgramInstanceService
     public void updateProgramInstance( ProgramInstance programInstance )
     {
         programInstanceStore.update( programInstance );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( Program program )
+    {
+        return programInstanceStore.getProgramInstances( program );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( Program program, boolean completed )
+    {
+        return programInstanceStore.getProgramInstances( program, completed );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( Patient patient )
+    {
+        return programInstanceStore.getProgramInstances( patient );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed )
+    {
+        return programInstanceStore.getProgramInstances( patient, completed );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program )
+    {
+        return programInstanceStore.getProgramInstances( patient, program );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed )
+    {
+        return programInstanceStore.getProgramInstances( patient, program, completed );
     }
 
 }

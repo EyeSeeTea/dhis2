@@ -30,6 +30,8 @@ import java.util.Collection;
 
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceStore;
 
@@ -46,6 +48,51 @@ public class HibernateProgramInstanceStore
     public Collection<ProgramInstance> getProgramInstances( boolean completed )
     {
         return getCriteria( Restrictions.eq( "completed", completed ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> getProgramInstances( Program program )
+    {
+        return getCriteria( Restrictions.eq( "program", program ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> getProgramInstances( Program program, boolean completed )
+    {
+        return getCriteria( 
+            Restrictions.eq( "program", program ),            
+            Restrictions.eq( "completed", completed ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> getProgramInstances( Patient patient )
+    {
+        return getCriteria( Restrictions.eq( "patient", patient ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed )
+    {
+        return getCriteria( 
+            Restrictions.eq( "patient", patient ),            
+            Restrictions.eq( "completed", completed ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program )
+    {
+        return getCriteria( 
+            Restrictions.eq( "patient", patient ),            
+            Restrictions.eq( "program", program ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed )
+    {
+        return getCriteria( 
+            Restrictions.eq( "patient", patient ),
+            Restrictions.eq( "program", program ),
+            Restrictions.eq( "completed", completed ) ).list();
     }
 
 }

@@ -1,0 +1,92 @@
+
+<h3>$i18n.getString( "program_enrollment" )</h3>
+
+<form id="updateProgramEnrollmentForm" name="updateProgramEnrollmentForm" action="updateProgramEnrollment.action" method="post" onsubmit="submitForm()">
+
+<div>
+    <input type="hidden" id="id" name="id" value="$patient.id">
+</div>
+
+<table class="mainPageTable">
+    
+  <tr>
+    <td style="vertical-align:top">    
+      <table class="listTable">                   
+          <col>
+          <col>
+          <col>
+          <col>
+          <col>          
+          <tr>
+            <th>$i18n.getString( "first_name" )</th>
+            <th>$i18n.getString( "middle_name" )</th>
+            <th>$i18n.getString( "last_name" )</th>            
+            <th>$i18n.getString( "gender" )</th>
+            <th>$i18n.getString( "date_of_birth" )</th>           
+          </tr>
+          <tr>
+            <td>            
+                $encoder.htmlEncode( $patient.firstName )
+            </td>
+            <td>            
+                $encoder.htmlEncode( $patient.middleName )
+            </td>
+            <td>            
+                $encoder.htmlEncode( $patient.lastName )
+            </td>               
+            <td>            
+                $encoder.htmlEncode( $patient.gender )
+            </td>
+            <td>            
+                $format.formatDate( $patient.birthDate )
+            </td>
+          </tr>  
+    </td>
+  </tr>    
+  <tr><td>&nbsp;</td></tr>      
+</table>
+
+  <table id="programEnrollmentArea">
+    
+    <thead>     
+      <tr><b>$i18n.getString( "programs" )</b></tr>
+      <tr>        
+		<th>$i18n.getString( "not_enrolled" )</th>
+		<th></th>
+		<th>$i18n.getString( "enrolled" )</th>
+      </tr>
+    </thead>
+  
+    <tbody>      
+      <tr>
+     	<td>
+            <select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
+                #foreach ( $program in $programs )
+                    <option value="$program.id">$encoder.htmlEncode( $program.name )</option>
+                #end              
+            </select>
+        </td>
+        <td valign="top" align="center">            
+            <input type="button" value="&gt;" onclick="move( 'availableList' )"><br>    
+            <input type="button" value="&lt;" onclick="move ( 'selectedList' )"><br><br>                             
+        <td>
+            <select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">
+                #foreach ( $patientProgram in $patient.programs )
+                    <option value="$patientProgram.id">$encoder.htmlEncode( $patientProgram.name )</option>
+                #end
+            </select>
+        </td>
+        
+      </tr>
+      
+    </tbody>
+  </table>
+
+<p>
+	<input type="submit" value="$i18n.getString( "update" )" style="width:10em">
+	<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='patient.action'" style="width:10em">
+</p>
+
+</form> 	
+
+<span id="message"></span>

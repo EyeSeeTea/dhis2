@@ -91,8 +91,8 @@ public class ProgramInstance
 
         final ProgramInstance other = (ProgramInstance) o;
 
-        return startDate.equals( other.getStartDate() ) && endDate.equals( other.getEndDate() )
-            && patient.equals( other.getPatient() ) && program.equals( other.getProgram() );
+        return startDate.equals( other.getStartDate() ) && patient.equals( other.getPatient() )
+            && program.equals( other.getProgram() );
 
     }
 
@@ -102,8 +102,7 @@ public class ProgramInstance
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + startDate.hashCode();
-        result = result * prime + endDate.hashCode();
+        result = result * prime + startDate.hashCode();        
         result = result * prime + patient.hashCode();
         result = result * prime + program.hashCode();
 

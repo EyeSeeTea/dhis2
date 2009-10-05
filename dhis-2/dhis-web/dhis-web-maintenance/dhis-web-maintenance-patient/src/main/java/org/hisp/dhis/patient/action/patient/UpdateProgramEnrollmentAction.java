@@ -24,15 +24,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.patient;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
@@ -41,14 +45,13 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class GetPatientAction
+public class UpdateProgramEnrollmentAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private PatientService patientService;
 
     public void setPatientService( PatientService patientService )
@@ -56,20 +59,20 @@ public class GetPatientAction
         this.patientService = patientService;
     }
 
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }    
-    
     private ProgramService programService;
-    
+
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
-    }
-   
+    }    
+    
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }   
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -80,29 +83,14 @@ public class GetPatientAction
     {
         this.id = id;
     }
+    
+    private Collection<String> selectedList = new HashSet<String>();
 
-    private Patient patient;
+    public void setSelectedList( Collection<String> selectedList )
+    {
+        this.selectedList = selectedList;
+    }
 
-    public Patient getPatient()
-    {
-        return patient;
-    }
-                              
-    private PatientIdentifier patientIdentifier;
-    
-    public PatientIdentifier getPatientIdentifier()
-    {
-        return patientIdentifier;
-    }
-    
-    private Collection<Program> programs;
-    
-    public Collection<Program> getPrograms()
-    {
-        return programs;
-    } 
-    
-    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -110,16 +98,60 @@ public class GetPatientAction
     public String execute()
         throws Exception
     {
+        
+        Patient patient = patientService.getPatient( id );
+        
+        Set<Program> earlierEnrollments = new HashSet<Program>( patient.getPrograms());       
 
-        patient = patientService.getPatient( id );  
+        Set<Program> newEnrollments = new HashSet<Program>();
+
+        for ( String id : selectedList )
+        {
+            Program program = programService.getProgram( Integer.parseInt( id ) );
+
+            newEnrollments.add( program );
+        }
         
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
+        //Check for newly added programs (ProgramInstance should be launched)
         
-        programs = programService.getAllPrograms();
+        for( Program program : newEnrollments )
+        {
+            if( ! earlierEnrollments.contains( program ) )                
+            {
+                ProgramInstance programInstance = new ProgramInstance();
+                
+                programInstance.setPatient( patient );
+                programInstance.setProgram( program );
+                programInstance.setStartDate( new Date() );
+                programInstance.setCompleted( false );
+                
+                programInstanceService.addProgramInstance( programInstance );              
+                
+            }
+        }        
         
-        programs.removeAll( patient.getPrograms() );
+        //Check for removed programs (active ProgramInstance should be closed)
         
+        for( Program program : earlierEnrollments )
+        {
+            if( !newEnrollments.contains(  program  ) )
+            {
+                Collection<ProgramInstance> activeProgramInstances = programInstanceService.getProgramInstances( patient, program, false );
+                
+                for( ProgramInstance programInstance : activeProgramInstances )
+                {
+                    programInstance.setCompleted( true );
+                    programInstance.setEndDate( new Date() );
+                    
+                    programInstanceService.addProgramInstance( programInstance );
+                }
+            }
+        }
+        
+        patient.setPrograms( newEnrollments );
+        
+        patientService.updatePatient( patient );
+
         return SUCCESS;
-        
     }
 }

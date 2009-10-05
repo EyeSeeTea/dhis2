@@ -28,6 +28,8 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
+import org.hisp.dhis.patient.Patient;
+
 /**
  * @author Abyot Asalefew
  * @version $Id$
@@ -47,5 +49,17 @@ public interface ProgramInstanceService
     Collection<ProgramInstance> getAllProgramInstances();
     
     Collection<ProgramInstance> getProgramInstances( boolean completed );   
+    
+    Collection<ProgramInstance> getProgramInstances( Program program );
+    
+    Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
+    
+    Collection<ProgramInstance> getProgramInstances( Patient patient );
+    
+    Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed );
+    
+    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
+    
+    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );
     
 }
