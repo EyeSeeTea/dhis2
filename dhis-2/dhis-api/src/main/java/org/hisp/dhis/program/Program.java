@@ -27,6 +27,7 @@
 
 package org.hisp.dhis.program;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +38,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @version $Id$
  */
 public class Program
+    implements Serializable
 {
     private int id;
 

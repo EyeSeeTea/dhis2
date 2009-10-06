@@ -4,5 +4,62 @@
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
   
+  <bean id="org.hisp.dhis.caseentry.state.SelectedStateManager"
+    class="org.hisp.dhis.caseentry.state.DefaultSelectedStateManager">
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="programStageService"
+      ref="org.hisp.dhis.program.ProgramStageService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.caseentry.action.SearchPatientAction"
+    class="org.hisp.dhis.caseentry.action.SearchPatientAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>      
+  </bean>
+  
+  <bean id="org.hisp.dhis.caseentry.action.SelectAction"
+    class="org.hisp.dhis.caseentry.action.SelectAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>           
+  </bean>
+  
+  <bean id="org.hisp.dhis.caseentry.action.ValidateSearchAction"
+    class="org.hisp.dhis.caseentry.action.ValidateSearchAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.caseentry.action.DataRecordingSelectAction"
+    class="org.hisp.dhis.caseentry.action.DataRecordingSelectAction" 
+    scope="prototype">   
+    <property name="selectedStateManager"
+      ref="org.hisp.dhis.caseentry.state.SelectedStateManager"/>
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="programStageService"
+      ref="org.hisp.dhis.program.ProgramStageService"/>               
+  </bean>
+  
+  <bean id="org.hisp.dhis.caseentry.action.DataEntryAction"
+    class="org.hisp.dhis.caseentry.action.DataEntryAction" 
+    scope="prototype">   
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="programStageService"
+      ref="org.hisp.dhis.program.ProgramStageService"/>               
+  </bean>
+  
+   
+  
   
 </beans>

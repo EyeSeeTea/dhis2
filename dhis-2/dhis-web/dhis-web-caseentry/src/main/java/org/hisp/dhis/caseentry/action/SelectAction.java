@@ -24,67 +24,63 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
 
-import java.util.Collection;
+package org.hisp.dhis.caseentry.action;
 
-import org.hisp.dhis.common.GenericNameStore;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew
+ * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-@Transactional
-public class DefaultProgramStageService
-    implements ProgramStageService
+public class SelectAction
+    implements Action
 {
+    private static final String SEARCH_FORM = "searchform";
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericNameStore<ProgramStage> programStageStore;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setProgramStageStore( GenericNameStore<ProgramStage> programStageStore )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.programStageStore = programStageStore;
+        this.selectionManager = selectionManager;
     }
 
     // -------------------------------------------------------------------------
-    // ProgramStage implementation
-    // -------------------------------------------------------------------------    
-   
-    public int addProgramStage( ProgramStage programStage )
-    {       
-        return programStageStore.save( programStage );       
-    }
-    
-    public void deleteProgramStage( ProgramStage programStage )
-    {     
-        programStageStore.delete( programStage );
-    }
-    
-    public Collection<ProgramStage> getAllProgramStages()
-    {     
-        return programStageStore.getAll();
-    }
-    
-    public ProgramStage getProgramStage( int id )
-    {        
-        return programStageStore.get( id );
-    }
-    
-    public ProgramStage getProgramStageByName( String name )
-    {        
-        return programStageStore.getByName( name );
-    }
-    
-    public void updateProgramStage( ProgramStage programStage )
-    {        
-        programStageStore.update( programStage );
+    // Input/output
+    // -------------------------------------------------------------------------
+
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
     }
 
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
+
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        if ( organisationUnit == null )
+        {
+            return SUCCESS;
+        }
+
+        return SEARCH_FORM;
+    }
 }

@@ -1,6 +1,7 @@
 
 #parse( "/dhis-web-maintenance-patient/selectPatient.vm" )
 
+
 <form id="searchPatientForm" action="searchPatient.action" method="post" onsubmit="return validateSearchPatient()">
 
 <table>	

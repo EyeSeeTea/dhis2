@@ -1,0 +1,41 @@
+#parse( "/dhis-web-caseentry/dataRecordingSelect.vm" )
+
+<table class="mainPageTable">
+    <col id="noCol">
+    <col id="deCol">    
+    <col id="entryCol">    
+    <tr>
+        <th>$i18n.getString( "nr" )</th>
+        <th>$i18n.getString( "data_element" )</th>                
+        <th>$i18n.getString( "entry" )</th>        
+    </tr>
+#set( $dataElementRowCount = 0 )
+#set( $mark = 0 )
+#set( $tabIndex = 1 )
+#foreach( $dataElement in $dataElements )
+    #set( $dataElementRowCount = $dataElementRowCount + 1 )
+    #if( $mark == 1 )
+        #set( $mark = 0 )
+    #else
+        #set( $mark = 1 )
+    #end
+    
+    <tr #if( $mark == 0 ) style="background-color:#dddddd" #end>
+        ##dataElementRowCount
+        <td style="text-align:right">$dataElementRowCount</td>
+        
+        ##data element name
+        <td>
+            <span id="value[$dataElement.id].name" title="$!encoder.htmlEncode( $dataElement.description )">
+                $encoder.htmlEncode( $dataElement.name )            
+            </span>
+        </td>       
+        
+        ##entry     
+        <td>
+            <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" onchange="saveValue()" onkeypress="return keyPress(event, this)" style="width:100% tabindex="$tabIndex" >
+        </td>       
+    </tr>
+    #set( $tabIndex = $tabIndex + 1 )
+#end
+</table>

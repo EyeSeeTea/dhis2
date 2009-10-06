@@ -1,5 +1,7 @@
+package org.hisp.dhis.caseentry.state;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,22 +26,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action;
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public class NoAction
-    implements Action
-{
-    public String execute()
-        throws Exception
-    {
+public interface SelectedStateManager
+{    
 
-        return SUCCESS;
+    void setSelectedProgram( Program program );
 
-    }
+    Program getSelectedProgram();
+
+    void clearSelectedProgram();
+    
+    void setSelectedProgramStage( ProgramStage programStage );      
+
+    ProgramStage getSelectedProgramStage();   
+
+    void clearSelectedProgramStage();
+    
 }

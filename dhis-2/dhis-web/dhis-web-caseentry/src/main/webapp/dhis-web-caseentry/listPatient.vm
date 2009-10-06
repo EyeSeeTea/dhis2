@@ -1,0 +1,80 @@
+#parse( "/dhis-web-caseentry/select.vm" )
+
+<table>
+	<tr>
+		<td>$i18n.getString( "search_result_matching_the_search_criteria" )</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>$searchText</td>
+	</tr>	
+</table>
+ 
+<table class="mainPageTable">
+  	
+  <tr>
+    <td style="vertical-align:top">    
+      <table class="listTable">                   
+          <col>
+          <col>
+          <col>
+          <col>
+          <col>
+          <col>              
+		  <tr>
+		  	<td></td>
+		  	<td></td>
+		  	<td></td>
+		  	<td></td>
+		  	<td></td>		  	
+		  	<td style="text-align:right">			
+				<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='select.action'" style="width:10em">
+			</td>
+          <tr>
+            <th>$i18n.getString( "first_name" )</th>
+            <th>$i18n.getString( "middle_name" )</th>
+            <th>$i18n.getString( "last_name" )</th>            
+            <th>$i18n.getString( "gender" )</th>
+            <th>$i18n.getString( "date_of_birth" )</th>            
+            <th>$i18n.getString( "operations" )</th>
+          </tr>
+          
+          <tbody id="list">	
+          #set( $mark = false )
+          
+          #foreach( $patient in $patients )
+          	<tr #alternate( $mark )>
+				<td>			
+					$encoder.htmlEncode( $patient.firstName )
+				</td>
+				<td>			
+					$encoder.htmlEncode( $patient.middleName )
+				</td>
+				<td>			
+					$encoder.htmlEncode( $patient.lastName )
+				</td>				
+				<td>			
+					$encoder.htmlEncode( $patient.gender )
+				</td>
+				<td>			
+					$format.formatDate( $patient.birthDate )
+				</td>
+				
+				<td style="text-align:center"#alternate( $mark )>
+                  <a href="selectDataRecording.action?id=$patient.id" title="$i18n.getString( "manage_data_recording" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_data_recording" )"></a>                  
+                </td>               
+                				
+			</tr>
+			#if( $mark )
+				#set( $mark = false )
+			#else
+				#set( $mark = true )
+			#end
+    	#end
+    	</tbody>
+    
+	 </table>
+   </td>
+  </tr>
+</table>
+   
+<span id="message"></span>
