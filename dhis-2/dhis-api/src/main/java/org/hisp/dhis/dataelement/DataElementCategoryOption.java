@@ -29,34 +29,18 @@ package org.hisp.dhis.dataelement;
 
 import java.io.Serializable;
 
+import org.hisp.dhis.common.IdentifiableObject;
+
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
 public class DataElementCategoryOption
+    extends IdentifiableObject
     implements Serializable
 {
     public static final String DEFAULT_NAME = "default";
     
-    /**
-     * The database internal identifier for this DataElementCategoryOption.
-     */
-    private int id;
-    
-    /**
-     * The name.
-     */
-    private String name;
-    
-    /**
-     * The shortname.
-     */
-    private String shortName;
-    
-    /**
-     * The Universally Unique Identifier. 
-     */ 
-    private String uuid;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -121,49 +105,5 @@ public class DataElementCategoryOption
     public String toString()
     {
         return "[" + name + "]";
-    }
-
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-    
-    public int getId()
-    {
-        return id;
-    }
-    
-    public void setId( int id )
-    {
-        this.id =  id;
-    }
-    
-    public String getName()
-    {
-        return name;
-    }
-    
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getShortName()
-    {
-        return shortName;
-    }
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
-    }
-    
-    public String getUuid()
-    {
-        return uuid;
-    }
-
-    public void setUuid( String uuid )
-    {
-        this.uuid = uuid;
     }
 }

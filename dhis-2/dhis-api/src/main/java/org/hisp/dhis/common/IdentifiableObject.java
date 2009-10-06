@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,90 +27,120 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hisp.dhis.common.IdentifiableObject;
-
 /**
- * @author Kristian Nordal
- * @version $Id: DataElementGroup.java 5540 2008-08-19 10:47:07Z larshelg $
+ * @author Bob Jolliffe
+ * @version $Id$
  */
-public class DataElementGroup
-    extends IdentifiableObject
-    implements Serializable
+public class IdentifiableObject
 {
 
     /**
-     * The members of the DataElementGroup.
+     * The database internal identifier for this Object.
      */
-    private Set<DataElement> members = new HashSet<DataElement>();
+    protected int id;
+    
+    /**
+     * The Universally Unique Identifer for this Object. 
+     */    
+    protected String uuid;
 
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
+    /**
+     * The name of this Object. Required and unique.
+     */
+    protected String name;
 
-    public DataElementGroup()
-    {
-    }
+    /**
+     * An alternative name of this Object. Optional but unique.
+     */
+    protected String alternativeName;
 
-    public DataElementGroup( String name )
-    {
-        this.name = name;
-    }
+    /**
+     * An short name representing this Object. Optional but unique.
+     */
+    protected String shortName;
 
-    // -------------------------------------------------------------------------
-    // hashCode and equals
-    // -------------------------------------------------------------------------
+    /**
+     * An code representing this Object. Optional but unique.
+     */
+    protected String code;
 
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof DataElementGroup) )
-        {
-            return false;
-        }
-
-        final DataElementGroup other = (DataElementGroup) o;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
-    }
+    /**
+     * Description of this Object.
+     */
+    protected String description;
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-
-    public Set<DataElement> getMembers()
+    public int getId()
     {
-        return members;
+        return id;
     }
 
-    public void setMembers( Set<DataElement> members )
+    public void setId( int id )
     {
-        this.members = members;
+        this.id = id;
     }
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid( String uuid )
+    {
+        this.uuid = uuid;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    public String getAlternativeName()
+    {
+        return alternativeName;
+    }
+
+    public void setAlternativeName( String alternativeName )
+    {
+        this.alternativeName = alternativeName;
+    }
+
+    public String getShortName()
+    {
+        return shortName;
+    }
+
+    public void setShortName( String shortName )
+    {
+        this.shortName = shortName;
+    }
+
+    public String getCode()
+    {
+        return code;
+    }
+
+    public void setCode( String code )
+    {
+        this.code = code;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
 }
