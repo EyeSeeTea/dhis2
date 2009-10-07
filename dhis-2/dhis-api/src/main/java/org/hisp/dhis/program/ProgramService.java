@@ -40,7 +40,7 @@ public interface ProgramService
 {
     String ID = ProgramService.class.getName();
 
-    int addProgram( Program program );
+    int saveProgram( Program program );
 
     void deleteProgram( Program program );
 

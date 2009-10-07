@@ -29,6 +29,7 @@ package org.hisp.dhis.patient;
 
 import java.util.Collection;
 
+import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
@@ -36,25 +37,15 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @version $Id$
  */
 public interface PatientIdentifierStore
+    extends GenericStore<PatientIdentifier>
 {
     String ID = PatientIdentifierStore.class.getName();
 
-    int addPatientIdentifier( PatientIdentifier patientIdentifier );
+    PatientIdentifier get( Patient patient );
 
-    void deletePatientIdentifier( PatientIdentifier patientIdentifier );
+    PatientIdentifier get( String identifier, OrganisationUnit organisationUnit );
 
-    void updatePatientIdentifier( PatientIdentifier patientIdentifier );
+    Collection<PatientIdentifier> getByIdentifier( String identifier );
 
-    PatientIdentifier getPatientIdentifier( int id );
-
-    PatientIdentifier getPatientIdentifier( Patient patient );
-
-    PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit );
-
-    Collection<PatientIdentifier> getAllPatientIdentifiers();
-
-    Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier );
-
-    Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit );
-
+    Collection<PatientIdentifier> getByOrganisationUnit( OrganisationUnit organisationUnit );
 }

@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
@@ -40,24 +41,22 @@ import org.hisp.dhis.program.ProgramInstanceStore;
  * @version $Id$
  */
 public class HibernateProgramInstanceStore
-    extends HibernateGenericStore<ProgramInstance>
-    implements ProgramInstanceStore
+    extends HibernateGenericStore<ProgramInstance> implements ProgramInstanceStore
 {
-
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstance> getProgramInstances( boolean completed )
+    public Collection<ProgramInstance> get( boolean completed )
     {
         return getCriteria( Restrictions.eq( "completed", completed ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstance> getProgramInstances( Program program )
+    public Collection<ProgramInstance> get( Program program )
     {
         return getCriteria( Restrictions.eq( "program", program ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstance> getProgramInstances( Program program, boolean completed )
+    public Collection<ProgramInstance> get( Program program, boolean completed )
     {
         return getCriteria( 
             Restrictions.eq( "program", program ),            
@@ -65,13 +64,13 @@ public class HibernateProgramInstanceStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstance> getProgramInstances( Patient patient )
+    public Collection<ProgramInstance> get( Patient patient )
     {
         return getCriteria( Restrictions.eq( "patient", patient ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed )
+    public Collection<ProgramInstance> get( Patient patient, boolean completed )
     {
         return getCriteria( 
             Restrictions.eq( "patient", patient ),            
@@ -79,7 +78,7 @@ public class HibernateProgramInstanceStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program )
+    public Collection<ProgramInstance> get( Patient patient, Program program )
     {
         return getCriteria( 
             Restrictions.eq( "patient", patient ),            
@@ -87,12 +86,11 @@ public class HibernateProgramInstanceStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed )
+    public Collection<ProgramInstance> get( Patient patient, Program program, boolean completed )
     {
         return getCriteria( 
             Restrictions.eq( "patient", patient ),
             Restrictions.eq( "program", program ),
             Restrictions.eq( "completed", completed ) ).list();
     }
-
 }

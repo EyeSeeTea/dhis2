@@ -82,8 +82,8 @@ public class PatientDataValueStoreTest
         patientA = createPatient( 'A' );
         patientB = createPatient( 'B' );
         
-        patientService.addPatient( patientA );
-        patientService.addPatient( patientB );
+        patientService.savePatient( patientA );
+        patientService.savePatient( patientB );
         
         categoryOptionCombo = categoryOptionComboService.getDefaultDataElementCategoryOptionCombo();
 
@@ -109,14 +109,14 @@ public class PatientDataValueStoreTest
     @Test
     public void addGet()
     {
-        patientDataValueStore.addPatientDataValue( valueA );
-        patientDataValueStore.addPatientDataValue( valueB );
-        patientDataValueStore.addPatientDataValue( valueC );
-        patientDataValueStore.addPatientDataValue( valueD );
+        patientDataValueStore.saveVoid( valueA );
+        patientDataValueStore.saveVoid( valueB );
+        patientDataValueStore.saveVoid( valueC );
+        patientDataValueStore.saveVoid( valueD );
         
-        assertEquals( valueA, patientDataValueStore.getPatientDataValue( patientA, dataElementA, categoryOptionCombo ) );
-        assertEquals( valueB, patientDataValueStore.getPatientDataValue( patientA, dataElementB, categoryOptionCombo ) );
-        assertEquals( valueC, patientDataValueStore.getPatientDataValue( patientB, dataElementA, categoryOptionCombo ) );
-        assertEquals( valueD, patientDataValueStore.getPatientDataValue( patientB, dataElementB, categoryOptionCombo ) );        
+        assertEquals( valueA, patientDataValueStore.get( patientA, dataElementA, categoryOptionCombo ) );
+        assertEquals( valueB, patientDataValueStore.get( patientA, dataElementB, categoryOptionCombo ) );
+        assertEquals( valueC, patientDataValueStore.get( patientB, dataElementA, categoryOptionCombo ) );
+        assertEquals( valueD, patientDataValueStore.get( patientB, dataElementB, categoryOptionCombo ) );        
     }
 }

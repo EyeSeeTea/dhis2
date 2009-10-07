@@ -29,10 +29,8 @@ package org.hisp.dhis.patient.hibernate;
 
 import java.util.Collection;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
@@ -43,94 +41,31 @@ import org.hisp.dhis.patient.PatientIdentifierStore;
  * @version $Id$
  */
 public class HibernatePatientIdentifierStore
-    implements PatientIdentifierStore
+    extends HibernateGenericStore<PatientIdentifier> implements PatientIdentifierStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientIdentifier> getByIdentifier( String identifier )
     {
-        this.sessionFactory = sessionFactory;
+        return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) ).list();
     }
 
-    // -------------------------------------------------------------------------
-    // PatientIdentifier
-    // -------------------------------------------------------------------------
-
-    public int addPatientIdentifier( PatientIdentifier patientIdentifier )
+    public PatientIdentifier get( String identifier, OrganisationUnit organisationUnit )
     {
-        return (Integer) sessionFactory.getCurrentSession().save( patientIdentifier );
-    }
-
-    public void deletePatientIdentifier( PatientIdentifier patientIdentifier )
-    {
-        sessionFactory.getCurrentSession().delete( patientIdentifier );
+        return (PatientIdentifier) getCriteria( 
+            Restrictions.eq( "identifier", identifier ),
+            Restrictions.eq( "organisationUnit", organisationUnit ) ).uniqueResult();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientIdentifier> getAllPatientIdentifiers()
+    public Collection<PatientIdentifier> getByOrganisationUnit( OrganisationUnit organisationUnit )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientIdentifier.class );
-
-        return criteria.list();
+        return getCriteria( Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier )
+    public PatientIdentifier get( Patient patient )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientIdentifier.class );
-        criteria.add( Restrictions.ilike( "identifier", "%" + identifier + "%" ) );
-
-        return criteria.list();
-    }
-
-    public PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientIdentifier.class );
-        criteria.add( Restrictions.eq( "identifier", identifier ) );
-        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
-
-        return (PatientIdentifier) criteria.uniqueResult();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientIdentifier.class );
-        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
-
-        return criteria.list();
-    }
-
-    public void updatePatientIdentifier( PatientIdentifier patientIdentifier )
-    {
-        sessionFactory.getCurrentSession().update( patientIdentifier );
-    }
-
-    public PatientIdentifier getPatientIdentifier( Patient patient )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientIdentifier.class );
-        criteria.add( Restrictions.eq( "patient", patient ) );
-        criteria.add( Restrictions.eq( "preferred", true ) );
-
-        return (PatientIdentifier) criteria.uniqueResult();
-    }
-
-    public PatientIdentifier getPatientIdentifier( int id )
-    {
-        return (PatientIdentifier) sessionFactory.getCurrentSession().get( PatientIdentifier.class, id );
+        return (PatientIdentifier) getCriteria( 
+            Restrictions.eq( "patient", patient ),
+            Restrictions.eq( "preferred", true ) ).uniqueResult();
     }
 }

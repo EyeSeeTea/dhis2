@@ -86,8 +86,8 @@ public class PatientDataValueAggregationEngineTest
         patientA = createPatient( 'A' );
         patientB = createPatient( 'B' );
         
-        patientService.addPatient( patientA );
-        patientService.addPatient( patientB );
+        patientService.savePatient( patientA );
+        patientService.savePatient( patientB );
         
         categoryOptionCombo = categoryOptionComboService.getDefaultDataElementCategoryOptionCombo();
         
@@ -113,10 +113,9 @@ public class PatientDataValueAggregationEngineTest
     @Test
     public void aggregate()
     {
-        patientDataValueStore.addPatientDataValue( valueA );
-        patientDataValueStore.addPatientDataValue( valueB );
-        patientDataValueStore.addPatientDataValue( valueC );
-        patientDataValueStore.addPatientDataValue( valueD );
-        
+        patientDataValueStore.saveVoid( valueA );
+        patientDataValueStore.saveVoid( valueB );
+        patientDataValueStore.saveVoid( valueC );
+        patientDataValueStore.saveVoid( valueD );        
     }
 }

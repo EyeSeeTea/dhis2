@@ -29,13 +29,11 @@ package org.hisp.dhis.patientdatavalue.hibernate;
 
 import java.util.Collection;
 
-import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
@@ -45,122 +43,60 @@ import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
  * @version $Id$
  */
 public class HibernatePatientDataValueStore
-    implements PatientDataValueStore
+    extends HibernateGenericStore<PatientDataValue> implements PatientDataValueStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
-    // -------------------------------------------------------------------------
-    // PatientDataValue
-    // -------------------------------------------------------------------------
-
-    public void addPatientDataValue( PatientDataValue patientDataValue )
+    public void saveVoid( PatientDataValue patientDataValue )
     {
         sessionFactory.getCurrentSession().save( patientDataValue );
     }
-
-    public void deletePatientDataValue( PatientDataValue patientDataValue )
+    
+    public int delete( Patient patient )
     {
-        sessionFactory.getCurrentSession().delete( patientDataValue );
-    }
-
-    public int deletePatientDataValue( Patient patient )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Query query = session.createQuery( "delete PatientDataValue where patient = :patient" );
+        Query query = getQuery( "delete PatientDataValue where patient = :patient" );        
         query.setEntity( "patient", patient );
-
         return query.executeUpdate();
     }
 
-    public int deletePatientDataValue( DataElement dataElement )
+    public int delete( DataElement dataElement )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Query query = session.createQuery( "delete PatientDataValue where dataElement = :dataElement" );
+        Query query = getQuery( "delete PatientDataValue where dataElement = :dataElement" );        
         query.setEntity( "dataElement", dataElement );
-
         return query.executeUpdate();
     }
 
-    public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo )
+    public int delete( DataElementCategoryOptionCombo optionCombo )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Query query = session.createQuery( "delete PatientDataValue where optionCombo = :optionCombo" );
+        Query query = getQuery( "delete PatientDataValue where optionCombo = :optionCombo" );        
         query.setEntity( "optionCombo", optionCombo );
-
         return query.executeUpdate();
     }
 
-    public PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement,
+    public PatientDataValue get( Patient patient, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "patient", patient ) );
-        criteria.add( Restrictions.eq( "dataElement", dataElement ) );
-        criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );
-
-        return (PatientDataValue) criteria.uniqueResult();
+        return (PatientDataValue) getCriteria( 
+            Restrictions.eq( "patient", patient ),
+            Restrictions.eq( "dataElement", dataElement ),
+            Restrictions.eq( "optionCombo", optionCombo ) ).uniqueResult();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement )
+    public Collection<PatientDataValue> get( Patient patient, DataElement dataElement )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "patient", patient ) );
-        criteria.add( Restrictions.eq( "dataElement", dataElement ) );
-
-        return criteria.list();
+        return getCriteria(
+            Restrictions.eq( "patient", patient ),
+            Restrictions.eq( "dataElement", dataElement ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> getPatientDataValues( Patient patient )
+    public Collection<PatientDataValue> get( Patient patient )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "patient", patient ) );
-
-        return criteria.list();
+        return getCriteria( Restrictions.eq( "patient", patient ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
+    public Collection<PatientDataValue> get( DataElementCategoryOptionCombo optionCombo )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientDataValue.class );
-        criteria.add( Restrictions.eq( "optionCombo", optionCombo ) );
-
-        return criteria.list();
-    }
-
-    public void updatePatientDataValue( PatientDataValue patientDataValue )
-    {
-        sessionFactory.getCurrentSession().update( patientDataValue );
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> getAllPatientDataValues()
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( PatientDataValue.class );
-
-        return criteria.list();
+        return getCriteria( Restrictions.eq( "optionCombo", optionCombo ) ).list();
     }
 }

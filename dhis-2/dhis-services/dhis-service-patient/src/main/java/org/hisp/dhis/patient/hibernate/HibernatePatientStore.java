@@ -32,8 +32,8 @@ import java.util.Date;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientStore;
 
@@ -42,45 +42,21 @@ import org.hisp.dhis.patient.PatientStore;
  * @version $Id$
  */
 public class HibernatePatientStore
-    implements PatientStore
-{
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
-    // -------------------------------------------------------------------------
-    // Patient
-    // -------------------------------------------------------------------------
-
-    public int addPatient( Patient patient )
-    {
-        return (Integer) sessionFactory.getCurrentSession().save( patient );
-    }
-
-    public void deletePatient( Patient patient )
-    {
-        sessionFactory.getCurrentSession().delete( patient );
-    }
-
+    extends HibernateGenericStore<Patient> implements PatientStore
+{    
     @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getAllPatients()
+    public Collection<Patient> get( Boolean isDead )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Patient.class );
+        criteria.add( Restrictions.eq( "isDead", isDead ) );
 
         return criteria.list();
     }
-
+    
     @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getPatiensByGender( String gender )
+    public Collection<Patient> getByGender( String gender )
     {
         Session session = sessionFactory.getCurrentSession();
 
@@ -89,51 +65,19 @@ public class HibernatePatientStore
 
         return criteria.list();
     }
-
-    public Patient getPatient( int id )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Patient) session.get( Patient.class, id );
-    }
     
     @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getPatientsByBirthDate( Date birthDate )
+    public Collection<Patient> getByBirthDate( Date birthDate )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Patient.class );
-        criteria.add( Restrictions.eq( "birthDate", birthDate ) );
-
-        return criteria.list();
+        return getCriteria( Restrictions.eq( "birthDate", birthDate ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getPatientsByNames( String name )
+    public Collection<Patient> getByNames( String name )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Patient.class );
-        criteria.add( Restrictions.disjunction().add( Restrictions.ilike( "firstName", "%" + name + "%" ) ).add(
+        return getCriteria( 
+            Restrictions.disjunction().add( Restrictions.ilike( "firstName", "%" + name + "%" ) ).add(
             Restrictions.ilike( "middleName", "%" + name + "%" ) ).add(
-            Restrictions.ilike( "lastName", "%" + name + "%" ) ) );
-
-        return criteria.list();
-    }
-
-    public void updatePatient( Patient patient )
-    {
-        sessionFactory.getCurrentSession().update( patient );
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getAllPatients( Boolean isDead )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Patient.class );
-        criteria.add( Restrictions.eq( "isDead", isDead ) );
-
-        return criteria.list();
+            Restrictions.ilike( "lastName", "%" + name + "%" ) ) ).list();        
     }
 }

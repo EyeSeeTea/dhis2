@@ -39,7 +39,6 @@ import org.hisp.dhis.dataelement.DataElement;
 public class ProgramStage
     implements Serializable
 {
-
     private int id;
 
     private String name;

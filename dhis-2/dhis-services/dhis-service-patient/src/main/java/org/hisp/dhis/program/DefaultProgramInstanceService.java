@@ -77,7 +77,7 @@ public class DefaultProgramInstanceService
 
     public Collection<ProgramInstance> getProgramInstances( boolean completed )
     {
-        return programInstanceStore.getProgramInstances( completed );
+        return programInstanceStore.get( completed );
     }
 
     public void updateProgramInstance( ProgramInstance programInstance )
@@ -87,32 +87,31 @@ public class DefaultProgramInstanceService
 
     public Collection<ProgramInstance> getProgramInstances( Program program )
     {
-        return programInstanceStore.getProgramInstances( program );
+        return programInstanceStore.get( program );
     }
 
     public Collection<ProgramInstance> getProgramInstances( Program program, boolean completed )
     {
-        return programInstanceStore.getProgramInstances( program, completed );
+        return programInstanceStore.get( program, completed );
     }
 
     public Collection<ProgramInstance> getProgramInstances( Patient patient )
     {
-        return programInstanceStore.getProgramInstances( patient );
+        return programInstanceStore.get( patient );
     }
 
     public Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed )
     {
-        return programInstanceStore.getProgramInstances( patient, completed );
+        return programInstanceStore.get( patient, completed );
     }
 
     public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program )
     {
-        return programInstanceStore.getProgramInstances( patient, program );
+        return programInstanceStore.get( patient, program );
     }
 
     public Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed )
     {
-        return programInstanceStore.getProgramInstances( patient, program, completed );
+        return programInstanceStore.get( patient, program, completed );
     }
-
 }

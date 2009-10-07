@@ -40,18 +40,17 @@ public interface ProgramInstanceStore
 {
     String ID = ProgramInstanceStore.class.getName();
     
-    Collection<ProgramInstance> getProgramInstances( boolean completed );
+    Collection<ProgramInstance> get( boolean completed );
     
-    Collection<ProgramInstance> getProgramInstances( Program program );
+    Collection<ProgramInstance> get( Program program );
     
-    Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
+    Collection<ProgramInstance> get( Program program, boolean completed );
     
-    Collection<ProgramInstance> getProgramInstances( Patient patient );
+    Collection<ProgramInstance> get( Patient patient );
     
-    Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed );
+    Collection<ProgramInstance> get( Patient patient, boolean completed );
     
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
+    Collection<ProgramInstance> get( Patient patient, Program program );
     
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );
-
+    Collection<ProgramInstance> get( Patient patient, Program program, boolean completed );
 }

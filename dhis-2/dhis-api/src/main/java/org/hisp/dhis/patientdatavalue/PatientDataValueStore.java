@@ -29,6 +29,7 @@ package org.hisp.dhis.patientdatavalue;
 
 import java.util.Collection;
 
+import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.patient.Patient;
@@ -38,28 +39,23 @@ import org.hisp.dhis.patient.Patient;
  * @version $Id$
  */
 public interface PatientDataValueStore
+    extends GenericStore<PatientDataValue>
 {
     String ID = PatientDataValueStore.class.getName();
 
-    void addPatientDataValue( PatientDataValue patientDataValue );
+    void saveVoid( PatientDataValue patientDataValue );
+    
+    int delete( Patient patient );
 
-    void updatePatientDataValue( PatientDataValue patientDataValue );
+    int delete( DataElement dataElement );
 
-    void deletePatientDataValue( PatientDataValue patientDataValue );
+    int delete( DataElementCategoryOptionCombo optionCombo );
 
-    int deletePatientDataValue( Patient patient );
+    PatientDataValue get( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
 
-    int deletePatientDataValue( DataElement dataElement );
+    Collection<PatientDataValue> get( Patient patient, DataElement dataElement );
 
-    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
+    Collection<PatientDataValue> get( Patient patient );
 
-    PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
-
-    Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement );
-
-    Collection<PatientDataValue> getPatientDataValues( Patient patient );
-
-    Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
-
-    Collection<PatientDataValue> getAllPatientDataValues();
+    Collection<PatientDataValue> get( DataElementCategoryOptionCombo optionCombo );
 }

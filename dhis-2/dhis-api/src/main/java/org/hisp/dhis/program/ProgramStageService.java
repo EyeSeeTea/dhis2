@@ -40,7 +40,7 @@ public interface ProgramStageService
     // ProgramStage
     // -------------------------------------------------------------------------
     
-    int addProgramStage( ProgramStage programStage );
+    int saveProgramStage( ProgramStage programStage );
     
     void deleteProgramStage( ProgramStage programStage );
     
@@ -50,6 +50,5 @@ public interface ProgramStageService
     
     ProgramStage getProgramStageByName( String name );
     
-    Collection<ProgramStage> getAllProgramStages();   
-
+    Collection<ProgramStage> getAllProgramStages();
 }

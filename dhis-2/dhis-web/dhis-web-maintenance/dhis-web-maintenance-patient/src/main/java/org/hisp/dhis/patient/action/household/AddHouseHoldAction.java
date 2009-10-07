@@ -94,7 +94,7 @@ public class AddHouseHoldAction
         houseHold.setLandMark( landMark );
         houseHold.setAddress( address );
 
-        houseHoldService.addHouseHold( houseHold );
+        houseHoldService.saveHouseHold( houseHold );
 
         return SUCCESS;
     }

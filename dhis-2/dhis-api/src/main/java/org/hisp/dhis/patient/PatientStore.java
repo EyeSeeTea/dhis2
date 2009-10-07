@@ -30,29 +30,22 @@ package org.hisp.dhis.patient;
 import java.util.Collection;
 import java.util.Date;
 
+import org.hisp.dhis.common.GenericStore;
+
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public interface PatientStore
+    extends GenericStore<Patient>
 {
     String ID = PatientStore.class.getName();
 
-    int addPatient( Patient patient );
+    Collection<Patient> get( Boolean isDead );
 
-    void deletePatient( Patient patient );
+    Collection<Patient> getByGender( String gender );
 
-    void updatePatient( Patient patient );
+    Collection<Patient> getByBirthDate( Date birthDate );
 
-    Patient getPatient( int id );
-
-    Collection<Patient> getAllPatients();
-
-    Collection<Patient> getAllPatients( Boolean isDead );
-
-    Collection<Patient> getPatiensByGender( String gender );
-
-    Collection<Patient> getPatientsByBirthDate( Date birthDate );
-
-    Collection<Patient> getPatientsByNames( String name );
+    Collection<Patient> getByNames( String name );
 }

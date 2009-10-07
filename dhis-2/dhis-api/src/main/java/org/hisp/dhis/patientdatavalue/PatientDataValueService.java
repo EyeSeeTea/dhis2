@@ -41,7 +41,7 @@ public interface PatientDataValueService
 {
     String ID = PatientDataValueService.class.getName();
 
-    void addPatientDataValue( PatientDataValue patientDataValue );
+    void savePatientDataValue( PatientDataValue patientDataValue );
 
     void updatePatientDataValue( PatientDataValue patientDataValue );
 
@@ -53,8 +53,7 @@ public interface PatientDataValueService
 
     int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
 
-    PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo );
+    PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
 
     Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement );
 

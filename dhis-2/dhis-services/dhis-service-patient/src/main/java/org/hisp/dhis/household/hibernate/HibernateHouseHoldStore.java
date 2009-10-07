@@ -29,10 +29,8 @@ package org.hisp.dhis.household.hibernate;
 
 import java.util.Collection;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.household.HouseHoldStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -42,61 +40,11 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @version $Id$
  */
 public class HibernateHouseHoldStore
-    implements HouseHoldStore
+    extends HibernateGenericStore<HouseHold> implements HouseHoldStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
-    // -------------------------------------------------------------------------
-    // HouseHold
-    // -------------------------------------------------------------------------
-
-    public int addHouseHold( HouseHold houseHold )
-    {
-        return (Integer) sessionFactory.getCurrentSession().save( houseHold );
-    }
-
-    public void updateHouseHold( HouseHold houseHold )
-    {
-        sessionFactory.getCurrentSession().update( houseHold );
-    }
-
-    public void deleteHouseHold( HouseHold houseHold )
-    {
-        sessionFactory.getCurrentSession().delete( houseHold );
-    }
-
     @SuppressWarnings( "unchecked" )
-    public Collection<HouseHold> getAllHouseHolds()
+    public Collection<HouseHold> get( OrganisationUnit organisationUnit )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( HouseHold.class );
-
-        return criteria.list();
-    }
-
-    public HouseHold getHouseHold( int id )
-    {
-        return (HouseHold) sessionFactory.getCurrentSession().get( HouseHold.class, id );
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit organisationUnit )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( HouseHold.class );
-        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
-
-        return criteria.list();
+        return getCriteria( Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
     }
 }

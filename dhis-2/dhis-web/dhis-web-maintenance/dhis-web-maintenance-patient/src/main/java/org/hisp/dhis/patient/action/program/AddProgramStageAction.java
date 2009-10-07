@@ -136,7 +136,7 @@ public class AddProgramStageAction
 
         programStage.setDataElements( dataElements );
 
-        programStageService.addProgramStage( programStage );
+        programStageService.saveProgramStage( programStage );
 
         return SUCCESS;
     }

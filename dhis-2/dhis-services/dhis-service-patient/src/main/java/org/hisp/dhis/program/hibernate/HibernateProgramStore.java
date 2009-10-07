@@ -29,11 +29,9 @@ package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
 
-import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-import org.hibernate.classic.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStore;
@@ -43,96 +41,25 @@ import org.hisp.dhis.program.ProgramStore;
  * @version $Id$
  */
 public class HibernateProgramStore
-    implements ProgramStore
+    extends HibernateGenericStore<Program> implements ProgramStore
 {
-
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
+    @SuppressWarnings( "unchecked" )
+    public Collection<Program> get( DataSet dataSet )
     {
-        this.sessionFactory = sessionFactory;
-    }
-
-    // -------------------------------------------------------------------------
-    // Program
-    // -------------------------------------------------------------------------
-
-    public int addProgram( Program program )
-    {
-        
-        return (Integer) sessionFactory.getCurrentSession().save( program );
-
-    }
-
-    public void deleteProgram( Program program )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( program );
-
+        return getCriteria( Restrictions.eq( "dataSet", dataSet ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<Program> getAllPrograms()
+    public Collection<Program> get( OrganisationUnit organisationUnit )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Program.class );
-
-        return criteria.list();
-    }
-
-    public Program getProgram( int id )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Program) session.get( Program.class, id );
+        return getCriteria( Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<Program> getPrograms( DataSet dataSet )
+    public Collection<Program> get( OrganisationUnit organisationUnit, DataSet dataSet )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Program.class );
-        criteria.add( Restrictions.eq( "dataSet", dataSet ) );
-
-        return criteria.list();
+        return getCriteria( 
+            Restrictions.eq( "dataSet", dataSet ), 
+            Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
     }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<Program> getPrograms( OrganisationUnit organisationUnit )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Program.class );
-        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
-
-        return criteria.list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Program.class );
-        criteria.add( Restrictions.eq( "dataSet", dataSet ) );
-        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
-
-        return criteria.list();
-    }
-
-    public void updateProgram( Program program )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( program );
-
-    }
-
 }

@@ -133,7 +133,7 @@ public class AddProgramAction
 
         program.setProgramStages( programStages );
 
-        programService.addProgram( program );
+        programService.saveProgram( program );
 
         return SUCCESS;
     }

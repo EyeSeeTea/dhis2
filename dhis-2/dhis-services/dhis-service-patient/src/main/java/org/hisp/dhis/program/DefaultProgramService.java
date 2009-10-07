@@ -56,43 +56,43 @@ public class DefaultProgramService
     // Program
     // -------------------------------------------------------------------------
 
-    public int addProgram( Program program )
+    public int saveProgram( Program program )
     {
-        return programStore.addProgram( program );
-    }
-
-    public void deleteProgram( Program program )
-    {
-        programStore.deleteProgram( program );
-    }
-
-    public Collection<Program> getAllPrograms()
-    {
-        return programStore.getAllPrograms();
-    }
-
-    public Program getProgram( int id )
-    {
-        return programStore.getProgram( id );
-    }
-
-    public Collection<Program> getPrograms( DataSet dataSet )
-    {
-        return programStore.getPrograms( dataSet );
-    }
-
-    public Collection<Program> getPrograms( OrganisationUnit organisationUnit )
-    {
-        return programStore.getPrograms( organisationUnit );
-    }
-
-    public Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet )
-    {
-        return programStore.getPrograms( organisationUnit, dataSet );
+        return programStore.save( program );
     }
 
     public void updateProgram( Program program )
     {
-        programStore.updateProgram( program );
+        programStore.update( program );
+    }
+
+    public void deleteProgram( Program program )
+    {
+        programStore.delete( program );
+    }
+
+    public Collection<Program> getAllPrograms()
+    {
+        return programStore.getAll();
+    }
+
+    public Program getProgram( int id )
+    {
+        return programStore.get( id );
+    }
+
+    public Collection<Program> getPrograms( DataSet dataSet )
+    {
+        return programStore.get( dataSet );
+    }
+
+    public Collection<Program> getPrograms( OrganisationUnit organisationUnit )
+    {
+        return programStore.get( organisationUnit );
+    }
+
+    public Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet )
+    {
+        return programStore.get( organisationUnit, dataSet );
     }
 }

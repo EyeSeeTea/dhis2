@@ -38,7 +38,6 @@ import org.hisp.dhis.patient.Patient;
 public class ProgramInstance
     implements Serializable
 {
-
     private int id;
 
     private Date startDate;

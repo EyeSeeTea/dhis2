@@ -35,7 +35,7 @@ public interface AddressService
 {
     String ID = AddressService.class.getName();
 
-    int addAddress( Address address );
+    int saveAddress( Address address );
 
     void updateAddress( Address address );
 
@@ -44,5 +44,4 @@ public interface AddressService
     Address getAddress( int id );
 
     Address getAddress( Patient patient );
-    
 }

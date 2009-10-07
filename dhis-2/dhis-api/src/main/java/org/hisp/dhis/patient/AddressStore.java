@@ -27,21 +27,16 @@
 
 package org.hisp.dhis.patient;
 
+import org.hisp.dhis.common.GenericStore;
+
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public interface AddressStore
+    extends GenericStore<Address>
 {
     String ID = AddressStore.class.getName();
 
-    int addAddress( Address address );
-
-    void updateAddress( Address address );
-
-    void deleteAddress( Address address );
-
-    Address getAddress( int id );
-
-    Address getAddress( Patient patient );
+    Address get( Patient patient );
 }

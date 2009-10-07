@@ -52,73 +52,28 @@ public class DefaultAddressService
     // Address
     // -------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.AddressService#addAddress(org
-     * .hisp.dhis.chis.patient.Address)
-     */
-    public int addAddress( Address address )
+    public int saveAddress( Address address )
     {
-        // TODO Auto-generated method stub
-
-        return addressStore.addAddress( address );
+        return addressStore.save( address );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.AddressService#deleteAddress
-     * (org.hisp.dhis.chis.patient.Address)
-     */
     public void deleteAddress( Address address )
     {
-        // TODO Auto-generated method stub
-
-        addressStore.deleteAddress( address );
+        addressStore.delete( address );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.AddressService#getAddress(int)
-     */
     public Address getAddress( int id )
     {
-        // TODO Auto-generated method stub
-
-        return addressStore.getAddress( id );
+        return addressStore.get( id );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.AddressService#getAddress(org
-     * .hisp.dhis.chis.patient.Patient)
-     */
     public Address getAddress( Patient patient )
     {
-        // TODO Auto-generated method stub
-
-        return addressStore.getAddress( patient );
+        return addressStore.get( patient );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hisp.dhis.chis.patient.AddressService#updateAddress
-     * (org.hisp.dhis.chis.patient.Address)
-     */
     public void updateAddress( Address address )
     {
-        // TODO Auto-generated method stub
-
-        addressStore.updateAddress( address );
+        addressStore.update( address );
     }
-
 }

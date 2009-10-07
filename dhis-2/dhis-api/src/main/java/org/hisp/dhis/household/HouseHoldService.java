@@ -39,7 +39,7 @@ public interface HouseHoldService
 {
     String ID = HouseHoldService.class.getName();
 
-    int addHouseHold( HouseHold houseHold );
+    int saveHouseHold( HouseHold houseHold );
 
     void deleteHouseHold( HouseHold houseHold );
 

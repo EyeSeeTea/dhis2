@@ -38,7 +38,7 @@ public interface PatientService
 {
     String ID = PatientService.class.getName();
 
-    int addPatient( Patient patient );
+    int savePatient( Patient patient );
 
     void deletePatient( Patient patient );
 

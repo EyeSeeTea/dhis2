@@ -41,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultProgramStageService
     implements ProgramStageService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -57,7 +56,7 @@ public class DefaultProgramStageService
     // ProgramStage implementation
     // -------------------------------------------------------------------------    
    
-    public int addProgramStage( ProgramStage programStage )
+    public int saveProgramStage( ProgramStage programStage )
     {       
         return programStageStore.save( programStage );       
     }
@@ -86,5 +85,4 @@ public class DefaultProgramStageService
     {        
         programStageStore.update( programStage );
     }
-
 }

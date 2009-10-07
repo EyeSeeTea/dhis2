@@ -39,7 +39,7 @@ public interface PatientIdentifierService
 {
     String ID = PatientIdentifierService.class.getName();
 
-    int addPatientIdentifier( PatientIdentifier patientIdentifier );
+    int savePatientIdentifier( PatientIdentifier patientIdentifier );
 
     void deletePatientIdentifier( PatientIdentifier patientIdentifier );
 

@@ -59,55 +59,54 @@ public class DefaultPatientIdentifierService
     // PatientIdentifier
     // -------------------------------------------------------------------------
 
-    public int addPatientIdentifier( PatientIdentifier patientIdentifier )
+    public int savePatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        return patientIdentifierStore.addPatientIdentifier( patientIdentifier );
+        return patientIdentifierStore.save( patientIdentifier );
     }
 
     public void deletePatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        patientIdentifierStore.deletePatientIdentifier( patientIdentifier );
+        patientIdentifierStore.delete( patientIdentifier );
     }
 
     public Collection<PatientIdentifier> getAllPatientIdentifiers()
     {
-        return patientIdentifierStore.getAllPatientIdentifiers();
+        return patientIdentifierStore.getAll();
     }
 
     public Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier )
     {
-        return patientIdentifierStore.getPatienIdentifiersByIdentifier( identifier );
+        return patientIdentifierStore.getByIdentifier( identifier );
     }
 
     public PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit )
     {
-        return patientIdentifierStore.getPatientIdentifier( identifier, organisationUnit );
+        return patientIdentifierStore.get( identifier, organisationUnit );
     }
 
     public Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit )
     {
-        return patientIdentifierStore.getPatientIdentifiersByOrgUnit( organisationUnit );
+        return patientIdentifierStore.getByOrganisationUnit( organisationUnit );
     }
 
     public void updatePatientIdentifier( PatientIdentifier patientIdentifier )
     {
-        patientIdentifierStore.updatePatientIdentifier( patientIdentifier );
+        patientIdentifierStore.update( patientIdentifier );
     }
 
     public PatientIdentifier getPatientIdentifier( Patient patient )
     {
-        return patientIdentifierStore.getPatientIdentifier( patient );
+        return patientIdentifierStore.get( patient );
     }
 
     public PatientIdentifier getPatientIdentifier( int id )
     {
-        return patientIdentifierStore.getPatientIdentifier( id );
+        return patientIdentifierStore.get( id );
     }
 
     public String getNextIdentifierForOrgUnit( OrganisationUnit orgUnit )
     {
-        Collection<PatientIdentifier> patientIdentifiers = patientIdentifierStore
-            .getPatientIdentifiersByOrgUnit( orgUnit );
+        Collection<PatientIdentifier> patientIdentifiers = patientIdentifierStore.getByOrganisationUnit( orgUnit );
 
         List<String> sortedIdentifiers = new ArrayList<String>();
 

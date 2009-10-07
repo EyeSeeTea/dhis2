@@ -187,7 +187,7 @@ public class AddPatientAction
         patient.setGender( gender );
         patient.setBirthDate( format.parseDate( birthDate ) );
 
-        patientService.addPatient( patient );
+        patientService.savePatient( patient );
 
         PatientIdentifier patientIdentifier = new PatientIdentifier();
         patientIdentifier.setIdentifier( identifier );
@@ -195,7 +195,7 @@ public class AddPatientAction
         patientIdentifier.setPatient( patient );
         patientIdentifier.setPreferred( true );
 
-        patientIdentifierService.addPatientIdentifier( patientIdentifier );
+        patientIdentifierService.savePatientIdentifier( patientIdentifier );
 
         return SUCCESS;
     }

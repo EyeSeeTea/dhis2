@@ -61,39 +61,39 @@ public class DefaultHouseHoldService
     // HouseHold
     // -------------------------------------------------------------------------
 
-    public int addHouseHold( HouseHold houseHold )
+    public int saveHouseHold( HouseHold houseHold )
     {
-        return houseHoldStore.addHouseHold( houseHold );
+        return houseHoldStore.save( houseHold );
     }
 
     public void deleteHouseHold( HouseHold houseHold )
     {
-        houseHoldStore.deleteHouseHold( houseHold );
+        houseHoldStore.delete( houseHold );
     }
 
     public Collection<HouseHold> getAllHouseHolds()
     {
-        return houseHoldStore.getAllHouseHolds();
+        return houseHoldStore.getAll();
     }
 
     public HouseHold getHouseHold( int id )
     {
-        return houseHoldStore.getHouseHold( id );
+        return houseHoldStore.get( id );
     }
 
     public Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit organisationUnit )
     {
-        return houseHoldStore.getHouseHoldsForOrgUnit( organisationUnit );
+        return houseHoldStore.get( organisationUnit );
     }
 
     public void updateHouseHold( HouseHold houseHold )
     {
-        houseHoldStore.updateHouseHold( houseHold );
+        houseHoldStore.update( houseHold );
     }
 
     public String getNextHouseHoldNumber( OrganisationUnit registeringUnit )
     {
-        Collection<HouseHold> houseHolds = houseHoldStore.getHouseHoldsForOrgUnit( registeringUnit );
+        Collection<HouseHold> houseHolds = houseHoldStore.get( registeringUnit );
 
         List<String> sortedHouseHoldNumbers = new ArrayList<String>();
 

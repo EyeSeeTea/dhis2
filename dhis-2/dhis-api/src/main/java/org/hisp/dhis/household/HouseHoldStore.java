@@ -29,6 +29,7 @@ package org.hisp.dhis.household;
 
 import java.util.Collection;
 
+import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
@@ -36,18 +37,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  * @version $Id$
  */
 public interface HouseHoldStore
+    extends GenericStore<HouseHold>
 {
     String ID = HouseHoldStore.class.getName();
 
-    int addHouseHold( HouseHold houseHold );
-
-    void deleteHouseHold( HouseHold houseHold );
-
-    void updateHouseHold( HouseHold houseHold );
-
-    HouseHold getHouseHold( int id );
-
-    Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit registeringUnit );
-
-    Collection<HouseHold> getAllHouseHolds();
+    Collection<HouseHold> get( OrganisationUnit organisationUnit );
 }

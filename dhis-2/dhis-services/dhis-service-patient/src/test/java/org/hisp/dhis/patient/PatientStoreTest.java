@@ -72,39 +72,39 @@ public class PatientStoreTest
     @Test
     public void addGet()
     {
-        int idA = patientStore.addPatient( patientA );
-        int idB = patientStore.addPatient( patientB );
+        int idA = patientStore.save( patientA );
+        int idB = patientStore.save( patientB );
         
-        assertEquals( patientA.getFirstName(), patientStore.getPatient( idA ).getFirstName() );
-        assertEquals( patientB.getFirstName(), patientStore.getPatient( idB ).getFirstName() );        
+        assertEquals( patientA.getFirstName(), patientStore.get( idA ).getFirstName() );
+        assertEquals( patientB.getFirstName(), patientStore.get( idB ).getFirstName() );        
     }
     
     @Test
     public void delete()
     {
-        int idA = patientStore.addPatient( patientA );
-        int idB = patientStore.addPatient( patientB );
+        int idA = patientStore.save( patientA );
+        int idB = patientStore.save( patientB );
         
-        assertNotNull( patientStore.getPatient( idA ) );
-        assertNotNull( patientStore.getPatient( idB ) );
+        assertNotNull( patientStore.get( idA ) );
+        assertNotNull( patientStore.get( idB ) );
 
-        patientStore.deletePatient( patientA );
+        patientStore.delete( patientA );
         
-        assertNull( patientStore.getPatient( idA ) );
-        assertNotNull( patientStore.getPatient( idB ) );
+        assertNull( patientStore.get( idA ) );
+        assertNotNull( patientStore.get( idB ) );
 
-        patientStore.deletePatient( patientB );
+        patientStore.delete( patientB );
         
-        assertNull( patientStore.getPatient( idA ) );
-        assertNull( patientStore.getPatient( idB ) );        
+        assertNull( patientStore.get( idA ) );
+        assertNull( patientStore.get( idB ) );        
     }
     
     @Test
     public void getAll()
     {
-        patientStore.addPatient( patientA );
-        patientStore.addPatient( patientB );
+        patientStore.save( patientA );
+        patientStore.save( patientB );
         
-        assertTrue( equals( patientStore.getAllPatients(), patientA, patientB ) );
+        assertTrue( equals( patientStore.getAll(), patientA, patientB ) );
     }
 }

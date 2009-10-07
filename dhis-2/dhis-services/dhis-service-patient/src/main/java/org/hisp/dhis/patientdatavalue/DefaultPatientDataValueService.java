@@ -60,68 +60,68 @@ public class DefaultPatientDataValueService
     // PatientDataValue
     // -------------------------------------------------------------------------
 
-    public void addPatientDataValue( PatientDataValue patientDataValue )
+    public void savePatientDataValue( PatientDataValue patientDataValue )
     {
         if ( patientDataValue.getValue() != null )
         {
-            patientDataValueStore.addPatientDataValue( patientDataValue );
+            patientDataValueStore.saveVoid( patientDataValue );
         }
     }
 
     public void deletePatientDataValue( PatientDataValue patientDataValue )
     {
-        patientDataValueStore.deletePatientDataValue( patientDataValue );
+        patientDataValueStore.delete( patientDataValue );
     }
 
     public int deletePatientDataValue( Patient patient )
     {
-        return patientDataValueStore.deletePatientDataValue( patient );
+        return patientDataValueStore.delete( patient );
     }
 
     public int deletePatientDataValue( DataElement dataElement )
     {
-        return patientDataValueStore.deletePatientDataValue( dataElement );
+        return patientDataValueStore.delete( dataElement );
     }
 
     public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo )
     {
-        return patientDataValueStore.deletePatientDataValue( optionCombo );
+        return patientDataValueStore.delete( optionCombo );
     }
 
     public PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
     {
-        return patientDataValueStore.getPatientDataValue( patient, dataElement, optionCombo );
+        return patientDataValueStore.get( patient, dataElement, optionCombo );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement )
     {
-        return patientDataValueStore.getPatientDataValues( patient, dataElement );
+        return patientDataValueStore.get( patient, dataElement );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( Patient patient )
     {
-        return patientDataValueStore.getPatientDataValues( patient );
+        return patientDataValueStore.get( patient );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
     {
-        return patientDataValueStore.getPatientDataValues( optionCombo );
+        return patientDataValueStore.get( optionCombo );
     }
 
     public void updatePatientDataValue( PatientDataValue patientDataValue )
     {
         if ( patientDataValue.getValue() == null )
         {
-            patientDataValueStore.deletePatientDataValue( patientDataValue );
+            patientDataValueStore.delete( patientDataValue );
         }
         else
         {
-            patientDataValueStore.updatePatientDataValue( patientDataValue );
+            patientDataValueStore.update( patientDataValue );
         }
     }
 
     public Collection<PatientDataValue> getAllPatientDataValues()
     {
-        return patientDataValueStore.getAllPatientDataValues();
+        return patientDataValueStore.getAll();
     }
 }

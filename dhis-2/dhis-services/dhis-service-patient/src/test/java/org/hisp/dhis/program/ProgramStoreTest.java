@@ -46,15 +46,15 @@ public class ProgramStoreTest
 {    
     private ProgramStore programStore;
     
+    private ProgramStageService programStageService;
+    
     private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
     
     private OrganisationUnit organisationUnit;
     
-    ProgramStage programStageA;
-    
-    ProgramStage programStageB;
-    
-    ProgramStage programStageC;
+    private ProgramStage programStageA;    
+    private ProgramStage programStageB;    
+    private ProgramStage programStageC;
     
     
     @Override
@@ -70,18 +70,17 @@ public class ProgramStoreTest
         
         organisationUnitService.addOrganisationUnit( organisationUnit );              
         
-        programStageA = createProrgamStage( 'A', 1, 1, 10 );       
-        programStageB = createProrgamStage( 'B', 2, 12, 40 );
-        programStageC = createProrgamStage( 'C', 3, 45, 60 );        
+        programStageA = createProgramStage( 'A' );       
+        programStageB = createProgramStage( 'B' );
+        programStageC = createProgramStage( 'C' );        
 
-        programStageService.addProgramStage( programStageA );
-        programStageService.addProgramStage( programStageB );
-        programStageService.addProgramStage( programStageC );
+        programStageService.saveProgramStage( programStageA );
+        programStageService.saveProgramStage( programStageB );
+        programStageService.saveProgramStage( programStageC );
         
         programStages.add( programStageA );
         programStages.add( programStageB );
-        programStages.add( programStageC );    
-            
+        programStages.add( programStageC );            
     }
     
     protected static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages, OrganisationUnit organisationUnit )
@@ -97,26 +96,39 @@ public class ProgramStoreTest
         return program;
     }
     
+    protected static ProgramStage createProgramStage( char uniqueCharacter )
+    {
+        ProgramStage stage = new ProgramStage();
+        
+        stage.setName( "ProgramStage" + uniqueCharacter );
+        stage.setDescription( "Description" + uniqueCharacter );
+        stage.setStageInProgram( 2 );
+        stage.setMinDaysFromStart( 5 );
+        stage.setMaxDaysFromStart( 10 );
+        
+        return stage;
+    }
+    
     @Test
     public void addGet()
     {
         Program programA = createProgram( 'A', programStages, organisationUnit );
         Program programB = createProgram( 'B', programStages, organisationUnit );
         
-        int idA = programStore.addProgram( programA );
-        int idB = programStore.addProgram( programB );
+        int idA = programStore.save( programA );
+        int idB = programStore.save( programB );
         
-        assertEquals( programA, programStore.getProgram( idA ) );
-        assertEquals( programB, programStore.getProgram( idB ) );
+        assertEquals( programA, programStore.get( idA ) );
+        assertEquals( programB, programStore.get( idB ) );
 
-        assertEquals( programA.getOrganisationUnit(), programStore.getProgram( idA ).getOrganisationUnit() );
-        assertEquals( programB.getOrganisationUnit(), programStore.getProgram( idB ).getOrganisationUnit() );
+        assertEquals( programA.getOrganisationUnit(), programStore.get( idA ).getOrganisationUnit() );
+        assertEquals( programB.getOrganisationUnit(), programStore.get( idB ).getOrganisationUnit() );
         
-        assertEquals( programStages.size(), programStore.getProgram( idA ).getProgramStages().size() );
-        assertEquals( programStages.size(), programStore.getProgram( idB ).getProgramStages().size() );
+        assertEquals( programStages.size(), programStore.get( idA ).getProgramStages().size() );
+        assertEquals( programStages.size(), programStore.get( idB ).getProgramStages().size() );
                 
-        assertTrue( programStore.getProgram( idA ).getProgramStages().containsAll( programStages ) );
-        assertTrue( programStore.getProgram( idB ).getProgramStages().containsAll( programStages ) );
+        assertTrue( programStore.get( idA ).getProgramStages().containsAll( programStages ) );
+        assertTrue( programStore.get( idB ).getProgramStages().containsAll( programStages ) );
     }    
 }
 

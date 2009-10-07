@@ -63,49 +63,49 @@ public class DefaultPatientService
     // PatientDataValue
     // -------------------------------------------------------------------------   
 
-    public int addPatient( Patient patient )
+    public int savePatient( Patient patient )
     {
-        return patientStore.addPatient( patient );
+        return patientStore.save( patient );
     }
 
     public void deletePatient( Patient patient )
     {
-        patientStore.deletePatient( patient );
+        patientStore.delete( patient );
     }
 
     public Collection<Patient> getAllPatients()
     {
-        return patientStore.getAllPatients();
+        return patientStore.getAll();
     }
 
     public Collection<Patient> getPatiensByGender( String gender )
     {
-        return patientStore.getPatiensByGender( gender );
+        return patientStore.getByGender( gender );
     }
 
     public Patient getPatient( int id )
     {
-        return patientStore.getPatient( id );
+        return patientStore.get( id );
     }
     
     public Collection<Patient> getPatientsByBirthDate( Date birthDate )
     {
-        return patientStore.getPatientsByBirthDate( birthDate );
+        return patientStore.getByBirthDate( birthDate );
     }
 
     public Collection<Patient> getPatientsByNames( String name )
     {
-        return patientStore.getPatientsByNames( name );
+        return patientStore.getByNames( name );
     }
 
     public void updatePatient( Patient patient )
     {
-        patientStore.updatePatient( patient );
+        patientStore.update( patient );
     }
 
     public Collection<Patient> getAllPatients( Boolean isDead )
     {
-        return patientStore.getAllPatients( isDead );
+        return patientStore.get( isDead );
     }
     
     public Collection<Patient> getPatients( String searchText )

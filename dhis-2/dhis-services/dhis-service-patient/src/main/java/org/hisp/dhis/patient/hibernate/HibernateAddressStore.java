@@ -29,50 +29,20 @@ package org.hisp.dhis.patient.hibernate;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.patient.Address;
 import org.hisp.dhis.patient.AddressStore;
+import org.hisp.dhis.patient.Patient;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public class HibernateAddressStore
-    implements AddressStore
+    extends HibernateGenericStore<Address> implements AddressStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
-    // -------------------------------------------------------------------------
-    // Address
-    // -------------------------------------------------------------------------
-
-    public int addAddress( Address address )
-    {
-        return (Integer) sessionFactory.getCurrentSession().save( address );
-    }
-
-    public void deleteAddress( Address address )
-    {
-        sessionFactory.getCurrentSession().delete( address );
-    }
-
-    public Address getAddress( int id )
-    {
-        return (Address) sessionFactory.getCurrentSession().get( Address.class, id );
-    }
-
-    public Address getAddress( Patient patient )
+    public Address get( Patient patient )
     {
         Session session = sessionFactory.getCurrentSession();
 
@@ -81,10 +51,5 @@ public class HibernateAddressStore
         criteria.add( Restrictions.eq( "preferred", true ) );
 
         return (Address) criteria.uniqueResult();
-    }
-
-    public void updateAddress( Address address )
-    {
-        sessionFactory.getCurrentSession().update( address );
     }
 }
