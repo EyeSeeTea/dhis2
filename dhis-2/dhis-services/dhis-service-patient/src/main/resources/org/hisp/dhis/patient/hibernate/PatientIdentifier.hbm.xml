@@ -9,6 +9,9 @@
 		<id name="id" column="patientidentifierid">
 			<generator class="native"/>
 		</id>
+    
+    <many-to-one name="identifierType" class="org.hisp.dhis.patient.PatientIdentifierType" 
+          column="patientidentifiertypeid" foreign-key="fk_patientidentifier_patientidentifiertypeid"/>
 		
 		<many-to-one name="patient" class="org.hisp.dhis.patient.Patient"
 			column="patientid" not-null="true"/>

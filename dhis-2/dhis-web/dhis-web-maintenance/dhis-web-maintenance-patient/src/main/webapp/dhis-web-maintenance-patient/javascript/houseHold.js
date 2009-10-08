@@ -79,7 +79,7 @@ function showHouseHoldDetails( houseHoldId )
 
 function houseHoldReceived( houseHoldElement )
 {
-	setFieldValue( 'idField', getElementValue( programStageElement, 'id' ) );
+	setFieldValue( 'idField', getElementValue( houseHoldElement, 'id' ) );
 	setFieldValue( 'houseNumberField', getElementValue( houseHoldElement, 'houseNumber' ) );
 	setFieldValue( 'registeringUnitField', getElementValue( houseHoldElement, 'registeringUnit' ) );
     setFieldValue( 'landMarkField', getElementValue( houseHoldElement, 'landMark' ) );

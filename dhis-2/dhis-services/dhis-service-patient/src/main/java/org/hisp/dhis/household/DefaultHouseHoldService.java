@@ -91,9 +91,9 @@ public class DefaultHouseHoldService
         houseHoldStore.update( houseHold );
     }
 
-    public String getNextHouseHoldNumber( OrganisationUnit registeringUnit )
+    public String getNextHouseHoldNumber( OrganisationUnit organisationUnit )
     {
-        Collection<HouseHold> houseHolds = houseHoldStore.get( registeringUnit );
+        Collection<HouseHold> houseHolds = houseHoldStore.get( organisationUnit );
 
         List<String> sortedHouseHoldNumbers = new ArrayList<String>();
 
@@ -112,12 +112,12 @@ public class DefaultHouseHoldService
         {
             lastAssignedHouseNumber = sortedHouseHoldNumbers.get( 0 );
 
-            lastAssignedHouseNumber = lastAssignedHouseNumber.substring( registeringUnit.getShortName().length() + 1 );
+            lastAssignedHouseNumber = lastAssignedHouseNumber.substring( organisationUnit.getShortName().length() + 1 );
         }
 
         if ( lastAssignedHouseNumber == null )
         {
-            nextHouseNumber = registeringUnit.getShortName() + HouseHold.HOUSE_NUMBER_FIRST_INDEX;
+            nextHouseNumber = organisationUnit.getShortName() + HouseHold.HOUSE_NUMBER_FIRST_INDEX;
 
             return nextHouseNumber;
         }
@@ -135,7 +135,7 @@ public class DefaultHouseHoldService
                 prefix += "0";
             }
 
-            nextHouseNumber = registeringUnit.getShortName() + "." + prefix + nextIdentifierIndex;
+            nextHouseNumber = organisationUnit.getShortName() + "." + prefix + nextIdentifierIndex;
         }
 
         return nextHouseNumber;

@@ -44,6 +44,8 @@ public class PatientIdentifier
 
     private int id;
 
+    private PatientIdentifierType identifierType;
+
     private Patient patient;
 
     private String identifier;
@@ -68,72 +70,40 @@ public class PatientIdentifier
     {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((identifierType == null) ? 0 : identifierType.hashCode());
         result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
         result = prime * result + ((organisationUnit == null) ? 0 : organisationUnit.hashCode());
-        result = prime * result + ((patient == null) ? 0 : patient.hashCode());
+
         return result;
     }
-    
+
     public boolean equals( Object obj )
     {
         if ( this == obj )
         {
             return true;
         }
-        
+
         if ( obj == null )
         {
             return false;
         }
-        
-        if ( getClass() != obj.getClass() )
+
+        if ( !(obj instanceof PatientIdentifier) )
         {
             return false;
         }
-        
+
         PatientIdentifier other = (PatientIdentifier) obj;
-        
-        if ( identifier == null )
-        {
-            if ( other.identifier != null )
-            {
-                return false;
-            }
-        }
-        else if ( !identifier.equals( other.identifier ) )
-        {
-            return false;
-        }
-        
-        if ( organisationUnit == null )
-        {
-            if ( other.organisationUnit != null )
-            {
-                return false;
-            }
-        }
-        else if ( !organisationUnit.equals( other.organisationUnit ) )
-        {
-            return false;
-        }
-        
-        if ( patient == null )
-        {
-            if ( other.patient != null )
-                return false;
-        }
-        else if ( !patient.equals( other.patient ) )
-        {
-            return false;
-        }
-        
-        return true;
+
+        return identifier.equals( other.getIdentifier() ) && identifierType.equals( other.getIdentifierType() )
+            && organisationUnit.equals( other.getOrganisationUnit() );
     }
 
     @Override
     public String toString()
     {
-        return "[" + identifier + "]";
+        return "[" + organisationUnit.getName() + ":" + identifierType.getName() + ":"  + identifier + "]";
     }
 
     // -------------------------------------------------------------------------
@@ -188,5 +158,15 @@ public class PatientIdentifier
     public void setOrganisationUnit( OrganisationUnit organisationUnit )
     {
         this.organisationUnit = organisationUnit;
+    }
+
+    public void setIdentifierType( PatientIdentifierType identifierType )
+    {
+        this.identifierType = identifierType;
+    }
+
+    public PatientIdentifierType getIdentifierType()
+    {
+        return identifierType;
     }
 }

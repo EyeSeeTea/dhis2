@@ -80,9 +80,9 @@ public class GetHouseHoldListAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit registeringUnit = selectionManager.getSelectedOrganisationUnit();
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        houseHolds = houseHoldService.getHouseHoldsForOrgUnit( registeringUnit );
+        houseHolds = houseHoldService.getHouseHoldsForOrgUnit( organisationUnit );       
 
         return SUCCESS;
     }

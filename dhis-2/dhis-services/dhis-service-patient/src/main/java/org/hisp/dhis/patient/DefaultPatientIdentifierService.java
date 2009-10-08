@@ -73,8 +73,13 @@ public class DefaultPatientIdentifierService
     {
         return patientIdentifierStore.getAll();
     }
+    
+    public Collection<PatientIdentifier> getPatientIdentifiersByType( PatientIdentifierType identifierType )
+    {
+        return patientIdentifierStore.getPatientIdentifiersByType( identifierType );
+    }
 
-    public Collection<PatientIdentifier> getPatienIdentifiersByIdentifier( String identifier )
+    public Collection<PatientIdentifier> getPatientIdentifiersByIdentifier( String identifier )
     {
         return patientIdentifierStore.getByIdentifier( identifier );
     }
@@ -154,5 +159,5 @@ public class DefaultPatientIdentifierService
         }
 
         return nextIdentifier;
-    }
+    }    
 }

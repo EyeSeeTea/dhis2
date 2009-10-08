@@ -43,10 +43,16 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="clazz" value="org.hisp.dhis.patient.PatientIdentifier"/>
     <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
+  
+  <bean id="org.hisp.dhis.patient.PatientIdentifierTypeStore"
+    class="org.hisp.dhis.hibernate.HibernateGenericStore">
+    <property name="clazz" value="org.hisp.dhis.patient.PatientIdentifierType"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
     	
   <bean id="org.hisp.dhis.household.HouseHoldStore"
 	class="org.hisp.dhis.household.hibernate.HibernateHouseHoldStore">
-    <property name="clazz" value="org.hisp.dhis.household.HouseHoldStore"/>
+    <property name="clazz" value="org.hisp.dhis.household.HouseHold"/>
 	<property name="sessionFactory" ref="sessionFactory"/>
   </bean>
 	
@@ -88,6 +94,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   <bean id="org.hisp.dhis.patient.PatientIdentifierService"
     class="org.hisp.dhis.patient.DefaultPatientIdentifierService">
     <property name="patientIdentifierStore" ref="org.hisp.dhis.patient.PatientIdentifierStore"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.PatientIdentifierTypeService"
+    class="org.hisp.dhis.patient.DefaultPatientIdentifierTypeService">
+    <property name="patientIdentifierTypeStore" ref="org.hisp.dhis.patient.PatientIdentifierTypeStore"/>
   </bean>
 	    
   <bean id="org.hisp.dhis.household.HouseHoldService"

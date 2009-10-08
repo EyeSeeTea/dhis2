@@ -24,40 +24,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.patient;
 
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public interface PatientIdentifierService
+public interface PatientIdentifierTypeService
 {
-    String ID = PatientIdentifierService.class.getName();
+    String ID = PatientIdentifierTypeService.class.getName();
 
-    int savePatientIdentifier( PatientIdentifier patientIdentifier );
+    int savePatientIdentifierType( PatientIdentifierType patientIdentifierType );
 
-    void deletePatientIdentifier( PatientIdentifier patientIdentifier );
+    void deletePatientIdentifierType( PatientIdentifierType patientIdentifierType );
 
-    void updatePatientIdentifier( PatientIdentifier patientIdentifier );
+    void updatePatientIdentifierType( PatientIdentifierType patientIdentifierType );
 
-    PatientIdentifier getPatientIdentifier( int id );
+    PatientIdentifierType getPatientIdentifierType( int id );
 
-    PatientIdentifier getPatientIdentifier( Patient patient );
+    Collection<PatientIdentifierType> getAllPatientIdentifierTypes();
 
-    PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit );
-
-    Collection<PatientIdentifier> getAllPatientIdentifiers();
-    
-    Collection<PatientIdentifier> getPatientIdentifiersByType( PatientIdentifierType identifierType );
-
-    Collection<PatientIdentifier> getPatientIdentifiersByIdentifier( String identifier );
-
-    Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit );
-
-    String getNextIdentifierForOrgUnit( OrganisationUnit orgUnit );
 }

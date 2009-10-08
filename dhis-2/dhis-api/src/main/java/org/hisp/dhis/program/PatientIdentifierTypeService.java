@@ -24,40 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient;
+package org.hisp.dhis.program;
 
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.PatientIdentifierType;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public interface PatientIdentifierService
+public interface PatientIdentifierTypeService
 {
-    String ID = PatientIdentifierService.class.getName();
+    String ID = PatientIdentifierTypeService.class.getName();
 
-    int savePatientIdentifier( PatientIdentifier patientIdentifier );
+    // -------------------------------------------------------------------------
+    // ProgramStage
+    // -------------------------------------------------------------------------
 
-    void deletePatientIdentifier( PatientIdentifier patientIdentifier );
+    int addPatientIdentifierType( PatientIdentifierType programStage );
 
-    void updatePatientIdentifier( PatientIdentifier patientIdentifier );
+    void deletePatientIdentifierType( PatientIdentifierType programStage );
 
-    PatientIdentifier getPatientIdentifier( int id );
+    void updatePatientIdentifierType( PatientIdentifierType programStage );
 
-    PatientIdentifier getPatientIdentifier( Patient patient );
+    PatientIdentifierType getPatientIdentifierType( int id );
 
-    PatientIdentifier getPatientIdentifier( String identifier, OrganisationUnit organisationUnit );
+    PatientIdentifierType getPatientIdentifierTypeByName( String name );
 
-    Collection<PatientIdentifier> getAllPatientIdentifiers();
-    
-    Collection<PatientIdentifier> getPatientIdentifiersByType( PatientIdentifierType identifierType );
+    PatientIdentifierType getPatientIdentifierTypeByFormat( String format );
 
-    Collection<PatientIdentifier> getPatientIdentifiersByIdentifier( String identifier );
+    Collection<PatientIdentifierType> getAllPatientIdentifierTypes();
 
-    Collection<PatientIdentifier> getPatientIdentifiersByOrgUnit( OrganisationUnit organisationUnit );
-
-    String getNextIdentifierForOrgUnit( OrganisationUnit orgUnit );
 }

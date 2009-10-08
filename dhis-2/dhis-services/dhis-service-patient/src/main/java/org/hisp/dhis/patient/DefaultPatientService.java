@@ -114,7 +114,7 @@ public class DefaultPatientService
         
         result.addAll( getPatientsByNames( searchText ) );
         
-        for( PatientIdentifier patientIdentifier : patientIdentifierService.getPatienIdentifiersByIdentifier( searchText ) )
+        for( PatientIdentifier patientIdentifier : patientIdentifierService.getPatientIdentifiersByIdentifier( searchText ) )
         {
             result.add( patientIdentifier.getPatient() );
         }       

@@ -35,6 +35,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierStore;
+import org.hisp.dhis.patient.PatientIdentifierType;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -67,5 +68,11 @@ public class HibernatePatientIdentifierStore
         return (PatientIdentifier) getCriteria( 
             Restrictions.eq( "patient", patient ),
             Restrictions.eq( "preferred", true ) ).uniqueResult();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientIdentifier> getPatientIdentifiersByType( PatientIdentifierType identifierType )
+    {
+        return getCriteria( Restrictions.eq( "identifierType", identifierType ) ).list();
     }
 }

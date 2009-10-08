@@ -61,7 +61,7 @@
 		  	<input type="button" value="&lt;" onclick="move ( 'selectedList' )">             
 		<td>
         	<select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">
-        		#foreach ( $houseHoldMember in $houseHoldMembers )
+        		#foreach ( $houseHoldMember in $houseHold.members )
               		<option value="$houseHoldMember.id">$encoder.htmlEncode( $houseHoldMember.firstName )  $encoder.htmlEncode( $houseHoldMember.middleName )   $encoder.htmlEncode( $houseHoldMember.lastName )</option>
             	#end
           	</select>

@@ -24,112 +24,61 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.patient;
 
-import java.io.Serializable;
+import java.util.Collection;
 
-public class PatientIdentifierType
-    implements Serializable
+import org.hisp.dhis.common.GenericNameStore;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * @author Abyot Asalefew
+ * @version $Id$
+ */
+@Transactional
+public class DefaultPatientIdentifierTypeService
+    implements PatientIdentifierTypeService
 {
-    private int id;
-
-    private String name;
-
-    private String description;
-
-    private String format;
 
     // -------------------------------------------------------------------------
-    // Constructors
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public PatientIdentifierType()
-    {
-    }
+    private GenericNameStore<PatientIdentifierType> patientIdentifierTypeStore;
 
-    public PatientIdentifierType( String name, String description, String format )
+    public void setPatientIdentifierTypeStore( GenericNameStore<PatientIdentifierType> patientIdentifierTypeStore )
     {
-        this.name = name;
-        this.description = description;
-        this.format = format;
+        this.patientIdentifierTypeStore = patientIdentifierTypeStore;
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
+    // PatientIdentifierType implementation
     // -------------------------------------------------------------------------
 
-    @Override
-    public int hashCode()
+    public void deletePatientIdentifierType( PatientIdentifierType patientIdentifierType )
     {
-        return name.hashCode();
+        patientIdentifierTypeStore.save( patientIdentifierType );
+
     }
 
-    @Override
-    public boolean equals( Object o )
+    public Collection<PatientIdentifierType> getAllPatientIdentifierTypes()
     {
-        if ( this == o )
-        {
-            return true;
-        }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof PatientIdentifierType) )
-        {
-            return false;
-        }
-
-        final PatientIdentifierType other = (PatientIdentifierType) o;
-
-        return name.equals( other.getName() );
+        return patientIdentifierTypeStore.getAll();
     }
 
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
-    public int getId()
+    public PatientIdentifierType getPatientIdentifierType( int id )
     {
-        return id;
+        return patientIdentifierTypeStore.get( id );
     }
 
-    public void setId( int id )
+    public int savePatientIdentifierType( PatientIdentifierType patientIdentifierType )
     {
-        this.id = id;
+        return patientIdentifierTypeStore.save( patientIdentifierType );
     }
 
-    public String getName()
+    public void updatePatientIdentifierType( PatientIdentifierType patientIdentifierType )
     {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    public String getFormat()
-    {
-        return format;
-    }
-
-    public void setFormat( String format )
-    {
-        this.format = format;
+        patientIdentifierTypeStore.update( patientIdentifierType );
     }
 
 }

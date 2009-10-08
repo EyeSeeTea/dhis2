@@ -28,6 +28,7 @@
 package org.hisp.dhis.patient;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,6 +43,7 @@ public class Patient
     implements Serializable
 {
     public static final String MALE = "M";
+
     public static final String FEMALE = "F";
 
     private Integer id;
@@ -63,7 +65,7 @@ public class Patient
     private Set<PatientIdentifier> identifiers = new HashSet<PatientIdentifier>();
 
     private Set<Address> addresses = new HashSet<Address>();
-    
+
     private Set<Program> programs = new HashSet<Program>();
 
     // -------------------------------------------------------------------------
@@ -93,6 +95,7 @@ public class Patient
 
         return null;
     }
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -238,5 +241,37 @@ public class Patient
     public void setPrograms( Set<Program> programs )
     {
         this.programs = programs;
+    }
+
+    // -------------------------------------------------------------------------
+    // Convenience method
+    // -------------------------------------------------------------------------
+    
+    public Integer getAge()
+    {
+        if ( birthDate == null )
+        {
+            return 0;
+        }
+
+        Calendar birthCalendar = Calendar.getInstance();
+        birthCalendar.setTime( birthDate );
+
+        Calendar todayCalendar = Calendar.getInstance();
+
+        int age = todayCalendar.get( Calendar.YEAR ) - birthCalendar.get( Calendar.YEAR );
+
+        if ( todayCalendar.get( Calendar.MONTH ) < birthCalendar.get( Calendar.MONTH ) )
+        {
+            age--;
+        }
+        else if ( todayCalendar.get( Calendar.MONTH ) == birthCalendar.get( Calendar.MONTH )
+            && todayCalendar.get( Calendar.DAY_OF_MONTH ) < birthCalendar.get( Calendar.DAY_OF_MONTH ) )
+        {
+            age--;
+        }
+
+        return age;
+
     }
 }

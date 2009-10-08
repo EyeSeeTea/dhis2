@@ -47,7 +47,7 @@ public interface HouseHoldService
 
     HouseHold getHouseHold( int id );
 
-    Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit registeringUnit );
+    Collection<HouseHold> getHouseHoldsForOrgUnit( OrganisationUnit organisationUnit );
 
     Collection<HouseHold> getAllHouseHolds();
 

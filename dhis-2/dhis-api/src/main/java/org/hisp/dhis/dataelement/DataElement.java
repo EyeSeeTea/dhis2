@@ -54,6 +54,8 @@ import org.hisp.dhis.period.PeriodType;
 public class DataElement
     implements Serializable, MetaObject
 {
+    public static final String TYPE_DATE = "date";
+        
     public static final String TYPE_STRING = "string";
 
     public static final String TYPE_INT = "int";
