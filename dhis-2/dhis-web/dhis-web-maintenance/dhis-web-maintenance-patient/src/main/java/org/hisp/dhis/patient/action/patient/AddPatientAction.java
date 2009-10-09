@@ -27,6 +27,8 @@
 
 package org.hisp.dhis.patient.action.patient;
 
+import java.util.Date;
+
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
@@ -186,6 +188,7 @@ public class AddPatientAction
         patient.setLastName( lastName );
         patient.setGender( gender );
         patient.setBirthDate( format.parseDate( birthDate ) );
+        patient.setRegistrationDate( new Date() );     
 
         patientService.savePatient( patient );
 

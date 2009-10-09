@@ -19,6 +19,8 @@
 		<property name="birthDate" column="birthdate"/>
 		
 		<property name="deathDate" column="deathdate"/>
+    
+    <property name="registrationDate" column="registrationdate"/>    
 		
 		<property name="isDead" column="isdead" not-null="true"/>
 		

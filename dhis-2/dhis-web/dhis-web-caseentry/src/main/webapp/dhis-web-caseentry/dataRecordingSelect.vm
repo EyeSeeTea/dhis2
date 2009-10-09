@@ -12,22 +12,30 @@
 <table>
     
     <tr>
+        <th>$i18n.getString( "identifier" )</th>
         <td>            
-            $encoder.htmlEncode( $patient.firstName )
-        </td>
-        <td>            
-            $encoder.htmlEncode( $patient.middleName )
-        </td>
-        <td>            
-            $encoder.htmlEncode( $patient.lastName )
-        </td>               
-        <td>            
-            $encoder.htmlEncode( $patient.gender )
-        </td>
-        <td>            
-            $format.formatDate( $patient.birthDate )
+            $encoder.htmlEncode( $patientIdentifier.identifier )
         </td>
     </tr>
+    <tr>
+        <th>$i18n.getString( "full_name" )</th>
+        <td>            
+            $encoder.htmlEncode( $patient.firstName ) $encoder.htmlEncode( $patient.middleName ) $encoder.htmlEncode( $patient.lastName )
+        </td>
+    </tr>    
+    <tr>
+        <th>$i18n.getString( "age" )</th>
+        <td>            
+            $age
+        </td>
+    </tr>
+    <tr>
+        <th>$i18n.getString( "registration_date" )</th>
+        <td>            
+            $encoder.htmlEncode( $patient.registrationDate )
+        </td>
+    </tr>    
+    
 </table>
 
 <hr style="clear:both">

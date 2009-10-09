@@ -31,10 +31,11 @@ import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStage;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -73,9 +74,14 @@ public class DefaultPatientDataValueService
         patientDataValueStore.delete( patientDataValue );
     }
 
-    public int deletePatientDataValue( Patient patient )
+    public int deletePatientDataValue( ProgramInstance programInstance )
     {
-        return patientDataValueStore.delete( patient );
+        return patientDataValueStore.delete( programInstance );
+    }
+
+    public int deletePatientDataValue( ProgramStage programStage )
+    {
+        return patientDataValueStore.delete( programStage );
     }
 
     public int deletePatientDataValue( DataElement dataElement )
@@ -86,26 +92,6 @@ public class DefaultPatientDataValueService
     public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo )
     {
         return patientDataValueStore.delete( optionCombo );
-    }
-
-    public PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
-    {
-        return patientDataValueStore.get( patient, dataElement, optionCombo );
-    }
-
-    public Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement )
-    {
-        return patientDataValueStore.get( patient, dataElement );
-    }
-
-    public Collection<PatientDataValue> getPatientDataValues( Patient patient )
-    {
-        return patientDataValueStore.get( patient );
-    }
-
-    public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
-    {
-        return patientDataValueStore.get( optionCombo );
     }
 
     public void updatePatientDataValue( PatientDataValue patientDataValue )
@@ -124,4 +110,37 @@ public class DefaultPatientDataValueService
     {
         return patientDataValueStore.getAll();
     }
+
+    public PatientDataValue getPatientDataValue( ProgramInstance programInstance, ProgramStage programStage,
+        DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
+    {
+        return patientDataValueStore.get( programInstance, programStage, dataElement, optionCombo );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance )
+    {
+        return patientDataValueStore.get( programInstance );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage )
+    {
+        return patientDataValueStore.get( programInstance, programStage );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance,
+        ProgramStage programStage, DataElement dataElement )
+    {
+        return patientDataValueStore.get( programInstance, programStage, dataElement );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( DataElement dataElement )
+    {
+        return patientDataValueStore.get( dataElement );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
+    {
+        return patientDataValueStore.get( optionCombo );
+    }
+
 }

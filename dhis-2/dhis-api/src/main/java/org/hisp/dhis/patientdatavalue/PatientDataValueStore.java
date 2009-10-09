@@ -32,7 +32,8 @@ import java.util.Collection;
 import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStage;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -44,18 +45,28 @@ public interface PatientDataValueStore
     String ID = PatientDataValueStore.class.getName();
 
     void saveVoid( PatientDataValue patientDataValue );
-    
-    int delete( Patient patient );
+
+    int delete( ProgramInstance programInstance );
+
+    int delete( ProgramStage programStage );
 
     int delete( DataElement dataElement );
 
     int delete( DataElementCategoryOptionCombo optionCombo );
 
-    PatientDataValue get( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
+    PatientDataValue get( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo );
 
-    Collection<PatientDataValue> get( Patient patient, DataElement dataElement );
+    Collection<PatientDataValue> get( ProgramInstance programInstance );
+    
+    Collection<PatientDataValue> get( ProgramStage programStage );
 
-    Collection<PatientDataValue> get( Patient patient );
+    Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage );
+
+    Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage,
+        DataElement dataElement );
+
+    Collection<PatientDataValue> get( DataElement dataElement );
 
     Collection<PatientDataValue> get( DataElementCategoryOptionCombo optionCombo );
 }

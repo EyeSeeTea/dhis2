@@ -2,7 +2,8 @@ package org.hisp.dhis.patientdatavalue;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStage;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -14,14 +15,17 @@ import java.util.Date;
 public class PatientDataValue
     implements Serializable
 {
-    private Patient patient;
 
     private DataElement dataElement;
 
     private DataElementCategoryOptionCombo optionCombo;
 
+    private ProgramInstance programInstance;
+
+    private ProgramStage programStage;
+
     private Date timestamp;
-    
+
     private String value;
 
     // -------------------------------------------------------------------------
@@ -32,20 +36,33 @@ public class PatientDataValue
     {
     }
 
-    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date timestamp )
+    public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo )
     {
-        this.patient = patient;
+        this.programInstance = programInstance;
+        this.programStage = programStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
-        this.timestamp = timestamp;
     }
 
-    public PatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date timestamp, String value )
+    public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo, Date timeStamp )
     {
-        this.patient = patient;
+        this.programInstance = programInstance;
+        this.programStage = programStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
-        this.timestamp = timestamp;
+        this.timestamp = timeStamp;
+    }
+    
+    public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo, Date timeStamp, String value )
+    {
+        this.programInstance = programInstance;
+        this.programStage = programStage;
+        this.dataElement = dataElement;
+        this.optionCombo = optionCombo;
+        this.timestamp = timeStamp;
         this.value = value;
     }
 
@@ -59,10 +76,10 @@ public class PatientDataValue
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + patient.hashCode();
+        result = result * prime + programInstance.hashCode();
+        result = result * prime + programStage.hashCode();
         result = result * prime + dataElement.hashCode();
         result = result * prime + optionCombo.hashCode();
-        result = result * prime + timestamp.hashCode();
 
         return result;
     }
@@ -87,22 +104,32 @@ public class PatientDataValue
 
         final PatientDataValue other = (PatientDataValue) o;
 
-        return patient.equals( other.patient ) && dataElement.equals( other.dataElement )
-            && optionCombo.equals( other.optionCombo ) && timestamp.equals( other.timestamp );
+        return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() )
+            && dataElement.equals( other.dataElement ) && optionCombo.equals( other.optionCombo );
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public void setPatient( Patient patient )
+    public void setProgramInstance( ProgramInstance programInstance )
     {
-        this.patient = patient;
+        this.programInstance = programInstance;
     }
 
-    public Patient getPatient()
+    public ProgramInstance getProgramInstance()
     {
-        return patient;
+        return programInstance;
+    }
+
+    public ProgramStage getProgramStage()
+    {
+        return programStage;
+    }
+
+    public void setProgramStage( ProgramStage programStage )
+    {
+        this.programStage = programStage;
     }
 
     public void setDataElement( DataElement dataElement )
@@ -144,4 +171,5 @@ public class PatientDataValue
     {
         return value;
     }
+
 }

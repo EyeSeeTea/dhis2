@@ -37,61 +37,96 @@ import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStage;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public class HibernatePatientDataValueStore
-    extends HibernateGenericStore<PatientDataValue> implements PatientDataValueStore
+    extends HibernateGenericStore<PatientDataValue>
+    implements PatientDataValueStore
 {
     public void saveVoid( PatientDataValue patientDataValue )
     {
         sessionFactory.getCurrentSession().save( patientDataValue );
     }
-    
-    public int delete( Patient patient )
+
+    public int delete( ProgramInstance programInstance )
     {
-        Query query = getQuery( "delete PatientDataValue where patient = :patient" );        
-        query.setEntity( "patient", patient );
+        Query query = getQuery( "delete PatientDataValue where programInstance = :programInstance" );
+        query.setEntity( "programInstance", programInstance );
+        return query.executeUpdate();
+    }
+
+    public int delete( ProgramStage programStage )
+    {
+        Query query = getQuery( "delete PatientDataValue where programStage = :programStage" );
+        query.setEntity( "programStage", programStage );
         return query.executeUpdate();
     }
 
     public int delete( DataElement dataElement )
     {
-        Query query = getQuery( "delete PatientDataValue where dataElement = :dataElement" );        
+        Query query = getQuery( "delete PatientDataValue where dataElement = :dataElement" );
         query.setEntity( "dataElement", dataElement );
         return query.executeUpdate();
     }
 
     public int delete( DataElementCategoryOptionCombo optionCombo )
     {
-        Query query = getQuery( "delete PatientDataValue where optionCombo = :optionCombo" );        
+        Query query = getQuery( "delete PatientDataValue where optionCombo = :optionCombo" );
         query.setEntity( "optionCombo", optionCombo );
         return query.executeUpdate();
     }
 
-    public PatientDataValue get( Patient patient, DataElement dataElement,
+    public PatientDataValue get( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo )
     {
-        return (PatientDataValue) getCriteria( 
-            Restrictions.eq( "patient", patient ),
-            Restrictions.eq( "dataElement", dataElement ),
+        return (PatientDataValue) getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "dataElement", dataElement ),
             Restrictions.eq( "optionCombo", optionCombo ) ).uniqueResult();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage,
+        DataElement dataElement )
+    {
+        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "dataElement", dataElement ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
     public Collection<PatientDataValue> get( Patient patient, DataElement dataElement )
     {
-        return getCriteria(
-            Restrictions.eq( "patient", patient ),
-            Restrictions.eq( "dataElement", dataElement ) ).list();
+        return getCriteria( Restrictions.eq( "patient", patient ), Restrictions.eq( "dataElement", dataElement ) )
+            .list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( Patient patient )
+    public Collection<PatientDataValue> get( ProgramInstance programInstance )
     {
-        return getCriteria( Restrictions.eq( "patient", patient ) ).list();
+        return getCriteria( Restrictions.eq( "programInstance", programInstance ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( ProgramStage programStage )
+    {
+        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage )
+    {
+        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( DataElement dataElement )
+    {
+        return getCriteria( Restrictions.eq( "dataElement", dataElement ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )

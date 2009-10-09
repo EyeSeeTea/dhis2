@@ -27,9 +27,13 @@
 package org.hisp.dhis.caseentry.action;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientIdentifier;
+import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
@@ -51,7 +55,8 @@ public class DataRecordingSelectAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
+    
     private SelectedStateManager selectedStateManager;
 
     public void setSelectedStateManager( SelectedStateManager selectedStateManager )
@@ -78,6 +83,13 @@ public class DataRecordingSelectAction
     public void setProgramStageService( ProgramStageService programStageService )
     {
         this.programStageService = programStageService;
+    }
+    
+    private PatientIdentifierService patientIdentifierService;
+
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
     }
 
     // -------------------------------------------------------------------------
@@ -126,6 +138,20 @@ public class DataRecordingSelectAction
     {
         return patient;
     }   
+    
+    private PatientIdentifier patientIdentifier;
+
+    public PatientIdentifier getPatientIdentifier()
+    {
+        return patientIdentifier;
+    }
+    
+    private Integer age;
+
+    public Integer getAge()
+    {
+        return age;
+    } 
 
     private Collection<Program> programs;
 
@@ -160,17 +186,40 @@ public class DataRecordingSelectAction
             programId = null;
             programStageId = null;
 
+            selectedStateManager.clearSelectedPatient();
             selectedStateManager.clearSelectedProgram();
-            selectedStateManager.clearSelectedProgramStage();
+            selectedStateManager.clearSelectedProgramStage();            
 
             return SUCCESS;
         }
+        
+        selectedStateManager.setSelectedPatient( patient );
+        
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
 
+        age = patient.getAge();
+        
         // ---------------------------------------------------------------------
         // Load Enrolled Programs
         // ---------------------------------------------------------------------
 
         programs = patient.getPrograms();
+        
+        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();       
+
+        Collection<Program> programsAtFacility =  programService.getPrograms( organisationUnit );
+        
+        Iterator<Program> programIterator = programs.iterator();
+        
+        while( programIterator.hasNext() )
+        {
+            Program program = programIterator.next();
+            
+            if( ! programsAtFacility.contains( program ) )
+            {
+                programIterator.remove();
+            }
+        }
 
         // ---------------------------------------------------------------------
         // Validate selected Program

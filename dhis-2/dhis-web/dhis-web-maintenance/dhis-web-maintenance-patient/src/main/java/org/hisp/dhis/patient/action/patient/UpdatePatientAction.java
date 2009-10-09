@@ -26,6 +26,8 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
+import java.util.Date;
+
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -185,6 +187,7 @@ public class UpdatePatientAction
         patient.setLastName( lastName );
         patient.setGender( gender );
         patient.setBirthDate( format.parseDate( birthDate ) );
+        patient.setRegistrationDate( new Date() );
 
         patientService.updatePatient( patient );
 

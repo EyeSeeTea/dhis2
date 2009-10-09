@@ -60,6 +60,8 @@ public class Patient
 
     private Date deathDate;
 
+    private Date registrationDate;
+
     private Boolean isDead = false;
 
     private Set<PatientIdentifier> identifiers = new HashSet<PatientIdentifier>();
@@ -246,7 +248,7 @@ public class Patient
     // -------------------------------------------------------------------------
     // Convenience method
     // -------------------------------------------------------------------------
-    
+
     public Integer getAge()
     {
         if ( birthDate == null )
@@ -273,5 +275,15 @@ public class Patient
 
         return age;
 
+    }
+
+    public void setRegistrationDate( Date registrationDate )
+    {
+        this.registrationDate = registrationDate;
+    }
+
+    public Date getRegistrationDate()
+    {
+        return registrationDate;
     }
 }

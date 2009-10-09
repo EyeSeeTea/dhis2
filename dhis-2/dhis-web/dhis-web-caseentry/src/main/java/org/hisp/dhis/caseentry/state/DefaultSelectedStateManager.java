@@ -29,6 +29,10 @@ package org.hisp.dhis.caseentry.state;
 
 import java.util.Map;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
@@ -44,6 +48,8 @@ public class DefaultSelectedStateManager
     implements SelectedStateManager
 {
     
+    public static final String SESSION_KEY_SELECTED_PATIENT_ID = "selected_patient_id";
+    
     public static final String SESSION_KEY_SELECTED_PROGRAM_ID = "selected_program_id";
 
     public static final String SESSION_KEY_SELECTED_PROGRAMSTAGE_ID = "selected_program_stage_index";
@@ -51,6 +57,20 @@ public class DefaultSelectedStateManager
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private OrganisationUnitSelectionManager selectionManager;
+
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
+    
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
 
     private ProgramService programService;
 
@@ -68,7 +88,35 @@ public class DefaultSelectedStateManager
     
     // -------------------------------------------------------------------------
     // SelectedStateManager implementation
-    // -------------------------------------------------------------------------    
+    // -------------------------------------------------------------------------
+    
+    public OrganisationUnit getSelectedOrganisationUnit()
+    {
+        return selectionManager.getSelectedOrganisationUnit();
+    }
+    
+    @SuppressWarnings( "unchecked" )
+    public void setSelectedPatient( Patient patient )
+    {
+        getSession().put( SESSION_KEY_SELECTED_PATIENT_ID, patient.getId() );
+    }
+
+    public Patient getSelectedPatient()
+    {
+        Integer id = (Integer) getSession().get( SESSION_KEY_SELECTED_PATIENT_ID );
+
+        if ( id == null )
+        {
+            return null;
+        }
+
+        return patientService.getPatient( id );
+    }
+
+    public void clearSelectedPatient()
+    {
+        getSession().remove( SESSION_KEY_SELECTED_PATIENT_ID );
+    }
 
     @SuppressWarnings( "unchecked" )
     public void setSelectedProgram( Program program )

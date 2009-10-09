@@ -27,6 +27,8 @@ package org.hisp.dhis.caseentry.state;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 
@@ -37,6 +39,14 @@ import org.hisp.dhis.program.ProgramStage;
 public interface SelectedStateManager
 {    
 
+    OrganisationUnit getSelectedOrganisationUnit(); 
+    
+    void setSelectedPatient( Patient patient );
+
+    Patient getSelectedPatient();
+
+    void clearSelectedPatient();
+    
     void setSelectedProgram( Program program );
 
     Program getSelectedProgram();

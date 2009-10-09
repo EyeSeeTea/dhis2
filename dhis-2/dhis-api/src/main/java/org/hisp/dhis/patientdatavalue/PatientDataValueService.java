@@ -31,7 +31,8 @@ import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStage;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -47,17 +48,24 @@ public interface PatientDataValueService
 
     void deletePatientDataValue( PatientDataValue patientDataValue );
 
-    int deletePatientDataValue( Patient patient );
+    int deletePatientDataValue( ProgramInstance programInstance );
+
+    int deletePatientDataValue( ProgramStage programStage );
 
     int deletePatientDataValue( DataElement dataElement );
 
     int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
 
-    PatientDataValue getPatientDataValue( Patient patient, DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
+    PatientDataValue getPatientDataValue( ProgramInstance programInstance, ProgramStage programStage,
+        DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
 
-    Collection<PatientDataValue> getPatientDataValues( Patient patient, DataElement dataElement );
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance );
 
-    Collection<PatientDataValue> getPatientDataValues( Patient patient );
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage );
+    
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement );
+    
+    Collection<PatientDataValue> getPatientDataValues( DataElement dataElement );
 
     Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
 

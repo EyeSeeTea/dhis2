@@ -28,11 +28,20 @@ package org.hisp.dhis.caseentry.action;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientIdentifier;
+import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patientdatavalue.PatientDataValue;
+import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
@@ -65,6 +74,13 @@ public class DataEntryAction
         this.programService = programService;
     }
 
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
     private ProgramStageService programStageService;
 
     public void setProgramStageService( ProgramStageService programStageService )
@@ -72,10 +88,24 @@ public class DataEntryAction
         this.programStageService = programStageService;
     }
 
+    private PatientIdentifierService patientIdentifierService;
+
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
+    }
+
+    private PatientDataValueService patientDataValueService;
+
+    public void setPatientDataValueService( PatientDataValueService patientDataValueService )
+    {
+        this.patientDataValueService = patientDataValueService;
+    }
+    
     // -------------------------------------------------------------------------
     // Input/Output
-    // -------------------------------------------------------------------------    
-    
+    // -------------------------------------------------------------------------
+
     private Integer id;
 
     public void setId( Integer id )
@@ -111,12 +141,26 @@ public class DataEntryAction
     {
         this.programStageId = programStageId;
     }
-    
+
     private Patient patient;
 
     public Patient getPatient()
     {
         return patient;
+    }
+
+    private PatientIdentifier patientIdentifier;
+
+    public PatientIdentifier getPatientIdentifier()
+    {
+        return patientIdentifier;
+    }
+
+    private Integer age;
+
+    public Integer getAge()
+    {
+        return age;
     }
 
     private Program program;
@@ -132,12 +176,26 @@ public class DataEntryAction
     {
         return programStage;
     }
-    
+
     private Collection<DataElement> dataElements = new ArrayList<DataElement>();
 
     public Collection<DataElement> getDataElements()
     {
         return dataElements;
+    }   
+
+    private Map<Integer, Collection<DataElementCategoryOptionCombo>> optionMap = new HashMap<Integer, Collection<DataElementCategoryOptionCombo>>();
+
+    public Map<Integer, Collection<DataElementCategoryOptionCombo>> getOptionMap()
+    {
+        return optionMap;
+    }
+
+    private Map<Integer, PatientDataValue> patientDataValueMap;
+
+    public Map<Integer, PatientDataValue> getPatientDataValueMap()
+    {
+        return patientDataValueMap;
     }
 
     // -------------------------------------------------------------------------
@@ -150,12 +208,36 @@ public class DataEntryAction
 
         patient = patientService.getPatient( id );
 
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
+
+        age = patient.getAge();
+
         program = programService.getProgram( programId );
 
         programStage = programStageService.getProgramStage( programStageId );
-        
+
         dataElements = programStage.getDataElements();
 
+        for ( DataElement dataElement : dataElements )
+        {
+            optionMap.put( dataElement.getId(), dataElement.getCategoryCombo().getOptionCombos() );
+        }
+
+        Collection<ProgramInstance> progamInsances = programInstanceService
+            .getProgramInstances( patient, program, true );
+
+        ProgramInstance programInstance = progamInsances.iterator().next();
+
+        Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues( programInstance,
+            programStage );
+        
+        patientDataValueMap = new HashMap<Integer, PatientDataValue>( patientDataValues.size() );       
+
+        for ( PatientDataValue patientDataValue : patientDataValues )
+        {
+            patientDataValueMap.put( patientDataValue.getDataElement().getId(), patientDataValue );
+        }
+        
         return SUCCESS;
     }
 }

@@ -6,34 +6,63 @@
     <col id="entryCol">    
     <tr>
         <th>$i18n.getString( "nr" )</th>
-        <th>$i18n.getString( "data_element" )</th>                
+        <th>$i18n.getString( "data_element" )</th>  
+        <th>$i18n.getString( "type" )</th>              
         <th>$i18n.getString( "entry" )</th>        
     </tr>
 #set( $dataElementRowCount = 0 )
 #set( $mark = 0 )
 #set( $tabIndex = 1 )
+
 #foreach( $dataElement in $dataElements )
-    #set( $dataElementRowCount = $dataElementRowCount + 1 )
+    #set( $dataElementRowCount = $dataElementRowCount + 1 )    
     #if( $mark == 1 )
         #set( $mark = 0 )
     #else
         #set( $mark = 1 )
-    #end
-    
+    #end    
+    #set( $patientDataValue = false )
+    #set( $patientDataValue = $patientDataValueMap.get( $dataElement.id ) )    
     <tr #if( $mark == 0 ) style="background-color:#dddddd" #end>
         ##dataElementRowCount
-        <td style="text-align:right">$dataElementRowCount</td>
-        
+        <td style="text-align:right">$dataElementRowCount</td>        
         ##data element name
         <td>
             <span id="value[$dataElement.id].name" title="$!encoder.htmlEncode( $dataElement.description )">
                 $encoder.htmlEncode( $dataElement.name )            
             </span>
-        </td>       
-        
-        ##entry     
-        <td>
-            <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" onchange="saveValue()" onkeypress="return keyPress(event, this)" style="width:100% tabindex="$tabIndex" >
+        </td>        
+        ##type        
+        <td style="display:none"><span id="value[$dataElement.id].type" style="display:none">$encoder.htmlEncode( $dataElement.type )</span></td>       
+        ##entry        
+        <td>        
+            #if( $dataElement.type == "bool" )
+                <select name="entryselect" id="value[$dataElement.id].value" onchange="saveChoice( $dataElement.id, this )" style="width:100%" tabindex="$tabIndex">              
+                    <option value="">[$i18n.getString( "no_value" )]</option>
+                    <option value="true" #if( $patientDataValue.value == "true" ) selected="selected" #end>$i18n.getString( "yes" )</option>
+                    <option value="false" #if( $patientDataValue.value == "false" ) selected="selected" #end>$i18n.getString( "no" )</option>
+                </select>                              
+            #elseif( $dataElement.type == "string" )
+                #set( $optionValues = $optionMap.get( $dataElement.id ) )
+                <select name="entryselect" id="value[$dataElement.id].value" onchange="saveChoice( $dataElement.id, this )" tabindex="$tabIndex">              
+                    <option value="">[$i18n.getString( "no_value" )]</option>
+                    #foreach( $optionValue in $optionValues )
+                        <option value="$optionValue.id" #if( $patientDataValue.value == $optionValue.id ) selected="selected" #end>$encoder.htmlEncode( $optionValue.name )</option>
+                    #end
+                </select>
+            #elseif( $dataElement.type == "date" )
+                <input type="text" id="value[$dataElement.id].value" name="entryfield" value="$!encoder.htmlEncode( $patientDataValue.value )" onchange="saveValue( $dataElement.id, '$encoder.jsEncode( $dataElement.name )' )" tabindex="$tabIndex" >
+                    <img src="../images/calendar_icon.gif" width="16" height="16" id="getServiceDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "service_date" )"></td>
+                    <script type="text/javascript">
+                        Calendar.setup({
+                            inputField     :    "value[$dataElement.id].value",      // id of the input field
+                            ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
+                            button         :    "getServiceDate"   // trigger for the calendar (button ID)
+                        });
+                    </script>                    
+            #else
+                <input name="entryfield" id="value[$dataElement.id].value" type="text" value="$!encoder.htmlEncode( $patientDataValue.value )" onchange="saveValue( $dataElement.id, '$encoder.jsEncode( $dataElement.name )' )" onkeypress="return keyPress(event, this)" tabindex="$tabIndex" >
+            #end
         </td>       
     </tr>
     #set( $tabIndex = $tabIndex + 1 )
