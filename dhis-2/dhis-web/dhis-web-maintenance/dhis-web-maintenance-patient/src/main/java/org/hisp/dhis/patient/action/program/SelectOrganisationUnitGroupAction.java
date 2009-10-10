@@ -1,5 +1,7 @@
+package org.hisp.dhis.patient.action.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,55 +27,68 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
-
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Lars Helge Overland
  * @version $Id$
  */
-public class ShowAddProgramFormAction
+public class SelectOrganisationUnitGroupAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private SelectionTreeManager selectionTreeManager;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        this.programStageService = programStageService;
+        this.selectionTreeManager = selectionTreeManager;
     }
 
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
+    private OrganisationUnitGroupService organisationUnitGroupService;
 
-    private Collection<ProgramStage> programStages;
-
-    public Collection<ProgramStage> getProgramStages()
+    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
-        return programStages;
+        this.organisationUnitGroupService = organisationUnitGroupService;
     }
-
+    
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Input & output
+    // -------------------------------------------------------------------------
+
+    private Integer organisationUnitGroupId;
+
+    public void setOrganisationUnitGroupId( Integer organisationUnitGroupId )
+    {
+        this.organisationUnitGroupId = organisationUnitGroupId;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
-
+        OrganisationUnitGroup group = organisationUnitGroupService.getOrganisationUnitGroup( organisationUnitGroupId );
+        
+        if ( group != null )
+        {
+            Collection<OrganisationUnit> units = selectionTreeManager.getSelectedOrganisationUnits();
+            
+            units.addAll( group.getMembers() );
+            
+            selectionTreeManager.setSelectedOrganisationUnits( units );
+        }
+        
         return SUCCESS;
     }
 }

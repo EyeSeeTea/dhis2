@@ -28,8 +28,10 @@
 package org.hisp.dhis.program;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.common.GenericNameStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,9 +47,9 @@ public class DefaultProgramService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStore programStore;
+    private GenericNameStore<Program> programStore;
 
-    public void setProgramStore( ProgramStore programStore )
+    public void setProgramStore( GenericNameStore<Program> programStore )
     {
         this.programStore = programStore;
     }
@@ -79,20 +81,20 @@ public class DefaultProgramService
     public Program getProgram( int id )
     {
         return programStore.get( id );
-    }
-
-    public Collection<Program> getPrograms( DataSet dataSet )
-    {
-        return programStore.get( dataSet );
-    }
+    }   
 
     public Collection<Program> getPrograms( OrganisationUnit organisationUnit )
     {
-        return programStore.get( organisationUnit );
-    }
-
-    public Collection<Program> getPrograms( OrganisationUnit organisationUnit, DataSet dataSet )
-    {
-        return programStore.get( organisationUnit, dataSet );
+        Set<Program> programs = new HashSet<Program>();
+        
+        for( Program program : getAllPrograms() )
+        {
+            if( program.getOrganisationUnits().contains( organisationUnit ) )
+            {
+                programs.add( program );                
+            }
+        }
+        
+        return programs;
     }
 }

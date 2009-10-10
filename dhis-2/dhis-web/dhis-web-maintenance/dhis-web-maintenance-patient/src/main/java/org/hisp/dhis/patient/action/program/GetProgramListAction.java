@@ -32,8 +32,6 @@ import java.util.Collection;
 
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -47,13 +45,6 @@ public class GetProgramListAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
 
     private ProgramService programService;
 
@@ -80,9 +71,7 @@ public class GetProgramListAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        programs = programService.getPrograms( organisationUnit );
+        programs = programService.getAllPrograms();
 
         return SUCCESS;
     }

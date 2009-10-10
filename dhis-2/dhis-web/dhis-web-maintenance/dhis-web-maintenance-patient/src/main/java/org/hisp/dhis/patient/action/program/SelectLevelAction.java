@@ -1,5 +1,7 @@
+package org.hisp.dhis.patient.action.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,55 +27,81 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
-
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Torgeir Lorange Ostby
+ * @version $Id: SelectLevelAction.java 4524 2008-02-04 18:48:53Z larshelg $
  */
-public class ShowAddProgramFormAction
+public class SelectLevelAction
     implements Action
 {
+    private static final int FIRST_LEVEL = 1;
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private SelectionTreeManager selectionTreeManager;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        this.programStageService = programStageService;
+        this.selectionTreeManager = selectionTreeManager;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Input
     // -------------------------------------------------------------------------
 
-    private Collection<ProgramStage> programStages;
+    private Integer level;
 
-    public Collection<ProgramStage> getProgramStages()
+    public void setLevel( Integer level )
     {
-        return programStages;
+        this.level = level;
     }
-
+    
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
+        Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
 
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
+        Collection<OrganisationUnit> selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();
+
+        for ( OrganisationUnit rootUnit : rootUnits )
+        {
+            selectLevel( rootUnit, FIRST_LEVEL, selectedUnits );
+        }
+
+        selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
 
         return SUCCESS;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private void selectLevel( OrganisationUnit orgUnit, int currentLevel, Collection<OrganisationUnit> selectedUnits )
+    {
+        if ( currentLevel == level )
+        {
+            selectedUnits.add( orgUnit );
+        }
+        else
+        {
+            for ( OrganisationUnit child : orgUnit.getChildren() )
+            {
+                selectLevel( child, currentLevel + 1, selectedUnits );
+            }
+        }
     }
 }

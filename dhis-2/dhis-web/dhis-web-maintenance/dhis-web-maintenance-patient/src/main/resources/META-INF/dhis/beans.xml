@@ -180,9 +180,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.patient.action.program.AddProgramAction"
     class="org.hisp.dhis.patient.action.program.AddProgramAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    scope="prototype">    
     <property name="programService"
       ref="org.hisp.dhis.program.ProgramService"/>
     <property name="programStageService"
@@ -191,9 +189,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.patient.action.program.GetProgramListAction"
     class="org.hisp.dhis.patient.action.program.GetProgramListAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    scope="prototype">    
     <property name="programService"
       ref="org.hisp.dhis.program.ProgramService"/>                  
   </bean>
@@ -204,7 +200,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="programService"
       ref="org.hisp.dhis.program.ProgramService"/>
     <property name="programStageService"
-      ref="org.hisp.dhis.program.ProgramStageService"/>                   
+      ref="org.hisp.dhis.program.ProgramStageService"/>
+    <property name="organisationUnitService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/>    
+    <property name="organisationUnitGroupService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>                      
   </bean>
   
   <bean id="org.hisp.dhis.patient.action.program.RemoveProgramAction"
@@ -216,9 +216,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.patient.action.program.ShowAddProgramFormAction"
     class="org.hisp.dhis.patient.action.program.ShowAddProgramFormAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>          
+    scope="prototype">              
     <property name="programStageService"
       ref="org.hisp.dhis.program.ProgramStageService"/>         
   </bean>
@@ -234,10 +232,67 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.patient.action.program.ValidateProgramAction"
     class="org.hisp.dhis.patient.action.program.ValidateProgramAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>              
+    scope="prototype">                  
   </bean>  
+  
+  <!-- Program_OrganisationUnit Association -->
+  
+  <bean id="org.hisp.dhis.patient.action.program.SetupAssociationsTreeAction"
+    class="org.hisp.dhis.patient.action.program.SetupAssociationsTreeAction" 
+    scope="prototype">
+    <property name="selectionTreeManager"
+      ref ="org.hisp.dhis.oust.manager.SelectionTreeManager"/>    
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.DefineProgramAssociationsAction"
+    class="org.hisp.dhis.patient.action.program.DefineProgramAssociationsAction" 
+    scope="prototype">
+    <property name="selectionTreeManager"
+      ref ="org.hisp.dhis.oust.manager.SelectionTreeManager"/>    
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>   
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.SelectLevelAction"
+    class="org.hisp.dhis.patient.action.program.SelectLevelAction" 
+    scope="prototype">
+    <property name="selectionTreeManager"
+      ref ="org.hisp.dhis.oust.manager.SelectionTreeManager"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.UnselectLevelAction"
+    class="org.hisp.dhis.patient.action.program.UnselectLevelAction" 
+    scope="prototype">
+    <property name="selectionTreeManager"
+      ref ="org.hisp.dhis.oust.manager.SelectionTreeManager"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.UnselectAllAction"
+    class="org.hisp.dhis.patient.action.program.UnselectAllAction" 
+    scope="prototype">
+    <property name="selectionTreeManager"
+      ref ="org.hisp.dhis.oust.manager.SelectionTreeManager"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.SelectOrganisationUnitGroupAction"
+    class="org.hisp.dhis.patient.action.program.SelectOrganisationUnitGroupAction"
+    scope="prototype">
+    <property name="selectionTreeManager"
+      ref ="org.hisp.dhis.oust.manager.SelectionTreeManager"/>
+    <property name="organisationUnitGroupService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>    
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.program.UnselectOrganisationUnitGroupAction"
+    class="org.hisp.dhis.patient.action.program.UnselectOrganisationUnitGroupAction"
+    scope="prototype">
+    <property name="selectionTreeManager"
+      ref ="org.hisp.dhis.oust.manager.SelectionTreeManager"/>
+    <property name="organisationUnitGroupService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
+  </bean>
   
   <!-- ProgramStage --> 
   

@@ -1,5 +1,7 @@
+package org.hisp.dhis.patient.action.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,26 +27,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.program;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
-import java.util.Collection;
-
-import org.hisp.dhis.common.GenericNameStore;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew
+ * @author Lars Helge Overland
  * @version $Id$
  */
-public interface ProgramStore
-    extends GenericNameStore<Program>
+public class UnselectAllAction
+implements Action
 {
-    String ID = ProgramStore.class.getName();
-    
-    Collection<Program> get( OrganisationUnit organisationUnit );
-    
-    Collection<Program> get( DataSet dataSet );
-    
-    Collection<Program> get( OrganisationUnit organisationUnit, DataSet dataSet );
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private SelectionTreeManager selectionTreeManager;
+
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    {
+        this.selectionTreeManager = selectionTreeManager;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        selectionTreeManager.clearSelectedOrganisationUnits();
+        
+        return SUCCESS;
+    }   
 }

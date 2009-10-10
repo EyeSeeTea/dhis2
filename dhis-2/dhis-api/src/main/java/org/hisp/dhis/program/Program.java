@@ -50,8 +50,8 @@ public class Program
 
     private int numberOfDays;
 
-    private OrganisationUnit organisationUnit;
-    
+    private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+
     private Set<ProgramInstance> programInstances = new HashSet<ProgramInstance>();
 
     // -------------------------------------------------------------------------
@@ -61,7 +61,7 @@ public class Program
     public Program()
     {
     }
-    
+
     public Program( String name, String description )
     {
         this.name = name;
@@ -133,13 +133,13 @@ public class Program
     public void setDescription( String description )
     {
         this.description = description;
-    }   
-    
+    }
+
     public Set<ProgramStage> getProgramStages()
     {
         return programStages;
     }
-    
+
     public void setProgramStages( Set<ProgramStage> programStages )
     {
         this.programStages = programStages;
@@ -155,23 +155,24 @@ public class Program
         return numberOfDays;
     }
 
-    public OrganisationUnit getOrganisationUnit()
+    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
-        return organisationUnit;
+        this.organisationUnits = organisationUnits;
     }
 
-    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    public Set<OrganisationUnit> getOrganisationUnits()
     {
-        this.organisationUnit = organisationUnit;
+        return organisationUnits;
     }
 
     public void setProgramInstances( Set<ProgramInstance> programInstances )
     {
         this.programInstances = programInstances;
     }
-    
+
     public Set<ProgramInstance> getProgramInstances()
     {
         return programInstances;
     }
+
 }

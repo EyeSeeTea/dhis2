@@ -31,8 +31,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
@@ -56,13 +54,6 @@ public class AddProgramAction
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
-    }
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
     }
 
     private ProgramStageService programStageService;
@@ -112,13 +103,10 @@ public class AddProgramAction
         throws Exception
     {
 
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
         Program program = new Program();
 
         program.setName( nameField );
-        program.setDescription( description );
-        program.setOrganisationUnit( organisationUnit );
+        program.setDescription( description );        
         program.setNumberOfDays( Integer.parseInt( numberOfDays ) );
 
         Set<ProgramStage> programStages = new HashSet<ProgramStage>();

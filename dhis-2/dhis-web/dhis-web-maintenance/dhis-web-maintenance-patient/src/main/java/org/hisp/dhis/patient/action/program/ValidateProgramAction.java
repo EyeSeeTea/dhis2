@@ -28,7 +28,6 @@
 package org.hisp.dhis.patient.action.program;
 
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -44,13 +43,6 @@ public class ValidateProgramAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
 
     // -------------------------------------------------------------------------
     // Input/Output
@@ -98,13 +90,6 @@ public class ValidateProgramAction
     public String execute()
         throws Exception
     {
-
-        if ( selectionManager.getSelectedOrganisationUnit() == null )
-        {
-            message = i18n.getString( "please_select_a_registering_unit" );
-
-            return INPUT;
-        }
 
         if ( nameField == null )
         {

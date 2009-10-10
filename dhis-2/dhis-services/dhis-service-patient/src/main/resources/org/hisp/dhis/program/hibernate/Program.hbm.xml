@@ -8,16 +8,19 @@
     
     <id name="id" column="programid">
       <generator class="native"/>
-    </id>
-
-    <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit"
-        column="organisationunitid" not-null="true" foreign-key="fk_program_organisationunitid"/>
+    </id>   
     
     <property name="name" not-null="true" unique="true" length="160"/>
     
     <property name="description" type="text"/>    
     
     <property name="numberOfDays"/>
+    
+    <set name="organisationUnits" table="program_organisationunits">
+      <key column="programid"/>
+      <many-to-many column="organisationunitid" 
+        class="org.hisp.dhis.organisationunit.OrganisationUnit"/>
+    </set>
     
     <set name="programStages" table="program_programstages">
       <key column="programid"/>      
