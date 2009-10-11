@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
@@ -112,9 +113,9 @@ public class DefaultPatientDataValueService
     }
 
     public PatientDataValue getPatientDataValue( ProgramInstance programInstance, ProgramStage programStage,
-        DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
+        DataElement dataElement, DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
     {
-        return patientDataValueStore.get( programInstance, programStage, dataElement, optionCombo );
+        return patientDataValueStore.get( programInstance, programStage, dataElement, optionCombo, organisationUnit );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance )
@@ -141,6 +142,41 @@ public class DefaultPatientDataValueService
     public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
     {
         return patientDataValueStore.get( optionCombo );
+    }    
+
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance,
+        ProgramStage programStage, DataElement dataElement, OrganisationUnit organisationUnit )
+    {
+        return patientDataValueStore.get( programInstance, programStage, dataElement );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        ProgramInstance programInstance )
+    {
+        return patientDataValueStore.get( organisationUnit, programInstance );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        ProgramInstance programInstance, ProgramStage programStage )
+    {
+        return patientDataValueStore.get( organisationUnit, programInstance, programStage );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement )
+    {
+        return patientDataValueStore.get( organisationUnit, programInstance, programStage, dataElement );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElement dataElement )
+    {
+        return patientDataValueStore.get( organisationUnit, dataElement );
+    }
+
+    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        DataElementCategoryOptionCombo optionCombo )
+    {
+        return patientDataValueStore.get( organisationUnit, optionCombo );
     }
 
 }

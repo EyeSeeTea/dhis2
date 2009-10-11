@@ -34,6 +34,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
@@ -82,11 +83,12 @@ public class HibernatePatientDataValueStore
     }
 
     public PatientDataValue get( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo )
+        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
     {
         return (PatientDataValue) getCriteria( Restrictions.eq( "programInstance", programInstance ),
             Restrictions.eq( "programStage", programStage ), Restrictions.eq( "dataElement", dataElement ),
-            Restrictions.eq( "optionCombo", optionCombo ) ).uniqueResult();
+            Restrictions.eq( "organisationUnit", organisationUnit ), Restrictions.eq( "optionCombo", optionCombo ) )
+            .uniqueResult();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -134,4 +136,52 @@ public class HibernatePatientDataValueStore
     {
         return getCriteria( Restrictions.eq( "optionCombo", optionCombo ) ).list();
     }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance )
+    {
+        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramStage programStage )
+    {
+        return getCriteria( Restrictions.eq( "programStage", programStage ),
+            Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance,
+        ProgramStage programStage )
+    {
+        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "organisationUnit", organisationUnit ) )
+            .list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance,
+        ProgramStage programStage, DataElement dataElement )
+    {
+        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "dataElement", dataElement ),
+            Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, DataElement dataElement )
+    {
+        return getCriteria( Restrictions.eq( "dataElement", dataElement ),
+            Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
+        DataElementCategoryOptionCombo optionCombo )
+    {
+        return getCriteria( Restrictions.eq( "optionCombo", optionCombo ),
+            Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
+    }
+
 }

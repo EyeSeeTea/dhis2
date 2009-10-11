@@ -36,6 +36,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
@@ -134,6 +135,8 @@ public class SaveValueAction
         throws Exception
     {
 
+        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
+
         Patient patient = selectedStateManager.getSelectedPatient();
 
         Program program = selectedStateManager.getSelectedProgram();
@@ -170,7 +173,7 @@ public class SaveValueAction
         }
 
         PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programInstance, programStage,
-            dataElement, optionCombo );
+            dataElement, optionCombo, organisationUnit );
 
         if ( patientDataValue == null )
         {
@@ -179,7 +182,7 @@ public class SaveValueAction
                 LOG.debug( "Adding PatientDataValue, value added" );
 
                 patientDataValue = new PatientDataValue( programInstance, programStage, dataElement, optionCombo,
-                    new Date(), value );
+                    organisationUnit, new Date(), value );
 
                 patientDataValueService.savePatientDataValue( patientDataValue );
             }

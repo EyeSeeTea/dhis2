@@ -31,8 +31,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
@@ -101,7 +103,14 @@ public class DataEntryAction
     {
         this.patientDataValueService = patientDataValueService;
     }
-    
+
+    private SelectedStateManager selectedStateManager;
+
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    {
+        this.selectedStateManager = selectedStateManager;
+    }
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -182,7 +191,7 @@ public class DataEntryAction
     public Collection<DataElement> getDataElements()
     {
         return dataElements;
-    }   
+    }
 
     private Map<Integer, Collection<DataElementCategoryOptionCombo>> optionMap = new HashMap<Integer, Collection<DataElementCategoryOptionCombo>>();
 
@@ -206,6 +215,8 @@ public class DataEntryAction
         throws Exception
     {
 
+        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
+
         patient = patientService.getPatient( id );
 
         patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
@@ -222,22 +233,22 @@ public class DataEntryAction
         {
             optionMap.put( dataElement.getId(), dataElement.getCategoryCombo().getOptionCombos() );
         }
-        
-        Collection<ProgramInstance> progamInstances = programInstanceService
-            .getProgramInstances( patient, program, false );
+
+        Collection<ProgramInstance> progamInstances = programInstanceService.getProgramInstances( patient, program,
+            false );
 
         ProgramInstance programInstance = progamInstances.iterator().next();
 
-        Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues( programInstance,
-            programStage );
-        
-        patientDataValueMap = new HashMap<Integer, PatientDataValue>( patientDataValues.size() );       
+        Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues(
+            organisationUnit, programInstance, programStage );
+
+        patientDataValueMap = new HashMap<Integer, PatientDataValue>( patientDataValues.size() );
 
         for ( PatientDataValue patientDataValue : patientDataValues )
         {
             patientDataValueMap.put( patientDataValue.getDataElement().getId(), patientDataValue );
         }
-        
+
         return SUCCESS;
     }
 }

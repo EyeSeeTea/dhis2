@@ -2,6 +2,7 @@ package org.hisp.dhis.patientdatavalue;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStage;
 
@@ -24,6 +25,8 @@ public class PatientDataValue
 
     private ProgramStage programStage;
 
+    private OrganisationUnit organisationUnit;
+
     private Date timestamp;
 
     private String value;
@@ -37,31 +40,34 @@ public class PatientDataValue
     }
 
     public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo )
+        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
     {
         this.programInstance = programInstance;
         this.programStage = programStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
+        this.organisationUnit = organisationUnit;
     }
 
     public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo, Date timeStamp )
+        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit, Date timeStamp )
     {
         this.programInstance = programInstance;
         this.programStage = programStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
+        this.organisationUnit = organisationUnit;
         this.timestamp = timeStamp;
     }
-    
+
     public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo, Date timeStamp, String value )
+        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit, Date timeStamp, String value )
     {
         this.programInstance = programInstance;
         this.programStage = programStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
+        this.organisationUnit = organisationUnit;
         this.timestamp = timeStamp;
         this.value = value;
     }
@@ -80,6 +86,7 @@ public class PatientDataValue
         result = result * prime + programStage.hashCode();
         result = result * prime + dataElement.hashCode();
         result = result * prime + optionCombo.hashCode();
+        result = result * prime + organisationUnit.hashCode();
 
         return result;
     }
@@ -104,8 +111,9 @@ public class PatientDataValue
 
         final PatientDataValue other = (PatientDataValue) o;
 
-        return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() )
-            && dataElement.equals( other.dataElement ) && optionCombo.equals( other.optionCombo );
+        return programInstance.equals( other.programInstance ) && programStage.equals( other.programStage )
+            && dataElement.equals( other.dataElement ) && optionCombo.equals( other.optionCombo )
+            && organisationUnit.equals( other.organisationUnit );
     }
 
     // -------------------------------------------------------------------------
@@ -170,6 +178,16 @@ public class PatientDataValue
     public String getValue()
     {
         return value;
+    }
+
+    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        this.organisationUnit = organisationUnit;
+    }
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
     }
 
 }

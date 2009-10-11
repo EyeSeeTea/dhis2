@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStage;
 
@@ -57,7 +58,7 @@ public interface PatientDataValueService
     int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
 
     PatientDataValue getPatientDataValue( ProgramInstance programInstance, ProgramStage programStage,
-        DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
+        DataElement dataElement, DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit );
 
     Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance );
 
@@ -65,9 +66,21 @@ public interface PatientDataValueService
     
     Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement );
     
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement, OrganisationUnit organisationUnit );
+    
     Collection<PatientDataValue> getPatientDataValues( DataElement dataElement );
 
     Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
+    
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, ProgramInstance programInstance );
+
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, ProgramInstance programInstance, ProgramStage programStage );
+    
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement );   
+    
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElement dataElement );
+
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElementCategoryOptionCombo optionCombo );
 
     Collection<PatientDataValue> getAllPatientDataValues();
 }
