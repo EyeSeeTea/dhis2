@@ -20,12 +20,7 @@
 		
 		<many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit"
 			column="organisationunitid" not-null="true"
-			foreign-key="fk_household_organisationunitid"/>
-		
-    <set name="members" table="household_members">
-      <key column="householdid"/>
-      <many-to-many class="org.hisp.dhis.patient.Patient" column="patientid" unique="true"/>
-    </set>    
+			foreign-key="fk_household_organisationunitid"/>       
 		
 	</class>
 </hibernate-mapping>

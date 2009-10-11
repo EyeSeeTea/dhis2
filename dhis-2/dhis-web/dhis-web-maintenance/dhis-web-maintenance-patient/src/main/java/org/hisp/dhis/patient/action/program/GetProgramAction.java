@@ -30,12 +30,9 @@ package org.hisp.dhis.patient.action.program;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Collection;
 
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -62,20 +59,13 @@ public class GetProgramAction
         this.programService = programService;
     }
 
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
-    
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
     }
-    
+
     private OrganisationUnitGroupService organisationUnitGroupService;
 
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
@@ -83,14 +73,13 @@ public class GetProgramAction
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
-
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
     private int id;
 
-    public int getProgramId()
+    public int getId()
     {
         return id;
     }
@@ -105,13 +94,6 @@ public class GetProgramAction
     public Program getProgram()
     {
         return program;
-    }
-
-    private Collection<ProgramStage> programStages;
-
-    public Collection<ProgramStage> getProgramStages()
-    {
-        return programStages;
     }
 
     private List<OrganisationUnitLevel> levels;
@@ -161,16 +143,12 @@ public class GetProgramAction
     {
         program = programService.getProgram( id );
 
-        programStages = programStageService.getAllProgramStages();
-
-        programStages.removeAll( program.getProgramStages() );
-
         levels = organisationUnitService.getOrganisationUnitLevels();
 
         groups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService.getAllOrganisationUnitGroups() );
-        
+
         Collections.sort( groups, new OrganisationUnitGroupNameComparator() );
-        
+
         return SUCCESS;
 
     }

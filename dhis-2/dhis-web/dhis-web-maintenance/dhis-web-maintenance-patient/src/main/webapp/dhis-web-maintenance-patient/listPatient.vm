@@ -22,7 +22,8 @@
           <col width="20">
           <col width="20">
           <col width="20">
-          <col width="20">       
+          <col width="20">    
+          
 		  <tr>
 		  	<td></td>
 		  	<td></td>
@@ -65,7 +66,7 @@
 				
 				<td style="text-align:center"#alternate( $mark )>
                   <a href="showProgramEnrollmentForm.action?id=$patient.id" title="$i18n.getString( "manage_program_enrollment" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_program_enrollment" )"></a>                  
-                </td>
+                </td>                
                 
                 <td style="text-align:center"#alternate( $mark )>
                   <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
@@ -108,8 +109,6 @@
   </tr>
 </table>
    
-<span id="message"></span>
-
 <script type="text/javascript">
 	var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete_patient" ) , "'" )';
 	var i18n_adding_patient_failed = '$encoder.jsEscape( $i18n.getString( "adding_patient_failed" ), "'")';

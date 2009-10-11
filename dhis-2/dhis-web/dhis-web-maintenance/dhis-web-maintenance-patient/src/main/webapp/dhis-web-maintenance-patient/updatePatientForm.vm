@@ -47,16 +47,37 @@
 		<td><label for="birthDate">$i18n.getString( "date_of_birth" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><input type="text" id="birthDate" name="birthDate" value="$format.formatDate( $patient.birthDate )" style="width:30em">
 			<img src="../images/calendar_icon.gif" width="16" height="16" id="getBirthDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "date_of_birth" )"></td>
-	</tr>
-	<script type="text/javascript">
-        Calendar.setup({
-            inputField     :    "birthDate",      // id of the input field
-            ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
-            button         :    "getBirthDate"   // trigger for the calendar (button ID)
-        });
-  	</script>
-  	<tr><td>&nbsp;</td></tr>  	
-  	
+	</tr>  
+		
+</table>
+
+<table class="mainPageTable">
+
+    <tr>
+       <td style="vertical-align:top"><label>$i18n.getString( "house_hold" )</label></td>
+       <td>
+        <select id="houseHoldSelectId" name="houseHoldSelectId" style="min-width:20em" onchange="showHouseHoldMembers( this )">
+            <option value="">[$i18n.getString( "select" )]</option>
+            #foreach ( $houseHold in $houseHolds )
+                <option value="$houseHold.id" #if( $patient.houseHold.id == $houseHold.id ) ) selected="selected" #end>$encoder.htmlEncode( $houseHold.houseNumber )</option>
+            #end
+        </select>
+       </td>
+       <td style="width:20em; vertical-align:top">
+            <div id="detailsArea" style="display:none">
+                <h4>$i18n.getString( "members_in_the_selected_house_hold" )</h4>
+                <div style="float:right">
+                    <a href="javascript:hideDetails()" title="$i18n.getString( "hide_details" )"><img src="../images/close.png" alt="$i18n.getString( "hide_details" )"></a>
+                </div>
+                    <select id="selectedMembers" disabled="disabled" multiple="multiple">                                     
+                    </select>                                      
+            </div>
+
+        </td>
+    </tr>     
+        
+    <tr><td>&nbsp;</td></tr>    
+    
 </table>
 
 <p>
@@ -68,10 +89,19 @@
 
 <span id="message"></span>
 
-<script type="text/javascript">
+<script type="text/javascript">	
 	
 	var firstNameField = document.getElementById( 'firstName' );
 	firstNameField.select();
 	firstNameField.focus();
 
-</script>				
+</script>
+
+<script type="text/javascript">
+        Calendar.setup({
+            inputField     :    "birthDate",      // id of the input field
+            ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
+            button         :    "getBirthDate"   // trigger for the calendar (button ID)
+        });
+</script>
+				

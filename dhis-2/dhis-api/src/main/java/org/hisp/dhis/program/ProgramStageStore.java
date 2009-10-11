@@ -24,41 +24,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient;
+package org.hisp.dhis.program;
 
 import java.util.Collection;
-import java.util.Date;
 
-import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.common.GenericStore;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public interface PatientService
+public interface ProgramStageStore
+    extends GenericStore<ProgramStage>
 {
-    String ID = PatientService.class.getName();
+    String ID = ProgramStageStore.class.getName();
 
-    int savePatient( Patient patient );
+    Collection<ProgramStage> get( Program program );
 
-    void deletePatient( Patient patient );
-
-    void updatePatient( Patient patient );
-
-    Patient getPatient( int id );
-
-    Collection<Patient> getAllPatients();
-    
-    Collection<Patient> getPatientsByHouseHold( HouseHold houseHold );
-
-    Collection<Patient> getAllPatients( Boolean isDead );
-
-    Collection<Patient> getPatiensByGender( String gender );
-
-    Collection<Patient> getPatientsByBirthDate( Date birthDate );
-
-    Collection<Patient> getPatientsByNames( String name );
-    
-    Collection<Patient> getPatients( String searchText );
 }

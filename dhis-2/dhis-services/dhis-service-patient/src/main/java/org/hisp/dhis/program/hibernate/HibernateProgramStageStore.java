@@ -25,46 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.program.hibernate;
 
-import org.hisp.dhis.program.ProgramStageService;
+import java.util.Collection;
 
-import com.opensymphony.xwork2.Action;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageStore;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public class RemoveProgramStageAction
-    implements Action
+public class HibernateProgramStageStore
+    extends HibernateGenericStore<ProgramStage>
+    implements ProgramStageStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramStage> get( Program program )
     {
-        this.programStageService = programStageService;
+        return getCriteria( Restrictions.eq( "program", program ) ).list();
     }
 
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
-
-    private int id;
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String execute()
-        throws Exception
-    {
-        programStageService.deleteProgramStage( programStageService.getProgramStage( id ) );
-
-        return SUCCESS;
-    }
 }

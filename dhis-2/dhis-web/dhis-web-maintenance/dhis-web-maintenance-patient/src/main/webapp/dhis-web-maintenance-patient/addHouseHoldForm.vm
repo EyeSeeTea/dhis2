@@ -1,5 +1,5 @@
 
-<h3>$i18n.getString( "create_new_house_hold" )</h3>
+<h3>$i18n.getString( "add_new_household" )</h3>
 																					
 <form id="addHouseHoldForm" action="addHouseHold.action" method="post" onsubmit="return validateAddHouseHold()">
 

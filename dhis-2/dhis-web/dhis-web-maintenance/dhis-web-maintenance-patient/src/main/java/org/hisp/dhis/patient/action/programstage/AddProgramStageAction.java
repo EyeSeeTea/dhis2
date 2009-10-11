@@ -25,14 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.patient.action.programstage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 
@@ -42,10 +44,9 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddProgramStageFormAction
+public class AddProgramStageAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -55,6 +56,13 @@ public class ShowAddProgramStageFormAction
     public void setProgramStageService( ProgramStageService programStageService )
     {
         this.programStageService = programStageService;
+    }
+
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
     }
 
     private DataElementService dataElementService;
@@ -68,18 +76,58 @@ public class ShowAddProgramStageFormAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private Collection<ProgramStage> programStages;
+    private int id;
 
-    public Collection<ProgramStage> getProgramStages()
+    public int getId()
     {
-        return programStages;
+        return id;
     }
 
-    private List<DataElement> dataElements;
-
-    public List<DataElement> getDataElements()
+    public void setId( int id )
     {
-        return dataElements;
+        this.id = id;
+    }
+
+    private String nameField;
+
+    public void setNameField( String nameField )
+    {
+        this.nameField = nameField;
+    }
+
+    private String description;
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    private String stageInProgram;
+
+    public void setStageInProgram( String stageInProgram )
+    {
+        this.stageInProgram = stageInProgram;
+    }
+
+    private String minDaysFromStart;
+
+    public void setMinDaysFromStart( String minDaysFromStart )
+    {
+        this.minDaysFromStart = minDaysFromStart;
+    }
+
+    private String maxDaysFromStart;
+
+    public void setMaxDaysFromStart( String maxDaysFromStart )
+    {
+        this.maxDaysFromStart = maxDaysFromStart;
+    }
+
+    private Collection<String> selectedList = new HashSet<String>();
+
+    public void setSelectedList( Collection<String> selectedList )
+    {
+        this.selectedList = selectedList;
     }
 
     // -------------------------------------------------------------------------
@@ -87,11 +135,32 @@ public class ShowAddProgramStageFormAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
 
-        programStages = new ArrayList<ProgramStage>( programStageService.getAllProgramStages() );
+        ProgramStage programStage = new ProgramStage();
 
-        dataElements = new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() );
+        Program program = programService.getProgram( id );
+
+        programStage.setProgram( program );
+        programStage.setName( nameField );
+        programStage.setDescription( description );
+        programStage.setStageInProgram( Integer.parseInt( stageInProgram ) );
+        programStage.setMinDaysFromStart( Integer.parseInt( minDaysFromStart ) );
+        programStage.setMaxDaysFromStart( Integer.parseInt( maxDaysFromStart ) );
+
+        Set<DataElement> dataElements = new HashSet<DataElement>();
+
+        for ( String id : selectedList )
+        {
+            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );
+
+            dataElements.add( dataElement );
+        }
+
+        programStage.setDataElements( dataElements );
+
+        programStageService.saveProgramStage( programStage );
 
         return SUCCESS;
     }

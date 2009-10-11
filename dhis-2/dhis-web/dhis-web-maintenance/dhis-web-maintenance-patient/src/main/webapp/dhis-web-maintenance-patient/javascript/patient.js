@@ -10,6 +10,41 @@ selection.setListenerFunction( organisationUnitSelected );
 // View details
 // -----------------------------------------------------------------------------
 
+function showHouseHoldMembers( selectedOption )
+{
+	var houseHoldId = selectedOption.options[selectedOption.selectedIndex].value
+	
+	if( houseHoldId != "null " || houseHoldId != "" )
+	{
+		var request = new Request();
+	    request.setResponseTypeXML( 'member' );
+	    request.setCallbackSuccess( houseHoldMembersReceived );
+	    request.send( 'getHouseHoldMembers.action?id=' + houseHoldId );
+	}	
+    
+}
+
+function houseHoldMembersReceived( xmlObject )
+{
+	var selectedMembers = document.getElementById( "selectedMembers" );
+	
+	clearList( selectedMembers );
+	
+	var members = xmlObject.getElementsByTagName( "member" );
+	
+	for ( var i = 0; i < members.length; i++ )
+	{	
+		var fullName = members[ i ].getElementsByTagName( "fullName" )[0].firstChild.nodeValue;
+		
+		var option = document.createElement( "option" );		
+		option.text = fullName;
+		option.title = fullName;
+		selectedMembers.add( option, null );		
+	}
+	
+	showDetails();
+}
+
 function showPatientDetails( patientId )
 {
     var request = new Request();
@@ -80,7 +115,7 @@ function removePatientCompleted( messageElement )
     
     if ( type == 'success' )
     {
-        window.location.href = 'patient.action';
+        window.location.href = 'patientform.action';
     }
     else if ( type = 'error' )
     {

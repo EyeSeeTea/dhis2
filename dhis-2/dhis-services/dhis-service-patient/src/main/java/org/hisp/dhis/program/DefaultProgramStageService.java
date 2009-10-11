@@ -28,7 +28,6 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericNameStore;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,44 +44,45 @@ public class DefaultProgramStageService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericNameStore<ProgramStage> programStageStore;
+    private ProgramStageStore programStageStore;
 
-    public void setProgramStageStore( GenericNameStore<ProgramStage> programStageStore )
+    public void setProgramStageStore( ProgramStageStore programStageStore )
     {
         this.programStageStore = programStageStore;
     }
 
     // -------------------------------------------------------------------------
     // ProgramStage implementation
-    // -------------------------------------------------------------------------    
-   
+    // -------------------------------------------------------------------------
+
     public int saveProgramStage( ProgramStage programStage )
-    {       
-        return programStageStore.save( programStage );       
+    {
+        return programStageStore.save( programStage );
     }
-    
+
     public void deleteProgramStage( ProgramStage programStage )
-    {     
+    {
         programStageStore.delete( programStage );
     }
-    
-    public Collection<ProgramStage> getAllProgramStages()
-    {     
-        return programStageStore.getAll();
-    }
-    
+
     public ProgramStage getProgramStage( int id )
-    {        
+    {
         return programStageStore.get( id );
     }
-    
-    public ProgramStage getProgramStageByName( String name )
-    {        
-        return programStageStore.getByName( name );
-    }
-    
+
     public void updateProgramStage( ProgramStage programStage )
-    {        
+    {
         programStageStore.update( programStage );
     }
+
+    public Collection<ProgramStage> getProgramStagesByProgram( Program program )
+    {
+        return programStageStore.get( program );
+    }
+
+    public Collection<ProgramStage> getAllProgramStages()
+    {
+        return programStageStore.getAll();
+    }
+
 }

@@ -1,7 +1,7 @@
 
-<h3>$i18n.getString( "update_house_hold" )</h3>
+<h3>$i18n.getString( "update_household" )</h3>
 
-<form id="updateHouseHoldForm" name="updateHouseHoldForm" action="updateHouseHold.action" method="post" onsubmit="submitForm(); return validateUpdateHouseHold()">
+<form id="updateHouseHoldForm" name="updateHouseHoldForm" action="updateHouseHold.action" method="post" onsubmit="return validateUpdateHouseHold()">
 
 <div style="display:inline">
   <input type="hidden" id="id" name="id" value="$houseHold.id">
@@ -31,45 +31,7 @@
       </tr>
     </tbody>
   </table>
-
-  <table id="houseHoldMembersArea">
-    
-    <thead>
-      <tr>        
-		<th>$i18n.getString( "not_members" )</th>
-		<th></th>
-		<th>$i18n.getString( "members" )</th>
-      </tr>
-    </thead>
   
-    <tbody>   
-     <tr>
-     	<td><input type="text" id="searchText" name="searchText" maxlength="30" style="width:20em"><input type="button" value="$i18n.getString( "search" )" style="width:10em" onclick="searchHouseHoldMembers()"></td>
-        <td></td>        
-        <td></td>
-      </tr>	   
-      <tr> 
-      	<td>
-        	<select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
-        		#foreach ( $member in $members )
-              		<option value="$member.id">$encoder.htmlEncode( $member.firstName )  $encoder.htmlEncode( $member.middleName )   $encoder.htmlEncode( $member.lastName )</option>
-            	#end            	
-          	</select>
-        </td>
-        <td valign="top" align="center">		 
-        	<input type="button" value="&gt;" onclick="move( 'availableList' )"><br> <br>	
-		  	<input type="button" value="&lt;" onclick="move ( 'selectedList' )">             
-		<td>
-        	<select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">
-        		#foreach ( $houseHoldMember in $houseHold.members )
-              		<option value="$houseHoldMember.id">$encoder.htmlEncode( $houseHoldMember.firstName )  $encoder.htmlEncode( $houseHoldMember.middleName )   $encoder.htmlEncode( $houseHoldMember.lastName )</option>
-            	#end
-          	</select>
-        </td>                
-      </tr>
-    </tbody>
-  </table>
-
 <p>
 	<input type="submit" value="$i18n.getString( "update" )" style="width:10em">
 	<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='household.action'" style="width:10em">
@@ -81,6 +43,7 @@
 
 <script type="text/javascript">
 	
+	var i18n_empty_search_result = '$encoder.jsEscape( $i18n.getString( "empty_search_result" ) , "'")';
 	var addressField = document.getElementById( 'address' );
 	addressField.select();
 	addressField.focus();

@@ -25,17 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.household;
+package org.hisp.dhis.patient.action.programstage;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -43,76 +42,75 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SearchHouseHoldMembersAction
+public class ShowAddProgramStageFormAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private DataElementService dataElementService;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setDataElementService( DataElementService dataElementService )
     {
-        this.selectionManager = selectionManager;
+        this.dataElementService = dataElementService;
     }
 
-    private HouseHoldService houseHoldService;
+    private ProgramService programService;
 
-    public void setHouseHoldService( HouseHoldService houseHoldService )
+    public void setProgramService( ProgramService programService )
     {
-        this.houseHoldService = houseHoldService;
+        this.programService = programService;
     }
 
-    private PatientService patientService;
-    
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
-    
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
+    private Integer id;
 
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    private String searchText;
-
-    public void setSearchText( String searchText )
-    {
-        this.searchText = searchText;
-    }
-
-    private Collection<Patient> members = new ArrayList<Patient>();
-
-    public Collection<Patient> getMembers()
-    {
-        return members;
-    }
-
-    private int id;
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public int getId()
+    public Integer getId()
     {
         return id;
     }
 
-    private HouseHold houseHold;
-
-    public HouseHold getHouseHold()
+    public void setId( Integer id )
     {
-        return houseHold;
+        this.id = id;
+    }
+
+    private Program program;
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    public void setProgram( Program program )
+    {
+        this.program = program;
+    }
+
+    private List<DataElement> dataElements;
+
+    public List<DataElement> getDataElements()
+    {
+        return dataElements;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -120,18 +118,19 @@ public class SearchHouseHoldMembersAction
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------
 
-        houseHold = houseHoldService.getHouseHold( id );
+        if ( id == null )
+        {
+            message = i18n.getString( "please_select_program" );
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-        
-        members = patientService.getPatients( searchText );
-        
+            return INPUT;
+        }
+
+        program = programService.getProgram( id.intValue() );
+
+        dataElements = new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() );
+
         return SUCCESS;
-    }    
+    }
 }

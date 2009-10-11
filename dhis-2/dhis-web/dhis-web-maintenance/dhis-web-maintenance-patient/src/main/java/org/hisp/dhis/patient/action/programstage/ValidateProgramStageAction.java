@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.patient.action.programstage;
 
 import org.hisp.dhis.i18n.I18n;
 

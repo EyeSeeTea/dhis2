@@ -25,11 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.patient.action.programstage;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 
@@ -39,12 +41,12 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class GetProgramStageListAction
+public class GetProgramStageAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------   
+    // -------------------------------------------------------------------------
 
     private ProgramStageService programStageService;
 
@@ -52,16 +54,49 @@ public class GetProgramStageListAction
     {
         this.programStageService = programStageService;
     }
+    
+    private DataElementService dataElementService;
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private Collection<ProgramStage> programStages = new ArrayList<ProgramStage>();
-
-    public Collection<ProgramStage> getProgramStages()
+    public void setDataElementService( DataElementService dataElementService )
     {
-        return programStages;
+        this.dataElementService = dataElementService;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+    private int id;
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    private ProgramStage programStage;
+
+    public ProgramStage getProgramStage()
+    {
+        return programStage;
+    }
+
+    private Collection<DataElement> programStageDataElements;
+
+    public Collection<DataElement> getProgramStageDataElements()
+    {
+        return programStageDataElements;
+    }
+    
+    private Collection<DataElement> dataElements;
+
+    public Collection<DataElement> getDataElements()
+    {
+        return dataElements;
     }
 
     // -------------------------------------------------------------------------
@@ -70,9 +105,13 @@ public class GetProgramStageListAction
 
     public String execute()
         throws Exception
-    {        
+    {
 
-        programStages = programStageService.getAllProgramStages();
+        programStage = programStageService.getProgramStage( id );
+        
+        programStageDataElements = programStage.getDataElements();
+        
+        dataElements = dataElementService.getAllDataElements();
 
         return SUCCESS;
     }

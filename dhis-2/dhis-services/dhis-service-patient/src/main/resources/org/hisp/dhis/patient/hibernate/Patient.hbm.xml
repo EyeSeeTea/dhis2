@@ -41,6 +41,15 @@
       <many-to-many class="org.hisp.dhis.program.Program"
           column="programid" foreign-key="fk_patient_programid"/>
     </set>
+    
+    <join table="patient_household" 
+        optional="true">
+        <key column="patientid" unique="true"/>
+        <many-to-one name="houseHold"
+            column="householdid" 
+            not-null="true"/>
+    </join>
+
 		
 	</class>
 </hibernate-mapping>

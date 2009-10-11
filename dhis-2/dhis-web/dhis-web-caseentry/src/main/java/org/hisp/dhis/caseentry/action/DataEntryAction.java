@@ -222,11 +222,11 @@ public class DataEntryAction
         {
             optionMap.put( dataElement.getId(), dataElement.getCategoryCombo().getOptionCombos() );
         }
+        
+        Collection<ProgramInstance> progamInstances = programInstanceService
+            .getProgramInstances( patient, program, false );
 
-        Collection<ProgramInstance> progamInsances = programInstanceService
-            .getProgramInstances( patient, program, true );
-
-        ProgramInstance programInstance = progamInsances.iterator().next();
+        ProgramInstance programInstance = progamInstances.iterator().next();
 
         Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues( programInstance,
             programStage );

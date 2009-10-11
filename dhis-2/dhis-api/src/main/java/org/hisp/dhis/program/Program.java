@@ -44,9 +44,7 @@ public class Program
 
     private String name;
 
-    private String description;
-
-    private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+    private String description;   
 
     private int numberOfDays;
 
@@ -134,17 +132,7 @@ public class Program
     {
         this.description = description;
     }
-
-    public Set<ProgramStage> getProgramStages()
-    {
-        return programStages;
-    }
-
-    public void setProgramStages( Set<ProgramStage> programStages )
-    {
-        this.programStages = programStages;
-    }
-
+    
     public void setNumberOfDays( int numberOfDays )
     {
         this.numberOfDays = numberOfDays;

@@ -6,65 +6,6 @@ function organisationUnitSelected( orgUnits )
 
 selection.setListenerFunction( organisationUnitSelected );
 
-//-----------------------------------------------------------------------------
-// Move members
-//-----------------------------------------------------------------------------
-
-
-var selectedList;
-var availableList;
-
-function move( listId ) {
-	
-	var fromList = document.getElementById(listId);
-	
-	if ( fromList.selectedIndex == -1 ) { return; }
-	
-	if ( ! availableList ) 
-	{
-		availableList = document.getElementById( 'availableList' );
-	}
-	
-	if ( ! selectedList ) 
-	{
-		selectedList = document.getElementById( 'selectedList' );
-	}
-	
-	var toList = ( fromList == availableList ? selectedList : availableList );
-	
-	while ( fromList.selectedIndex > -1 ) {
-		
-		option = fromList.options.item(fromList.selectedIndex);
-		fromList.remove(fromList.selectedIndex);
-		toList.add(option, null);
-	}
-}
-
-function submitForm() {
-	
-	if ( ! availableList ) 
-	{
-		availableList = document.getElementById('availableList');
-	}
-	
-	if ( ! selectedList ) 
-	{
-		selectedList = document.getElementById('selectedList');
-	}
-	
-	selectAll( selectedList );
-	
-	return false;
-}
-
-function selectAll( list ) 
-{
-	for ( var i = 0, option; option = list.options.item(i); i++ ) 
-	{
-		option.selected = true;
-	}
-}
-
 // -----------------------------------------------------------------------------
 // View details
 // -----------------------------------------------------------------------------
@@ -87,7 +28,7 @@ function houseHoldReceived( houseHoldElement )
     setFieldValue( 'memberCountField', getElementValue( houseHoldElement, 'memberCount' ) );      
    
     showDetails();
-}
+}	
 
 // -----------------------------------------------------------------------------
 // Remove houseHold
@@ -201,6 +142,18 @@ function getMembersReceived( xmlObject )
 		option.title = givenName + ' ' + middleName + ' ' + familyName;
 		
 		availableList.add( option, null );		
+	}
+	
+	if( members.length == 0 )
+	{
+		var option = document.createElement( "option" );
+		
+		option.value = "";
+		option.text = i18n_empty_search_result;
+		option.title = i18n_empty_search_result;
+		option.disabled = "disabled";
+		
+		availableList.add( option, null );
 	}
 }	
 

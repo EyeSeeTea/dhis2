@@ -35,6 +35,8 @@ import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.i18n.I18nFormat;
 
 import com.opensymphony.xwork2.Action;
@@ -76,6 +78,13 @@ public class AddPatientAction
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
+    }
+
+    private HouseHoldService houseHoldService;
+
+    public void setHouseHoldService( HouseHoldService houseHoldService )
+    {
+        this.houseHoldService = houseHoldService;
     }
 
     // -------------------------------------------------------------------------
@@ -132,10 +141,22 @@ public class AddPatientAction
         this.gender = gender;
     }
 
+    // -------------------------------------------------------------------------
+    // Input - household
+    // -------------------------------------------------------------------------
+
+    private Integer houseHoldSelectId;
+
+    public void setHouseHoldSelectId( Integer houseHoldSelectId )
+    {
+        this.houseHoldSelectId = houseHoldSelectId;
+    }
+
     /*
-     * // -------------------------------------------------------------------------
-     * // Input - address 
-     * // -------------------------------------------------------------------------
+     * //
+     * -------------------------------------------------------------------------
+     * // Input - address //
+     * -------------------------------------------------------------------------
      * 
      * private String address1;
      * 
@@ -188,7 +209,13 @@ public class AddPatientAction
         patient.setLastName( lastName );
         patient.setGender( gender );
         patient.setBirthDate( format.parseDate( birthDate ) );
-        patient.setRegistrationDate( new Date() );     
+        patient.setRegistrationDate( new Date() );
+
+        if ( houseHoldSelectId != null )
+        {
+            HouseHold houseHold = houseHoldService.getHouseHold( houseHoldSelectId );
+            patient.setHouseHold( houseHold );
+        }
 
         patientService.savePatient( patient );
 

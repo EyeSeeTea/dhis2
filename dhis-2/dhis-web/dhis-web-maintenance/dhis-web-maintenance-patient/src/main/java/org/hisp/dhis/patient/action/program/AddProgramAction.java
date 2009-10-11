@@ -27,14 +27,8 @@
 
 package org.hisp.dhis.patient.action.program;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -54,13 +48,6 @@ public class AddProgramAction
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
-    }
-
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
     }
 
     // -------------------------------------------------------------------------
@@ -88,13 +75,6 @@ public class AddProgramAction
         this.numberOfDays = numberOfDays;
     }
 
-    private Collection<String> selectedList = new HashSet<String>();
-
-    public void setSelectedList( Collection<String> selectedList )
-    {
-        this.selectedList = selectedList;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -106,20 +86,8 @@ public class AddProgramAction
         Program program = new Program();
 
         program.setName( nameField );
-        program.setDescription( description );        
+        program.setDescription( description );
         program.setNumberOfDays( Integer.parseInt( numberOfDays ) );
-
-        Set<ProgramStage> programStages = new HashSet<ProgramStage>();
-
-        for ( String id : selectedList )
-        {
-            ProgramStage programStage = programStageService.getProgramStage( Integer.parseInt( id ) );
-
-            programStages.add( programStage );
-
-        }
-
-        program.setProgramStages( programStages );
 
         programService.saveProgram( program );
 

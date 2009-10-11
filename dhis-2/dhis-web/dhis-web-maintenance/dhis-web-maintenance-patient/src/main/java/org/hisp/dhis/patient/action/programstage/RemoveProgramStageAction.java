@@ -25,10 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.patient.action.programstage;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -36,51 +35,36 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SelectProgramAction
+public class RemoveProgramStageAction
     implements Action
 {
-    private static final String PROGRAM_FORM = "programform";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private ProgramStageService programStageService;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setProgramStageService( ProgramStageService programStageService )
     {
-        this.selectionManager = selectionManager;
+        this.programStageService = programStageService;
     }
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
+    private int id;
 
-    public OrganisationUnit getOrganisationUnit()
+    public void setId( int id )
     {
-        return organisationUnit;
+        this.id = id;
     }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------
+        programStageService.deleteProgramStage( programStageService.getProgramStage( id ) );
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        if ( organisationUnit == null )
-        {
-            return SUCCESS;
-        }
-
-        return PROGRAM_FORM;
+        return SUCCESS;
     }
 }

@@ -27,11 +27,7 @@
 
 package org.hisp.dhis.household;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -49,9 +45,7 @@ public class HouseHold
 
     private String houseNumber;
 
-    private OrganisationUnit organisationUnit;
-
-    private Set<Patient> members = new HashSet<Patient>();
+    private OrganisationUnit organisationUnit;   
 
     private String address;
 
@@ -128,17 +122,7 @@ public class HouseHold
     public void setHouseNumber( String houseNumber )
     {
         this.houseNumber = houseNumber;
-    }
-
-    public Set<Patient> getMembers()
-    {
-        return members;
-    }
-
-    public void setMembers( Set<Patient> members )
-    {
-        this.members = members;
-    }
+    }  
 
     public String getAddress()
     {

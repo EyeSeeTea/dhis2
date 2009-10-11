@@ -34,6 +34,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientStore;
 
@@ -79,5 +80,11 @@ public class HibernatePatientStore
             Restrictions.disjunction().add( Restrictions.ilike( "firstName", "%" + name + "%" ) ).add(
             Restrictions.ilike( "middleName", "%" + name + "%" ) ).add(
             Restrictions.ilike( "lastName", "%" + name + "%" ) ) ).list();        
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<Patient> getByHouseHold( HouseHold houseHold )
+    {
+        return getCriteria( Restrictions.eq( "houseHold", houseHold ) ).list();
     }
 }

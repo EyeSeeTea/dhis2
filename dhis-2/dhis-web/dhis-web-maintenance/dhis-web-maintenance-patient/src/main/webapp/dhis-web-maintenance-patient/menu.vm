@@ -1,14 +1,14 @@
 
-<h2>$i18n.getString( "patient_register" )&nbsp;</h2>
+<h2>$i18n.getString( "patient_management" )&nbsp;</h2>
 <ul>
-	<li><a href="patient.action">$i18n.getString( "patient_register" )&nbsp;</a></li>		
-	<li><a href="household.action">$i18n.getString( "house_hold_register" )&nbsp;</a></li>
+	<li><a href="patient.action">$i18n.getString( "patient_management" )&nbsp;</a></li>		
+	<li><a href="household.action">$i18n.getString( "household_management" )&nbsp;</a></li>
 </ul>
 
-<h2>$i18n.getString( "program_register" )&nbsp;</h2>
+<h2>$i18n.getString( "program_management" )&nbsp;</h2>
 <ul>
-    <li><a href="program.action">$i18n.getString( "program_register" )&nbsp;</a></li>   
-    <li><a href="programStage.action">$i18n.getString( "program_stage_register" )&nbsp;</a></li>
+    <li><a href="program.action">$i18n.getString( "program_management" )&nbsp;</a></li>   
+    <li><a href="programStage.action">$i18n.getString( "program_stage_management" )&nbsp;</a></li>
 </ul>
 
 <br>

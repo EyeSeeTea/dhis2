@@ -50,6 +50,8 @@ public class ProgramStage
     private int minDaysFromStart;
 
     private int maxDaysFromStart;
+    
+    private Program program;
 
     private Set<DataElement> dataElements = new HashSet<DataElement>();
 
@@ -61,9 +63,10 @@ public class ProgramStage
     {
     }
 
-    public ProgramStage( String name )
+    public ProgramStage( String name, Program program )
     {
         this.name = name;
+        this.program = program;
     }
 
     // -------------------------------------------------------------------------
@@ -220,6 +223,22 @@ public class ProgramStage
     public void setDataElements( Set<DataElement> dataElements )
     {
         this.dataElements = dataElements;
+    }
+
+    /**
+     * @param program the program to set
+     */
+    public void setProgram( Program program )
+    {
+        this.program = program;
+    }
+
+    /**
+     * @return the program
+     */
+    public Program getProgram()
+    {
+        return program;
     }
 
 }

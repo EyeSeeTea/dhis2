@@ -1,7 +1,7 @@
 
-<h3>$i18n.getString( "create_new_program" )</h3>
+<h3>$i18n.getString( "add_new_program" )</h3>
 																		
-<form id="addProgramForm" name "addProgramForm" action="addProgram.action" method="post" onsubmit="submitForm(); return validateAddProgram()">
+<form id="addProgramForm" name "addProgramForm" action="addProgram.action" method="post" onsubmit="return validateAddProgram()">
 
 <table>	
 	<tr>
@@ -19,41 +19,6 @@
 		<td><input type="text" id="numberOfDays" name="numberOfDays" maxlength="30" style="width:30em"></td>
 	</tr>	
   	  	
-</table>
-
-<table id="programEncounterTypesArea">
-    
-    <thead>
-      <tr><b>$i18n.getString( "program_stages_in_program" )</b></tr>
-      <tr>        
-        <th>$i18n.getString( "not_in_the_program" )</th>
-        <th></th>
-        <th>$i18n.getString( "in_the_program" )</th>
-      </tr>
-    </thead>
-  
-    <tbody>
-      <tr>
-        <td>
-            <select size="15" id="availableList" name="availableList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'availableList' )">
-                #foreach ( $programStage in $programStages )
-                    <option value="$programStage.id">$encoder.htmlEncode( $programStage.name )</option>
-                #end                
-            </select>
-        </td>
-        <td valign="top" align="center">         
-            <input type="button" value="&gt;" onclick="move( 'availableList' )"><br>    
-            <input type="button" value="&lt;" onclick="move ( 'selectedList' )"><br><br>
-            <a href="#" onclick="moveUp('selectedList')"><img src="../images/move_up.png" border="0" alt=""></a><br><br>
-            <a href="#" onclick="moveDown('selectedList')"><img src="../images/move_down.png" border="0" alt=""></a>        
-        <td>
-            <select id="selectedList" name="selectedList" multiple="multiple" style="min-width:20em;height:20em" ondblclick="move( 'selectedList' )">                
-            </select>
-        </td>
-        
-      </tr>
-      
-    </tbody>
 </table>
 
 <p>

@@ -10,6 +10,26 @@ function isInt( value )
     return true;
 }
 
+function getStageByProgram( programId )
+{
+	window.location = "programStage.action?id=" + programId;
+}
+
+function addProgramStage()
+{
+	var programId = document.getElementById('id').value;
+	
+	if( programId == "null"  || programId == "" )
+	{
+		window.alert( i18n_please_select_program );
+	}
+	else
+	{
+		window.location.href="showAddProgramStageForm.action?id=" + programId;
+	}
+}
+
+
 //-----------------------------------------------------------------------------
 // Move members
 //-----------------------------------------------------------------------------

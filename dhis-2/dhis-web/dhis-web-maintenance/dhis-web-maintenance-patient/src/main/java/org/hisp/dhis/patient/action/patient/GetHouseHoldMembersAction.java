@@ -25,15 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.patient.action.patient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,62 +41,43 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class GetProgramStageAction
+public class GetHouseHoldMembersAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private HouseHoldService houseHoldService;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setHouseHoldService( HouseHoldService houseHoldService )
     {
-        this.programStageService = programStageService;
+        this.houseHoldService = houseHoldService;
     }
-    
-    private DataElementService dataElementService;
 
-    public void setDataElementService( DataElementService dataElementService )
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
     {
-        this.dataElementService = dataElementService;
+        this.patientService = patientService;
     }
-    
+
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Input/output
     // -------------------------------------------------------------------------
+
+    private Collection<Patient> members = new ArrayList<Patient>();
+
+    public Collection<Patient> getMembers()
+    {
+        return members;
+    }
 
     private int id;
-
-    public int getId()
-    {
-        return id;
-    }
 
     public void setId( int id )
     {
         this.id = id;
-    }
-
-    private ProgramStage programStage;
-
-    public ProgramStage getProgramStage()
-    {
-        return programStage;
-    }
-
-    private Collection<DataElement> programStageDataElements;
-
-    public Collection<DataElement> getProgramStageDataElements()
-    {
-        return programStageDataElements;
-    }
-    
-    private Collection<DataElement> dataElements;
-
-    public Collection<DataElement> getDataElements()
-    {
-        return dataElements;
     }
 
     // -------------------------------------------------------------------------
@@ -105,13 +86,11 @@ public class GetProgramStageAction
 
     public String execute()
         throws Exception
-    {
+    {       
 
-        programStage = programStageService.getProgramStage( id );
-        
-        programStageDataElements = programStage.getDataElements();
-        
-        dataElements = dataElementService.getAllDataElements();
+        HouseHold houseHold = houseHoldService.getHouseHold( id );       
+
+        members = patientService.getPatientsByHouseHold( houseHold );
 
         return SUCCESS;
     }

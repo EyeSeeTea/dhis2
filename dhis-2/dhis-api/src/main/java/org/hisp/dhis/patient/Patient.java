@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.program.Program;
 
 /**
@@ -69,6 +70,8 @@ public class Patient
     private Set<Address> addresses = new HashSet<Address>();
 
     private Set<Program> programs = new HashSet<Program>();
+    
+    private HouseHold houseHold;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -285,5 +288,15 @@ public class Patient
     public Date getRegistrationDate()
     {
         return registrationDate;
+    }
+    
+    public void setHouseHold( HouseHold houseHold )
+    {
+        this.houseHold = houseHold;
+    }
+    
+    public HouseHold getHouseHold()
+    {
+        return houseHold;
     }
 }

@@ -27,13 +27,8 @@
 
 package org.hisp.dhis.patient.action.household;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.household.HouseHoldService;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -53,13 +48,6 @@ public class UpdateHouseHoldAction
     public void setHouseHoldService( HouseHoldService houseHoldService )
     {
         this.houseHoldService = houseHoldService;
-    }
-
-    private PatientService patientService;
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
     }
 
     // -------------------------------------------------------------------------
@@ -86,14 +74,7 @@ public class UpdateHouseHoldAction
     {
         this.id = id;
     }
-
-    private Collection<String> selectedList = new HashSet<String>();
-
-    public void setSelectedList( Collection<String> selectedList )
-    {
-        this.selectedList = selectedList;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -104,14 +85,7 @@ public class UpdateHouseHoldAction
         HouseHold houseHold = houseHoldService.getHouseHold( id );
 
         houseHold.setLandMark( landMark );
-        houseHold.setAddress( address );
-
-        for ( String id : selectedList )
-        {
-            Patient patient = patientService.getPatient( Integer.parseInt( id ) );
-
-            houseHold.getMembers().add( patient );
-        }
+        houseHold.setAddress( address );       
 
         houseHoldService.updateHouseHold( houseHold );
 

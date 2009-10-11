@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import org.hisp.dhis.household.HouseHold;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -51,17 +52,17 @@ public class DefaultPatientService
     {
         this.patientStore = patientStore;
     }
-    
-    private PatientIdentifierService patientIdentifierService;    
-    
+
+    private PatientIdentifierService patientIdentifierService;
+
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
-    }  
+    }
 
     // -------------------------------------------------------------------------
     // PatientDataValue
-    // -------------------------------------------------------------------------   
+    // -------------------------------------------------------------------------
 
     public int savePatient( Patient patient )
     {
@@ -87,7 +88,7 @@ public class DefaultPatientService
     {
         return patientStore.get( id );
     }
-    
+
     public Collection<Patient> getPatientsByBirthDate( Date birthDate )
     {
         return patientStore.getByBirthDate( birthDate );
@@ -107,18 +108,24 @@ public class DefaultPatientService
     {
         return patientStore.get( isDead );
     }
-    
+
     public Collection<Patient> getPatients( String searchText )
     {
         Collection<Patient> result = new ArrayList<Patient>();
-        
+
         result.addAll( getPatientsByNames( searchText ) );
-        
-        for( PatientIdentifier patientIdentifier : patientIdentifierService.getPatientIdentifiersByIdentifier( searchText ) )
+
+        for ( PatientIdentifier patientIdentifier : patientIdentifierService
+            .getPatientIdentifiersByIdentifier( searchText ) )
         {
             result.add( patientIdentifier.getPatient() );
-        }       
-        
-        return result;        
+        }
+
+        return result;
+    }
+
+    public Collection<Patient> getPatientsByHouseHold( HouseHold houseHold )
+    {
+        return patientStore.getByHouseHold( houseHold );
     }
 }

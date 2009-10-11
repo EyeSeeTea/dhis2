@@ -78,12 +78,7 @@
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
-    </action>    
-    
-    <action name="searchHouseHoldMembers" class="org.hisp.dhis.patient.action.household.SearchHouseHoldMembersAction">      
-      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseMemberList.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>               
-    </action>   
+    </action>      
 	  
 	<!-- Patient -->	
     
@@ -115,12 +110,10 @@
     <action name="getPatient" class="org.hisp.dhis.patient.action.patient.GetPatientAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responsePatient.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
-    </action>
+    </action>   
     
     <action name="removePatient" class="org.hisp.dhis.patient.action.patient.RemovePatientAction">
-      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
-      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>
+      <result name="success" type="redirect">patientform.action</result>      
       <param name="requiredAuthorities">F_PATIENT_DELETE</param>      
     </action>
     
@@ -167,7 +160,7 @@
       <result name="success" type="redirect">patient.action</result>
       <param name="javascripts">javascript/patient.js</param>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>
-    </action>
+    </action>   
     
     <action name="validatePatient"
       class="org.hisp.dhis.patient.action.patient.ValidatePatientAction">
@@ -184,24 +177,19 @@
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>  
+    
+    <action name="getHouseHoldMembers" class="org.hisp.dhis.patient.action.patient.GetHouseHoldMembersAction">      
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseMemberList.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>               
+    </action> 
         
-    <!-- Program -->
+    <!-- Program -->   
     
-    <!--<action name="program" class="org.hisp.dhis.patient.action.program.SelectProgramAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
-      <result name="programform" type="chain">programform</result>
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/selectProgram.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js</param>             
-    </action> -->
-    
-    <action name="program" class="org.hisp.dhis.patient.action.program.GetProgramListAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
+    <action name="program" class="org.hisp.dhis.patient.action.program.GetProgramListAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/programList.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>        
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/program.js</param>            
+      <param name="javascripts">javascript/program.js</param>            
     </action>
     
     <action name="getProgram" class="org.hisp.dhis.patient.action.program.GetProgramAction">
@@ -209,8 +197,7 @@
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
     
-    <action name="removeProgram" class="org.hisp.dhis.patient.action.program.RemoveProgramAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>      
+    <action name="removeProgram" class="org.hisp.dhis.patient.action.program.RemoveProgramAction">            
       <result name="success" type="redirect">program.action</result>      
       <param name="requiredAuthorities">F_PROGRAM_DELETE</param>      
     </action>
@@ -220,26 +207,23 @@
       <param name="requiredAuthorities">F_PROGRAM_ADD</param>
     </action>
     
-    <action name="showAddProgramForm" class="org.hisp.dhis.patient.action.program.ShowAddProgramFormAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
+    <action name="showAddProgramForm" class="org.hisp.dhis.patient.action.program.ShowAddProgramFormAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/addProgramForm.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/program.js</param>
+      <param name="javascripts">javascript/program.js</param>
       <param name="requiredAuthorities">F_PROGRAM_ADD</param>      
     </action>
     
-    <action name="showUpdateProgramForm" class="org.hisp.dhis.patient.action.program.GetProgramAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
+    <action name="showUpdateProgramForm" class="org.hisp.dhis.patient.action.program.GetProgramAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updateProgramForm.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/program.js</param>
+      <param name="javascripts">javascript/program.js</param>
       <param name="requiredAuthorities">F_PROGRAM_UPDATE</param>      
     </action>
     
-    <action name="updateProgram" class="org.hisp.dhis.patient.action.program.UpdateProgramAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
+    <action name="updateProgram" class="org.hisp.dhis.patient.action.program.UpdateProgramAction">      
       <result name="success" type="redirect">program.action</result>
       <param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
     </action>
@@ -251,9 +235,7 @@
       <param name="onExceptionReturn">plainTextError</param>      
     </action> 
     
-    <!-- Program_OrganisationUnit Association -->
-    
-    <!-- DataSet association -->
+    <!-- Program_OrganisationUnit Association -->   
     
     <action name="defineProgramAssociationsForm"
       class="org.hisp.dhis.patient.action.program.SetupAssociationsTreeAction">
@@ -307,21 +289,22 @@
     
     <!-- ProgramStage -->
     
-    <action name="programStage" class="org.hisp.dhis.patient.action.program.GetProgramStageListAction">
+    <action name="programStage" class="org.hisp.dhis.patient.action.programstage.GetProgramStageListAction">
       <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/programStage.vm</param>
+      <param name="page">/dhis-web-maintenance-patient/programStageList.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>
       <param name="javascripts">javascript/programStage.js</param>
     </action>
     
     <action name="getProgramStage"
-      class="org.hisp.dhis.patient.action.program.GetProgramStageAction">
+      class="org.hisp.dhis.patient.action.programstage.GetProgramStageAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseProgramStage.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     
-    <action name="showAddProgramStageForm" class="org.hisp.dhis.patient.action.program.ShowAddProgramStageFormAction">      
-      <result name="success" type="velocity">/main.vm</result>
+    <action name="showAddProgramStageForm" class="org.hisp.dhis.patient.action.programstage.ShowAddProgramStageFormAction">
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>      
+      <result name="success" type="velocity">/main.vm</result>      
       <param name="page">/dhis-web-maintenance-patient/addProgramStageForm.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
       <param name="javascripts">javascript/programStage.js</param>
@@ -329,12 +312,12 @@
     </action>
     
     <action name="addProgramStage"
-      class="org.hisp.dhis.patient.action.program.AddProgramStageAction">
+      class="org.hisp.dhis.patient.action.programstage.AddProgramStageAction">
       <result name="success" type="redirect">programStage.action</result>
       <param name="requiredAuthorities">F_PROGRAMSTAGE_ADD</param>
     </action>     
     
-     <action name="validateProgramStage" class="org.hisp.dhis.patient.action.program.ValidateProgramStageAction">
+     <action name="validateProgramStage" class="org.hisp.dhis.patient.action.programstage.ValidateProgramStageAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
@@ -342,12 +325,12 @@
     </action>
     
     <action name="updateProgramStage"
-      class="org.hisp.dhis.patient.action.program.UpdateProgramStageAction">
+      class="org.hisp.dhis.patient.action.programstage.UpdateProgramStageAction">
       <result name="success" type="redirect">programStage.action</result>
       <param name="requiredAuthorities">F_PROGRAMSTAGE_UPDATE</param>
     </action>   
     
-    <action name="showUpdateProgramStageForm" class="org.hisp.dhis.patient.action.program.GetProgramStageAction">      
+    <action name="showUpdateProgramStageForm" class="org.hisp.dhis.patient.action.programstage.GetProgramStageAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updateProgramStageForm.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
@@ -355,7 +338,7 @@
       <param name="requiredAuthorities">F_PROGRAMSTAGE_UPDATE</param>      
     </action>
     
-    <action name="removeProgramStage" class="org.hisp.dhis.patient.action.program.RemoveProgramStageAction">         
+    <action name="removeProgramStage" class="org.hisp.dhis.patient.action.programstage.RemoveProgramStageAction">         
       <result name="success" type="redirect">programStage.action</result>      
       <param name="requiredAuthorities">F_PROGRAMSTAGE_DELETE</param>      
     </action>

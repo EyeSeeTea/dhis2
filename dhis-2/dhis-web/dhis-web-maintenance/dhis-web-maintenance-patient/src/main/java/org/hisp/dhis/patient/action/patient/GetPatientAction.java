@@ -26,8 +26,11 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
@@ -61,15 +64,22 @@ public class GetPatientAction
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
-    }    
-    
+    }
+
     private ProgramService programService;
-    
+
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
     }
-   
+
+    private HouseHoldService houseHoldService;
+
+    public void setHouseHoldService( HouseHoldService houseHoldService )
+    {
+        this.houseHoldService = houseHoldService;
+    }
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -87,22 +97,35 @@ public class GetPatientAction
     {
         return patient;
     }
-                              
+
+    private Integer age;
+
+    public Integer getAge()
+    {
+        return age;
+    }
+
     private PatientIdentifier patientIdentifier;
-    
+
     public PatientIdentifier getPatientIdentifier()
     {
         return patientIdentifier;
     }
-    
+
     private Collection<Program> programs;
-    
+
     public Collection<Program> getPrograms()
     {
         return programs;
-    } 
-    
-    
+    }
+
+    private Collection<HouseHold> houseHolds = new ArrayList<HouseHold>();
+
+    public Collection<HouseHold> getHouseHolds()
+    {
+        return houseHolds;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -111,15 +134,19 @@ public class GetPatientAction
         throws Exception
     {
 
-        patient = patientService.getPatient( id );  
-        
+        patient = patientService.getPatient( id );
+
+        age = patient.getAge();
+
         patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
-        
+
         programs = programService.getAllPrograms();
-        
+
         programs.removeAll( patient.getPrograms() );
-        
+
+        houseHolds = houseHoldService.getAllHouseHolds();
+
         return SUCCESS;
-        
+
     }
 }

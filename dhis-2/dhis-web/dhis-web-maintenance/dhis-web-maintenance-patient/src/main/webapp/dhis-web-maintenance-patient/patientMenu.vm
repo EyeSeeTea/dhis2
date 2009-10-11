@@ -1,8 +1,8 @@
 
-<h2>$i18n.getString( "patient_register" )&nbsp;</h2>
+<h2>$i18n.getString( "patient_management" )&nbsp;</h2>
 <ul>
-	<li><a href="patient.action">$i18n.getString( "patient_register" )&nbsp;</a></li>		
-	<li><a href="household.action">$i18n.getString( "house_hold_register" )&nbsp;</a></li>
+	<li><a href="patient.action">$i18n.getString( "patient_management" )&nbsp;</a></li>		
+	<li><a href="household.action">$i18n.getString( "household_management" )&nbsp;</a></li>
 </ul>
 
 <br>

@@ -1,4 +1,4 @@
-<h3>$i18n.getString( "house_hold_register" )</h3>
+<h3>$i18n.getString( "household_management" )</h3>
 
 <form id="selectHouseHold" name="selectHouseHold" method="post" action="household.action">
 
