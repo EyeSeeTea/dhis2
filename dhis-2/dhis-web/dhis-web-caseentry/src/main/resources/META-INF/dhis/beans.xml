@@ -68,7 +68,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="programInstanceService"
       ref="org.hisp.dhis.program.ProgramInstanceService"/>
     <property name="patientDataValueService"
-      ref="org.hisp.dhis.patientdatavalue.PatientDataValueService"/>            
+      ref="org.hisp.dhis.patientdatavalue.PatientDataValueService"/>
+     <property name="selectedStateManager"
+      ref="org.hisp.dhis.caseentry.state.SelectedStateManager"/>           
   </bean>
   
   <bean id="org.hisp.dhis.caseentry.action.SaveValueAction"

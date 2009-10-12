@@ -1,5 +1,5 @@
 
-<h2>$i18n.getString( "patient_management" )&nbsp;</h2>
+<a href="index.action"><h2>$i18n.getString( "paitents_and_programs" )</h2></a>
 <ul>
 	<li><a href="patient.action">$i18n.getString( "patient_management" )&nbsp;</a></li>		
 	<li><a href="household.action">$i18n.getString( "household_management" )&nbsp;</a></li>

@@ -10,33 +10,50 @@
 </div>
 
 <table>
-    
+
     <tr>
-        <th>$i18n.getString( "identifier" )</th>
+        <td><strong>$i18n.getString( "identifier" ):</strong></td>
         <td>            
             $encoder.htmlEncode( $patientIdentifier.identifier )
         </td>
     </tr>
     <tr>
-        <th>$i18n.getString( "full_name" )</th>
-        <td>            
-            $encoder.htmlEncode( $patient.firstName ) $encoder.htmlEncode( $patient.middleName ) $encoder.htmlEncode( $patient.lastName )
-        </td>
-    </tr>    
-    <tr>
-        <th>$i18n.getString( "age" )</th>
-        <td>            
-            $age
+        <td><strong>$i18n.getString( "full_name" ):</strong></td>
+        <td>           
+            $encoder.htmlEncode( $patient.firstName ) $encoder.htmlEncode( $patient.middleName ) $encoder.htmlEncode( $patient.lastName )  
         </td>
     </tr>
     <tr>
-        <th>$i18n.getString( "registration_date" )</th>
+        <td><strong>$i18n.getString( "gender" ):</strong></td>
+        <td>            
+            $encoder.htmlEncode( $patient.gender )
+        </td>
+    </tr>    
+    <tr>
+        <td><strong>$i18n.getString( "date_of_birth" ):</strong></td>
+        <td>            
+            $encoder.htmlEncode( $patient.birthDate )
+        </td>
+    </tr>
+    <tr>
+        <td><strong>$i18n.getString( "age" ):</strong></td>
+        <td>            
+            $encoder.htmlEncode( $age )
+        </td>
+    </tr>    
+    <tr>
+        <td><strong>$i18n.getString( "registration_date" ):</strong></td>
         <td>            
             $encoder.htmlEncode( $patient.registrationDate )
         </td>
-    </tr>    
-    
+    </tr> 
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+        
 </table>
+
+
 
 <hr style="clear:both">
 

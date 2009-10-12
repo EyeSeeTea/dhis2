@@ -33,6 +33,12 @@
         </td>
     </tr> 
     <tr>
+        <td><strong>$i18n.getString( "registration_date" ):</strong></td>
+        <td>            
+            $encoder.htmlEncode( $patient.registrationDate )
+        </td>
+    </tr>
+    <tr>
         <td>&nbsp;</td>
     </tr>
         

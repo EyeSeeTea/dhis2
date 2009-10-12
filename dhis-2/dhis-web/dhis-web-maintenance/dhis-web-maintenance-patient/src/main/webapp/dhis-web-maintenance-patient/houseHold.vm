@@ -1,6 +1,8 @@
 
 #parse( "/dhis-web-maintenance-patient/selectHouseHold.vm" )
 
+#if( $houseHolds.size() > 0 )
+
 <table class="mainPageTable">
   <tr>
     <td style="vertical-align:top">
@@ -67,6 +69,8 @@
 		</td>
   </tr>
 </table>
+
+#end
 
 <script type="text/javascript">
 	var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete_house_hold" ) , "'" )';

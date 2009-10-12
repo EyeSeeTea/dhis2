@@ -215,7 +215,7 @@ public class DataEntryAction
         throws Exception
     {
 
-        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
+        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();        
 
         patient = patientService.getPatient( id );
 

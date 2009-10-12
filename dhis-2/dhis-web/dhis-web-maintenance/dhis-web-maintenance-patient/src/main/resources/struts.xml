@@ -343,5 +343,18 @@
       <param name="requiredAuthorities">F_PROGRAMSTAGE_DELETE</param>      
     </action>
     
+    <action name="showSortProgramStageForm" class="org.hisp.dhis.patient.action.programstage.ShowSortProgramStageFormAction">
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>      
+      <result name="success" type="velocity">/main.vm</result>      
+      <param name="page">/dhis-web-maintenance-patient/sortProgramStageForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
+      <param name="javascripts">javascript/programStage.js</param>
+      <param name="requiredAuthorities">F_PROGRAMSTAGE_ADD</param>      
+    </action>
+    
+    <action name="saveProgramStageSortOder" class="org.hisp.dhis.patient.action.programstage.SaveProgramStageSortOrderAction">            
+      <result name="success" type="redirect">programStage.action</result>           
+    </action>
+    
   </package>
 </struts>

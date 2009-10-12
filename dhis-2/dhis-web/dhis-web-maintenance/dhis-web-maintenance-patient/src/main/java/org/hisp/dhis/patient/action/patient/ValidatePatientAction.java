@@ -115,10 +115,10 @@ public class ValidatePatientAction
     // -------------------------------------------------------------------------
 
     public String execute()
-    {        
+    {
 
         Date dateOfBirth;
-        
+
         if ( selectionManager.getSelectedOrganisationUnit() == null )
         {
             message = i18n.getString( "please_select_a_registering_unit" );
@@ -126,7 +126,7 @@ public class ValidatePatientAction
             return INPUT;
         }
 
-        if ( firstName == null || middleName == null || lastName == null )
+        if ( firstName == null && middleName == null && lastName == null )
         {
             message = i18n.getString( "specfiy_name_s" );
 
@@ -139,7 +139,7 @@ public class ValidatePatientAction
             middleName = middleName.trim();
             lastName = lastName.trim();
 
-            if ( firstName.length() == 0 || middleName.length() == 0 || lastName.length() == 0 )
+            if ( firstName.length() == 0 && middleName.length() == 0 && lastName.length() == 0 )
             {
                 message = i18n.getString( "specfiy_name_s" );
 
@@ -147,29 +147,21 @@ public class ValidatePatientAction
             }
         }
 
-        if ( birthDate == null )
+        if ( birthDate != null )
         {
-            message = i18n.getString( "specify_date_of_birth" );
+            birthDate = birthDate.trim();
 
-            return INPUT;
-        }
+            if ( birthDate.length() != 0 )
+            {
+                dateOfBirth = format.parseDate( birthDate );
 
-        birthDate = birthDate.trim();
+                if ( dateOfBirth == null || dateOfBirth.after( new Date() ) )
+                {
+                    message = i18n.getString( "please_enter_a_valid_birth_date" );
 
-        if ( birthDate.length() == 0 )
-        {
-            message = i18n.getString( "please_enter_a_valid_birth_date" );
-
-            return INPUT;
-        }
-
-        dateOfBirth = format.parseDate( birthDate );
-
-        if ( dateOfBirth == null || dateOfBirth.after( new Date() ) )
-        {
-            message = i18n.getString( "please_enter_a_valid_birth_date" );
-
-            return INPUT;
+                    return INPUT;
+                }
+            }
         }
 
         // ---------------------------------------------------------------------

@@ -29,6 +29,7 @@ package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.program.Program;
@@ -47,7 +48,7 @@ public class HibernateProgramStageStore
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramStage> get( Program program )
     {
-        return getCriteria( Restrictions.eq( "program", program ) ).list();
+        return getCriteria( Restrictions.eq( "program", program ) ).addOrder( Order.asc( "stageInProgram" ) ).list();
     }
 
 }

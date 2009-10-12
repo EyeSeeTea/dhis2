@@ -1,7 +1,7 @@
 
 function organisationUnitSelected( orgUnits )
 {	
-    window.location.href = 'household.action';
+    window.location.href = 'householdform.action';
 }
 
 selection.setListenerFunction( organisationUnitSelected );

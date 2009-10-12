@@ -27,7 +27,10 @@
 
 package org.hisp.dhis.patient.action.programstage;
 
-import org.hisp.dhis.i18n.I18n;
+import java.util.List;
+
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -35,8 +38,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-
-public class ValidateProgramStageAction
+public class SaveProgramStageSortOrderAction
     implements Action
 {
 
@@ -44,91 +46,41 @@ public class ValidateProgramStageAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
+    private ProgramStageService programStageService;
 
-    private String nameField;
-
-    public void setNameField( String nameField )
+    public void setProgramStageService( ProgramStageService programStageService )
     {
-        this.nameField = nameField;
+        this.programStageService = programStageService;
     }
 
-    private String description;
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
-    public void setDescription( String description )
+    private List<String> programStageList;
+
+    public void setprogramStageList( List<String> programStageList )
     {
-        this.description = description;
-    }    
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
+        this.programStageList = programStageList;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
     public String execute()
-        throws Exception
     {
 
-        if ( nameField == null )
+        int stageInProgram = 1;
+
+        for ( String id : programStageList )
         {
-            message = i18n.getString( "please_specify_a_name" );
+            ProgramStage programStage = programStageService.getProgramStage( Integer.parseInt( id ) );
 
-            return INPUT;
+            programStage.setStageInProgram( stageInProgram++ );
+
+            programStageService.updateProgramStage( programStage );
         }
-
-        else
-        {
-            nameField = nameField.trim();
-
-            if ( nameField.length() == 0 )
-            {
-                message = i18n.getString( "please_specify_a_name" );
-
-                return INPUT;
-            }
-        }
-
-        if ( description == null )
-        {
-            message = i18n.getString( "please_specify_a_description" );
-
-            return INPUT;
-        }
-
-        else
-        {
-            description = description.trim();
-
-            if ( description.length() == 0 )
-            {
-                message = i18n.getString( "please_specify_a_description" );
-
-                return INPUT;
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Validation success
-        // ---------------------------------------------------------------------
-
-        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
-
     }
 }

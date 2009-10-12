@@ -88,23 +88,16 @@ public class UpdateProgramStageAction
         this.description = description;
     }
 
-    private String stageInProgram;
+    private Integer minDaysFromStart;
 
-    public void setStageInProgram( String stageInProgram )
-    {
-        this.stageInProgram = stageInProgram;
-    }
-
-    private String minDaysFromStart;
-
-    public void setMinDaysFromStart( String minDaysFromStart )
+    public void setMinDaysFromStart( Integer minDaysFromStart )
     {
         this.minDaysFromStart = minDaysFromStart;
     }
 
-    private String maxDaysFromStart;
+    private Integer maxDaysFromStart;
 
-    public void setMaxDaysFromStart( String maxDaysFromStart )
+    public void setMaxDaysFromStart( Integer maxDaysFromStart )
     {
         this.maxDaysFromStart = maxDaysFromStart;
     }
@@ -127,9 +120,16 @@ public class UpdateProgramStageAction
 
         programStage.setName( nameField );
         programStage.setDescription( description );
-        programStage.setStageInProgram( Integer.parseInt( stageInProgram ) );
-        programStage.setMinDaysFromStart( Integer.parseInt( minDaysFromStart ) );
-        programStage.setMaxDaysFromStart( Integer.parseInt( maxDaysFromStart ) );
+
+        if ( minDaysFromStart == null )
+        {
+            minDaysFromStart = 0;
+        }
+
+        if ( maxDaysFromStart == null )
+        {
+            maxDaysFromStart = 0;
+        }
 
         Set<DataElement> dataElements = new HashSet<DataElement>();
 
@@ -139,6 +139,9 @@ public class UpdateProgramStageAction
 
             dataElements.add( dataElement );
         }
+        
+        programStage.setMinDaysFromStart( minDaysFromStart.intValue() );
+        programStage.setMaxDaysFromStart( maxDaysFromStart.intValue() );
 
         programStage.setDataElements( dataElements );
 

@@ -27,7 +27,14 @@
 
 package org.hisp.dhis.patient.action.programstage;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -35,8 +42,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-
-public class ValidateProgramStageAction
+public class ShowSortProgramStageFormAction
     implements Action
 {
 
@@ -44,23 +50,54 @@ public class ValidateProgramStageAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
+    private ProgramStageService programStageService;
+
+    public void setProgramStageService( ProgramStageService programStageService )
+    {
+        this.programStageService = programStageService;
+    }
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private String nameField;
+    private Integer id;
 
-    public void setNameField( String nameField )
+    public Integer getId()
     {
-        this.nameField = nameField;
+        return id;
     }
 
-    private String description;
-
-    public void setDescription( String description )
+    public void setId( Integer id )
     {
-        this.description = description;
-    }    
+        this.id = id;
+    }
+
+    private Program program;
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    public void setProgram( Program program )
+    {
+        this.program = program;
+    }
+
+    private Collection<ProgramStage> programStages = new ArrayList<ProgramStage>();
+
+    public Collection<ProgramStage> getProgramStages()
+    {
+        return programStages;
+    }
 
     private String message;
 
@@ -81,54 +118,19 @@ public class ValidateProgramStageAction
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
 
-        if ( nameField == null )
+        if ( id == null )
         {
-            message = i18n.getString( "please_specify_a_name" );
+            message = i18n.getString( "please_select_program" );
 
             return INPUT;
         }
 
-        else
-        {
-            nameField = nameField.trim();
+        program = programService.getProgram( id.intValue() );
 
-            if ( nameField.length() == 0 )
-            {
-                message = i18n.getString( "please_specify_a_name" );
-
-                return INPUT;
-            }
-        }
-
-        if ( description == null )
-        {
-            message = i18n.getString( "please_specify_a_description" );
-
-            return INPUT;
-        }
-
-        else
-        {
-            description = description.trim();
-
-            if ( description.length() == 0 )
-            {
-                message = i18n.getString( "please_specify_a_description" );
-
-                return INPUT;
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Validation success
-        // ---------------------------------------------------------------------
-
-        message = i18n.getString( "everything_is_ok" );
+        programStages = programStageService.getProgramStagesByProgram( program );
 
         return SUCCESS;
-
     }
 }

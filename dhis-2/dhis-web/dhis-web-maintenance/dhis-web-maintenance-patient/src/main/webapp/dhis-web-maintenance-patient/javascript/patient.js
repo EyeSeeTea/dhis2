@@ -1,7 +1,7 @@
 
 function organisationUnitSelected( orgUnits )
 {	
-    window.location.href = 'patient.action';
+    window.location.href = 'patientform.action';
 }
 
 selection.setListenerFunction( organisationUnitSelected );

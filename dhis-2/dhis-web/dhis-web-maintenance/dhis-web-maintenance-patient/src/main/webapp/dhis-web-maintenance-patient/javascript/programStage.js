@@ -29,6 +29,20 @@ function addProgramStage()
 	}
 }
 
+function showSortProgramStage()
+{
+	var programId = document.getElementById('id').value;
+	
+	if( programId == "null"  || programId == "" )
+	{
+		window.alert( i18n_please_select_program );
+	}
+	else
+	{
+		window.location.href="showSortProgramStageForm.action?id=" + programId;
+	}
+}
+
 
 //-----------------------------------------------------------------------------
 // Move members
@@ -89,7 +103,47 @@ function selectAll( list )
 	}
 }
 
+
+function moveUp( listId ) 
+{
 	
+	var withInList = document.getElementById( listId ); 
+	  
+	var index = withInList.selectedIndex;
+	  
+	if ( index == -1 ) { return; } 
+	  
+	if( index - 1 < 0 ) { return; }//window.alert( 'Item cant be moved up');        
+	  
+	var option = new Option( withInList.options[index].text, withInList.options[index].value); 
+	var temp = new Option( withInList.options[index-1].text, withInList.options[index-1].value);
+	  
+	withInList.options[index-1] = option;
+	withInList.options[index-1].selected = true;
+	withInList.options[index] = temp;  
+
+}
+
+function moveDown( listId ) 
+{
+	var withInList = document.getElementById( listId ); 
+	  
+	var index = withInList.selectedIndex;
+	  
+	if ( index == -1 ) { return; } 
+	  
+	if( index + 1 == withInList.options.length ) { return; }//window.alert( 'Item cant be moved down');   
+	    
+	var option = new Option( withInList.options[index].text, withInList.options[index].value); 
+	var temp = new Option( withInList.options[index+1].text, withInList.options[index+1].value);
+	  
+	withInList.options[index+1] = option;
+	withInList.options[index+1].selected = true;
+	withInList.options[index] = temp; 
+	  
+}
+
+
 // -----------------------------------------------------------------------------
 // View details
 // -----------------------------------------------------------------------------
@@ -154,19 +208,66 @@ function removeProgramStageCompleted( messageElement )
 // -----------------------------------------------------------------------------
 
 function validateAddProgramStage()
-{
+{	
+	var minDaysFromStartField = document.getElementById( 'minDaysFromStart' );
 	
-	if( !isInt( getFieldValue( 'stageInProgram' ) ) )//|| !isInt( getFieldValue( 'minDaysFromStart' ) ) || !isInt( getFieldValue( 'maxDaysFromStart' ) ) )
+	if( !isInt( minDaysFromStartField.value ) )
 	{
 		window.alert( i18n_value_must_integer );
+		minDaysFromStartField.select();
+		minDaysFromStartField.focus();
 		
 		return false;
-	}	
+	}
+	
+	if( isInt( minDaysFromStartField.value ) )
+	{
+		if( minDaysFromStartField.value < 0 )
+		{
+			window.alert( i18n_value_must_positive );
+			minDaysFromStartField.select();
+			minDaysFromStartField.focus();
+			
+			return false;
+		}		
+	}
+	
+	var maxDaysFromStartField = document.getElementById( 'maxDaysFromStart' );
+	
+	if( !isInt( maxDaysFromStartField.value ) )
+	{
+		window.alert( i18n_value_must_integer );
+		maxDaysFromStartField.select();
+		maxDaysFromStartField.focus();
+		
+		return false;
+	}
+	
+	if( isInt( maxDaysFromStartField.value ) )
+	{
+		if( maxDaysFromStartField.value < 0 )
+		{
+			window.alert( i18n_value_must_positive );
+			maxDaysFromStartField.select();
+			maxDaysFromStartField.focus();
+			
+			return false;
+		}		
+	}
+	
+	if( maxDaysFromStartField.value < minDaysFromStartField.value )
+	{
+		window.alert( i18n_invalid_min_max_days );
+		
+		minDaysFromStartField.focus();
+		maxDaysFromStartField.focus();
+		
+		return false;
+	}
 	
 	var url = 'validateProgramStage.action?' +
 		'nameField=' + getFieldValue( 'nameField' ) +			
-		'&description=' + getFieldValue( 'description' ) +	                
-		'&stageInProgram=' + getFieldValue( 'stageInProgram' ) +
+		'&description=' + getFieldValue( 'description' ) +		
 		'&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' ) +	                
 		'&maxDaysFromStart=' + getFieldValue( 'maxDaysFromStart' );
 
@@ -206,11 +307,66 @@ function addValidationCompleted( messageElement )
 function validateUpdateProgramStage()
 {
 	
+	var minDaysFromStartField = document.getElementById( 'minDaysFromStart' );
+	
+	if( !isInt( minDaysFromStartField.value ) )
+	{
+		window.alert( i18n_value_must_integer );
+		minDaysFromStartField.select();
+		minDaysFromStartField.focus();
+		
+		return false;
+	}
+	
+	if( isInt( minDaysFromStartField.value ) )
+	{
+		if( minDaysFromStartField.value < 0 )
+		{
+			window.alert( i18n_value_must_positive );
+			minDaysFromStartField.select();
+			minDaysFromStartField.focus();
+			
+			return false;
+		}		
+	}
+	
+	var maxDaysFromStartField = document.getElementById( 'maxDaysFromStart' );
+	
+	if( !isInt( maxDaysFromStartField.value ) )
+	{
+		window.alert( i18n_value_must_integer );
+		maxDaysFromStartField.select();
+		maxDaysFromStartField.focus();
+		
+		return false;
+	}
+	
+	if( isInt( maxDaysFromStartField.value ) )
+	{
+		if( maxDaysFromStartField.value < 0 )
+		{
+			window.alert( i18n_value_must_positive );
+			maxDaysFromStartField.select();
+			maxDaysFromStartField.focus();
+			
+			return false;
+		}		
+	}
+	
+	if( maxDaysFromStartField.value < minDaysFromStartField.value )
+	{
+		window.alert( i18n_invalid_min_max_days );
+		
+		minDaysFromStartField.focus();
+		maxDaysFromStartField.focus();
+		
+		return false;
+	}
+	
     var url = 'validateProgramStage.action?' + 
     		'id=' + getFieldValue( 'id' ) +
     		'&nameField=' + getFieldValue( 'nameField' ) +			
-	        '&description=' + getFieldValue( 'description' ) +	                
-	        '&stageInProgram=' + getFieldValue( 'stageInProgram' ) +
+	        '&description=' + getFieldValue( 'description' ) +	        
 	        '&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' ) +	                
 	        '&maxDaysFromStart=' + getFieldValue( 'maxDaysFromStart' );
 	
