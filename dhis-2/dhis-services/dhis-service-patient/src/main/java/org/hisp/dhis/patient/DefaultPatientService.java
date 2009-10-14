@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -111,21 +112,48 @@ public class DefaultPatientService
 
     public Collection<Patient> getPatients( String searchText )
     {
-        Collection<Patient> result = new ArrayList<Patient>();
+        Collection<Patient> patients = new ArrayList<Patient>();
 
-        result.addAll( getPatientsByNames( searchText ) );
+        patients.addAll( getPatientsByNames( searchText ) );
 
         for ( PatientIdentifier patientIdentifier : patientIdentifierService
             .getPatientIdentifiersByIdentifier( searchText ) )
         {
-            result.add( patientIdentifier.getPatient() );
+            patients.add( patientIdentifier.getPatient() );
         }
 
-        return result;
+        return patients;
     }
 
     public Collection<Patient> getPatientsByHouseHold( HouseHold houseHold )
     {
         return patientStore.getByHouseHold( houseHold );
+    }
+
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText )
+    {
+        Collection<Patient> patients = new ArrayList<Patient>();
+               
+        Collection<Patient> allPatients = getPatients( searchText );
+        
+        if( allPatients.retainAll( getPatientsByOrgUnit( organisationUnit ) ) )
+        {
+            patients = allPatients;
+        }
+        
+        return patients;
+    }
+
+    public Collection<Patient> getPatientsByOrgUnit( OrganisationUnit organisationUnit )
+    {
+        Collection<Patient> patients = new ArrayList<Patient>();
+
+        for ( PatientIdentifier patientIdentifier : patientIdentifierService
+            .getPatientIdentifiersByOrgUnit( organisationUnit ) )
+        {
+            patients.add( patientIdentifier.getPatient() );
+        }        
+        
+        return patients;
     }
 }

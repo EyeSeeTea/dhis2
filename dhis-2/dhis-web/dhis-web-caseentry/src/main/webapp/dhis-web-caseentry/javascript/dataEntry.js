@@ -136,13 +136,17 @@ function ValueSaver( dataElementId_, value_, resultColor_, selectedOption_ )
  
 	function markValue( color )
 	{
-		var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerText;       
+		var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML;       
      
 		var element;
      
 		if ( type == 'bool' )
 		{
 			element = document.getElementById( 'value[' + dataElementId + '].boolean' );
+		}		
+		else if( type == 'date' )
+		{
+			element = document.getElementById( 'value[' + dataElementId + '].date' );
 		}		
 		else if( selectedOption )
 		{

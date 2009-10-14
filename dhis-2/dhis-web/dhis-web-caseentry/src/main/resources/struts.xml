@@ -56,7 +56,8 @@
       <param name="page">/dhis-web-caseentry/dataRecordingSelect.vm</param>
       <param name="menu">/dhis-web-caseentry/menu.vm</param>      
       <param name="menuTreeHeight">420</param>  
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>            
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>
+      <param name="stylesheets">style/patient.css</param>            
     </action>    
     
     <action name="dataentryform" class="org.hisp.dhis.caseentry.action.DataEntryAction">
@@ -65,6 +66,7 @@
       <param name="menu">/dhis-web-caseentry/menu.vm</param>      
       <param name="menuTreeHeight">420</param>  
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js</param>
+      <param name="stylesheets">style/patient.css</param>
     </action>
     
     <action name="saveValue" class="org.hisp.dhis.caseentry.action.SaveValueAction">

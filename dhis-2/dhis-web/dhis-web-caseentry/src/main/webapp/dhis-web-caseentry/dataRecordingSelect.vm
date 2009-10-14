@@ -1,59 +1,45 @@
 <h3>$i18n.getString( "name_based_data_entry" )</h3>
 
-
-<br>
-
 <form id="selectRecordingForm" name="selectRecordingForm" method="post" action="selectDataRecording.action">
 
 <div>
     <input type="hidden" id="id" name="id" value="$patient.id">
 </div>
 
+
+<div id="patientInfo">
 <table>
-
     <tr>
-        <td><strong>$i18n.getString( "identifier" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $patientIdentifier.identifier )
-        </td>
+        <td colspan="2">$i18n.getString( "identifier" ):</td>
+        <td colspan="2">$encoder.htmlEncode( $patientIdentifier.identifier )</td>   
+        <td colspan="2">$i18n.getString( "registration_date" ):</td>
+        <td colspan="2">$format.formatDate( $patient.registrationDate )</td>
     </tr>
-    <tr>
-        <td><strong>$i18n.getString( "full_name" ):</strong></td>
-        <td>           
-            $encoder.htmlEncode( $patient.firstName ) $encoder.htmlEncode( $patient.middleName ) $encoder.htmlEncode( $patient.lastName )  
-        </td>
+    <tr>      
+        <td>$i18n.getString( "full_name" ):</td>
+        <td>$encoder.htmlEncode( $patient.firstName ) $encoder.htmlEncode( $patient.middleName ) $encoder.htmlEncode( $patient.lastName )</td>
+        <td>$i18n.getString( "gender" ):</td>
+        <td>$encoder.htmlEncode( $patient.gender )</td>   
+        <td>$i18n.getString( "age" ):</td>
+        <td>$encoder.htmlEncode( $age )</td>
+        <td>$i18n.getString( "date_of_birth" ):</td>
+        <td>$format.formatDate( $patient.birthDate )</td>
+    </tr>       
+    <tr>      
+        <td colspan="8">$i18n.getString( "address" )</td>        
     </tr>
-    <tr>
-        <td><strong>$i18n.getString( "gender" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $patient.gender )
-        </td>
-    </tr>    
-    <tr>
-        <td><strong>$i18n.getString( "date_of_birth" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $patient.birthDate )
-        </td>
-    </tr>
-    <tr>
-        <td><strong>$i18n.getString( "age" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $age )
-        </td>
-    </tr>    
-    <tr>
-        <td><strong>$i18n.getString( "registration_date" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $patient.registrationDate )
-        </td>
-    </tr> 
-    <tr>
-        <td>&nbsp;</td>
-    </tr>
-        
+    <tr>      
+        <td>$i18n.getString( "village" ):</td>
+        <td></td>
+        <td>$i18n.getString( "sub_center" ):</td>
+        <td></td>
+        <td>$i18n.getString( "block" ):</td>
+        <td></td>
+        <td>$i18n.getString( "district" ):</td>
+        <td></td>
+    </tr>        
 </table>
-
-
+</div>
 
 <hr style="clear:both">
 

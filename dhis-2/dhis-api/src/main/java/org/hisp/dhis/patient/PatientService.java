@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.hisp.dhis.household.HouseHold;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -48,9 +49,7 @@ public interface PatientService
 
     Patient getPatient( int id );
 
-    Collection<Patient> getAllPatients();
-    
-    Collection<Patient> getPatientsByHouseHold( HouseHold houseHold );
+    Collection<Patient> getAllPatients();    
 
     Collection<Patient> getAllPatients( Boolean isDead );
 
@@ -61,4 +60,10 @@ public interface PatientService
     Collection<Patient> getPatientsByNames( String name );
     
     Collection<Patient> getPatients( String searchText );
+    
+    Collection<Patient> getPatientsByHouseHold( HouseHold houseHold );
+    
+    Collection<Patient> getPatientsByOrgUnit( OrganisationUnit organisationUnit );
+    
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText );
 }

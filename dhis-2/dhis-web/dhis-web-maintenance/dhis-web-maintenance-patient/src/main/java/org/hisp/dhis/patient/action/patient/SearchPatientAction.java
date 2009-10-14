@@ -104,9 +104,9 @@ public class SearchPatientAction
         // Validate selected OrganisationUnit
         // ---------------------------------------------------------------------
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();        
         
-        patients = patientService.getPatients( searchText );
+        patients = patientService.getPatients( organisationUnit, searchText );
 
         return SUCCESS;
     }
