@@ -72,6 +72,13 @@ public class GetHouseHoldListAction
     {
         return houseHolds;
     }
+    
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -80,7 +87,7 @@ public class GetHouseHoldListAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         houseHolds = houseHoldService.getHouseHoldsForOrgUnit( organisationUnit );       
 

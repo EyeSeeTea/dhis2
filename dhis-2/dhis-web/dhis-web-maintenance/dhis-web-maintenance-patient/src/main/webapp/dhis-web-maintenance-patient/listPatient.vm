@@ -9,8 +9,6 @@
 	</tr>	
 </table>
  
-#if( $patients.size() > 0 )
-
 <table class="mainPageTable">
   	
   <tr>
@@ -110,14 +108,6 @@
 		</td>
   </tr>
 </table>
-
-#else
-    <p>
-        $i18n.getString( "no_matching_found" )
-        <input type="button" value="$i18n.getString( "back" )" onclick="window.location.href='patient.action'">
-    </p>
-#end
-   
 
 <script type="text/javascript">
 	var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete_patient" ) , "'" )';

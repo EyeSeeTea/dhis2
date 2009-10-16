@@ -73,6 +73,13 @@ public class GetPatientListAction
     {
         return patientIdentifiers;
     }
+    
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
 
     // -------------------------------------------------------------------------
     // Input
@@ -85,7 +92,7 @@ public class GetPatientListAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         patientIdentifiers = patientIdentifierService.getPatientIdentifiersByOrgUnit( organisationUnit );
 

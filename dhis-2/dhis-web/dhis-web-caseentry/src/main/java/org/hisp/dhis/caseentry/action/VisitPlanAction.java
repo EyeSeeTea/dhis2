@@ -25,25 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patient;
-
-import java.util.ArrayList;
-import java.util.Collection;
+package org.hisp.dhis.caseentry.action;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
- */             
-public class SearchPatientAction
+ */
+public class VisitPlanAction
     implements Action
 {
+    private static final String VISIT_PLAN = "visitplan";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -54,13 +50,6 @@ public class SearchPatientAction
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
-    }
-    
-    private PatientService patientService;
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
     }
 
     // -------------------------------------------------------------------------
@@ -74,25 +63,6 @@ public class SearchPatientAction
         return organisationUnit;
     }
 
-    private String searchText;
-
-    public void setSearchText( String searchText )
-    {
-        this.searchText = searchText;
-    }
-
-    public String getSearchText()
-    {
-        return searchText;
-    }
-
-    private Collection<Patient> patients = new ArrayList<Patient>();
-
-    public Collection<Patient> getPatients()
-    {
-        return patients;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -104,10 +74,13 @@ public class SearchPatientAction
         // Validate selected OrganisationUnit
         // ---------------------------------------------------------------------
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();        
-        
-        patients = patientService.getPatients( searchText );
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        return SUCCESS;
+        if ( organisationUnit == null )
+        {
+            return SUCCESS;
+        }
+
+        return VISIT_PLAN;
     }
 }

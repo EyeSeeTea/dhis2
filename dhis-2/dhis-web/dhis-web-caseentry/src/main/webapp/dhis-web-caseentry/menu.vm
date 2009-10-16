@@ -1,2 +1,12 @@
+
+<h2>$i18n.getString( "data_entry_and_visit_plans" )&nbsp;</h2>
+<ul>
+    <li><a href="index.action">$i18n.getString( "name_based_data_entry" )</a></li>     
+    <li><a href="visitPlanSelect.action">$i18n.getString( "visit_plan" )</a></li>
+</ul>
+
+
 <br>
 #parse( "/dhis-web-commons/ouwt/orgunittree.vm" )
+
+

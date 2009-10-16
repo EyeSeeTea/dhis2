@@ -1,6 +1,6 @@
 
 function organisationUnitSelected( orgUnits )
-{	
+{
     window.location.href = 'householdform.action';
 }
 

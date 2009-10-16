@@ -1,0 +1,10 @@
+#parse( "/dhis-web-caseentry/visitPlanSelect.vm" )
+
+<table class="mainPageTable">
+    
+    <tr>
+        <td>List of Visit Plans. Coming soon......</td>       
+    </tr>
+    
+    
+</table>
