@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.categoryoption;
+package org.hisp.dhis.dataelement;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,52 +27,48 @@ package org.hisp.dhis.dd.action.categoryoption;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import java.util.Iterator;
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Abyot Asalefew
+ * @author Lars Helge Overland
  * @version $Id$
  */
-public class AddDataElementCategoryOptionAction
-    implements Action
+public class DataElementCategoryOptionDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementCategoryService dataElementCategoryService;
+    private DataElementCategoryService categoryService;
 
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        this.dataElementCategoryService = dataElementCategoryService;
+        this.categoryService = categoryService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private String name;
-
-    public void setName( String name )
+    @Override
+    public String getClassName()
     {
-        this.name = name;
+        return DataElementCategoryOption.class.getSimpleName();
     }
     
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    @Override
+    public void deleteDataElementCategory( DataElementCategory category )
     {
-        DataElementCategoryOption dataElementCategoryOption = new DataElementCategoryOption();
-
-        dataElementCategoryOption.setName( name );
-
-        dataElementCategoryService.addDataElementCategoryOption( dataElementCategoryOption );
-
-        return SUCCESS;
+        Iterator<DataElementCategoryOption> iterator = category.getCategoryOptions().iterator();
+        
+        while ( iterator.hasNext() )
+        {
+            DataElementCategoryOption categoryOption = iterator.next();
+            iterator.remove();
+            categoryService.deleteDataElementCategoryOption( categoryOption );            
+        }
     }
 }
