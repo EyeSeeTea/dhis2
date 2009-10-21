@@ -30,40 +30,61 @@ package org.hisp.dhis.dataelement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hisp.dhis.common.Dimension;
 import org.hisp.dhis.common.DimensionOption;
 import org.hisp.dhis.common.IdentifiableObject;
 
 /**
- * @author Abyot Asalefew
- * @version $Id$
+ * DataElementGroupSet is a set of DataElementGroups. It is by default exclusive,
+ * in the sense that a DataElement can only be a member of one or zero of the 
+ * DataElementGroups in a DataElementGroupSet.
+ * 
+ * @author Lars Helge Overland
  */
-public class DataElementCategoryOption
-    extends IdentifiableObject implements DimensionOption
+public class DataElementGroupSet
+    extends IdentifiableObject
+    implements Dimension
 {
-    public static final String DEFAULT_NAME = "default";
-    
-    private DataElementCategory category;
-    
-    private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
-    
+    private List<DataElementGroup> members = new ArrayList<DataElementGroup>();
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public DataElementCategoryOption()
-    {
+    public DataElementGroupSet()
+    {   
     }
     
-    /**
-     * @param name the name.
-     */
-    public DataElementCategoryOption( String name )
+    public DataElementGroupSet( String name )
     {
-    	this.name = name;
+        this.name = name;
+    }
+
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public List<? extends DimensionOption> getDimensionOptions()
+    {
+        return members;
+    }
+    
+    public DimensionOption getDimensionOption( Object object )
+    {
+        for ( DataElementGroup group : members )
+        {
+            System.out.println( "group: " + group + " object " + object );
+            if ( group.getMembers().contains( object ) )
+            {
+                return group;
+            }
+        }
+        
+        return null;
     }
     
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
+    // equals and hashCode
     // -------------------------------------------------------------------------
 
     @Override
@@ -73,24 +94,24 @@ public class DataElementCategoryOption
     }
 
     @Override
-    public boolean equals( Object object )
+    public boolean equals( Object o )
     {
-        if ( this == object )
+        if ( this == o )
         {
             return true;
         }
-        
-        if ( object == null )
+
+        if ( o == null )
         {
             return false;
         }
-        
-        if ( getClass() != object.getClass() )
+
+        if ( !( o instanceof DataElementGroupSet ) )
         {
             return false;
         }
-        
-        final DataElementCategoryOption other = (DataElementCategoryOption) object;
+
+        final DataElementGroupSet other = (DataElementGroupSet) o;
 
         return name.equals( other.getName() );
     }
@@ -105,29 +126,13 @@ public class DataElementCategoryOption
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @Override
-    public String getShortName()
+    public List<DataElementGroup> getMembers()
     {
-        return name;
-    }
-    
-    public DataElementCategory getCategory()
-    {
-        return category;
+        return members;
     }
 
-    public void setCategory( DataElementCategory category )
+    public void setMembers( List<DataElementGroup> members )
     {
-        this.category = category;
-    }
-
-    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
-    {
-        return categoryOptionCombos;
-    }
-
-    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        this.categoryOptionCombos = categoryOptionCombos;
-    }
+        this.members = members;
+    }    
 }

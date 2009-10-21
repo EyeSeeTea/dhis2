@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement;
+package org.hisp.dhis.indicator;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -30,40 +30,38 @@ package org.hisp.dhis.dataelement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hisp.dhis.common.Dimension;
 import org.hisp.dhis.common.DimensionOption;
 import org.hisp.dhis.common.IdentifiableObject;
 
 /**
- * @author Abyot Asalefew
- * @version $Id$
+ * An IndicatorGroupSet is a set of IndicatorGroups. It is by default exclusive,
+ * in the sense that an Indicator can only be a member of one or zero of the
+ * IndicatorGroups in a IndicatorGroupSet. 
+ * 
+ * @author Lars Helge Overland
  */
-public class DataElementCategoryOption
-    extends IdentifiableObject implements DimensionOption
+public class IndicatorGroupSet
+    extends IdentifiableObject
+    implements Dimension
 {
-    public static final String DEFAULT_NAME = "default";
-    
-    private DataElementCategory category;
-    
-    private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
-    
+    private List<IndicatorGroup> members = new ArrayList<IndicatorGroup>();
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public DataElementCategoryOption()
-    {
+    public IndicatorGroupSet()
+    {   
     }
-    
-    /**
-     * @param name the name.
-     */
-    public DataElementCategoryOption( String name )
+
+    public IndicatorGroupSet( String name )
     {
-    	this.name = name;
+        this.name = name;
     }
-    
+
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
+    // equals and hashCode
     // -------------------------------------------------------------------------
 
     @Override
@@ -73,24 +71,24 @@ public class DataElementCategoryOption
     }
 
     @Override
-    public boolean equals( Object object )
+    public boolean equals( Object o )
     {
-        if ( this == object )
+        if ( this == o )
         {
             return true;
         }
-        
-        if ( object == null )
+
+        if ( o == null )
         {
             return false;
         }
-        
-        if ( getClass() != object.getClass() )
+
+        if ( !( o instanceof IndicatorGroupSet ) )
         {
             return false;
         }
-        
-        final DataElementCategoryOption other = (DataElementCategoryOption) object;
+
+        final IndicatorGroupSet other = (IndicatorGroupSet) o;
 
         return name.equals( other.getName() );
     }
@@ -102,32 +100,38 @@ public class DataElementCategoryOption
     }
 
     // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public List<? extends DimensionOption> getDimensionOptions()
+    {
+        return members;
+    }
+    
+    public DimensionOption getDimensionOption( Object object )
+    {        
+        for ( IndicatorGroup group : members )
+        {
+            if ( group.getMembers().contains( object ) )
+            {
+                return group;
+            }
+        }
+        
+        return null;
+    }
+    
+    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @Override
-    public String getShortName()
+    public List<IndicatorGroup> getMembers()
     {
-        return name;
-    }
-    
-    public DataElementCategory getCategory()
-    {
-        return category;
+        return members;
     }
 
-    public void setCategory( DataElementCategory category )
+    public void setMembers( List<IndicatorGroup> members )
     {
-        this.category = category;
-    }
-
-    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
-    {
-        return categoryOptionCombos;
-    }
-
-    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        this.categoryOptionCombos = categoryOptionCombos;
-    }
+        this.members = members;
+    }    
 }

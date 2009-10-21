@@ -28,6 +28,7 @@ package org.hisp.dhis.source;
  */
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.Dimension;
@@ -48,13 +49,63 @@ public abstract class Source
     // Dimension
     // -------------------------------------------------------------------------
 
-    public static final Dimension DIMENSION = new Dimension()
+    public static Dimension DIMENSION = new SourceDimension();
+    
+    public static class SourceDimension
+        implements Dimension
     {
+        private static final String NAME = "Source";
+        
         public String getName()
         {
-            return "Source";
+            return NAME;
         }
-    };
+        
+        public List<? extends DimensionOption> getDimensionOptions()
+        {
+            return null;
+        }
+
+        public DimensionOption getDimensionOption( Object object )
+        {
+            return null;
+        }
+        
+        @Override
+        public boolean equals( Object o )
+        {
+            if ( this == o )
+            {
+                return true;
+            }
+            
+            if ( o == null )
+            {
+                return false;
+            }
+            
+            if ( !( o instanceof SourceDimension ) )
+            {
+                return false;
+            }
+            
+            final SourceDimension other = (SourceDimension) o;
+            
+            return NAME.equals( other.getName() );
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            return NAME.hashCode();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "[" + NAME + "]";
+        }
+    }
     
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
