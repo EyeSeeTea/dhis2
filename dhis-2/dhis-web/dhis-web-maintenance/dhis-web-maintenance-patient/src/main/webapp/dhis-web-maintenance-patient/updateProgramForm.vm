@@ -23,7 +23,7 @@
 		<td><input type="text" id="description" name="description" value="$encoder.htmlEncode( $program.description )" style="width:30em"></td>
 	  </tr>
 	  <tr>
-		<td><label">$i18n.getString( "number_of_days" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><label">$i18n.getString( "number_of_days" )</label></td>
 		<td><input type="text" id="numberOfDays" name="numberOfDays" maxlength="30" value="$encoder.htmlEncode( $program.numberOfDays )" style="width:30em"></td>
 	  </tr>   
       <tr>

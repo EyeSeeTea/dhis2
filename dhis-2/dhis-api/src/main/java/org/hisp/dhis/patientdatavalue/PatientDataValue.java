@@ -3,8 +3,7 @@ package org.hisp.dhis.patientdatavalue;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramInstanceStage;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -21,9 +20,7 @@ public class PatientDataValue
 
     private DataElementCategoryOptionCombo optionCombo;
 
-    private ProgramInstance programInstance;
-
-    private ProgramStage programStage;
+    private ProgramInstanceStage programInstanceStage;
 
     private OrganisationUnit organisationUnit;
 
@@ -39,32 +36,29 @@ public class PatientDataValue
     {
     }
 
-    public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+    public PatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
     {
-        this.programInstance = programInstance;
-        this.programStage = programStage;
+        this.programInstanceStage = programInstanceStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
         this.organisationUnit = organisationUnit;
     }
 
-    public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+    public PatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit, Date timeStamp )
     {
-        this.programInstance = programInstance;
-        this.programStage = programStage;
+        this.programInstanceStage = programInstanceStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
         this.organisationUnit = organisationUnit;
         this.timestamp = timeStamp;
     }
 
-    public PatientDataValue( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+    public PatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit, Date timeStamp, String value )
     {
-        this.programInstance = programInstance;
-        this.programStage = programStage;
+        this.programInstanceStage = programInstanceStage;
         this.dataElement = dataElement;
         this.optionCombo = optionCombo;
         this.organisationUnit = organisationUnit;
@@ -82,8 +76,7 @@ public class PatientDataValue
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + programInstance.hashCode();
-        result = result * prime + programStage.hashCode();
+        result = result * prime + programInstanceStage.hashCode();
         result = result * prime + dataElement.hashCode();
         result = result * prime + optionCombo.hashCode();
         result = result * prime + organisationUnit.hashCode();
@@ -111,33 +104,22 @@ public class PatientDataValue
 
         final PatientDataValue other = (PatientDataValue) o;
 
-        return programInstance.equals( other.programInstance ) && programStage.equals( other.programStage )
-            && dataElement.equals( other.dataElement ) && optionCombo.equals( other.optionCombo )
-            && organisationUnit.equals( other.organisationUnit );
+        return programInstanceStage.equals( other.programInstanceStage ) && dataElement.equals( other.dataElement )
+            && optionCombo.equals( other.optionCombo ) && organisationUnit.equals( other.organisationUnit );
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public void setProgramInstance( ProgramInstance programInstance )
+    public void setProgramInstanceStage( ProgramInstanceStage programInstanceStage )
     {
-        this.programInstance = programInstance;
+        this.programInstanceStage = programInstanceStage;
     }
 
-    public ProgramInstance getProgramInstance()
+    public ProgramInstanceStage getProgramInstanceStage()
     {
-        return programInstance;
-    }
-
-    public ProgramStage getProgramStage()
-    {
-        return programStage;
-    }
-
-    public void setProgramStage( ProgramStage programStage )
-    {
-        this.programStage = programStage;
+        return programInstanceStage;
     }
 
     public void setDataElement( DataElement dataElement )

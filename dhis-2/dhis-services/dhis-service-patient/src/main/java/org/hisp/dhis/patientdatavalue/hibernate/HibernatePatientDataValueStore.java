@@ -38,8 +38,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramInstanceStage;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -54,17 +53,10 @@ public class HibernatePatientDataValueStore
         sessionFactory.getCurrentSession().save( patientDataValue );
     }
 
-    public int delete( ProgramInstance programInstance )
+    public int delete( ProgramInstanceStage programInstanceStage )
     {
-        Query query = getQuery( "delete PatientDataValue where programInstance = :programInstance" );
-        query.setEntity( "programInstance", programInstance );
-        return query.executeUpdate();
-    }
-
-    public int delete( ProgramStage programStage )
-    {
-        Query query = getQuery( "delete PatientDataValue where programStage = :programStage" );
-        query.setEntity( "programStage", programStage );
+        Query query = getQuery( "delete PatientDataValue where programInstanceStage = :programInstanceStage" );
+        query.setEntity( "programInstanceStage", programInstanceStage );
         return query.executeUpdate();
     }
 
@@ -82,21 +74,19 @@ public class HibernatePatientDataValueStore
         return query.executeUpdate();
     }
 
-    public PatientDataValue get( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+    public PatientDataValue get( ProgramInstanceStage programInstanceStage, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
     {
-        return (PatientDataValue) getCriteria( Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "dataElement", dataElement ),
-            Restrictions.eq( "organisationUnit", organisationUnit ), Restrictions.eq( "optionCombo", optionCombo ) )
-            .uniqueResult();
+        return (PatientDataValue) getCriteria( Restrictions.eq( "programInstanceStage", programInstanceStage ),
+            Restrictions.eq( "dataElement", dataElement ), Restrictions.eq( "organisationUnit", organisationUnit ),
+            Restrictions.eq( "optionCombo", optionCombo ) ).uniqueResult();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage,
-        DataElement dataElement )
+    public Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, DataElement dataElement )
     {
-        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "dataElement", dataElement ) ).list();
+        return getCriteria( Restrictions.eq( "programInstanceStage", programInstanceStage ),
+            Restrictions.eq( "dataElement", dataElement ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -107,28 +97,15 @@ public class HibernatePatientDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( ProgramInstance programInstance )
+    public Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage )
     {
-        return getCriteria( Restrictions.eq( "programInstance", programInstance ) ).list();
-    }
-    
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( Collection<ProgramInstance> programInstances )
-    {
-        return getCriteria( Restrictions.in( "programInstance", programInstances ) ).list();
+        return getCriteria( Restrictions.eq( "programInstanceStage", programInstanceStage ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( ProgramStage programStage )
+    public Collection<PatientDataValue> get( Collection<ProgramInstanceStage> programInstanceStages )
     {
-        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage )
-    {
-        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ) ).list();
+        return getCriteria( Restrictions.in( "programInstanceStage", programInstanceStages ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -144,34 +121,19 @@ public class HibernatePatientDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
+        ProgramInstanceStage programInstanceStage )
     {
-        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
+        return getCriteria( Restrictions.eq( "programInstanceStage", programInstanceStage ),
             Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramStage programStage )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
+        ProgramInstanceStage programInstanceStage, DataElement dataElement )
     {
-        return getCriteria( Restrictions.eq( "programStage", programStage ),
-            Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance,
-        ProgramStage programStage )
-    {
-        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "organisationUnit", organisationUnit ) )
-            .list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance,
-        ProgramStage programStage, DataElement dataElement )
-    {
-        return getCriteria( Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ), Restrictions.eq( "dataElement", dataElement ),
+        return getCriteria( Restrictions.eq( "programInstanceStage", programInstanceStage ),
+            Restrictions.eq( "dataElement", dataElement ),
             Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
     }
 
@@ -190,4 +152,19 @@ public class HibernatePatientDataValueStore
             Restrictions.eq( "organisationUnit", organisationUnit ) ).list();
     }
 
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, DataElement dataElement,
+        OrganisationUnit organisationUnit )
+    {
+        return getCriteria( Restrictions.eq( "programInstanceStage", programInstanceStage ),
+            Restrictions.eq( "dataElement", dataElement ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
+        Collection<ProgramInstanceStage> programInstanceStages )
+    {
+        return getCriteria( Restrictions.eq( "organisationUnit", organisationUnit ),
+            Restrictions.in( "programInstanceStage", programInstanceStages ) ).list();
+    }
 }

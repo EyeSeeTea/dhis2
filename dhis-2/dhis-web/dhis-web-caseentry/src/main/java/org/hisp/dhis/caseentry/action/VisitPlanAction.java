@@ -27,6 +27,7 @@
 
 package org.hisp.dhis.caseentry.action;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstanceStage;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 
@@ -139,13 +141,18 @@ public class VisitPlanAction
         // ---------------------------------------------------------------------
 
         Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( programs, false );
+        
+        Collection<ProgramInstanceStage> programInstanceStages = new ArrayList<ProgramInstanceStage>();
 
         // ---------------------------------------------------------------------
         // Initially assume to have a first visit for all programInstances
         // ---------------------------------------------------------------------
 
         for ( ProgramInstance programInstance : programInstances )
-        {
+        {   
+            
+            programInstanceStages.addAll( programInstance.getProgramInstanceStages() );
+            
             ProgramStage nextStage = programInstance.getProgram().getProgramStageByStage( 1 );
 
             visitsByProgramInstances.put( programInstance, nextStage );
@@ -157,24 +164,24 @@ public class VisitPlanAction
         // ---------------------------------------------------------------------
 
         Collection<PatientDataValue> patientDataValues = patientDataValueService
-            .getPatientDataValues( programInstances );
+            .getPatientDataValues( programInstanceStages );
 
         for ( PatientDataValue patientDataValue : patientDataValues )
         {
-            ProgramStage currentStage = patientDataValue.getProgramStage();
+            ProgramStage currentStage = patientDataValue.getProgramInstanceStage().getProgramStage();
 
-            ProgramStage nextStage = patientDataValue.getProgramStage().getProgram().getProgramStageByStage(
+            ProgramStage nextStage = patientDataValue.getProgramInstanceStage().getProgramStage().getProgram().getProgramStageByStage(
                 currentStage.getStageInProgram() + 1 );
 
             if ( nextStage != null )
             {
-                visitsByProgramInstances.put( patientDataValue.getProgramInstance(), nextStage );
+                visitsByProgramInstances.put( patientDataValue.getProgramInstanceStage().getProgramInstance(), nextStage );
             }
-            if ( nextStage == null && visitsByProgramInstances.containsKey( patientDataValue.getProgramInstance() ) )
+            if ( nextStage == null && visitsByProgramInstances.containsKey( patientDataValue.getProgramInstanceStage().getProgramInstance() ) )
             {
                 // This patient has completed all services, programInstance
                 // should therefore be closed!
-                visitsByProgramInstances.remove( patientDataValue.getProgramInstance() );
+                visitsByProgramInstances.remove( patientDataValue.getProgramInstanceStage().getProgramInstance() );
             }
         }
 

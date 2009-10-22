@@ -33,8 +33,7 @@ import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramInstanceStage;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -47,41 +46,36 @@ public interface PatientDataValueStore
 
     void saveVoid( PatientDataValue patientDataValue );
 
-    int delete( ProgramInstance programInstance );
-
-    int delete( ProgramStage programStage );
+    int delete( ProgramInstanceStage programInstanceStage );
 
     int delete( DataElement dataElement );
 
-    int delete( DataElementCategoryOptionCombo optionCombo );
+    int delete( DataElementCategoryOptionCombo optionCombo );    
 
-    PatientDataValue get( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement,
+    PatientDataValue get( ProgramInstanceStage programInstanceStage, DataElement dataElement,
         DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit );
 
-    Collection<PatientDataValue> get( ProgramInstance programInstance );
-    
-    Collection<PatientDataValue> get( Collection<ProgramInstance> programInstances );
-    
-    Collection<PatientDataValue> get( ProgramStage programStage );
+    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage );
 
-    Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage );
+    Collection<PatientDataValue> get( Collection<ProgramInstanceStage> programInstanceStages );
 
-    Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage,
-        DataElement dataElement );
+    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, DataElement dataElement );
+
+    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, DataElement dataElement,
+        OrganisationUnit organisationUnit );
 
     Collection<PatientDataValue> get( DataElement dataElement );
 
     Collection<PatientDataValue> get( DataElementCategoryOptionCombo optionCombo );
-    
-    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance );
-    
-    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramStage programStage );
 
-    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance, ProgramStage programStage );
+    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstanceStage programInstanceStage );
 
-    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstance programInstance, ProgramStage programStage,
-        DataElement dataElement );   
-    
+    Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
+        Collection<ProgramInstanceStage> programInstanceStages );
+
+    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstanceStage programInstanceStage,
+        DataElement dataElement );
+
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit, DataElement dataElement );
 
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit, DataElementCategoryOptionCombo optionCombo );

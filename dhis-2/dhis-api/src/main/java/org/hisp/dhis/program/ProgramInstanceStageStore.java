@@ -28,40 +28,21 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
-import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.common.GenericStore;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public interface ProgramInstanceService
+public interface ProgramInstanceStageStore
+    extends GenericStore<ProgramInstanceStage>
 {
-    String ID = ProgramInstanceService.class.getName();
+    String ID = ProgramInstanceStageStore.class.getName();   
     
-    int addProgramInstance( ProgramInstance programInstance );
+    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );
     
-    void deleteProgramInstance( ProgramInstance programInstance );
+    Collection<ProgramInstanceStage> get( ProgramInstance programInstance );
     
-    void updateProgramInstance( ProgramInstance programInstance );
-    
-    ProgramInstance getProgramInstance( int id );
-    
-    Collection<ProgramInstance> getAllProgramInstances();
-    
-    Collection<ProgramInstance> getProgramInstances( boolean completed );   
-    
-    Collection<ProgramInstance> getProgramInstances( Program program );
-    
-    Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );   
+    Collection<ProgramInstanceStage> get( ProgramStage programStage );   
     
 }

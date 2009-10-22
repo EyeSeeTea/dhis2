@@ -67,6 +67,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.program.ProgramStageService"/>       
     <property name="programInstanceService"
       ref="org.hisp.dhis.program.ProgramInstanceService"/>
+    <property name="programInstanceStageService"
+      ref="org.hisp.dhis.program.ProgramInstanceStageService"/>
     <property name="patientDataValueService"
       ref="org.hisp.dhis.patientdatavalue.PatientDataValueService"/>
      <property name="selectedStateManager"
@@ -84,6 +86,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
     <property name="programInstanceService"
       ref="org.hisp.dhis.program.ProgramInstanceService"/>
+    <property name="programInstanceStageService"
+      ref="org.hisp.dhis.program.ProgramInstanceStageService"/>
     <property name="patientDataValueService"
       ref="org.hisp.dhis.patientdatavalue.PatientDataValueService"/>               
   </bean>

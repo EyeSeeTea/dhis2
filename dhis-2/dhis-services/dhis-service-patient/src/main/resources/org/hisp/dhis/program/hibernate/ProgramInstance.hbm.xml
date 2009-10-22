@@ -20,7 +20,12 @@
         column="patientid" not-null="true" foreign-key="fk_programinstance_patientid"/>
     
     <many-to-one name="program" class="org.hisp.dhis.program.Program"
-        column="programid" not-null="true" foreign-key="fk_programinstance_programid"/>    	
+        column="programid" not-null="true" foreign-key="fk_programinstance_programid"/>
+    
+    <set name="programInstanceStages" inverse="true" cascade="all">
+      <key column="programinstanceid"/>      
+      <one-to-many class="org.hisp.dhis.program.ProgramInstanceStage"/>
+    </set>    	
 	
   </class>
 </hibernate-mapping>

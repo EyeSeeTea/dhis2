@@ -60,14 +60,7 @@ public class ValidateProgramAction
     public void setDescription( String description )
     {
         this.description = description;
-    }
-
-    private String numberOfDays;
-
-    public void setNumberOfDays( String numberOfDays )
-    {
-        this.numberOfDays = numberOfDays;
-    }
+    }   
 
     private String message;
 
@@ -128,25 +121,7 @@ public class ValidateProgramAction
                 return INPUT;
             }
         }
-
-        if ( numberOfDays == null )
-        {
-            message = i18n.getString( "please_specify_number_of_days" );
-
-            return INPUT;
-        }
-
-        else
-        {
-            numberOfDays = numberOfDays.trim();
-
-            if ( numberOfDays.length() == 0 )
-            {
-                message = i18n.getString( "please_specify_number_of_days" );
-
-                return INPUT;
-            }
-        }
+        
 
         // ---------------------------------------------------------------------
         // Validation success

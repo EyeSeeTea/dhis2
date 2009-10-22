@@ -32,8 +32,7 @@ import java.util.Collection;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramInstanceStage;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -49,40 +48,42 @@ public interface PatientDataValueService
 
     void deletePatientDataValue( PatientDataValue patientDataValue );
 
-    int deletePatientDataValue( ProgramInstance programInstance );
-
-    int deletePatientDataValue( ProgramStage programStage );
+    int deletePatientDataValue( ProgramInstanceStage programInstanceStage );
 
     int deletePatientDataValue( DataElement dataElement );
 
-    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );
+    int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );    
 
-    PatientDataValue getPatientDataValue( ProgramInstance programInstance, ProgramStage programStage,
-        DataElement dataElement, DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit );
+    PatientDataValue getPatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit );
 
-    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance );
-    
-    Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstance> programInstances );
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage );
 
-    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage );
-    
-    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement );
-    
-    Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement, OrganisationUnit organisationUnit );
-    
+    Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstanceStage> programInstanceStages );
+
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
+        DataElement dataElement );
+
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
+        DataElement dataElement, OrganisationUnit organisationUnit );
+
     Collection<PatientDataValue> getPatientDataValues( DataElement dataElement );
 
     Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
-    
-    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, ProgramInstance programInstance );
 
-    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, ProgramInstance programInstance, ProgramStage programStage );
-    
-    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement );   
-    
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        ProgramInstanceStage programInstanceStage );
+
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        Collection<ProgramInstanceStage> programInstanceStages );
+
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        ProgramInstanceStage programInstanceStage, DataElement dataElement );
+
     Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElement dataElement );
 
-    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElementCategoryOptionCombo optionCombo );
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        DataElementCategoryOptionCombo optionCombo );
 
     Collection<PatientDataValue> getAllPatientDataValues();
 }

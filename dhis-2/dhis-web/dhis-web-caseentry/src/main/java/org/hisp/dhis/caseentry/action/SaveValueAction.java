@@ -41,6 +41,8 @@ import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramInstanceStageService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -73,6 +75,13 @@ public class SaveValueAction
     public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
         this.programInstanceService = programInstanceService;
+    }
+    
+    private ProgramInstanceStageService programInstanceStageService;
+
+    public void setProgramInstanceStageService( ProgramInstanceStageService programInstanceStageService )
+    {
+        this.programInstanceStageService = programInstanceStageService;
     }
 
     private DataElementService dataElementService;
@@ -147,6 +156,8 @@ public class SaveValueAction
             .getProgramInstances( patient, program, false );
 
         ProgramInstance programInstance = progamInstances.iterator().next();
+        
+        ProgramInstanceStage programInstanceStage = programInstanceStageService.getProgramInstanceStage( programInstance, programStage );
 
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
@@ -172,7 +183,7 @@ public class SaveValueAction
             optionCombo = dataElement.getCategoryCombo().getOptionCombos().iterator().next();
         }
 
-        PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programInstance, programStage,
+        PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programInstanceStage,
             dataElement, optionCombo, organisationUnit );
 
         if ( patientDataValue == null )
@@ -181,7 +192,7 @@ public class SaveValueAction
             {
                 LOG.debug( "Adding PatientDataValue, value added" );
 
-                patientDataValue = new PatientDataValue( programInstance, programStage, dataElement, optionCombo,
+                patientDataValue = new PatientDataValue( programInstanceStage, dataElement, optionCombo,
                     organisationUnit, new Date(), value );
 
                 patientDataValueService.savePatientDataValue( patientDataValue );

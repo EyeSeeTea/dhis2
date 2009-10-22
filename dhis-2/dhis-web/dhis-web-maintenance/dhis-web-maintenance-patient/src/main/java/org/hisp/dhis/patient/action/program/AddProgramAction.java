@@ -68,9 +68,9 @@ public class AddProgramAction
         this.description = description;
     }
 
-    private String numberOfDays;
+    private Integer numberOfDays;
 
-    public void setNumberOfDays( String numberOfDays )
+    public void setNumberOfDays( Integer numberOfDays )
     {
         this.numberOfDays = numberOfDays;
     }
@@ -85,9 +85,15 @@ public class AddProgramAction
 
         Program program = new Program();
 
+        if( numberOfDays == null )
+        {
+            numberOfDays = 0;            
+        }
+        
+        program.setNumberOfDays( numberOfDays.intValue() );        
         program.setName( nameField );
         program.setDescription( description );
-        program.setNumberOfDays( Integer.parseInt( numberOfDays ) );
+        
 
         programService.saveProgram( program );
 

@@ -28,40 +28,27 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
-import org.hisp.dhis.patient.Patient;
-
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public interface ProgramInstanceService
+public interface ProgramInstanceStageService
 {
-    String ID = ProgramInstanceService.class.getName();
+    String ID = ProgramInstanceStageService.class.getName();
     
-    int addProgramInstance( ProgramInstance programInstance );
+    int addProgramInstanceStage( ProgramInstanceStage programInstanceStage );    
     
-    void deleteProgramInstance( ProgramInstance programInstance );
+    void deleteProgramInstanceStage( ProgramInstanceStage programInstanceStage );
     
-    void updateProgramInstance( ProgramInstance programInstance );
+    void updateProgramInstanceStage( ProgramInstanceStage programInstanceStage );
     
-    ProgramInstance getProgramInstance( int id );
+    ProgramInstanceStage getProgramInstanceStage( int id );
     
-    Collection<ProgramInstance> getAllProgramInstances();
+    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );    
     
-    Collection<ProgramInstance> getProgramInstances( boolean completed );   
+    Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramInstance programInstance );   
     
-    Collection<ProgramInstance> getProgramInstances( Program program );
+    Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramStage programStage );
     
-    Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );   
-    
+    Collection<ProgramInstanceStage> getAllProgramInstanceStages();        
 }

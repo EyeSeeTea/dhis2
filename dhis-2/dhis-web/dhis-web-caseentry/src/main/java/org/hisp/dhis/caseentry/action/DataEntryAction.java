@@ -44,6 +44,8 @@ import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramInstanceStageService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
@@ -88,6 +90,13 @@ public class DataEntryAction
     public void setProgramStageService( ProgramStageService programStageService )
     {
         this.programStageService = programStageService;
+    }
+
+    private ProgramInstanceStageService programInstanceStageService;
+
+    public void setProgramInstanceStageService( ProgramInstanceStageService programInstanceStageService )
+    {
+        this.programInstanceStageService = programInstanceStageService;
     }
 
     private PatientIdentifierService patientIdentifierService;
@@ -215,7 +224,7 @@ public class DataEntryAction
         throws Exception
     {
 
-        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();        
+        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
 
         patient = patientService.getPatient( id );
 
@@ -239,8 +248,11 @@ public class DataEntryAction
 
         ProgramInstance programInstance = progamInstances.iterator().next();
 
+        ProgramInstanceStage programInstanceStage = programInstanceStageService.getProgramInstanceStage(
+            programInstance, programStage );
+
         Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues(
-            organisationUnit, programInstance, programStage );
+            organisationUnit, programInstanceStage );
 
         patientDataValueMap = new HashMap<Integer, PatientDataValue>( patientDataValues.size() );
 

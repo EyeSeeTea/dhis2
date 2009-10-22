@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="org.hisp.dhis.program.ProgramInstanceStage" table="programinstancestage">
+    
+    <id name="id" column="programinstancestageid">
+      <generator class="native"/>
+    </id>   
+    
+    <many-to-one name="programInstance" class="org.hisp.dhis.program.ProgramInstance"
+        column="programinstanceid" not-null="true" foreign-key="fk_programinstancestage_programinstanceid"/>
+    
+    <many-to-one name="programStage" class="org.hisp.dhis.program.ProgramStage"
+        column="programstageid" not-null="true" foreign-key="fk_programinstancestage_programstageid"/>
+
+    <property name="dueDate" column="duedate"/>
+    
+    <property name="executionDate" column="executiondate"/>       	
+	
+  </class>
+</hibernate-mapping>

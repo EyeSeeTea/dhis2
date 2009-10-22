@@ -28,46 +28,37 @@ package org.hisp.dhis.program;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.hisp.dhis.patient.Patient;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class ProgramInstance
+public class ProgramInstanceStage
     implements Serializable
 {
-    private int id;
+    private int id;    
 
-    private Date startDate;
-
-    private Date endDate;
-
-    private boolean completed = false;
-
-    private Patient patient;
-
-    private Program program;
+    private ProgramInstance programInstance;
     
-    private Set<ProgramInstanceStage> programInstanceStages = new HashSet<ProgramInstanceStage>();
+    private ProgramStage programStage;
+    
+    private Date dueDate;
+
+    private Date executionDate;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ProgramInstance()
+    public ProgramInstanceStage()
     {
     }
 
-    public ProgramInstance( Date startDate, Date endDate, Patient patient, Program program )
+    public ProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
     {
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.patient = patient;
-        this.program = program;
+        this.programInstance = programInstance;
+        this.programStage = programStage;
     }
 
     // -------------------------------------------------------------------------
@@ -87,15 +78,14 @@ public class ProgramInstance
             return false;
         }
 
-        if ( !(o instanceof ProgramInstance) )
+        if ( !(o instanceof ProgramInstanceStage) )
         {
             return false;
         }
 
-        final ProgramInstance other = (ProgramInstance) o;
+        final ProgramInstanceStage other = (ProgramInstanceStage) o;
 
-        return startDate.equals( other.getStartDate() ) && patient.equals( other.getPatient() )
-            && program.equals( other.getProgram() );
+        return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
 
     }
 
@@ -105,9 +95,8 @@ public class ProgramInstance
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + startDate.hashCode();        
-        result = result * prime + patient.hashCode();
-        result = result * prime + program.hashCode();
+        result = result * prime + programInstance.hashCode();        
+        result = result * prime + programStage.hashCode();   
 
         return result;
     }
@@ -133,99 +122,67 @@ public class ProgramInstance
     }
 
     /**
-     * @return the startDate
+     * @return the programInstance
      */
-    public Date getStartDate()
+    public ProgramInstance getProgramInstance()
     {
-        return startDate;
+        return programInstance;
     }
 
     /**
-     * @param startDate the startDate to set
+     * @param programInstance the programInstance to set
      */
-    public void setStartDate( Date startDate )
+    public void setProgramInstance( ProgramInstance programInstance )
     {
-        this.startDate = startDate;
+        this.programInstance = programInstance;
     }
 
     /**
-     * @return the endDate
+     * @return the programStage
      */
-    public Date getEndDate()
+    public ProgramStage getProgramStage()
     {
-        return endDate;
+        return programStage;
     }
 
     /**
-     * @param endDate the endDate to set
+     * @param programStage the programStage to set
      */
-    public void setEndDate( Date endDate )
+    public void setProgramStage( ProgramStage programStage )
     {
-        this.endDate = endDate;
+        this.programStage = programStage;
     }
 
     /**
-     * @return the completed
+     * @return the dueDate
      */
-    public boolean isCompleted()
+    public Date getDueDate()
     {
-        return completed;
+        return dueDate;
     }
 
     /**
-     * @param completed the completed to set
+     * @param dueDate the dueDate to set
      */
-    public void setCompleted( boolean completed )
+    public void setDueDate( Date dueDate )
     {
-        this.completed = completed;
+        this.dueDate = dueDate;
     }
 
     /**
-     * @return the patient
+     * @return the executionDate
      */
-    public Patient getPatient()
+    public Date getExecutionDate()
     {
-        return patient;
+        return executionDate;
     }
 
     /**
-     * @param patient the patient to set
+     * @param executionDate the executionDate to set
      */
-    public void setPatient( Patient patient )
+    public void setExecutionDate( Date executionDate )
     {
-        this.patient = patient;
-    }
-
-    /**
-     * @return the program
-     */
-    public Program getProgram()
-    {
-        return program;
-    }
-
-    /**
-     * @param program the program to set
-     */
-    public void setProgram( Program program )
-    {
-        this.program = program;
-    }
-
-    /**
-     * @return the programInstanceStages
-     */
-    public Set<ProgramInstanceStage> getProgramInstanceStages()
-    {
-        return programInstanceStages;
-    }
-
-    /**
-     * @param programInstanceStages the programInstanceStages to set
-     */
-    public void setProgramInstanceStages( Set<ProgramInstanceStage> programInstanceStages )
-    {
-        this.programInstanceStages = programInstanceStages;
+        this.executionDate = executionDate;
     }   
 
 }

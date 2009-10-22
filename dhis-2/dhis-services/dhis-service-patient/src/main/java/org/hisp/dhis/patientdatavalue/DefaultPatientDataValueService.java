@@ -35,8 +35,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramInstanceStage;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -75,14 +74,9 @@ public class DefaultPatientDataValueService
         patientDataValueStore.delete( patientDataValue );
     }
 
-    public int deletePatientDataValue( ProgramInstance programInstance )
+    public int deletePatientDataValue( ProgramInstanceStage programInstanceStage )
     {
-        return patientDataValueStore.delete( programInstance );
-    }
-
-    public int deletePatientDataValue( ProgramStage programStage )
-    {
-        return patientDataValueStore.delete( programStage );
+        return patientDataValueStore.delete( programInstanceStage );
     }
 
     public int deletePatientDataValue( DataElement dataElement )
@@ -93,7 +87,7 @@ public class DefaultPatientDataValueService
     public int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo )
     {
         return patientDataValueStore.delete( optionCombo );
-    }
+    }   
 
     public void updatePatientDataValue( PatientDataValue patientDataValue )
     {
@@ -112,31 +106,26 @@ public class DefaultPatientDataValueService
         return patientDataValueStore.getAll();
     }
 
-    public PatientDataValue getPatientDataValue( ProgramInstance programInstance, ProgramStage programStage,
-        DataElement dataElement, DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
+    public PatientDataValue getPatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
     {
-        return patientDataValueStore.get( programInstance, programStage, dataElement, optionCombo, organisationUnit );
+        return patientDataValueStore.get( programInstanceStage, dataElement, optionCombo, organisationUnit );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance )
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage )
     {
-        return patientDataValueStore.get( programInstance );
+        return patientDataValueStore.get( programInstanceStage );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstance> programInstances )
+    public Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstanceStage> programInstanceStages )
     {
-        return patientDataValueStore.get( programInstances );
-    }
-    
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage )
-    {
-        return patientDataValueStore.get( programInstance, programStage );
+        return patientDataValueStore.get( programInstanceStages );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance,
-        ProgramStage programStage, DataElement dataElement )
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
+        DataElement dataElement )
     {
-        return patientDataValueStore.get( programInstance, programStage, dataElement );
+        return patientDataValueStore.get( programInstanceStage, dataElement );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( DataElement dataElement )
@@ -147,30 +136,30 @@ public class DefaultPatientDataValueService
     public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
     {
         return patientDataValueStore.get( optionCombo );
-    }    
+    }
 
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance,
-        ProgramStage programStage, DataElement dataElement, OrganisationUnit organisationUnit )
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
+        DataElement dataElement, OrganisationUnit organisationUnit )
     {
-        return patientDataValueStore.get( programInstance, programStage, dataElement );
+        return patientDataValueStore.get( programInstanceStage, dataElement );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        ProgramInstance programInstance )
+        ProgramInstanceStage programInstanceStage )
     {
-        return patientDataValueStore.get( organisationUnit, programInstance );
+        return patientDataValueStore.get( organisationUnit, programInstanceStage );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        ProgramInstance programInstance, ProgramStage programStage )
+        ProgramInstanceStage programInstanceStage, DataElement dataElement )
     {
-        return patientDataValueStore.get( organisationUnit, programInstance, programStage );
+        return patientDataValueStore.get( organisationUnit, programInstanceStage, dataElement );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        ProgramInstance programInstance, ProgramStage programStage, DataElement dataElement )
+        Collection<ProgramInstanceStage> programInstanceStages )
     {
-        return patientDataValueStore.get( organisationUnit, programInstance, programStage, dataElement );
+        return patientDataValueStore.get( organisationUnit, programInstanceStages );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElement dataElement )
@@ -182,6 +171,6 @@ public class DefaultPatientDataValueService
         DataElementCategoryOptionCombo optionCombo )
     {
         return patientDataValueStore.get( organisationUnit, optionCombo );
-    }   
+    }
 
 }

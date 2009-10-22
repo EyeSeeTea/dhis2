@@ -24,44 +24,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
+package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
 
-import org.hisp.dhis.patient.Patient;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramInstanceStageStore;
+
+import org.hisp.dhis.program.ProgramStage;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public interface ProgramInstanceService
+public class HibernateProgramInstanceStageStore
+    extends HibernateGenericStore<ProgramInstanceStage>
+    implements ProgramInstanceStageStore
 {
-    String ID = ProgramInstanceService.class.getName();
-    
-    int addProgramInstance( ProgramInstance programInstance );
-    
-    void deleteProgramInstance( ProgramInstance programInstance );
-    
-    void updateProgramInstance( ProgramInstance programInstance );
-    
-    ProgramInstance getProgramInstance( int id );
-    
-    Collection<ProgramInstance> getAllProgramInstances();
-    
-    Collection<ProgramInstance> getProgramInstances( boolean completed );   
-    
-    Collection<ProgramInstance> getProgramInstances( Program program );
-    
-    Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
-    
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );   
-    
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstanceStage> get( ProgramInstance programInstance )
+    {
+        return getCriteria( Restrictions.eq( "programInstance", programInstance ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstanceStage> get( ProgramStage programStage )
+    {
+        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
+    }
+
+    public ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
+    {
+        return (ProgramInstanceStage) getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ) ).uniqueResult();
+    }
 }

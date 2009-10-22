@@ -24,84 +24,73 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.program;
 
-package org.hisp.dhis.patient.action.program;
+import java.util.Collection;
 
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-
-import com.opensymphony.xwork2.Action;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Abyot Asalefew
  * @version $Id$
  */
-public class UpdateProgramAction
-    implements Action
+@Transactional
+public class DefaultProgramInstanceStageService
+    implements ProgramInstanceStageService
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramService programService;
+    private ProgramInstanceStageStore programInstanceStageStore;
 
-    public void setProgramService( ProgramService programService )
+    public void setProgramInstanceStageStore( ProgramInstanceStageStore programInstanceStageStore )
     {
-        this.programService = programService;
+        this.programInstanceStageStore = programInstanceStageStore;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // ProgramInstanceStage implementation
     // -------------------------------------------------------------------------
 
-    private int id;
-
-    public void setId( int id )
+    public int addProgramInstanceStage( ProgramInstanceStage programInstanceStage )
     {
-        this.id = id;
+        return programInstanceStageStore.save( programInstanceStage );
     }
 
-    private String nameField;
-
-    public void setNameField( String nameField )
+    public void deleteProgramInstanceStage( ProgramInstanceStage programInstanceStage )
     {
-        this.nameField = nameField;
+        programInstanceStageStore.delete( programInstanceStage );
     }
 
-    private String description;
-
-    public void setDescription( String description )
+    public Collection<ProgramInstanceStage> getAllProgramInstanceStages()
     {
-        this.description = description;
+        return programInstanceStageStore.getAll();
     }
 
-    private Integer numberOfDays;
-
-    public void setNumberOfDays( Integer numberOfDays )
+    public ProgramInstanceStage getProgramInstanceStage( int id )
     {
-        this.numberOfDays = numberOfDays;
+        return programInstanceStageStore.get( id );
     }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
+    public ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
     {
-        Program program = programService.getProgram( id );
-        
-        if( numberOfDays == null )
-        {
-            numberOfDays = 0;            
-        }
-
-        program.setNumberOfDays( numberOfDays.intValue() );        
-        program.setName( nameField );
-        program.setDescription( description );
-
-        programService.updateProgram( program );
-
-        return SUCCESS;
+        return programInstanceStageStore.getProgramInstanceStage( programInstance, programStage );
     }
+
+    public Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramInstance programInstance )
+    {
+        return programInstanceStageStore.get( programInstance );
+    }
+
+    public Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramStage programStage )
+    {
+        return programInstanceStageStore.get( programStage );
+    }
+
+    public void updateProgramInstanceStage( ProgramInstanceStage programInstanceStage )
+    {
+        programInstanceStageStore.update( programInstanceStage );
+    }    
 }
