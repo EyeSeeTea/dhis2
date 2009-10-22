@@ -143,10 +143,10 @@ public class SaveValueAction
 
         ProgramStage programStage = selectedStateManager.getSelectedProgramStage();
 
-        Collection<ProgramInstance> progamInsances = programInstanceService
+        Collection<ProgramInstance> progamInstances = programInstanceService
             .getProgramInstances( patient, program, false );
 
-        ProgramInstance programInstance = progamInsances.iterator().next();
+        ProgramInstance programInstance = progamInstances.iterator().next();
 
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
 

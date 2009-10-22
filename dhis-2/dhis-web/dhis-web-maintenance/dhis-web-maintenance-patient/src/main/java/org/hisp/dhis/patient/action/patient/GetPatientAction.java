@@ -26,11 +26,8 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
@@ -72,14 +69,7 @@ public class GetPatientAction
     {
         this.programService = programService;
     }
-
-    private HouseHoldService houseHoldService;
-
-    public void setHouseHoldService( HouseHoldService houseHoldService )
-    {
-        this.houseHoldService = houseHoldService;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -118,14 +108,7 @@ public class GetPatientAction
     {
         return programs;
     }
-
-    private Collection<HouseHold> houseHolds = new ArrayList<HouseHold>();
-
-    public Collection<HouseHold> getHouseHolds()
-    {
-        return houseHolds;
-    }
-
+   
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -142,9 +125,7 @@ public class GetPatientAction
 
         programs = programService.getAllPrograms();
 
-        programs.removeAll( patient.getPrograms() );
-
-        houseHolds = houseHoldService.getAllHouseHolds();
+        programs.removeAll( patient.getPrograms() );        
 
         return SUCCESS;
 

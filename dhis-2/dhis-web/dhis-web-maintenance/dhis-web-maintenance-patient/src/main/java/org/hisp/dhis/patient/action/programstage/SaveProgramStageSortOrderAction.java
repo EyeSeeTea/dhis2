@@ -27,6 +27,7 @@
 
 package org.hisp.dhis.patient.action.programstage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.program.ProgramStage;
@@ -51,8 +52,8 @@ public class SaveProgramStageSortOrderAction
     public void setProgramStageService( ProgramStageService programStageService )
     {
         this.programStageService = programStageService;
-    }
-
+    }   
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -63,6 +64,18 @@ public class SaveProgramStageSortOrderAction
     {
         this.programStageList = programStageList;
     }
+    
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -71,16 +84,20 @@ public class SaveProgramStageSortOrderAction
     {
 
         int stageInProgram = 1;
+        
+        List<ProgramStage> programStages = new ArrayList<ProgramStage>(programStageList.size());       
 
-        for ( String id : programStageList )
+        for ( String programStageId : programStageList )
         {
-            ProgramStage programStage = programStageService.getProgramStage( Integer.parseInt( id ) );
+            ProgramStage programStage = programStageService.getProgramStage( Integer.parseInt( programStageId ) );
+            
+            programStages.add( programStage );
 
             programStage.setStageInProgram( stageInProgram++ );
 
             programStageService.updateProgramStage( programStage );
-        }
-
+        }        
+                
         return SUCCESS;
     }
 }

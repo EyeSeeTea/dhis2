@@ -28,7 +28,9 @@
 package org.hisp.dhis.program;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -44,13 +46,15 @@ public class Program
 
     private String name;
 
-    private String description;   
+    private String description;
 
     private int numberOfDays;
 
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
 
     private Set<ProgramInstance> programInstances = new HashSet<ProgramInstance>();
+
+    private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -132,7 +136,7 @@ public class Program
     {
         this.description = description;
     }
-    
+
     public void setNumberOfDays( int numberOfDays )
     {
         this.numberOfDays = numberOfDays;
@@ -161,6 +165,44 @@ public class Program
     public Set<ProgramInstance> getProgramInstances()
     {
         return programInstances;
+    }
+
+    public void setProgramStages( Set<ProgramStage> programStages )
+    {
+        this.programStages = programStages;
+    }
+
+    public Set<ProgramStage> getProgramStages()
+    {
+        return programStages;
+    }
+
+    // -------------------------------------------------------------------------
+    // Convenience method
+    // -------------------------------------------------------------------------
+
+    public ProgramStage getProgramStageByStage( int stage)
+    {
+        if ( programStages.size() == 0 )
+        {
+            return null;
+        }
+
+        Map<Integer, ProgramStage> stageMap = new HashMap<Integer, ProgramStage>( programStages.size() );
+        
+        for( ProgramStage programStage : programStages )
+        {
+            stageMap.put( programStage.getStageInProgram(), programStage );
+        }
+        
+        if( stageMap.containsKey( stage ) )
+        {
+            return stageMap.get( stage );
+        }
+        else
+        {
+            return null;
+        }
     }
 
 }

@@ -123,6 +123,11 @@ public class DefaultPatientDataValueService
         return patientDataValueStore.get( programInstance );
     }
 
+    public Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstance> programInstances )
+    {
+        return patientDataValueStore.get( programInstances );
+    }
+    
     public Collection<PatientDataValue> getPatientDataValues( ProgramInstance programInstance, ProgramStage programStage )
     {
         return patientDataValueStore.get( programInstance, programStage );
@@ -177,6 +182,6 @@ public class DefaultPatientDataValueService
         DataElementCategoryOptionCombo optionCombo )
     {
         return patientDataValueStore.get( organisationUnit, optionCombo );
-    }
+    }   
 
 }

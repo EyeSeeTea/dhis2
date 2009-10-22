@@ -60,6 +60,8 @@ public interface PatientDataValueStore
 
     Collection<PatientDataValue> get( ProgramInstance programInstance );
     
+    Collection<PatientDataValue> get( Collection<ProgramInstance> programInstances );
+    
     Collection<PatientDataValue> get( ProgramStage programStage );
 
     Collection<PatientDataValue> get( ProgramInstance programInstance, ProgramStage programStage );

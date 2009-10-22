@@ -1,10 +1,21 @@
 #parse( "/dhis-web-caseentry/visitPlanSelect.vm" )
 
-<table class="mainPageTable">
+
+<table class="mainPageTable">    
     
-    <tr>
-        <td>List of Visit Plans. Coming soon......</td>       
-    </tr>
-    
+    #foreach( $patient in $patients )
+        <tr>            
+            <td colspan="3"><strong>$patient.firstName&nbsp;&nbsp;$patient.middleName&nbsp;&nbsp;$patient.lastName&nbsp;&nbsp;</strong></td>       
+        </tr>
+        
+        #set( $stages = $visitsByPatients.get( $patient ) )        
+        #foreach( $stage in $stages )
+            <tr>
+                <td></td>
+                <td>$stage.program.name</td>
+                <td>$stage.name</td>
+            </tr>          
+        #end        
+    #end 
     
 </table>

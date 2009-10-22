@@ -30,7 +30,6 @@ package org.hisp.dhis.patient;
 import java.util.Collection;
 import java.util.Date;
 
-import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
@@ -61,7 +60,7 @@ public interface PatientService
     
     Collection<Patient> getPatients( String searchText );
     
-    Collection<Patient> getPatientsByHouseHold( HouseHold houseHold );
+    //Collection<Patient> getPatientsByAttribute( PatientAttribute attribute );
     
     Collection<Patient> getPatientsByOrgUnit( OrganisationUnit organisationUnit );
     

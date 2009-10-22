@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<houseHold>
+<program>
   <id>$program.id</id>
   <name>$encoder.xmlEncode( $program.name )</name>
   <description>$encoder.xmlEncode( $program.description )</description>
   <numberOfDays>$encoder.xmlEncode( $program.numberOfDays )</numberOfDays>
   <programStageCount>$program.programStages.size()</programStageCount>   
-</houseHold>
+</program>

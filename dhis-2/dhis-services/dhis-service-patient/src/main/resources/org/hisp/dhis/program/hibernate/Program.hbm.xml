@@ -16,6 +16,11 @@
     
     <property name="numberOfDays"/>
     
+    <set name="programStages" order-by="stageinprogram" inverse="true" cascade="all">
+      <key column="programid"/>      
+      <one-to-many class="org.hisp.dhis.program.ProgramStage"/>
+    </set>
+    
     <set name="organisationUnits" table="program_organisationunits">
       <key column="programid"/>
       <many-to-many column="organisationunitid" 

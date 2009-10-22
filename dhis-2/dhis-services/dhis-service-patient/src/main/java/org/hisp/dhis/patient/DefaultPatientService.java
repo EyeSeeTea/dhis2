@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,10 +124,10 @@ public class DefaultPatientService
         return patients;
     }
 
-    public Collection<Patient> getPatientsByHouseHold( HouseHold houseHold )
+    /*public Collection<Patient> getPatientsByAttribute( PatientAttribute attribute )
     {
-        return patientStore.getByHouseHold( houseHold );
-    }
+        return patientStore.getByAttribute( attribute );
+    }*/
 
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText )
     {

@@ -4,69 +4,72 @@
   xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-  <!-- HouseHold -->
+  <!-- PatientAttribute -->
   
-  <bean id="org.hisp.dhis.patient.action.household.GetHouseHoldListAction"
-    class="org.hisp.dhis.patient.action.household.GetHouseHoldListAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>                  
-  </bean>
-  
-  <bean id="org.hisp.dhis.patient.action.household.AddHouseHoldAction"
-    class="org.hisp.dhis.patient.action.household.AddHouseHoldAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>  
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>         
-  </bean>
-  
-  <bean id="org.hisp.dhis.patient.action.household.SelectHouseHoldAction"
-    class="org.hisp.dhis.patient.action.household.SelectHouseHoldAction" 
+  <bean id="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeListAction"
+    class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeListAction" 
     scope="prototype">    
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>           
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>                  
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeAction"
+    class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeAction" 
+    scope="prototype">    
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>             
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patientattribute.AddPatientAttributeAction"
+    class="org.hisp.dhis.patient.action.patientattribute.AddPatientAttributeAction" 
+    scope="prototype">    
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>      
   </bean>  
   
-  <bean id="org.hisp.dhis.patient.action.household.GetHouseHoldAction"
-    class="org.hisp.dhis.patient.action.household.GetHouseHoldAction" 
-    scope="prototype">      
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>         
-  </bean> 
+  <bean id="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeAction"
+    class="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeAction" 
+    scope="prototype">    
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>           
+  </bean>   	
   
-  <bean id="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction"
-    class="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction" 
-    scope="prototype">      
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>         
-  </bean>  
-	
-  <bean id="org.hisp.dhis.patient.action.household.ShowAddHouseHoldFormAction"
-    class="org.hisp.dhis.patient.action.household.ShowAddHouseHoldFormAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>
-  </bean>  	
+  <bean id="org.hisp.dhis.patient.action.patientattribute.UpdatePatientAttributeAction"
+    class="org.hisp.dhis.patient.action.patientattribute.UpdatePatientAttributeAction" 
+    scope="prototype">    
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>             
+  </bean>
 
-  <bean id="org.hisp.dhis.patient.action.household.ValidateHouseHoldAction"
-    class="org.hisp.dhis.patient.action.household.ValidateHouseHoldAction" 
+  <bean id="org.hisp.dhis.patient.action.patientattribute.ValidatePatientAttributeAction"
+    class="org.hisp.dhis.patient.action.patientattribute.ValidatePatientAttributeAction" 
     scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>
   </bean>
   
-  <bean id="org.hisp.dhis.patient.action.household.UpdateHouseHoldAction"
-    class="org.hisp.dhis.patient.action.household.UpdateHouseHoldAction" 
-    scope="prototype">
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>	
+  <!-- Patient Attribute value -->
+  
+  <bean id="org.hisp.dhis.patient.action.patientattribute.ShowUpdatePatientAttributeValueAction"
+    class="org.hisp.dhis.patient.action.patientattribute.ShowUpdatePatientAttributeValueAction" 
+    scope="prototype">    
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>    
+    <property name="patientAttributeValueService"
+      ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>
   </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patientattribute.SavePatientAttributeValueAction"
+    class="org.hisp.dhis.patient.action.patientattribute.SavePatientAttributeValueAction" 
+    scope="prototype">    
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>             
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>
+    <property name="patientAttributeValueService"
+      ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>
+  </bean>
+ 
   	
   <!-- Patient -->  
 		    
@@ -87,9 +90,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="patientIdentifierService"
       ref="org.hisp.dhis.patient.PatientIdentifierService"/> 
     <property name="programService"
-      ref="org.hisp.dhis.program.ProgramService"/>
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/> 
+      ref="org.hisp.dhis.program.ProgramService"/>     
   </bean>
   
   <bean id="org.hisp.dhis.patient.action.patient.AddPatientAction"
@@ -100,9 +101,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="patientService"
       ref="org.hisp.dhis.patient.PatientService"/>
     <property name="patientIdentifierService"
-      ref="org.hisp.dhis.patient.PatientIdentifierService"/>
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>          
+      ref="org.hisp.dhis.patient.PatientIdentifierService"/>  
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>           
   </bean> 
 	
   <bean id="org.hisp.dhis.patient.action.patient.RemovePatientAction"
@@ -116,9 +117,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.patient.action.patient.UpdatePatientAction" 
     scope="prototype">      
     <property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>         
+      ref="org.hisp.dhis.patient.PatientService"/>            
   </bean>
   
    <bean id="org.hisp.dhis.patient.action.patient.UpdateProgramEnrollmentAction"
@@ -138,9 +137,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>   
     <property name="patientIdentifierService"
-      ref="org.hisp.dhis.patient.PatientIdentifierService"/>
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>     
+      ref="org.hisp.dhis.patient.PatientIdentifierService"/>      
   </bean>
         
   <bean id="org.hisp.dhis.patient.action.patient.SelectPatientAction"
@@ -155,16 +152,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-  </bean>   
-  
-  <bean id="org.hisp.dhis.patient.action.patient.GetHouseHoldMembersAction"
-    class="org.hisp.dhis.patient.action.patient.GetHouseHoldMembersAction" 
-    scope="prototype">    
-    <property name="houseHoldService"
-      ref="org.hisp.dhis.household.HouseHoldService"/>
-    <property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>  
-  </bean>
+  </bean>  
   
   <bean id="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction"
     class="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction" 
@@ -327,9 +315,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.patient.action.programstage.ShowSortProgramStageFormAction" 
     scope="prototype">
     <property name="programService"
-      ref="org.hisp.dhis.program.ProgramService"/>
-     <property name="programStageService"
-      ref="org.hisp.dhis.program.ProgramStageService"/>             
+      ref="org.hisp.dhis.program.ProgramService"/>                  
   </bean>
   
   <bean id="org.hisp.dhis.patient.action.programstage.SaveProgramStageSortOrderAction"

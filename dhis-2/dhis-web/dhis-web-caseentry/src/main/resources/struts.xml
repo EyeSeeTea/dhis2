@@ -78,7 +78,7 @@
     
     <!-- Visit Plan -->
     
-    <action name="visitPlanSelect" class="org.hisp.dhis.caseentry.action.VisitPlanAction">
+    <action name="visitPlanSelect" class="org.hisp.dhis.caseentry.action.VisitPlanSelectAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="visitplan" type="chain">visitplan</result>
       <result name="success" type="velocity">/main.vm</result>
@@ -88,7 +88,7 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/visitPlan.js</param>      
     </action>   
     
-    <action name="visitplan" class="org.hisp.dhis.caseentry.action.NoAction">
+    <action name="visitplan" class="org.hisp.dhis.caseentry.action.VisitPlanAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/visitPlan.vm</param>

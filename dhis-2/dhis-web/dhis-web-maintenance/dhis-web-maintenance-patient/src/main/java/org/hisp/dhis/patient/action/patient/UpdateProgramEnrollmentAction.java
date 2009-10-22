@@ -140,10 +140,10 @@ public class UpdateProgramEnrollmentAction
                 
                 for( ProgramInstance programInstance : activeProgramInstances )
                 {
-                    programInstance.setCompleted( true );
                     programInstance.setEndDate( new Date() );
+                    programInstance.setCompleted( true );                   
                     
-                    programInstanceService.addProgramInstance( programInstance );
+                    programInstanceService.updateProgramInstance( programInstance );
                 }
             }
         }

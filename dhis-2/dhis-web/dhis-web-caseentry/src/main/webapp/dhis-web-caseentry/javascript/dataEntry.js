@@ -193,7 +193,7 @@ function valueFocus(e)
 		return;
 	}
 
-	deId = match[1];	
+	var deId = match[1];	
 	
 	//Get the data element name
 	var nameContainer = document.getElementById('value[' + deId + '].name');	

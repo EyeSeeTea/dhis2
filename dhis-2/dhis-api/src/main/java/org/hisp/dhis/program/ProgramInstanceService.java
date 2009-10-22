@@ -54,6 +54,8 @@ public interface ProgramInstanceService
     
     Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
     
+    Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed );
+    
     Collection<ProgramInstance> getProgramInstances( Patient patient );
     
     Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed );
@@ -61,5 +63,11 @@ public interface ProgramInstanceService
     Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
     
     Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );
+    
+    // ---------------------------------------------------------------------
+    // Initially assume to have a first visit for all programInstances
+    // ---------------------------------------------------------------------
+    
+    
     
 }

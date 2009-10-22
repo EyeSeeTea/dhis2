@@ -34,7 +34,6 @@ import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -55,14 +54,7 @@ public class ShowSortProgramStageFormAction
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
-    }
-
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
+    }  
 
     // -------------------------------------------------------------------------
     // Input/Output
@@ -129,7 +121,7 @@ public class ShowSortProgramStageFormAction
 
         program = programService.getProgram( id.intValue() );
 
-        programStages = programStageService.getProgramStagesByProgram( program );
+        programStages = program.getProgramStages();
 
         return SUCCESS;
     }

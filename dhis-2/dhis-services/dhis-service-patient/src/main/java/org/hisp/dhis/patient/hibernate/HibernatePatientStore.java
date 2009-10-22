@@ -30,11 +30,8 @@ package org.hisp.dhis.patient.hibernate;
 import java.util.Collection;
 import java.util.Date;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientStore;
 
@@ -47,24 +44,14 @@ public class HibernatePatientStore
 {    
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> get( Boolean isDead )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Patient.class );
-        criteria.add( Restrictions.eq( "isDead", isDead ) );
-
-        return criteria.list();
+    {        
+        return getCriteria( Restrictions.eq( "isDead", isDead ) ).list();
     }
     
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getByGender( String gender )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Patient.class );
-        criteria.add( Restrictions.eq( "gender", gender ) );
-
-        return criteria.list();
+        return getCriteria( Restrictions.eq( "gender", gender ) ).list();
     }
     
     @SuppressWarnings( "unchecked" )
@@ -81,10 +68,5 @@ public class HibernatePatientStore
             Restrictions.ilike( "middleName", "%" + name + "%" ) ).add(
             Restrictions.ilike( "lastName", "%" + name + "%" ) ) ).list();        
     }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getByHouseHold( HouseHold houseHold )
-    {
-        return getCriteria( Restrictions.eq( "houseHold", houseHold ) ).list();
-    }
+    
 }

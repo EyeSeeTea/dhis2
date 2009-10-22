@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.household.HouseHold;
 import org.hisp.dhis.program.Program;
 
 /**
@@ -67,11 +66,9 @@ public class Patient
 
     private Set<PatientIdentifier> identifiers = new HashSet<PatientIdentifier>();
 
-    private Set<Address> addresses = new HashSet<Address>();
-
     private Set<Program> programs = new HashSet<Program>();
-    
-    private HouseHold houseHold;
+
+    private Set<PatientAttribute> attributes = new HashSet<PatientAttribute>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -228,16 +225,6 @@ public class Patient
         this.identifiers = identifiers;
     }
 
-    public Set<Address> getAddresses()
-    {
-        return addresses;
-    }
-
-    public void setAddresses( Set<Address> addresses )
-    {
-        this.addresses = addresses;
-    }
-
     public Set<Program> getPrograms()
     {
         return programs;
@@ -246,6 +233,26 @@ public class Patient
     public void setPrograms( Set<Program> programs )
     {
         this.programs = programs;
+    }
+
+    public void setRegistrationDate( Date registrationDate )
+    {
+        this.registrationDate = registrationDate;
+    }
+
+    public Date getRegistrationDate()
+    {
+        return registrationDate;
+    }
+
+    public Set<PatientAttribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public void setAttributes( Set<PatientAttribute> attributes )
+    {
+        this.attributes = attributes;
     }
 
     // -------------------------------------------------------------------------
@@ -277,26 +284,11 @@ public class Patient
         }
 
         return age;
-
     }
 
-    public void setRegistrationDate( Date registrationDate )
+    public String getFullName()
     {
-        this.registrationDate = registrationDate;
+        return firstName + " " + middleName + " " + lastName;
     }
 
-    public Date getRegistrationDate()
-    {
-        return registrationDate;
-    }
-    
-    public void setHouseHold( HouseHold houseHold )
-    {
-        this.houseHold = houseHold;
-    }
-    
-    public HouseHold getHouseHold()
-    {
-        return houseHold;
-    }
 }

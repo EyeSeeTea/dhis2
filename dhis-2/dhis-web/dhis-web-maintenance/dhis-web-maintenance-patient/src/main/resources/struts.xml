@@ -14,73 +14,75 @@
       <param name="menu">/dhis-web-maintenance-patient/menu.vm</param> 
     </action>	  
     
-    <!-- HouseHold -->
+    <!-- PatientAttribute -->   
     
-    <action name="household" class="org.hisp.dhis.patient.action.household.SelectHouseHoldAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
-      <result name="householdform" type="chain">householdform</result>
+    <action name="patientAttribute" class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeListAction">      
       <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/selectHouseHold.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>      
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js</param>	           
+      <param name="page">/dhis-web-maintenance-patient/patientAttribute.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>        
+      <param name="javascripts">javascript/patientAttribute.js</param>            
     </action>
     
-    <action name="householdform" class="org.hisp.dhis.patient.action.household.GetHouseHoldListAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/houseHold.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>        
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/houseHold.js</param>            
-    </action>
-    
-    <action name="getHouseHold" class="org.hisp.dhis.patient.action.household.GetHouseHoldAction">
-      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseHouseHold.vm</result>
+    <action name="getPatientAttribute" class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responsePatientAttribute.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
     
-    <action name="removeHouseHold" class="org.hisp.dhis.patient.action.household.RemoveHouseHoldAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>      
-      <result name="success" type="redirect">household.action</result>      
-      <param name="requiredAuthorities">F_HOUSEHOLD_DELETE</param>      
+    <action name="removePatientAttribute" class="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeAction">      
+      <result name="success" type="redirect">patientAttribute.action</result>      
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTE_DELETE</param>      
     </action>
     
-    <action name="addHouseHold" class="org.hisp.dhis.patient.action.household.AddHouseHoldAction">
-      <result name="success" type="redirect">household.action</result>
-      <param name="requiredAuthorities">F_HOUSEHOLD_ADD</param>
+    <action name="addPatientAttribute" class="org.hisp.dhis.patient.action.patientattribute.AddPatientAttributeAction">
+      <result name="success" type="redirect">patientAttribute.action</result>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTE_ADD</param>
     </action>
     
-    <action name="showAddHouseHoldForm" class="org.hisp.dhis.patient.action.household.ShowAddHouseHoldFormAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
+    <action name="showAddPatientAttributeForm" class="org.hisp.dhis.patient.action.NoAction">      
       <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/addHouseHoldForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>      
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/houseHold.js</param>
-      <param name="requiredAuthorities">F_HOUSEHOLD_ADD</param>      
+      <param name="page">/dhis-web-maintenance-patient/addPatientAttributeForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>      
+      <param name="javascripts">javascript/patientAttribute.js</param>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTE_ADD</param>      
     </action>
     
-    <action name="showUpdateHouseHoldForm" class="org.hisp.dhis.patient.action.household.GetHouseHoldAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
+    <action name="showUpdatePatientAttributeForm" class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeAction">      
       <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/updateHouseHoldForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>      
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/houseHold.js</param>
-      <param name="requiredAuthorities">F_HOUSEHOLD_UPDATE</param>      
+      <param name="page">/dhis-web-maintenance-patient/updatePatientAttributeForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>      
+      <param name="javascripts">javascript/patientAttribute.js</param>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>      
     </action>
     
-    <action name="updateHouseHold" class="org.hisp.dhis.patient.action.household.UpdateHouseHoldAction">
-      <interceptor-ref name="organisationUnitTreeStack"/>
-      <result name="success" type="redirect">household.action</result>
-      <param name="requiredAuthorities">F_HOUSEHOLD_UPDATE</param>
+    <action name="updatePatientAttribute" class="org.hisp.dhis.patient.action.patientattribute.UpdatePatientAttributeAction">      
+      <result name="success" type="redirect">patientAttribute.action</result>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>
     </action>
     
-    <action name="validateHouseHold" class="org.hisp.dhis.patient.action.household.ValidateHouseHoldAction">
+    <action name="validatePatientAttribute" class="org.hisp.dhis.patient.action.patientattribuet.ValidatePatientAttributeAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
-    </action>      
+    </action>   
+    
+    <!-- PatientAttributeValue -->
+    
+    <action name="showUpdatePatientAttributeValueForm" class="org.hisp.dhis.patient.action.patientattribute.ShowUpdatePatientAttributeValueAction">      
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/updatePatientAttributeValueForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>      
+      <param name="javascripts">javascript/patientAttributeValue.js</param>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_UPDATE</param>      
+    </action>
+    
+    <action name="savePatientAttributeValue" class="org.hisp.dhis.patient.action.patientattribute.SavePatientAttributeValueAction">      
+      <result name="success" type="velocity">status.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_ADD,F_PATIENTATTRIBUTEVALUE_UPDATE,F_PATIENTATTRIBUTEVALUE_DELETE</param>
+    </action>   
 	  
-	<!-- Patient -->	
+    <!-- Patient -->	
     
     <action name="patient" class="org.hisp.dhis.patient.action.patient.SelectPatientAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
@@ -118,7 +120,7 @@
     </action>
     
     <action name="addPatient" class="org.hisp.dhis.patient.action.patient.AddPatientAction">
-      <result name="success" type="redirect">patient.action</result>
+      <result name="success" type="redirect">patientform.action</result>
       <param name="requiredAuthorities">F_PATIENT_ADD</param>
     </action>
     
@@ -142,7 +144,7 @@
     
     <action name="updatePatient"
       class="org.hisp.dhis.patient.action.patient.UpdatePatientAction">
-      <result name="success" type="redirect">patient.action</result>
+      <result name="success" type="redirect">patientform.action</result>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>
     </action>
     

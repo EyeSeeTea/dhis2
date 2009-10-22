@@ -46,9 +46,7 @@ public interface ProgramStageService
     
     void updateProgramStage( ProgramStage programStage );
     
-    ProgramStage getProgramStage( int id );    
-    
-    Collection<ProgramStage> getProgramStagesByProgram( Program program );
+    ProgramStage getProgramStage( int id );   
     
     Collection<ProgramStage> getAllProgramStages();
 }

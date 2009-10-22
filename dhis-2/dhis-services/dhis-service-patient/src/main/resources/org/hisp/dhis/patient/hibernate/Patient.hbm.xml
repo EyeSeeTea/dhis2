@@ -24,15 +24,10 @@
 		
 		<property name="isDead" column="isdead" not-null="true"/>
 		
-		<property name="gender" column="gender" length="5"/>
+		<property name="gender" column="gender" length="5"/>	
 		
-		<set name="addresses" inverse="true" cascade="all-delete-orphan" table="patient_addresses">
-			<key not-null="true" column="patientid"/>
-			<one-to-many class="org.hisp.dhis.patient.Address"/>
-		</set>
-		
-		<set name="identifiers" inverse="true" cascade="all-delete-orphan" table="patient_identifiers">
-			<key not-null="true" column="patientid"/>
+		<set name="identifiers" inverse="true" cascade="all">
+			<key column="patientid"/>
 			<one-to-many class="org.hisp.dhis.patient.PatientIdentifier"/>
 		</set>
         
@@ -42,13 +37,11 @@
           column="programid" foreign-key="fk_patient_programid"/>
     </set>
     
-    <join table="patient_household" 
-        optional="true">
-        <key column="patientid" unique="true"/>
-        <many-to-one name="houseHold"
-            column="householdid" 
-            not-null="true"/>
-    </join>
+    <set name="attributes" table="patient_attributes">
+      <key column="patientid"/>      
+      <many-to-many class="org.hisp.dhis.patient.PatientAttribute"
+          column="patientattributeid" foreign-key="fk_patient_patientattributeid"/>
+    </set>
 		
 	</class>
 </hibernate-mapping>

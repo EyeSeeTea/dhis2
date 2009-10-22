@@ -248,7 +248,7 @@ public class DataRecordingSelectAction
         // Load ProgramStages
         // ---------------------------------------------------------------------
 
-        programStages = programStageService.getProgramStagesByProgram( selectedProgram );
+        programStages = selectedProgram.getProgramStages();
 
         // ---------------------------------------------------------------------
         // Validate selected ProgramStage

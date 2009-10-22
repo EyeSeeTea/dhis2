@@ -2,7 +2,7 @@
 <h2>$i18n.getString( "patient_management" )&nbsp;</h2>
 <ul>
 	<li><a href="patient.action">$i18n.getString( "patient_management" )&nbsp;</a></li>		
-	<li><a href="household.action">$i18n.getString( "household_management" )&nbsp;</a></li>
+	<li><a href="patientAttribute.action">$i18n.getString( "patient_attribute_management" )&nbsp;</a></li>
 </ul>
 
 <h2>$i18n.getString( "program_management" )&nbsp;</h2>

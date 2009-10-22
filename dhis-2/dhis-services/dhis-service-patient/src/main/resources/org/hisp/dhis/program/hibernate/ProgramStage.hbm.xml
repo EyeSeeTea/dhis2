@@ -20,7 +20,7 @@
     <property name="maxDaysFromStart" column="maxdaysfromstart"/>
     
     <many-to-one name="program" class="org.hisp.dhis.program.Program"
-        column="programid" not-null="true" foreign-key="fk_programstage_programid"/>    
+        column="programid" not-null="true"/>    
     
     <set name="dataElements" table="programstage_dataelements">
       <key column="programstageid"/>

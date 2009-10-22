@@ -111,6 +111,12 @@ public class HibernatePatientDataValueStore
     {
         return getCriteria( Restrictions.eq( "programInstance", programInstance ) ).list();
     }
+    
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientDataValue> get( Collection<ProgramInstance> programInstances )
+    {
+        return getCriteria( Restrictions.in( "programInstance", programInstances ) ).list();
+    }
 
     @SuppressWarnings( "unchecked" )
     public Collection<PatientDataValue> get( ProgramStage programStage )

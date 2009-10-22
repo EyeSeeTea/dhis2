@@ -62,6 +62,14 @@ public class HibernateProgramInstanceStore
             Restrictions.eq( "program", program ),            
             Restrictions.eq( "completed", completed ) ).list();
     }
+    
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> get( Collection<Program> programs, boolean completed )
+    {
+        return getCriteria( 
+            Restrictions.in( "program", programs ),            
+            Restrictions.eq( "completed", completed ) ).list();
+    }
 
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> get( Patient patient )
@@ -92,5 +100,5 @@ public class HibernateProgramInstanceStore
             Restrictions.eq( "patient", patient ),
             Restrictions.eq( "program", program ),
             Restrictions.eq( "completed", completed ) ).list();
-    }
+    }    
 }

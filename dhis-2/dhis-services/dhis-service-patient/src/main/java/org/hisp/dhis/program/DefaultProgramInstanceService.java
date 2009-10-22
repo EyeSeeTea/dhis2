@@ -89,6 +89,11 @@ public class DefaultProgramInstanceService
     {
         return programInstanceStore.get( program );
     }
+    
+    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed )
+    {
+        return programInstanceStore.get( programs, completed );
+    }
 
     public Collection<ProgramInstance> getProgramInstances( Program program, boolean completed )
     {

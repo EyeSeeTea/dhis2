@@ -31,7 +31,7 @@
 		  	<td></td>
 		  	<td></td>
 		  	<td></td>
-		  	<td colspan="4" style="text-align:right">			
+		  	<td colspan="5" style="text-align:right">			
 				<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='patient.action'" style="width:10em">
 			</td>
           <tr>
@@ -40,7 +40,7 @@
             <th>$i18n.getString( "last_name" )</th>            
             <th>$i18n.getString( "gender" )</th>
             <th>$i18n.getString( "date_of_birth" )</th>            
-            <th colspan="4">$i18n.getString( "operations" )</th>
+            <th colspan="5">$i18n.getString( "operations" )</th>
           </tr>
           
           <tbody id="list">	
@@ -70,6 +70,10 @@
                 
                 <td style="text-align:center"#alternate( $mark )>
                   <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
+                </td>
+                
+                <td style="text-align:center"#alternate( $mark )>
+                  <a href="showUpdatePatientAttributeValueForm.action?id=$patient.id" title="$i18n.getString( "edit_attribute_values" )"><img src="../images/custom_value.png" alt="$i18n.getString( "edit_attribute_values" )"></a>
                 </td>                
  
                 <td style="text-align:center"#alternate( $mark )>

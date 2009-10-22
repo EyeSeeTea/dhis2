@@ -30,8 +30,6 @@ import java.util.Date;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.i18n.I18nFormat;
 
 import com.opensymphony.xwork2.Action;
@@ -60,13 +58,6 @@ public class UpdatePatientAction
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
-    }
-
-    private HouseHoldService houseHoldService;
-
-    public void setHouseHoldService( HouseHoldService houseHoldService )
-    {
-        this.houseHoldService = houseHoldService;
     }
 
     // -------------------------------------------------------------------------
@@ -124,53 +115,16 @@ public class UpdatePatientAction
     }
 
     // -------------------------------------------------------------------------
-    // Input - household
+    // Output - making the patient available so that its attributes can be
+    // edited
     // -------------------------------------------------------------------------
 
-    private Integer houseHoldSelectId;
+    private Patient patient;
 
-    public void setHouseHoldSelectId( Integer houseHoldSelectId )
+    public Patient getPatient()
     {
-        this.houseHoldSelectId = houseHoldSelectId;
+        return patient;
     }
-
-    /*
-     * //
-     * -------------------------------------------------------------------------
-     * // Input - address //
-     * -------------------------------------------------------------------------
-     * 
-     * private String address1;
-     * 
-     * public void setAddress1( String address1 ) { this.address1 = address1; }
-     * 
-     * private String address2;
-     * 
-     * public void setAddress2( String address2 ) { this.address2 = address2; }
-     * 
-     * private String landMark;
-     * 
-     * public void setLandMark( String landMark ) { this.landMark = landMark; }
-     * 
-     * private String cityVillage;
-     * 
-     * public void setCityVillage( String cityVillage ) { this.cityVillage =
-     * cityVillage; }
-     * 
-     * private String stateProvince;
-     * 
-     * public void setStateProvince( String stateProvince ) { this.stateProvince
-     * = stateProvince; }
-     * 
-     * private String country;
-     * 
-     * public void setCountry( String country ) { this.country = country; }
-     * 
-     * private String postalCode;
-     * 
-     * public void setPostalCode( String postalCode ) { this.postalCode =
-     * postalCode; }
-     */
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -184,19 +138,13 @@ public class UpdatePatientAction
         // Update patient
         // ---------------------------------------------------------------------
 
-        Patient patient = patientService.getPatient( id );
+        patient = patientService.getPatient( id );
         patient.setFirstName( firstName );
         patient.setMiddleName( middleName );
         patient.setLastName( lastName );
         patient.setGender( gender );
         patient.setBirthDate( format.parseDate( birthDate ) );
         patient.setRegistrationDate( new Date() );
-
-        if ( houseHoldSelectId != null )
-        {
-            HouseHold houseHold = houseHoldService.getHouseHold( houseHoldSelectId );
-            patient.setHouseHold( houseHold );
-        }
 
         patientService.updatePatient( patient );
 

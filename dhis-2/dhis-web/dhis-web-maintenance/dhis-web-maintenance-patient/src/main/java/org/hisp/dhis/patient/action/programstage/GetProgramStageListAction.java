@@ -110,15 +110,15 @@ public class GetProgramStageListAction
         throws Exception
     {
 
-        programs = programService.getAllPrograms();
+        programs = programService.getAllPrograms();       
 
         programStages = programStageService.getAllProgramStages();
 
         if ( id != null )
         {
             Program program = programService.getProgram( id );
-
-            programStages = programStageService.getProgramStagesByProgram( program );
+            
+            programStages = program.getProgramStages();           
 
         }
 

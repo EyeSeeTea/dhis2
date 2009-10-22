@@ -3,6 +3,9 @@
 																		
 <form id="sortProgramStageForm" name "sortProgramStageForm" action="saveProgramStageSortOder.action" method="post">
 
+<div style="display:inline">
+  <input type="hidden" id="id" name="id" value="$program.id">
+</div>
 <table>
     
     <tr><td></td></tr>

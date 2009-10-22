@@ -174,9 +174,8 @@ public class ProgramStage
     public void setStageInProgram( int stageInProgram )
     {
         this.stageInProgram = stageInProgram;
-    }   
-
-
+    }
+    
     /**
      * @return the minDaysFromStart
      */

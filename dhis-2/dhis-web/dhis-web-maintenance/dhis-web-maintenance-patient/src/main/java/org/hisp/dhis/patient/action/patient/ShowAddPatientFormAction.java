@@ -27,13 +27,8 @@
 
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
-import org.hisp.dhis.household.HouseHold;
-import org.hisp.dhis.household.HouseHoldService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
@@ -66,15 +61,8 @@ public class ShowAddPatientFormAction
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
-    }
+    }    
     
-    private HouseHoldService houseHoldService;
-
-    public void setHouseHoldService( HouseHoldService houseHoldService )
-    {
-        this.houseHoldService = houseHoldService;
-    }
-
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -93,13 +81,7 @@ public class ShowAddPatientFormAction
         return identifier;
     }
     
-    private Collection<HouseHold> houseHolds = new ArrayList<HouseHold>();
-
-    public Collection<HouseHold> getHouseHolds()
-    {
-        return houseHolds;
-    }
-
+  
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -108,9 +90,7 @@ public class ShowAddPatientFormAction
     {
         OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );
-        
-        houseHolds = houseHoldService.getHouseHoldsForOrgUnit( organisationUnit );
+        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );        
 
         return SUCCESS;
     }

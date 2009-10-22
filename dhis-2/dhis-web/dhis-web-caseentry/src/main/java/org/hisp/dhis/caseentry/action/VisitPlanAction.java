@@ -27,8 +27,22 @@
 
 package org.hisp.dhis.caseentry.action;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patientdatavalue.PatientDataValue;
+import org.hisp.dhis.patientdatavalue.PatientDataValueService;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
 
 import com.opensymphony.xwork2.Action;
 
@@ -39,7 +53,6 @@ import com.opensymphony.xwork2.Action;
 public class VisitPlanAction
     implements Action
 {
-    private static final String VISIT_PLAN = "visitplan";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -50,6 +63,27 @@ public class VisitPlanAction
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
+    }
+
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
+    private PatientDataValueService patientDataValueService;
+
+    public void setPatientDataValueService( PatientDataValueService patientDataValueService )
+    {
+        this.patientDataValueService = patientDataValueService;
     }
 
     // -------------------------------------------------------------------------
@@ -63,6 +97,20 @@ public class VisitPlanAction
         return organisationUnit;
     }
 
+    private Map<Patient, Set<ProgramStage>> visitsByPatients = new HashMap<Patient, Set<ProgramStage>>();
+
+    public Map<Patient, Set<ProgramStage>> getVisitsByPatients()
+    {
+        return visitsByPatients;
+    }
+    
+    private Collection<Patient> patients;
+    
+    public Collection<Patient> getPatients()
+    {
+        return patients;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -70,17 +118,84 @@ public class VisitPlanAction
     public String execute()
         throws Exception
     {
+
+        Map<ProgramInstance, ProgramStage> visitsByProgramInstances = new HashMap<ProgramInstance, ProgramStage>();
+
         // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
+        // Get the facility planning to do a visit
         // ---------------------------------------------------------------------
 
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        if ( organisationUnit == null )
+        // ---------------------------------------------------------------------
+        // Get all the programs the facility is providing
+        // ---------------------------------------------------------------------
+
+        Collection<Program> programs = programService.getPrograms( organisationUnit );
+
+        // ---------------------------------------------------------------------
+        // For all the programs a facility is servicing get the active instances
+        // completed = false
+        // ---------------------------------------------------------------------
+
+        Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( programs, false );
+
+        // ---------------------------------------------------------------------
+        // Initially assume to have a first visit for all programInstances
+        // ---------------------------------------------------------------------
+
+        for ( ProgramInstance programInstance : programInstances )
         {
-            return SUCCESS;
+            ProgramStage nextStage = programInstance.getProgram().getProgramStageByStage( 1 );
+
+            visitsByProgramInstances.put( programInstance, nextStage );
         }
 
-        return VISIT_PLAN;
+        // ---------------------------------------------------------------------
+        // For each of these active instances, see at which stage they are
+        // currently
+        // ---------------------------------------------------------------------
+
+        Collection<PatientDataValue> patientDataValues = patientDataValueService
+            .getPatientDataValues( programInstances );
+
+        for ( PatientDataValue patientDataValue : patientDataValues )
+        {
+            ProgramStage currentStage = patientDataValue.getProgramStage();
+
+            ProgramStage nextStage = patientDataValue.getProgramStage().getProgram().getProgramStageByStage(
+                currentStage.getStageInProgram() + 1 );
+
+            if ( nextStage != null )
+            {
+                visitsByProgramInstances.put( patientDataValue.getProgramInstance(), nextStage );
+            }
+            if ( nextStage == null && visitsByProgramInstances.containsKey( patientDataValue.getProgramInstance() ) )
+            {
+                // This patient has completed all services, programInstance
+                // should therefore be closed!
+                visitsByProgramInstances.remove( patientDataValue.getProgramInstance() );
+            }
+        }
+
+        for ( ProgramInstance programInstance : visitsByProgramInstances.keySet() )
+        {
+            if ( visitsByPatients.containsKey( programInstance.getPatient() ) )
+            {
+                visitsByPatients.get( programInstance.getPatient() ).add(
+                    visitsByProgramInstances.get( programInstance ) );
+            }
+            else
+            {
+                Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+                programStages.add( visitsByProgramInstances.get( programInstance ) );
+
+                visitsByPatients.put( programInstance.getPatient(), programStages );
+            }
+        }        
+        
+        patients = visitsByPatients.keySet();
+
+        return SUCCESS;
     }
 }

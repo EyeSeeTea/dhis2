@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.household.HouseHold;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -50,5 +49,5 @@ public interface PatientStore
 
     Collection<Patient> getByNames( String name );
     
-    Collection<Patient> getByHouseHold( HouseHold houseHold );
+    //Collection<Patient> getByAttribute( PatientAttribute attribute );
 }

@@ -46,6 +46,8 @@ public interface ProgramInstanceStore
     
     Collection<ProgramInstance> get( Program program, boolean completed );
     
+    Collection<ProgramInstance> get( Collection<Program> programs, boolean completed );
+    
     Collection<ProgramInstance> get( Patient patient );
     
     Collection<ProgramInstance> get( Patient patient, boolean completed );
