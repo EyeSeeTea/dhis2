@@ -1,4 +1,4 @@
-#parse( "/dhis-web-maintenance-patient/selectPatient.vm" )
+#parse( "/dhis-web-maintenance-patient/patient.vm" )
 
 <table>
 	<tr>
@@ -19,6 +19,7 @@
           <col>
           <col>
           <col>
+          <col width="20">
           <col width="20">
           <col width="20">
           <col width="20">
@@ -45,7 +46,7 @@
           
           <tbody id="list">	
           #set( $mark = false )
-          
+        
           #foreach( $patient in $patients )
           	<tr #alternate( $mark )>
 				<td>			
@@ -65,15 +66,15 @@
 				</td>
 				
 				<td style="text-align:center"#alternate( $mark )>
-                  <a href="showProgramEnrollmentForm.action?id=$patient.id" title="$i18n.getString( "manage_program_enrollment" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_program_enrollment" )"></a>                  
+                  <a href="javascript:editWindow( 'showProgramEnrollmentForm.action', '$patient.id' )" title="$i18n.getString( "manage_program_enrollment" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_program_enrollment" )"></a>                  
                 </td>                
                 
-                <td style="text-align:center"#alternate( $mark )>
+                <td style="text-align:center"#alternate( $mark )>                  
                   <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>
-                  <a href="showUpdatePatientAttributeValueForm.action?id=$patient.id" title="$i18n.getString( "edit_attribute_values" )"><img src="../images/custom_value.png" alt="$i18n.getString( "edit_attribute_values" )"></a>
+                  <a href="javascript:editWindow( 'showUpdatePatientAttributeValueForm.action', '$patient.id' )" title="$i18n.getString( "edit_attribute_values" )"><img src="../images/custom_value.png" alt="$i18n.getString( "edit_attribute_values" )"></a>
                 </td>                
  
                 <td style="text-align:center"#alternate( $mark )>

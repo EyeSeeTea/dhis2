@@ -162,8 +162,7 @@ function programStageReceived( programStageElement )
 	setFieldValue( 'nameField', getElementValue( programStageElement, 'name' ) );	
     setFieldValue( 'descriptionField', getElementValue( programStageElement, 'description' ) );
     setFieldValue( 'stageInProgramField', getElementValue( programStageElement, 'stageInProgram' ) );   
-    setFieldValue( 'minDaysFromStartField', getElementValue( programStageElement, 'minDaysFromStart' ) );
-    setFieldValue( 'maxDaysFromStartField', getElementValue( programStageElement, 'maxDaysFromStart' ) );
+    setFieldValue( 'minDaysFromStartField', getElementValue( programStageElement, 'minDaysFromStart' ) );    
     setFieldValue( 'dataElementCountField', getElementValue( programStageElement, 'dataElementCount' ) );   
    
     showDetails();
@@ -232,44 +231,11 @@ function validateAddProgramStage()
 		}		
 	}
 	
-	var maxDaysFromStartField = document.getElementById( 'maxDaysFromStart' );
-	
-	if( !isInt( maxDaysFromStartField.value ) )
-	{
-		window.alert( i18n_value_must_integer );
-		maxDaysFromStartField.select();
-		maxDaysFromStartField.focus();
-		
-		return false;
-	}
-	
-	if( isInt( maxDaysFromStartField.value ) )
-	{
-		if( maxDaysFromStartField.value < 0 )
-		{
-			window.alert( i18n_value_must_positive );
-			maxDaysFromStartField.select();
-			maxDaysFromStartField.focus();
-			
-			return false;
-		}		
-	}
-	
-	if( maxDaysFromStartField.value < minDaysFromStartField.value )
-	{
-		window.alert( i18n_invalid_min_max_days );
-		
-		minDaysFromStartField.focus();
-		maxDaysFromStartField.focus();
-		
-		return false;
-	}
 	
 	var url = 'validateProgramStage.action?' +
 		'nameField=' + getFieldValue( 'nameField' ) +			
 		'&description=' + getFieldValue( 'description' ) +		
-		'&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' ) +	                
-		'&maxDaysFromStart=' + getFieldValue( 'maxDaysFromStart' );
+		'&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' );
 
 	var request = new Request();
 		request.setResponseTypeXML( 'message' );
@@ -330,45 +296,11 @@ function validateUpdateProgramStage()
 		}		
 	}
 	
-	var maxDaysFromStartField = document.getElementById( 'maxDaysFromStart' );
-	
-	if( !isInt( maxDaysFromStartField.value ) )
-	{
-		window.alert( i18n_value_must_integer );
-		maxDaysFromStartField.select();
-		maxDaysFromStartField.focus();
-		
-		return false;
-	}
-	
-	if( isInt( maxDaysFromStartField.value ) )
-	{
-		if( maxDaysFromStartField.value < 0 )
-		{
-			window.alert( i18n_value_must_positive );
-			maxDaysFromStartField.select();
-			maxDaysFromStartField.focus();
-			
-			return false;
-		}		
-	}
-	
-	if( maxDaysFromStartField.value < minDaysFromStartField.value )
-	{
-		window.alert( i18n_invalid_min_max_days );
-		
-		minDaysFromStartField.focus();
-		maxDaysFromStartField.focus();
-		
-		return false;
-	}
-	
     var url = 'validateProgramStage.action?' + 
     		'id=' + getFieldValue( 'id' ) +
     		'&nameField=' + getFieldValue( 'nameField' ) +			
 	        '&description=' + getFieldValue( 'description' ) +	        
-	        '&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' ) +	                
-	        '&maxDaysFromStart=' + getFieldValue( 'maxDaysFromStart' );
+	        '&minDaysFromStart=' + getFieldValue( 'minDaysFromStart' );
 	
 	var request = new Request();
     request.setResponseTypeXML( 'message' );

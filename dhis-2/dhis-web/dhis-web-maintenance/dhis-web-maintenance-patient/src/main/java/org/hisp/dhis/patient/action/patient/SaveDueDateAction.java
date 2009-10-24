@@ -26,14 +26,11 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.Collection;
-
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramInstanceStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,74 +38,60 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class GetPatientAction
+public class SaveDueDateAction
     implements Action
 {
+
+    private static final Log LOG = LogFactory.getLog( SaveDueDateAction.class );
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
+    private ProgramInstanceStageService programInstanceStageService;
 
-    public void setPatientService( PatientService patientService )
+    public void setProgramInstanceStageService( ProgramInstanceStageService programInstanceStageService )
     {
-        this.patientService = patientService;
+        this.programInstanceStageService = programInstanceStageService;
     }
 
-    private PatientIdentifierService patientIdentifierService;
+    private I18nFormat format;
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    public void setFormat( I18nFormat format )
     {
-        this.patientIdentifierService = patientIdentifierService;
+        this.format = format;
     }
 
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-    
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private String dueDate;
 
-    public void setId( int id )
+    public void setDueDate( String dueDate )
     {
-        this.id = id;
+        this.dueDate = dueDate;
     }
 
-    private Patient patient;
+    private int programInstanceStageId;
 
-    public Patient getPatient()
+    public void setProgramInstanceStageId( int programInstanceStageId )
     {
-        return patient;
+        this.programInstanceStageId = programInstanceStageId;
     }
 
-    private Integer age;
-
-    public Integer getAge()
+    public int getProgramInstanceStageId()
     {
-        return age;
+        return programInstanceStageId;
     }
 
-    private PatientIdentifier patientIdentifier;
+    private int statusCode;
 
-    public PatientIdentifier getPatientIdentifier()
+    public int getStatusCode()
     {
-        return patientIdentifier;
+        return statusCode;
     }
 
-    private Collection<Program> programs;
-
-    public Collection<Program> getPrograms()
-    {
-        return programs;
-    }
-   
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -117,15 +100,28 @@ public class GetPatientAction
         throws Exception
     {
 
-        patient = patientService.getPatient( id );
+        ProgramInstanceStage programInstanceStage = programInstanceStageService
+            .getProgramInstanceStage( programInstanceStageId );
 
-        age = patient.getAge();
+        if ( programInstanceStage != null )
+        {
+            if ( dueDate != null && dueDate.trim().length() == 0 )
+            {
+                dueDate = null;
+            }
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
+            if ( dueDate != null )
+            {
+                dueDate = dueDate.trim();
 
-        programs = programService.getAllPrograms();               
+                programInstanceStage.setDueDate( format.parseDate( dueDate ) );
+
+                programInstanceStageService.updateProgramInstanceStage( programInstanceStage );
+
+                LOG.debug( "Updating PatientDataValue, value added/changed" );
+            }
+        }
 
         return SUCCESS;
-
     }
 }

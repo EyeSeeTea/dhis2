@@ -821,15 +821,14 @@ public abstract class DhisConvenienceTest
         return user;
     }
 
-    public static ProgramStage createProrgamStage( char uniqueCharacter, int stage, int minDays, int maxDays )
+    public static ProgramStage createProrgamStage( char uniqueCharacter, int stage, int minDays )
     {
         ProgramStage programStage = new ProgramStage();
 
         programStage.setName( "name" + uniqueCharacter );
         programStage.setDescription( "description" + uniqueCharacter );
         programStage.setStageInProgram( stage );
-        programStage.setMinDaysFromStart( minDays );
-        programStage.setMaxDaysFromStart( maxDays );
+        programStage.setMinDaysFromStart( minDays );        
 
         return programStage;
     }

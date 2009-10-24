@@ -43,6 +43,8 @@ public class ProgramInstanceStage
     
     private ProgramStage programStage;
     
+    private int stageInProgram;
+    
     private Date dueDate;
 
     private Date executionDate;
@@ -183,6 +185,22 @@ public class ProgramInstanceStage
     public void setExecutionDate( Date executionDate )
     {
         this.executionDate = executionDate;
+    }
+
+    /**
+     * @param stageInProgram the stageInProgram to set
+     */
+    public void setStageInProgram( int stageInProgram )
+    {
+        this.stageInProgram = stageInProgram;
+    }
+
+    /**
+     * @return the stageInProgram
+     */
+    public int getStageInProgram()
+    {
+        return stageInProgram;
     }   
 
 }

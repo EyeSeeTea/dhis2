@@ -73,14 +73,7 @@ public class UpdateProgramAction
     public void setDescription( String description )
     {
         this.description = description;
-    }
-
-    private Integer numberOfDays;
-
-    public void setNumberOfDays( Integer numberOfDays )
-    {
-        this.numberOfDays = numberOfDays;
-    }
+    }    
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -89,14 +82,8 @@ public class UpdateProgramAction
     public String execute()
         throws Exception
     {
-        Program program = programService.getProgram( id );
-        
-        if( numberOfDays == null )
-        {
-            numberOfDays = 0;            
-        }
-
-        program.setNumberOfDays( numberOfDays.intValue() );        
+        Program program = programService.getProgram( id );     
+            
         program.setName( nameField );
         program.setDescription( description );
 

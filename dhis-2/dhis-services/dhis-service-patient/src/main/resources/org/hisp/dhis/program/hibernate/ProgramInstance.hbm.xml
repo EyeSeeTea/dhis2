@@ -10,7 +10,9 @@
       <generator class="native"/>
     </id>
 
-    <property name="startDate" column="startdate" not-null="true"/>
+    <property name="dateOfIncident" column="dateofincident" not-null="true"/>
+    
+    <property name="enrollmentDate" column="enrollmentdate" not-null="true"/>    
     
     <property name="endDate" column="enddate"/>   
     
@@ -22,7 +24,7 @@
     <many-to-one name="program" class="org.hisp.dhis.program.Program"
         column="programid" not-null="true" foreign-key="fk_programinstance_programid"/>
     
-    <set name="programInstanceStages" inverse="true" cascade="all">
+    <set name="programInstanceStages" order-by="stageinprogram" inverse="true" cascade="all">
       <key column="programinstanceid"/>      
       <one-to-many class="org.hisp.dhis.program.ProgramInstanceStage"/>
     </set>    	

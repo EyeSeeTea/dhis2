@@ -47,9 +47,7 @@ public class ProgramStage
 
     private int stageInProgram;
 
-    private int minDaysFromStart;
-
-    private int maxDaysFromStart;
+    private int minDaysFromStart;    
     
     private Program program;
 
@@ -190,22 +188,6 @@ public class ProgramStage
     public void setMinDaysFromStart( int minDaysFromStart )
     {
         this.minDaysFromStart = minDaysFromStart;
-    }
-
-    /**
-     * @return the maxDaysFromStart
-     */
-    public int getMaxDaysFromStart()
-    {
-        return maxDaysFromStart;
-    }
-
-    /**
-     * @param maxDaysFromStart the maxDaysFromStart to set
-     */
-    public void setMaxDaysFromStart( int maxDaysFromStart )
-    {
-        this.maxDaysFromStart = maxDaysFromStart;
     }    
 
     /**

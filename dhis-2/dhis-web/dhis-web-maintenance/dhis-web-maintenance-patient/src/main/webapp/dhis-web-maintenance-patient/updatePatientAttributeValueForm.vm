@@ -23,7 +23,7 @@
     <tr>
         <td><strong>$i18n.getString( "date_of_birth" ):</strong></td>
         <td>            
-            $encoder.htmlEncode( $patient.birthDate )
+            $format.formatDate( $patient.birthDate )
         </td>
     </tr>
     <tr>
@@ -31,13 +31,7 @@
         <td>            
             $encoder.htmlEncode( $age )
         </td>
-    </tr> 
-    <tr>
-        <td><strong>$i18n.getString( "registration_date" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $patient.registrationDate )
-        </td>
-    </tr>
+    </tr>     
     <tr>
         <td>&nbsp;</td>
     </tr>
@@ -111,7 +105,7 @@
 </table>
 
 <p>
-    <input type="button" value="$i18n.getString( "back" )" onclick="window.location.href='patient.action'" style="width:10em">
+    <input type="button" value="$i18n.getString( "close" )" onclick="window.close()" style="width:10em">
 </p>
 
 </form>     

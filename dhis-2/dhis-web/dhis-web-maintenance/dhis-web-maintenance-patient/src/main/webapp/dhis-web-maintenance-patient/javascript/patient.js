@@ -6,44 +6,134 @@ function organisationUnitSelected( orgUnits )
 
 selection.setListenerFunction( organisationUnitSelected );
 
+//------------------------------------------------------------------------------
+//Popup window
+//------------------------------------------------------------------------------
+
+function editWindow( url, patientId ) 
+{
+	var url = url + '?id=' + patientId;	
+	var width = 800
+    var height = 500;
+    var left = parseInt( ( screen.availWidth/2 ) - ( width/2 ) );
+    var top = parseInt( ( screen.availHeight/2 ) - ( height/2 ) );
+    var windowFeatures = 'width=' + width + ',height=' + height + ',scrollbars=yes, resizable=yes,left=' + left + ',top=' + top + 'screenX=' + left + ',screenY=' + top;
+    
+    window.open( url, '_blank_', windowFeatures);
+}
+
+//------------------------------------------------------------------------------
+// Validate EnrollmentDate
+//------------------------------------------------------------------------------
+
+function validateProgramEnrollment()
+{	
+	
+	var url = 'validatePatientProgramEnrollment.action?' +
+			'enrollmentDate=' + getFieldValue( 'enrollmentDate' ) +
+			'&dateOfIncident=' + getFieldValue( 'dateOfIncident' ) ;
+	
+	var request = new Request();
+    request.setResponseTypeXML( 'message' );
+    request.setCallbackSuccess( programEnrollmentValidationCompleted );    
+    request.send( url );        
+
+    return false;
+}
+
+function programEnrollmentValidationCompleted( messageElement )
+{
+    var type = messageElement.getAttribute( 'type' );
+    var message = messageElement.firstChild.nodeValue;
+    
+    if ( type == 'success' )
+    {
+        var form = document.getElementById( 'programEnrollmentForm' );        
+        form.submit();
+    }
+    else if ( type == 'error' )
+    {
+        window.alert( i18n_program_enrollment_failed + ':' + '\n' + message );
+    }
+    else if ( type == 'input' )
+    {
+        document.getElementById( 'message' ).innerHTML = message;
+        document.getElementById( 'message' ).style.display = 'block';
+    }
+}
+
+//-----------------------------------------------------------------------------
+//Save
+//-----------------------------------------------------------------------------
+
+function saveDueDate( programInstanceStageId, programInstanceStageName )
+{
+	var field = document.getElementById( 'value[' + programInstanceStageId + '].date' );
+	
+	field.style.backgroundColor = '#ffffcc';
+	
+	var dateSaver = new DateSaver( programInstanceStageId, field.value, '#ccffcc' );
+	dateSaver.save();
+  
+}
+
+
+//-----------------------------------------------------------------------------
+//Saver objects
+//-----------------------------------------------------------------------------
+
+function DateSaver( programInstanceStageId_, dueDate_, resultColor_ )
+{
+	var SUCCESS = '#ccffcc';
+	var ERROR = '#ccccff';
+	
+	var programInstanceStageId = programInstanceStageId_;	
+	var dueDate = dueDate_;
+	var resultColor = resultColor_;	
+
+	this.save = function()
+	{
+		var request = new Request();
+		request.setCallbackSuccess( handleResponse );
+		request.setCallbackError( handleHttpError );
+		request.setResponseTypeXML( 'status' );
+		request.send( 'saveDueDate.action?programInstanceStageId=' + programInstanceStageId + '&dueDate=' + dueDate );
+	};
+
+	function handleResponse( rootElement )
+	{
+		var codeElement = rootElement.getElementsByTagName( 'code' )[0];
+		var code = parseInt( codeElement.firstChild.nodeValue );
+   
+		if ( code == 0 )
+		{
+			markValue( resultColor );                   
+		}
+		else
+		{
+			markValue( ERROR );
+			window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
+		}
+	}
+
+	function handleHttpError( errorCode )
+	{
+		markValue( ERROR );
+		window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+	}   
+
+	function markValue( color )
+	{       
+   
+		var element = document.getElementById( 'value[' + programInstanceStageId + '].date' );	
+           
+		element.style.backgroundColor = color;
+	}
+}
+
 // -----------------------------------------------------------------------------
 // View details
 // -----------------------------------------------------------------------------
-
-function showHouseHoldMembers( selectedOption )
-{
-	var houseHoldId = selectedOption.options[selectedOption.selectedIndex].value
-	
-	if( houseHoldId != "null " || houseHoldId != "" )
-	{
-		var request = new Request();
-	    request.setResponseTypeXML( 'member' );
-	    request.setCallbackSuccess( houseHoldMembersReceived );
-	    request.send( 'getHouseHoldMembers.action?id=' + houseHoldId );
-	}	
-    
-}
-
-function houseHoldMembersReceived( xmlObject )
-{
-	var selectedMembers = document.getElementById( "selectedMembers" );
-	
-	clearList( selectedMembers );
-	
-	var members = xmlObject.getElementsByTagName( "member" );
-	
-	for ( var i = 0; i < members.length; i++ )
-	{	
-		var fullName = members[ i ].getElementsByTagName( "fullName" )[0].firstChild.nodeValue;
-		
-		var option = document.createElement( "option" );		
-		option.text = fullName;
-		option.title = fullName;
-		selectedMembers.add( option, null );		
-	}
-	
-	showDetails();
-}
 
 function showPatientDetails( patientId )
 {
@@ -61,32 +151,7 @@ function patientReceived( patientElement )
     setFieldValue( 'lastNameField', getElementValue( patientElement, 'lastName' ) );
     setFieldValue( 'genderField', getElementValue( patientElement, 'gender' ) );  
     setFieldValue( 'birthDateField', getElementValue( patientElement, 'birthDate' ) );
-    //setFieldValue( 'enrolledProgramField', getElementValue( patientElement, 'enrolledProgram' ) );
-      
-    
-    /*var address1 = getElementValue( patientElement, 'address1');
-    setFieldValue( 'address1Field', address1 ? address1 : '[' + i18n_none + ']' );
-    
-    var address2 = getElementValue( patientElement, 'address2');
-    setFieldValue( 'address2Field', address2 ? address2 : '[' + i18n_none + ']' );
-    
-    var landMark = getElementValue( patientElement, 'landMark');
-    setFieldValue( 'landMarkField', landMark ? landMark : '[' + i18n_none + ']' );
-    
-    var cityVillage = getElementValue( patientElement, 'cityVillage');
-    setFieldValue( 'cityVillageField', cityVillage ? cityVillage : '[' + i18n_none + ']' );
-    
-    var stateProvince = getElementValue( patientElement, 'stateProvince');
-    setFieldValue( 'stateProvinceField', stateProvince ? stateProvince : '[' + i18n_none + ']' );
-    
-    var stateProvince = getElementValue( patientElement, 'stateProvince');
-    setFieldValue( 'stateProvinceField', stateProvince ? stateProvince : '[' + i18n_none + ']' );
-    
-    var country = getElementValue( patientElement, 'country');
-    setFieldValue( 'countryField', country ? country : '[' + i18n_none + ']' );
-    
-    var postalCode = getElementValue( patientElement, 'postalCode');
-    setFieldValue( 'postalCodeField', postalCode ? postalCode : '[' + i18n_none + ']' );   */ 
+    //setFieldValue( 'enrolledProgramField', getElementValue( patientElement, 'enrolledProgram' ) );    
    
     showDetails();
 }
@@ -258,8 +323,6 @@ function updateValidationCompleted( messageElement )
 //-----------------------------------------------------------------------------
 //Move members
 //-----------------------------------------------------------------------------
-
-
 var selectedList;
 var availableList;
 

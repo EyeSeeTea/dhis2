@@ -12,11 +12,6 @@
 	<tr>
 		<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><input type="text" id="description" name="description" style="width:30em"></td>
-	</tr>
-	
-	<tr>
-		<td><label>$i18n.getString( "number_of_days" )</label></td>
-		<td><input type="text" id="numberOfDays" name="numberOfDays" maxlength="30" style="width:30em"></td>
 	</tr>	
   	  	
 </table>

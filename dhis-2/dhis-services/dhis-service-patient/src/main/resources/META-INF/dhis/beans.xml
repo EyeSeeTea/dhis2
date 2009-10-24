@@ -8,6 +8,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	
   <!-- Store definitions -->
   
+  <bean id="org.hisp.dhis.program.ProgramInstanceStageStore"
+    class="org.hisp.dhis.program.hibernate.HibernateProgramInstanceStageStore">
+    <property name="clazz" value="org.hisp.dhis.program.ProgramInstanceStage"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+  
   <bean id="org.hisp.dhis.program.ProgramInstanceStore"
     class="org.hisp.dhis.program.hibernate.HibernateProgramInstanceStore">
     <property name="clazz" value="org.hisp.dhis.program.ProgramInstance"/>
@@ -63,6 +69,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
 	
   <!-- Service definitions -->
+  
+  <bean id="org.hisp.dhis.program.ProgramInstanceStageService"
+    class="org.hisp.dhis.program.DefaultProgramInstanceStageService">
+    <property name="programInstanceStageStore" ref="org.hisp.dhis.program.ProgramInstanceStageStore"/>    
+  </bean>
   
   <bean id="org.hisp.dhis.program.ProgramInstanceService"
     class="org.hisp.dhis.program.DefaultProgramInstanceService">

@@ -15,9 +15,7 @@
     
     <property name="stageInProgram" column="stageinprogram"/>
     
-    <property name="minDaysFromStart" column="mindaysfromstart"/>     
-    
-    <property name="maxDaysFromStart" column="maxdaysfromstart"/>
+    <property name="minDaysFromStart" column="mindaysfromstart"/>   
     
     <many-to-one name="program" class="org.hisp.dhis.program.Program"
         column="programid" not-null="true"/>    

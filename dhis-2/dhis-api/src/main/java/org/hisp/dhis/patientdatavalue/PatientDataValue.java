@@ -27,6 +27,8 @@ public class PatientDataValue
     private Date timestamp;
 
     private String value;
+    
+    private boolean providedAtFacility = true;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -171,5 +173,14 @@ public class PatientDataValue
     {
         return organisationUnit;
     }
-
+   
+    public void setProvidedAtFacility( boolean providedAtFacility )
+    {
+        this.providedAtFacility = providedAtFacility;
+    }
+    
+    public boolean isProvidedAtFacility()
+    {
+        return providedAtFacility;
+    }
 }

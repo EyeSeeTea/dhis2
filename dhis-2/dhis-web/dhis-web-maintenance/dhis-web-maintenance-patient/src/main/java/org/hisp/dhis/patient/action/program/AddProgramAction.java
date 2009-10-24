@@ -66,14 +66,7 @@ public class AddProgramAction
     public void setDescription( String description )
     {
         this.description = description;
-    }
-
-    private Integer numberOfDays;
-
-    public void setNumberOfDays( Integer numberOfDays )
-    {
-        this.numberOfDays = numberOfDays;
-    }
+    }    
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -83,14 +76,8 @@ public class AddProgramAction
         throws Exception
     {
 
-        Program program = new Program();
-
-        if( numberOfDays == null )
-        {
-            numberOfDays = 0;            
-        }
-        
-        program.setNumberOfDays( numberOfDays.intValue() );        
+        Program program = new Program();             
+                
         program.setName( nameField );
         program.setDescription( description );
         

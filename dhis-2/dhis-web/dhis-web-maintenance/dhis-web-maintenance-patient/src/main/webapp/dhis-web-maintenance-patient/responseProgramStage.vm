@@ -4,7 +4,6 @@
   <name>$encoder.xmlEncode( $programStage.name )</name>
   <description>$encoder.xmlEncode( $programStage.description )</description>
   <stageInProgram>$programStage.stageInProgram</stageInProgram>
-  <minDaysFromStart>$programStage.minDaysFromStart</minDaysFromStart>
-  <maxDaysFromStart>$programStage.maxDaysFromStart</maxDaysFromStart>
+  <minDaysFromStart>$programStage.minDaysFromStart</minDaysFromStart>  
   <dataElementCount>$programStageDataElements.size()</dataElementCount>  
 </programStage>

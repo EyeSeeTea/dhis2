@@ -22,12 +22,7 @@
     <tr>
         <td><label>$i18n.getString( "max_days_from_start" )</label></td>
         <td><input type="text" id="maxDaysFromStart" name="maxDaysFromStart" maxlength="30" style="width:30em"></td>
-    </tr>
-    
-    <tr>
-        <td><label>$i18n.getString( "program" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-        <td><input type="text" style="width:20em" value="$program.name" disabled="disabled"><input type="hidden" id="id" name="id" value="$program.id"></td>
-    </tr>
+    </tr>    
       
     <tr><td>&nbsp;</td><td>&nbsp;</td></tr>      	  	
 </table>

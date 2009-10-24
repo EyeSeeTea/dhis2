@@ -14,8 +14,7 @@ function programReceived( programElement )
 {
 	setFieldValue( 'idField', getElementValue( programElement, 'id' ) );
 	setFieldValue( 'nameField', getElementValue( programElement, 'name' ) );	
-    setFieldValue( 'descriptionField', getElementValue( programElement, 'description' ) );
-    setFieldValue( 'numberOfDaysField', getElementValue( programElement, 'numberOfDays' ) );
+    setFieldValue( 'descriptionField', getElementValue( programElement, 'description' ) );    
     setFieldValue( 'programStageCountField', getElementValue( programElement, 'programStageCount' ) );
    
     showDetails();
@@ -64,8 +63,8 @@ function validateAddProgram()
 	
 	var url = 'validateProgram.action?' +
 			'nameField=' + getFieldValue( 'nameField' ) +			
-	        '&description=' + getFieldValue( 'description' ) +	                
-	        '&numberOfDays=' + getFieldValue( 'numberOfDays' );
+	        '&description=' + getFieldValue( 'description' );	                
+	        
 	
 	var request = new Request();
     request.setResponseTypeXML( 'message' );
@@ -105,8 +104,7 @@ function validateUpdateProgram()
     var url = 'validateProgram.action?' + 
     		'id=' + getFieldValue( 'id' ) +
     		'&nameField=' + getFieldValue( 'nameField' ) +			
-	        '&description=' + getFieldValue( 'description' ) +	                
-	        '&numberOfDays=' + getFieldValue( 'numberOfDays' );
+	        '&description=' + getFieldValue( 'description' );
 	
 	var request = new Request();
     request.setResponseTypeXML( 'message' );

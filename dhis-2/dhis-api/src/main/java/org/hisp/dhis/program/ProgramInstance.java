@@ -42,7 +42,9 @@ public class ProgramInstance
 {
     private int id;
 
-    private Date startDate;
+    private Date dateOfIncident;
+
+    private Date enrollmentDate;
 
     private Date endDate;
 
@@ -51,7 +53,7 @@ public class ProgramInstance
     private Patient patient;
 
     private Program program;
-    
+
     private Set<ProgramInstanceStage> programInstanceStages = new HashSet<ProgramInstanceStage>();
 
     // -------------------------------------------------------------------------
@@ -62,9 +64,9 @@ public class ProgramInstance
     {
     }
 
-    public ProgramInstance( Date startDate, Date endDate, Patient patient, Program program )
+    public ProgramInstance( Date enrollmentDate, Date endDate, Patient patient, Program program )
     {
-        this.startDate = startDate;
+        this.enrollmentDate = enrollmentDate;
         this.endDate = endDate;
         this.patient = patient;
         this.program = program;
@@ -94,7 +96,7 @@ public class ProgramInstance
 
         final ProgramInstance other = (ProgramInstance) o;
 
-        return startDate.equals( other.getStartDate() ) && patient.equals( other.getPatient() )
+        return enrollmentDate.equals( other.getEnrollmentDate() ) && patient.equals( other.getPatient() )
             && program.equals( other.getProgram() );
 
     }
@@ -105,7 +107,7 @@ public class ProgramInstance
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + startDate.hashCode();        
+        result = result * prime + enrollmentDate.hashCode();
         result = result * prime + patient.hashCode();
         result = result * prime + program.hashCode();
 
@@ -133,19 +135,35 @@ public class ProgramInstance
     }
 
     /**
-     * @return the startDate
+     * @return the dateOfIncident
      */
-    public Date getStartDate()
+    public Date getDateOfIncident()
     {
-        return startDate;
+        return dateOfIncident;
     }
 
     /**
-     * @param startDate the startDate to set
+     * @param dateOfIncident the dateOfIncident to set
      */
-    public void setStartDate( Date startDate )
+    public void setDateOfIncident( Date dateOfIncident )
     {
-        this.startDate = startDate;
+        this.dateOfIncident = dateOfIncident;
+    }
+
+    /**
+     * @return the enrollmentDate
+     */
+    public Date getEnrollmentDate()
+    {
+        return enrollmentDate;
+    }
+
+    /**
+     * @param enrollmentDate the enrollmentDate to set
+     */
+    public void setEnrollmentDate( Date enrollmentDate )
+    {
+        this.enrollmentDate = enrollmentDate;
     }
 
     /**
@@ -226,6 +244,6 @@ public class ProgramInstance
     public void setProgramInstanceStages( Set<ProgramInstanceStage> programInstanceStages )
     {
         this.programInstanceStages = programInstanceStages;
-    }   
+    }
 
 }

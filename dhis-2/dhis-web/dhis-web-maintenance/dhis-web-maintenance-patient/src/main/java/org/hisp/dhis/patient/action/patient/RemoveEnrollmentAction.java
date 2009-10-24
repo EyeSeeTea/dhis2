@@ -24,14 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.patient.action.patient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
+import org.hisp.dhis.patient.state.SelectedStateManager;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
@@ -45,7 +44,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class UpdateProgramEnrollmentAction
+public class RemoveEnrollmentAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -64,32 +63,94 @@ public class UpdateProgramEnrollmentAction
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
-    }    
-    
+    }
+
     private ProgramInstanceService programInstanceService;
 
     public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
         this.programInstanceService = programInstanceService;
+    }
+
+    private SelectedStateManager selectedStateManager;
+
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    {
+        this.selectedStateManager = selectedStateManager;
     }   
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private Integer id;
 
-    public void setId( int id )
+    public void setId( Integer id )
     {
         this.id = id;
     }
-    
-    private Collection<String> selectedList = new HashSet<String>();
 
-    public void setSelectedList( Collection<String> selectedList )
+    public Integer getId()
     {
-        this.selectedList = selectedList;
+        return id;
     }
+
+    private Patient patient;
+
+    public Patient getPatient()
+    {
+        return patient;
+    }   
+   
+    public void setPatient( Patient patient )
+    {
+        this.patient = patient;
+    }
+
+    private ProgramInstance programInstance;
+    
+    public ProgramInstance getProgramInstance()
+    {
+        return programInstance;
+    }
+
+    private Integer programId;
+
+    public void setProgramId( Integer programId )
+    {
+        this.programId = programId;
+    }
+
+    public Integer getProgramId()
+    {
+        return programId;
+    }
+
+    private Integer programInstanceId;
+
+    public Integer getProgramInstanceId()
+    {
+        return programInstanceId;
+    }
+
+    public void setProgramInstanceId( Integer programInstanceId )
+    {
+        this.programInstanceId = programInstanceId;
+    }    
+    
+    private Integer age;
+
+    public Integer getAge()
+    {
+        return age;
+    }
+
+    private Collection<Program> programs = new ArrayList<Program>();
+
+    public Collection<Program> getPrograms()
+    {
+        return programs;
+    }    
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -98,59 +159,34 @@ public class UpdateProgramEnrollmentAction
     public String execute()
         throws Exception
     {
-        
-        Patient patient = patientService.getPatient( id );
-        
-        Set<Program> earlierEnrollments = new HashSet<Program>( patient.getPrograms());       
 
-        Set<Program> newEnrollments = new HashSet<Program>();
+        patient = selectedStateManager.getSelectedPatient();
 
-        for ( String id : selectedList )
+        Program program = selectedStateManager.getSelectedProgram();        
+
+        age = patient.getAge();
+
+        programs = programService.getAllPrograms();
+        
+        Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( patient, program, false );
+        
+        if( programInstances.iterator().hasNext() )
         {
-            Program program = programService.getProgram( Integer.parseInt( id ) );
-
-            newEnrollments.add( program );
+            programInstance = programInstances.iterator().next();
         }
         
-        //Check for newly added programs (ProgramInstance should be launched)
-        
-        for( Program program : newEnrollments )
-        {
-            if( ! earlierEnrollments.contains( program ) )                
-            {
-                ProgramInstance programInstance = new ProgramInstance();
-                
-                programInstance.setPatient( patient );
-                programInstance.setProgram( program );
-                programInstance.setStartDate( new Date() );
-                programInstance.setCompleted( false );
-                
-                programInstanceService.addProgramInstance( programInstance );              
-                
-            }
-        }        
-        
-        //Check for removed programs (active ProgramInstance should be closed)
-        
-        for( Program program : earlierEnrollments )
-        {
-            if( !newEnrollments.contains(  program  ) )
-            {
-                Collection<ProgramInstance> activeProgramInstances = programInstanceService.getProgramInstances( patient, program, false );
-                
-                for( ProgramInstance programInstance : activeProgramInstances )
-                {
-                    programInstance.setEndDate( new Date() );
-                    programInstance.setCompleted( true );                   
-                    
-                    programInstanceService.updateProgramInstance( programInstance );
-                }
-            }
-        }
-        
-        patient.setPrograms( newEnrollments );
-        
-        patientService.updatePatient( patient );
+        if ( programInstance != null )
+        {           
+            programInstance.setEndDate( new Date() );            
+            programInstance.setCompleted( true );
+
+            programInstanceService.updateProgramInstance( programInstance );            
+            
+            patient.getPrograms().remove( program );
+            patientService.updatePatient( patient );
+            
+            selectedStateManager.clearSelectedProgram();
+        }      
 
         return SUCCESS;
     }

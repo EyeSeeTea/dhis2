@@ -6,35 +6,22 @@
 
 <table>	
 	<tr>
+	
 		<td><label for="searchText">$i18n.getString( "search_by_name_identifier") <em title="$i18n.getString( "required" )" class="required">*</em></label></td>		
 		<td><input type="text" id="searchText" name="searchText" maxlength="30" style="width:30em"></td>		
-		<td><input type="submit" value="$i18n.getString( "search" )" style="width:15em"></td>
+		<td><input type="submit" value="$i18n.getString( "search" )"</td>
+		<td>&nbsp;</td>
+		<td><input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddPatientForm.action'"></td>
+		
 	</tr>
 	
-	<tr>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>$i18n.getString( "or")</td>
-		<td>&nbsp;</td>
-	</tr>
+	<tr></tr>
   	  	
 </table>
 
 </form>
 
-<table>	
-	<tr>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddPatientForm.action'">
-	</tr>
-  	  	
-</table>
+
 
 <span id="message"></span>
 

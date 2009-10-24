@@ -46,9 +46,7 @@ public class Program
 
     private String name;
 
-    private String description;
-
-    private int numberOfDays;
+    private String description;    
 
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
 
@@ -135,17 +133,7 @@ public class Program
     public void setDescription( String description )
     {
         this.description = description;
-    }
-
-    public void setNumberOfDays( int numberOfDays )
-    {
-        this.numberOfDays = numberOfDays;
-    }
-
-    public int getNumberOfDays()
-    {
-        return numberOfDays;
-    }
+    }    
 
     public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {

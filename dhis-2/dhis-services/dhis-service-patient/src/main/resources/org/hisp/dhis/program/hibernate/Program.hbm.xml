@@ -12,9 +12,7 @@
     
     <property name="name" not-null="true" unique="true" length="160"/>
     
-    <property name="description" type="text"/>    
-    
-    <property name="numberOfDays"/>
+    <property name="description" type="text"/>   
     
     <set name="programStages" order-by="stageinprogram" inverse="true" cascade="all">
       <key column="programid"/>      

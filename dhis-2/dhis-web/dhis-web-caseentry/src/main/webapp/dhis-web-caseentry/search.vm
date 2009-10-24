@@ -7,7 +7,7 @@
 	<tr>
 		<td><label for="searchText">$i18n.getString( "search_by_name_identifier") <em title="$i18n.getString( "required" )" class="required">*</em></label></td>		
 		<td><input type="text" id="searchText" name="searchText" maxlength="30" style="width:30em"></td>		
-		<td><input type="submit" value="$i18n.getString( "search" )" style="width:15em"></td>
+		<td><input type="submit" value="$i18n.getString( "search" )"</td>		
 	</tr>
   	  	
 </table>

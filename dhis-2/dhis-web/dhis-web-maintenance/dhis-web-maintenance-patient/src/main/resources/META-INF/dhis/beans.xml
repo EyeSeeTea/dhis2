@@ -4,6 +4,18 @@
   xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
+  <bean id="org.hisp.dhis.patient.state.SelectedStateManager"
+    class="org.hisp.dhis.patient.state.DefaultSelectedStateManager">
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="programStageService"
+      ref="org.hisp.dhis.program.ProgramStageService"/>
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+  </bean>
+  
   <!-- PatientAttribute -->
   
   <bean id="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeListAction"
@@ -120,17 +132,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.patient.PatientService"/>            
   </bean>
   
-   <bean id="org.hisp.dhis.patient.action.patient.UpdateProgramEnrollmentAction"
-    class="org.hisp.dhis.patient.action.patient.UpdateProgramEnrollmentAction" 
-    scope="prototype">      
-    <property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>
-    <property name="programService"
-      ref="org.hisp.dhis.program.ProgramService"/>         
-    <property name="programInstanceService"
-      ref="org.hisp.dhis.program.ProgramInstanceService"/>
-  </bean>   
-    
   <bean id="org.hisp.dhis.patient.action.patient.ShowAddPatientFormAction"
     class="org.hisp.dhis.patient.action.patient.ShowAddPatientFormAction" 
     scope="prototype">
@@ -146,7 +147,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>           
   </bean>
-	        
+          
   <bean id="org.hisp.dhis.patient.action.patient.ValidatePatientAction"
     class="org.hisp.dhis.patient.action.patient.ValidatePatientAction" 
     scope="prototype">
@@ -159,7 +160,71 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-  </bean>	
+  </bean>
+  
+  <!-- Patient-Program Enrollment -->
+  
+  <bean id="org.hisp.dhis.patient.action.patient.ProgramEnrollmentSelectAction"
+    class="org.hisp.dhis.patient.action.patient.ProgramEnrollmentSelectAction" 
+    scope="prototype">      
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="selectedStateManager"
+      ref="org.hisp.dhis.patient.state.SelectedStateManager"/>       
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patient.ProgramEnrollmentAction"
+    class="org.hisp.dhis.patient.action.patient.ProgramEnrollmentAction" 
+    scope="prototype">   
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/> 
+    <property name="programInstanceService"
+      ref="org.hisp.dhis.program.ProgramInstanceService"/>
+    <property name="selectedStateManager"
+      ref="org.hisp.dhis.patient.state.SelectedStateManager"/>      
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patient.SaveProgramEnrollmentAction"
+    class="org.hisp.dhis.patient.action.patient.SaveProgramEnrollmentAction" 
+    scope="prototype">  
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>
+    <property name="programInstanceService"
+      ref="org.hisp.dhis.program.ProgramInstanceService"/>
+    <property name="programInstanceStageService"
+      ref="org.hisp.dhis.program.ProgramInstanceStageService"/>
+    <property name="selectedStateManager"
+      ref="org.hisp.dhis.patient.state.SelectedStateManager"/>   
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patient.SaveDueDateAction"
+    class="org.hisp.dhis.patient.action.patient.SaveDueDateAction" 
+    scope="prototype">    
+    <property name="programInstanceStageService"
+      ref="org.hisp.dhis.program.ProgramInstanceStageService"/>       
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patient.RemoveEnrollmentAction"
+    class="org.hisp.dhis.patient.action.patient.RemoveEnrollmentAction" 
+    scope="prototype">      
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="programService"
+      ref="org.hisp.dhis.program.ProgramService"/>         
+    <property name="programInstanceService"
+      ref="org.hisp.dhis.program.ProgramInstanceService"/>
+    <property name="selectedStateManager"
+      ref="org.hisp.dhis.patient.state.SelectedStateManager"/>
+  </bean>  
+  
+  <bean id="org.hisp.dhis.patient.action.patient.ValidatePatientProgramEnrollmentAction"
+    class="org.hisp.dhis.patient.action.patient.ValidatePatientProgramEnrollmentAction" 
+    scope="prototype">                
+  </bean> 	
   
   <!-- Program -->  
   

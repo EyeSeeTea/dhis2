@@ -95,13 +95,6 @@ public class UpdateProgramStageAction
         this.minDaysFromStart = minDaysFromStart;
     }
 
-    private Integer maxDaysFromStart;
-
-    public void setMaxDaysFromStart( Integer maxDaysFromStart )
-    {
-        this.maxDaysFromStart = maxDaysFromStart;
-    }
-
     private Collection<String> selectedList = new HashSet<String>();
 
     public void setSelectedList( Collection<String> selectedList )
@@ -126,11 +119,6 @@ public class UpdateProgramStageAction
             minDaysFromStart = 0;
         }
 
-        if ( maxDaysFromStart == null )
-        {
-            maxDaysFromStart = 0;
-        }
-
         Set<DataElement> dataElements = new HashSet<DataElement>();
 
         for ( String id : selectedList )
@@ -139,10 +127,8 @@ public class UpdateProgramStageAction
 
             dataElements.add( dataElement );
         }
-        
-        programStage.setMinDaysFromStart( minDaysFromStart.intValue() );
-        programStage.setMaxDaysFromStart( maxDaysFromStart.intValue() );
 
+        programStage.setMinDaysFromStart( minDaysFromStart.intValue() );
         programStage.setDataElements( dataElements );
 
         programStageService.updateProgramStage( programStage );

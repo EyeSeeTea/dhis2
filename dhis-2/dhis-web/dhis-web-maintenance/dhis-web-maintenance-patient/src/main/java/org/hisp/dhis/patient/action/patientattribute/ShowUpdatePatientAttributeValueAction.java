@@ -49,46 +49,53 @@ public class ShowUpdatePatientAttributeValueAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private PatientService patientService;
 
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
-    }  
-    
+    }
+
     private PatientAttributeValueService patientAttributeValueService;
 
     public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
     {
         this.patientAttributeValueService = patientAttributeValueService;
-    } 
+    }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
-    
+
     private int id;
 
     public void setId( int id )
     {
         this.id = id;
     }
-    
+
     private Patient patient;
 
     public Patient getPatient()
     {
         return patient;
     }
-    
+
+    private Integer age;
+
+    public Integer getAge()
+    {
+        return age;
+    }
+
     Collection<PatientAttribute> patientAttributes;
-    
+
     public Collection<PatientAttribute> getPatientAttributes()
     {
         return patientAttributes;
-    } 
-    
+    }
+
     private Map<Integer, PatientAttributeValue> patientAttributeValueMap;
 
     public Map<Integer, PatientAttributeValue> getPatientAttributeValueMap()
@@ -104,15 +111,18 @@ public class ShowUpdatePatientAttributeValueAction
         throws Exception
     {
         patient = patientService.getPatient( id );
-        
-        patientAttributes = patient.getAttributes();       
-        
-        Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService.getPatientAttributeValues( patient );
-        
-        patientAttributeValueMap = new HashMap<Integer, PatientAttributeValue>( patientAttributeValues.size() );        
-                
-        for( PatientAttributeValue patientAttributeValue : patientAttributeValues )
-        {            
+
+        age = patient.getAge();
+
+        patientAttributes = patient.getAttributes();
+
+        Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
+            .getPatientAttributeValues( patient );
+
+        patientAttributeValueMap = new HashMap<Integer, PatientAttributeValue>( patientAttributeValues.size() );
+
+        for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
+        {
             patientAttributeValueMap.put( patientAttributeValue.getPatientAttribute().getId(), patientAttributeValue );
         }
 

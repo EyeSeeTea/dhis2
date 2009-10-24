@@ -2,7 +2,6 @@
 <program>
   <id>$program.id</id>
   <name>$encoder.xmlEncode( $program.name )</name>
-  <description>$encoder.xmlEncode( $program.description )</description>
-  <numberOfDays>$encoder.xmlEncode( $program.numberOfDays )</numberOfDays>
+  <description>$encoder.xmlEncode( $program.description )</description>  
   <programStageCount>$program.programStages.size()</programStageCount>   
 </program>
