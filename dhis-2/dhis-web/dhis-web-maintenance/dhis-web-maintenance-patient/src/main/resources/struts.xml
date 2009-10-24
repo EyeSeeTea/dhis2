@@ -83,13 +83,13 @@
 	  
     <!-- Patient -->	
     
-    <action name="patient" class="org.hisp.dhis.patient.action.patient.SelectPatientAction">
+    <action name="patient" class="org.hisp.dhis.patient.action.patient.SelectAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="patientform" type="chain">patientform</result>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/selectPatient.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>      
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js</param>               
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>             
     </action>
     
     <action name="patientform" class="org.hisp.dhis.patient.action.NoAction">

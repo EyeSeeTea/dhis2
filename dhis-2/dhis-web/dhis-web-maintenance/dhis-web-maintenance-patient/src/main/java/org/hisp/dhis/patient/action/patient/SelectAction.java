@@ -36,7 +36,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SelectPatientAction
+public class SelectAction
     implements Action
 {
     private static final String PATIENT_FORM = "patientform";

@@ -1,10 +1,11 @@
 
 function organisationUnitSelected( orgUnits )
-{	
-    window.location.href = 'patientform.action';
+{		
+    window.location.href = 'patient.action';    
 }
 
 selection.setListenerFunction( organisationUnitSelected );
+
 
 //------------------------------------------------------------------------------
 //Popup window
