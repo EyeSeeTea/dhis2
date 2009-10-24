@@ -46,10 +46,6 @@ public class DeletionInterceptor
         this.deletionManager = deletionManager;
     }
 
-    // ----------------------------------------------------------------------
-    // MethodInterceptor Implementation
-    // ----------------------------------------------------------------------
-
     public void intercept( JoinPoint joinPoint )
     {
         if ( joinPoint.getArgs() != null && joinPoint.getArgs().length > 0 )

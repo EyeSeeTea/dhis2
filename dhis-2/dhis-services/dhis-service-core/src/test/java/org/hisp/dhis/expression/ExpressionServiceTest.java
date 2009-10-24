@@ -39,11 +39,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.Operand;
 import org.hisp.dhis.datavalue.DataValueService;
@@ -58,12 +57,8 @@ import org.junit.Test;
  * @version $Id$
  */
 public class ExpressionServiceTest
-    extends DhisSpringTest
-{
-    private ExpressionService expressionService;
-
-    private DataElementCategoryComboService categoryComboService;
-        
+    extends DhisTest
+{        
     private SourceStore sourceStore;
     
     private DataElement dataElementA;
@@ -80,8 +75,6 @@ public class ExpressionServiceTest
     private int dataElementIdC;    
     private int dataElementIdD;
 
-    private DataElementCategoryCombo categoryCombo;
-    
     private DataElementCategoryOptionCombo categoryOptionCombo;
     
     private int categoryOptionComboId;
@@ -106,7 +99,7 @@ public class ExpressionServiceTest
         
         dataElementService = (DataElementService) getBean( DataElementService.ID );
 
-        categoryComboService = (DataElementCategoryComboService) getBean( DataElementCategoryComboService.ID );
+        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
         
         dataValueService = (DataValueService) getBean( DataValueService.ID );
         
@@ -122,9 +115,7 @@ public class ExpressionServiceTest
         dataElementIdC = dataElementService.addDataElement( dataElementC );
         dataElementIdD = dataElementService.addDataElement( dataElementD );
         
-        categoryCombo = categoryComboService.getDataElementCategoryComboByName( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );             
-        
-        categoryOptionCombo = categoryCombo.getOptionCombos().iterator().next();
+        categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
         
         categoryOptionComboId = categoryOptionCombo.getId();
         
@@ -149,6 +140,12 @@ public class ExpressionServiceTest
         dataValueService.addDataValue( createDataValue( dataElementB, period, source, "5", categoryOptionCombo ) );        
     }
 
+    @Override
+    public boolean emptyDatabaseAfterTest()
+    {
+        return true;
+    }
+
     // -------------------------------------------------------------------------
     // Business logic tests
     // -------------------------------------------------------------------------
@@ -166,7 +163,7 @@ public class ExpressionServiceTest
 
         value = expressionService.getExpressionValue( expression, period, source, false );
         
-        assertEquals( value, 0.0 );
+        assertEquals( 0.0, value );
     }
 
     @Test
@@ -247,7 +244,7 @@ public class ExpressionServiceTest
     {
         String description = expressionService.getExpressionDescription( expressionA );        
         
-        assertEquals( description, "DataElementA + DataElementB" );
+        assertEquals( "DataElementA + DataElementB", description );
     }
 
     @Test
@@ -255,11 +252,11 @@ public class ExpressionServiceTest
     {
         String expression = expressionService.generateExpression( expressionA, period, source, false );
         
-        assertEquals( expression, "10 + 5" );
+        assertEquals( "10 + 5", expression );
         
         expression = expressionService.generateExpression( expressionB, period, source, false );
         
-        assertEquals( expression, "0 - 0" );
+        assertEquals( "0 - 0", expression );
     }
     
     // -------------------------------------------------------------------------
@@ -275,9 +272,9 @@ public class ExpressionServiceTest
         
         expression = expressionService.getExpression( id );
         
-        assertEquals( expression.getExpression(), expressionA );
-        assertEquals( expression.getDescription(), descriptionA );
-        assertEquals( expression.getDataElementsInExpression(), dataElements );
+        assertEquals( expressionA, expression.getExpression() );
+        assertEquals( descriptionA, expression.getDescription() );
+        assertEquals( dataElements, expression.getDataElementsInExpression() );
     }
 
     @Test
@@ -289,8 +286,8 @@ public class ExpressionServiceTest
         
         expression = expressionService.getExpression( id );
         
-        assertEquals( expression.getExpression(), expressionA );
-        assertEquals( expression.getDescription(), descriptionA );
+        assertEquals( expressionA, expression.getExpression() );
+        assertEquals( descriptionA, expression.getDescription() );
         
         expression.setExpression( expressionB );
         expression.setDescription( descriptionB );
@@ -299,8 +296,8 @@ public class ExpressionServiceTest
 
         expression = expressionService.getExpression( id );
         
-        assertEquals( expression.getExpression(), expressionB );
-        assertEquals( expression.getDescription(), descriptionB );
+        assertEquals( expressionB, expression.getExpression() );
+        assertEquals( descriptionB, expression.getDescription() );
     }
 
     @Test

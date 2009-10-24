@@ -11,11 +11,13 @@
 			<generator class="native"/>
 		</id>
 			
-		<property name="name" column="name" unique="true"/>
+		<property name="name" column="name"/>
 	
-		<property name="mapLayerPath" column="maplayerpath"/>
+		<property name="mapLayerPath" column="maplayerpath" unique="true"/>
 		
 		<property name="type" column="type"/>
+		
+		<property name="sourceType" column="sourcetype"/>
 			
 		<many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" 
 			column="organisationunitid" not-null="true" foreign-key="fk_map_organisationunitid"/>

@@ -27,12 +27,11 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.common.MetaObject;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
@@ -46,28 +45,8 @@ import org.hisp.dhis.source.Source;
  * @version $Id: DataSet.java 6255 2008-11-10 16:01:24Z larshelg $
  */
 public class DataSet
-    implements Serializable, MetaObject
+    extends IdentifiableObject
 {
-    /**
-     * The unique identifier for this DataSet
-     */
-    private int id;
-
-    /**
-     * Name of DataSet. Required and unique.
-     */
-    private String name;
-    
-    /**
-     * Shortname of DataSet. Required and unique.
-     */
-    private String shortName;
-    
-    /**
-     * Code of DataSet.
-     */
-    private String code;
-
     /**
      * The PeriodType indicating the frequency that this DataSet should be used
      */
@@ -177,56 +156,6 @@ public class DataSet
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getShortName()
-    {
-        return shortName;
-    }
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-    
-    public String getAlternativeName()
-    {
-        return getShortName();
-    }
-    
-    public void setAlternativeName( String alternativeName )
-    {
-        throw new UnsupportedOperationException( "Cannot set alternativename on DataSet: " + alternativeName );
-    }
     
     public PeriodType getPeriodType()
     {

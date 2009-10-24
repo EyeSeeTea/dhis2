@@ -38,7 +38,7 @@
     </action>
     
     <action name="getDataSetsForOrguntwiseLocking" class="org.hisp.dhis.dataadmin.action.lock.GetDataSetsForLockAction">
-      <result name="success" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseDataSet.vm</result>
+      <result name="success" type="velocity-xml"> /dhis-web-maintenance-dataadmin/responseDataSet.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     
@@ -47,7 +47,11 @@
       <result name="success" type="velocity">
         /dhis-web-maintenance-dataadmin/selectionedTreeInFrame.vm</result>
       <param name="javascripts">
-        javascript/oust.js,javascript/associations.js,javascript/locking.js</param>
+        javascript/oust.js,javascript/associations.js,javascript/locking.js,
+		  ../dhis-web-commons/util/commons.js,
+		  ../dhis-web-commons/util/lists.js,
+		  ../dhis-web-commons/util/jquery.js,
+		  ../dhis-web-commons/css/${stylesheetDirectory}/dom.js</param>
     </action>
     
     <action name="defineLockOnDataSetOrgunitAndPeriod"
@@ -57,29 +61,68 @@
  
 	<action name="selectLevel"
       class="org.hisp.dhis.dataadmin.action.lock.SelectLevelAction">
-      <result name="success" type="chain">getSelectionTree</result>
+      <result name="success" type="chain">getLockSelectionTree</result>
     </action>
     
     <action name="unselectLevel"
       class="org.hisp.dhis.dataadmin.action.lock.UnselectLevelAction">
-      <result name="success" type="chain">getSelectionTree</result>
+      <result name="success" type="chain">getLockSelectionTree</result>
     </action>
     
     <action name="selectAll"
       class="org.hisp.dhis.dataadmin.action.lock.SelectAllAction">
-      <result name="success" type="chain">getSelectionTree</result>
+      <result name="success" type="chain">getLockSelectionTree</result>
     </action>
     
     <action name="unselectAll"
       class="org.hisp.dhis.dataadmin.action.lock.UnselectAllAction">
-      <result name="success" type="chain">getSelectionTree</result>
+      <result name="success" type="chain">getLockSelectionTree</result>
     </action>
     
-    <action name="getSelectionTree"
+    <action name="getLockSelectionTree"
       class="org.hisp.dhis.dataadmin.action.NoAction">
       <result name="success" type="velocity">
         /dhis-web-maintenance-dataadmin/selectionedTreeInFrame.vm</result>
-      <param name="javascripts">javascript/oust.js,javascript/locking.js,javascript/dataElementsList.js,javascript/associations.js</param>
+      <param name="javascripts">javascript/oust.js,javascript/locking.js,
+		  javascript/dataElementsList.js,javascript/associations.js,
+		  ../dhis-web-commons/util/commons.js,
+		  ../dhis-web-commons/util/lists.js,
+		  ../dhis-web-commons/util/jquery.js,
+		  ../dhis-web-commons/css/${stylesheetDirectory}/dom.js</param>
+    </action>
+	  
+	 <action name="getExpandedTreeForLock" class="org.hisp.dhis.dataadmin.action.lock.GetExpandedTreeForLockAction">
+      <result name="success" type="velocity"> /dhis-web-maintenance-dataadmin/responseTree.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+	  
+	<action name="lockorgunit"
+      class="org.hisp.dhis.dataadmin.action.lock.LockSelectedOrganisationUnitAction">
+      <result name="success" type="velocity"> /dhis-web-maintenance-dataadmin/responseSelect.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="removelockorgunit"
+      class="org.hisp.dhis.dataadmin.action.lock.RemoveLockSelectedOrganisationUnitAction">
+      <result name="success" type="velocity">
+        /dhis-web-maintenance-dataadmin/responseSelect.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="noactionfordatalocking"
+      class="org.hisp.dhis.dataadmin.action.lock.NoActionForDataLock">
+      <result name="success" type="velocity"> /dhis-web-maintenance-dataadmin/responseSelect.vm</result>   
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+	  
+	<action name="expandSubtree" class="org.hisp.dhis.dataadmin.action.lock.ExpandSubtreeAction">
+      <result name="success" type="velocity"> /dhis-web-maintenance-dataadmin/responseExpand.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+	  
+	<action name="getPeriodsForLock" class="org.hisp.dhis.dataadmin.action.lock.GetPeriodsForLockAction">
+      <result name="success" type="velocity"> /dhis-web-maintenance-dataadmin/responsePeriod.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
     </action>
     
     <!-- Maintenance -->
@@ -182,36 +225,6 @@
         <param name="contentDisposition">attachment;filename="${fileName}"</param>
         <param name="bufferSize">10240</param>
       </result>
-    </action>
-    
-    <!-- Outlier analysis -->
-    
-    <action name="outlierAnalysisForm" class="org.hisp.dhis.dataadmin.action.outlieranalysis.OutlierFormAction">
-      <result name="success" type="velocity">/main.vm</result>        
-      <param name="page">/dhis-web-maintenance-dataadmin/outlierForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-      <param name="javascripts">
-        ../dhis-web-commons/ouwt/ouwt.js,
-        ../dhis-web-commons/oust/oust.js,
-        ../dhis-web-commons/calendar/calendar.js,
-        ../dhis-web-commons/calendar/calendar-lang.js,
-        ../dhis-web-commons/calendar/calendar-setup.js,
-        ../dhis-web-commons/lists/lists.js,
-        javascript/outlierAnalysis.js
-      </param>
-      <interceptor-ref name="organisationUnitTreeStack"/>
-    </action>
-    
-    <action name="searchOutlierResult" class="org.hisp.dhis.dataadmin.action.outlieranalysis.GetOutliersAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-dataadmin/outlierSearchResult.vm</param>
-      <param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-      <param name="javascripts">javascript/outlierAnalysisEditValue.js</param>
-    </action>
-    
-    <action name="editOutlier" class="org.hisp.dhis.dataadmin.action.outlieranalysis.EditOutlierAction">
-      <result name="success" type="velocity">responseStatus.vm</result>
-      <result name="error" type="velocity">responseStatus.vm</result>
     </action>
     
   </package>

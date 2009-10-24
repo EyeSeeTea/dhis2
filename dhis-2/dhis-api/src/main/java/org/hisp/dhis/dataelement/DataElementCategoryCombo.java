@@ -28,34 +28,51 @@ package org.hisp.dhis.dataelement;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.hisp.dhis.common.Dimension;
+import org.hisp.dhis.common.DimensionSet;
 
 /**
  * @author Abyot Aselefew
  * @version $Id$
  */
 public class DataElementCategoryCombo
-    implements Serializable
+    implements Serializable, DimensionSet
 {
     public static final String DEFAULT_CATEGORY_COMBO_NAME = "default";
     
     /**
-     * The database internal identifier for this DataElementCategoryCombo.
+     * The database internal identifier.
      */
     private int id;
     
+    /**
+     * The name.
+     */
     private String name;
     
     /**
      * A set with categories.
      */
-    private Set<DataElementCategory> categories = new HashSet<DataElementCategory>();
+    private List<DataElementCategory> categories = new ArrayList<DataElementCategory>();
     
     /**
-     *
+     * A set of category option combos.
      */
     private Set<DataElementCategoryOptionCombo> optionCombos = new HashSet<DataElementCategoryOptionCombo>();
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    public List<? extends Dimension> getDimensions()
+    {
+        return categories;
+    }
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -70,7 +87,7 @@ public class DataElementCategoryCombo
     	this.name = name;
     }
     
-    public DataElementCategoryCombo( String name, Set<DataElementCategory> categories )
+    public DataElementCategoryCombo( String name, List<DataElementCategory> categories )
     {
         this.name = name;
         this.categories = categories;
@@ -139,12 +156,12 @@ public class DataElementCategoryCombo
         this.name = name;
     }    
 
-    public Set<DataElementCategory> getCategories()
+    public List<DataElementCategory> getCategories()
     {
         return categories;
     }
     
-    public void setCategories( Set<DataElementCategory> categories )
+    public void setCategories( List<DataElementCategory> categories )
     {
         this.categories = categories;
     }
@@ -154,8 +171,8 @@ public class DataElementCategoryCombo
         return optionCombos;
     }
     
-    public void setOptionCombos( Set<DataElementCategoryOptionCombo> optionsCombo )
-    {
-        this.optionCombos = optionsCombo;
+    public void setOptionCombos( Set<DataElementCategoryOptionCombo> optionCombos )
+    {        
+        this.optionCombos = optionCombos;
     }
 }

@@ -123,6 +123,58 @@ function disable( elementId )
 }
 
 /**
+ * Enables the element with the given identifier if the element exists in parent window of frame.
+ */
+function enableParent( elementId )
+{
+    var element = parent.document.getElementById( elementId );
+    
+    if ( element )
+    {
+        element.disabled = false;
+    }
+}
+
+/**
+ * Disables the element with the given identifier if the element exists in parent window of frame.
+ */
+function disableParent( elementId )
+{
+    var element = parent.document.getElementById( elementId );
+    
+    if ( element )
+    {
+        element.disabled = true;
+    }
+}
+
+/**
+ * Enables the element with the given identifier if the element exists in parent window of frame.
+ */
+function enableParent( elementId )
+{
+    var element = parent.document.getElementById( elementId );
+    
+    if ( element )
+    {
+        element.disabled = false;
+    }
+}
+
+/**
+ * Disables the element with the given identifier if the element exists in parent window of frame.
+ */
+function disableParent( elementId )
+{
+    var element = parent.document.getElementById( elementId );
+    
+    if ( element )
+    {
+        element.disabled = true;
+    }
+}
+
+/**
  * Returns true if the element with the given identifier has selected elements
  * associated with it, false if not.
  * 
@@ -410,7 +462,7 @@ function deleteDivEffect()
 }
 
 /**
- * Returns a query string with all selected element values in the select with
+ * Returns a query string with all element values in the select list with
  * the specified identifier.
  */
 function getParamString( elementId )

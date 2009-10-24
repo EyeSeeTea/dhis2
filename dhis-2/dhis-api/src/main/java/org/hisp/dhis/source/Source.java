@@ -27,10 +27,13 @@ package org.hisp.dhis.source;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.common.Dimension;
+import org.hisp.dhis.common.DimensionOption;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataset.DataSet;
 
 /**
@@ -38,11 +41,71 @@ import org.hisp.dhis.dataset.DataSet;
  * @version $Id: Source.java 5277 2008-05-27 15:48:42Z larshelg $
  */
 public abstract class Source
-    implements Serializable
+    extends IdentifiableObject implements DimensionOption
 {
-    protected int id;
-
     protected Set<DataSet> dataSets = new HashSet<DataSet>();
+
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public static Dimension DIMENSION = new SourceDimension();
+    
+    public static class SourceDimension
+        implements Dimension
+    {
+        private static final String NAME = "Source";
+        
+        public String getName()
+        {
+            return NAME;
+        }
+        
+        public List<? extends DimensionOption> getDimensionOptions()
+        {
+            return null;
+        }
+
+        public DimensionOption getDimensionOption( Object object )
+        {
+            return null;
+        }
+        
+        @Override
+        public boolean equals( Object o )
+        {
+            if ( this == o )
+            {
+                return true;
+            }
+            
+            if ( o == null )
+            {
+                return false;
+            }
+            
+            if ( !( o instanceof SourceDimension ) )
+            {
+                return false;
+            }
+            
+            final SourceDimension other = (SourceDimension) o;
+            
+            return NAME.equals( other.getName() );
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            return NAME.hashCode();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "[" + NAME + "]";
+        }
+    }
     
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
@@ -57,16 +120,6 @@ public abstract class Source
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
 
     public Set<DataSet> getDataSets()
     {

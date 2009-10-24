@@ -29,7 +29,7 @@ package org.hisp.dhis.options.displayproperty;
 
 import java.util.List;
 
-import org.hisp.dhis.common.MetaObject;
+import org.hisp.dhis.common.IdentifiableObject;
 
 /**
  * @author Lars Helge Overland
@@ -49,44 +49,17 @@ public class DefaultDisplayPropertyHandler
     // DisplayPropertyHandler implementation
     // -------------------------------------------------------------------------
 
-    public List<? extends MetaObject> handle( List<? extends MetaObject> list )
+    public List<? extends IdentifiableObject> handle( List<? extends IdentifiableObject> list )
     {
-        if ( displayProperty.equals( DisplayPropertyManager.DISPLAY_PROPERTY_SHORTNAME ) )
+        for ( IdentifiableObject object : list )
         {
-            for ( MetaObject object : list )
-            {
-                if ( object.getShortName() != null )
-                {
-                    object.setName( object.getShortName() );
-                }
-            }
-        }        
-        else if ( displayProperty.equals( DisplayPropertyManager.DISPLAY_PROPERTY_CODE ) )
-        {
-            for ( MetaObject object : list )
-            {
-                if ( object.getCode() != null )
-                {
-                    object.setName( object.getCode() );
-                }
-            }
-        }
-        
-        else if ( displayProperty.equals( DisplayPropertyManager.DISPLAY_PROPERTY_ALTERNATIVENAME ) )
-        {
-            for ( MetaObject object : list )
-            {
-                if ( object.getAlternativeName() != null )
-                {
-                    object.setName( object.getAlternativeName() );
-                }
-            }
+            handle( object );
         }
         
         return list;
     }
     
-    public MetaObject handle( MetaObject object )
+    public IdentifiableObject handle( IdentifiableObject object )
     {
         if ( displayProperty.equals( DisplayPropertyManager.DISPLAY_PROPERTY_SHORTNAME ) )
         {
@@ -101,8 +74,7 @@ public class DefaultDisplayPropertyHandler
             {
                 object.setName( object.getCode() );
             }
-        }
-        
+        }        
         else if ( displayProperty.equals( DisplayPropertyManager.DISPLAY_PROPERTY_ALTERNATIVENAME ) )
         {
             if ( object.getAlternativeName() != null )

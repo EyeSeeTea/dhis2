@@ -62,11 +62,11 @@ public class ValidateDataElementCategoryAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer dataElementCategoryId;
+    private Integer id;
 
-    public void setDataElementCategoryId( Integer dataElementCategoryId )
+    public void setId( Integer id )
     {
-        this.dataElementCategoryId = dataElementCategoryId;
+        this.id = id;
     }
 
     private String name;
@@ -112,14 +112,16 @@ public class ValidateDataElementCategoryAction
 
             DataElementCategory match = dataElementCategoryService.getDataElementCategoryByName( name );
 
-            if ( match != null && (dataElementCategoryId == null || match.getId() != dataElementCategoryId) )
+            if ( match != null && (id == null || match.getId() != id) )
             {
                 message = i18n.getString( "name_in_use" );
 
                 return INPUT;
             }
         }
-
+        
+        message = "ok";
+        
         return SUCCESS;
     }
 }

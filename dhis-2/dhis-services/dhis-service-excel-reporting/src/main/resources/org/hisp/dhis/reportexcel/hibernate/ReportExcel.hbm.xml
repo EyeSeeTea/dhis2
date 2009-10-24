@@ -11,11 +11,11 @@
 		<property name="excelTemplateFile" column="exceltemplate" />
 		<property name="periodRow" column="periodrow" />
 		<property name="periodColumn" column="periodcolumn" />
-		<property name="organisationRow" column="rganisationrow" />
+		<property name="organisationRow" column="organisationrow" />
 		<property name="organisationColumn" column="organisationcolumn" />
 		<property name="group" column="reportgroup" />
 
-		<set name="reportExcelItems" cascade="all" lazy="false">
+		<set name="reportExcelItems" lazy="false" cascade="delete">
 			<key column="reportexcelid" />
 			<one-to-many class="org.hisp.dhis.reportexcel.ReportExcelItem" />
 		</set>
@@ -24,13 +24,7 @@
 			<key column="reportexcelid" />
 			<many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnit"
 				column="organisationid"  foreign-key="fk_reportexcel_organisation"/>
-		</set>
-
-		<set name="userRoles" table="reportexcel_userroles">
-			<key column="reportexcelid" />
-			<many-to-many class="org.hisp.dhis.user.UserAuthorityGroup"
-				column="userroleid" foreign-key="fk_reportexcel_userrole"/>
-		</set>
+		</set>		
 		
 		<joined-subclass name="org.hisp.dhis.reportexcel.ReportExcelNormal" table="reportexcels_normal">
 			<key column="reportexcelid" />			

@@ -40,11 +40,11 @@ public class DataElementCategoryComboDeletionHandler
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementCategoryComboService categoryComboService;
+    private DataElementCategoryService categoryService;
 
-    public void setCategoryComboService( DataElementCategoryComboService categoryComboService )
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        this.categoryComboService = categoryComboService;
+        this.categoryService = categoryService;
     }
 
     // -------------------------------------------------------------------------
@@ -60,9 +60,9 @@ public class DataElementCategoryComboDeletionHandler
     @Override
     public boolean allowDeleteDataElementCategory( DataElementCategory category )
     {
-        for ( DataElementCategoryCombo categoryCombo : categoryComboService.getAllDataElementCategoryCombos() )
+        for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryService.getAllDataElementCategoryOptionCombos() )
         {
-            if ( categoryCombo.getCategories().contains( category ) )
+            if ( categoryOptionCombo.getCategoryCombo().getCategories().contains( category ) )
             {
                 return false;
             }

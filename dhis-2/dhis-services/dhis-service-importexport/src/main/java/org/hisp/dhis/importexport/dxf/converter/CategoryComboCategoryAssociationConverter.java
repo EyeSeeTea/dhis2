@@ -35,7 +35,6 @@ import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.AssociationType;
 import org.hisp.dhis.importexport.ExportParams;
@@ -58,13 +57,12 @@ public class CategoryComboCategoryAssociationConverter
     
     private static final String FIELD_CATEGORY_COMBO = "categoryCombo";
     private static final String FIELD_CATEGORY = "category";
+    private static final String FIELD_SORT_ORDER = "sortOrder";
 
     // -------------------------------------------------------------------------
     // Properties
     // -------------------------------------------------------------------------
 
-    private DataElementCategoryComboService categoryComboService;
-    
     private DataElementCategoryService categoryService;
     
     private Map<Object, Integer> categoryComboMapping;
@@ -78,10 +76,8 @@ public class CategoryComboCategoryAssociationConverter
     /**
      * Constructor for write operations.
      */
-    public CategoryComboCategoryAssociationConverter( DataElementCategoryComboService categoryComboService,
-        DataElementCategoryService categoryService )
+    public CategoryComboCategoryAssociationConverter( DataElementCategoryService categoryService )
     {
-        this.categoryComboService = categoryComboService;
         this.categoryService = categoryService;
     }
 
@@ -110,7 +106,7 @@ public class CategoryComboCategoryAssociationConverter
 
     public void write( XMLWriter writer, ExportParams params )
     {
-        Collection<DataElementCategoryCombo> categoryCombos = categoryComboService.getDataElementCategoryCombos( params.getCategoryCombos() );
+        Collection<DataElementCategoryCombo> categoryCombos = categoryService.getDataElementCategoryCombos( params.getCategoryCombos() );
         
         Collection<DataElementCategory> categories = categoryService.getDataElementCategories( params.getCategories() );
         
@@ -122,6 +118,8 @@ public class CategoryComboCategoryAssociationConverter
             {
                 if ( categoryCombo.getCategories() != null )
                 {
+                    int sortOrder = 0;
+                    
                     for ( DataElementCategory category : categoryCombo.getCategories() )
                     {
                         if ( categories.contains( category ) )
@@ -130,6 +128,7 @@ public class CategoryComboCategoryAssociationConverter
                             
                             writer.writeElement( FIELD_CATEGORY_COMBO, String.valueOf( categoryCombo.getId() ) );
                             writer.writeElement( FIELD_CATEGORY, String.valueOf( category.getId() ) );
+                            writer.writeElement( FIELD_SORT_ORDER, String.valueOf( sortOrder++ ) );
                             
                             writer.closeElement();
                         }
@@ -143,6 +142,8 @@ public class CategoryComboCategoryAssociationConverter
 
     public void read( XMLReader reader, ImportParams params )
     {
+        int sortOrder = 1;
+        
         while ( reader.moveToStartElement( ELEMENT_NAME, COLLECTION_NAME ) )
         {
             final Map<String, String> values = reader.readElements( ELEMENT_NAME );
@@ -151,6 +152,8 @@ public class CategoryComboCategoryAssociationConverter
             
             association.setGroupId( categoryComboMapping.get( Integer.parseInt( values.get( FIELD_CATEGORY_COMBO ) ) ) );            
             association.setMemberId( categoryMapping.get( Integer.parseInt( values.get( FIELD_CATEGORY ) ) ) );
+            association.setSortOrder( sortOrder++ ); //TODO Fix
+            //association.setSortOrder( values.containsKey( FIELD_SORT_ORDER ) ? categoryMapping.get( Integer.parseInt( values.get( FIELD_SORT_ORDER ) ) ) : 0 );
             
             read( association, GroupMemberType.CATEGORYCOMBO_CATEGORY, params );
         }

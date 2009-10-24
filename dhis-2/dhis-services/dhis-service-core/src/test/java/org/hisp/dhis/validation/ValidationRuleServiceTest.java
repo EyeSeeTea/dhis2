@@ -38,11 +38,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -64,11 +64,9 @@ import org.junit.Test;
  * @version $Id$
  */
 public class ValidationRuleServiceTest
-    extends DhisSpringTest
+    extends DhisTest
 {    
     private ValidationRuleService validationRuleService;
-
-    private DataElementCategoryComboService categoryComboService;
 
     private ExpressionService expressionService;
     
@@ -123,7 +121,7 @@ public class ValidationRuleServiceTest
 
         dataElementService = (DataElementService) getBean( DataElementService.ID );
 
-        categoryComboService = (DataElementCategoryComboService) getBean( DataElementCategoryComboService.ID );
+        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
         
         expressionService = (ExpressionService) getBean ( ExpressionService.ID );
         
@@ -153,7 +151,7 @@ public class ValidationRuleServiceTest
         dataElementsB.add( dataElementD );
         dataElementsC.add( dataElementB );
         
-        categoryCombo = categoryComboService.getDataElementCategoryComboByName( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );             
+        categoryCombo = categoryService.getDataElementCategoryComboByName( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );             
         
         categoryOptionCombo = categoryCombo.getOptionCombos().iterator().next();
 
@@ -200,6 +198,12 @@ public class ValidationRuleServiceTest
         validationRuleD = createValidationRule( 'D', ValidationRule.OPERATOR_LESSER, expressionA, expressionC );
         
         group = createValidationRuleGroup( 'A' );
+    }
+
+    @Override
+    public boolean emptyDatabaseAfterTest()
+    {
+        return true;
     }
 
     // ----------------------------------------------------------------------

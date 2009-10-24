@@ -29,6 +29,7 @@ package org.hisp.dhis;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URI;
 import java.net.URL;
 import javax.swing.*;
 
@@ -97,7 +98,7 @@ public class TrayApp
     MenuItem defaultItem = new MenuItem("Exit");
     popup.add(defaultItem);
 
-    trayIcon = new TrayIcon(image,"DHIS2 Lite", popup);
+    trayIcon = new TrayIcon(image,"DHIS 2 Live", popup);
     trayIcon.setImageAutoSize(true);
 
     ActionListener listener = new ActionListener() {
@@ -168,9 +169,14 @@ public class TrayApp
   public void lifeCycleStarted(LifeCycle arg0) {
     log.info("Lifecycle: server started");
     String url = "http://localhost:" + appServer.getConnectorPort();
-    trayIcon.displayMessage("Started","DHIS2 is running. Point your\nbrowser to " + url + ".",TrayIcon.MessageType.INFO);
+    trayIcon.displayMessage("Started","DHIS 2 is running. Your browser will\nbe pointed to " + url + ".",TrayIcon.MessageType.INFO);
     trayIcon.setToolTip("DHIS 2 Server running");
     trayIcon.setImage(createImage(RUNNING_ICON, "Running icon"));
+    try {
+    	Desktop.getDesktop().browse(URI.create(url));
+    } catch (Exception ex) {
+    	log.info("Couldn't open default desktop browse");
+    }
   }
 
   /**
@@ -241,7 +247,7 @@ public class TrayApp
 
   /**
    *  The <code>getInstallDir</code> method is a hack to determine the current
-   *  directory the dhis2 lite package is installed in.  It does this by finding
+   *  directory the DHIS 2 Live package is installed in.  It does this by finding
    *  the file URL of a resource within the executable jar and extracting the 
    *  installation path from that. 
    *

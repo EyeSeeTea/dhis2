@@ -14,7 +14,7 @@
 		
 		#foreach( $optionCombo in $orderdCategoryOptionCombos )			
 			<td>
-				<span id="value[option$optionCombo.id].name" style="display:none">$optionComboNames.get( $optionCombo.id )</span>							
+				<span id="value[option$optionCombo.id].name" style="display:none">$optionCombo.name</span>							
 			</td>		
 		#end		
 		
@@ -35,7 +35,7 @@
 		#foreach( $optionCombo in $orderdCategoryOptionCombos )
 			
 			<td>
-				<span id="value[option$optionCombo.id].name" style="display:none">$optionComboNames.get( $optionCombo.id )</span>							
+				<span id="value[option$optionCombo.id].name" style="display:none">$optionCombo.name</span>							
 			</td>		
 			
 		#end
@@ -134,8 +134,7 @@
                                             #end 
                                         </select>
                                     #else
-                                    #set( $zeroValueSaveMode = true )
-                                           <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionCombo.id, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" ondblclick="viewHistory( $dataElement.id, $optionCombo.id, true  )" #else disabled="disabled" #end onkeypress="return keyPress(event, this)" style="width:100% #if( $minMaxError ) ;background-color:#ffcccc #end #if( $dataElement.type == "int" ) ;text-align:center #end" tabindex="$tabIndex" #if( $locked ) disabled="disabled"#end>                                
+                                        <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionCombo.id, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" ondblclick="viewHistory( $dataElement.id, $optionCombo.id, true  )" #else disabled="disabled" #end onkeypress="return keyPress(event, this)" style="width:100% #if( $minMaxError ) ;background-color:#ffcccc #end #if( $dataElement.type == "int" ) ;text-align:center #end" tabindex="$tabIndex" #if( $locked ) disabled="disabled"#end>                                
                                     #end    
                             #end    
                             
@@ -146,19 +145,16 @@
 									#end
 								#end
 												
-								<span id="value[option$optionCombo.id].name" style="display:none">$optionComboNames.get( $optionCombo.id )</span>
+								<span id="value[option$optionCombo.id].name" style="display:none">$optionCombo.name</span>
 								<span id="value[$dataElement.id].name" style="display:none">$encoder.htmlEncode( $dataElement.shortName )</span>
 								<div id="value[$dataElement.id:$optionCombo.id].min" style="display:none">$!minMax.min</div>
 								<div id="value[$dataElement.id:$optionCombo.id].max" style="display:none">$!minMax.max</div>	
 					
 								#if( $dataElement.aggregationOperator == "sum" && $dataElement.type != "string")
 									<input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionCombo.id, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" ondblclick="viewHistory( $dataElement.id, $optionCombo.id, true  )" #else disabled="disabled" #end onkeypress="return keyPress(event, this)" style="width:100% #if( $minMaxError ) ;background-color:#ffcccc #end #if( $dataElement.type == "int" ) ;text-align:center #end" tabindex="$tabIndex" #if( $locked ) disabled="disabled"#end>
-								#else
-									#set( $zeroValueSaveMode = true )
-                                        #if( $dataElement.type != "string")
-									       <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionCombo.id, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" ondblclick="viewHistory( $dataElement.id, $optionCombo.id, true  )" #else disabled="disabled" #end onkeypress="return keyPress(event, this)" style="width:100% #if( $minMaxError ) ;background-color:#ffcccc #end #if( $dataElement.type == "int" ) ;text-align:center #end" tabindex="$tabIndex" #if( $locked ) disabled="disabled"#end>
-                                        #end            
-								#end				
+								#elseif( $dataElement.type != "string")
+								    <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionCombo.id, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" ondblclick="viewHistory( $dataElement.id, $optionCombo.id, true  )" #else disabled="disabled" #end onkeypress="return keyPress(event, this)" style="width:100% #if( $minMaxError ) ;background-color:#ffcccc #end #if( $dataElement.type == "int" ) ;text-align:center #end" tabindex="$tabIndex" #if( $locked ) disabled="disabled"#end>
+								#end
 							#end			
 							
 						</td>		

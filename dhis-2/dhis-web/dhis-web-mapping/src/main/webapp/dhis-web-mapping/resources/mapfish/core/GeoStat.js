@@ -362,7 +362,17 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
      *   nBins - {Integer} Total number of bins
      */
     defaultLabelGenerator: function(bin, binIndex, nbBins) {
-        return parseFloat(bin.lowerBound).toFixed(1) + ' - ' + parseFloat(bin.upperBound).toFixed(1) + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
+		if (ACTIVEPANEL == 'mapping') {
+			if (bin.upperBound < 1) {
+				return 'Available' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
+			}
+			else {
+				return 'Assigned' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
+			}
+		}
+		else {
+			return parseFloat(bin.lowerBound).toFixed(1) + ' - ' + parseFloat(bin.upperBound).toFixed(1) + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
+		}
     },
 
     classifyWithBounds: function(bounds) {
@@ -437,10 +447,6 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         return Math.floor(1 + 3.3 * Math.log(this.nbVal, 10));
     },
 	
-	isNumber: function(k) {
-		return ( (typeof k === typeof 1) && (null !== k) && isFinite(k) );
-	},
-
     /**
      * Method: classify
      *    This function calls the appropriate classifyBy... function.
@@ -470,13 +476,10 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
             var bounds = new Array();
             bounds = str.split(',');
 			
-			for (var i = 0; i < bounds.length; i++) {
-				if (!this.isNumber(parseFloat(bounds[i]))) {
-					for (var j = i+1; j < (bounds.length); j++) {
-						bounds[j-1] = bounds[j];
-					}
-					bounds.pop();
-					i--;
+            for (var i = 0; i < bounds.length; i++) {
+				if (!Ext.num(parseFloat(bounds[i]), false)) {
+                    bounds.remove(bounds[i]);
+                    i--;
 				}
 			}
 			

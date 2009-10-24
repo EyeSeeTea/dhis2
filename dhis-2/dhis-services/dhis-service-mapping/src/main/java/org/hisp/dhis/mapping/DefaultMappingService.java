@@ -167,7 +167,7 @@ public class DefaultMappingService
         return mappingStore.addMap( map );
     }
 
-    public int addMap( String name, String mapLayerPath, String type, int organisationUnitId,
+    public int addMap( String name, String mapLayerPath, String type, String sourceType, int organisationUnitId,
         int organisationUnitLevelId, String nameColumn, String longitude, String latitude, int zoom )
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
@@ -175,13 +175,13 @@ public class DefaultMappingService
         OrganisationUnitLevel organisationUnitLevel = organisationUnitService
             .getOrganisationUnitLevel( organisationUnitLevelId );
 
-        Map map = new Map( name, mapLayerPath, type, organisationUnit, organisationUnitLevel, nameColumn,
+        Map map = new Map( name, mapLayerPath, type, sourceType, organisationUnit, organisationUnitLevel, nameColumn,
             longitude, latitude, zoom, null );
 
         return addMap( map );
     }
 
-    public void addOrUpdateMap( String name, String mapLayerPath, String type, int organisationUnitId,
+    public void addOrUpdateMap( String name, String mapLayerPath, String type, String sourceType, int organisationUnitId,
         int organisationUnitLevelId, String nameColumn, String longitude, String latitude, int zoom )
     {
         Map map = getMapByMapLayerPath( mapLayerPath );
@@ -203,7 +203,7 @@ public class DefaultMappingService
             OrganisationUnitLevel organisationUnitLevel = organisationUnitService
                 .getOrganisationUnitLevel( organisationUnitLevelId );
 
-            map = new Map( name, mapLayerPath, type, organisationUnit, organisationUnitLevel, nameColumn,
+            map = new Map( name, mapLayerPath, type, sourceType, organisationUnit, organisationUnitLevel, nameColumn,
                 longitude, latitude, zoom, null );
 
             addMap( map );
@@ -239,6 +239,13 @@ public class DefaultMappingService
     {
         return mappingStore.getMapsByType( type );
     }
+    
+    public Collection<Map> getMapsBySourceType()
+    {
+        String sourceType = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+        
+        return mappingStore.getMapsBySourceType( sourceType );        
+    }
 
     public Collection<Map> getMapsAtLevel( OrganisationUnitLevel organisationUnitLevel )
     {
@@ -270,9 +277,9 @@ public class DefaultMappingService
 
     public Collection<Map> getAllUserMaps()
     {
-        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_DATABASE );
+        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
 
-        return type != null && type.equals( MAP_SOURCE_TYPE_DATABASE ) ? getAllGeneratedMaps() : getAllMaps();
+        return type != null && type.equals( MAP_SOURCE_TYPE_DATABASE ) ? getAllGeneratedMaps() : getMapsBySourceType();
     }
 
     // -------------------------------------------------------------------------
@@ -399,6 +406,23 @@ public class DefaultMappingService
     public MapOrganisationUnitRelation getMapOrganisationUnitRelation( Map map, OrganisationUnit organisationUnit )
     {
         return mappingStore.getMapOrganisationUnitRelation( map, organisationUnit );
+    }
+    
+    public MapOrganisationUnitRelation getMapOrganisationUnitRelationByFeatureId( String featureId, String mapLayerPath )
+    {   
+        Map map = mappingStore.getMapByMapLayerPath( mapLayerPath );
+        
+        Collection<MapOrganisationUnitRelation> relations = mappingStore.getMapOrganisationUnitRelationsByMap( map );
+        
+        for ( MapOrganisationUnitRelation relation : relations )
+        {
+            if ( relation.getFeatureId().equals( featureId ))
+            {
+                return relation;
+            }
+        }
+        
+        return null;
     }
 
     public Collection<MapOrganisationUnitRelation> getAllMapOrganisationUnitRelations()
@@ -600,7 +624,7 @@ public class DefaultMappingService
     }
 
     public void addOrUpdateMapView( String name, int indicatorGroupId, int indicatorId, String periodTypeName,
-        int periodId, String mapSourceType, String mapSource, int method, int classes, String colorLow, String colorHigh )
+        int periodId, String mapSource, int method, int classes, String colorLow, String colorHigh )
     {
         IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( indicatorGroupId );
 
@@ -610,6 +634,8 @@ public class DefaultMappingService
             .getClass() );
 
         Period period = periodService.getPeriod( periodId );
+        
+        String mapSourceType = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
 
         MapView mapView = mappingStore.getMapViewByName( name );
 
@@ -652,6 +678,13 @@ public class DefaultMappingService
     {
         return mappingStore.getMapViewByName( name );
     }
+    
+    public Collection<MapView> getMapViewsByMapSourceType()
+    {
+        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+        
+        return mappingStore.getMapViewsByMapSourceType( type );
+    }
 
     public Collection<MapView> getAllMapViews()
     {
@@ -659,14 +692,13 @@ public class DefaultMappingService
 
         Collection<MapView> mapViews = mappingStore.getAllMapViews();
 
-        String mapSourceType = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE,
-            MAP_SOURCE_TYPE_SHAPEFILE );
+        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
 
         if ( mapViews != null )
         {
             for ( MapView mapView : mapViews )
             {
-                if ( mapView.getMapSourceType().equals( mapSourceType ) )
+                if ( mapView.getMapSourceType().equals( type ) )
                 {
                     selectedMapViews.add( mapView );
                 }
@@ -694,11 +726,14 @@ public class DefaultMappingService
         String strokeColor, int strokeWidth )
     {
         MapLayer mapLayer = mappingStore.getMapLayerByName( name );
+        
+        String mapSourceType = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
 
         if ( mapLayer != null )
         {
             mapLayer.setName( name );
             mapLayer.setType( type );
+            mapLayer.setMapSourceType( mapSourceType );
             mapLayer.setMapSource( mapSource );
             mapLayer.setFillColor( fillColor );
             mapLayer.setFillOpacity( fillOpacity );
@@ -709,7 +744,7 @@ public class DefaultMappingService
         }
         else
         {
-            addMapLayer( new MapLayer( name, type, mapSource, fillColor, fillOpacity, strokeColor, strokeWidth ) );
+            addMapLayer( new MapLayer( name, type, mapSourceType, mapSource, fillColor, fillOpacity, strokeColor, strokeWidth ) );
         }
     }
 
@@ -726,6 +761,13 @@ public class DefaultMappingService
     public MapLayer getMapLayerByName( String name )
     {
         return mappingStore.getMapLayerByName( name );
+    }
+    
+    public Collection<MapLayer> getMapLayersByMapSourceType()
+    {
+        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+        
+        return mappingStore.getMapLayersByMapSourceType( type );
     }
 
     public MapLayer getMapLayerByMapSource( String mapSource )

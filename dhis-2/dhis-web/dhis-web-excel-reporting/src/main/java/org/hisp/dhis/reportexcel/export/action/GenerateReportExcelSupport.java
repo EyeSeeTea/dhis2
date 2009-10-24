@@ -54,13 +54,14 @@ import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -73,7 +74,6 @@ import org.hisp.dhis.reportexcel.utils.ExcelUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.user.CurrentUserService;
 
-
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -85,48 +85,48 @@ public abstract class GenerateReportExcelSupport
 {
 
     private static final String NULL_REPLACEMENT = "0";
-    
-    protected static final String[] chappter = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX",
-        "X","XI","XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII",
-        "XXIII", "XXIV", "XXV","XXVI", "XXVII", "XXVIII", "XXIX", "XXX"};
+
+    protected static final String[] chappter = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI",
+        "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI",
+        "XXVII", "XXVIII", "XXIX", "XXX" };
 
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
-    OrganisationUnitSelectionManager organisationUnitSelectionManager;
+    protected OrganisationUnitSelectionManager organisationUnitSelectionManager;
 
-    CurrentUserService currentUserService;
+    protected CurrentUserService currentUserService;
 
-    AggregationService aggregationService;
+    protected AggregationService aggregationService;
 
-    IndicatorService indicatorService;
+    protected IndicatorService indicatorService;
 
-    DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
+    protected DataElementCategoryService categoryService;
 
-    StatementManager statementManager;
+    protected StatementManager statementManager;
 
-    DataElementService dataElementService;
+    protected DataElementService dataElementService;
 
-    ReportLocationManager reportLocationManager;
+    protected ReportLocationManager reportLocationManager;
 
-    ReportExcelService reportService;
+    protected ReportExcelService reportService;
 
-    PeriodService periodService;
+    protected PeriodService periodService;
 
-    I18nFormat format;
+    protected I18nFormat format;
 
-    DataMartStore dataMartStore;
+    protected DataMartStore dataMartStore;
 
-    SelectionManager selectionManager;
+    protected SelectionManager selectionManager;
 
     // -------------------------------------------
     // Output
     // -------------------------------------------
 
-    String outputXLS;
+    protected String outputXLS;
 
-    InputStream inputStream;
+    protected InputStream inputStream;
 
     // -------------------------------------------
     // Getter & Setter
@@ -152,10 +152,9 @@ public abstract class GenerateReportExcelSupport
         this.currentUserService = currentUserService;
     }
 
-    public void setDataElementCategoryOptionComboService(
-        DataElementCategoryOptionComboService dataElementCategoryOptionComboService )
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        this.dataElementCategoryOptionComboService = dataElementCategoryOptionComboService;
+        this.categoryService = categoryService;
     }
 
     public void setStatementManager( StatementManager statementManager )
@@ -206,15 +205,15 @@ public abstract class GenerateReportExcelSupport
     // -----------------------------------------
     // Local variable
     // -----------------------------------------
-    File outputReportFile;
+    protected File outputReportFile;
 
     File inputExcelTemplate;
 
-    WritableWorkbook outputReportWorkbook;
+    protected WritableWorkbook outputReportWorkbook;
 
     Date startDate;
 
-    Date endDate;
+    protected Date endDate;
 
     Date firstDayOfYear;
 
@@ -244,7 +243,7 @@ public abstract class GenerateReportExcelSupport
 
     WritableCellFormat text = new WritableCellFormat();
 
-    WritableCellFormat textLeft = new WritableCellFormat();
+    protected WritableCellFormat textLeft = new WritableCellFormat();
 
     WritableCellFormat textRight = new WritableCellFormat();
 
@@ -255,13 +254,13 @@ public abstract class GenerateReportExcelSupport
     WritableFont writableChapterFont = new WritableFont( WritableFont.ARIAL, 11, WritableFont.BOLD, false,
         UnderlineStyle.NO_UNDERLINE, Colour.BLACK );
 
-    WritableCellFormat textChapterLeft = new WritableCellFormat( writableChapterFont );
+    protected WritableCellFormat textChapterLeft = new WritableCellFormat( writableChapterFont );
 
     WritableCellFormat textNumberBoldRight = new WritableCellFormat( writableNumberFont );
 
-    WritableCellFormat textICDBoldJustify = new WritableCellFormat( writableICDFont );
+    protected WritableCellFormat textICDBoldJustify = new WritableCellFormat( writableICDFont );
 
-    WritableCellFormat number = new WritableCellFormat();
+    protected WritableCellFormat number = new WritableCellFormat();
 
     protected void installExcelFormat()
         throws WriteException
@@ -408,6 +407,16 @@ public abstract class GenerateReportExcelSupport
 
     }
 
+    public void complete()
+        throws IOException, WriteException
+    {
+        outputReportWorkbook.write();
+
+        outputReportWorkbook.close();
+        
+        selectionManager.setReportExcelOutput( outputReportFile.getPath() );
+    }
+
     protected String generateIndicatorExpression( ReportExcelItem reportItem, Date startDate, Date endDate,
         OrganisationUnit organisationUnit )
     {
@@ -421,8 +430,6 @@ public abstract class GenerateReportExcelSupport
             while ( matcher.find() )
             {
                 String replaceString = matcher.group();
-
-                System.out.println( replaceString );
 
                 replaceString = replaceString.replaceAll( "[\\[\\]]", "" );
 
@@ -538,7 +545,7 @@ public abstract class GenerateReportExcelSupport
 
                 DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
-                DataElementCategoryOptionCombo optionCombo = dataElementCategoryOptionComboService
+                DataElementCategoryOptionCombo optionCombo = categoryService
                     .getDataElementCategoryOptionCombo( optionComboId );
 
                 double aggregatedValue = aggregationService.getAggregatedDataValue( dataElement, optionCombo,
@@ -564,6 +571,32 @@ public abstract class GenerateReportExcelSupport
         {
             throw new RuntimeException( "Illegal DataElement id", ex );
         }
+
+    }
+
+    protected void installReadTemplateFile( ReportExcel reportExcel, Period period, OrganisationUnitGroup organisationUnitGroup )
+        throws BiffException, IOException, RowsExceededException, WriteException, IndexOutOfBoundsException
+    {
+
+        File reportTempDir = reportLocationManager.getReportExcelTempDirectory();
+
+        this.inputExcelTemplate = new File( reportLocationManager.getReportExcelTemplateDirectory() + File.separator
+            + reportExcel.getExcelTemplateFile() );
+
+        Calendar calendar = Calendar.getInstance();
+
+        this.outputReportFile = new File( reportTempDir, currentUserService.getCurrentUsername()
+            + this.dateformatter.format( calendar.getTime() ) + inputExcelTemplate.getName() );
+
+        Workbook templateWorkbook = Workbook.getWorkbook( inputExcelTemplate );
+
+        outputReportWorkbook = Workbook.createWorkbook( outputReportFile, templateWorkbook );
+
+        ExcelUtils.writeValue( reportExcel.getOrganisationRow(), reportExcel.getOrganisationColumn(), organisationUnitGroup
+            .getName(), ExcelUtils.TEXT, outputReportWorkbook.getSheet( 0 ), text );
+
+        ExcelUtils.writeValue( reportExcel.getPeriodRow(), reportExcel.getPeriodColumn(),
+            format.formatPeriod( period ), ExcelUtils.TEXT, outputReportWorkbook.getSheet( 0 ), text );
 
     }
 

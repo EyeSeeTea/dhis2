@@ -30,10 +30,8 @@ package org.hisp.dhis.de.action;
 import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
@@ -79,19 +77,12 @@ public class HistoryAction
     {
         this.dataValueService = dataValueService;
     }
-    
-    private DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
 
-    public void setDataElementCategoryOptionComboService( DataElementCategoryOptionComboService dataElementCategoryOptionComboService )
-    {
-        this.dataElementCategoryOptionComboService = dataElementCategoryOptionComboService;
-    }
+    private DataElementCategoryService categoryService;
     
-    private DataElementCategoryComboService dataElementCategoryComboService;
-
-    public void setDataElementCategoryComboService( DataElementCategoryComboService dataElementCategoryComboService )
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        this.dataElementCategoryComboService = dataElementCategoryComboService;
+        this.categoryService = categoryService;
     }
 
     private SelectedStateManager selectedStateManager;
@@ -179,13 +170,11 @@ public class HistoryAction
     {    	
     	DataElement dataElement = dataElementService.getDataElement( dataElementId );       
         
-        DataElementCategoryOptionCombo optionCombo = dataElementCategoryOptionComboService.getDataElementCategoryOptionCombo( optionComboId );
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
         
         if ( optionCombo == null )
         {
-            String defaultName = DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME;
-            
-            optionCombo = dataElementCategoryComboService.getDataElementCategoryComboByName( defaultName ).getOptionCombos().iterator().next();
+            optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
         }
 
         if ( dataElement == null )

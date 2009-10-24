@@ -27,10 +27,10 @@ package org.hisp.dhis.importexport.service;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
@@ -42,11 +42,9 @@ import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
@@ -151,25 +149,11 @@ public class DefaultImportObjectManager
         this.importObjectStore = importObjectStore;
     }
     
-    private DataElementCategoryOptionService categoryOptionService;
+    private DataElementCategoryService categoryService;
 
-    public void setCategoryOptionService( DataElementCategoryOptionService categoryOptionService )
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        this.categoryOptionService = categoryOptionService;
-    }
-    
-    private DataElementCategoryComboService categoryComboService;
-
-    public void setCategoryComboService( DataElementCategoryComboService categoryComboService )
-    {
-        this.categoryComboService = categoryComboService;
-    }
-
-    private DataElementCategoryOptionComboService categoryOptionComboService;
-
-    public void setCategoryOptionComboService( DataElementCategoryOptionComboService categoryOptionComboService )
-    {
-        this.categoryOptionComboService = categoryOptionComboService;
+        this.categoryService = categoryService;
     }
 
     private DataElementService dataElementService;
@@ -350,15 +334,15 @@ public class DefaultImportObjectManager
             
             int categoryComboId = categoryComboMapping.get( object.getCategoryCombo().getId() );
             
-            object.setCategoryCombo( categoryComboService.getDataElementCategoryCombo( categoryComboId ) );
+            object.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
             
-            Set<DataElementCategoryOption> categoryOptions = new HashSet<DataElementCategoryOption>();
+            List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
             
             for ( DataElementCategoryOption categoryOption : object.getCategoryOptions() )
             {
                 int categoryOptionId = categoryOptionMapping.get( categoryOption.getId() );
                 
-                categoryOptions.add( categoryOptionService.getDataElementCategoryOption( categoryOptionId ) );
+                categoryOptions.add( categoryService.getDataElementCategoryOption( categoryOptionId ) );
             }
             
             object.setCategoryOptions( categoryOptions );
@@ -367,11 +351,11 @@ public class DefaultImportObjectManager
             
             if ( importObject.getStatus() == ImportObjectStatus.NEW )
             {
-                categoryOptionComboService.addDataElementCategoryOptionCombo( object );
+                categoryService.addDataElementCategoryOptionCombo( object );
             }
             else if ( importObject.getStatus() == ImportObjectStatus.UPDATE )
             {
-                categoryOptionComboService.updateDataElementCategoryOptionCombo( object );
+                categoryService.updateDataElementCategoryOptionCombo( object );
             }
         }
 

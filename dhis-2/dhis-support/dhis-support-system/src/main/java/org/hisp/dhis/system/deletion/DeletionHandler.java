@@ -34,8 +34,6 @@ import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrder;
-import org.hisp.dhis.dataelement.DataElementDimensionRowOrder;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.datamart.DataMartExport;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
@@ -81,7 +79,6 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
  * @author Lars Helge Overland
  * @version $Id$
  */
-@SuppressWarnings( "unused" )
 public abstract class DeletionHandler
 {
     // -------------------------------------------------------------------------
@@ -164,25 +161,7 @@ public abstract class DeletionHandler
     public boolean allowDeleteDataElementCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
     {
         return true;
-    }
-    
-    public void deleteDataElementDimensionRowOrder( DataElementDimensionRowOrder rowOrder )
-    {
-    }
-    
-    public boolean allowDeleteDataElementDimensionRowOrder( DataElementDimensionRowOrder rowOrder )
-    {
-        return true;
-    }
-    
-    public void deleteDataElementDimensionColumnOrder( DataElementDimensionColumnOrder columnOrder )
-    {   
-    }
-    
-    public boolean allowDataElementDimensionColumnOrder( DataElementDimensionColumnOrder columnOrder )
-    {
-        return true;
-    }
+    }    
     
     public void deleteDataSet( DataSet dataSet )
     {

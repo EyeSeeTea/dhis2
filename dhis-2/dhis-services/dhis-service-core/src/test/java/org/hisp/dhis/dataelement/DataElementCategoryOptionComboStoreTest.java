@@ -31,9 +31,9 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.GenericStore;
@@ -74,10 +74,6 @@ public class DataElementCategoryOptionComboStoreTest
     {
         categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
         
-        categoryComboService = (DataElementCategoryComboService) getBean( DataElementCategoryComboService.ID );
-        
-        categoryOptionService = (DataElementCategoryOptionService) getBean( DataElementCategoryOptionService.ID );
-        
         categoryOptionComboStore = (GenericStore<DataElementCategoryOptionCombo>) getBean( "org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" );
         
         categoryOptionA = new DataElementCategoryOption( "Male" );
@@ -85,10 +81,10 @@ public class DataElementCategoryOptionComboStoreTest
         categoryOptionC = new DataElementCategoryOption( "0-20" );
         categoryOptionD = new DataElementCategoryOption( "20-100" );
 
-        categoryOptionService.addDataElementCategoryOption( categoryOptionA );
-        categoryOptionService.addDataElementCategoryOption( categoryOptionB );
-        categoryOptionService.addDataElementCategoryOption( categoryOptionC );
-        categoryOptionService.addDataElementCategoryOption( categoryOptionD );
+        categoryService.addDataElementCategoryOption( categoryOptionA );
+        categoryService.addDataElementCategoryOption( categoryOptionB );
+        categoryService.addDataElementCategoryOption( categoryOptionC );
+        categoryService.addDataElementCategoryOption( categoryOptionD );
                 
         categoryA = new DataElementCategory( "Gender" );
         categoryB = new DataElementCategory( "Agegroup" );
@@ -108,8 +104,8 @@ public class DataElementCategoryOptionComboStoreTest
         categoryComboA.getCategories().add( categoryB );
         categoryComboB.getCategories().add( categoryA );
         
-        categoryComboService.addDataElementCategoryCombo( categoryComboA );
-        categoryComboService.addDataElementCategoryCombo( categoryComboB ); 
+        categoryService.addDataElementCategoryCombo( categoryComboA );
+        categoryService.addDataElementCategoryCombo( categoryComboB ); 
     }
 
     // -------------------------------------------------------------------------
@@ -121,7 +117,7 @@ public class DataElementCategoryOptionComboStoreTest
     {
         categoryOptionComboA = new DataElementCategoryOptionCombo();
         
-        Set<DataElementCategoryOption> categoryOptions = new HashSet<DataElementCategoryOption>();
+        List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
         
         categoryOptions.add( categoryOptionA );
         categoryOptions.add( categoryOptionB );        
@@ -143,7 +139,7 @@ public class DataElementCategoryOptionComboStoreTest
     {
         categoryOptionComboA = new DataElementCategoryOptionCombo();
         
-        Set<DataElementCategoryOption> categoryOptions = new HashSet<DataElementCategoryOption>();
+        List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
         
         categoryOptions.add( categoryOptionA );
         categoryOptions.add( categoryOptionB );        

@@ -31,7 +31,7 @@
 	#set( $mark = false )
 	#foreach($reportItem in $reportItems)
 		<tr #alternate( $mark )>
-			<td align=center><input type="checkbox" value="$reportItem.id" name="reportItemCheck"/></td>
+			<td align=center><input type="checkbox" value="$reportItem.id" name="reportItemCheck" id="reportItemCheck"/></td>
 			<td>$encoder.htmlEncode( $reportItem.name )</td>
 			<td>$i18n.getString( $reportItem.itemType )</td>
 			<td>$i18n.getString( $reportItem.periodType )</td>
@@ -87,6 +87,10 @@
 					<option value='formulaexcel'>$i18n.getString('formulaexcel')</option>					
 					<option value='indicator'>$i18n.getString('indicator')</option>		
 					<option value='serial'>$i18n.getString('serial')</option>	
+					#end
+					#if ($!reportExcel.isPeriodColumnListing())					
+					<option value='dataelement'>$i18n.getString('dataelement')</option>							
+					<option value='indicator'>$i18n.getString('indicator')</option>				
 					#end
 					
 				</select>
@@ -272,7 +276,7 @@
 	function openExpressionBuild() {		
 		var itemTypeValue = $("#itemType").val();
 		var reportType = '$!reportExcel.getReportType()';
-		if(reportType=='CATEGORY'){
+		if($!reportExcel.isCategory()){
 			if(itemTypeValue=='dataelement'){
 				openCategoryExpression();
 			}else{

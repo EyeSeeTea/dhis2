@@ -38,27 +38,11 @@
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
-		<action name="getAdminOptions"
-			class="org.hisp.dhis.reportexcel.configuration.action.GetAdminOptionsAction">
-			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/reportUserRoles.vm</param>
-			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
-			<param name="javascripts">javascript/admin.js</param>
-			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
-		</action>
-
 		<action name="openAdministrator"
 			class="org.hisp.dhis.reportexcel.configuration.action.NoAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-excel-reporting/viewAdministrator.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
-			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
-		</action>
-
-		<action name="saveReportUserRoles"
-			class="org.hisp.dhis.reportexcel.configuration.action.SaveReportUserRolesAction">
-			<result name="success" type="chain">getAdminOptions
-			</result>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
@@ -130,7 +114,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-excel-reporting/listDataElementGroup.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
-			<param name="javascripts">javascript/ui.core.js,javascript/ui.core.js,javascript/ui.sortable.js,javascript/dataElementGroup.js,javascript/commons.js</param>
+			<param name="javascripts">javascript/ui.core.js,javascript/ui.sortable.js,javascript/dataElementGroup.js,javascript/commons.js</param>
 			<param name="stylesheets">style/ui.theme.css,style/basic.css</param>
 		</action>
 
@@ -339,7 +323,7 @@
 		<action name="getListSheet"
 			class="org.hisp.dhis.reportexcel.item.action.GetListSheetAction">
 			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/sheets.vm</result>
+				/dhis-web-excel-reporting/responseSheets.vm</result>
 		</action>
 
 		<action name="getDataElementOrder"
@@ -401,7 +385,7 @@
 			<param name="page">/dhis-web-excel-reporting/reportparams.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
 			<param name="menuTreeHeight">250</param>
-			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/export.js,javascript/commons.js</param>
+			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/export.js,javascript/commons.js,javascript/preview.js</param>
 		</action>
 
 		<action name="getReportExcelsByGroup"
@@ -416,50 +400,50 @@
 				/dhis-web-excel-reporting/responsePeriods.vm</result>
 		</action>
 
+		<!-- Generate Report By Ajax -->
+
 		<action name="generateReportExcel"
 			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelFlowAction">
-			<result name="CATEGORY" type="chain">generateReportExcelCategory
+			<result name="CATEGORY" type="chain">
+				generateReportExcelCategoryAjax
 			</result>
-			<result name="NORMAL" type="chain">generateReportExcelNormal
+			<result name="NORMAL" type="chain">
+				generateReportExcelNormalAjax
 			</result>
 			<result name="ORGANIZATION_GROUP_LISTING" type="chain">
-				generateReportExcelOrganizationGroupListing</result>
+				generateReportExcelOrganizationGroupListingAjax
+			</result>
 			<result name="PERIOD_COLUMN_LISTING" type="chain">
-				generateReportExcelPeriodColumnListing</result>
+				generateReportExcelPeriodColumnListingAjax
+			</result>
 		</action>
 
-		<action name="generateReportExcelCategory"
+		<action name="generateReportExcelCategoryAjax"
 			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelCategoryAction">
-			<result name="success" type="stream">
-				<param name="contentType">application/vnd.ms-excel</param>
-				<param name="inputName">inputStream</param>
-				<param name="contentDisposition">filename="${outputXLS}"</param>
-				<param name="bufferSize">1024</param>
-			</result>
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
 		</action>
 
-		<action name="generateReportExcelNormal"
+		<action name="generateReportExcelNormalAjax"
 			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelNormalAction">
-			<result name="success" type="stream">
-				<param name="contentType">application/vnd.ms-excel</param>
-				<param name="inputName">inputStream</param>
-				<param name="contentDisposition">filename="${outputXLS}"</param>
-				<param name="bufferSize">1024</param>
-			</result>
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
 		</action>
 
-		<action name="generateReportExcelOrganizationGroupListing"
+		<action name="generateReportExcelOrganizationGroupListingAjax"
 			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelOrganizationGroupListingAction">
-			<result name="success" type="stream">
-				<param name="contentType">application/vnd.ms-excel</param>
-				<param name="inputName">inputStream</param>
-				<param name="contentDisposition">filename="${outputXLS}"</param>
-				<param name="bufferSize">1024</param>
-			</result>
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
 		</action>
 
-		<action name="generateReportExcelPeriodColumnListing"
+		<action name="generateReportExcelPeriodColumnListingAjax"
 			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelPeriodColumnListingAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
+		</action>
+
+		<action name="downloadExcelOutput"
+			class="org.hisp.dhis.reportexcel.export.action.DowloadExcelAction">
 			<result name="success" type="stream">
 				<param name="contentType">application/vnd.ms-excel</param>
 				<param name="inputName">inputStream</param>
@@ -467,7 +451,6 @@
 				<param name="bufferSize">1024</param>
 			</result>
 		</action>
-
 
 		<!-- DATA ENTRY STATUS ACTION -->
 
@@ -539,7 +522,7 @@
 				/dhis-web-excel-reporting/responseDataSets.vm</result>
 		</action>
 
-		<!-- DATA ENTRY STATUS ACTION -->
+		<!-- DATA SET COMPLETED REPORT ACTION -->
 
 		<action name="selectDataSetCompletedReport"
 			class="org.hisp.dhis.reportexcel.datasetcompleted.action.SelectParamsAction">
@@ -547,7 +530,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-excel-reporting/dataSetCompleteReportSelect.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
-			<param name="menuTreeHeight">400</param>
+			<param name="menuTreeHeight">220</param>
 			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataSetCompleted.js</param>
 		</action>
 
@@ -572,7 +555,217 @@
 			<param name="page">/dhis-web-excel-reporting/viewCustomDataSetReport.vm</param>
 		</action>
 
+		<!-- PREVIEW REPORT EXCEL ACTION -->
 
+		<action name="validateGenerateReport"
+			class="org.hisp.dhis.reportexcel.export.action.ValidateGenerateReportAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
+			<result name="error" type="velocity-xml">
+				/dhis-web-excel-reporting/responseError.vm</result>
+		</action>
 
+		<action name="openPreviewReport"
+			class="org.hisp.dhis.reportexcel.preview.action.OpenPreviewReportAction">
+			<result name="success" type="velocity">/popup.vm</result>
+			<result name="input" type="velocity-xml">
+				/dhis-web-excel-reporting/responseError.vm</result>
+			<param name="page">/dhis-web-excel-reporting/viewReportPreview.vm</param>
+			<param name="stylesheets">style/previewStyle.css</param>
+			<param name="javascripts">javascript/preview.js</param>
+		</action>
+
+		<action name="previewReportExcel"
+			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelFlowAction">
+			<result name="CATEGORY" type="chain">
+				generatePreviewCategory
+			</result>
+			<result name="NORMAL" type="chain">
+				generatePreviewNormal
+			</result>
+			<result name="ORGANIZATION_GROUP_LISTING" type="chain">
+				generatePreviewOrgGroupListing
+			</result>
+			<result name="PERIOD_COLUMN_LISTING" type="chain">
+				generatePreviewPeriodColumnListing
+			</result>
+		</action>
+
+		<action name="generatePreviewCategory"
+			class="org.hisp.dhis.reportexcel.preview.action.GeneratePreviewCategoryAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+
+		<action name="generatePreviewNormal"
+			class="org.hisp.dhis.reportexcel.preview.action.GeneratePreviewNormalAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+
+		<action name="generatePreviewOrgGroupListing"
+			class="org.hisp.dhis.reportexcel.preview.action.GeneratePreviewOrgGroupListingAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+
+		<action name="generatePreviewPeriodColumnListing"
+			class="org.hisp.dhis.reportexcel.preview.action.GeneratePreviewPeriodColumnListingAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+
+		<action name="exportXMLChain"
+			class="org.hisp.dhis.reportexcel.preview.action.ExportXMLAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseReportPreview.vm</result>
+			<result name="error" type="velocity-xml">
+				/dhis-web-excel-reporting/responseError.vm</result>
+		</action>
+
+		<!--  GERERATE ADVANCE -->
+
+		<action name="selectAdvancedExportForm"
+            class="org.hisp.dhis.reportexcel.export.advance.action.SelectAdvancedExportFormAction">
+            <result name="success" type="velocity">/main.vm</result>
+            <param name="page">/dhis-web-excel-reporting/advancedReport.vm</param>
+            <param name="menu">/dhis-web-excel-reporting/menu.vm</param>
+            <param name="menuTreeHeight">250</param>
+            <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/export.js,javascript/commons.js,javascript/preview.js</param>
+        </action>
+     
+		<action name="generateAdvancedReportExcel"
+			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelFlowAction">
+			<result name="CATEGORY" type="chain">
+				generateAdvancedReportExcelCategory
+            </result>
+			<result name="NORMAL" type="chain">generateAdvancedReportExcelNormal
+			</result>
+			<result name="ORGANIZATION_GROUP_LISTING" type="chain">
+				generateAdvancedReportExcelOrganizationGroupListing</result>
+			<result name="PERIOD_COLUMN_LISTING" type="chain">
+				generateAdvancedReportExcelPeriodColumnListingAction</result>
+		</action>
+
+		<action name="generateAdvancedReportExcelNormal"
+			class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelNormalAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
+		</action>
+
+		<action name="generateAdvancedReportExcelOrganizationGroupListing"
+			class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelOrganisationGroupListingAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
+		</action>
+
+		<action name="generateAdvancedReportExcelPeriodColumnListingAction"
+			class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelPeriodColumnListingAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
+		</action>
+
+		<action name="generateAdvancedReportExcelCategory"
+			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelCategoryAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
+		</action>
+
+		<!-- INDIVIDUAL REPORT EXCEL -->
+
+		<action name="openIndividualReportExcel"
+			class="org.hisp.dhis.reportexcel.export.individual.action.OpenIndividualReportExcelAction">
+			<interceptor-ref name="organisationUnitTreeStack" />
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-excel-reporting/individualReportExcel.vm</param>
+			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
+			<param name="menuTreeHeight">220</param>
+			<param name="javascripts">javascript/individual.js,javascript/commons.js,../dhis-web-commons/ouwt/ouwt.js</param>			
+		</action>
+
+		<action name="filterAvailableDataElementsByDataElementGroup"
+			class="org.hisp.dhis.reportexcel.export.individual.action.DataElementListFilteredByGroup">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseDataElementGroup.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+
+		<action name="generateIndividualReportExcel"
+			class="org.hisp.dhis.reportexcel.export.individual.action.GenerateIndividualReportExcelAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responseSuccess.vm</result>
+		</action>
+		
+        <action name="cleanUpReportExcel"
+            class="org.hisp.dhis.reportexcel.action.CleanUpReportExcelAction">
+            <result name="success" type="velocity-xml">
+                /dhis-web-excel-reporting/responseSuccess.vm</result>
+        </action>
+		
+		<!-- PREVIEW ADVANCED REPORT -->
+		
+		<action name="previewAdvancedReportExcel"
+			class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelFlowAction">
+			<result name="CATEGORY" type="chain">
+				generatePreviewAdvancedCategory
+            </result>
+			<result name="NORMAL" type="chain">
+				generatePreviewAdvancedNormal
+			</result>
+			<result name="ORGANIZATION_GROUP_LISTING" type="chain">
+				generatePreviewAdvancedOrgGroupListing
+			</result>
+			<result name="PERIOD_COLUMN_LISTING" type="chain">
+				generatePreviewAdvancedPeriodColumnListing
+			</result>
+		</action>
+		
+		<action name="generatePreviewAdvancedCategory"
+			class="org.hisp.dhis.reportexcel.preview.advance.action.GeneratePreviewAdvancedCategoryAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+		
+		<action name="generatePreviewAdvancedNormal"
+			class="org.hisp.dhis.reportexcel.preview.advance.action.GeneratePreviewAdvancedNormalAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+	
+		<action name="generatePreviewAdvancedOrgGroupListing"
+			class="org.hisp.dhis.reportexcel.preview.advance.action.GeneratePreviewAdvancedOrgGroupListingAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+
+		<action name="generatePreviewAdvancedPeriodColumnListing"
+			class="org.hisp.dhis.reportexcel.preview.advance.action.GeneratePreviewAdvancedPeriodColumnListingAction">
+			<result name="success" type="chain">exportXMLChain
+			</result>
+		</action>
+		
+				
+		<!-- PROCESSED FOR PERIOD IN INDIVIDUAL REPORT -->
+		
+		<action name="getPeriodsByPeriodType"
+			class="org.hisp.dhis.reportexcel.export.individual.action.GetPeriodsByPeriodTypeAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responsePeriods.vm</result>
+			<result name="error" type="velocity-xml">
+				/dhis-web-excel-reporting/responseError.vm</result>
+		</action>
+		
+		<action name="nextPeriods" 
+			class="org.hisp.dhis.reportexcel.export.individual.action.NextPeriodsAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responsePeriods.vm</result>
+		</action>
+		
+		<action name="previousPeriods" 
+			class="org.hisp.dhis.reportexcel.export.individual.action.PreviousPeriodsAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/responsePeriods.vm</result>
+		</action>
+		
 	</package>
 </struts>

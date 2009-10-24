@@ -29,9 +29,15 @@ package org.hisp.dhis.datavalue;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.common.Dimension;
+import org.hisp.dhis.common.DimensionOption;
+import org.hisp.dhis.common.DimensionSet;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.source.Source;
 
@@ -42,6 +48,9 @@ import org.hisp.dhis.source.Source;
 public class DataValue
     implements Serializable
 {
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
+    
     /**
      * Part of the DataValue's composite ID
      */
@@ -120,18 +129,53 @@ public class DataValue
     }
     
     public DataValue( DataElement dataElement, Period period, Source source, String value, String storedBy,
-            Date timestamp, String comment, DataElementCategoryOptionCombo optionCombo )
+        Date timestamp, String comment, DataElementCategoryOptionCombo optionCombo )
     {
-            this.dataElement = dataElement;
-            this.period = period;
-            this.source = source;
-            this.value = value;
-            this.storedBy = storedBy;
-            this.timestamp = timestamp;
-            this.comment = comment;
-            this.optionCombo = optionCombo;
+        this.dataElement = dataElement;
+        this.period = period;
+        this.source = source;
+        this.value = value;
+        this.storedBy = storedBy;
+        this.timestamp = timestamp;
+        this.comment = comment;
+        this.optionCombo = optionCombo;
     }
 
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public Map<Dimension, DimensionOption> getDimensions()
+    {
+        Map<Dimension, DimensionOption> dimensions = new HashMap<Dimension, DimensionOption>();
+        
+        dimensions.put( DataElement.DIMENSION, dataElement );
+        dimensions.put( Period.DIMENSION, period );
+        dimensions.put( Source.DIMENSION, source );
+        
+        if ( optionCombo != null && !optionCombo.isDefault() )
+        {
+            for ( DataElementCategoryOption categoryOption : optionCombo.getCategoryOptions() )
+            {
+                dimensions.put( categoryOption.getCategory(), categoryOption );
+            }
+        }
+        
+        return dimensions;
+    }
+    
+    public Map<Dimension, DimensionOption> getDimensions( DimensionSet dimensionSet )
+    {
+        Map<Dimension, DimensionOption> dimensions = getDimensions();
+                
+        for ( Dimension dimension : dimensionSet.getDimensions() )
+        {
+            dimensions.put( dimension, dimension.getDimensionOption( dataElement ) );
+        }
+        
+        return dimensions;
+    }
+    
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -257,5 +301,4 @@ public class DataValue
     {
         this.optionCombo = optionCombo;
     }
-
 }

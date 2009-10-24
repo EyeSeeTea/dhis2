@@ -27,16 +27,12 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrder;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrderService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -57,37 +53,23 @@ public class AddDataElementCategoryAction
     {
         this.dataElementCategoryService = dataElementCategoryService;
     }
-
-    private DataElementCategoryOptionService dataElementCategoryOptionService;
-
-    public void setDataElementCategoryOptionService( DataElementCategoryOptionService dataElementCategoryOptionService )
-    {
-        this.dataElementCategoryOptionService = dataElementCategoryOptionService;
-    }
-
-    private DataElementDimensionColumnOrderService dataElementDimensionColumnOrderService;
-
-    public void setDataElementDimensionColumnOrderService( DataElementDimensionColumnOrderService dataElementDimensionColumnOrderService )
-    {
-        this.dataElementDimensionColumnOrderService = dataElementDimensionColumnOrderService;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String nameField;;
+    private String name;
 
-    public void setNameField( String nameField )
+    public void setName( String name )
     {
-        this.nameField = nameField;
+        this.name = name;
     }
 
-    private Collection<String> selectedList = new HashSet<String>();
+    private List<String> categoryOptionNames = new ArrayList<String>();
 
-    public void setSelectedList( Collection<String> selectedList )
+    public void setCategoryOptionNames( List<String> categoryOptionNames )
     {
-        this.selectedList = selectedList;
+        this.categoryOptionNames = categoryOptionNames;
     }
 
     // -------------------------------------------------------------------------
@@ -97,49 +79,17 @@ public class AddDataElementCategoryAction
     public String execute()
     {
         DataElementCategory dataElementCategory = new DataElementCategory();
-        dataElementCategory.setName( nameField );
-
-        Set<DataElementCategoryOption> categoryOptions = new HashSet<DataElementCategoryOption>();
-
-        for ( String id : selectedList )
+        dataElementCategory.setName( name );
+        
+        for ( String categoryOptionName : categoryOptionNames )
         {
-            DataElementCategoryOption dataElementCategoryOption = dataElementCategoryOptionService
-                .getDataElementCategoryOption( Integer.parseInt( id ) );
-
-            categoryOptions.add( dataElementCategoryOption );
+            DataElementCategoryOption categoryOption = new DataElementCategoryOption( categoryOptionName );
+            dataElementCategoryService.addDataElementCategoryOption( categoryOption );
+            dataElementCategory.getCategoryOptions().add( categoryOption );
         }
-
-        dataElementCategory.setCategoryOptions( categoryOptions );
 
         dataElementCategoryService.addDataElementCategory( dataElementCategory );
-
-        int displayOrder = 1;
-
-        DataElementDimensionColumnOrder columnOrder = null;
-
-        for ( String id : selectedList )
-        {
-            DataElementCategoryOption dataElementCategoryOption = dataElementCategoryOptionService
-                .getDataElementCategoryOption( Integer.parseInt( id ) );
-
-            columnOrder = dataElementDimensionColumnOrderService.getDataElementDimensionColumnOrder(
-                dataElementCategory, dataElementCategoryOption );
-
-            if ( columnOrder == null )
-            {
-                columnOrder = new DataElementDimensionColumnOrder( dataElementCategory, dataElementCategoryOption,
-                    displayOrder );
-                dataElementDimensionColumnOrderService.addDataElementDimensionColumnOrder( columnOrder );
-            }
-            else
-            {
-                columnOrder.setDisplayOrder( displayOrder );
-                dataElementDimensionColumnOrderService.updateDataElementDimensionColumnOrder( columnOrder );
-            }
-
-            displayOrder++;
-        }
-
+        
         return SUCCESS;
     }
 }

@@ -27,8 +27,8 @@
 package org.hisp.dhis.reportexcel.item.action;
 
 import java.util.Collection;
-import java.util.Set;
 
+import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
 import org.hisp.dhis.reportexcel.ReportExcelService;
@@ -39,13 +39,17 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class CopyReportExcelItemAction implements Action
+
+public class CopyReportExcelItemAction
+    implements Action
 {
- // -------------------------------------------
+    // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
     private ReportExcelService reportService;
+
+    private StatementManager statementManager;
 
     // -------------------------------------------
     // Input
@@ -64,6 +68,11 @@ public class CopyReportExcelItemAction implements Action
     public void setReportService( ReportExcelService reportService )
     {
         this.reportService = reportService;
+    }
+
+    public void setStatementManager( StatementManager statementManager )
+    {
+        this.statementManager = statementManager;
     }
 
     public Integer getReportId()
@@ -94,12 +103,13 @@ public class CopyReportExcelItemAction implements Action
     public String execute()
         throws Exception
     {
-        ReportExcel reportExcel = reportService.getReportExcel( reportId  );  
-        
-            
-        for(String itemId:this.reportItems){
-            Set<ReportExcelItem> reportItems = reportExcel.getReportExcelItems(); 
-            ReportExcelItem reportItem = reportService.getReportExcelItem( Integer.parseInt( itemId ) ) ;
+        statementManager.initialise();
+
+        ReportExcel reportExcel = reportService.getReportExcel( reportId );
+
+        for ( String itemId : this.reportItems )
+        {
+            ReportExcelItem reportItem = reportService.getReportExcelItem( Integer.parseInt( itemId ) );
             ReportExcelItem newReportItem = new ReportExcelItem();
             newReportItem.setName( reportItem.getName() );
             newReportItem.setItemType( reportItem.getItemType() );
@@ -108,12 +118,13 @@ public class CopyReportExcelItemAction implements Action
             newReportItem.setRow( reportItem.getRow() );
             newReportItem.setColumn( reportItem.getColumn() );
             newReportItem.setSheetNo( sheetNo );
-            reportItems.add( newReportItem );
-            reportExcel.setReportExcelItems( reportItems );
-            reportService.updateReportExcel( reportExcel );
-            
-        }   
-               
+            newReportItem.setReportExcel( reportExcel );
+            reportService.addReportExcelItem( newReportItem );
+        }     
+
+        statementManager.destroy();
+
         return SUCCESS;
     }
+
 }

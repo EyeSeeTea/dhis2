@@ -29,17 +29,17 @@ package org.hisp.dhis.reportexcel.importing.action;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import jxl.Sheet;
 import jxl.Workbook;
-import jxl.WorkbookSettings;
 
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
 import org.hisp.dhis.reportexcel.ReportExcelService;
+import org.hisp.dhis.reportexcel.ReportLocationManager;
+import org.hisp.dhis.reportexcel.comparator.ReportExcelItemNameComparator;
 import org.hisp.dhis.reportexcel.importing.ReportExcelItemValue;
 import org.hisp.dhis.reportexcel.utils.ExcelUtils;
 
@@ -54,7 +54,7 @@ public class ViewDataAction
     implements Action
 {
     // --------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // --------------------------------------------------------------------
 
     private ReportExcelService reportExcelService;
@@ -64,8 +64,15 @@ public class ViewDataAction
         this.reportExcelService = reportExcelService;
     }
 
+    private ReportLocationManager reportLocationManager;
+
+    public void setReportLocationManager( ReportLocationManager reportLocationManager )
+    {
+        this.reportLocationManager = reportLocationManager;
+    }
+
     // --------------------------------------------------------------------
-    // Getter and Setter
+    // Getters and Setters
     // --------------------------------------------------------------------
 
     private Integer reportId;
@@ -95,18 +102,20 @@ public class ViewDataAction
 
     public String execute()
     {
-
         try
-        {
-            ReportExcel report = reportExcelService.getReportExcel( reportId );
-            File upload = new File( uploadFileName );
-            WorkbookSettings ws = new WorkbookSettings();
-            ws.setLocale( new Locale( "en", "EN" ) );
-            Workbook templateWorkbook = Workbook.getWorkbook( upload, ws );
-
-            Collection<ReportExcelItem> reportItems = report.getReportExcelItems();
-            System.out.println( "reportItems : " + reportItems.size() );
+        {            
+            File upload = new File( reportLocationManager.getReportExcelTempDirectory() + File.separator
+                + uploadFileName );
+            
+            Workbook templateWorkbook = Workbook.getWorkbook( upload );
+            
             Sheet sheet = templateWorkbook.getSheet( 0 );
+
+            ReportExcel report = reportExcelService.getReportExcel( reportId );
+            
+            ArrayList<ReportExcelItem> reportItems = new ArrayList<ReportExcelItem>( report.getReportExcelItems() );
+
+            Collections.sort( reportItems, new ReportExcelItemNameComparator() );
 
             reportItemValues = new ArrayList<ReportExcelItemValue>();
 
@@ -125,7 +134,6 @@ public class ViewDataAction
 
                     reportItemValues.add( reportItemvalue );
                 }
-                
             }
 
             return SUCCESS;

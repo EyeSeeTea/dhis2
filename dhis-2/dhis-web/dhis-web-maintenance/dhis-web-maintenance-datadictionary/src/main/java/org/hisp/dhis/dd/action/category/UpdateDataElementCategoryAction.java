@@ -27,16 +27,11 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrder;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrderService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -58,44 +53,29 @@ public class UpdateDataElementCategoryAction
         this.dataElementCategoryService = dataElementCategoryService;
     }
 
-    private DataElementCategoryOptionService dataElementCategoryOptionService;
-
-    public void setDataElementCategoryOptionService( DataElementCategoryOptionService dataElementCategoryOptionService )
-    {
-        this.dataElementCategoryOptionService = dataElementCategoryOptionService;
-    }
-
-    private DataElementDimensionColumnOrderService dataElementDimensionColumnOrderService;
-
-    public void setDataElementDimensionColumnOrderService(
-        DataElementDimensionColumnOrderService dataElementDimensionColumnOrderService )
-    {
-        this.dataElementDimensionColumnOrderService = dataElementDimensionColumnOrderService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer dataElementCategoryId;
+    private Integer id;
 
-    public void setDataElementCategoryId( Integer dataElementCategoryId )
+    public void setId( Integer id )
     {
-        this.dataElementCategoryId = dataElementCategoryId;
+        this.id = id;
     }
 
-    private String nameField;
+    private String name;
 
-    public void setNameField( String nameField )
+    public void setName( String name )
     {
-        this.nameField = nameField;
+        this.name = name;
     }
 
-    private Collection<String> selectedList = new HashSet<String>();
+    private List<String> categoryOptions = new ArrayList<String>();
 
-    public void setSelectedList( Collection<String> selectedList )
+    public void setCategoryOptions( List<String> categoryOptions )
     {
-        this.selectedList = selectedList;
+        this.categoryOptions = categoryOptions;
     }
 
     // -------------------------------------------------------------------------
@@ -104,51 +84,21 @@ public class UpdateDataElementCategoryAction
 
     public String execute()
     {
+        DataElementCategory dataElementCategory = dataElementCategoryService.getDataElementCategory( id );
+        dataElementCategory.setName( name );        
+        
         // ---------------------------------------------------------------------
-        // Update data element category
+        // CategoryOptions can only be sorted on update
         // ---------------------------------------------------------------------
 
-        DataElementCategory dataElementCategory = dataElementCategoryService
-            .getDataElementCategory( dataElementCategoryId );
-
-        dataElementCategory.setName( nameField );        
+        dataElementCategory.getCategoryOptions().clear();
         
-        Set<DataElementCategoryOption> updatedCategoryOptions = new HashSet<DataElementCategoryOption>();
-
-        for ( String id : selectedList )
+        for ( String id : categoryOptions )
         {
-            updatedCategoryOptions.add( dataElementCategoryOptionService.getDataElementCategoryOption( Integer.parseInt( id ) ) );
+            dataElementCategory.getCategoryOptions().add( dataElementCategoryService.getDataElementCategoryOption( Integer.parseInt( id ) ) );
         }
-
-        dataElementCategory.setCategoryOptions( updatedCategoryOptions );
         
-        dataElementCategoryService.updateDataElementCategory( dataElementCategory );
-        
-        int displayOrder = 1;
-        
-        DataElementDimensionColumnOrder columnOrder = null;
-
-        for ( String id : selectedList )
-        {
-            DataElementCategoryOption dataElementCategoryOption = dataElementCategoryOptionService
-                .getDataElementCategoryOption( Integer.parseInt( id ) );
-
-            columnOrder = dataElementDimensionColumnOrderService.getDataElementDimensionColumnOrder(
-                dataElementCategory, dataElementCategoryOption );
-
-            if ( columnOrder == null )
-            {
-                columnOrder = new DataElementDimensionColumnOrder( dataElementCategory, dataElementCategoryOption, displayOrder );
-                dataElementDimensionColumnOrderService.addDataElementDimensionColumnOrder( columnOrder );
-            }
-            else
-            {
-                columnOrder.setDisplayOrder( displayOrder );
-                dataElementDimensionColumnOrderService.updateDataElementDimensionColumnOrder( columnOrder );
-            }
-
-            displayOrder++;
-        }
+        dataElementCategoryService.updateDataElementCategory( dataElementCategory );        
 
         return SUCCESS;
     }

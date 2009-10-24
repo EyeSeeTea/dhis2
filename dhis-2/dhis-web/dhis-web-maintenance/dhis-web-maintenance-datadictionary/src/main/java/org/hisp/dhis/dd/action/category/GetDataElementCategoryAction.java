@@ -27,19 +27,8 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrder;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrderService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -61,31 +50,20 @@ public class GetDataElementCategoryAction
         this.dataElementCategoryService = dataElementCategoryService;
     }
 
-    private DataElementCategoryOptionService dataElementCategoryOptionService;
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
-    public void setDataElementCategoryOptionService( DataElementCategoryOptionService dataElementCategoryOptionService )
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        this.dataElementCategoryOptionService = dataElementCategoryOptionService;
-    }
-
-    private DataElementDimensionColumnOrderService dataElementDimensionColumnOrderService;
-
-    public void setDataElementDimensionColumnOrderService(
-        DataElementDimensionColumnOrderService dataElementDimensionColumnOrderService )
-    {
-        this.dataElementDimensionColumnOrderService = dataElementDimensionColumnOrderService;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Output
     // -------------------------------------------------------------------------
-
-    private Integer dataElementCategoryId;
-
-    public void setDataElementCategoryId( Integer dataElementCategoryId )
-    {
-        this.dataElementCategoryId = dataElementCategoryId;
-    }
 
     private DataElementCategory dataElementCategory;
 
@@ -94,75 +72,14 @@ public class GetDataElementCategoryAction
         return dataElementCategory;
     }
 
-    private Collection<DataElementCategoryOption> dataElementCategoryOptions = new ArrayList<DataElementCategoryOption>();
-
-    public Collection<DataElementCategoryOption> getDataElementCategoryOptions()
-    {
-        return dataElementCategoryOptions;
-    }
-
-    private List<DataElementCategoryOption> allDataElementCategoryOptions;
-
-    public List<DataElementCategoryOption> getAllDataElementCategoryOptions()
-    {
-        return allDataElementCategoryOptions;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        dataElementCategory = dataElementCategoryService.getDataElementCategory( dataElementCategoryId );
-
-        List<DataElementCategoryOption> options = new ArrayList<DataElementCategoryOption>( dataElementCategory
-            .getCategoryOptions() );
-
-        Map<Integer, DataElementCategoryOption> map = new TreeMap<Integer, DataElementCategoryOption>();
-
-        boolean storedDisplayOrder = true;
-
-        DataElementDimensionColumnOrder columnOrder = null;
-
-        for ( DataElementCategoryOption option : options )
-        {
-            columnOrder = dataElementDimensionColumnOrderService.getDataElementDimensionColumnOrder(
-                dataElementCategory, option );
-
-            if ( columnOrder == null )
-            {
-                storedDisplayOrder = false;
-                break;
-            }
-
-            map.put( columnOrder.getDisplayOrder(), option );
-        }
-
-        if ( storedDisplayOrder == false )
-        {
-            dataElementCategoryOptions = options;
-        }
-        else
-        {
-            dataElementCategoryOptions = map.values();
-        }
-
-        allDataElementCategoryOptions = new ArrayList<DataElementCategoryOption>( dataElementCategoryOptionService
-            .getAllDataElementCategoryOptions() );
-
-        Iterator<DataElementCategoryOption> categoryOptionIterator = allDataElementCategoryOptions.iterator();
-
-        while ( categoryOptionIterator.hasNext() )
-        {
-            DataElementCategoryOption option = categoryOptionIterator.next();
-
-            if ( dataElementCategoryOptions.contains( option ) )
-            {
-                categoryOptionIterator.remove();
-            }
-        }
-
+        dataElementCategory = dataElementCategoryService.getDataElementCategory( id );
+        
         return SUCCESS;
     }
 }

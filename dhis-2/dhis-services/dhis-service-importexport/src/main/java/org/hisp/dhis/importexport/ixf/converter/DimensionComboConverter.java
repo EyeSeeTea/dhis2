@@ -27,13 +27,13 @@ package org.hisp.dhis.importexport.ixf.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
+import java.util.List;
 
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
@@ -51,7 +51,7 @@ public class DimensionComboConverter
     // Properties
     // -------------------------------------------------------------------------
 
-    private Set<DataElementCategory> categories;
+    private List<DataElementCategory> categories;
     
     // -------------------------------------------------------------------------
     // Constructor
@@ -60,11 +60,11 @@ public class DimensionComboConverter
     /**
      * Constructor for read operations.
      */
-    public DimensionComboConverter( Set<DataElementCategory> categories,
-        DataElementCategoryComboService categoryComboService )
+    public DimensionComboConverter( List<DataElementCategory> categories,
+        DataElementCategoryService categoryService )
     {
         this.categories = categories;
-        this.categoryComboService = categoryComboService;
+        this.categoryService = categoryService;
     }
     
     // -------------------------------------------------------------------------

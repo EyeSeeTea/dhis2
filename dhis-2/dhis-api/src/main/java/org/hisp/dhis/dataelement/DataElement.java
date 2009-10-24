@@ -27,13 +27,17 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
+// import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.MetaObject;
+import org.hisp.dhis.common.Dimension;
+import org.hisp.dhis.common.DimensionOption;
+import org.hisp.dhis.common.DimensionSet;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
@@ -52,56 +56,16 @@ import org.hisp.dhis.period.PeriodType;
  * @version $Id: DataElement.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 public class DataElement
-    implements Serializable, MetaObject
+    extends IdentifiableObject implements DimensionOption, DimensionSet
 {
-    public static final String TYPE_DATE = "date";
-        
     public static final String TYPE_STRING = "string";
-
     public static final String TYPE_INT = "int";
-
     public static final String TYPE_BOOL = "bool";
+    public static final String TYPE_DATE = "date";
 
     public static final String AGGREGATION_OPERATOR_SUM = "sum";
-
-    public static final String AGGREGATION_OPERATOR_AVERAGE ="average";
-    
+    public static final String AGGREGATION_OPERATOR_AVERAGE ="average";    
     public static final String AGGREGATION_OPERATOR_COUNT = "count";
-
-    /**
-     * The database internal identifier for this DataElement.
-     */
-    private int id;
-    
-    /**
-     * The Universally Unique Identifer for this DataElement. 
-     */    
-    private String uuid;
-
-    /**
-     * The name of this DataElement. Required and unique.
-     */
-    private String name;
-
-    /**
-     * An alternative name of this DataElement. Optional but unique.
-     */
-    private String alternativeName;
-
-    /**
-     * An short name representing this DataElement. Optional but unique.
-     */
-    private String shortName;
-
-    /**
-     * An code representing this DataElement. Optional but unique.
-     */
-    private String code;
-
-    /**
-     * Description of this DataElement.
-     */
-    private String description;
 
     /**
      * If this DataElement is active or not (enabled or disabled).
@@ -160,6 +124,11 @@ public class DataElement
      */
     private List<Integer> aggregationLevels = new ArrayList<Integer>();
     
+    /**
+     * A Set of DataElementGroupSets.
+     */
+    private List<DataElementGroupSet> groupSets = new ArrayList<DataElementGroupSet>();
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -167,7 +136,79 @@ public class DataElement
     public DataElement()
     {
     }
+    
+    public DataElement( String name )
+    {
+        this.name = name;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
 
+    public static Dimension DIMENSION = new DataElementDimension();
+    
+    public static class DataElementDimension
+        implements Dimension
+    {
+        private static final String NAME = "DataElement";
+        
+        public String getName()
+        {
+            return NAME;
+        }
+        
+        public List<? extends DimensionOption> getDimensionOptions()
+        {
+            return null;
+        }
+
+        public DimensionOption getDimensionOption( Object object )
+        {
+            return null;
+        }
+        
+        @Override
+        public boolean equals( Object o )
+        {
+            if ( this == o )
+            {
+                return true;
+            }
+            
+            if ( o == null )
+            {
+                return false;
+            }
+            
+            if ( !( o instanceof DataElementDimension ) )
+            {
+                return false;
+            }
+            
+            final DataElementDimension other = (DataElementDimension) o;
+            
+            return NAME.equals( other.getName() );
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            return NAME.hashCode();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "[" + NAME + "]";
+        }
+    }
+    
+    public List<? extends Dimension> getDimensions()
+    {
+        return groupSets;
+    }
+    
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -241,84 +282,43 @@ public class DataElement
         return true;
     }
     
+    /**
+     * Tests whether more than one aggregation level exists for the DataElement.
+     */
     public boolean hasAggregationLevels()
     {
         return aggregationLevels != null && aggregationLevels.size() > 0;
     }
     
+    /**
+     * Tests whether the DataElement is associated with a DataELementCategoryCombo
+     * with more than one DataElementCategory, or any DataElementCategory with more
+     * than one DataElementCategoryOption.
+     */
+    public boolean isMultiDimensional()
+    {
+        if ( categoryCombo != null )
+        {
+            if ( categoryCombo.getCategories().size() > 1 )
+            {
+                return true;
+            }
+            
+            for ( DataElementCategory category : categoryCombo.getCategories() )
+            {
+                if ( category.getCategoryOptions().size() > 1 )
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String getUuid()
-    {
-        return uuid;
-    }
-
-    public void setUuid( String uuid )
-    {
-        this.uuid = uuid;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getAlternativeName()
-    {
-        return alternativeName;
-    }
-
-    public void setAlternativeName( String alternativeName )
-    {
-        this.alternativeName = alternativeName;
-    }
-
-    public String getShortName()
-    {
-        return shortName;
-    }
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
 
     public boolean isActive()
     {
@@ -429,5 +429,15 @@ public class DataElement
     public void setAggregationLevels( List<Integer> aggregationLevels )
     {
         this.aggregationLevels = aggregationLevels;
+    }
+
+    public List<DataElementGroupSet> getGroupSets()
+    {
+        return groupSets;
+    }
+
+    public void setGroupSets( List<DataElementGroupSet> groupSets )
+    {
+        this.groupSets = groupSets;
     }
 }

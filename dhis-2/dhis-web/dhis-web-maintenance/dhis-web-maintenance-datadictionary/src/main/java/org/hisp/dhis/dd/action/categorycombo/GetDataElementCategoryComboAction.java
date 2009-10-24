@@ -29,17 +29,10 @@ package org.hisp.dhis.dd.action.categorycombo;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementDimensionRowOrder;
-import org.hisp.dhis.dataelement.DataElementDimensionRowOrderService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -61,30 +54,15 @@ public class GetDataElementCategoryComboAction
         this.dataElementCategoryService = dataElementCategoryService;
     }
 
-    private DataElementCategoryComboService dataElementCategoryComboService;
-
-    public void setDataElementCategoryComboService( DataElementCategoryComboService dataElementCategoryComboService )
-    {
-        this.dataElementCategoryComboService = dataElementCategoryComboService;
-    }
-
-    private DataElementDimensionRowOrderService dataElementDimensionRowOrderService;
-
-    public void setDataElementDimensionRowOrderService(
-        DataElementDimensionRowOrderService dataElementDimensionRowOrderService )
-    {
-        this.dataElementDimensionRowOrderService = dataElementDimensionRowOrderService;
-    }
-
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
 
-    private Integer dataElementCategoryComboId;
+    private Integer id;
 
-    public void setDataElementCategoryComboId( Integer dataElementCategoryComboId )
+    public void setId( Integer id )
     {
-        this.dataElementCategoryComboId = dataElementCategoryComboId;
+        this.id = id;
     }
 
     private DataElementCategoryCombo dataElementCategoryCombo;
@@ -101,9 +79,9 @@ public class GetDataElementCategoryComboAction
         return dataElementCategories;
     }
 
-    private List<DataElementCategory> allDataElementCategories;
+    private Collection<DataElementCategory> allDataElementCategories = new ArrayList<DataElementCategory>();
 
-    public List<DataElementCategory> getAllDataElementCategories()
+    public Collection<DataElementCategory> getAllDataElementCategories()
     {
         return allDataElementCategories;
     }
@@ -114,55 +92,14 @@ public class GetDataElementCategoryComboAction
 
     public String execute()
     {
-        dataElementCategoryCombo = dataElementCategoryComboService
-            .getDataElementCategoryCombo( dataElementCategoryComboId );
-
-        List<DataElementCategory> cateogries = new ArrayList<DataElementCategory>( dataElementCategoryCombo
-            .getCategories() );
-
-        Map<Integer, DataElementCategory> temp = new TreeMap<Integer, DataElementCategory>();
-
-        boolean storedDisplayOrder = true;
+        dataElementCategoryCombo = dataElementCategoryService.getDataElementCategoryCombo( id );
         
-        DataElementDimensionRowOrder rowOrder = null;
+        dataElementCategories = dataElementCategoryCombo.getCategories();
         
-        for ( DataElementCategory category : cateogries )
-        {
-            rowOrder = dataElementDimensionRowOrderService.getDataElementDimensionRowOrder( dataElementCategoryCombo, category );
-
-            if ( rowOrder == null )
-            {
-                storedDisplayOrder = false;
-                break;
-            }
-
-            temp.put( rowOrder.getDisplayOrder(), category );
-        }
-
-        if ( storedDisplayOrder == false )
-        {
-            dataElementCategories = cateogries;
-        }
-        else
-        {
-            dataElementCategories = temp.values();
-        }
-
-        allDataElementCategories = new ArrayList<DataElementCategory>( dataElementCategoryService
-            .getAllDataElementCategories() );
-
-        Iterator<DataElementCategory> categoryIterator = allDataElementCategories.iterator();
-
-        while ( categoryIterator.hasNext() )
-        {
-            DataElementCategory category = categoryIterator.next();
-
-            if ( dataElementCategories.contains( category ) )
-            {
-                categoryIterator.remove();
-            }
-        }
-
+        allDataElementCategories = dataElementCategoryService.getAllDataElementCategories();
+        
+        allDataElementCategories.removeAll( dataElementCategories  );
+        
         return SUCCESS;
     }
 }

@@ -32,9 +32,9 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.GenericNameStore;
@@ -58,7 +58,7 @@ public class DataElementCategoryStoreTest
     private DataElementCategory categoryB;
     private DataElementCategory categoryC;
     
-    private Set<DataElementCategoryOption> categoryOptions;
+    private List<DataElementCategoryOption> categoryOptions;
 
     // -------------------------------------------------------------------------
     // Fixture
@@ -67,7 +67,7 @@ public class DataElementCategoryStoreTest
     @Override
     public void setUpTest()
     {
-        categoryOptionService = (DataElementCategoryOptionService) getBean( DataElementCategoryOptionService.ID );
+        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
         
         categoryStore = (GenericNameStore<DataElementCategory>) getBean( "org.hisp.dhis.dataelement.DataElementCategoryStore" );
 
@@ -75,11 +75,11 @@ public class DataElementCategoryStoreTest
         categoryOptionB = new DataElementCategoryOption( "CategoryOptionB" );
         categoryOptionC = new DataElementCategoryOption( "CategoryOptionC" );
         
-        categoryOptionService.addDataElementCategoryOption( categoryOptionA );
-        categoryOptionService.addDataElementCategoryOption( categoryOptionB );
-        categoryOptionService.addDataElementCategoryOption( categoryOptionC );
+        categoryService.addDataElementCategoryOption( categoryOptionA );
+        categoryService.addDataElementCategoryOption( categoryOptionB );
+        categoryService.addDataElementCategoryOption( categoryOptionC );
         
-        categoryOptions = new HashSet<DataElementCategoryOption>();
+        categoryOptions = new ArrayList<DataElementCategoryOption>();
         
         categoryOptions.add( categoryOptionA );
         categoryOptions.add( categoryOptionB );

@@ -123,10 +123,9 @@ public class GetDataSetsForLockAction
                     dataSetService.updateDataSet( dataSet );
                     dataSets.add( dataSet );
                 }
-            }
-            //selectionTreeManager.clearLockOnSelectedOrganisationUnits();
-           // selectionTreeManager.clearSelectedOrganisationUnits();
+            }            
         }
+        
         return SUCCESS;
     }
 }

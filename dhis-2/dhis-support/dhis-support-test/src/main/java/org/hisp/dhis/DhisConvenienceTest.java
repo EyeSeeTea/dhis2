@@ -27,6 +27,7 @@ package org.hisp.dhis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Collection;
@@ -35,8 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import java.io.File;
-
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
@@ -44,14 +43,9 @@ import org.hisp.dhis.datadictionary.ExtendedDataElement;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementDimensionColumnOrderService;
-import org.hisp.dhis.dataelement.DataElementDimensionRowOrderService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
@@ -112,16 +106,6 @@ public abstract class DhisConvenienceTest
     protected DataElementService dataElementService;
 
     protected DataElementCategoryService categoryService;
-
-    protected DataElementCategoryComboService categoryComboService;
-
-    protected DataElementCategoryOptionService categoryOptionService;
-
-    protected DataElementCategoryOptionComboService categoryOptionComboService;
-
-    protected DataElementDimensionColumnOrderService dimensionColumnOrderService;
-
-    protected DataElementDimensionRowOrderService dimensionRowOrderService;
 
     protected DataDictionaryService dataDictionaryService;
 
@@ -424,8 +408,7 @@ public abstract class DhisConvenienceTest
 
         for ( char identifier : categoryOptionUniqueIdentifiers )
         {
-            categoryOptionCombo.getCategoryOptions().add(
-                new DataElementCategoryOption( "CategoryOption" + identifier, "CategoryOption" + identifier ) );
+            categoryOptionCombo.getCategoryOptions().add( new DataElementCategoryOption( "CategoryOption" + identifier ) );
         }
 
         return categoryOptionCombo;

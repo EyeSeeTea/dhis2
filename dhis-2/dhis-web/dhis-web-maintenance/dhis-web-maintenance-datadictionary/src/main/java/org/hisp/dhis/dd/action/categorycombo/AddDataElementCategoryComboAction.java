@@ -27,17 +27,14 @@ package org.hisp.dhis.dd.action.categorycombo;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementDimensionRowOrder;
-import org.hisp.dhis.dataelement.DataElementDimensionRowOrderService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -59,38 +56,15 @@ public class AddDataElementCategoryComboAction
         this.dataElementCategoryService = dataElementCategoryService;
     }
 
-    private DataElementCategoryComboService dataElementCategoryComboService;
-
-    public void setDataElementCategoryComboService( DataElementCategoryComboService dataElementCategoryComboService )
-    {
-        this.dataElementCategoryComboService = dataElementCategoryComboService;
-    }
-
-    private DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
-
-    public void setDataElementCategoryOptionComboService(
-        DataElementCategoryOptionComboService dataElementCategoryOptionComboService )
-    {
-        this.dataElementCategoryOptionComboService = dataElementCategoryOptionComboService;
-    }
-
-    private DataElementDimensionRowOrderService dataElementDimensionRowOrderService;
-
-    public void setDataElementDimensionRowOrderService(
-        DataElementDimensionRowOrderService dataElementDimensionRowOrderService )
-    {
-        this.dataElementDimensionRowOrderService = dataElementDimensionRowOrderService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String nameField;;
+    private String name;;
 
-    public void setNameField( String nameField )
+    public void setName( String name )
     {
-        this.nameField = nameField;
+        this.name = name;
     }
 
     private Collection<String> selectedList = new HashSet<String>();
@@ -107,9 +81,9 @@ public class AddDataElementCategoryComboAction
     public String execute()
     {
         DataElementCategoryCombo dataElementCategoryCombo = new DataElementCategoryCombo();
-        dataElementCategoryCombo.setName( nameField );
+        dataElementCategoryCombo.setName( name );
 
-        Set<DataElementCategory> categories = new HashSet<DataElementCategory>();
+        List<DataElementCategory> categories = new ArrayList<DataElementCategory>();
 
         for ( String id : selectedList )
         {
@@ -121,37 +95,10 @@ public class AddDataElementCategoryComboAction
 
         dataElementCategoryCombo.setCategories( categories );
 
-        dataElementCategoryComboService.addDataElementCategoryCombo( dataElementCategoryCombo );
+        dataElementCategoryService.addDataElementCategoryCombo( dataElementCategoryCombo );
 
-        dataElementCategoryOptionComboService.generateOptionCombos( dataElementCategoryCombo );
-
-        int displayOrder = 1;
-
-        DataElementDimensionRowOrder rowOrder = null;
-
-        for ( String id : selectedList )
-        {
-            DataElementCategory dataElementCategory = dataElementCategoryService.getDataElementCategory( Integer
-                .parseInt( id ) );
-
-            rowOrder = dataElementDimensionRowOrderService.getDataElementDimensionRowOrder( dataElementCategoryCombo,
-                dataElementCategory );
-
-            if ( rowOrder == null )
-            {
-                rowOrder = new DataElementDimensionRowOrder( dataElementCategoryCombo, dataElementCategory,
-                    displayOrder );
-                dataElementDimensionRowOrderService.addDataElementDimensionRowOrder( rowOrder );
-            }
-            else
-            {
-                rowOrder.setDisplayOrder( displayOrder );
-                dataElementDimensionRowOrderService.updateDataElementDimensionRowOrder( rowOrder );
-            }
-
-            displayOrder++;
-        }
-
+        dataElementCategoryService.generateOptionCombos( dataElementCategoryCombo );
+        
         return SUCCESS;
     }
 }

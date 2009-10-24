@@ -27,9 +27,12 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.common.MetaObject;
+import org.hisp.dhis.common.Dimension;
+import org.hisp.dhis.common.DimensionSet;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
 
 /**
@@ -37,22 +40,8 @@ import org.hisp.dhis.datadictionary.ExtendedDataElement;
  * @version $Id: Indicator.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 public class Indicator
-    implements Serializable, MetaObject
+    extends IdentifiableObject implements DimensionSet
 {
-    private int id;
-    
-    private String uuid;
-
-    private String name;
-
-    private String alternativeName;
-
-    private String shortName;
-    
-    private String code;
-
-    private String description;
-    
     private Boolean annualized;
 
     private IndicatorType indicatorType;
@@ -75,6 +64,8 @@ public class Indicator
 
     private String url;
         
+    private List<IndicatorGroupSet> groupSets = new ArrayList<IndicatorGroupSet>();
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -100,6 +91,15 @@ public class Indicator
         this.denominator = denominator;
         this.denominatorDescription = denominatorDescription;
         this.denominatorAggregationOperator = denominatorAggregationOperator;
+    }
+
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public List<? extends Dimension> getDimensions()
+    {
+        return groupSets;
     }
     
     // -------------------------------------------------------------------------
@@ -144,76 +144,6 @@ public class Indicator
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String getUuid()
-    {
-        return uuid;
-    }
-
-    public void setUuid( String uuid )
-    {
-        this.uuid = uuid;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getAlternativeName()
-    {
-        return alternativeName;
-    }
-
-    public void setAlternativeName( String alternativeName )
-    {
-        this.alternativeName = alternativeName;
-    }
-    
-    public String getShortName()
-    {
-        return shortName;
-    }
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
 
     public Boolean getAnnualized()
     {
@@ -323,5 +253,15 @@ public class Indicator
     public void setUrl( String url )
     {
         this.url = url;
+    }
+
+    public List<IndicatorGroupSet> getGroupSets()
+    {
+        return groupSets;
+    }
+
+    public void setGroupSets( List<IndicatorGroupSet> groupSets )
+    {
+        this.groupSets = groupSets;
     }
 }

@@ -9,16 +9,21 @@
     <id name="id" column="categoryid">
       <generator class="native"/>
     </id>
-        	
+ 
+    <property name="uuid">
+      <column name="uuid" length="40"/>
+    </property>
+       	
     <property name="name">
       <column name="name" not-null="true" unique="true" length="160"/>
     </property>
     
-    <set name="categoryOptions" table="categories_categoryoptions">
+    <list name="categoryOptions" table="categories_categoryoptions">
       <key column="categoryid"/>
+      <list-index column="sort_order" base="1"/>
       <many-to-many class="org.hisp.dhis.dataelement.DataElementCategoryOption" 
-        column="categoryoptionid" foreign-key="fk_category_categoryoptionid"/>
-    </set>
+        column="categoryoptionid" foreign-key="fk_category_categoryoptionid" unique="true"/>
+    </list>    
         
   </class>
 </hibernate-mapping>

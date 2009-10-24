@@ -28,8 +28,8 @@ package org.hisp.dhis.reportexcel;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.user.UserAuthorityGroup;
 
 /**
  * @author Tran Thanh Tri
@@ -49,11 +49,9 @@ public abstract class ReportExcel
 
     private int organisationColumn;
 
-    private Set<ReportExcelItem> reportExcelItems = new HashSet<ReportExcelItem>();
+    private Set<ReportExcelItem> reportExcelItems;
 
-    private Set<OrganisationUnit> organisationAssocitions = new HashSet<OrganisationUnit>();
-
-    private Set<UserAuthorityGroup> userRoles = new HashSet<UserAuthorityGroup>();
+    private Set<OrganisationUnit> organisationAssocitions;   
 
     private String group;
 
@@ -65,24 +63,8 @@ public abstract class ReportExcel
 
     public ReportExcel()
     {
-        super();
-    }
-
-    public ReportExcel( String name, String excelTemplateFile, int periodRow, int periodColumn, int organisationRow,
-        int organisationColumn, Set<ReportExcelItem> reportExcelItems, Set<OrganisationUnit> organisationAssocitions,
-        Set<UserAuthorityGroup> userRoles, String group )
-    {
-        super();
-        this.name = name;
-        this.excelTemplateFile = excelTemplateFile;
-        this.periodRow = periodRow;
-        this.periodColumn = periodColumn;
-        this.organisationRow = organisationRow;
-        this.organisationColumn = organisationColumn;
-        this.reportExcelItems = reportExcelItems;
-        this.organisationAssocitions = organisationAssocitions;
-        this.userRoles = userRoles;
-        this.group = group;
+        this.reportExcelItems = new HashSet<ReportExcelItem>();
+        this.organisationAssocitions = new HashSet<OrganisationUnit>();
     }
 
     public ReportExcelItem getReportExcelItem( String name )
@@ -118,6 +100,8 @@ public abstract class ReportExcel
         return this.getReportType().equalsIgnoreCase( TYPE.NORMAL );
     }
 
+    
+    
     // -------------------------------------------------------------------------
     // Abstract methods
     // -------------------------------------------------------------------------
@@ -250,17 +234,7 @@ public abstract class ReportExcel
     {
         this.organisationAssocitions = organisationAssocitions;
     }
-
-    public Set<UserAuthorityGroup> getUserRoles()
-    {
-        return userRoles;
-    }
-
-    public void setUserRoles( Set<UserAuthorityGroup> userRoles )
-    {
-        this.userRoles = userRoles;
-    }
-
+   
     public String getGroup()
     {
         return group;
@@ -280,4 +254,6 @@ public abstract class ReportExcel
     {
         this.excelTemplateFile = excelTemplateFile;
     }
+    
+    
 }

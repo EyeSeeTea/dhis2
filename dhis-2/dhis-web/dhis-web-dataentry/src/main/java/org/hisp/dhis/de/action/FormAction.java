@@ -40,6 +40,8 @@ import org.hisp.dhis.customvalue.CustomValueService;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.datalock.DataSetLock;
 import org.hisp.dhis.datalock.DataSetLockService;
 import org.hisp.dhis.dataset.DataEntryForm;
 import org.hisp.dhis.dataset.DataEntryFormService;
@@ -151,6 +153,13 @@ public class FormAction
     public void setDataSetLockService( DataSetLockService dataSetLockService)
     {
         this.dataSetLockService = dataSetLockService;
+    }
+
+    private DataElementCategoryService categoryService;
+    
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
     }
 
     // -------------------------------------------------------------------------
@@ -293,11 +302,6 @@ public class FormAction
     {
         zeroValueSaveMode = (Boolean) systemSettingManager.getSystemSetting( KEY_ZERO_VALUE_SAVE_MODE, false );
 
-        if ( zeroValueSaveMode == null )
-        {
-            zeroValueSaveMode = false;
-        }
-
         OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
 
         DataSet dataSet = selectedStateManager.getSelectedDataSet();
@@ -305,11 +309,12 @@ public class FormAction
         customValues = (List<CustomValue>) customValueService.getCustomValuesByDataSet( dataSet );
 
         Period period = selectedStateManager.getSelectedPeriod();
-       
-        if(dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period ) != null){        	          	  
-		       if( dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period ).getSources().contains(organisationUnit) ) {
-			        	disabled = "disabled";
-			        }
+
+        DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
+        
+        if ( dataSetLock != null && dataSetLock.getSources().contains( organisationUnit ) )
+        {
+            disabled = "disabled";
         }
 
         Collection<DataElement> dataElements = dataSet.getDataElements();
@@ -319,17 +324,15 @@ public class FormAction
             return SUCCESS;
         }
 
-        Collection<DataElementCategoryOptionCombo> defaultOptionCombo = dataElements.iterator().next()
-            .getCategoryCombo().getOptionCombos();
-
-        optionComboId = defaultOptionCombo.iterator().next().getId();
+        DataElementCategoryOptionCombo defaultOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+        
+        optionComboId = defaultOptionCombo.getId();
 
         // ---------------------------------------------------------------------
         // Get the min/max values
         // ---------------------------------------------------------------------
 
-        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
-            organisationUnit, dataElements );
+        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataElements );
 
         minMaxMap = new HashMap<Integer, MinMaxDataElement>( minMaxDataElements.size() );
 
@@ -342,8 +345,7 @@ public class FormAction
         // Get the DataValues and create a map
         // ---------------------------------------------------------------------
 
-        Collection<DataValue> dataValues = dataValueService.getDataValues( organisationUnit, period, dataElements,
-            defaultOptionCombo );
+        Collection<DataValue> dataValues = dataValueService.getDataValues( organisationUnit, period, dataElements );
 
         dataValueMap = new HashMap<Integer, DataValue>( dataValues.size() );
 
@@ -356,8 +358,7 @@ public class FormAction
         // Prepare values for unsaved CalculatedDataElements
         // ---------------------------------------------------------------------
 
-        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet,
-            period );
+        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet, period );
 
         // ---------------------------------------------------------------------
         // Make the standard comments available
@@ -370,6 +371,7 @@ public class FormAction
         // ---------------------------------------------------------------------
 
         dataElementTypeMap = new HashMap<String, String>();
+        dataElementTypeMap.put( DataElement.TYPE_DATE, i18n.getString( "date" ) );
         dataElementTypeMap.put( DataElement.TYPE_BOOL, i18n.getString( "yes_no" ) );
         dataElementTypeMap.put( DataElement.TYPE_INT, i18n.getString( "number" ) );
         dataElementTypeMap.put( DataElement.TYPE_STRING, i18n.getString( "text" ) );

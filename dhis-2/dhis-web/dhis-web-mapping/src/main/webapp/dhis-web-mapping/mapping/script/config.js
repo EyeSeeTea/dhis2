@@ -1,30 +1,20 @@
-//  Country dependent
+﻿//  Country dependent
 
-    PHU_LEVEL = 4;
+    FACILITY_LEVEL = 4;
 
-    COUNTRY_LONGITUDE = -11.8;
-    COUNTRY_LATITUDE = 8.5;
-    COUNTRY_ZOOM = 8;
-
-//  Layers and widgets
-
-    INIT_URL = 'init';
-    CHOROPLETH_LAYERNAME = 'Thematic map';
-
-//  Map
-
-    init_longitude = 15;
-    init_latitude = 0;
-    init_zoom = 3;
-    
 //  MapFish print module
 
-    printConfigUrl = '../../print-servlet-1.2-SNAPSHOT/pdf/info.json';
+    printConfigUrl = '../../../print-servlet-1.2-SNAPSHOT/pdf/info.json';
 
 //  Ajax requests
 
-    path = '../';
+    path = '../'; // dhis-web-mapping
     type = '.action';
+
+	path_geoserver = '../../../geoserver/';
+	ows = 'ows?service=WMS&request=GetCapabilities';
+	wfs = 'wfs?request=GetFeature&typename=';	
+	output = '&outputformat=json&version=1.0.0';	
 
 //  Layout
 
@@ -33,7 +23,8 @@
     south_height = 70; // viewport south
 
     gridpanel_width = west_width - 15;
-    gridpanel_height = 700;
+    
+    multiselect_width = 230;
 	
     combo_width = 150;
 	combo_list_width = combo_width + 17;
@@ -53,9 +44,18 @@
 	MENU_TITLECOLOR_ADMIN = '#111';
 	MENU_EMPTYTEXT = '';
 	MENU_LABELSEPARATOR = '';
+	
+//	Styles
+
+	AA_DARK = 'font-family:myriad pro,frutiger,arial; font-weight:bold; font-size:12px; color:#111; letter-spacing:1px;';
+	AA_MED = 'font-family:myriad pro,frutiger,arial; font-weight:bold; font-size:12px; color:#444; letter-spacing:1px;';
+	AA_LIGHT = 'font-family:myriad pro,frutiger,arial; font-weight:bold; font-size:12px; color:#888; letter-spacing:1px;';
+	LABEL = 'padding-bottom:2px; padding-left:3px;';
+	
+	ASSIGNED_ROW_COLOR = '#b1ffa1';
+	UNASSIGNED_ROW_COLOR = '#ffffff';
 
 //  Ext.message
 
     msg_highlight_start = '<b><font color="#555555">';
-    msg_highlight_end = '</font></b>';
-        
+    msg_highlight_end = '</font></b>';      

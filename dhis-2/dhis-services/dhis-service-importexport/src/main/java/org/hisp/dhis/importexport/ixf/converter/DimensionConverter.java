@@ -27,17 +27,15 @@ package org.hisp.dhis.importexport.ixf.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryComboService;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.GroupMemberType;
@@ -66,10 +64,6 @@ public class DimensionConverter
     
     private BatchHandler<DataElementCategoryOption> categoryOptionBatchHandler;
     
-    private DataElementCategoryOptionService categoryOptionService;
-    
-    private DataElementCategoryComboService categoryComboService;
-    
     private DataElementCategoryService categoryService;
     
     // -------------------------------------------------------------------------
@@ -94,16 +88,12 @@ public class DimensionConverter
     public DimensionConverter( BatchHandler<DataElementCategory> batchHandler,
         ImportObjectService importObjectService,
         DataElementCategoryService categoryService,
-        BatchHandler<DataElementCategoryOption> categoryOptionBatchHandler,
-        DataElementCategoryOptionService categoryOptionService,
-        DataElementCategoryComboService categoryComboService )
+        BatchHandler<DataElementCategoryOption> categoryOptionBatchHandler )
     {
         this.batchHandler = batchHandler;
         this.importObjectService = importObjectService;
         this.categoryService = categoryService;
         this.categoryOptionBatchHandler = categoryOptionBatchHandler;
-        this.categoryOptionService = categoryOptionService;
-        this.categoryComboService = categoryComboService;
     }
     
     // -------------------------------------------------------------------------
@@ -141,7 +131,7 @@ public class DimensionConverter
 
     public void read( XMLReader reader, ImportParams params )
     {
-        Set<DataElementCategory> categories = new HashSet<DataElementCategory>();
+        List<DataElementCategory> categories = new ArrayList<DataElementCategory>();
         
         while ( reader.moveToStartElement( ELEMENT_NAME, COLLECTION_NAME ) )
         {
@@ -159,12 +149,12 @@ public class DimensionConverter
             // -----------------------------------------------------------------
             
             itemConverter = new DimensionItemConverter( categoryOptionBatchHandler,
-                importObjectService, categoryOptionService );
+                importObjectService, categoryService );
             
             itemConverter.read( reader, params );
         }
         
-        XMLConverter dimensionComboConverter = new DimensionComboConverter( categories, categoryComboService );
+        XMLConverter dimensionComboConverter = new DimensionComboConverter( categories, categoryService );
         
         dimensionComboConverter.read( reader, params );
     }

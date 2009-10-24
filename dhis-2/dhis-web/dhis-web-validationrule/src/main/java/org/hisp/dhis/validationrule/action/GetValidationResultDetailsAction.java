@@ -32,7 +32,7 @@ import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.Operand;
 import org.hisp.dhis.datavalue.DataValue;
@@ -95,12 +95,11 @@ public class GetValidationResultDetailsAction
         this.expressionService = expressionService;
     }
 
-    private DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
+    private DataElementCategoryService categoryService;
 
-    public void setDataElementCategoryOptionComboService(
-        DataElementCategoryOptionComboService dataElementCategoryOptionComboService )
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        this.dataElementCategoryOptionComboService = dataElementCategoryOptionComboService;
+        this.categoryService = categoryService;
     }
 
     private DataElementService dataElementService;
@@ -176,7 +175,7 @@ public class GetValidationResultDetailsAction
         for ( Operand operand : expressionService.getOperandsInExpression( validationRule.getLeftSide().getExpression() ) )
         {
             DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
-            DataElementCategoryOptionCombo categoryOptionCombo = dataElementCategoryOptionComboService
+            DataElementCategoryOptionCombo categoryOptionCombo = categoryService
                 .getDataElementCategoryOptionCombo( operand.getOptionComboId() );
 
             DataValue dataValue = dataValueService.getDataValue( source, dataElement, period, categoryOptionCombo );
@@ -184,13 +183,13 @@ public class GetValidationResultDetailsAction
             String value = dataValue != null ? dataValue.getValue() : NULL_REPLACEMENT;
             
             leftSideMap.put( dataElement.getName() + " " +
-                dataElementCategoryOptionComboService.getOptionNames( categoryOptionCombo ), value );
+                categoryOptionCombo.getName(), value );
         }
 
         for ( Operand operand : expressionService.getOperandsInExpression( validationRule.getRightSide().getExpression() ) )
         {
             DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
-            DataElementCategoryOptionCombo categoryOptionCombo = dataElementCategoryOptionComboService
+            DataElementCategoryOptionCombo categoryOptionCombo = categoryService
                 .getDataElementCategoryOptionCombo( operand.getOptionComboId() );
 
             DataValue dataValue = dataValueService.getDataValue( source, dataElement, period, categoryOptionCombo );
@@ -198,7 +197,7 @@ public class GetValidationResultDetailsAction
             String value = dataValue != null ? dataValue.getValue() : NULL_REPLACEMENT;
             
             rightSideMap.put( dataElement.getName() + " " +
-                dataElementCategoryOptionComboService.getOptionNames( categoryOptionCombo ), value );
+                categoryOptionCombo.getName(), value );
         }
 
         return SUCCESS;

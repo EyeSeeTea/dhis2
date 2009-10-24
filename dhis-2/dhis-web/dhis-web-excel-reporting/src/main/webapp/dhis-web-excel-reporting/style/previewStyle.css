@@ -1,0 +1,44 @@
+
+/* body sector
+-----------------------------------------*/
+	body { 
+		background-attachment:scroll; 
+		background-color:#E1FFFF; 
+	} 
+	
+
+/* table sector
+-----------------------------------------*/	
+	table { 
+		border:2px dotted #FF9933; 
+		border-collapse:seperate; 
+		border-spacing:3px;
+		empty-cells:hide; 
+		font-weight:bold; 
+		width:100%; 
+	} 
+	
+
+/* td sector
+-----------------------------------------*/	
+	
+	td { 
+		border-style:outset; 
+		border-width:1px; 
+	} 
+	td.formatNumber { 
+		color:blue; 
+		margin:60%;
+		text-align:center; 
+	} 
+
+/* label sector
+-----------------------------------------*/	
+
+	label.formatLabel { 
+		color:red; 
+		font-weight:bold; 
+		text-transform:uppercase; 
+		text-decoration:blink;
+		
+	} 

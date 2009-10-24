@@ -27,27 +27,23 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.MetaObject;
+import org.hisp.dhis.common.IdentifiableObject;
 
 /**
  * @author Abyot Aselefew
  * @version $Id$
  */
 public class DataElementCategoryOptionCombo
-    implements Serializable, MetaObject
+    extends IdentifiableObject
 {
     public static final String DEFAULT_NAME = "default";
-    
-    /**
-     * The database internal identifier.
-     */
-    private int id;  
     
     /**
      * The category combo.
@@ -57,7 +53,7 @@ public class DataElementCategoryOptionCombo
     /**
      * The category options.
      */
-    private Set<DataElementCategoryOption> categoryOptions = new HashSet<DataElementCategoryOption>();
+    private List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -68,7 +64,7 @@ public class DataElementCategoryOptionCombo
     }
     
     // -------------------------------------------------------------------------
-    // hashCode and equals
+    // hashCode, equals and toString
     // -------------------------------------------------------------------------
 
     @Override
@@ -152,6 +148,10 @@ public class DataElementCategoryOptionCombo
         return buffer.append( "]]" ).toString();
     }
 
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
     /**
      * Tests whether two objects compare on a name basis. The default equals method
      * becomes unusable in conjunction with persistence frameworks that put proxys
@@ -218,20 +218,15 @@ public class DataElementCategoryOptionCombo
         return null;
     }
 
+    public boolean isDefault()
+    {
+        return categoryCombo != null && categoryCombo.getName().equals( DEFAULT_NAME );
+    }
+    
     // -------------------------------------------------------------------------
-    // MetaObject implementation
+    // Getters and setters
     // -------------------------------------------------------------------------
 
-    public int getId()
-    {
-        return id;
-    }
-    
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-    
     public String getName()
     {
         StringBuffer name = new StringBuffer();
@@ -304,10 +299,6 @@ public class DataElementCategoryOptionCombo
         throw new UnsupportedOperationException( "Cannot set alternativename on DataElementCategoryOptionCombo: " + alternativeName );
     }
     
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -318,12 +309,12 @@ public class DataElementCategoryOptionCombo
         this.categoryCombo = categoryCombo;
     }
     
-    public Set<DataElementCategoryOption> getCategoryOptions()
+    public List<DataElementCategoryOption> getCategoryOptions()
     {
         return categoryOptions;
     }
     
-    public void setCategoryOptions( Set<DataElementCategoryOption> categoryOptions )
+    public void setCategoryOptions( List<DataElementCategoryOption> categoryOptions )
     {
         this.categoryOptions = categoryOptions;
     }

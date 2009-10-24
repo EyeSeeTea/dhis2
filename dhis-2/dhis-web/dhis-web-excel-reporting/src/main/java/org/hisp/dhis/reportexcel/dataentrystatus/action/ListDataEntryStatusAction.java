@@ -1,22 +1,5 @@
 package org.hisp.dhis.reportexcel.dataentrystatus.action;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.reportexcel.ReportExcelService;
-import org.hisp.dhis.reportexcel.status.DataEntryStatus;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserCredentials;
-import org.hisp.dhis.user.UserStore;
-
-import com.opensymphony.xwork2.Action;
-
 /*
  * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
@@ -43,6 +26,23 @@ import com.opensymphony.xwork2.Action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.reportexcel.ReportExcelService;
+import org.hisp.dhis.reportexcel.status.DataEntryStatus;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserStore;
+
+import com.opensymphony.xwork2.Action;
+
 /**
  * @author Tran Thanh Tri
  * @version $Id$
@@ -60,8 +60,6 @@ public class ListDataEntryStatusAction
 
     private UserStore userStore;
 
-    private OrganisationUnitSelectionManager selectionManager;
-
     private DataSetService dataSetService;
 
     // -------------------------------------------------
@@ -77,11 +75,6 @@ public class ListDataEntryStatusAction
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
-    }
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
     }
 
     public void setUserStore( UserStore userStore )
@@ -107,29 +100,24 @@ public class ListDataEntryStatusAction
     public String execute()
         throws Exception
     {
-        if ( selectionManager.getSelectedOrganisationUnit() != null )
+        List<DataSet> dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
+
+        if ( !currentUserService.currentUserIsSuper() )
         {
+            UserCredentials userCredentials = userStore.getUserCredentials( currentUserService.getCurrentUser() );
 
-            List<DataSet> dataSets = new ArrayList<DataSet>( dataSetService.getDataSetsBySource( selectionManager
-                .getSelectedOrganisationUnit() ) );
+            Set<DataSet> dataSetUserAuthorityGroups = new HashSet<DataSet>();
 
-            if ( !currentUserService.currentUserIsSuper() )
+            for ( UserAuthorityGroup userAuthorityGroup : userCredentials.getUserAuthorityGroups() )
             {
-                UserCredentials userCredentials = userStore.getUserCredentials( currentUserService.getCurrentUser() );
-
-                Set<DataSet> dataSetUserAuthorityGroups = new HashSet<DataSet>();
-
-                for ( UserAuthorityGroup userAuthorityGroup : userCredentials.getUserAuthorityGroups() )
-                {
-                    dataSetUserAuthorityGroups.addAll( userAuthorityGroup.getDataSets() );
-                }
-
-                dataSets.retainAll( dataSetUserAuthorityGroups );
+                dataSetUserAuthorityGroups.addAll( userAuthorityGroup.getDataSets() );
             }
 
-            dataStatus = new ArrayList<DataEntryStatus>( reportService.getDataEntryStatusDefaultByDataSets( dataSets ) );
+            dataSets.retainAll( dataSetUserAuthorityGroups );
+        }       
 
-        }
+        dataStatus = new ArrayList<DataEntryStatus>( reportService.getDataEntryStatusDefaultByDataSets( dataSets ) );
+
         return SUCCESS;
     }
 }

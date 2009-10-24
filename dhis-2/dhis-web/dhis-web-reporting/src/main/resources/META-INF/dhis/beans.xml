@@ -164,8 +164,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.reporttable.ReportTableService"/>
     <property name="dataElementService"
       ref="org.hisp.dhis.dataelement.DataElementService"/>
-    <property name="categoryComboService"
-      ref="org.hisp.dhis.dataelement.DataElementCategoryComboService"/>
+    <property name="categoryService"
+      ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
     <property name="indicatorService"
       ref="org.hisp.dhis.indicator.IndicatorService"/>
     <property name="periodService"
@@ -183,8 +183,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.reporttable.ReportTableService"/>
     <property name="dataElementService"
       ref="org.hisp.dhis.dataelement.DataElementService"/>
-    <property name="categoryComboService"
-      ref="org.hisp.dhis.dataelement.DataElementCategoryComboService"/>
+    <property name="categoryService"
+      ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
     <property name="indicatorService"
       ref="org.hisp.dhis.indicator.IndicatorService"/>
     <property name="periodService"
@@ -327,6 +327,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.report.ReportManager"/>
     <property name="reportService"
       ref="org.hisp.dhis.report.ReportService"/>
+    <property name="systemSettingManager"
+      ref="org.hisp.dhis.options.SystemSettingManager"/>
   </bean>
   
   <bean id="org.hisp.dhis.reporting.reportviewer.action.GetReportAction"
@@ -539,17 +541,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="dataMartStore"
       ref="org.hisp.dhis.datamart.DataMartStore"/>
     <property name="selectedStateManager"
-      ref="org.hisp.dhis.reporting.dataset.state.SelectedStateManager"/>
-    <property name="dataElementCategoryOptionComboService"
-      ref="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>		
+      ref="org.hisp.dhis.reporting.dataset.state.SelectedStateManager"/>    		
     <property name="dataElementOrderManager"
-      ref="org.hisp.dhis.order.manager.DataElementOrderManager"/>
-    <property name="dataElementCategoryComboService"
-      ref="org.hisp.dhis.dataelement.DataElementCategoryComboService"/>
-    <property name="dataElementCategoryService"
-      ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
+      ref="org.hisp.dhis.order.manager.DataElementOrderManager"/>   
     <property name="dataValueService"
-      ref="org.hisp.dhis.datavalue.DataValueService"/>		     
+      ref="org.hisp.dhis.datavalue.DataValueService"/>
+    <property name="categoryService"
+      ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>		     
   </bean>
   
   <bean id="org.hisp.dhis.reporting.dataset.action.GetViewFormStateAction" 

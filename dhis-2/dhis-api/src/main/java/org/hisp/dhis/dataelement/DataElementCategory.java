@@ -27,24 +27,29 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.common.Dimension;
+import org.hisp.dhis.common.DimensionOption;
+import org.hisp.dhis.common.IdentifiableObject;
+
 
 /**
+ * A Category is a dimension of a data element.  DataElements can have sets 
+ * of dimensions (known as CategoryCombos).  An Example of a Category might 
+ * be "Sex".  The Category could have two (or more) CategoryOptions such as 
+ * "Male" and "Female".
+ * 
  * @author Abyot Asalefew
  * @version $Id$
  */
 public class DataElementCategory
-    implements Serializable
+    extends IdentifiableObject implements Dimension
 {
     public static final String DEFAULT_NAME = "default";
-    
-    private int id;
-    
-    private String name;
-    
-    private Set<DataElementCategoryOption> categoryOptions = new HashSet<DataElementCategoryOption>();
+        
+    private List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -59,10 +64,32 @@ public class DataElementCategory
     	this.name = name;
     }
     
-    public DataElementCategory( String name, Set<DataElementCategoryOption> categoryOptions )
+    public DataElementCategory( String name, List<DataElementCategoryOption> categoryOptions )
     {
         this.name = name;
         this.categoryOptions = categoryOptions;
+    }
+
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+    
+    public List<DataElementCategoryOption> getDimensionOptions()
+    {
+        return categoryOptions;
+    }
+    
+    public DimensionOption getDimensionOption( Object object )
+    {
+        for ( DataElementCategoryOption categoryOption : categoryOptions )
+        {
+            if ( categoryOption.getCategoryOptionCombos().contains( object ) )
+            {
+                return categoryOption;
+            }
+        }
+        
+        return null;
     }
     
     // -------------------------------------------------------------------------
@@ -107,33 +134,13 @@ public class DataElementCategory
     // ------------------------------------------------------------------------
     // Getters and setters
     // ------------------------------------------------------------------------
-
-    public int getId() 
-    {
-        return id;
-    }
     
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-    
-    public String getName()
-    {
-        return name;
-    }
-    
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-    
-    public Set<DataElementCategoryOption> getCategoryOptions()
+    public List<DataElementCategoryOption> getCategoryOptions()
     {
         return categoryOptions;
     }
     
-    public void setCategoryOptions( Set<DataElementCategoryOption> categoryOptions )
+    public void setCategoryOptions( List<DataElementCategoryOption> categoryOptions )
     {
         this.categoryOptions = categoryOptions;
     }

@@ -3,18 +3,18 @@
 // View details
 // -----------------------------------------------------------------------------
 
-function showDataElementCategoryDetails( dataElementCategoryId )
+function showDataElementCategoryDetails( categoryId )
 {	
     var request = new Request();
     request.setResponseTypeXML( 'dataElementCategory' );
     request.setCallbackSuccess( dataElementCategoryReceived );
-    request.send( 'getDataElementCategory.action?dataElementCategoryId=' + dataElementCategoryId );
+    request.send( 'getDataElementCategory.action?id=' + categoryId );
 }
 
-function dataElementCategoryReceived( dataElementCategoryElement )
+function dataElementCategoryReceived( categoryElement )
 {
-    setFieldValue( 'nameField', getElementValue( dataElementCategoryElement, 'name' ) );    
-    setFieldValue( 'categoryOptionsCountField', getElementValue( dataElementCategoryElement, 'categoryOptionCount' ) );
+    setFieldValue( 'nameField', getElementValue( categoryElement, 'name' ) );    
+    setFieldValue( 'categoryOptionsCountField', getElementValue( categoryElement, 'categoryOptionCount' ) );
           
     showDetails();
 }
@@ -23,18 +23,16 @@ function dataElementCategoryReceived( dataElementCategoryElement )
 // Delete Category
 // -----------------------------------------------------------------------------
 
-var tmpDataElementCategoryId;
-
-function removeDataElementCategory( dataElementCategoryId, dataElementCategoryName )
+function removeDataElementCategory( categoryId, categoryName )
 {
-  var result = window.confirm( i18n_confirm_delete + '\n\n' + dataElementCategoryName );
+  var result = window.confirm( i18n_confirm_delete + '\n\n' + categoryName );
 
   if ( result )
   {
     var request = new Request();
     request.setResponseTypeXML( 'message' );
     request.setCallbackSuccess( removeDataElementCategoryCompleted );
-    request.send( 'removeDataElementCategory.action?id=' + dataElementCategoryId );
+    request.send( 'removeDataElementCategory.action?id=' + categoryId );
   }
 }
 
@@ -55,52 +53,81 @@ function removeDataElementCategoryCompleted( messageElement )
     }
 }
 
+function addCategoryOptionToCategory()
+{
+	var categoryName = document.getElementById( 'categoryOptionName' ).value;
+	
+	if ( categoryName == "" )
+	{
+		setMessage( i18n_specify_category_option_name );
+	}
+	else if ( listContainsById( 'categoryOptionNames', categoryName ) )
+	{
+		setMessage( i18n_category_option_name_already_exists );
+	}
+	else
+	{
+	   addOption( 'categoryOptionNames', categoryName, categoryName );
+	
+	   document.getElementById( 'categoryOptionName' ).value = "";
+	}
+}
+
 // ----------------------------------------------------------------------
 // Validation
 // ----------------------------------------------------------------------
 
 function validateAddDataElementCategory()
 {
-  var request = new Request();
-  request.setResponseTypeXML( 'message' );
-  request.setCallbackSuccess( addDataElementCategoryValidationCompleted );
+    var request = new Request();
+    request.setResponseTypeXML( 'message' );
+    request.setCallbackSuccess( addDataElementCategoryValidationCompleted );
 
-  var requestString = 'validateDataElementCategory.action?name=' + document.getElementById( 'nameField' ).value;
+    if ( document.getElementById( 'categoryOptionNames' ).options.length == 0 )
+    {
+        setMessage( i18n_must_include_category_option );
+        return;
+    }
 
-  request.send( requestString );
+    var requestString = 'validateDataElementCategory.action?name=' + htmlEncode( document.getElementById( 'name' ).value );
   
-  return false;
+    requestString += "&" + getParamString( 'categoryOptionNames' );
+
+    request.send( requestString );
+  
+    return false;
 }
 
 function addDataElementCategoryValidationCompleted( messageElement )
 {
-  var type = messageElement.getAttribute( 'type' );
-  var message = messageElement.firstChild.nodeValue;
+    var type = messageElement.getAttribute( 'type' );
+    var message = messageElement.firstChild.nodeValue;
 
-  if ( type == 'success' )
-  {           
-      document.forms['addDataElementCategoryForm'].submit();
-  }
-  
-  else if ( type == 'input' )
-  {
-    document.getElementById( 'message' ).innerHTML = message;
-    document.getElementById( 'message' ).style.display = 'block';
-  }
+    if ( type == 'success' )
+    {
+  	    selectAllById( 'categoryOptionNames' );
+        document.getElementById( 'addDataElementCategoryForm' ).submit();
+    }  
+    else if ( type == 'input' )
+    {
+  	    setMessage( message );
+    }
 }
 
 function validateEditDataElementCategory()
 {
-  var request = new Request();
-  request.setResponseTypeXML( 'message' );
-  request.setCallbackSuccess( editDataElementCategoryValidationCompleted );
+    var request = new Request();
+    request.setResponseTypeXML( 'message' );
+    request.setCallbackSuccess( editDataElementCategoryValidationCompleted );
+  
+    var requestString = 'validateDataElementCategory.action?id=' + document.getElementById( 'id' ).value + 
+        '&name=' + htmlEncode( document.getElementById( 'name' ).value );
 
-  var requestString = 'validateDataElementCategory.action?name=' + document.getElementById( 'nameField' ).value
-          + '&dataElementCategoryId=' + document.getElementById( 'dataElementCategoryId' ).value;
-
-  request.send( requestString );
+    requestString += "&" + getParamString( 'categoryOptions' );
+  
+    request.send( requestString );
     
-  return false;
+    return false;
 }
 
 function editDataElementCategoryValidationCompleted( messageElement )
@@ -110,13 +137,11 @@ function editDataElementCategoryValidationCompleted( messageElement )
 
     if ( type == 'success' )
     {
-        // Both edit and add form has id='dataSetForm'
-        document.forms['editDataElementCategoryForm'].submit();
+        selectAllById( 'categoryOptions' );
+        document.getElementById( 'editDataElementCategoryForm' ).submit();
     }
     else if ( type == 'input' )
     {
-      document.getElementById( 'message' ).innerHTML = message;
-      document.getElementById( 'message' ).style.display = 'block';
+        setMessage( message );
     }
 }
-

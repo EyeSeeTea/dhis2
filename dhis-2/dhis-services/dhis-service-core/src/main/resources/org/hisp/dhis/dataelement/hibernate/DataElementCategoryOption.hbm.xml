@@ -10,13 +10,23 @@
       <generator class="native"/>
     </id>
         	
+    <property name="uuid" length="40"/>
+    
     <property name="name">
-      <column name="name" not-null="true" unique="true" length="160"/>
+      <column name="name" not-null="true" length="160"/>
     </property>
     
-    <property name="shortName" unique="true" length="40"/>
+    <list name="categoryOptionCombos" table="categoryoptioncombos_categoryoptions" inverse="true">
+	  <key column="categoryoptionid"/>
+      <list-index column="sort_order" base="1"/>
+	  <many-to-many class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo"
+		column="categoryoptioncomboid" foreign-key="fk_categoryoption_categoryoptioncomboid"/>
+	</list> 
     
-    <property name="uuid" length="40"/>
+    <join table="categories_categoryoptions" inverse="true">
+      <key column="categoryoptionid"/>
+      <many-to-one column="categoryid" name="category"/>
+    </join>
     
   </class>
 </hibernate-mapping>

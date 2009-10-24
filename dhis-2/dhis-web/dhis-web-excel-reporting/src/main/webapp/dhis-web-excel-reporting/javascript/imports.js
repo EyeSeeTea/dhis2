@@ -113,7 +113,7 @@ function Completed( xmlObject ){
 	}
 }
 
-function getPreviewImportData(){
+function getPreviewImportData(fileExcel){
 	
 	var request = new Request();
 	
@@ -123,9 +123,7 @@ function getPreviewImportData(){
 	
 	var reportId = byId("reportId").value;
 	
-	var uploadFileName = byId("uploadFileName").value;
-
-	request.send( "previewData.action?reportId=" + reportId +"&uploadFileName=" + uploadFileName);
+	request.send( "previewData.action?reportId=" + reportId +"&uploadFileName=" + fileExcel);
 }
 
 function getReportItemValuesReceived( xmlObject ){

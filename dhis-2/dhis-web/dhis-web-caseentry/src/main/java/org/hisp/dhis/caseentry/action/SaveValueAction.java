@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
@@ -98,12 +98,12 @@ public class SaveValueAction
         this.patientDataValueService = patientDataValueService;
     }
 
-    private DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
+    private DataElementCategoryService dataElementCategoryService;
 
     public void setDataElementCategoryOptionComboService(
-        DataElementCategoryOptionComboService dataElementCategoryOptionComboService )
+        DataElementCategoryService dataElementCategoryService )
     {
-        this.dataElementCategoryOptionComboService = dataElementCategoryOptionComboService;
+        this.dataElementCategoryService = dataElementCategoryService;
     }
 
     // -------------------------------------------------------------------------
@@ -175,7 +175,7 @@ public class SaveValueAction
 
         if ( dataElement.getType().equalsIgnoreCase( DataElement.TYPE_STRING ) )
         {
-            optionCombo = dataElementCategoryOptionComboService.getDataElementCategoryOptionCombo( Integer
+            optionCombo = dataElementCategoryService.getDataElementCategoryOptionCombo( Integer
                 .parseInt( value ) );
         }
         else

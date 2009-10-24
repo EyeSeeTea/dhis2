@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2007-2008  Camptocamp
  *
  * This file is part of MapFish Client
@@ -129,13 +129,13 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         var h = screen.height;
         
         if (h <= 800) {
-            return 300;
+            return 120;
         }
         else if (h <= 1050) {
-            return 540;
+            return 480;
         }
         else if (h <= 1200) {
-            return 530;
+            return 600;
         }
         else {
             return 900;
@@ -143,8 +143,6 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
     },
      
     newUrl : false,
-    
-    organisationUnits: [],
     
     /**
      * Method: initComponent
@@ -190,6 +188,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
             {
                 xtype: 'combo',
                 id: 'maps_cb',
+				labelStyle: AA_LIGHT,
                 fieldLabel: 'Map',
                 typeAhead: true,
                 editable: false,
@@ -226,7 +225,9 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                 xtype: 'grid',
                 id: 'grid_gp',
                 store: gridStore,
-                columns: [ { header: 'Organisation units ', id: 'organisationUnitId', dataIndex: 'organisationUnit', sortable: true } ],
+                columns: [ { header: 'Organisation units ', id: 'organisationUnitId', dataIndex: 'organisationUnit', sortable: true, width: gridpanel_width } ],
+				autoExpandColumn: 'organisationUnitId',
+				enableHdMenu: true,
                 width: gridpanel_width,
                 height: this.getGridPanelHeight(),
                 view: gridView,
@@ -240,6 +241,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             xtype: 'button',
                             id: 'autoassign_be',
                             text: 'Auto-assign',
+							cls: 'aa_med',
                             isVisible: false,
                             handler: function()
                             {
@@ -256,6 +258,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             xtype: 'button',
                             id: 'removerelation_b',
                             text: 'Remove',
+							cls: 'aa_med',
                             isVisible: false,
                             handler: function()
                             {
@@ -299,6 +302,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             xtype: 'button',
                             id: 'removeallrelations_b',
                             text: 'Remove all',
+							cls: 'aa_med',
                             isVisible: false,
                             handler: function() {
                                 if (!Ext.getCmp('maps_cb').getValue()) {
@@ -390,6 +394,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
      */
     classify: function(exception) {
         if (!this.ready) {
+alert(2);		
             Ext.MessageBox.alert('Error', 'Component init not complete');
             return;
         }
@@ -397,7 +402,13 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         if (this.newUrl) {
             URL = this.newUrl;
             this.newUrl = false;
-            this.setUrl(path + 'getGeoJson.action?name=' + URL);
+			
+			if (MAPSOURCE == MAP_SOURCE_TYPE_GEOJSON) {
+				this.setUrl(path + 'getGeoJson.action?name=' + URL);
+			}
+			else if (MAPSOURCE == MAP_SOURCE_TYPE_SHAPEFILE) {
+				this.setUrl(path_geoserver + wfs + URL + output);
+			}
         }
         
         if (!Ext.getCmp('maps_cb').getValue()) {

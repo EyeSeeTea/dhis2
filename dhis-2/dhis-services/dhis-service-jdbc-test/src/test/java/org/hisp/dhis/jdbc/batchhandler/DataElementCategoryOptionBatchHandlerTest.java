@@ -38,9 +38,7 @@ import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.system.util.UUIdUtils;
 import org.junit.Test;
 
 /**
@@ -57,9 +55,7 @@ public class DataElementCategoryOptionBatchHandlerTest
     private DataElementCategoryOption categoryOptionA;
     private DataElementCategoryOption categoryOptionB;
     private DataElementCategoryOption categoryOptionC;
-    
-    private final String UUID = UUIdUtils.getUUId();
-    
+        
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -67,7 +63,7 @@ public class DataElementCategoryOptionBatchHandlerTest
     @Override
     public void setUpTest()
     {
-        categoryOptionService = (DataElementCategoryOptionService) getBean( DataElementCategoryOptionService.ID );
+        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
         
         categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
         
@@ -77,8 +73,8 @@ public class DataElementCategoryOptionBatchHandlerTest
 
         batchHandler.init();
         
-        categoryOptionA = new DataElementCategoryOption( "CategoryOptionA", UUID );
-        categoryOptionB = new DataElementCategoryOption( "CategoryOptionB", UUID );
+        categoryOptionA = new DataElementCategoryOption( "CategoryOptionA" );
+        categoryOptionB = new DataElementCategoryOption( "CategoryOptionB" );
         categoryOptionC = new DataElementCategoryOption( "CategoryOptionC" );
     }
 
@@ -107,7 +103,7 @@ public class DataElementCategoryOptionBatchHandlerTest
         
         batchHandler.flush();
         
-        Collection<DataElementCategoryOption> categoryOptions = categoryOptionService.getAllDataElementCategoryOptions();
+        Collection<DataElementCategoryOption> categoryOptions = categoryService.getAllDataElementCategoryOptions();
         
         assertTrue( categoryOptions.contains( categoryOptionA ) );
         assertTrue( categoryOptions.contains( categoryOptionB ) );
@@ -121,9 +117,9 @@ public class DataElementCategoryOptionBatchHandlerTest
         int idB = batchHandler.insertObject( categoryOptionB, true );
         int idC = batchHandler.insertObject( categoryOptionC, true );
         
-        assertNotNull( categoryOptionService.getDataElementCategoryOption( idA ) );
-        assertNotNull( categoryOptionService.getDataElementCategoryOption( idB ) );
-        assertNotNull( categoryOptionService.getDataElementCategoryOption( idC ) );
+        assertNotNull( categoryService.getDataElementCategoryOption( idA ) );
+        assertNotNull( categoryService.getDataElementCategoryOption( idB ) );
+        assertNotNull( categoryService.getDataElementCategoryOption( idC ) );
     }
 
     @Test
@@ -136,13 +132,13 @@ public class DataElementCategoryOptionBatchHandlerTest
         
         batchHandler.updateObject( categoryOptionA );
         
-        assertEquals( "UpdatedName", categoryOptionService.getDataElementCategoryOption( id ).getName() );
+        assertEquals( "UpdatedName", categoryService.getDataElementCategoryOption( id ).getName() );
     }
 
     @Test
     public void testGetObjectIdentifier()
     {
-        int referenceId = categoryOptionService.addDataElementCategoryOption( categoryOptionA );
+        int referenceId = categoryService.addDataElementCategoryOption( categoryOptionA );
         
         int retrievedId = batchHandler.getObjectIdentifier( "CategoryOptionA" );
         
@@ -152,7 +148,7 @@ public class DataElementCategoryOptionBatchHandlerTest
     @Test
     public void testObjectExists()
     {
-        categoryOptionService.addDataElementCategoryOption( categoryOptionA );
+        categoryService.addDataElementCategoryOption( categoryOptionA );
         
         assertTrue( batchHandler.objectExists( categoryOptionA ) );
         

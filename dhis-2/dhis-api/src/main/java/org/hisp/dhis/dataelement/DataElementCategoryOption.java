@@ -27,36 +27,24 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.common.DimensionOption;
+import org.hisp.dhis.common.IdentifiableObject;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
 public class DataElementCategoryOption
-    implements Serializable
+    extends IdentifiableObject implements DimensionOption
 {
     public static final String DEFAULT_NAME = "default";
     
-    /**
-     * The database internal identifier for this DataElementCategoryOption.
-     */
-    private int id;
+    private DataElementCategory category;
     
-    /**
-     * The name.
-     */
-    private String name;
-    
-    /**
-     * The shortname.
-     */
-    private String shortName;
-    
-    /**
-     * The Universally Unique Identifier. 
-     */ 
-    private String uuid;
+    private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -72,16 +60,6 @@ public class DataElementCategoryOption
     public DataElementCategoryOption( String name )
     {
     	this.name = name;
-    }
-    
-    /**
-     * @param name the name.
-     * @param shortName the shortname.
-     */
-    public DataElementCategoryOption( String name, String shortName )
-    {
-        this.name = name;
-        this.shortName = shortName;
     }
     
     // -------------------------------------------------------------------------
@@ -126,44 +104,30 @@ public class DataElementCategoryOption
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-    
-    public int getId()
-    {
-        return id;
-    }
-    
-    public void setId( int id )
-    {
-        this.id =  id;
-    }
-    
-    public String getName()
+
+    @Override
+    public String getShortName()
     {
         return name;
     }
     
-    public void setName( String name )
+    public DataElementCategory getCategory()
     {
-        this.name = name;
+        return category;
     }
 
-    public String getShortName()
+    public void setCategory( DataElementCategory category )
     {
-        return shortName;
+        this.category = category;
     }
 
-    public void setShortName( String shortName )
+    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
     {
-        this.shortName = shortName;
-    }
-    
-    public String getUuid()
-    {
-        return uuid;
+        return categoryOptionCombos;
     }
 
-    public void setUuid( String uuid )
+    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
     {
-        this.uuid = uuid;
+        this.categoryOptionCombos = categoryOptionCombos;
     }
 }

@@ -1,4 +1,4 @@
-    /*
+﻿    /*
  * Copyright (C) 2007-2008  Camptocamp
  *
  * This file is part of MapFish Client
@@ -151,17 +151,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'load': {
                     fn: function() {
-                        if (URLACTIVE) {
+                        if (PARAMETER) {
                             Ext.Ajax.request({
                                 url: path + 'getMapView' + type,
                                 method: 'POST',
                                 params: { id: PARAMETER },
 
                                 success: function( responseObject ) {
-                                    MAPVIEWACTIVE = true;
+									PARAMETER = null;
                                     MAPVIEW = Ext.util.JSON.decode(responseObject.responseText).mapView[0];
                                     
                                     MAPSOURCE = MAPVIEW.mapSourceType;
+									Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                     
                                     Ext.getCmp('mapview_cb').setValue(MAPVIEW.id);
                                     
@@ -214,7 +215,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         
                         Ext.getCmp('indicator_cb').reset();
 
-                        if (MAPVIEWACTIVE) {
+                        if (MAPVIEW) {
                             Ext.getCmp('indicator_cb').setValue(MAPVIEW.indicatorId);
                             
                             var name = MAPVIEW.periodTypeId;
@@ -245,7 +246,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'load': {
                     fn: function() {
-                        if (MAPVIEWACTIVE) {
+                        if (MAPVIEW) {
                             Ext.getCmp('period_cb').setValue(MAPVIEW.periodId);
                             
                             var mst = MAPVIEW.mapSourceType;
@@ -283,9 +284,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'load': {
                     fn: function() {
-                        if (MAPVIEWACTIVE) {
+                        if (MAPVIEW) {
                             Ext.getCmp('map_cb').setValue(MAPVIEW.mapSource);
-                            MAPVIEWACTIVE = false;
+                            MAPVIEW = null;
                             choropleth.classify(false);
                         }
                     }
@@ -298,6 +299,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'mapview_cb',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Map view',
             typeAhead: true,
             editable: false,
@@ -322,7 +324,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             params: { id: mId },
 
                             success: function( responseObject ) {
-                                MAPVIEWACTIVE = true;
                                 MAPVIEW = Ext.util.JSON.decode(responseObject.responseText).mapView[0];
                                 
                                 MAPSOURCE = MAPVIEW.mapSourceType;
@@ -351,6 +352,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'indicatorgroup_cb',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Indicator group',
             typeAhead: true,
             editable: false,
@@ -384,6 +386,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'indicator_cb',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Indicator',
             typeAhead: true,
             editable: false,
@@ -438,6 +441,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'periodtype_cb',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Period type',
             typeAhead: true,
             editable: false,
@@ -470,6 +474,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'period_cb',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Period',
             typeAhead: true,
             editable: false,
@@ -500,6 +505,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'map_cb',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Map',
             typeAhead: true,
             editable: false,
@@ -532,6 +538,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'combo',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Method',
             id: 'method',
             editable: false,
@@ -572,6 +579,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'textfield',
             id: 'bounds',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Bounds',
 			labelSeparator: MENU_LABELSEPARATOR,
             emptyText: 'Comma separated values',
@@ -582,6 +590,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Classes',
 			labelSeparator: MENU_LABELSEPARATOR,
             id: 'numClasses',
@@ -612,6 +621,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'colorfield',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'Low color',
 			labelSeparator: MENU_LABELSEPARATOR,
             id: 'colorA_cf',
@@ -623,6 +633,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'colorfield',
+			labelStyle: AA_LIGHT,
             fieldLabel: 'High color',
 			labelSeparator: MENU_LABELSEPARATOR,
             id: 'colorB_cf',
@@ -636,6 +647,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'button',
+			cls: 'aa_med',
             isFormField: true,
             fieldLabel: '',
             labelSeparator: '',
@@ -712,18 +724,21 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         if (this.newUrl) {
             URL = this.newUrl;
             this.newUrl = false;
-			
+				
             if (MAPSOURCE == MAP_SOURCE_TYPE_DATABASE) {
-                if (URL == PHU_LEVEL) {
+                if (URL == FACILITY_LEVEL) {
                     this.setUrl(path + 'getPointShapefile.action?level=' + URL);
                 }
                 else {
                     this.setUrl(path + 'getPolygonShapefile.action?level=' + URL);
                 }
             }
-            else {
+            else if (MAPSOURCE == MAP_SOURCE_TYPE_GEOJSON) {
                 this.setUrl(path + 'getGeoJson.action?name=' + URL);
             }
+			else if (MAPSOURCE == MAP_SOURCE_TYPE_SHAPEFILE) {
+				this.setUrl(path_geoserver + wfs + URL + output);
+			}
         }
                 
         if (!Ext.getCmp('indicator_cb').getValue() ||
