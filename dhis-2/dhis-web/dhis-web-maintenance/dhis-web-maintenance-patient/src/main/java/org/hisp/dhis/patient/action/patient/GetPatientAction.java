@@ -114,7 +114,7 @@ public class GetPatientAction
         return programs;
     }
     
-    private Map<Integer, String> patientAttributeValueMap;
+    private Map<Integer, String> patientAttributeValueMap = new HashMap<Integer, String>();
 
     public Map<Integer, String> getPatientAttributeValueMap()
     {
@@ -131,13 +131,11 @@ public class GetPatientAction
 
         patient = patientService.getPatient( id );       
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
-        
-        patientAttributeValueMap = new HashMap<Integer, String>();
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );        
         
         for( PatientAttribute patientAttribute : patient.getAttributes() )
         {
-            patientAttributeValueMap.put( patientAttribute.getId(), "" );
+            patientAttributeValueMap.put( patientAttribute.getId(), PatientAttributeValue.UNKNOWN );
         }
 
         Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
