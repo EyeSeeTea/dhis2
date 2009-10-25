@@ -76,6 +76,11 @@
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
     
+    <action name="getPatient" class="org.hisp.dhis.caseentry.action.GetPatientAction">
+      <result name="success" type="velocity-xml">/dhis-web-caseentry/responsePatient.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>   
+    
     <!-- Visit Plan -->
     
     <action name="visitPlanSelect" class="org.hisp.dhis.caseentry.action.VisitPlanSelectAction">

@@ -46,6 +46,57 @@ function searchValidationCompleted( messageElement )
 }
 
 //-----------------------------------------------------------------------------
+//View details
+//-----------------------------------------------------------------------------
+
+function showPatientDetails( patientId )
+{
+ var request = new Request();
+ request.setResponseTypeXML( 'patient' );
+ request.setCallbackSuccess( patientReceived );
+ request.send( 'getPatient.action?id=' + patientId );
+}
+
+function patientReceived( patientElement )
+{   
+ var identifiers = patientElement.getElementsByTagName( "identifier" );   
+ 
+ var identifierText = '';
+	
+	for ( var i = 0; i < identifiers.length; i++ )
+	{		
+		identifierText = identifierText + identifiers[ i ].getElementsByTagName( "identifierText" )[0].firstChild.nodeValue + '<br>';		
+	}
+	
+	setFieldValue( 'identifierField', identifierText );
+	
+	var attributes = patientElement.getElementsByTagName( "attribute" );   
+ 
+ var attributeValues = '';
+	
+	for ( var i = 0; i < attributes.length; i++ )
+	{		
+		attributeValues = attributeValues + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  <strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '</strong><br>';		
+	}
+	
+	setFieldValue( 'attributeField', attributeValues );
+ 
+ var programs = patientElement.getElementsByTagName( "program" );   
+ 
+ var programName = '';
+	
+	for ( var i = 0; i < programs.length; i++ )
+	{		
+		programName = programName + programs[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue + '<br>';		
+	}
+	
+	setFieldValue( 'programField', programName );
+
+ showDetails();
+}
+
+
+//-----------------------------------------------------------------------------
 //Save
 //-----------------------------------------------------------------------------
 

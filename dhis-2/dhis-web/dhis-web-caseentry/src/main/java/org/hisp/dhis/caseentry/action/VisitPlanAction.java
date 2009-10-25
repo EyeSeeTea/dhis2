@@ -138,71 +138,75 @@ public class VisitPlanAction
         // ---------------------------------------------------------------------
         // For all the programs a facility is servicing get the active instances
         // completed = false
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------       
 
         Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( programs, false );
         
-        Collection<ProgramInstanceStage> programInstanceStages = new ArrayList<ProgramInstanceStage>();
-
-        // ---------------------------------------------------------------------
-        // Initially assume to have a first visit for all programInstances
-        // ---------------------------------------------------------------------
-
-        for ( ProgramInstance programInstance : programInstances )
-        {   
-            
-            programInstanceStages.addAll( programInstance.getProgramInstanceStages() );
-            
-            ProgramStage nextStage = programInstance.getProgram().getProgramStageByStage( 1 );
-
-            visitsByProgramInstances.put( programInstance, nextStage );
-        }
-
-        // ---------------------------------------------------------------------
-        // For each of these active instances, see at which stage they are
-        // currently
-        // ---------------------------------------------------------------------
-
-        Collection<PatientDataValue> patientDataValues = patientDataValueService
-            .getPatientDataValues( programInstanceStages );
-
-        for ( PatientDataValue patientDataValue : patientDataValues )
+        if( programInstances.size() > 0 )
         {
-            ProgramStage currentStage = patientDataValue.getProgramInstanceStage().getProgramStage();
+            Collection<ProgramInstanceStage> programInstanceStages = new ArrayList<ProgramInstanceStage>();
 
-            ProgramStage nextStage = patientDataValue.getProgramInstanceStage().getProgramStage().getProgram().getProgramStageByStage(
-                currentStage.getStageInProgram() + 1 );
+            // ---------------------------------------------------------------------
+            // Initially assume to have a first visit for all programInstances
+            // ---------------------------------------------------------------------
 
-            if ( nextStage != null )
-            {
-                visitsByProgramInstances.put( patientDataValue.getProgramInstanceStage().getProgramInstance(), nextStage );
-            }
-            if ( nextStage == null && visitsByProgramInstances.containsKey( patientDataValue.getProgramInstanceStage().getProgramInstance() ) )
-            {
-                // This patient has completed all services, programInstance
-                // should therefore be closed!
-                visitsByProgramInstances.remove( patientDataValue.getProgramInstanceStage().getProgramInstance() );
-            }
-        }
+            for ( ProgramInstance programInstance : programInstances )
+            {   
+                
+                programInstanceStages.addAll( programInstance.getProgramInstanceStages() );
+                
+                ProgramStage nextStage = programInstance.getProgram().getProgramStageByStage( 1 );
 
-        for ( ProgramInstance programInstance : visitsByProgramInstances.keySet() )
-        {
-            if ( visitsByPatients.containsKey( programInstance.getPatient() ) )
-            {
-                visitsByPatients.get( programInstance.getPatient() ).add(
-                    visitsByProgramInstances.get( programInstance ) );
+                visitsByProgramInstances.put( programInstance, nextStage );
             }
-            else
-            {
-                Set<ProgramStage> programStages = new HashSet<ProgramStage>();
-                programStages.add( visitsByProgramInstances.get( programInstance ) );
 
-                visitsByPatients.put( programInstance.getPatient(), programStages );
+            // ---------------------------------------------------------------------
+            // For each of these active instances, see at which stage they are
+            // currently
+            // ---------------------------------------------------------------------
+
+            Collection<PatientDataValue> patientDataValues = patientDataValueService
+                .getPatientDataValues( programInstanceStages );
+
+            for ( PatientDataValue patientDataValue : patientDataValues )
+            {
+                ProgramStage currentStage = patientDataValue.getProgramInstanceStage().getProgramStage();
+
+                ProgramStage nextStage = patientDataValue.getProgramInstanceStage().getProgramStage().getProgram().getProgramStageByStage(
+                    currentStage.getStageInProgram() + 1 );
+
+                if ( nextStage != null )
+                {
+                    visitsByProgramInstances.put( patientDataValue.getProgramInstanceStage().getProgramInstance(), nextStage );
+                }
+                if ( nextStage == null && visitsByProgramInstances.containsKey( patientDataValue.getProgramInstanceStage().getProgramInstance() ) )
+                {
+                    // This patient has completed all services, programInstance
+                    // should therefore be closed!
+                    visitsByProgramInstances.remove( patientDataValue.getProgramInstanceStage().getProgramInstance() );
+                }
             }
+
+            for ( ProgramInstance programInstance : visitsByProgramInstances.keySet() )
+            {
+                if ( visitsByPatients.containsKey( programInstance.getPatient() ) )
+                {
+                    visitsByPatients.get( programInstance.getPatient() ).add(
+                        visitsByProgramInstances.get( programInstance ) );
+                }
+                else
+                {
+                    Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+                    programStages.add( visitsByProgramInstances.get( programInstance ) );
+
+                    visitsByPatients.put( programInstance.getPatient(), programStages );
+                }
+            }        
+            
+            patients = visitsByPatients.keySet();
+            
         }        
         
-        patients = visitsByPatients.keySet();
-
         return SUCCESS;
     }
 }

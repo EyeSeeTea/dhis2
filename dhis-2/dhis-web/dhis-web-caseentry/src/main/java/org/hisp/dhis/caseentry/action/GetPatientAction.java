@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient.action.patient;
+package org.hisp.dhis.caseentry.action;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -114,7 +114,7 @@ public class GetPatientAction
         return programs;
     }
     
-    private Map<Integer, String> patientAttributeValueMap;
+    private Map<Integer, String> patientAttributeValueMap = new HashMap<Integer, String>();
 
     public Map<Integer, String> getPatientAttributeValueMap()
     {
@@ -131,13 +131,11 @@ public class GetPatientAction
 
         patient = patientService.getPatient( id );       
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
-        
-        patientAttributeValueMap = new HashMap<Integer, String>();
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );        
         
         for( PatientAttribute patientAttribute : patient.getAttributes() )
         {
-            patientAttributeValueMap.put( patientAttribute.getId(), "" );
+            patientAttributeValueMap.put( patientAttribute.getId(), PatientAttributeValue.UNKNOWN );
         }
 
         Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService

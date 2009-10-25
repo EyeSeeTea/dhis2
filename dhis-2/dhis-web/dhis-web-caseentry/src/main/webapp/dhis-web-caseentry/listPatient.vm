@@ -19,14 +19,17 @@
           <col>
           <col>
           <col>
-          <col width="20">              
+          <col>
+          <col width="20">
+          <col width="20">                        
 		  <tr>
 		  	<td></td>
 		  	<td></td>
 		  	<td></td>
 		  	<td></td>
-		  	<td></td>		  	
-		  	<td style="text-align:right">			
+		  	<td></td>
+		  	<td></td>  		  	
+		  	<td colspan="2" style="text-align:right">  			
 				<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='select.action'" style="width:10em">
 			</td>
           <tr>
@@ -34,8 +37,9 @@
             <th>$i18n.getString( "middle_name" )</th>
             <th>$i18n.getString( "last_name" )</th>            
             <th>$i18n.getString( "gender" )</th>
-            <th>$i18n.getString( "date_of_birth" )</th>            
-            <th>$i18n.getString( "operations" )</th>
+            <th>$i18n.getString( "date_of_birth" )</th>
+            <th>$i18n.getString( "age" )</th>            
+            <th colspan="2">$i18n.getString( "operations" )</th>
           </tr>
           
           <tbody id="list">	
@@ -58,9 +62,14 @@
 				<td>			
 					$format.formatDate( $patient.birthDate )
 				</td>
-				
+				<td>            
+                    $encoder.htmlEncode( $patient.getAge() )
+                </td>				
 				<td style="text-align:center"#alternate( $mark )>
                   <a href="selectDataRecording.action?id=$patient.id" title="$i18n.getString( "data_recording" )"><img src="../images/assign.png" alt="$i18n.getString( "data_recording" )"></a>                  
+                </td>
+                <td style="text-align:center"#alternate( $mark )>
+                  <a href="javascript:showPatientDetails( $patient.id )" title="$i18n.getString( "show_details" )"><img src="../images/information.png" alt="$i18n.getString( "show_details" )"></a>
                 </td>               
                 				
 			</tr>
@@ -74,6 +83,18 @@
     
 	 </table>
    </td>
+        <td style="width:20em; padding-left:2em; vertical-align:top">
+            <div id="detailsArea" style="display:none">
+                <div style="float:right">
+                    <a href="javascript:hideDetails()" title="$i18n.getString( "hide_details" )"><img src="../images/close.png" alt="$i18n.getString( "hide_details" )"></a>
+                </div>              
+                    <p><label>$i18n.getString( "identifier" ):</label><br><span id="identifierField"></span></p>                    
+                    <p><label>$i18n.getString( "attributes" ):</label><br><span id="attributeField"></span></p>
+                    <p><label>$i18n.getString( "enrolled_in_program" ):</label><br><span id="programField"></span></p>
+                </div>
+
+        </td>
+
   </tr>
 </table>
    

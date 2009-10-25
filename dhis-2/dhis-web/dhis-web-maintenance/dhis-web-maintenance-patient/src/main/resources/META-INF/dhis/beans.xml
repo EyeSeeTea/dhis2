@@ -102,7 +102,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="patientIdentifierService"
       ref="org.hisp.dhis.patient.PatientIdentifierService"/> 
     <property name="programService"
-      ref="org.hisp.dhis.program.ProgramService"/>     
+      ref="org.hisp.dhis.program.ProgramService"/>   
+    <property name="patientAttributeValueService"
+      ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>  
   </bean>
   
   <bean id="org.hisp.dhis.patient.action.patient.AddPatientAction"

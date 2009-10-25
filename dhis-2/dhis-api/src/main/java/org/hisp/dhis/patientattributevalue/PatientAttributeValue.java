@@ -39,6 +39,8 @@ public class PatientAttributeValue
     implements Serializable
 {
 
+    public static final String UNKNOWN = "unknown";
+    
     private PatientAttribute patientAttribute;
 
     private Patient patient;

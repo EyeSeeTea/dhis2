@@ -145,14 +145,39 @@ function showPatientDetails( patientId )
 }
 
 function patientReceived( patientElement )
-{
-	setFieldValue( 'identifierField', getElementValue( patientElement, 'identifier' ) );
-	setFieldValue( 'firstNameField', getElementValue( patientElement, 'firstName' ) );
-    setFieldValue( 'middleNameField', getElementValue( patientElement, 'middleName' ) );
-    setFieldValue( 'lastNameField', getElementValue( patientElement, 'lastName' ) );
-    setFieldValue( 'genderField', getElementValue( patientElement, 'gender' ) );  
-    setFieldValue( 'birthDateField', getElementValue( patientElement, 'birthDate' ) );
-    //setFieldValue( 'enrolledProgramField', getElementValue( patientElement, 'enrolledProgram' ) );    
+{   
+    var identifiers = patientElement.getElementsByTagName( "identifier" );   
+    
+    var identifierText = '';
+	
+	for ( var i = 0; i < identifiers.length; i++ )
+	{		
+		identifierText = identifierText + identifiers[ i ].getElementsByTagName( "identifierText" )[0].firstChild.nodeValue + '<br>';		
+	}
+	
+	setFieldValue( 'identifierField', identifierText );
+	
+	var attributes = patientElement.getElementsByTagName( "attribute" );   
+    
+    var attributeValues = '';
+	
+	for ( var i = 0; i < attributes.length; i++ )
+	{		
+		attributeValues = attributeValues + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  <strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '</strong><br>';		
+	}
+	
+	setFieldValue( 'attributeField', attributeValues );
+    
+    var programs = patientElement.getElementsByTagName( "program" );   
+    
+    var programName = '';
+	
+	for ( var i = 0; i < programs.length; i++ )
+	{		
+		programName = programName + programs[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue + '<br>';		
+	}
+	
+	setFieldValue( 'programField', programName );
    
     showDetails();
 }

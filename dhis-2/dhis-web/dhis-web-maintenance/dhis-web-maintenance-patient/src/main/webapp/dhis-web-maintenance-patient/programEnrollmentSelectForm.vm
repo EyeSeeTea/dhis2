@@ -32,7 +32,7 @@
     <tr>
         <td><strong>$i18n.getString( "age" ):</strong></td>
         <td>            
-            $encoder.htmlEncode( $age )
+            $encoder.htmlEncode( $patient.getAge() )
         </td>
     </tr>    
     <tr>
