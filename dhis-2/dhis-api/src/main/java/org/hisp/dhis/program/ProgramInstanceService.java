@@ -27,6 +27,8 @@
 package org.hisp.dhis.program;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import org.hisp.dhis.patient.Patient;
 
@@ -62,6 +64,8 @@ public interface ProgramInstanceService
     
     Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
     
-    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );   
+    Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );
+    
+    Map<Patient, Set<ProgramInstanceStage>> getNextVisitsForProgramInstances( Collection<ProgramInstance> programInstances );
     
 }

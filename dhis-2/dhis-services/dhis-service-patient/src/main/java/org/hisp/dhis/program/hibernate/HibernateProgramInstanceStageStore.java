@@ -43,23 +43,17 @@ import org.hisp.dhis.program.ProgramStage;
 public class HibernateProgramInstanceStageStore
     extends HibernateGenericStore<ProgramInstanceStage>
     implements ProgramInstanceStageStore
-{
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstanceStage> get( ProgramInstance programInstance )
-    {
-        return getCriteria( Restrictions.eq( "programInstance", programInstance ) ).list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstanceStage> get( ProgramStage programStage )
-    {
-        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
-    }
+{    
 
     public ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
     {
         return (ProgramInstanceStage) getCriteria( Restrictions.eq( "programInstance", programInstance ),
             Restrictions.eq( "programStage", programStage ) ).uniqueResult();
+    }
+    
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstanceStage> get( ProgramStage programStage )
+    {
+        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
     }
 }

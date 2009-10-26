@@ -77,7 +77,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   
   <bean id="org.hisp.dhis.program.ProgramInstanceService"
     class="org.hisp.dhis.program.DefaultProgramInstanceService">
-    <property name="programInstanceStore" ref="org.hisp.dhis.program.ProgramInstanceStore"/>    
+    <property name="programInstanceStore" ref="org.hisp.dhis.program.ProgramInstanceStore"/>
+    <property name="patientDataValueService" ref="org.hisp.dhis.patientdatavalue.PatientDataValueService"/>    
   </bean>
   
   <bean id="org.hisp.dhis.program.ProgramStageService"
@@ -93,8 +94,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	
   <bean id="org.hisp.dhis.patient.PatientService"
     class="org.hisp.dhis.patient.DefaultPatientService">
-	<property name="patientStore" ref="org.hisp.dhis.patient.PatientStore"/>
-	<property name="patientIdentifierService" ref="org.hisp.dhis.patient.PatientIdentifierService"/>
+    <property name="patientStore" ref="org.hisp.dhis.patient.PatientStore"/>
+    <property name="patientIdentifierService" ref="org.hisp.dhis.patient.PatientIdentifierService"/>
+    <property name="patientAttributeValueService" ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>
   </bean> 
 	
   <bean id="org.hisp.dhis.patient.PatientIdentifierService"

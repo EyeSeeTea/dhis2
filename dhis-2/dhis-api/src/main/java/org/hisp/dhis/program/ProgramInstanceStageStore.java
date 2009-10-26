@@ -39,9 +39,7 @@ public interface ProgramInstanceStageStore
 {
     String ID = ProgramInstanceStageStore.class.getName();   
     
-    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );
-    
-    Collection<ProgramInstanceStage> get( ProgramInstance programInstance );
+    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );   
     
     Collection<ProgramInstanceStage> get( ProgramStage programStage );   
     

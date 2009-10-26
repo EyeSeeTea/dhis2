@@ -30,8 +30,12 @@ package org.hisp.dhis.patient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -58,6 +62,13 @@ public class DefaultPatientService
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
+    }
+
+    private PatientAttributeValueService patientAttributeValueService;
+
+    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
+    {
+        this.patientAttributeValueService = patientAttributeValueService;
     }
 
     // -------------------------------------------------------------------------
@@ -124,22 +135,22 @@ public class DefaultPatientService
         return patients;
     }
 
-    /*public Collection<Patient> getPatientsByAttribute( PatientAttribute attribute )
-    {
-        return patientStore.getByAttribute( attribute );
-    }*/
+    /*
+     * public Collection<Patient> getPatientsByAttribute( PatientAttribute
+     * attribute ) { return patientStore.getByAttribute( attribute ); }
+     */
 
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText )
     {
         Collection<Patient> patients = new ArrayList<Patient>();
-               
+
         Collection<Patient> allPatients = getPatients( searchText );
-        
-        if( allPatients.retainAll( getPatientsByOrgUnit( organisationUnit ) ) )
+
+        if ( allPatients.retainAll( getPatientsByOrgUnit( organisationUnit ) ) )
         {
             patients = allPatients;
         }
-        
+
         return patients;
     }
 
@@ -151,8 +162,45 @@ public class DefaultPatientService
             .getPatientIdentifiersByOrgUnit( organisationUnit ) )
         {
             patients.add( patientIdentifier.getPatient() );
-        }        
-        
+        }
+
         return patients;
+    }
+
+    public Collection<Patient> sortPatientsByAttribute( Collection<Patient> patients, PatientAttribute patientAttribute )
+    {
+        // ---------------------------------------------------------------------
+        // Better to fetch all attribute values at once than fetching the
+        // required attribute values using loop
+        // ---------------------------------------------------------------------
+
+        Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
+            .getPatientAttributeValues( patients );
+
+        SortedMap<String, Patient> patientsSortedByAttribute = new TreeMap<String, Patient>();
+
+        for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
+        {
+
+            if ( patientAttribute == patientAttributeValue.getPatientAttribute() )
+            {
+                patientsSortedByAttribute.put( patientAttributeValue.getValue(), patientAttributeValue.getPatient() );
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // Make sure all patients are in the sorted list - because all
+        // patients might not have required attribute/value
+        // -----------------------------------------------------------------
+
+        for ( Patient patient : patients )
+        {
+            if ( !patientsSortedByAttribute.values().contains( patient ) )
+            {                
+                patientsSortedByAttribute.put( patient.getId().toString(), patient );
+            }
+        }
+        
+        return patientsSortedByAttribute.values();
     }
 }

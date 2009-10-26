@@ -44,9 +44,7 @@ public interface ProgramInstanceStageService
     
     ProgramInstanceStage getProgramInstanceStage( int id );
     
-    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );    
-    
-    Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramInstance programInstance );   
+    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );      
     
     Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramStage programStage );
     

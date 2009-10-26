@@ -77,12 +77,7 @@ public class DefaultProgramInstanceStageService
     public ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
     {
         return programInstanceStageStore.getProgramInstanceStage( programInstance, programStage );
-    }
-
-    public Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramInstance programInstance )
-    {
-        return programInstanceStageStore.get( programInstance );
-    }
+    }   
 
     public Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramStage programStage )
     {

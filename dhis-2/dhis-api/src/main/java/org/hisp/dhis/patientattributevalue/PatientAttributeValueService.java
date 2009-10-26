@@ -27,6 +27,7 @@
 package org.hisp.dhis.patientattributevalue;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -58,5 +59,6 @@ public interface PatientAttributeValueService
     Collection<PatientAttributeValue> getPatientAttributeValues( Collection<Patient> patients );    
     
     Collection<PatientAttributeValue> getAllPatientAttributeValues();
-
+    
+    Map<Integer, Collection<PatientAttributeValue>> getPatientAttributeValueMapForPatients( Collection<Patient> patients );
 }

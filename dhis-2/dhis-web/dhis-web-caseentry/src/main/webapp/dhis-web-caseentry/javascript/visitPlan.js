@@ -6,3 +6,7 @@ function organisationUnitSelected( orgUnits )
 
 selection.setListenerFunction( organisationUnitSelected );
 
+function sortByAttribute( sortingAttributeId )
+{	
+	window.location = "visitplan.action?sortingAttributeId=" + sortingAttributeId;
+}

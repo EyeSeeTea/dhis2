@@ -132,12 +132,16 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
     <property name="programService"
       ref="org.hisp.dhis.program.ProgramService"/>      
     <property name="programInstanceService"
-      ref="org.hisp.dhis.program.ProgramInstanceService"/>
-    <property name="patientDataValueService"
-      ref="org.hisp.dhis.patientdatavalue.PatientDataValueService"/>           
+      ref="org.hisp.dhis.program.ProgramInstanceService"/>     
+    <property name="patientAttributeValueService"
+      ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>          
   </bean>
   
 </beans>

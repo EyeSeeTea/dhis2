@@ -27,6 +27,12 @@
 package org.hisp.dhis.patientattributevalue;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -99,13 +105,50 @@ public class DefaultPatientAttributeValueService
     public void savePatientAttributeValue( PatientAttributeValue patientAttributeValue )
     {
         if ( patientAttributeValue.getValue() != null )
-        {            
+        {
             patientAttributeValueStore.saveVoid( patientAttributeValue );
-        }       
+        }
     }
 
     public void updatePatientAttributeValue( PatientAttributeValue patientAttributeValue )
     {
         patientAttributeValueStore.update( patientAttributeValue );
+    }
+
+    public Map<Integer, Collection<PatientAttributeValue>> getPatientAttributeValueMapForPatients( Collection<Patient> patients )
+    {
+        Map<Integer, Set<PatientAttributeValue>> attributeValueMap = new HashMap<Integer, Set<PatientAttributeValue>>();
+
+        Collection<PatientAttributeValue> patientAttributeValues = getPatientAttributeValues( patients );
+
+        for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
+        {
+            if ( attributeValueMap.containsKey( patientAttributeValue.getPatient().getId() ) )
+            {
+                attributeValueMap.get( patientAttributeValue.getPatient().getId() ).add( patientAttributeValue );
+            }
+            else
+            {
+                Set<PatientAttributeValue> attributeValues = new HashSet<PatientAttributeValue>();
+                attributeValues.add( patientAttributeValue );
+                attributeValueMap.put( patientAttributeValue.getPatient().getId(), attributeValues );
+            }
+        }
+        
+        Map<Integer, Collection<PatientAttributeValue>> patentAttributeValueMap = new HashMap<Integer, Collection<PatientAttributeValue>>();
+        
+        for( Integer id : attributeValueMap.keySet() )
+        {
+            SortedMap<String, PatientAttributeValue> sortedByAttribute = new TreeMap<String, PatientAttributeValue>();
+            for( PatientAttributeValue patientAttributeValue : attributeValueMap.get( id ) )
+            {
+                sortedByAttribute.put( patientAttributeValue.getPatientAttribute().getName(), patientAttributeValue );
+            }
+            
+            patentAttributeValueMap.put( id, sortedByAttribute.values() );
+            
+        }
+
+        return patentAttributeValueMap;
     }
 }
