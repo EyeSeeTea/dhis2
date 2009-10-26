@@ -96,14 +96,80 @@ function patientReceived( patientElement )
 }
 
 
+//------------------------------------------------------------------------------
+//Save providing facility
+//------------------------------------------------------------------------------
+
+function updateProvidingFacility( dataElementId, checkedBox )
+{
+	checkedBox.style.backgroundColor = '#ffffcc';	
+	var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
+	
+    var checkBoxSaver = new CheckBoxSaver( dataElementId, providedByAnotherFacility, '#ccffcc' );
+    checkBoxSaver.save();
+    
+}
+
 //-----------------------------------------------------------------------------
+//Saver objects - checkbox
+//-----------------------------------------------------------------------------
+
+function CheckBoxSaver( dataElementId_, providedByAnotherFacility_, resultColor_ )
+{
+	var SUCCESS = '#ccffcc';
+	var ERROR = '#ccccff';
+	
+	var dataElementId = dataElementId_;	
+	var providedByAnotherFacility = providedByAnotherFacility_;
+	var resultColor = resultColor_;	
+
+	this.save = function()
+	{
+		var request = new Request();
+		request.setCallbackSuccess( handleResponseCheckBox );
+		request.setCallbackError( handleHttpErrorCheckBox );
+		request.setResponseTypeXML( 'status' );
+		request.send( 'saveProvidingFacility.action?dataElementId=' + dataElementId + '&providedByAnotherFacility=' + providedByAnotherFacility );
+	};
+
+	function handleResponseCheckBox( rootElement )
+	{
+		var codeElement = rootElement.getElementsByTagName( 'code' )[0];
+		var code = parseInt( codeElement.firstChild.nodeValue );
+   
+		if ( code == 0 )
+		{
+			markValue( resultColor );                   
+		}
+		else
+		{
+			markValue( ERROR );
+			window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
+		}
+	}
+
+	function handleHttpErrorCheckBox( errorCode )
+	{
+		markValue( ERROR );
+		window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+	}   
+
+	function markValue( color )
+	{	
+		var element = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' );		
+		element.style.backgroundColor = color; //need to find another option as it is difficult to set background color for checkbox		
+	}
+}
+
+//------------------------------------------------------------------------------
 //Save
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 function saveValue( dataElementId, dataElementName )
 {
 	var field = document.getElementById( 'value[' + dataElementId + '].value' );
-    var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML;
+    var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML;    
+    var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
     
     field.style.backgroundColor = '#ffffcc';
     
@@ -126,7 +192,7 @@ function saveValue( dataElementId, dataElementName )
     	
     }
     
-    var valueSaver = new ValueSaver( dataElementId, field.value, '#ccffcc', '' );
+    var valueSaver = new ValueSaver( dataElementId, field.value, providedByAnotherFacility, '#ccffcc', '' );
     valueSaver.save();
     
 }
@@ -134,8 +200,10 @@ function saveValue( dataElementId, dataElementName )
 function saveChoice( dataElementId, selectedOption )
 {
 	selectedOption.style.backgroundColor = '#ffffcc';
+	
+	var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
  
-	var valueSaver = new ValueSaver( dataElementId, selectedOption.options[selectedOption.selectedIndex].value, '#ccffcc', selectedOption );
+	var valueSaver = new ValueSaver( dataElementId, selectedOption.options[selectedOption.selectedIndex].value, providedByAnotherFacility, '#ccffcc', selectedOption );
 	valueSaver.save();
 }
 
@@ -144,13 +212,14 @@ function saveChoice( dataElementId, selectedOption )
 //Saver objects
 //-----------------------------------------------------------------------------
 
-function ValueSaver( dataElementId_, value_, resultColor_, selectedOption_ )
+function ValueSaver( dataElementId_, value_, providedByAnotherFacility_, resultColor_, selectedOption_ )
 {
 	var SUCCESS = '#ccffcc';
 	var ERROR = '#ccccff';
 	
 	var dataElementId = dataElementId_;	
 	var value = value_;
+	var providedByAnotherFacility = providedByAnotherFacility_;
 	var resultColor = resultColor_;
 	var selectedOption = selectedOption_;
  
@@ -160,7 +229,7 @@ function ValueSaver( dataElementId_, value_, resultColor_, selectedOption_ )
 		request.setCallbackSuccess( handleResponse );
 		request.setCallbackError( handleHttpError );
 		request.setResponseTypeXML( 'status' );
-		request.send( 'saveValue.action?dataElementId=' + dataElementId + '&value=' + value );
+		request.send( 'saveValue.action?dataElementId=' + dataElementId + '&value=' + value + '&providedByAnotherFacility=' + providedByAnotherFacility );
 	};
  
 	function handleResponse( rootElement )

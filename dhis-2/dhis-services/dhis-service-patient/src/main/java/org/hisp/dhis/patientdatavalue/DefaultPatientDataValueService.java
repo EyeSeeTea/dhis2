@@ -107,9 +107,9 @@ public class DefaultPatientDataValueService
     }
 
     public PatientDataValue getPatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit )
+        OrganisationUnit organisationUnit )
     {
-        return patientDataValueStore.get( programInstanceStage, dataElement, optionCombo, organisationUnit );
+        return patientDataValueStore.get( programInstanceStage, dataElement, organisationUnit );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage )
@@ -121,39 +121,31 @@ public class DefaultPatientDataValueService
     {
         return patientDataValueStore.get( programInstanceStages );
     }
-
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
-        DataElement dataElement )
-    {
-        return patientDataValueStore.get( programInstanceStage, dataElement );
-    }
-
+    
     public Collection<PatientDataValue> getPatientDataValues( DataElement dataElement )
     {
         return patientDataValueStore.get( dataElement );
     }
 
+    public Collection<PatientDataValue> getPatientDataValues( DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
+    {
+        return patientDataValueStore.get( dataElement, optionCombo );
+    }
+    
     public Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo )
     {
         return patientDataValueStore.get( optionCombo );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
-        DataElement dataElement, OrganisationUnit organisationUnit )
+    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit )
     {
-        return patientDataValueStore.get( programInstanceStage, dataElement );
+        return patientDataValueStore.get( organisationUnit );
     }
-
+    
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
         ProgramInstanceStage programInstanceStage )
     {
         return patientDataValueStore.get( organisationUnit, programInstanceStage );
-    }
-
-    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        ProgramInstanceStage programInstanceStage, DataElement dataElement )
-    {
-        return patientDataValueStore.get( organisationUnit, programInstanceStage, dataElement );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
@@ -172,5 +164,27 @@ public class DefaultPatientDataValueService
     {
         return patientDataValueStore.get( organisationUnit, optionCombo );
     }
-
+    
+    public Collection<PatientDataValue> getPatientDataValues( boolean providedByAnotherFacility )
+    {
+        return patientDataValueStore.get( providedByAnotherFacility );
+    }
+    
+    public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
+        boolean providedByAnotherFacility )
+    {
+        return patientDataValueStore.get( organisationUnit, providedByAnotherFacility );
+    }
+   
+    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
+        boolean providedByAnotherFacility )
+    {
+        return patientDataValueStore.get( programInstanceStage, providedByAnotherFacility );
+    }
+   
+    public Collection<PatientDataValue> getPatientDataValues( DataElement dataElement, boolean providedByAnotherFacility )
+    {
+        return patientDataValueStore.get( dataElement, providedByAnotherFacility );
+    }   
+    
 }

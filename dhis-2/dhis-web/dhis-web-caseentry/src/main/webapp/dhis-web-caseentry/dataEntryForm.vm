@@ -3,11 +3,13 @@
 <table class="mainPageTable">
     <col id="noCol">
     <col id="deCol">    
-    <col id="entryCol">    
+    <col id="entryCol">
+    <col id="facilityCol">       
     <tr>
         <th>$i18n.getString( "nr" )</th>
         <th>$i18n.getString( "data_element" )</th>                   
-        <th>$i18n.getString( "entry" )</th>        
+        <th>$i18n.getString( "entry" )</th>
+        <th>$i18n.getString( "provided_by_another_facility" )</th>             
     </tr>
 #set( $dataElementRowCount = 0 )
 #set( $mark = 0 )
@@ -51,18 +53,22 @@
                 </select>
             #elseif( $dataElement.type == "date" )
                 <input type="text" id="value[$dataElement.id].date" name="entryfield" value="$!encoder.htmlEncode( $patientDataValue.value )" onchange="saveValue( $dataElement.id, '$encoder.jsEncode( $dataElement.name )' )" tabindex="$tabIndex" >
-                    <img src="../images/calendar_icon.gif" width="16" height="16" id="getServiceDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "service_date" )">
+                    <img src="../images/calendar_icon.gif" width="16" height="16" id="get$dataElement.id" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "service_date" )">
                     <script type="text/javascript">
                         Calendar.setup({
                             inputField     :    "value[$dataElement.id].date",      // id of the input field
                             ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
-                            button         :    "getServiceDate"   // trigger for the calendar (button ID)
+                            button         :    "get$dataElement.id"   // trigger for the calendar (button ID)
                         });
                     </script>                    
             #else
                 <input name="entryfield" id="value[$dataElement.id].value" type="text" value="$!encoder.htmlEncode( $patientDataValue.value )" onchange="saveValue( $dataElement.id, '$encoder.jsEncode( $dataElement.name )' )" onkeypress="return keyPress(event, this)" tabindex="$tabIndex" >
             #end
-        </td>       
+        </td>   
+        ##providedByAnotherFacility                
+        <td>            
+            <input name="providedByAnotherFacility" id="value[$dataElement.id].providedByAnotherFacility" type="checkbox"  #if( $patientDataValue.providedByAnotherFacility ) checked="checked" #end onclick="updateProvidingFacility( $dataElement.id, this )">                        
+        </td>    
     </tr>
     #set( $tabIndex = $tabIndex + 1 )
 #end

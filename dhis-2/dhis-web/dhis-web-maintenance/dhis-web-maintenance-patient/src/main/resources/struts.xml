@@ -48,7 +48,7 @@
     
     <action name="showUpdatePatientAttributeForm" class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeAction">      
       <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/updatePatientAttributeForm.vm</param>
+      <param name="page">/dhis-web-maintenance-patient/updatePatientAttibuteForm.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>      
       <param name="javascripts">javascript/patientAttribute.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>      
@@ -59,7 +59,7 @@
       <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>
     </action>
     
-    <action name="validatePatientAttribute" class="org.hisp.dhis.patient.action.patientattribuet.ValidatePatientAttributeAction">
+    <action name="validatePatientAttribute" class="org.hisp.dhis.patient.action.patientattribute.ValidatePatientAttributeAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>

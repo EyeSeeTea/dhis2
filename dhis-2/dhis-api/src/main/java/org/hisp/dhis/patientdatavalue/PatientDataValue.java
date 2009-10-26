@@ -28,7 +28,7 @@ public class PatientDataValue
 
     private String value;
     
-    private boolean providedAtFacility = true;
+    private boolean providedByAnotherFacility = false;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -67,6 +67,18 @@ public class PatientDataValue
         this.timestamp = timeStamp;
         this.value = value;
     }
+    
+    public PatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
+        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit, Date timeStamp, String value, boolean providedByAnotherFacility )
+    {
+        this.programInstanceStage = programInstanceStage;
+        this.dataElement = dataElement;
+        this.optionCombo = optionCombo;
+        this.organisationUnit = organisationUnit;
+        this.timestamp = timeStamp;
+        this.value = value;
+        this.providedByAnotherFacility = providedByAnotherFacility;
+    }
 
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
@@ -79,8 +91,7 @@ public class PatientDataValue
         int result = 1;
 
         result = result * prime + programInstanceStage.hashCode();
-        result = result * prime + dataElement.hashCode();
-        result = result * prime + optionCombo.hashCode();
+        result = result * prime + dataElement.hashCode();        
         result = result * prime + organisationUnit.hashCode();
 
         return result;
@@ -107,7 +118,7 @@ public class PatientDataValue
         final PatientDataValue other = (PatientDataValue) o;
 
         return programInstanceStage.equals( other.programInstanceStage ) && dataElement.equals( other.dataElement )
-            && optionCombo.equals( other.optionCombo ) && organisationUnit.equals( other.organisationUnit );
+            && organisationUnit.equals( other.organisationUnit );
     }
 
     // -------------------------------------------------------------------------
@@ -172,15 +183,15 @@ public class PatientDataValue
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
-    }
-   
-    public void setProvidedAtFacility( boolean providedAtFacility )
+    }   
+    
+    public void setProvidedByAnotherFacility( boolean providedByAnotherFacility )
     {
-        this.providedAtFacility = providedAtFacility;
+        this.providedByAnotherFacility = providedByAnotherFacility;
     }
     
-    public boolean isProvidedAtFacility()
+    public boolean isProvidedByAnotherFacility()
     {
-        return providedAtFacility;
+        return providedByAnotherFacility;
     }
 }

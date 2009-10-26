@@ -55,35 +55,38 @@ public interface PatientDataValueService
     int deletePatientDataValue( DataElementCategoryOptionCombo optionCombo );    
 
     PatientDataValue getPatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit );
+        OrganisationUnit organisationUnit );
 
     Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage );
 
-    Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstanceStage> programInstanceStages );
-
-    Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
-        DataElement dataElement );
-
-    Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
-        DataElement dataElement, OrganisationUnit organisationUnit );
+    Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstanceStage> programInstanceStages );      
 
     Collection<PatientDataValue> getPatientDataValues( DataElement dataElement );
+    
+    Collection<PatientDataValue> getPatientDataValues( DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
 
     Collection<PatientDataValue> getPatientDataValues( DataElementCategoryOptionCombo optionCombo );
 
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit );
+    
     Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
         ProgramInstanceStage programInstanceStage );
 
     Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        Collection<ProgramInstanceStage> programInstanceStages );
-
-    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        ProgramInstanceStage programInstanceStage, DataElement dataElement );
+        Collection<ProgramInstanceStage> programInstanceStages );   
 
     Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElement dataElement );
 
     Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
         DataElementCategoryOptionCombo optionCombo );
+    
+    Collection<PatientDataValue> getPatientDataValues( boolean providedByAnotherFacility );
+    
+    Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, boolean providedByAnotherFacility );
+    
+    Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage, boolean providedByAnotherFacility );
+    
+    Collection<PatientDataValue> getPatientDataValues( DataElement dataElement, boolean providedByAnotherFacility );
 
     Collection<PatientDataValue> getAllPatientDataValues();
 }

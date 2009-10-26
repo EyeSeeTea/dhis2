@@ -143,14 +143,7 @@ public class DataRecordingSelectAction
     public PatientIdentifier getPatientIdentifier()
     {
         return patientIdentifier;
-    }
-
-    private Integer age;
-
-    public Integer getAge()
-    {
-        return age;
-    }
+    }   
 
     private Collection<Program> programs = new ArrayList<Program>();
 
@@ -165,6 +158,13 @@ public class DataRecordingSelectAction
     {
         return programStages;
     }
+    
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -174,7 +174,7 @@ public class DataRecordingSelectAction
         throws Exception
     {
 
-        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
+        organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
 
         // ---------------------------------------------------------------------
         // Validate selected Patient
@@ -196,9 +196,7 @@ public class DataRecordingSelectAction
 
         selectedStateManager.setSelectedPatient( patient );
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
-
-        age = patient.getAge();
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );      
 
         // ---------------------------------------------------------------------
         // Load Enrolled Programs

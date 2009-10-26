@@ -215,6 +215,13 @@ public class DataEntryAction
     {
         return patientDataValueMap;
     }
+    
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -224,7 +231,7 @@ public class DataEntryAction
         throws Exception
     {
 
-        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
+        organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
 
         patient = patientService.getPatient( id );
 

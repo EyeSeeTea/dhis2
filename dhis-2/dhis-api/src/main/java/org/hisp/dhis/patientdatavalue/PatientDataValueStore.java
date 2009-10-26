@@ -50,34 +50,39 @@ public interface PatientDataValueStore
 
     int delete( DataElement dataElement );
 
-    int delete( DataElementCategoryOptionCombo optionCombo );    
+    int delete( DataElementCategoryOptionCombo optionCombo );
 
     PatientDataValue get( ProgramInstanceStage programInstanceStage, DataElement dataElement,
-        DataElementCategoryOptionCombo optionCombo, OrganisationUnit organisationUnit );
+        OrganisationUnit organisationUnit );
 
     Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage );
 
     Collection<PatientDataValue> get( Collection<ProgramInstanceStage> programInstanceStages );
 
-    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, DataElement dataElement );
-
-    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, DataElement dataElement,
-        OrganisationUnit organisationUnit );
-
     Collection<PatientDataValue> get( DataElement dataElement );
+
+    Collection<PatientDataValue> get( DataElement dataElement, DataElementCategoryOptionCombo optionCombo );
 
     Collection<PatientDataValue> get( DataElementCategoryOptionCombo optionCombo );
 
-    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstanceStage programInstanceStage );
+    Collection<PatientDataValue> get( OrganisationUnit organisationUnit );
+
+    Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
+        ProgramInstanceStage programInstanceStage );
 
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
         Collection<ProgramInstanceStage> programInstanceStages );
 
-    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, ProgramInstanceStage programInstanceStage,
-        DataElement dataElement );
-
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit, DataElement dataElement );
 
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit, DataElementCategoryOptionCombo optionCombo );
+
+    Collection<PatientDataValue> get( boolean providedByAnotherFacility );
+
+    Collection<PatientDataValue> get( OrganisationUnit organisationUnit, boolean providedByAnotherFacility );
+
+    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, boolean providedByAnotherFacility );
+
+    Collection<PatientDataValue> get( DataElement dataElement, boolean providedByAnotherFacility );
 
 }

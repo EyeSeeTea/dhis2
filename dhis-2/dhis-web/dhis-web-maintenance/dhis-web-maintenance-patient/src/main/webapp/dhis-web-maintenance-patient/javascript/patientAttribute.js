@@ -67,8 +67,7 @@ function validateAddPatientAttribute()
 	
 	var url = 'validatePatientAttribute.action?' +
 			'nameField=' + getFieldValue( 'nameField' ) +			
-	        '&description=' + getFieldValue( 'description' ) +	                
-	        '&valueType=' + getSelectValue( 'valueType' );
+	        '&description=' + getFieldValue( 'description' );
 	
 	var request = new Request();
     request.setResponseTypeXML( 'message' );
@@ -102,14 +101,13 @@ function addValidationCompleted( messageElement )
 // Update Patient Attribute
 // -----------------------------------------------------------------------------
 
-function validateUpdateProgram()
+function validateUpdatePatientAttribute()
 {
 	
     var url = 'validatePatientAttribute.action?' + 
     		'id=' + getFieldValue( 'id' ) +
     		'&nameField=' + getFieldValue( 'nameField' ) +			
-	        '&description=' + getFieldValue( 'description' ) +	                
-	        '&valueType=' + getSelectValue( 'valueType' );
+	        '&description=' + getFieldValue( 'description' );
 	
 	var request = new Request();
     request.setResponseTypeXML( 'message' );

@@ -1,5 +1,7 @@
-<h3>$i18n.getString( "name_based_data_entry" )</h3>
+##<h3>$i18n.getString( "name_based_data_entry" )</h3>
 
+#parse( "/dhis-web-caseentry/select.vm" )
+        
 <form id="selectRecordingForm" name="selectRecordingForm" method="post" action="selectDataRecording.action">
 
 <div>
@@ -29,10 +31,10 @@
     <tr>
         <td><strong>$i18n.getString( "age" ):</strong></td>
         <td>            
-            $encoder.htmlEncode( $age )
+            $encoder.htmlEncode( $patient.getAge() )
         </td>
     </tr>    
-   
+
 </table>
 
 

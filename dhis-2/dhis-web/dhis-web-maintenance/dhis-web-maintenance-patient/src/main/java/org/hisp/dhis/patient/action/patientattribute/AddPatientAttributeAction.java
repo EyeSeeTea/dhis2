@@ -48,7 +48,7 @@ public class AddPatientAttributeAction
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
         this.patientAttributeService = patientAttributeService;
-    }
+    }   
 
     // -------------------------------------------------------------------------
     // Input/Output
