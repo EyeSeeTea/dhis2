@@ -24,10 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.item.action;
 
-import org.hisp.dhis.reportexcel.ReportExcelItem;
-import org.hisp.dhis.reportexcel.ReportExcelService;
+package org.hisp.dhis.reportexcel.action;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import org.hisp.dhis.reportexcel.export.action.SelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -35,114 +40,67 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class AddReportExcelItemAction
+
+public class DownloadFileAction
     implements Action
 {
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
-    private ReportExcelService reportService;
+    private SelectionManager selectionManager;
 
     // -------------------------------------------
-    // Input & Output
+    // Output & Input
     // -------------------------------------------
 
-    private String name;
+    private String fileName;
 
-    private String itemType;
+    private InputStream inputStream;
 
-    private String expression;
-
-    private String periodType;
-
-    private Integer row;
-
-    private Integer column;
-
-    private Integer reportId;
-
-    private ReportExcelItem reportItem;
-
-    private Integer sheetNo;
+    private String outputFormat;
 
     // -------------------------------------------
     // Getter & Setter
     // -------------------------------------------
 
-    public void setReportService( ReportExcelService reportService )
+    public String getFileName()
     {
-        this.reportService = reportService;
-    }   
-
-    public void setSheetNo( Integer sheetNo )
-    {
-        this.sheetNo = sheetNo;
+        return fileName;
     }
 
-    public ReportExcelItem getReportItem()
+    public String getOutputFormat()
     {
-        return reportItem;
+        return outputFormat;
     }
 
-    public void setName( String name )
+    public void setOutputFormat( String outputFormat )
     {
-        this.name = name;
+        this.outputFormat = outputFormat;
     }
 
-    public void setItemType( String itemType )
+    public InputStream getInputStream()
     {
-        this.itemType = itemType;
+        return inputStream;
     }
 
-    public void setExpression( String expression )
+    public void setSelectionManager( SelectionManager selectionManager )
     {
-        this.expression = expression;
+        this.selectionManager = selectionManager;
     }
 
-    public void setPeriodType( String periodType )
-    {
-        this.periodType = periodType;
-    }
-
-    public void setRow( Integer row )
-    {
-        this.row = row;
-    }
-
-    public void setColumn( Integer column )
-    {
-        this.column = column;
-    }
-
-    public void setReportId( Integer reportId )
-    {
-        this.reportId = reportId;
-    }
-
-    public Integer getReportId()
-    {
-        return reportId;
-    }
-
+    @Override
     public String execute()
         throws Exception
-    {        
-
-        reportItem = new ReportExcelItem();
-        reportItem.setName( name );
-        reportItem.setItemType( itemType.trim() );
-        reportItem.setRow( row );
-        reportItem.setColumn( column );
-        reportItem.setExpression( expression.trim() );
-        reportItem.setPeriodType( periodType.trim() );
-        reportItem.setSheetNo( (sheetNo == null ? 1 : sheetNo) );
-        reportItem.setReportExcel( reportService.getReportExcel( reportId ) );
-        
-
-        reportService.addReportExcelItem( reportItem );        
+    {
        
+        File output = new File( selectionManager.getDownloadFilePath() );
+
+        fileName = output.getName();
+
+        inputStream = new BufferedInputStream( new FileInputStream( output ) );
 
         return SUCCESS;
     }
+
 }

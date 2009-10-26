@@ -1,4 +1,4 @@
-package org.hisp.dhis.oum.action.organisationunitgroup;
+package org.hisp.dhis.oum.action.organisationunitgroup.select;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,24 +27,22 @@ package org.hisp.dhis.oum.action.organisationunitgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
+import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: UpdateOrganisationUnitGroupAction.java 1898 2006-09-22
- *          12:06:56Z torgeilo $
+ * @version $Id: SelectLevelAction.java 4524 2008-02-04 18:48:53Z larshelg $
  */
-@SuppressWarnings("serial")
-public class UpdateOrganisationUnitGroupAction
-    extends ActionSupport
+public class SelectLevelAction
+    implements Action
 {
+    private static final int FIRST_LEVEL = 1;
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -56,47 +54,54 @@ public class UpdateOrganisationUnitGroupAction
         this.selectionTreeManager = selectionTreeManager;
     }
 
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer level;
 
-    public void setId( Integer id )
+    public void setLevel( Integer level )
     {
-        this.id = id;
+        this.level = level;
     }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
+    
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( id );
+        Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
 
-        organisationUnitGroup.setName( name );
+        Collection<OrganisationUnit> selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();
 
-        organisationUnitGroup.setMembers( new HashSet<OrganisationUnit>( selectionTreeManager
-            .getSelectedOrganisationUnits() ) );
+        for ( OrganisationUnit rootUnit : rootUnits )
+        {
+            selectLevel( rootUnit, FIRST_LEVEL, selectedUnits );
+        }
 
-        organisationUnitGroupService.updateOrganisationUnitGroup( organisationUnitGroup );
+        selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
 
         return SUCCESS;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private void selectLevel( OrganisationUnit orgUnit, int currentLevel, Collection<OrganisationUnit> selectedUnits )
+    {
+        if ( currentLevel == level )
+        {
+            selectedUnits.add( orgUnit );
+        }
+        else
+        {
+            for ( OrganisationUnit child : orgUnit.getChildren() )
+            {
+                selectLevel( child, currentLevel + 1, selectedUnits );
+            }
+        }
     }
 }

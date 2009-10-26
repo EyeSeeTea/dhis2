@@ -1,4 +1,4 @@
-package org.hisp.dhis.oum.action.organisationunitgroup;
+package org.hisp.dhis.oum.action.organisationunitgroup.select;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,23 +27,21 @@ package org.hisp.dhis.oum.action.organisationunitgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
+import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: UpdateOrganisationUnitGroupAction.java 1898 2006-09-22
- *          12:06:56Z torgeilo $
+ * @author Lars Helge Overland
+ * @version $Id$
  */
-@SuppressWarnings("serial")
-public class UpdateOrganisationUnitGroupAction
-    extends ActionSupport
+public class UnselectOrganisationUnitGroupAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -62,41 +60,35 @@ public class UpdateOrganisationUnitGroupAction
     {
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
-
+    
     // -------------------------------------------------------------------------
-    // Input
+    // Input & output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer organisationUnitGroupId;
 
-    public void setId( Integer id )
+    public void setOrganisationUnitGroupId( Integer organisationUnitGroupId )
     {
-        this.id = id;
+        this.organisationUnitGroupId = organisationUnitGroupId;
     }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
+    
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( id );
-
-        organisationUnitGroup.setName( name );
-
-        organisationUnitGroup.setMembers( new HashSet<OrganisationUnit>( selectionTreeManager
-            .getSelectedOrganisationUnits() ) );
-
-        organisationUnitGroupService.updateOrganisationUnitGroup( organisationUnitGroup );
-
+        OrganisationUnitGroup group = organisationUnitGroupService.getOrganisationUnitGroup( organisationUnitGroupId );
+        
+        if ( group != null )
+        {
+            Collection<OrganisationUnit> units = selectionTreeManager.getSelectedOrganisationUnits();
+            
+            units.removeAll( group.getMembers() );
+            
+            selectionTreeManager.setSelectedOrganisationUnits( units );
+        }
+        
         return SUCCESS;
     }
 }

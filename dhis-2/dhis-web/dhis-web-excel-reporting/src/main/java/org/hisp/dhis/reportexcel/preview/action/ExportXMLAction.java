@@ -99,7 +99,7 @@ public class ExportXMLAction
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings("static-access")
+    @SuppressWarnings( "static-access" )
     public String execute()
         throws IOException
     {
@@ -107,10 +107,10 @@ public class ExportXMLAction
         {
             this.init();
 
-            xmlStructureResponse = new XMLStructureResponse( this.FILE_XLS.getPath(), this.ENCODING, this.sheetId, true, false, true,
-                false, false ).getSTRUCTURE_DATA_RESPONSE();
+            xmlStructureResponse = new XMLStructureResponse( this.FILE_XLS.getPath(), this.ENCODING, this.sheetId,
+                true, false, true, false, false ).getSTRUCTURE_DATA_RESPONSE();
 
-            //this.FILE_XLS.deleteOnExit();
+            // this.FILE_XLS.deleteOnExit();
 
             return SUCCESS;
         }
@@ -127,10 +127,10 @@ public class ExportXMLAction
 
     private void init()
         throws Exception
-    {        
-        this.FILE_XLS = new File( selectionManager.getReportExcelOutput() );
+    {
+        this.FILE_XLS = new File( selectionManager.getDownloadFilePath() );
 
-        //inputStream.close();
+        // inputStream.close();
     }
 
     @SuppressWarnings( "unused" )
