@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.dimension;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -33,9 +33,7 @@ import java.util.List;
  * @author Lars Helge Overland
  */
 public interface Dimension
-{
-    //TODO move to dimension package
-    
+{    
     String getName();
     
     List<? extends DimensionOption> getDimensionOptions();

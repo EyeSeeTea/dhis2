@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.dimension;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,14 +27,10 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
 /**
  * @author Lars Helge Overland
  */
-public interface DimensionSet
+public interface DimensionOption
 {
     String getName();
-    
-    List<? extends Dimension> getDimensions();
 }
