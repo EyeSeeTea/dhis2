@@ -50,7 +50,7 @@ public interface PatientAttributeValueService
     
     int deletePatientAttributeValue( PatientAttribute patientAttribute );
     
-    PatientAttributeValue getPatientAttributeValue( Patient patient, PatientAttribute patientAttribute );
+    PatientAttributeValue getPatientAttributeValue( Patient patient, PatientAttribute patientAttribute );   
 
     Collection<PatientAttributeValue> getPatientAttributeValues( Patient patient );
     
@@ -61,4 +61,6 @@ public interface PatientAttributeValueService
     Collection<PatientAttributeValue> getAllPatientAttributeValues();
     
     Map<Integer, Collection<PatientAttributeValue>> getPatientAttributeValueMapForPatients( Collection<Patient> patients );
+    
+    Collection<PatientAttributeValue> searchPatientAttributeValue( PatientAttribute patientAttribute, String searchText );
 }

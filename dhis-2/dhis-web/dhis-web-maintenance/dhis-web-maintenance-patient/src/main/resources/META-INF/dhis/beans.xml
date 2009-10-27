@@ -86,16 +86,43 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
  
   	
   <!-- Patient -->  
+  
+   <bean id="org.hisp.dhis.patient.action.patient.SelectAction"
+    class="org.hisp.dhis.patient.action.patient.SelectAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>               
+  </bean> 
 		    
+  <bean id="org.hisp.dhis.patient.action.patient.SearchPatientFormAction"
+    class="org.hisp.dhis.patient.action.patient.SearchPatientFormAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>    
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>	    
+  </bean>
+  
+  <bean id="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction"
+    class="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction" 
+    scope="prototype">
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
+  </bean>
+  
   <bean id="org.hisp.dhis.patient.action.patient.SearchPatientAction"
     class="org.hisp.dhis.patient.action.patient.SearchPatientAction" 
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-	<property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>	    
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="patientAttributeValueService"
+      ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>     
   </bean>
-    
+      
   <bean id="org.hisp.dhis.patient.action.patient.GetPatientAction"
     class="org.hisp.dhis.patient.action.patient.GetPatientAction" 
     scope="prototype">    
@@ -142,27 +169,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="patientIdentifierService"
       ref="org.hisp.dhis.patient.PatientIdentifierService"/>      
   </bean>
-        
-  <bean id="org.hisp.dhis.patient.action.patient.SelectAction"
-    class="org.hisp.dhis.patient.action.patient.SelectAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>           
-  </bean>
-          
+  
   <bean id="org.hisp.dhis.patient.action.patient.ValidatePatientAction"
     class="org.hisp.dhis.patient.action.patient.ValidatePatientAction" 
     scope="prototype">
     <property name="selectionManager"
       ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-  </bean>  
-  
-  <bean id="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction"
-    class="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction" 
-    scope="prototype">
-    <property name="selectionManager"
-      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
-  </bean>
+  </bean> 
   
   <!-- Patient-Program Enrollment -->
   

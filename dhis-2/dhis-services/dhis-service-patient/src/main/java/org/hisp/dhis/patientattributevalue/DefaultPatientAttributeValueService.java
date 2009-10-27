@@ -151,4 +151,9 @@ public class DefaultPatientAttributeValueService
 
         return patentAttributeValueMap;
     }
+    
+    public Collection<PatientAttributeValue> searchPatientAttributeValue( PatientAttribute patientAttribute, String searchText )
+    {
+        return patientAttributeValueStore.searchByValue( patientAttribute, searchText );
+    }
 }

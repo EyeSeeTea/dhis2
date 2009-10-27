@@ -27,17 +27,12 @@
 
 package org.hisp.dhis.caseentry.action;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -45,7 +40,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SearchPatientAction
+public class SearchPatientFormAction
     implements Action
 {
 
@@ -60,25 +55,11 @@ public class SearchPatientAction
         this.selectionManager = selectionManager;
     }
 
-    private PatientService patientService;
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
-
     private PatientAttributeService patientAttributeService;
 
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
         this.patientAttributeService = patientAttributeService;
-    }
-
-    private PatientAttributeValueService patientAttributeValueService;
-
-    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
-    {
-        this.patientAttributeValueService = patientAttributeValueService;
     }
 
     // -------------------------------------------------------------------------
@@ -92,49 +73,11 @@ public class SearchPatientAction
         return organisationUnit;
     }
 
-    private String searchText;
-
-    public void setSearchText( String searchText )
-    {
-        this.searchText = searchText;
-    }
-
-    public String getSearchText()
-    {
-        return searchText;
-    }
-
-    private boolean listAll;
-
-    public void setListAll( boolean listAll )
-    {
-        this.listAll = listAll;
-    }
-
-    private Integer searchingAttributeId;
-
-    public Integer getSearchingAttributeId()
-    {
-        return searchingAttributeId;
-    }
-
-    public void setSearchingAttributeId( Integer searchingAttributeId )
-    {
-        this.searchingAttributeId = searchingAttributeId;
-    }
-    
     Collection<PatientAttribute> patientAttributes;
 
     public Collection<PatientAttribute> getPatientAttributes()
     {
         return patientAttributes;
-    }
-
-    private Collection<Patient> patients = new ArrayList<Patient>();
-
-    public Collection<Patient> getPatients()
-    {
-        return patients;
     }
 
     // -------------------------------------------------------------------------
@@ -149,34 +92,8 @@ public class SearchPatientAction
         // ---------------------------------------------------------------------
 
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
-        
+
         patientAttributes = patientAttributeService.getAllPatientAttributes();
-
-        if ( listAll )
-        {
-            patients = patientService.getPatientsByOrgUnit( organisationUnit );
-
-            searchText = "list_all_patients";
-
-            return SUCCESS;
-        }
-
-        if ( searchingAttributeId != null )
-        {
-            PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( searchingAttributeId );
-
-            Collection<PatientAttributeValue> matching = patientAttributeValueService.searchPatientAttributeValue(
-                patientAttribute, searchText );
-            
-            for( PatientAttributeValue patientAttributeValue : matching )
-            {
-                patients.add( patientAttributeValue.getPatient() );
-            }
-            
-            return SUCCESS;
-        }
-
-        patients = patientService.getPatients( searchText );
 
         return SUCCESS;
     }

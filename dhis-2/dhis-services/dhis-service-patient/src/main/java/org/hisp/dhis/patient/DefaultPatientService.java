@@ -30,6 +30,8 @@ package org.hisp.dhis.patient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -122,7 +124,7 @@ public class DefaultPatientService
 
     public Collection<Patient> getPatients( String searchText )
     {
-        Collection<Patient> patients = new ArrayList<Patient>();
+        Set<Patient> patients = new HashSet<Patient>();
 
         patients.addAll( getPatientsByNames( searchText ) );
 

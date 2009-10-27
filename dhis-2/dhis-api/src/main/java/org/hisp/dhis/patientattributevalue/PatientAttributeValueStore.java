@@ -54,4 +54,6 @@ public interface PatientAttributeValueStore
     Collection<PatientAttributeValue> get( PatientAttribute patientAttribute );
     
     Collection<PatientAttributeValue> get( Collection<Patient> patients );
+    
+    Collection<PatientAttributeValue> searchByValue( PatientAttribute patientAttribute, String searchText );
 }

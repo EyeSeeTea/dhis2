@@ -46,10 +46,10 @@ public class HibernatePatientAttributeValueStore
 {
 
     public void saveVoid( PatientAttributeValue patientAttributeValue )
-    {        
-        sessionFactory.getCurrentSession().save( patientAttributeValue );        
-    }  
-    
+    {
+        sessionFactory.getCurrentSession().save( patientAttributeValue );
+    }
+
     public int deleteByAttribute( PatientAttribute patientAttribute )
     {
         Query query = getQuery( "delete PatientAttributeValue where patientAttribute = :patientAttribute" );
@@ -86,6 +86,12 @@ public class HibernatePatientAttributeValueStore
     public Collection<PatientAttributeValue> get( Collection<Patient> patients )
     {
         return getCriteria( Restrictions.in( "patient", patients ) ).list();
-    } 
-      
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientAttributeValue> searchByValue( PatientAttribute patientAttribute, String searchText )
+    {
+        return getCriteria( Restrictions.eq( "patientAttribute", patientAttribute ),
+            Restrictions.ilike( "value", "%" + searchText + "%" ) ).list();
+    }
 }

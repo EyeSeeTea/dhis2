@@ -92,13 +92,21 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>             
     </action>
     
-    <action name="patientform" class="org.hisp.dhis.patient.action.NoAction">
+    <action name="patientform" class="org.hisp.dhis.patient.action.patient.SearchPatientFormAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/patient.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>            
     </action>    
+    
+    <action name="validateSearchPatient"
+      class="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action> 
         
     <action name="searchPatient" class="org.hisp.dhis.patient.action.patient.SearchPatientAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
@@ -107,6 +115,15 @@
       <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>        
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>            
     </action> 
+    
+    <action name="listAllPatients" class="org.hisp.dhis.patient.action.patient.SearchPatientAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="listAll">true</param>
+      <param name="page">/dhis-web-maintenance-patient/listPatient.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>        
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>            
+    </action>
     
     <action name="getPatient" class="org.hisp.dhis.patient.action.patient.GetPatientAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responsePatient.vm</result>
@@ -147,20 +164,7 @@
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
-    </action>
-    
-    <action name="validateSearchPatient"
-      class="org.hisp.dhis.patient.action.patient.ValidateSearchPatientAction">
-      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
-      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
-      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>
-    </action>  
-    
-    <action name="getHouseHoldMembers" class="org.hisp.dhis.patient.action.patient.GetHouseHoldMembersAction">      
-      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseMemberList.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>               
-    </action> 
+    </action>    
     
     <!-- Patient-Program Enrollment -->  
     
