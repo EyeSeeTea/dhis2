@@ -6,6 +6,22 @@ function organisationUnitSelected( orgUnits )
 
 selection.setListenerFunction( organisationUnitSelected );
 
+//------------------------------------------------------------------------------
+// Check for Integer
+//------------------------------------------------------------------------------
+
+function isInt( value )
+{
+    var number = new Number( value );
+    
+    if ( isNaN( number ))
+    {   	
+        return false;
+    }
+    
+    return true;
+}
+
 
 //------------------------------------------------------------------------------
 //Popup window
@@ -186,9 +202,9 @@ function patientReceived( patientElement )
 // Remove patient
 // -----------------------------------------------------------------------------
 
-function removePatient( patientId, firstName, lastName )
+function removePatient( patientId, fullName )
 {
-    var result = window.confirm( i18n_confirm_delete + '\n\n' + lastName + ',' + firstName );
+    var result = window.confirm( i18n_confirm_delete + '\n\n' + fullName );
     
     if ( result )
     {
@@ -263,13 +279,28 @@ function searchValidationCompleted( messageElement )
 function validateAddPatient()
 {
 	
+	var age = document.getElementById( 'age' );
+		
+	if( age.value != '' )
+	{
+		if( !isInt( age.value ) )
+		{
+			window.alert( i18n_age_must_integer );
+			age.select();
+			age.focus();
+			
+			return false;
+		}
+	}	
+	
 	var url = 'validatePatient.action?' +
 			'identifier=' + getFieldValue( 'identifier' ) +
 			'&firstName=' + getFieldValue( 'firstName' ) +
 	        '&middleName=' + getFieldValue( 'middleName' ) +
 	        '&lastName=' + getFieldValue( 'lastName' ) +
 	        '&gender=' + getFieldValue( 'gender' ) +
-	        '&birthDate=' + getFieldValue( 'birthDate' ) ;
+	        '&birthDate=' + getFieldValue( 'birthDate' ) +	        
+	        '&age=' + getFieldValue( 'age' ) ;
 	
 	var request = new Request();
     request.setResponseTypeXML( 'message' );
@@ -286,8 +317,18 @@ function addValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-        var form = document.getElementById( 'addPatientForm' );        
-        form.submit();
+    	window.location.href='addPatient.action?' +			
+			'&identifier=' + getFieldValue( 'identifier' ) +
+			'&firstName=' + getFieldValue( 'firstName' ) +
+			'&middleName=' + getFieldValue( 'middleName' ) +
+			'&lastName=' + getFieldValue( 'lastName' ) +
+			'&gender=' + getFieldValue( 'gender' ) +
+			'&birthDate=' + getFieldValue( 'birthDate' ) +
+			'&age=' + getFieldValue( 'age' ) +
+			'&birthDateEstimated=' + document.getElementById( 'birthDateEstimated' ).checked ;   
+    	
+        //var form = document.getElementById( 'addPatientForm' ) + document.getElementById( 'birthDateEstimated' ).checked;        
+        //form.submit();
     }
     else if ( type == 'error' )
     {
@@ -331,8 +372,17 @@ function updateValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-    	var form = document.getElementById( 'updatePatientForm' );        
-        form.submit();
+    	window.location.href='updatePatient.action?' + 
+    		'id=' + getFieldValue( 'id' ) +    		
+    		'&firstName=' + getFieldValue( 'firstName' ) +
+    		'&middleName=' + getFieldValue( 'middleName' ) +
+    		'&lastName=' + getFieldValue( 'lastName' ) +
+    		'&gender=' + getFieldValue( 'gender' ) +
+    		'&birthDate=' + getFieldValue( 'birthDate' ) +
+    		'&birthDateEstimated=' + document.getElementById( 'birthDateEstimated' ).checked ;   		
+    	
+    	//var form = document.getElementById( 'updatePatientForm' ) + document.getElementById( 'birthDateEstimated' ).checked;        
+        //form.submit();
     }
     else if ( type == 'error' )
     {

@@ -112,14 +112,7 @@ public class ProgramEnrollmentSelectAction
     public void setPatient( Patient patient )
     {
         this.patient = patient;
-    }
-
-    private Integer age;
-
-    public Integer getAge()
-    {
-        return age;
-    }
+    }    
 
     private Collection<Program> programs = new ArrayList<Program>();
 
@@ -184,9 +177,7 @@ public class ProgramEnrollmentSelectAction
         if ( patient == null )
         {
             return SUCCESS;
-        }
-
-        age = patient.getAge();
+        }        
 
         // ---------------------------------------------------------------------
         // Load Programs

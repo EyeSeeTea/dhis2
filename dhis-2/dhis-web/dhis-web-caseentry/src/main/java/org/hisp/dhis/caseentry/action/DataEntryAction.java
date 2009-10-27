@@ -172,14 +172,7 @@ public class DataEntryAction
     public PatientIdentifier getPatientIdentifier()
     {
         return patientIdentifier;
-    }
-
-    private Integer age;
-
-    public Integer getAge()
-    {
-        return age;
-    }
+    }  
 
     private Program program;
 
@@ -235,9 +228,7 @@ public class DataEntryAction
 
         patient = patientService.getPatient( id );
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
-
-        age = patient.getAge();
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );        
 
         program = programService.getProgram( programId );
 

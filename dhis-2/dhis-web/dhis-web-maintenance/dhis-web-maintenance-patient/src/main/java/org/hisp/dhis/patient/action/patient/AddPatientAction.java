@@ -27,15 +27,11 @@
 
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
@@ -73,13 +69,6 @@ public class AddPatientAction
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
     }
 
     private OrganisationUnitSelectionManager selectionManager;
@@ -136,20 +125,34 @@ public class AddPatientAction
         this.birthDate = birthDate;
     }
 
+    private Integer age;
+
+    public void setAge( Integer age )
+    {
+        this.age = age;
+    }
+
+    private boolean birthDateEstimated;
+
+    public void setBirthDateEstimated( boolean birthDateEstimated )
+    {
+        this.birthDateEstimated = birthDateEstimated;
+    }
+
     private String gender;
 
     public void setGender( String gender )
     {
         this.gender = gender;
     }
-    
+
     // -------------------------------------------------------------------------
     // Output - making the patient available so that its attributes can be
     // edited
     // -------------------------------------------------------------------------
-    
+
     private Patient patient;
-    
+
     public Patient getPatient()
     {
         return patient;
@@ -169,14 +172,37 @@ public class AddPatientAction
 
         patient = new Patient();
 
-        Collection<PatientAttribute> attributes = patientAttributeService.getAllPatientAttributes();
-
-        patient.setAttributes( new HashSet<PatientAttribute>( attributes ) );
         patient.setFirstName( firstName );
         patient.setMiddleName( middleName );
         patient.setLastName( lastName );
         patient.setGender( gender );
-        patient.setBirthDate( format.parseDate( birthDate ) );
+
+        if ( birthDate != null )
+        {
+
+            birthDate = birthDate.trim();
+
+            if ( birthDate.length() != 0 )
+            {
+                patient.setBirthDate( format.parseDate( birthDate ) );
+                patient.setBirthDateEstimated( birthDateEstimated );
+            }
+            else
+            {
+                if ( age != null )
+                {
+                    patient.setBirthDateFromAge( age.intValue() );
+                }
+            }
+        }
+        else
+        {
+            if ( age != null )
+            {
+                patient.setBirthDateFromAge( age.intValue() );                
+            }
+        }
+        
         patient.setRegistrationDate( new Date() );
 
         patientService.savePatient( patient );

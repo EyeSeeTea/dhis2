@@ -11,7 +11,7 @@
     <tr>
         <td><strong>$i18n.getString( "full_name" ):</strong></td>
         <td>           
-            $encoder.htmlEncode( $patient.firstName ) $encoder.htmlEncode( $patient.middleName ) $encoder.htmlEncode( $patient.lastName )  
+            $encoder.htmlEncode( $patient.getFullName() )  
         </td>
     </tr>
     <tr>
@@ -29,7 +29,7 @@
     <tr>
         <td><strong>$i18n.getString( "age" ):</strong></td>
         <td>            
-            $encoder.htmlEncode( $age )
+            $encoder.htmlEncode( $patient.getAge() )
         </td>
     </tr>     
     <tr>

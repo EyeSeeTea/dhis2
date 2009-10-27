@@ -92,6 +92,13 @@ public class ValidatePatientAction
         this.birthDate = birthDate;
     }
 
+    private Integer age;
+
+    public void setAge( Integer age )
+    {
+        this.age = age;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -145,6 +152,13 @@ public class ValidatePatientAction
 
                 return INPUT;
             }
+        }   
+        
+        if( age == null && birthDate == null )
+        {
+            message = i18n.getString( "specfiy_birth_date_or_age" );
+
+            return INPUT;
         }
 
         if ( birthDate != null )
@@ -162,7 +176,19 @@ public class ValidatePatientAction
                     return INPUT;
                 }
             }
+            else
+            {
+                if( age == null )
+                {
+                    message = i18n.getString( "specfiy_birth_date_or_age" );
+
+                    return INPUT;
+                }
+                
+            }
         }
+        
+        
 
         // ---------------------------------------------------------------------
         // Validation success

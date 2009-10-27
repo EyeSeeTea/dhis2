@@ -17,12 +17,14 @@
 		<property name="lastName" column="lastname"	length="50"/>
 		
 		<property name="birthDate" column="birthdate"/>
+    
+    <property name="birthDateEstimated" column="birthdateestimated"/>
 		
 		<property name="deathDate" column="deathdate"/>
     
-    <property name="registrationDate" column="registrationdate" not-null="true"/>    
+    <property name="registrationDate" column="registrationdate"/>    
 		
-		<property name="isDead" column="isdead" not-null="true"/>
+		<property name="isDead" column="isdead"/>
 		
 		<property name="gender" column="gender" length="5"/>	
 		

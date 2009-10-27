@@ -66,7 +66,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.patient.action.patientattribute.ShowUpdatePatientAttributeValueAction" 
     scope="prototype">    
     <property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>    
+      ref="org.hisp.dhis.patient.PatientService"/> 
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>   
     <property name="patientAttributeValueService"
       ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>
   </bean>
@@ -115,9 +117,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="patientService"
       ref="org.hisp.dhis.patient.PatientService"/>
     <property name="patientIdentifierService"
-      ref="org.hisp.dhis.patient.PatientIdentifierService"/>  
-    <property name="patientAttributeService"
-      ref="org.hisp.dhis.patient.PatientAttributeService"/>           
+      ref="org.hisp.dhis.patient.PatientIdentifierService"/>              
   </bean> 
 	
   <bean id="org.hisp.dhis.patient.action.patient.RemovePatientAction"

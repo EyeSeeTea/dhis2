@@ -117,14 +117,7 @@ public class ProgramEnrollmentAction
     public void setProgramInstanceId( Integer programInstanceId )
     {
         this.programInstanceId = programInstanceId;
-    }    
-
-    private Integer age;
-
-    public Integer getAge()
-    {
-        return age;
-    }
+    }   
 
     private Collection<Program> programs = new ArrayList<Program>();
 
@@ -178,9 +171,7 @@ public class ProgramEnrollmentAction
 
         Program program = selectedStateManager.getSelectedProgram();
         
-        programId = program.getId();
-
-        age = patient.getAge();
+        programId = program.getId();       
 
         programs = programService.getAllPrograms();
 

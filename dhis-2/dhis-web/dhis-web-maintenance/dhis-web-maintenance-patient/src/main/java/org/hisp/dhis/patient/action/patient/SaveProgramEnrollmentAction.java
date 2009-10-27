@@ -164,14 +164,7 @@ public class SaveProgramEnrollmentAction
     public void setDateOfIncident( String dateOfIncident )
     {
         this.dateOfIncident = dateOfIncident;
-    }
-
-    private Integer age;
-
-    public Integer getAge()
-    {
-        return age;
-    }
+    }  
 
     private Collection<Program> programs = new ArrayList<Program>();
 
@@ -199,9 +192,7 @@ public class SaveProgramEnrollmentAction
 
         Program program = selectedStateManager.getSelectedProgram();
 
-        programId = program.getId();
-
-        age = patient.getAge();
+        programId = program.getId();       
 
         programs = programService.getAllPrograms();
 

@@ -115,7 +115,13 @@ public class SavePatientAttributeValueAction
 
         Patient patient = patientService.getPatient( patientId );
         
-        PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( patientAttributeId );        
+        PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( patientAttributeId );
+        
+        if( !patient.getAttributes().contains( patientAttribute ) )
+        {
+            patient.getAttributes().add( patientAttribute );
+            patientService.updatePatient( patient );
+        }
 
         if ( value != null && value.trim().length() == 0 )
         {
@@ -135,7 +141,7 @@ public class SavePatientAttributeValueAction
             if ( value != null )
             {              
                 
-                LOG.debug( "Adding PatientAttributeValue, value added" );
+                LOG.debug( "Adding PatientAttributeValue, value added" );                
 
                 patientAttributeValue = new PatientAttributeValue( patientAttribute, patient, value );
 

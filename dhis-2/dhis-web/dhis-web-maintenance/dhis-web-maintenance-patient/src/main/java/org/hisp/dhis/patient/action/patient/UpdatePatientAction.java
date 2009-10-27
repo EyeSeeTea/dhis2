@@ -106,6 +106,13 @@ public class UpdatePatientAction
     {
         this.birthDate = birthDate;
     }
+    
+    private boolean birthDateEstimated;
+    
+    public void setBirthDateEstimated( boolean birthDateEstimated )
+    {
+        this.birthDateEstimated = birthDateEstimated;
+    }
 
     private String gender;
 
@@ -143,7 +150,8 @@ public class UpdatePatientAction
         patient.setMiddleName( middleName );
         patient.setLastName( lastName );
         patient.setGender( gender );
-        patient.setBirthDate( format.parseDate( birthDate ) );
+        patient.setBirthDate( format.parseDate( birthDate ) );        
+        patient.setBirthDateEstimated( birthDateEstimated );        
         patient.setRegistrationDate( new Date() );
 
         patientService.updatePatient( patient );

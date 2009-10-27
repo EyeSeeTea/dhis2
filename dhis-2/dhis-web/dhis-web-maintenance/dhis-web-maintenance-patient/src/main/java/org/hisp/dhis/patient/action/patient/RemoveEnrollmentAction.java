@@ -137,13 +137,6 @@ public class RemoveEnrollmentAction
     {
         this.programInstanceId = programInstanceId;
     }    
-    
-    private Integer age;
-
-    public Integer getAge()
-    {
-        return age;
-    }
 
     private Collection<Program> programs = new ArrayList<Program>();
 
@@ -162,9 +155,7 @@ public class RemoveEnrollmentAction
 
         patient = selectedStateManager.getSelectedPatient();
 
-        Program program = selectedStateManager.getSelectedProgram();        
-
-        age = patient.getAge();
+        Program program = selectedStateManager.getSelectedProgram();       
 
         programs = programService.getAllPrograms();
         

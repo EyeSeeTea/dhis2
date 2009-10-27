@@ -11,7 +11,7 @@
 		<th colspan="2">$i18n.getString( "patient_identifier_s" )</th>
 	</tr>
 	<tr>
-		<td><label for="identifier">$i18n.getString( "identifier" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><label for="identifier">$i18n.getString( "identifier" )</label></td>
 		<td><input type="text" readonly="readonly" id="identifier" name="identifier" value="$encoder.htmlEncode( $patientIdentifier.identifier )" style="width:30em"></td>
 	</tr>	
 	<tr><td>&nbsp;</td></tr>	
@@ -19,15 +19,15 @@
 		<th colspan="2">$i18n.getString( "name" )</th>
 	</tr>
 	<tr>
-		<td><label for="firstName">$i18n.getString( "first_name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><label for="firstName">$i18n.getString( "first_name" )</label></td>
 		<td><input type="text" id="firstName" name="firstName" value="$encoder.htmlEncode( $patient.firstName )" style="width:30em"></td>
 	</tr>
 	<tr>
-		<td><label for="middleName">$i18n.getString( "middle_name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><label for="middleName">$i18n.getString( "middle_name" ) </label></td>
 		<td><input type="text" id="middleName" name="middleName" value="$encoder.htmlEncode( $patient.middleName )" style="width:30em"></td>
 	</tr>
 	<tr>
-		<td><label for="lastName">$i18n.getString( "last_name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><label for="lastName">$i18n.getString( "last_name" )</label></td>
 		<td><input type="text" id="lastName" name="lastName" value="$encoder.htmlEncode( $patient.lastName )" style="width:30em"></td>
 	</tr>
 	<tr><td>&nbsp;</td></tr>	
@@ -35,7 +35,7 @@
 		<th colspan="2">$i18n.getString( "demographics" )</th>
 	</tr>
 	<tr>
-		<td><label for="gender">$i18n.getString( "gender" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><label for="gender">$i18n.getString( "gender" )</label></td>
 		<td>
 			<select id="gender" name="gender" style="min-width:20em">
 				<option value="M" #if( $patient.gender == 'M' ) selected="selected" #end>$i18n.getString( "male" )</option>
@@ -44,9 +44,16 @@
 		</td>					
 	</tr>	
 	<tr>
-		<td><label for="birthDate">$i18n.getString( "date_of_birth" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-		<td><input type="text" id="birthDate" name="birthDate" value="$format.formatDate( $patient.birthDate )" style="width:30em">
-			<img src="../images/calendar_icon.gif" width="16" height="16" id="getBirthDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "date_of_birth" )"></td>
+		<td><label for="birthDate">$i18n.getString( "date_of_birth" ) </label></td>
+		<td>
+		    <input type="text" id="birthDate" name="birthDate" value="$format.formatDate( $patient.birthDate )" style="width:10em">
+		    <img src="../images/calendar_icon.gif" width="16" height="16" id="getBirthDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "date_of_birth" )">		    
+            &nbsp;&nbsp;&nbsp;
+            <label for="estimated">$i18n.getString( "estimated" )</label>
+            <input type="checkbox" " id="birthDateEstimated" name="birthDateEstimated" #if( $patient.birthDateEstimated ) checked="checked" #end>
+            &nbsp;
+            <label for="age">$i18n.getString( "age" )</label>&nbsp;&nbsp;$encoder.htmlEncode( $patient.getAge() )            
+        </td> 
 	</tr>  
 		
 </table>

@@ -58,11 +58,13 @@ public class Patient
 
     private Date birthDate;
 
+    private boolean birthDateEstimated = false;
+
     private Date deathDate;
 
     private Date registrationDate;
 
-    private Boolean isDead = false;
+    private boolean isDead = false;
 
     private Set<PatientIdentifier> identifiers = new HashSet<PatientIdentifier>();
 
@@ -195,6 +197,16 @@ public class Patient
         this.birthDate = birthDate;
     }
 
+    public void setBirthDateEstimated( Boolean birthDateEstimated )
+    {
+        this.birthDateEstimated = birthDateEstimated;
+    }
+
+    public Boolean getBirthDateEstimated()
+    {
+        return birthDateEstimated;
+    }
+
     public Date getDeathDate()
     {
         return deathDate;
@@ -259,11 +271,11 @@ public class Patient
     // Convenience method
     // -------------------------------------------------------------------------
 
-    public Integer getAge()
+    public String getAge()
     {
         if ( birthDate == null )
         {
-            return 0;
+            return "0";
         }
 
         Calendar birthCalendar = Calendar.getInstance();
@@ -283,12 +295,33 @@ public class Patient
             age--;
         }
 
-        return age;
+        if ( age <= 1 )
+        {
+            return "( < 1 yr )";
+
+        }
+
+        else
+        {
+            return "( " + age + " yr )";
+        }
+    }
+
+    public void setBirthDateFromAge( int age )
+    {
+        Calendar todayCalendar = Calendar.getInstance();
+
+        // Assumed relative to the 1st of January
+        todayCalendar.set( Calendar.DATE, 1 );
+        todayCalendar.set( Calendar.MONTH, Calendar.JANUARY );
+        todayCalendar.add( Calendar.YEAR, -1 * age );
+
+        setBirthDate( todayCalendar.getTime() );
+        setBirthDateEstimated( true );
     }
 
     public String getFullName()
     {
         return firstName + " " + middleName + " " + lastName;
     }
-
 }

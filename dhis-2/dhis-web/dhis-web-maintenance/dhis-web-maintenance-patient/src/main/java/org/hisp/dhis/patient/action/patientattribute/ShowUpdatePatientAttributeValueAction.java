@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
@@ -55,6 +56,13 @@ public class ShowUpdatePatientAttributeValueAction
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
+    }
+    
+    private PatientAttributeService patientAttributeService;
+
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    {
+        this.patientAttributeService = patientAttributeService;
     }
 
     private PatientAttributeValueService patientAttributeValueService;
@@ -80,14 +88,7 @@ public class ShowUpdatePatientAttributeValueAction
     public Patient getPatient()
     {
         return patient;
-    }
-
-    private Integer age;
-
-    public Integer getAge()
-    {
-        return age;
-    }
+    } 
 
     Collection<PatientAttribute> patientAttributes;
 
@@ -110,11 +111,9 @@ public class ShowUpdatePatientAttributeValueAction
     public String execute()
         throws Exception
     {
-        patient = patientService.getPatient( id );
+        patient = patientService.getPatient( id );       
 
-        age = patient.getAge();
-
-        patientAttributes = patient.getAttributes();
+        patientAttributes = patientAttributeService.getAllPatientAttributes();
 
         Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
             .getPatientAttributeValues( patient );
