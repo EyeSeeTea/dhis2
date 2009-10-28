@@ -24,15 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient.action.patient;
 
-import java.util.Date;
+package org.hisp.dhis.caseentry.action.caseentry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.program.ProgramStageInstance;
-import org.hisp.dhis.program.ProgramStageInstanceService;
+import java.util.Collection;
+
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -40,63 +40,44 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SaveDueDateAction
+public class SearchPatientFormAction
     implements Action
 {
-
-    private static final Log LOG = LogFactory.getLog( SaveDueDateAction.class );
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageInstanceService programStageInstanceService;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.programStageInstanceService = programStageInstanceService;
+        this.selectionManager = selectionManager;
     }
 
-    private I18nFormat format;
+    private PatientAttributeService patientAttributeService;
 
-    public void setFormat( I18nFormat format )
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
-        this.format = format;
+        this.patientAttributeService = patientAttributeService;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private String dueDate;
+    private OrganisationUnit organisationUnit;
 
-    public void setDueDate( String dueDate )
+    public OrganisationUnit getOrganisationUnit()
     {
-        this.dueDate = dueDate;
+        return organisationUnit;
     }
 
-    private int programStageInstanceId;
+    Collection<PatientAttribute> patientAttributes;
 
-    public void setProgramStageInstanceId( int programStageInstanceId )
+    public Collection<PatientAttribute> getPatientAttributes()
     {
-        this.programStageInstanceId = programStageInstanceId;
-    }
-
-    public int getProgramStageInstanceId()
-    {
-        return programStageInstanceId;
-    }
-
-    private int statusCode;
-
-    public int getStatusCode()
-    {
-        return statusCode;
-    }
-
-    public void setStatusCode( int statusCode )
-    {
-        this.statusCode = statusCode;
+        return patientAttributes;
     }
 
     // -------------------------------------------------------------------------
@@ -106,37 +87,13 @@ public class SaveDueDateAction
     public String execute()
         throws Exception
     {
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
 
-        ProgramStageInstance programStageInstance = programStageInstanceService
-            .getProgramStageInstance( programStageInstanceId );
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        if ( programStageInstance != null )
-        {
-            if ( dueDate != null )
-            {
-                dueDate = dueDate.trim();
-
-                if ( dueDate.length() != 0 )
-                {
-                    Date dateOfDue = format.parseDate( dueDate );
-
-                    if ( dateOfDue != null )
-                    {
-                        programStageInstance.setDueDate( format.parseDate( dueDate ) );
-
-                        programStageInstanceService.updateProgramStageInstance( programStageInstance );
-
-                        LOG.debug( "Updating Due Date, value added/changed" );
-
-                        return SUCCESS;
-                    }
-                    else
-                    {
-                        statusCode = 1;
-                    }
-                }
-            }
-        }
+        patientAttributes = patientAttributeService.getAllPatientAttributes();
 
         return SUCCESS;
     }

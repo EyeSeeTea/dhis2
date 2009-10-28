@@ -24,11 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.caseentry.action.caseentry;
 
-package org.hisp.dhis.caseentry.action;
+import java.util.Date;
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -36,47 +40,63 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ValidateSearchAction
+public class SaveExecutionDateAction
     implements Action
 {
+
+    private static final Log LOG = LogFactory.getLog( SaveExecutionDateAction.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private ProgramStageInstanceService programStageInstanceService;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
-        this.selectionManager = selectionManager;
+        this.programStageInstanceService = programStageInstanceService;
+    }
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    private String searchText;
+    private String executionDate;
 
-    public void setSearchText( String searchText )
+    public void setExecutionDate( String executionDate )
     {
-        this.searchText = searchText;
+        this.executionDate = executionDate;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
+    private int programStageInstanceId;
 
-    private String message;
-
-    public String getMessage()
+    public void setProgramStageInstanceId( int programStageInstanceId )
     {
-        return message;
+        this.programStageInstanceId = programStageInstanceId;
     }
 
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
+    public int getProgramStageInstanceId()
     {
-        this.i18n = i18n;
+        return programStageInstanceId;
+    }
+
+    private int statusCode;
+
+    public int getStatusCode()
+    {
+        return statusCode;
+    }
+
+    public void setStatusCode( int statusCode )
+    {
+        this.statusCode = statusCode;
     }
 
     // -------------------------------------------------------------------------
@@ -87,38 +107,36 @@ public class ValidateSearchAction
         throws Exception
     {
 
-        if ( selectionManager.getSelectedOrganisationUnit() == null )
+        ProgramStageInstance programStageInstance = programStageInstanceService
+            .getProgramStageInstance( programStageInstanceId );
+
+        if ( programStageInstance != null )
         {
-            message = i18n.getString( "please_select_a_registering_unit" );
-
-            return INPUT;
-        }
-
-        if ( searchText == null )
-        {
-            message = i18n.getString( "specify_a_search_criteria" );
-
-            return INPUT;
-        }
-
-        else
-        {
-            searchText = searchText.trim();
-
-            if ( searchText.length() == 0 )
+            if ( executionDate != null )
             {
-                message = i18n.getString( "specify_a_search_criteria" );
+                executionDate = executionDate.trim();
 
-                return INPUT;
+                if ( executionDate.length() != 0 )
+                {
+                    Date dateOfExecution = format.parseDate( executionDate );
+
+                    if ( dateOfExecution != null )
+                    {
+                        programStageInstance.setExecutionDate( format.parseDate( executionDate ) );
+
+                        programStageInstanceService.updateProgramStageInstance( programStageInstance );
+
+                        LOG.debug( "Updating Execution Date, value added/changed" );
+
+                        return SUCCESS;
+                    }
+                    else
+                    {
+                        statusCode = 1;
+                    }
+                }               
             }
-
-        }
-
-        // ---------------------------------------------------------------------
-        // Validation success
-        // ---------------------------------------------------------------------
-
-        message = i18n.getString( "everything_is_ok" );
+        }       
 
         return SUCCESS;
     }

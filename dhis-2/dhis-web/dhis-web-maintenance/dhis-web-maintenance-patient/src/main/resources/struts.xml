@@ -8,7 +8,7 @@
   
   <package name="dhis-web-maintenance-patient" extends="dhis-web-commons" namespace="/dhis-web-maintenance-patient">
 	  
-	<action name="index" class="org.hisp.dhis.patient.action.NoAction">      
+    <action name="index" class="org.hisp.dhis.patient.action.NoAction">      
       <result name="success" type="velocity">/main.vm</result>     
       <param name="page">/dhis-web-maintenance-patient/index.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/menu.vm</param> 

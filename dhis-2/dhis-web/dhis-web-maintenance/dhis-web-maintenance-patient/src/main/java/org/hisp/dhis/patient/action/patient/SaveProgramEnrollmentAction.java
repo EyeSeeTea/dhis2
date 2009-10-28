@@ -37,8 +37,8 @@ import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramInstanceStage;
-import org.hisp.dhis.program.ProgramInstanceStageService;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.system.util.DateUtils;
@@ -77,11 +77,11 @@ public class SaveProgramEnrollmentAction
         this.programInstanceService = programInstanceService;
     }    
 
-    private ProgramInstanceStageService programInstanceStageService;
+    private ProgramStageInstanceService programStageInstanceService;
 
-    public void setProgramInstanceStageService( ProgramInstanceStageService programInstanceStageService )
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
-        this.programInstanceStageService = programInstanceStageService;
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     private SelectedStateManager selectedStateManager;
@@ -173,11 +173,11 @@ public class SaveProgramEnrollmentAction
         return programs;
     }
 
-    private Collection<ProgramInstanceStage> programInstanceStages = new ArrayList<ProgramInstanceStage>();
+    private Collection<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();
 
-    public Collection<ProgramInstanceStage> getProgramInstanceStages()
+    public Collection<ProgramStageInstance> getProgramStageInstances()
     {
-        return programInstanceStages;
+        return programStageInstances;
     }
 
     // -------------------------------------------------------------------------
@@ -220,18 +220,18 @@ public class SaveProgramEnrollmentAction
             
             for( ProgramStage programStage : program.getProgramStages() )
             {
-                ProgramInstanceStage programInstanceStage = new ProgramInstanceStage();
-                programInstanceStage.setProgramInstance( programInstance );
-                programInstanceStage.setProgramStage( programStage );
-                programInstanceStage.setStageInProgram( programStage.getStageInProgram() );
+                ProgramStageInstance programStageInstance = new ProgramStageInstance();
+                programStageInstance.setProgramInstance( programInstance );
+                programStageInstance.setProgramStage( programStage );
+                programStageInstance.setStageInProgram( programStage.getStageInProgram() );
                 
                 Date dueDate = DateUtils.getDateAfterAddition( format.parseDate( dateOfIncident ), programStage.getMinDaysFromStart() ) ;
                     
-                programInstanceStage.setDueDate( dueDate );
+                programStageInstance.setDueDate( dueDate );
                 
-                programInstanceStageService.addProgramInstanceStage( programInstanceStage );
+                programStageInstanceService.addProgramStageInstance( programStageInstance );
                 
-                programInstanceStages.add( programInstanceStage );
+                programStageInstances.add( programStageInstance );
             }
         }
 
@@ -242,16 +242,16 @@ public class SaveProgramEnrollmentAction
 
             programInstanceService.updateProgramInstance( programInstance );
             
-            for( ProgramInstanceStage programInstanceStage : programInstance.getProgramInstanceStages() )
+            for( ProgramStageInstance programStageInstance : programInstance.getProgramStageInstances() )
             {
                 
-                Date dueDate = DateUtils.getDateAfterAddition( format.parseDate( dateOfIncident ), programInstanceStage.getProgramStage().getMinDaysFromStart() ) ;
+                Date dueDate = DateUtils.getDateAfterAddition( format.parseDate( dateOfIncident ), programStageInstance.getProgramStage().getMinDaysFromStart() ) ;
                 
-                programInstanceStage.setDueDate( dueDate );
+                programStageInstance.setDueDate( dueDate );
                 
-                programInstanceStageService.updateProgramInstanceStage( programInstanceStage );
+                programStageInstanceService.updateProgramStageInstance( programStageInstance );
                 
-                programInstanceStages.add( programInstanceStage );
+                programStageInstances.add( programStageInstance );
             }
         }
 

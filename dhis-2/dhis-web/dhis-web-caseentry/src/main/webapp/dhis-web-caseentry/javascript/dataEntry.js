@@ -1,7 +1,7 @@
 
 function organisationUnitSelected( orgUnits )
 {
-    window.location.href = 'select.action';
+    window.location.href = 'dataEntrySelect.action';
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -93,6 +93,76 @@ function patientReceived( patientElement )
 	setFieldValue( 'programField', programName );
 
  showDetails();
+ 
+}
+
+//------------------------------------------------------------------------------
+// Save Execution Date
+//------------------------------------------------------------------------------
+
+function saveExecutionDate( programStageInstanceId, programStageInstanceName )
+{
+	var field = document.getElementById( 'executionDate' );
+	
+	field.style.backgroundColor = '#ffffcc';
+	
+	var dateSaver = new DateSaver( programStageInstanceId, field.value, '#ccffcc' );
+	dateSaver.save();
+  
+}
+
+
+//-----------------------------------------------------------------------------
+// Date Saver objects
+//-----------------------------------------------------------------------------
+
+function DateSaver( programStageInstanceId_, executionDate_, resultColor_ )
+{
+	var SUCCESS = '#ccffcc';
+	var ERROR = '#ffcc00';
+	
+	var programStageInstanceId = programStageInstanceId_;	
+	var executionDate = executionDate_;
+	var resultColor = resultColor_;	
+
+	this.save = function()
+	{
+		var request = new Request();
+		request.setCallbackSuccess( handleResponse );
+		request.setCallbackError( handleHttpError );
+		request.setResponseTypeXML( 'status' );
+		request.send( 'saveExecutionDate.action?programStageInstanceId=' + programStageInstanceId + '&executionDate=' + executionDate );
+	};
+
+	function handleResponse( rootElement )
+	{
+		var codeElement = rootElement.getElementsByTagName( 'code' )[0];
+		var code = parseInt( codeElement.firstChild.nodeValue );
+   
+		if ( code == 0 )
+		{
+			markValue( resultColor );                   
+		}
+		else
+		{
+			markValue( ERROR );
+			window.alert( i18n_invalid_date );
+		}
+	}
+
+	function handleHttpError( errorCode )
+	{
+		markValue( ERROR );
+		window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+	}   
+
+	function markValue( color )
+	{       
+   
+		var element = document.getElementById( 'executionDate' );	
+           
+		element.style.backgroundColor = color;
+	}
 }
 
 

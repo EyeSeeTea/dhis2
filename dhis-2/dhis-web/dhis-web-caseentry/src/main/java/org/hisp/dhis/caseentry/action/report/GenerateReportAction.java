@@ -25,14 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action;
+package org.hisp.dhis.caseentry.action.report;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
 
 import com.opensymphony.xwork2.Action;
 
@@ -40,7 +42,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SearchPatientFormAction
+public class GenerateReportAction
     implements Action
 {
 
@@ -48,18 +50,18 @@ public class SearchPatientFormAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private SelectedStateManager selectedStateManager;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
-        this.selectionManager = selectionManager;
+        this.selectedStateManager = selectedStateManager;
     }
+    
+    private ProgramService programService;
 
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setProgramService( ProgramService programService )
     {
-        this.patientAttributeService = patientAttributeService;
+        this.programService = programService;
     }
 
     // -------------------------------------------------------------------------
@@ -73,11 +75,56 @@ public class SearchPatientFormAction
         return organisationUnit;
     }
 
-    Collection<PatientAttribute> patientAttributes;
+    private Program program;
 
-    public Collection<PatientAttribute> getPatientAttributes()
+    public Program getProgram()
     {
-        return patientAttributes;
+        return program;
+    }  
+    
+    private Collection<Program> programs = new ArrayList<Program>();
+
+    public Collection<Program> getPrograms()
+    {
+        return programs;
+    }
+    
+    private Collection<ProgramStage> programStages;
+
+    public Collection<ProgramStage> getProgramStages()
+    {
+        return programStages;
+    }
+    
+    private Integer programId;
+    
+    public Integer getProgramId()
+    {
+        return programId;
+    }
+
+    private String startDate;
+
+    public void setStartDate( String startDate )
+    {
+        this.startDate = startDate;
+    }
+
+    public String getStartDate()
+    {
+        return startDate;
+    }
+
+    private String endDate;
+
+    public void setEndDate( String endDate )
+    {
+        this.endDate = endDate;
+    }
+   
+    public String getEndDate()
+    {
+        return endDate;
     }
 
     // -------------------------------------------------------------------------
@@ -87,13 +134,13 @@ public class SearchPatientFormAction
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------
+        organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
+        
+        programs = programService.getPrograms( organisationUnit );
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        patientAttributes = patientAttributeService.getAllPatientAttributes();
+        program = selectedStateManager.getSelectedProgram();   
+        
+        programId = program.getId();        
 
         return SUCCESS;
     }

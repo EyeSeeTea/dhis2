@@ -7,8 +7,8 @@
     <class name="org.hisp.dhis.patientdatavalue.PatientDataValue" table="patientdatavalue">
     
       <composite-id>
-        <key-many-to-one name="programInstanceStage" class="org.hisp.dhis.program.ProgramInstanceStage"
-          column="programinstancestageid" foreign-key="fk_patientdatavalue_programinstancestageid"/>        
+        <key-many-to-one name="programStageInstance" class="org.hisp.dhis.program.ProgramStageInstance"
+          column="programstageinstanceid" foreign-key="fk_patientdatavalue_programstageinstanceid"/>        
         <key-many-to-one name="dataElement" class="org.hisp.dhis.dataelement.DataElement"
           column="dataelementid" foreign-key="fk_patientdatavalue_dataelementid"/>	             
         <key-many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" 
@@ -16,9 +16,12 @@
       </composite-id>    
     
     <many-to-one name="optionCombo" class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" 
-          column="categoryoptioncomboid" foreign-key="fk_patientdatavalue_categoryoptioncomboid"/>                
-    <property name="value"/>   
+          column="categoryoptioncomboid" foreign-key="fk_patientdatavalue_categoryoptioncomboid"/>          
+            
+    <property name="value"/>
+         
     <property name="providedByAnotherFacility" column="providedbyanotherfacility" not-null="true"/>
+      
     <property name="timestamp"/>
         
   </class>

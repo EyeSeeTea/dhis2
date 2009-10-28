@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action;
+package org.hisp.dhis.caseentry.action.caseentry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,8 +36,12 @@ import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
@@ -82,6 +86,20 @@ public class DataRecordingSelectAction
     public void setProgramStageService( ProgramStageService programStageService )
     {
         this.programStageService = programStageService;
+    }
+
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
+    private ProgramStageInstanceService programStageInstanceService;
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     private PatientIdentifierService patientIdentifierService;
@@ -143,7 +161,7 @@ public class DataRecordingSelectAction
     public PatientIdentifier getPatientIdentifier()
     {
         return patientIdentifier;
-    }   
+    }
 
     private Collection<Program> programs = new ArrayList<Program>();
 
@@ -158,12 +176,19 @@ public class DataRecordingSelectAction
     {
         return programStages;
     }
-    
+
     private OrganisationUnit organisationUnit;
 
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
+    }
+
+    private ProgramStageInstance programStageInstance;
+
+    public ProgramStageInstance getProgramStageInstance()
+    {
+        return programStageInstance;
     }
 
     // -------------------------------------------------------------------------
@@ -196,16 +221,16 @@ public class DataRecordingSelectAction
 
         selectedStateManager.setSelectedPatient( patient );
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );      
+        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
 
         // ---------------------------------------------------------------------
         // Load Enrolled Programs
-        // ---------------------------------------------------------------------        
+        // ---------------------------------------------------------------------
 
         for ( Program program : patient.getPrograms() )
         {
             if ( program.getOrganisationUnits().contains( organisationUnit ) )
-            {                
+            {
                 programs.add( program );
             }
         }
@@ -276,6 +301,19 @@ public class DataRecordingSelectAction
 
             return SUCCESS;
         }
+
+        // ---------------------------------------------------------------------
+        // Load the active program instance completed = false we need the
+        // corresponding stage execution date
+        // ---------------------------------------------------------------------
+
+        Collection<ProgramInstance> progamInstances = programInstanceService.getProgramInstances( patient,
+            selectedProgram, false );
+
+        ProgramInstance programInstance = progamInstances.iterator().next();
+
+        programStageInstance = programStageInstanceService.getProgramStageInstance( programInstance,
+            selectedProgramStage );
 
         return DATAENTRY_FORM;
 

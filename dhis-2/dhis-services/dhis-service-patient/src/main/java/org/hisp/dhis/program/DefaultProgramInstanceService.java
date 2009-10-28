@@ -134,26 +134,26 @@ public class DefaultProgramInstanceService
         return programInstanceStore.get( patient, program, completed );
     }
 
-    public Map<Patient, Set<ProgramInstanceStage>> getNextVisitsForProgramInstances(
+    public Map<Patient, Set<ProgramStageInstance>> getNextVisitsForProgramInstances(
         Collection<ProgramInstance> programInstances )
     {
 
-        Map<Patient, Set<ProgramInstanceStage>> visitsByPatients = new HashMap<Patient, Set<ProgramInstanceStage>>();
+        Map<Patient, Set<ProgramStageInstance>> visitsByPatients = new HashMap<Patient, Set<ProgramStageInstance>>();
 
-        Collection<ProgramInstanceStage> programInstanceStages = new ArrayList<ProgramInstanceStage>();
+        Collection<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();
 
         // ---------------------------------------------------------------------
         // Initially assume to have a first visit for all programInstances
         // ---------------------------------------------------------------------
 
-        Map<ProgramInstance, ProgramInstanceStage> visitsByProgramInstances = new HashMap<ProgramInstance, ProgramInstanceStage>();
+        Map<ProgramInstance, ProgramStageInstance> visitsByProgramInstances = new HashMap<ProgramInstance, ProgramStageInstance>();
 
         for ( ProgramInstance programInstance : programInstances )
         {
 
-            programInstanceStages.addAll( programInstance.getProgramInstanceStages() );
+            programStageInstances.addAll( programInstance.getProgramStageInstances() );
 
-            ProgramInstanceStage nextStage = programInstance.getProgramInstanceStageByStage( 1 );
+            ProgramStageInstance nextStage = programInstance.getProgramStageInstanceByStage( 1 );
 
             visitsByProgramInstances.put( programInstance, nextStage );
         }
@@ -164,27 +164,27 @@ public class DefaultProgramInstanceService
         // ---------------------------------------------------------------------
 
         Collection<PatientDataValue> patientDataValues = patientDataValueService
-            .getPatientDataValues( programInstanceStages );
+            .getPatientDataValues( programStageInstances );
 
         for ( PatientDataValue patientDataValue : patientDataValues )
         {
-            ProgramInstanceStage currentStage = patientDataValue.getProgramInstanceStage();
+            ProgramStageInstance currentStage = patientDataValue.getProgramStageInstance();
 
-            ProgramInstanceStage nextStage = patientDataValue.getProgramInstanceStage().getProgramInstance()
-                .getProgramInstanceStageByStage( currentStage.getStageInProgram() + 1 );
+            ProgramStageInstance nextStage = patientDataValue.getProgramStageInstance().getProgramInstance()
+                .getProgramStageInstanceByStage( currentStage.getStageInProgram() + 1 );
 
             if ( nextStage != null )
             {
-                visitsByProgramInstances.put( patientDataValue.getProgramInstanceStage().getProgramInstance(),
+                visitsByProgramInstances.put( patientDataValue.getProgramStageInstance().getProgramInstance(),
                     nextStage );
             }
             if ( nextStage == null
-                && visitsByProgramInstances.containsKey( patientDataValue.getProgramInstanceStage()
+                && visitsByProgramInstances.containsKey( patientDataValue.getProgramStageInstance()
                     .getProgramInstance() ) )
             {
                 // This patient has completed all services, programInstance
                 // should therefore be closed!
-                visitsByProgramInstances.remove( patientDataValue.getProgramInstanceStage().getProgramInstance() );                               
+                visitsByProgramInstances.remove( patientDataValue.getProgramStageInstance().getProgramInstance() );                               
             }
         }
 
@@ -197,7 +197,7 @@ public class DefaultProgramInstanceService
             }
             else
             {
-                Set<ProgramInstanceStage> programStages = new HashSet<ProgramInstanceStage>();
+                Set<ProgramStageInstance> programStages = new HashSet<ProgramStageInstance>();
                 programStages.add( visitsByProgramInstances.get( programInstance ) );
 
                 visitsByPatients.put( programInstance.getPatient(), programStages );

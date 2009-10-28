@@ -24,23 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
+package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericStore;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceStore;
+
+import org.hisp.dhis.program.ProgramStage;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public interface ProgramInstanceStageStore
-    extends GenericStore<ProgramInstanceStage>
-{
-    String ID = ProgramInstanceStageStore.class.getName();   
+public class HibernateProgramStageInstanceStore
+    extends HibernateGenericStore<ProgramStageInstance>
+    implements ProgramStageInstanceStore
+{    
+
+    public ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
+    {
+        return (ProgramStageInstance) getCriteria( Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ) ).uniqueResult();
+    }
     
-    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );   
-    
-    Collection<ProgramInstanceStage> get( ProgramStage programStage );   
-    
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramStageInstance> get( ProgramStage programStage )
+    {
+        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
+    }
 }

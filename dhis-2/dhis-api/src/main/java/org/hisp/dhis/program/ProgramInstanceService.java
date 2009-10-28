@@ -66,6 +66,6 @@ public interface ProgramInstanceService
     
     Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );
     
-    Map<Patient, Set<ProgramInstanceStage>> getNextVisitsForProgramInstances( Collection<ProgramInstance> programInstances );
+    Map<Patient, Set<ProgramStageInstance>> getNextVisitsForProgramInstances( Collection<ProgramInstance> programInstances );
     
 }

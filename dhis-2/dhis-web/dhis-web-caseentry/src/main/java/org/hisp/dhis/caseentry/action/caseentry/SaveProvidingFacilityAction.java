@@ -24,25 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action;
+package org.hisp.dhis.caseentry.action.caseentry;
 
 import java.util.Collection;
-import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramInstanceStage;
-import org.hisp.dhis.program.ProgramInstanceStageService;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -53,11 +50,11 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class SaveValueAction
+public class SaveProvidingFacilityAction
     implements Action
 {
 
-    private static final Log LOG = LogFactory.getLog( SaveValueAction.class );
+    private static final Log LOG = LogFactory.getLog( SaveProvidingFacilityAction.class );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -77,11 +74,11 @@ public class SaveValueAction
         this.programInstanceService = programInstanceService;
     }
     
-    private ProgramInstanceStageService programInstanceStageService;
+    private ProgramStageInstanceService programStageInstanceService;
 
-    public void setProgramInstanceStageService( ProgramInstanceStageService programInstanceStageService )
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
-        this.programInstanceStageService = programInstanceStageService;
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     private DataElementService dataElementService;
@@ -96,15 +93,7 @@ public class SaveValueAction
     public void setPatientDataValueService( PatientDataValueService patientDataValueService )
     {
         this.patientDataValueService = patientDataValueService;
-    }
-
-    private DataElementCategoryService dataElementCategoryService;
-
-    public void setDataElementCategoryService(
-        DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
+    }    
 
     // -------------------------------------------------------------------------
     // Input/Output
@@ -115,14 +104,7 @@ public class SaveValueAction
     public void setProvidedByAnotherFacility( boolean providedByAnotherFacility )
     {
         this.providedByAnotherFacility = providedByAnotherFacility;
-    }
-
-    private String value;
-
-    public void setValue( String value )
-    {
-        this.value = value;
-    }
+    }    
 
     private int dataElementId;
 
@@ -164,59 +146,22 @@ public class SaveValueAction
 
         ProgramInstance programInstance = progamInstances.iterator().next();
         
-        ProgramInstanceStage programInstanceStage = programInstanceStageService.getProgramInstanceStage( programInstance, programStage );
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( programInstance, programStage );
 
-        DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-        if ( value != null && value.trim().length() == 0 )
-        {
-            value = null;
-        }
-
-        if ( value != null )
-        {
-            value = value.trim();
-        }
-
-        DataElementCategoryOptionCombo optionCombo = dataElement.getCategoryCombo().getOptionCombos().iterator().next(); ;
+        DataElement dataElement = dataElementService.getDataElement( dataElementId );      
         
-        PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programInstanceStage,
+        PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programStageInstance,
             dataElement, organisationUnit );
-
-        if ( dataElement.getType().equalsIgnoreCase( DataElement.TYPE_STRING ) )
-        {
-            if( value != null )
-            {                
-                optionCombo = dataElementCategoryService.getDataElementCategoryOptionCombo( Integer
-                    .parseInt( value ) );
-            }            
-        }             
-
-        if ( patientDataValue == null )
-        {
-            if ( value != null )
-            {
-                LOG.debug( "Adding PatientDataValue, value added" );
-
-                patientDataValue = new PatientDataValue( programInstanceStage, dataElement, optionCombo,
-                    organisationUnit, new Date(), value, providedByAnotherFacility );
-
-                patientDataValueService.savePatientDataValue( patientDataValue );
-            }
-        }
-        else
+        
+        if ( patientDataValue != null )
         {
             LOG.debug( "Updating PatientDataValue, value added/changed" );
-
-            patientDataValue.setValue( value );
-            patientDataValue.setOptionCombo( optionCombo );
+            
             patientDataValue.setProvidedByAnotherFacility( providedByAnotherFacility );
-            patientDataValue.setTimestamp( new Date() );
-
+            
             patientDataValueService.updatePatientDataValue( patientDataValue );
-
-        }
-
+        }       
+        
         return SUCCESS;
     }
 }

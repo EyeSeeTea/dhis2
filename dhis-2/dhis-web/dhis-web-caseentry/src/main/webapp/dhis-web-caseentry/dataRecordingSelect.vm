@@ -62,7 +62,23 @@
                     <option value="$programStage.id" #if( $programStageId && $programStage.id == $programStageId ) selected="selected" #end>$encoder.htmlEncode( $programStage.name )</option>
                 #end
             </select>
-        </td>
+        </td>        
+        #if( $programStageInstance )
+            <td>&nbsp;</td>
+            <td><label for="dueDate">$i18n.getString( "due_date" ) </label></td>
+            <td><input type="text" id="dueDate" name="dueDate" value="$!format.formatDate( $programStageInstance.dueDate )" disabled="disabled" </td>
+            <td>&nbsp;</td>
+            <td><label for="executionDate">$i18n.getString( "execution_date" ) </label></td>
+            <td><input type="text" id="executionDate" name="executionDate" value="$!format.formatDate( $programStageInstance.executionDate )" onchange="saveExecutionDate( $programStageInstance.id, '$encoder.jsEncode( $programStageInstance.programStage.name )' )" >
+                <img src="../images/calendar_icon.gif" width="16" height="16" id="getExecutionDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "execution_date" )"></td>
+                <script type="text/javascript">
+                    Calendar.setup({
+                        inputField     :    "executionDate",      // id of the input field
+                        ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
+                        button         :    "getExecutionDate"   // trigger for the calendar (button ID)
+                    });
+                </script>                
+        #end
     </tr>   
     
 </table>

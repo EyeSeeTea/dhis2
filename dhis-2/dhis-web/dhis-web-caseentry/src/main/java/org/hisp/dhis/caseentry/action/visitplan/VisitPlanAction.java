@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action;
+package org.hisp.dhis.caseentry.action.visitplan;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +44,7 @@ import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
@@ -133,9 +133,9 @@ public class VisitPlanAction
         return organisationUnit;
     }
 
-    private Map<Patient, Set<ProgramInstanceStage>> visitsByPatients = new HashMap<Patient, Set<ProgramInstanceStage>>();
+    private Map<Patient, Set<ProgramStageInstance>> visitsByPatients = new HashMap<Patient, Set<ProgramStageInstance>>();
 
-    public Map<Patient, Set<ProgramInstanceStage>> getVisitsByPatients()
+    public Map<Patient, Set<ProgramStageInstance>> getVisitsByPatients()
     {
         return visitsByPatients;
     }

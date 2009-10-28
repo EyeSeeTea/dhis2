@@ -24,36 +24,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program.hibernate;
+package org.hisp.dhis.program;
 
 import java.util.Collection;
-
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramInstanceStage;
-import org.hisp.dhis.program.ProgramInstanceStageStore;
-
-import org.hisp.dhis.program.ProgramStage;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class HibernateProgramInstanceStageStore
-    extends HibernateGenericStore<ProgramInstanceStage>
-    implements ProgramInstanceStageStore
-{    
-
-    public ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
-    {
-        return (ProgramInstanceStage) getCriteria( Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ) ).uniqueResult();
-    }
+public interface ProgramStageInstanceService
+{
+    String ID = ProgramStageInstanceService.class.getName();
     
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramInstanceStage> get( ProgramStage programStage )
-    {
-        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
-    }
+    int addProgramStageInstance( ProgramStageInstance programStageInstance );    
+    
+    void deleteProgramStageInstance( ProgramStageInstance programStageInstance );
+    
+    void updateProgramStageInstance( ProgramStageInstance programStageInstance );
+    
+    ProgramStageInstance getProgramStageInstance( int id );
+    
+    ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage );      
+    
+    Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage );
+    
+    Collection<ProgramStageInstance> getAllProgramStageInstances();        
 }

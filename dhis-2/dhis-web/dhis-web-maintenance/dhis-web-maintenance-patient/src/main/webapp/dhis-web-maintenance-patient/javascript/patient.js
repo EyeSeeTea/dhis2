@@ -83,13 +83,13 @@ function programEnrollmentValidationCompleted( messageElement )
 //Save
 //-----------------------------------------------------------------------------
 
-function saveDueDate( programInstanceStageId, programInstanceStageName )
+function saveDueDate( programStageInstanceId, programStageInstanceName )
 {
-	var field = document.getElementById( 'value[' + programInstanceStageId + '].date' );
+	var field = document.getElementById( 'value[' + programStageInstanceId + '].date' );
 	
 	field.style.backgroundColor = '#ffffcc';
 	
-	var dateSaver = new DateSaver( programInstanceStageId, field.value, '#ccffcc' );
+	var dateSaver = new DateSaver( programStageInstanceId, field.value, '#ccffcc' );
 	dateSaver.save();
   
 }
@@ -99,12 +99,12 @@ function saveDueDate( programInstanceStageId, programInstanceStageName )
 //Saver objects
 //-----------------------------------------------------------------------------
 
-function DateSaver( programInstanceStageId_, dueDate_, resultColor_ )
+function DateSaver( programStageInstanceId_, dueDate_, resultColor_ )
 {
 	var SUCCESS = '#ccffcc';
 	var ERROR = '#ccccff';
 	
-	var programInstanceStageId = programInstanceStageId_;	
+	var programStageInstanceId = programStageInstanceId_;	
 	var dueDate = dueDate_;
 	var resultColor = resultColor_;	
 
@@ -114,7 +114,7 @@ function DateSaver( programInstanceStageId_, dueDate_, resultColor_ )
 		request.setCallbackSuccess( handleResponse );
 		request.setCallbackError( handleHttpError );
 		request.setResponseTypeXML( 'status' );
-		request.send( 'saveDueDate.action?programInstanceStageId=' + programInstanceStageId + '&dueDate=' + dueDate );
+		request.send( 'saveDueDate.action?programStageInstanceId=' + programStageInstanceId + '&dueDate=' + dueDate );
 	};
 
 	function handleResponse( rootElement )
@@ -142,7 +142,7 @@ function DateSaver( programInstanceStageId_, dueDate_, resultColor_ )
 	function markValue( color )
 	{       
    
-		var element = document.getElementById( 'value[' + programInstanceStageId + '].date' );	
+		var element = document.getElementById( 'value[' + programStageInstanceId + '].date' );	
            
 		element.style.backgroundColor = color;
 	}
@@ -318,17 +318,14 @@ function addValidationCompleted( messageElement )
     if ( type == 'success' )
     {
     	window.location.href='addPatient.action?' +			
-			'&identifier=' + getFieldValue( 'identifier' ) +
+			'identifier=' + getFieldValue( 'identifier' ) +
 			'&firstName=' + getFieldValue( 'firstName' ) +
 			'&middleName=' + getFieldValue( 'middleName' ) +
 			'&lastName=' + getFieldValue( 'lastName' ) +
 			'&gender=' + getFieldValue( 'gender' ) +
 			'&birthDate=' + getFieldValue( 'birthDate' ) +
 			'&age=' + getFieldValue( 'age' ) +
-			'&birthDateEstimated=' + document.getElementById( 'birthDateEstimated' ).checked ;   
-    	
-        //var form = document.getElementById( 'addPatientForm' ) + document.getElementById( 'birthDateEstimated' ).checked;        
-        //form.submit();
+			'&birthDateEstimated=' + document.getElementById( 'birthDateEstimated' ).checked ;       
     }
     else if ( type == 'error' )
     {

@@ -25,9 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action;
+package org.hisp.dhis.caseentry.action.caseentry;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
@@ -36,11 +36,9 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class VisitPlanSelectAction
+public class ValidateSearchAction
     implements Action
 {
-    private static final String VISIT_PLAN = "visitplan";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -53,14 +51,32 @@ public class VisitPlanSelectAction
     }
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit organisationUnit;
+    private String searchText;
 
-    public OrganisationUnit getOrganisationUnit()
+    public void setSearchText( String searchText )
     {
-        return organisationUnit;
+        this.searchText = searchText;
+    }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -70,17 +86,40 @@ public class VisitPlanSelectAction
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        if ( organisationUnit == null )
+        if ( selectionManager.getSelectedOrganisationUnit() == null )
         {
-            return SUCCESS;
+            message = i18n.getString( "please_select_a_registering_unit" );
+
+            return INPUT;
         }
 
-        return VISIT_PLAN;
+        if ( searchText == null )
+        {
+            message = i18n.getString( "specify_a_search_criteria" );
+
+            return INPUT;
+        }
+
+        else
+        {
+            searchText = searchText.trim();
+
+            if ( searchText.length() == 0 )
+            {
+                message = i18n.getString( "specify_a_search_criteria" );
+
+                return INPUT;
+            }
+
+        }
+
+        // ---------------------------------------------------------------------
+        // Validation success
+        // ---------------------------------------------------------------------
+
+        message = i18n.getString( "everything_is_ok" );
+
+        return SUCCESS;
     }
 }

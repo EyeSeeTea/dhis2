@@ -35,7 +35,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValueStore;
-import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramStageInstance;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -74,9 +74,9 @@ public class DefaultPatientDataValueService
         patientDataValueStore.delete( patientDataValue );
     }
 
-    public int deletePatientDataValue( ProgramInstanceStage programInstanceStage )
+    public int deletePatientDataValue( ProgramStageInstance programStageInstance )
     {
-        return patientDataValueStore.delete( programInstanceStage );
+        return patientDataValueStore.delete( programStageInstance );
     }
 
     public int deletePatientDataValue( DataElement dataElement )
@@ -106,20 +106,20 @@ public class DefaultPatientDataValueService
         return patientDataValueStore.getAll();
     }
 
-    public PatientDataValue getPatientDataValue( ProgramInstanceStage programInstanceStage, DataElement dataElement,
+    public PatientDataValue getPatientDataValue( ProgramStageInstance programStageInstance, DataElement dataElement,
         OrganisationUnit organisationUnit )
     {
-        return patientDataValueStore.get( programInstanceStage, dataElement, organisationUnit );
+        return patientDataValueStore.get( programStageInstance, dataElement, organisationUnit );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage )
+    public Collection<PatientDataValue> getPatientDataValues( ProgramStageInstance programStageInstance )
     {
-        return patientDataValueStore.get( programInstanceStage );
+        return patientDataValueStore.get( programStageInstance );
     }
 
-    public Collection<PatientDataValue> getPatientDataValues( Collection<ProgramInstanceStage> programInstanceStages )
+    public Collection<PatientDataValue> getPatientDataValues( Collection<ProgramStageInstance> programStageInstances )
     {
-        return patientDataValueStore.get( programInstanceStages );
+        return patientDataValueStore.get( programStageInstances );
     }
     
     public Collection<PatientDataValue> getPatientDataValues( DataElement dataElement )
@@ -143,15 +143,15 @@ public class DefaultPatientDataValueService
     }
     
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        ProgramInstanceStage programInstanceStage )
+        ProgramStageInstance programStageInstance )
     {
-        return patientDataValueStore.get( organisationUnit, programInstanceStage );
+        return patientDataValueStore.get( organisationUnit, programStageInstance );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit,
-        Collection<ProgramInstanceStage> programInstanceStages )
+        Collection<ProgramStageInstance> programStageInstances )
     {
-        return patientDataValueStore.get( organisationUnit, programInstanceStages );
+        return patientDataValueStore.get( organisationUnit, programStageInstances );
     }
 
     public Collection<PatientDataValue> getPatientDataValues( OrganisationUnit organisationUnit, DataElement dataElement )
@@ -176,10 +176,10 @@ public class DefaultPatientDataValueService
         return patientDataValueStore.get( organisationUnit, providedByAnotherFacility );
     }
    
-    public Collection<PatientDataValue> getPatientDataValues( ProgramInstanceStage programInstanceStage,
+    public Collection<PatientDataValue> getPatientDataValues( ProgramStageInstance programStageInstance,
         boolean providedByAnotherFacility )
     {
-        return patientDataValueStore.get( programInstanceStage, providedByAnotherFacility );
+        return patientDataValueStore.get( programStageInstance, providedByAnotherFacility );
     }
    
     public Collection<PatientDataValue> getPatientDataValues( DataElement dataElement, boolean providedByAnotherFacility )

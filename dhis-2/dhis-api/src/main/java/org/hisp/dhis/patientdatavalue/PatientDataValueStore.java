@@ -33,7 +33,7 @@ import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramStageInstance;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -46,18 +46,18 @@ public interface PatientDataValueStore
 
     void saveVoid( PatientDataValue patientDataValue );
 
-    int delete( ProgramInstanceStage programInstanceStage );
+    int delete( ProgramStageInstance programStageInstance );
 
     int delete( DataElement dataElement );
 
     int delete( DataElementCategoryOptionCombo optionCombo );
 
-    PatientDataValue get( ProgramInstanceStage programInstanceStage, DataElement dataElement,
+    PatientDataValue get( ProgramStageInstance programStageInstance, DataElement dataElement,
         OrganisationUnit organisationUnit );
 
-    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage );
+    Collection<PatientDataValue> get( ProgramStageInstance programStageInstance );
 
-    Collection<PatientDataValue> get( Collection<ProgramInstanceStage> programInstanceStages );
+    Collection<PatientDataValue> get( Collection<ProgramStageInstance> programStageInstances );
 
     Collection<PatientDataValue> get( DataElement dataElement );
 
@@ -68,10 +68,10 @@ public interface PatientDataValueStore
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit );
 
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
-        ProgramInstanceStage programInstanceStage );
+        ProgramStageInstance programStageInstance );
 
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit,
-        Collection<ProgramInstanceStage> programInstanceStages );
+        Collection<ProgramStageInstance> programStageInstances );
 
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit, DataElement dataElement );
 
@@ -81,7 +81,7 @@ public interface PatientDataValueStore
 
     Collection<PatientDataValue> get( OrganisationUnit organisationUnit, boolean providedByAnotherFacility );
 
-    Collection<PatientDataValue> get( ProgramInstanceStage programInstanceStage, boolean providedByAnotherFacility );
+    Collection<PatientDataValue> get( ProgramStageInstance programStageInstance, boolean providedByAnotherFacility );
 
     Collection<PatientDataValue> get( DataElement dataElement, boolean providedByAnotherFacility );
 

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action;
+package org.hisp.dhis.caseentry.action.caseentry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,8 +44,8 @@ import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramInstanceStage;
-import org.hisp.dhis.program.ProgramInstanceStageService;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
@@ -92,11 +92,11 @@ public class DataEntryAction
         this.programStageService = programStageService;
     }
 
-    private ProgramInstanceStageService programInstanceStageService;
+    private ProgramStageInstanceService programStageInstanceService;
 
-    public void setProgramInstanceStageService( ProgramInstanceStageService programInstanceStageService )
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
-        this.programInstanceStageService = programInstanceStageService;
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     private PatientIdentifierService patientIdentifierService;
@@ -246,11 +246,11 @@ public class DataEntryAction
 
         ProgramInstance programInstance = progamInstances.iterator().next();
 
-        ProgramInstanceStage programInstanceStage = programInstanceStageService.getProgramInstanceStage(
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance(
             programInstance, programStage );
 
         Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues(
-            organisationUnit, programInstanceStage );
+            organisationUnit, programStageInstance );
 
         patientDataValueMap = new HashMap<Integer, PatientDataValue>( patientDataValues.size() );
 

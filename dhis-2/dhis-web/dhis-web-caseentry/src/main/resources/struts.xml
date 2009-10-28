@@ -7,15 +7,19 @@
   <include file="dhis-web-commons.xml"/>
     
   <package name="dhis-web-caseentry" extends="dhis-web-commons"
-    namespace="/dhis-web-caseentry">
+    namespace="/dhis-web-caseentry">   
+    
+    <action name="index" class="org.hisp.dhis.caseentry.action.NoAction">  
+      <interceptor-ref name="organisationUnitTreeStack"/>    
+      <result name="success" type="velocity">/main.vm</result>     
+      <param name="page">/dhis-web-caseentry/index.vm</param>
+      <param name="menu">/dhis-web-caseentry/menu.vm</param>             
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js</param>
+    </action>
     
     <!-- Data Entry -->
     
-    <action name="index" class="org.hisp.dhis.caseentry.action.NoAction">
-      <result name="success" type="redirect">select.action</result>
-    </action>
-    
-    <action name="select" class="org.hisp.dhis.caseentry.action.SelectAction">
+    <action name="dataEntrySelect" class="org.hisp.dhis.caseentry.action.caseentry.DataEntrySelectAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="searchform" type="chain">searchform</result>
       <result name="success" type="velocity">/main.vm</result>
@@ -24,7 +28,7 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>      
     </action>   
     
-    <action name="searchform" class="org.hisp.dhis.caseentry.action.SearchPatientFormAction">
+    <action name="searchform" class="org.hisp.dhis.caseentry.action.caseentry.SearchPatientFormAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/search.vm</param>
@@ -33,14 +37,14 @@
     </action>   
     
     <action name="validateSearch"
-      class="org.hisp.dhis.caseentry.action.ValidateSearchAction">
+      class="org.hisp.dhis.caseentry.action.caseentry.ValidateSearchAction">
       <result name="success" type="velocity-xml">/dhis-web-caseentry/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-caseentry/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-caseentry/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     
-    <action name="searchPatient" class="org.hisp.dhis.caseentry.action.SearchPatientAction">
+    <action name="searchPatient" class="org.hisp.dhis.caseentry.action.caseentry.SearchPatientAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/listPatient.vm</param>
@@ -48,7 +52,7 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>            
     </action>
     
-    <action name="listAllPatients" class="org.hisp.dhis.caseentry.action.SearchPatientAction">
+    <action name="listAllPatients" class="org.hisp.dhis.caseentry.action.caseentry.SearchPatientAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="listAll">true</param>
@@ -57,7 +61,7 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>            
     </action>   
     
-    <action name="selectDataRecording" class="org.hisp.dhis.caseentry.action.DataRecordingSelectAction">
+    <action name="selectDataRecording" class="org.hisp.dhis.caseentry.action.caseentry.DataRecordingSelectAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="dataentryform" type="chain">dataentryform</result>
       <result name="success" type="velocity">/main.vm</result>
@@ -67,7 +71,12 @@
       <param name="stylesheets">style/patient.css</param>            
     </action>    
     
-    <action name="dataentryform" class="org.hisp.dhis.caseentry.action.DataEntryAction">
+    <action name="saveExecutionDate" class="org.hisp.dhis.caseentry.action.caseentry.SaveExecutionDateAction">
+      <result name="success" type="velocity">status.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>  
+    
+    <action name="dataentryform" class="org.hisp.dhis.caseentry.action.caseentry.DataEntryAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/dataEntryForm.vm</param>
       <param name="menu">/dhis-web-caseentry/menu.vm</param>      
@@ -75,24 +84,25 @@
       <param name="stylesheets">style/patient.css</param>
     </action>
     
-    <action name="saveValue" class="org.hisp.dhis.caseentry.action.SaveValueAction">
+    <action name="saveValue" class="org.hisp.dhis.caseentry.action.caseentry.SaveValueAction">
       <result name="success" type="velocity">status.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
     
-    <action name="saveProvidingFacility" class="org.hisp.dhis.caseentry.action.SaveProvidingFacilityAction">
+    <action name="saveProvidingFacility" class="org.hisp.dhis.caseentry.action.caseentry.SaveProvidingFacilityAction">
       <result name="success" type="velocity">status.vm</result>
+      <result name="input" type="velocity">status.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
     
-    <action name="getPatient" class="org.hisp.dhis.caseentry.action.GetPatientAction">
+    <action name="getPatient" class="org.hisp.dhis.caseentry.action.caseentry.GetPatientAction">
       <result name="success" type="velocity-xml">/dhis-web-caseentry/responsePatient.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action>   
     
     <!-- Visit Plan -->
     
-    <action name="visitPlanSelect" class="org.hisp.dhis.caseentry.action.VisitPlanSelectAction">
+    <action name="visitPlanSelect" class="org.hisp.dhis.caseentry.action.visitplan.VisitPlanSelectAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="visitplan" type="chain">visitplan</result>
       <result name="success" type="velocity">/main.vm</result>
@@ -101,14 +111,39 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/visitPlan.js</param>      
     </action>   
     
-    <action name="visitplan" class="org.hisp.dhis.caseentry.action.VisitPlanAction">
+    <action name="visitplan" class="org.hisp.dhis.caseentry.action.visitplan.VisitPlanAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/visitPlan.vm</param>
       <param name="menu">/dhis-web-caseentry/menu.vm</param>     
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/visitPlan.js</param>            
-    </action>   
+    </action>
     
+    <!-- Report -->   
+    
+    <action name="reportSelect" class="org.hisp.dhis.caseentry.action.report.ReportSelectAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>  
+      <result name="success" type="velocity">/main.vm</result>     
+      <param name="page">/dhis-web-caseentry/reportSelect.vm</param>
+      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/report.js</param>      
+    </action>  
+    
+    <action name="validateReportParameters"
+      class="org.hisp.dhis.caseentry.action.report.ValidateReportParametersAction">
+      <result name="success" type="velocity-xml">/dhis-web-caseentry/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-caseentry/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-caseentry/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="generateReport" class="org.hisp.dhis.caseentry.action.report.GenerateReportAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>            
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-caseentry/report.vm</param>
+      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/report.js</param>      
+    </action>
 		  
   </package>
 </struts>

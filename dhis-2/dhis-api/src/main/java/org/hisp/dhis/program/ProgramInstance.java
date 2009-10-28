@@ -56,7 +56,7 @@ public class ProgramInstance
 
     private Program program;
 
-    private Set<ProgramInstanceStage> programInstanceStages = new HashSet<ProgramInstanceStage>();
+    private Set<ProgramStageInstance> programStageInstances = new HashSet<ProgramStageInstance>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -233,35 +233,36 @@ public class ProgramInstance
     }
 
     /**
-     * @return the programInstanceStages
+     * @return the programStageInstances
      */
-    public Set<ProgramInstanceStage> getProgramInstanceStages()
+    public Set<ProgramStageInstance> getProgramStageInstances()
     {
-        return programInstanceStages;
+        return programStageInstances;
     }
 
     /**
-     * @param programInstanceStages the programInstanceStages to set
+     * @param programStageInstances the programStageInstances to set
      */
-    public void setProgramInstanceStages( Set<ProgramInstanceStage> programInstanceStages )
+    public void setProgramStageInstances( Set<ProgramStageInstance> programStageInstances )
     {
-        this.programInstanceStages = programInstanceStages;
+        this.programStageInstances = programStageInstances;
     }
 
     // -------------------------------------------------------------------------
     // Convenience method
     // -------------------------------------------------------------------------
 
-    public ProgramInstanceStage getProgramInstanceStageByStage( int stage )
+    public ProgramStageInstance getProgramStageInstanceByStage( int stage )
     {
-        if ( programInstanceStages.size() == 0 )
+        if ( programStageInstances.size() == 0 )
         {
             return null;
         }
 
-        Map<Integer, ProgramInstanceStage> stageMap = new HashMap<Integer, ProgramInstanceStage>( programInstanceStages.size() );
+        Map<Integer, ProgramStageInstance> stageMap = new HashMap<Integer, ProgramStageInstance>( programStageInstances
+            .size() );
 
-        for ( ProgramInstanceStage programInstanceStage : programInstanceStages )
+        for ( ProgramStageInstance programInstanceStage : programStageInstances )
         {
             stageMap.put( programInstanceStage.getStageInProgram(), programInstanceStage );
         }

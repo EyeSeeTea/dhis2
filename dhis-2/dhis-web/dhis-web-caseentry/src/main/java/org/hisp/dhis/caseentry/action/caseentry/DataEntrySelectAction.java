@@ -24,68 +24,63 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
 
-import java.util.Collection;
+package org.hisp.dhis.caseentry.action.caseentry;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew
+ * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-@Transactional
-public class DefaultProgramInstanceStageService
-    implements ProgramInstanceStageService
+public class DataEntrySelectAction
+    implements Action
 {
+    private static final String SEARCH_FORM = "searchform";
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramInstanceStageStore programInstanceStageStore;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setProgramInstanceStageStore( ProgramInstanceStageStore programInstanceStageStore )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.programInstanceStageStore = programInstanceStageStore;
+        this.selectionManager = selectionManager;
     }
 
     // -------------------------------------------------------------------------
-    // ProgramInstanceStage implementation
+    // Input/output
     // -------------------------------------------------------------------------
 
-    public int addProgramInstanceStage( ProgramInstanceStage programInstanceStage )
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
     {
-        return programInstanceStageStore.save( programInstanceStage );
+        return organisationUnit;
     }
 
-    public void deleteProgramInstanceStage( ProgramInstanceStage programInstanceStage )
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
     {
-        programInstanceStageStore.delete( programInstanceStage );
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
+
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        if ( organisationUnit == null )
+        {
+            return SUCCESS;
+        }
+
+        return SEARCH_FORM;
     }
-
-    public Collection<ProgramInstanceStage> getAllProgramInstanceStages()
-    {
-        return programInstanceStageStore.getAll();
-    }
-
-    public ProgramInstanceStage getProgramInstanceStage( int id )
-    {
-        return programInstanceStageStore.get( id );
-    }
-
-    public ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
-    {
-        return programInstanceStageStore.getProgramInstanceStage( programInstance, programStage );
-    }   
-
-    public Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramStage programStage )
-    {
-        return programInstanceStageStore.get( programStage );
-    }
-
-    public void updateProgramInstanceStage( ProgramInstanceStage programInstanceStage )
-    {
-        programInstanceStageStore.update( programInstanceStage );
-    }    
 }

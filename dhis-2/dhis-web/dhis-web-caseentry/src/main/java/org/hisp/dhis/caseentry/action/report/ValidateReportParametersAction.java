@@ -25,13 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patient;
+package org.hisp.dhis.caseentry.action.report;
 
 import java.util.Date;
 
+import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -39,18 +39,18 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ValidatePatientAction
+public class ValidateReportParametersAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private SelectedStateManager selectedStateManager;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
-        this.selectionManager = selectionManager;
+        this.selectedStateManager = selectedStateManager;
     }
 
     private I18nFormat format;
@@ -64,39 +64,18 @@ public class ValidatePatientAction
     // Input
     // -------------------------------------------------------------------------
 
-    private String firstName;
+    private String startDate;
 
-    public void setFirstName( String firstName )
+    public void setStartDate( String startDate )
     {
-        this.firstName = firstName;
+        this.startDate = startDate;
     }
 
-    private String middleName;
+    private String endDate;
 
-    public void setMiddleName( String middleName )
+    public void setEndDate( String endDate )
     {
-        this.middleName = middleName;
-    }
-
-    private String lastName;
-
-    public void setLastName( String lastName )
-    {
-        this.lastName = lastName;
-    }
-
-    private String birthDate;
-
-    public void setBirthDate( String birthDate )
-    {
-        this.birthDate = birthDate;
-    }
-
-    private Integer age;
-
-    public void setAge( Integer age )
-    {
-        this.age = age;
+        this.endDate = endDate;
     }
 
     // -------------------------------------------------------------------------
@@ -122,70 +101,88 @@ public class ValidatePatientAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
 
-        Date dateOfBirth;
-
-        if ( selectionManager.getSelectedOrganisationUnit() == null )
+        if ( selectedStateManager.getSelectedOrganisationUnit() == null )
         {
-            message = i18n.getString( "please_select_a_registering_unit" );
+            message = i18n.getString( "please_select_a_reporting_unit" );
 
             return INPUT;
         }
 
-        if ( firstName == null && middleName == null && lastName == null )
+        if ( selectedStateManager.getSelectedProgram() == null )
         {
-            message = i18n.getString( "specfiy_name_s" );
+            message = i18n.getString( "please_select_a_program" );
 
             return INPUT;
         }
 
+        if ( startDate == null )
+        {
+            message = i18n.getString( "please_choose_a_valid_start_date" );
+
+            return INPUT;
+        }
         else
         {
-            firstName = firstName.trim();
-            middleName = middleName.trim();
-            lastName = lastName.trim();
+            startDate = startDate.trim();
 
-            if ( firstName.length() == 0 && middleName.length() == 0 && lastName.length() == 0 )
+            if ( startDate.length() != 0 )
             {
-                message = i18n.getString( "specfiy_name_s" );
+                Date start = format.parseDate( startDate );
 
-                return INPUT;
-            }
-        }   
-        
-        if( age == null && birthDate == null )
-        {
-            message = i18n.getString( "specfiy_birth_date_or_age" );
-
-            return INPUT;
-        }
-
-        if ( birthDate != null )
-        {
-            birthDate = birthDate.trim();
-
-            if ( birthDate.length() != 0 )
-            {
-                dateOfBirth = format.parseDate( birthDate );
-
-                if ( dateOfBirth == null || dateOfBirth.after( new Date() ) )
+                if ( start == null || start.after( new Date() ) )
                 {
-                    message = i18n.getString( "please_enter_a_valid_birth_date" );
+                    message = i18n.getString( "please_choose_a_valid_start_date" );
 
                     return INPUT;
                 }
             }
             else
             {
-                if( age == null )
+                message = i18n.getString( "please_choose_a_valid_start_date" );
+
+                return INPUT;
+            }
+        }
+
+        if ( endDate == null )
+        {
+            message = i18n.getString( "please_choose_a_valid_end_date" );
+
+            return INPUT;
+        }
+
+        else
+        {
+            endDate = endDate.trim();
+
+            if ( endDate.length() != 0 )
+            {
+                Date end = format.parseDate( endDate );
+
+                if ( end == null || end.after( new Date() ) )
                 {
-                    message = i18n.getString( "specfiy_birth_date_or_age" );
+                    message = i18n.getString( "please_choose_a_valid_end_date" );
 
                     return INPUT;
-                }                
+                }
             }
-        }        
+            else
+            {
+                message = i18n.getString( "please_choose_a_valid_end_date" );
+
+                return INPUT;
+            }
+        }
+
+        if ( format.parseDate( endDate ).before( format.parseDate( startDate ) ) )
+        {
+            message = i18n.getString( "please_choose_a_valid_start_end_date" );
+
+            return INPUT;
+        }
 
         // ---------------------------------------------------------------------
         // Validation success

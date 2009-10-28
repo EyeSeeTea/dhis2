@@ -34,7 +34,7 @@ import org.hisp.dhis.patient.state.SelectedStateManager;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramInstanceStage;
+import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 
@@ -152,11 +152,11 @@ public class ProgramEnrollmentAction
         this.programInstance = programInstance;
     }
     
-    private Collection<ProgramInstanceStage> programInstanceStages = new ArrayList<ProgramInstanceStage>();
+    private Collection<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();
 
-    public Collection<ProgramInstanceStage> getProgramInstanceStages()
+    public Collection<ProgramStageInstance> getProgramStageInstances()
     {
-        return programInstanceStages;
+        return programStageInstances;
     }
 
     // -------------------------------------------------------------------------
@@ -186,7 +186,7 @@ public class ProgramEnrollmentAction
         {
             programInstance = programInstances.iterator().next();
             
-            programInstanceStages = programInstance.getProgramInstanceStages();
+            programStageInstances = programInstance.getProgramStageInstances();
         }
         
         return SUCCESS;

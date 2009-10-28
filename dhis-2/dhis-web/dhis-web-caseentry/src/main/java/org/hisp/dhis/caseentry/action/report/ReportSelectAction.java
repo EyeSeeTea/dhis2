@@ -24,19 +24,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action;
 
+package org.hisp.dhis.caseentry.action.report;
+
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
+import org.hisp.dhis.caseentry.state.SelectedStateManager;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 
@@ -46,26 +41,18 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class GetPatientAction
+public class ReportSelectAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
+    private SelectedStateManager selectedStateManager;
 
-    public void setPatientService( PatientService patientService )
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
-        this.patientService = patientService;
-    }
-
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
+        this.selectedStateManager = selectedStateManager;
     }
 
     private ProgramService programService;
@@ -74,51 +61,35 @@ public class GetPatientAction
     {
         this.programService = programService;
     }
-    
-    private PatientAttributeValueService patientAttributeValueService;
-
-    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
-    {
-        this.patientAttributeValueService = patientAttributeValueService;
-    }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private OrganisationUnit organisationUnit;
 
-    public void setId( int id )
+    public OrganisationUnit getOrganisationUnit()
     {
-        this.id = id;
+        return organisationUnit;
+    }    
+
+    private Integer programId;
+
+    public void setProgramId( Integer programId )
+    {
+        this.programId = programId;
     }
 
-    private Patient patient;
-
-    public Patient getPatient()
+    public Integer getProgramId()
     {
-        return patient;
-    }   
-
-    private PatientIdentifier patientIdentifier;
-
-    public PatientIdentifier getPatientIdentifier()
-    {
-        return patientIdentifier;
+        return programId;
     }
 
-    private Collection<Program> programs;
+    private Collection<Program> programs = new ArrayList<Program>();
 
     public Collection<Program> getPrograms()
     {
         return programs;
-    }
-    
-    private Map<Integer, String> patientAttributeValueMap = new HashMap<Integer, String>();
-
-    public Map<Integer, String> getPatientAttributeValueMap()
-    {
-        return patientAttributeValueMap;
     }
 
     // -------------------------------------------------------------------------
@@ -128,27 +99,57 @@ public class GetPatientAction
     public String execute()
         throws Exception
     {
+        // ---------------------------------------------------------------------
+        // Validate selected OrganisationUnit
+        // ---------------------------------------------------------------------
 
-        patient = patientService.getPatient( id );       
+        organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );        
-        
-        for( PatientAttribute patientAttribute : patient.getAttributes() )
+        if ( organisationUnit == null )
         {
-            patientAttributeValueMap.put( patientAttribute.getId(), PatientAttributeValue.UNKNOWN );
+            programId = null;
+
+            selectedStateManager.clearSelectedProgram();
+
+            return SUCCESS;
         }
 
-        Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
-            .getPatientAttributeValues( patient );       
+        // ---------------------------------------------------------------------
+        // Load assigned Programs
+        // ---------------------------------------------------------------------
 
-        for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
+        programs = programService.getPrograms( organisationUnit );
+
+     // ---------------------------------------------------------------------
+        // Validate selected Program
+        // ---------------------------------------------------------------------
+
+        Program selectedProgram;
+
+        if ( programId != null )
         {
-            patientAttributeValueMap.put( patientAttributeValue.getPatientAttribute().getId(), patientAttributeValue.getValue() );
+            selectedProgram = programService.getProgram( programId );
+        }
+        else
+        {
+            selectedProgram = selectedStateManager.getSelectedProgram();
         }
 
-        programs = programService.getAllPrograms();
+        if ( selectedProgram != null && programs.contains( selectedProgram ) )
+        {
+            programId = selectedProgram.getId();
+            selectedStateManager.setSelectedProgram( selectedProgram );
+        }
 
+        else
+        {
+            programId = null;           
+
+            selectedStateManager.clearSelectedProgram();
+
+            return SUCCESS;
+        }
+            
         return SUCCESS;
-
     }
 }

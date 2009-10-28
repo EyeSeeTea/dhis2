@@ -4,17 +4,17 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="org.hisp.dhis.program.ProgramInstanceStage" table="programinstancestage">
+  <class name="org.hisp.dhis.program.ProgramStageInstance" table="programstageinstance">
     
-    <id name="id" column="programinstancestageid">
+    <id name="id" column="programstageinstanceid">
       <generator class="native"/>
     </id>   
     
     <many-to-one name="programInstance" class="org.hisp.dhis.program.ProgramInstance"
-        column="programinstanceid" not-null="true" foreign-key="fk_programinstancestage_programinstanceid"/>
+        column="programinstanceid" not-null="true" foreign-key="fk_programstageinstance_programinstanceid"/>
     
     <many-to-one name="programStage" class="org.hisp.dhis.program.ProgramStage"
-        column="programstageid" not-null="true" foreign-key="fk_programinstancestage_programstageid"/>
+        column="programstageid" not-null="true" foreign-key="fk_programstageinstance_programstageid"/>
     
     <property name="stageInProgram" column="stageinprogram"/>
 

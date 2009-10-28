@@ -34,7 +34,7 @@ import java.util.Date;
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class ProgramInstanceStage
+public class ProgramStageInstance
     implements Serializable
 {
     private int id;    
@@ -53,11 +53,11 @@ public class ProgramInstanceStage
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ProgramInstanceStage()
+    public ProgramStageInstance()
     {
     }
 
-    public ProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage )
+    public ProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
     {
         this.programInstance = programInstance;
         this.programStage = programStage;
@@ -80,12 +80,12 @@ public class ProgramInstanceStage
             return false;
         }
 
-        if ( !(o instanceof ProgramInstanceStage) )
+        if ( !(o instanceof ProgramStageInstance) )
         {
             return false;
         }
 
-        final ProgramInstanceStage other = (ProgramInstanceStage) o;
+        final ProgramStageInstance other = (ProgramStageInstance) o;
 
         return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
 

@@ -61,7 +61,7 @@
 #set( $mark = 0 )
 #set( $tabIndex = 1 )
 
-#foreach( $programInstanceStage in $programInstanceStages )
+#foreach( $programStageInstance in $programStageInstances )
     #set( $rowCount = $rowCount + 1 )    
     #if( $mark == 1 )
         #set( $mark = 0 )
@@ -73,20 +73,20 @@
         <td style="text-align:right">$rowCount</td>        
         ##stage name
         <td>
-            <span id="value[$programInstanceStage.id].name" title="$!encoder.htmlEncode( $programInstanceStage.programStage.description )">
-                $encoder.htmlEncode( $programInstanceStage.programStage.name )            
+            <span id="value[$programStageInstance.id].name" title="$!encoder.htmlEncode( $programStageInstance.programStage.description )">
+                $encoder.htmlEncode( $programStageInstance.programStage.name )            
             </span>
         </td>        
                
         ##entry        
         <td>        
-            <input type="text" id="value[$programInstanceStage.id].date" name="entryfield" value="$!format.formatDate( $programInstanceStage.dueDate )" onchange="saveDueDate( $programInstanceStage.id, '$encoder.jsEncode( $programInstanceStage.programStage.name )' )" tabindex="$tabIndex" >
-                <img src="../images/calendar_icon.gif" width="16" height="16" id="get$programInstanceStage.id" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "due_date" )">
+            <input type="text" id="value[$programStageInstance.id].date" name="entryfield" value="$!format.formatDate( $programStageInstance.dueDate )" onchange="saveDueDate( $programStageInstance.id, '$encoder.jsEncode( $programStageInstance.programStage.name )' )" tabindex="$tabIndex" >
+                <img src="../images/calendar_icon.gif" width="16" height="16" id="get$programStageInstance.id" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "due_date" )">
                 <script type="text/javascript">
                     Calendar.setup({
-                        inputField     :    "value[$programInstanceStage.id].date",      // id of the input field
+                        inputField     :    "value[$programStageInstance.id].date",      // id of the input field
                         ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
-                        button         :    "get$programInstanceStage.id"   // trigger for the calendar (button ID)
+                        button         :    "get$programStageInstance.id"   // trigger for the calendar (button ID)
                     });
                 </script>
         </td>       

@@ -28,25 +28,19 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
+import org.hisp.dhis.common.GenericStore;
+
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public interface ProgramInstanceStageService
+public interface ProgramStageInstanceStore
+    extends GenericStore<ProgramStageInstance>
 {
-    String ID = ProgramInstanceStageService.class.getName();
+    String ID = ProgramStageInstanceStore.class.getName();   
     
-    int addProgramInstanceStage( ProgramInstanceStage programInstanceStage );    
+    ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage );   
     
-    void deleteProgramInstanceStage( ProgramInstanceStage programInstanceStage );
+    Collection<ProgramStageInstance> get( ProgramStage programStage );   
     
-    void updateProgramInstanceStage( ProgramInstanceStage programInstanceStage );
-    
-    ProgramInstanceStage getProgramInstanceStage( int id );
-    
-    ProgramInstanceStage getProgramInstanceStage( ProgramInstance programInstance, ProgramStage programStage );      
-    
-    Collection<ProgramInstanceStage> getProgramInstanceStages( ProgramStage programStage );
-    
-    Collection<ProgramInstanceStage> getAllProgramInstanceStages();        
 }
