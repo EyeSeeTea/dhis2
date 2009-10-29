@@ -16,8 +16,28 @@
                 #end                
             </tr>
           
-            <tbody id="list"> 
-            
+            <tbody id="list">
+                #set( $mark = false )                 
+                #foreach( $programInstance in $programInstances )
+                    <tr #alternate( $mark )>                
+                        <td>$encoder.htmlEncode( $programInstance.patient.getFullName() )</td>                    
+                        #foreach( $programStageInstance in $programInstance.programStageInstances )
+                            #if( $programStageInstance.executionDate )
+                                <td style="text-align:center">
+                                    <a href="javascript:viewRecords( $programStageInstance.id )">
+                                    $format.formatDate( $programStageInstance.executionDate )
+                                </td>
+                            #else
+                                <td style="text-align:center">$format.formatDate( $programStageInstance.dueDate )</td>
+                            #end
+                        #end
+                    </tr>
+                    #if( $mark )
+                        #set( $mark = false )
+                    #else
+                        #set( $mark = true )
+                    #end 
+                #end    
             </tbody>
     
         </table>

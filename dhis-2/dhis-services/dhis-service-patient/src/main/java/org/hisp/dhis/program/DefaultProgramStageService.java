@@ -50,7 +50,7 @@ public class DefaultProgramStageService
     public void setProgramStageStore( GenericNameStore<ProgramStage> programStageStore )
     {
         this.programStageStore = programStageStore;
-    }   
+    }
 
     // -------------------------------------------------------------------------
     // ProgramStage implementation
@@ -71,11 +71,16 @@ public class DefaultProgramStageService
         return programStageStore.get( id );
     }
 
+    public ProgramStage getProgramStageByName( String name )
+    {
+        return programStageStore.getByName( name );
+    }
+
     public void updateProgramStage( ProgramStage programStage )
     {
         programStageStore.update( programStage );
     }
-    
+
     public Collection<ProgramStage> getAllProgramStages()
     {
         return programStageStore.getAll();

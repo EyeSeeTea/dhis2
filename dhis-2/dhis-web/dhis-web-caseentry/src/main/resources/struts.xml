@@ -144,6 +144,11 @@
       <param name="menu">/dhis-web-caseentry/menu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/report.js</param>      
     </action>
+    
+    <action name="viewRecords" class="org.hisp.dhis.caseentry.action.report.ViewRecordsAction">      
+      <result name="success" type="velocity">/popup.vm</result>      
+      <param name="page">/dhis-web-caseentry/records.vm</param>                  
+    </action>
 		  
   </package>
 </struts>

@@ -82,6 +82,11 @@ public class DefaultProgramService
     {
         return programStore.get( id );
     }   
+    
+    public Program getProgramByName( String name )
+    {
+        return programStore.getByName( name );
+    }
 
     public Collection<Program> getPrograms( OrganisationUnit organisationUnit )
     {
@@ -96,5 +101,6 @@ public class DefaultProgramService
         }
         
         return programs;
-    }
+    }    
+    
 }

@@ -54,6 +54,8 @@ public interface ProgramInstanceService
     
     Collection<ProgramInstance> getProgramInstances( Program program );
     
+    Collection<ProgramInstance> getProgramInstances( Collection<Program> programs );
+    
     Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
     
     Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed );

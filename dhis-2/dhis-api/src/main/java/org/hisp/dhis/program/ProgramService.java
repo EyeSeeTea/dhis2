@@ -46,6 +46,8 @@ public interface ProgramService
     void updateProgram( Program program );
 
     Program getProgram( int id );
+    
+    Program getProgramByName( String name );
 
     Collection<Program> getAllPrograms();
 

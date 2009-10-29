@@ -44,6 +44,8 @@ public interface ProgramInstanceStore
     
     Collection<ProgramInstance> get( Program program );
     
+    Collection<ProgramInstance> get( Collection<Program> programs );
+    
     Collection<ProgramInstance> get( Program program, boolean completed );
     
     Collection<ProgramInstance> get( Collection<Program> programs, boolean completed );

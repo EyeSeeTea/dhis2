@@ -41,7 +41,8 @@ import org.hisp.dhis.program.ProgramInstanceStore;
  * @version $Id$
  */
 public class HibernateProgramInstanceStore
-    extends HibernateGenericStore<ProgramInstance> implements ProgramInstanceStore
+    extends HibernateGenericStore<ProgramInstance>
+    implements ProgramInstanceStore
 {
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> get( boolean completed )
@@ -56,19 +57,21 @@ public class HibernateProgramInstanceStore
     }
 
     @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> get( Collection<Program> programs )
+    {
+        return getCriteria( Restrictions.in( "program", programs ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> get( Program program, boolean completed )
     {
-        return getCriteria( 
-            Restrictions.eq( "program", program ),            
-            Restrictions.eq( "completed", completed ) ).list();
+        return getCriteria( Restrictions.eq( "program", program ), Restrictions.eq( "completed", completed ) ).list();
     }
-    
+
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> get( Collection<Program> programs, boolean completed )
     {
-        return getCriteria( 
-            Restrictions.in( "program", programs ),            
-            Restrictions.eq( "completed", completed ) ).list();
+        return getCriteria( Restrictions.in( "program", programs ), Restrictions.eq( "completed", completed ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -80,25 +83,19 @@ public class HibernateProgramInstanceStore
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> get( Patient patient, boolean completed )
     {
-        return getCriteria( 
-            Restrictions.eq( "patient", patient ),            
-            Restrictions.eq( "completed", completed ) ).list();
+        return getCriteria( Restrictions.eq( "patient", patient ), Restrictions.eq( "completed", completed ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> get( Patient patient, Program program )
     {
-        return getCriteria( 
-            Restrictions.eq( "patient", patient ),            
-            Restrictions.eq( "program", program ) ).list();
+        return getCriteria( Restrictions.eq( "patient", patient ), Restrictions.eq( "program", program ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> get( Patient patient, Program program, boolean completed )
     {
-        return getCriteria( 
-            Restrictions.eq( "patient", patient ),
-            Restrictions.eq( "program", program ),
+        return getCriteria( Restrictions.eq( "patient", patient ), Restrictions.eq( "program", program ),
             Restrictions.eq( "completed", completed ) ).list();
-    }    
+    }
 }

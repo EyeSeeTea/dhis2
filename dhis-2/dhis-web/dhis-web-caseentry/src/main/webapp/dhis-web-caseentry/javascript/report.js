@@ -42,3 +42,16 @@ function reportValidationCompleted( messageElement )
 		document.getElementById( 'message' ).style.display = 'block';
 	}
 }
+
+function viewRecords( programStageInstanceId ) 
+{
+	var url = 'viewRecords.action?id=' + programStageInstanceId;
+	
+	var width = 800
+    var height = 500;
+    var left = parseInt( ( screen.availWidth/2 ) - ( width/2 ) );
+    var top = parseInt( ( screen.availHeight/2 ) - ( height/2 ) );
+    var windowFeatures = 'width=' + width + ',height=' + height + ',scrollbars=yes, resizable=yes,left=' + left + ',top=' + top + 'screenX=' + left + ',screenY=' + top;
+    
+    window.open( url, '_blank_', windowFeatures);
+}

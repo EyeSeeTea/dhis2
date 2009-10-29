@@ -31,8 +31,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 
@@ -56,12 +59,26 @@ public class GenerateReportAction
     {
         this.selectedStateManager = selectedStateManager;
     }
-    
+
     private ProgramService programService;
 
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
+    }
+
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     // -------------------------------------------------------------------------
@@ -80,24 +97,24 @@ public class GenerateReportAction
     public Program getProgram()
     {
         return program;
-    }  
-    
+    }
+
     private Collection<Program> programs = new ArrayList<Program>();
 
     public Collection<Program> getPrograms()
     {
         return programs;
     }
-    
+
     private Collection<ProgramStage> programStages;
 
     public Collection<ProgramStage> getProgramStages()
     {
         return programStages;
     }
-    
+
     private Integer programId;
-    
+
     public Integer getProgramId()
     {
         return programId;
@@ -121,10 +138,17 @@ public class GenerateReportAction
     {
         this.endDate = endDate;
     }
-   
+
     public String getEndDate()
     {
         return endDate;
+    }
+
+    Collection<ProgramInstance> programInstances = new ArrayList<ProgramInstance>();
+
+    public Collection<ProgramInstance> getProgramInstances()
+    {
+        return programInstances;
     }
 
     // -------------------------------------------------------------------------
@@ -135,12 +159,35 @@ public class GenerateReportAction
         throws Exception
     {
         organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
-        
-        programs = programService.getPrograms( organisationUnit );
 
-        program = selectedStateManager.getSelectedProgram();   
+        program = selectedStateManager.getSelectedProgram();
+
+        programId = program.getId();
+
+        programs = programService.getPrograms( organisationUnit );
         
-        programId = program.getId();        
+        // ---------------------------------------------------------------------
+        // Program instances for the selected program
+        // ---------------------------------------------------------------------
+
+        Collection<ProgramInstance> selectedProgramInstances = programInstanceService
+            .getProgramInstances( program );
+
+        for ( ProgramInstance programInstance : selectedProgramInstances )
+        {
+            if ( !programInstance.isCompleted() )
+            {
+                programInstances.add( programInstance );
+            }
+            else
+            {
+                if ( programInstance.getEnrollmentDate().before( format.parseDate( endDate ) )
+                    && programInstance.getEnrollmentDate().after( format.parseDate( startDate ) ) )
+                {
+                    programInstances.add( programInstance );
+                }
+            }
+        }
 
         return SUCCESS;
     }

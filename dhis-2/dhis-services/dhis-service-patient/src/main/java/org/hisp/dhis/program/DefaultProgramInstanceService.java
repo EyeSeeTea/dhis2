@@ -103,6 +103,11 @@ public class DefaultProgramInstanceService
         return programInstanceStore.get( program );
     }
 
+    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs )
+    {
+        return programInstanceStore.get( programs );
+    }
+
     public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed )
     {
         return programInstanceStore.get( programs, completed );
@@ -177,16 +182,17 @@ public class DefaultProgramInstanceService
                 visitsByProgramInstances.put( patientDataValue.getProgramStageInstance().getProgramInstance(),
                     nextStage );
             }
-            if ( nextStage == null  && visitsByProgramInstances.containsKey( patientDataValue.getProgramStageInstance()
+            if ( nextStage == null
+                && visitsByProgramInstances.containsKey( patientDataValue.getProgramStageInstance()
                     .getProgramInstance() ) )
             {
 
                 // -------------------------------------------------------------
                 // This patient has completed all services, programInstance
-                // should therefore be closed
+                // should therefore be closed!
                 // -------------------------------------------------------------
-                
-                visitsByProgramInstances.remove( patientDataValue.getProgramStageInstance().getProgramInstance() );                               
+
+                visitsByProgramInstances.remove( patientDataValue.getProgramStageInstance().getProgramInstance() );
             }
         }
 
