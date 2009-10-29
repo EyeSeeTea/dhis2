@@ -26,15 +26,12 @@
  */
 package org.hisp.dhis.program.nextvisit;
 
-
-
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
 public interface NextVisitGenerator
 {
-
     String ID = NextVisitGenerator.class.getName();  
     
     

@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultPatientIdentifierTypeService
     implements PatientIdentifierTypeService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -80,5 +79,4 @@ public class DefaultPatientIdentifierTypeService
     {
         patientIdentifierTypeStore.update( patientIdentifierType );
     }
-
 }

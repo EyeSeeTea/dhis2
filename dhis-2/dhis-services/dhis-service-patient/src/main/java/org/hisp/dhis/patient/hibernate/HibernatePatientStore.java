@@ -68,5 +68,4 @@ public class HibernatePatientStore
             Restrictions.ilike( "middleName", "%" + name + "%" ) ).add(
             Restrictions.ilike( "lastName", "%" + name + "%" ) ) ).list();        
     }
-    
 }

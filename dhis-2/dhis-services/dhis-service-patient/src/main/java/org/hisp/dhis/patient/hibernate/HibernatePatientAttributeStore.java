@@ -42,7 +42,6 @@ public class HibernatePatientAttributeStore
     extends HibernateGenericStore<PatientAttribute>
     implements PatientAttributeStore
 {
-
     @SuppressWarnings( "unchecked" )
     public Collection<PatientAttribute> getByValueType( String valueType )
     {

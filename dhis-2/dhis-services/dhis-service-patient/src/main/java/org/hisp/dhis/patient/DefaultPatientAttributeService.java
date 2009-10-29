@@ -38,7 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultPatientAttributeService
     implements PatientAttributeService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -57,7 +56,6 @@ public class DefaultPatientAttributeService
     public void deletePatientAttribute( PatientAttribute patientAttribute )
     {
         patientAttributeStore.delete( patientAttribute );
-
     }
 
     public Collection<PatientAttribute> getAllPatientAttributes()

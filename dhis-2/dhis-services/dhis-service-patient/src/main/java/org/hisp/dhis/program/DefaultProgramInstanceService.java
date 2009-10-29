@@ -46,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultProgramInstanceService
     implements ProgramInstanceService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -178,12 +177,15 @@ public class DefaultProgramInstanceService
                 visitsByProgramInstances.put( patientDataValue.getProgramStageInstance().getProgramInstance(),
                     nextStage );
             }
-            if ( nextStage == null
-                && visitsByProgramInstances.containsKey( patientDataValue.getProgramStageInstance()
+            if ( nextStage == null  && visitsByProgramInstances.containsKey( patientDataValue.getProgramStageInstance()
                     .getProgramInstance() ) )
             {
+
+                // -------------------------------------------------------------
                 // This patient has completed all services, programInstance
-                // should therefore be closed!
+                // should therefore be closed
+                // -------------------------------------------------------------
+                
                 visitsByProgramInstances.remove( patientDataValue.getProgramStageInstance().getProgramInstance() );                               
             }
         }

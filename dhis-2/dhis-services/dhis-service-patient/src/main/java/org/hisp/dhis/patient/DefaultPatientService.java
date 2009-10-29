@@ -137,11 +137,6 @@ public class DefaultPatientService
         return patients;
     }
 
-    /*
-     * public Collection<Patient> getPatientsByAttribute( PatientAttribute
-     * attribute ) { return patientStore.getByAttribute( attribute ); }
-     */
-
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText )
     {
         Collection<Patient> patients = new ArrayList<Patient>();
