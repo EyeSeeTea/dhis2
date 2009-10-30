@@ -1,5 +1,4 @@
 package org.hisp.dhis.dd.action.dataelementgroupset;
-
 /*
  * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
@@ -27,13 +26,8 @@ package org.hisp.dhis.dd.action.dataelementgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.system.util.UUIdUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,10 +35,9 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class AddDataElementGroupSetAction
-    implements Action
+public class GetDataElementGroupSetAction
+   implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -55,48 +48,32 @@ public class AddDataElementGroupSetAction
     {
         this.dataElementService = dataElementService;
     }
-
+       
     // -------------------------------------------------------------------------
-    // Input
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private String name;
+    private Integer id;
 
-    public void setName( String name )
+    public void setId( Integer id )
     {
-        this.name = name;
+        this.id = id;
+    }
+    
+    private DataElementGroupSet dataElementGroupSet;
+    
+    public DataElementGroupSet getDataElementGroupSet()
+    {
+        return dataElementGroupSet;
     }
 
-    private List<String> groupMembers = new ArrayList<String>();
-
-    public void setGroupMembers( List<String> groupMembers )
-    {
-        this.groupMembers = groupMembers;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
+    @Override
     public String execute()
         throws Exception
     {
-        DataElementGroupSet dataElementGroupSet = new DataElementGroupSet( name );
-        
-        dataElementGroupSet.setUuid( UUIdUtils.getUUId() );
 
-        List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
-
-        for ( String id : this.groupMembers )
-        {
-            DataElementGroup dataElementGroup = dataElementService.getDataElementGroup( Integer.parseInt( id ) );
-
-            dataElementGroups.add( dataElementGroup );
-        }
-
-        dataElementGroupSet.setMembers( dataElementGroups );
-
-        dataElementService.addDataElementGroupSet( dataElementGroupSet );
+        dataElementGroupSet = dataElementService.getDataElementGroupSet( id  );       
+       
 
         return SUCCESS;
     }

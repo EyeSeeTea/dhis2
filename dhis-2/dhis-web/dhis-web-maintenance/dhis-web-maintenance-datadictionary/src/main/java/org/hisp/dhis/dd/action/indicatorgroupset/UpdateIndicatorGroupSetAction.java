@@ -73,11 +73,11 @@ public class UpdateIndicatorGroupSetAction
         this.name = name;
     }
 
-    private List<String> selectedIndicatorGroups = new ArrayList<String>();
+    private List<String> groupMembers = new ArrayList<String>();
 
-    public void setSelectedIndicatorGroups( List<String> selectedIndicatorGroups )
+    public void setGroupMembers( List<String> groupMembers )
     {
-        this.selectedIndicatorGroups = selectedIndicatorGroups;
+        this.groupMembers = groupMembers;
     }
 
     // -------------------------------------------------------------------------
@@ -94,7 +94,7 @@ public class UpdateIndicatorGroupSetAction
 
         indicatorGroupSet.getMembers().clear();
 
-        for ( String id : selectedIndicatorGroups )
+        for ( String id : groupMembers )
         {
             IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( Integer.parseInt( id ) );
 
