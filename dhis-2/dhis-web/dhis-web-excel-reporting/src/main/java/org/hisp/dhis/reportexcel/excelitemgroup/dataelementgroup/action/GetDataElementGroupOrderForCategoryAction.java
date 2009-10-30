@@ -1,5 +1,3 @@
-package org.hisp.dhis.reportexcel.excelitemgroup.action;
-
 /*
  * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
@@ -26,10 +24,9 @@ package org.hisp.dhis.reportexcel.excelitemgroup.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.reportexcel.excelitemgroup.dataelementgroup.action;
 
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.DataElementGroupOrder;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 import com.opensymphony.xwork2.Action;
@@ -38,75 +35,44 @@ import com.opensymphony.xwork2.Action;
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class AddExcelItemGroupAction implements Action {
-
-	// -------------------------------------------------------------------------
-	// Dependencies
-	// -------------------------------------------------------------------------
+public class GetDataElementGroupOrderForCategoryAction implements Action {
+	// -------------------------------------------
+	// Dependency
+	// -------------------------------------------
 
 	private ExcelItemService excelItemService;
 
-	private PeriodService periodService;
+	// -------------------------------------------
+	// Input & Output
+	// -------------------------------------------
 
-	// -------------------------------------------------------------------------
-	// Inputs
-	// -------------------------------------------------------------------------
+	private Integer id;
 
-	private String name;
+	private DataElementGroupOrder dataElementGroupOrder;
 
-	private String excelTemplateFile;
+	// -------------------------------------------
+	// Getter & Setter
+	// -------------------------------------------
 
-	private String type;
-
-	private String periodTypeName;
-
-	// -------------------------------------------------------------------------
-	// Setters
-	// -------------------------------------------------------------------------
+	public DataElementGroupOrder getDataElementGroupOrder() {
+		return dataElementGroupOrder;
+	}
 
 	public void setExcelItemService(ExcelItemService excelItemService) {
 		this.excelItemService = excelItemService;
 	}
 
-	public void setPeriodTypeName(String periodTypeName) {
-		this.periodTypeName = periodTypeName;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setPeriodService(PeriodService periodService) {
-		this.periodService = periodService;
-	}
-
-	public void setExcelTemplateFile(String excelTemplateFile) {
-		this.excelTemplateFile = excelTemplateFile;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	// -------------------------------------------------------------------------
+	// -------------------------------------------
 	// Action implementation
-	// -------------------------------------------------------------------------
+	// -------------------------------------------
 
 	public String execute() throws Exception {
 
-		ExcelItemGroup excelItemGroup = new ExcelItemGroup();
-
-		excelItemGroup.setName(name);
-
-		excelItemGroup.setType(type);
-
-		excelItemGroup.setExcelTemplateFile(excelTemplateFile);
-		
-		PeriodType periodType = periodService.getPeriodTypeByName(periodTypeName);
-		
-		excelItemGroup.setPeriodType(periodType);
-		
-		excelItemService.addExcelItemGroup(excelItemGroup);
+		dataElementGroupOrder = excelItemService.getDataElementGroupOrder(id.intValue());
 
 		return SUCCESS;
 	}

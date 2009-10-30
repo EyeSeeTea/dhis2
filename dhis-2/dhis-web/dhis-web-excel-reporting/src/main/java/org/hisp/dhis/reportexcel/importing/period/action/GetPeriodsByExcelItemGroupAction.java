@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.excelitemgroup.action;
+package org.hisp.dhis.reportexcel.importing.period.action;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,88 +27,78 @@ package org.hisp.dhis.reportexcel.excelitemgroup.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.comparator.PeriodComparator;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
+ * @author Nguyen Tran Do Xuan Thuy
  * @version $Id$
+ * @since 2009-10-14
  */
-public class AddExcelItemGroupAction implements Action {
+
+public class GetPeriodsByExcelItemGroupAction implements Action {
 
 	// -------------------------------------------------------------------------
-	// Dependencies
+	// Dependences
 	// -------------------------------------------------------------------------
+
+	private SelectedStatePeriodManager selectedStateManager;
 
 	private ExcelItemService excelItemService;
 
-	private PeriodService periodService;
-
 	// -------------------------------------------------------------------------
-	// Inputs
+	// Input & Output
 	// -------------------------------------------------------------------------
 
-	private String name;
+	private List<Period> periods;
 
-	private String excelTemplateFile;
-
-	private String type;
-
-	private String periodTypeName;
+	private int excelItemGroupId;
 
 	// -------------------------------------------------------------------------
-	// Setters
+	// Getters & Setters
 	// -------------------------------------------------------------------------
+
+	public List<Period> getPeriods() {
+		return periods;
+	}
+
+	public void setExcelItemGroupId(int excelItemGroupId) {
+		this.excelItemGroupId = excelItemGroupId;
+	}
+
+	public void setSelectedStateManager(
+			SelectedStatePeriodManager selectedStateManager) {
+		this.selectedStateManager = selectedStateManager;
+	}
 
 	public void setExcelItemService(ExcelItemService excelItemService) {
 		this.excelItemService = excelItemService;
 	}
 
-	public void setPeriodTypeName(String periodTypeName) {
-		this.periodTypeName = periodTypeName;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setPeriodService(PeriodService periodService) {
-		this.periodService = periodService;
-	}
-
-	public void setExcelTemplateFile(String excelTemplateFile) {
-		this.excelTemplateFile = excelTemplateFile;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
 	// -------------------------------------------------------------------------
-	// Action implementation
+	// Implement Action method
 	// -------------------------------------------------------------------------
 
 	public String execute() throws Exception {
 
-		ExcelItemGroup excelItemGroup = new ExcelItemGroup();
+		ExcelItemGroup excelItemGroup = excelItemService
+				.getExcelItemGroup(excelItemGroupId);
 
-		excelItemGroup.setName(name);
-
-		excelItemGroup.setType(type);
-
-		excelItemGroup.setExcelTemplateFile(excelTemplateFile);
+		selectedStateManager.setSelectedExcelItemGroup(excelItemGroup);
 		
-		PeriodType periodType = periodService.getPeriodTypeByName(periodTypeName);
+        selectedStateManager.clearSelectedPeriod();
 		
-		excelItemGroup.setPeriodType(periodType);
+		periods = selectedStateManager.getPeriodList();
 		
-		excelItemService.addExcelItemGroup(excelItemGroup);
+		Collections.sort(periods, new PeriodComparator());
 
 		return SUCCESS;
 	}
-
 }

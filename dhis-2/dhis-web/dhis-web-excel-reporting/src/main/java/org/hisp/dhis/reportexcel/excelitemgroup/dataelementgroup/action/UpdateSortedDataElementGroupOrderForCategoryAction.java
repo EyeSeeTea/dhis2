@@ -1,5 +1,3 @@
-package org.hisp.dhis.reportexcel.excelitemgroup.action;
-
 /*
  * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
@@ -26,9 +24,12 @@ package org.hisp.dhis.reportexcel.excelitemgroup.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.reportexcel.excelitemgroup.dataelementgroup.action;
 
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.reportexcel.DataElementGroupOrder;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
@@ -38,75 +39,61 @@ import com.opensymphony.xwork2.Action;
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class AddExcelItemGroupAction implements Action {
-
-	// -------------------------------------------------------------------------
-	// Dependencies
-	// -------------------------------------------------------------------------
+public class UpdateSortedDataElementGroupOrderForCategoryAction implements
+		Action {
+	// -------------------------------------------
+	// Dependency
+	// -------------------------------------------
 
 	private ExcelItemService excelItemService;
 
-	private PeriodService periodService;
+	// -------------------------------------------
+	// Input & Output
+	// -------------------------------------------
 
-	// -------------------------------------------------------------------------
-	// Inputs
-	// -------------------------------------------------------------------------
+	private Integer excelItemGroupId;
 
-	private String name;
+	private List<String> dataElementGroupOrderId = new ArrayList<String>();
 
-	private String excelTemplateFile;
-
-	private String type;
-
-	private String periodTypeName;
-
-	// -------------------------------------------------------------------------
-	// Setters
-	// -------------------------------------------------------------------------
+	// -------------------------------------------
+	// Getters & Setters
+	// -------------------------------------------
 
 	public void setExcelItemService(ExcelItemService excelItemService) {
 		this.excelItemService = excelItemService;
 	}
 
-	public void setPeriodTypeName(String periodTypeName) {
-		this.periodTypeName = periodTypeName;
+	public void setExcelItemGroupId(Integer excelItemGroupId) {
+		this.excelItemGroupId = excelItemGroupId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setDataElementGroupOrderId(List<String> dataElementGroupOrderId) {
+		this.dataElementGroupOrderId = dataElementGroupOrderId;
 	}
 
-	public void setPeriodService(PeriodService periodService) {
-		this.periodService = periodService;
-	}
-
-	public void setExcelTemplateFile(String excelTemplateFile) {
-		this.excelTemplateFile = excelTemplateFile;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	// -------------------------------------------------------------------------
+	// -------------------------------------------
 	// Action implementation
-	// -------------------------------------------------------------------------
+	// -------------------------------------------
 
 	public String execute() throws Exception {
 
-		ExcelItemGroup excelItemGroup = new ExcelItemGroup();
+		ExcelItemGroup excelItemGroup = excelItemService
+				.getExcelItemGroup(excelItemGroupId);
 
-		excelItemGroup.setName(name);
+		List<DataElementGroupOrder> dataElementGroupOrders = new ArrayList<DataElementGroupOrder>();
 
-		excelItemGroup.setType(type);
+		for (String id : this.dataElementGroupOrderId) {
 
-		excelItemGroup.setExcelTemplateFile(excelTemplateFile);
-		
-		PeriodType periodType = periodService.getPeriodTypeByName(periodTypeName);
-		
-		excelItemGroup.setPeriodType(periodType);
-		
-		excelItemService.addExcelItemGroup(excelItemGroup);
+			DataElementGroupOrder daElementGroupOrder = excelItemService
+					.getDataElementGroupOrder(Integer.parseInt(id));
+
+			dataElementGroupOrders.add(daElementGroupOrder);
+
+		}
+
+		excelItemGroup.setDataElementOrders(dataElementGroupOrders);
+
+		excelItemService.updateExcelItemGroup(excelItemGroup);
 
 		return SUCCESS;
 	}
