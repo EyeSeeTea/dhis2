@@ -66,7 +66,6 @@
 </table>
 
 <p>
-	<input type="hidden" id="id" name="id" value="$id">
 	<input type="submit" value="$i18n.getString( "add" )" style="width:10em">
 	<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='programStage.action'" style="width:10em">
 </p>
