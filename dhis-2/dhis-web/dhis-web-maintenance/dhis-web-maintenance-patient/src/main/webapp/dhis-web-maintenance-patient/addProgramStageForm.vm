@@ -3,7 +3,14 @@
 																		
 <form id="addProgramStageForm" name "addProgramStageForm" action="addProgramStage.action" method="post" onsubmit="submitForm(); return validateAddProgramStage()">
 
-<table>	
+
+<div style="display:inline">
+  <input type="hidden" id="id" name="id" value="$program.id">
+</div>
+
+
+<table>
+
 	<tr>
 		<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><input type="text" id="nameField" name="nameField"  maxlength="30" style="width:30em"></td>
@@ -20,8 +27,8 @@
     </tr>
     
     <tr>
-        <td><label>$i18n.getString( "max_days_from_start" )</label></td>
-        <td><input type="text" id="maxDaysFromStart" name="maxDaysFromStart" maxlength="30" style="width:30em"></td>
+        <td><label>$i18n.getString( "program" )</label></td>
+        <td><input type="text" id="program" name="program" maxlength="30" value="$encoder.htmlEncode( $program.name )" style="width:30em" disabled="disabled">
     </tr>    
       
     <tr><td>&nbsp;</td><td>&nbsp;</td></tr>      	  	

@@ -27,6 +27,11 @@
 	  <tr>
         <td><label>$i18n.getString( "min_days_from_start" )</label></td>
         <td><input type="text" id="minDaysFromStart" name="minDaysFromStart" maxlength="30" value="$encoder.htmlEncode( $programStage.minDaysFromStart )" style="width:30em"></td>
+      </tr> 
+      
+      <tr>
+        <td><label>$i18n.getString( "program" )</label></td>
+        <td><input type="text" id="program" name="program" maxlength="30" value="$encoder.htmlEncode( $programStage.program.name )" style="width:30em" disabled="disabled">
       </tr>     
          
       <tr><td>&nbsp;</td><td>&nbsp;</td></tr>       

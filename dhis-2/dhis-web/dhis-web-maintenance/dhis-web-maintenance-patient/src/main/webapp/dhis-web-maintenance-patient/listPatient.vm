@@ -24,6 +24,7 @@
           <col width="20">
           <col width="20">
           <col width="20">
+          <col width="20">
           <col width="20">    
           
 		  <tr>
@@ -33,7 +34,7 @@
 		  	<td></td>
 		  	<td></td>
 		  	<td></td>
-		  	<td colspan="5" style="text-align:right">			
+		  	<td colspan="6" style="text-align:right">			
 				<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location.href='patient.action'" style="width:10em">
 			</td>
           <tr>
@@ -43,7 +44,7 @@
             <th>$i18n.getString( "gender" )</th>
             <th>$i18n.getString( "date_of_birth" )</th> 
             <th>$i18n.getString( "age" )</th>
-            <th colspan="5">$i18n.getString( "operations" )</th>
+            <th colspan="6" style="text-align:center">$i18n.getString( "operations" )</th>
           </tr>
           
           <tbody id="list">	
@@ -76,6 +77,10 @@
                 
                 <td style="text-align:center"#alternate( $mark )>                  
                   <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
+                </td>
+                
+                <td style="text-align:center"#alternate( $mark )>                  
+                  <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "manage_relationship" )"><img src="../images/edit.png" alt="$i18n.getString( "manage_relationship" )"></a>
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>

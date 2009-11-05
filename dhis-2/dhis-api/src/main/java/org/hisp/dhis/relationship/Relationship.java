@@ -24,52 +24,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patientattributevalue;
+package org.hisp.dhis.relationship;
 
 import java.io.Serializable;
 
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class PatientAttributeValue
+public class Relationship
     implements Serializable
 {
 
-    public static final String UNKNOWN = " ";
-    
-    private PatientAttribute patientAttribute;
+    private int id;
 
-    private Patient patient;
+    private Patient patientA;
 
-    private String value;
+    private RelationshipType relationshipType;
+
+    private Patient patientB;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public PatientAttributeValue()
+    public Relationship()
     {
     }
 
-    public PatientAttributeValue( PatientAttribute patientAttribute, Patient patient )
+    public Relationship( Patient patientA, RelationshipType relationshipType, Patient patientB )
     {
-        this.patientAttribute = patientAttribute;
-        this.patient = patient;
-    }
-
-    public PatientAttributeValue( PatientAttribute patientAttribute, Patient patient, String value )
-    {
-        this.patientAttribute = patientAttribute;
-        this.patient = patient;
-        this.value = value;
+        this.patientA = patientA;
+        this.relationshipType = relationshipType;
+        this.patientB = patientB;
     }
 
     // -------------------------------------------------------------------------
-    // hashCode and equals
+    // hashCode, equals and toString
     // -------------------------------------------------------------------------
 
     @Override
@@ -85,15 +78,16 @@ public class PatientAttributeValue
             return false;
         }
 
-        if ( !(o instanceof PatientAttributeValue) )
+        if ( !(o instanceof Relationship) )
         {
             return false;
         }
 
-        final PatientAttributeValue other = (PatientAttributeValue) o;
+        final Relationship other = (Relationship) o;
 
-        return patientAttribute.equals( other.getPatientAttribute() ) && patient.equals( other.getPatient() );
-            
+        return patientA.equals( other.getPatientA() ) && relationshipType.equals( other.getRelationshipType() )
+            && patientB.equals( other.getPatientB() );
+
     }
 
     @Override
@@ -102,9 +96,10 @@ public class PatientAttributeValue
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + patientAttribute.hashCode();
-        result = result * prime + patient.hashCode();
-        
+        result = result * prime + patientA.hashCode();
+        result = result * prime + patientB.hashCode();
+        result = result * prime + relationshipType.hashCode();
+
         return result;
     }
 
@@ -112,33 +107,68 @@ public class PatientAttributeValue
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public PatientAttribute getPatientAttribute()
+    /**
+     * @return the id
+     */
+    public int getId()
     {
-        return patientAttribute;
+        return id;
     }
 
-    public void setPatientAttribute( PatientAttribute patientAttribute )
+    /**
+     * @param id the id to set
+     */
+    public void setId( int id )
     {
-        this.patientAttribute = patientAttribute;
+        this.id = id;
     }
 
-    public Patient getPatient()
+    /**
+     * @return the patientA
+     */
+    public Patient getPatientA()
     {
-        return patient;
+        return patientA;
     }
 
-    public void setPatient( Patient patient )
+    /**
+     * @param patientA the patientA to set
+     */
+    public void setPatientA( Patient patientA )
     {
-        this.patient = patient;
+        this.patientA = patientA;
     }
 
-    public String getValue()
+    /**
+     * @return the relationshipType
+     */
+    public RelationshipType getRelationshipType()
     {
-        return value;
+        return relationshipType;
     }
 
-    public void setValue( String value )
+    /**
+     * @param relationshipType the relationshipType to set
+     */
+    public void setRelationshipType( RelationshipType relationshipType )
     {
-        this.value = value;
+        this.relationshipType = relationshipType;
     }
+
+    /**
+     * @return the patientB
+     */
+    public Patient getPatientB()
+    {
+        return patientB;
+    }
+
+    /**
+     * @param patientB the patientB to set
+     */
+    public void setPatientB( Patient patientB )
+    {
+        this.patientB = patientB;
+    }
+
 }

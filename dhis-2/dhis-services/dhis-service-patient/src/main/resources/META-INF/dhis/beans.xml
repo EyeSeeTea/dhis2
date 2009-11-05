@@ -8,6 +8,18 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	
   <!-- Store definitions -->
   
+  <bean id="org.hisp.dhis.relationship.RelationshipStore"
+    class="org.hisp.dhis.relationship.hibernate.HibernateRelationshipStore">
+    <property name="clazz" value="org.hisp.dhis.relationship.Relationship"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.relationship.RelationshipTypeStore"
+    class="org.hisp.dhis.hibernate.HibernateGenericStore">
+    <property name="clazz" value="org.hisp.dhis.relationship.RelationshipType"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+  
   <bean id="org.hisp.dhis.program.ProgramStageInstanceStore"
     class="org.hisp.dhis.program.hibernate.HibernateProgramStageInstanceStore">
     <property name="clazz" value="org.hisp.dhis.program.ProgramStageInstance"/>
@@ -69,6 +81,16 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
 	
   <!-- Service definitions -->
+  
+  <bean id="org.hisp.dhis.relationship.RelationshipService"
+    class="org.hisp.dhis.relationship.DefaultRelationshipService">
+    <property name="relationshipStore" ref="org.hisp.dhis.relationship.RelationshipStore"/>    
+  </bean>
+  
+  <bean id="org.hisp.dhis.relationship.RelationshipTypeService"
+    class="org.hisp.dhis.relationship.DefaultRelationshipTypeService">
+    <property name="relationshipTypeStore" ref="org.hisp.dhis.relationship.RelationshipTypeStore"/>    
+  </bean>
   
   <bean id="org.hisp.dhis.program.ProgramStageInstanceService"
     class="org.hisp.dhis.program.DefaultProgramStageInstanceService">

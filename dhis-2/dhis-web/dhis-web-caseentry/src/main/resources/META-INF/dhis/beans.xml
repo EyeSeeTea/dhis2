@@ -203,8 +203,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.program.ProgramInstanceService"/>                 
   </bean>
   
-  <bean id="org.hisp.dhis.caseentry.action.caseentry.ViewRecordsAction"
-    class="org.hisp.dhis.caseentry.action.caseentry.ViewRecordsAction" 
+  <bean id="org.hisp.dhis.caseentry.action.report.ViewRecordsAction"
+    class="org.hisp.dhis.caseentry.action.report.ViewRecordsAction" 
     scope="prototype">     
     <property name="patientDataValueService"
       ref="org.hisp.dhis.patientdatavalue.PatientDataValueService"/>

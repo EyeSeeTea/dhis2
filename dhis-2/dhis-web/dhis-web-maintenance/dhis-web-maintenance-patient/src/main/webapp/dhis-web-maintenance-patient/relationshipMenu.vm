@@ -1,0 +1,7 @@
+
+<a href="index.action"><h2>$i18n.getString( "paitents_and_programs" )</h2></a>
+<ul>			
+	<li><a href="relationshipType.action">$i18n.getString( "relationship_type_management" )&nbsp;</a></li>
+</ul>
+
+<br>

@@ -28,7 +28,11 @@
 package org.hisp.dhis.caseentry.action.report;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -38,6 +42,7 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageInstance;
 
 import com.opensymphony.xwork2.Action;
 
@@ -48,6 +53,10 @@ import com.opensymphony.xwork2.Action;
 public class GenerateReportAction
     implements Action
 {
+
+    private static final String RED = "#ff0000";
+
+    private static final String YELLOW = "#ffff00";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -151,6 +160,13 @@ public class GenerateReportAction
         return programInstances;
     }
 
+    private Map<Integer, String> colorMap = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getColorMap()
+    {
+        return colorMap;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -165,13 +181,12 @@ public class GenerateReportAction
         programId = program.getId();
 
         programs = programService.getPrograms( organisationUnit );
-        
+
         // ---------------------------------------------------------------------
         // Program instances for the selected program
         // ---------------------------------------------------------------------
 
-        Collection<ProgramInstance> selectedProgramInstances = programInstanceService
-            .getProgramInstances( program );
+        Collection<ProgramInstance> selectedProgramInstances = programInstanceService.getProgramInstances( program );
 
         for ( ProgramInstance programInstance : selectedProgramInstances )
         {
@@ -187,6 +202,29 @@ public class GenerateReportAction
                     programInstances.add( programInstance );
                 }
             }
+
+            for ( ProgramStageInstance programStageInstance : programInstance.getProgramStageInstances() )
+            {
+                // -------------------------------------------------------------
+                // If a program stage is not provided even a day after its due
+                // date, then that service is alerted red - because we are
+                // getting late
+                // -------------------------------------------------------------
+
+                Calendar dueDateCalendar = Calendar.getInstance();
+                dueDateCalendar.setTime( programStageInstance.getDueDate() );
+                dueDateCalendar.add( Calendar.DATE, 1 );
+
+                if ( dueDateCalendar.getTime().before( new Date() ) )
+                {
+                    colorMap.put( programStageInstance.getId(), RED );
+                }
+                else
+                {
+                    colorMap.put( programStageInstance.getId(), YELLOW );
+                }
+            }
+
         }
 
         return SUCCESS;

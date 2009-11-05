@@ -25,18 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.programstage;
+package org.hisp.dhis.patient.action.relationship;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.i18n.I18n;
 
 import com.opensymphony.xwork2.Action;
 
@@ -44,55 +35,31 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class AddProgramStageAction
+
+public class ValidateRelationshipTypeAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private String aIsToB;
 
-    public int getId()
+    public void setaIsToB( String aIsToB )
     {
-        return id;
+        this.aIsToB = aIsToB;
     }
 
-    public void setId( int id )
-    {
-        this.id = id;
-    }
+    private String bIsToA;
 
-    private String nameField;
-
-    public void setNameField( String nameField )
+    public void setbIsToA( String bIsToA )
     {
-        this.nameField = nameField;
+        this.bIsToA = bIsToA;
     }
 
     private String description;
@@ -102,18 +69,18 @@ public class AddProgramStageAction
         this.description = description;
     }
 
-    private Integer minDaysFromStart;
+    private String message;
 
-    public void setMinDaysFromStart( Integer minDaysFromStart )
+    public String getMessage()
     {
-        this.minDaysFromStart = minDaysFromStart;
+        return message;
     }
 
-    private Collection<String> selectedList = new HashSet<String>();
+    private I18n i18n;
 
-    public void setSelectedList( Collection<String> selectedList )
+    public void setI18n( I18n i18n )
     {
-        this.selectedList = selectedList;
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -124,33 +91,70 @@ public class AddProgramStageAction
         throws Exception
     {
 
-        ProgramStage programStage = new ProgramStage();
-
-        Program program = programService.getProgram( id );        
-
-        programStage.setProgram( program );
-        programStage.setName( nameField );
-        programStage.setDescription( description );
-
-        if ( minDaysFromStart == null )
+        if ( aIsToB == null )
         {
-            minDaysFromStart = 0;
-        }
-       
-        Set<DataElement> dataElements = new HashSet<DataElement>();
+            message = i18n.getString( "please_specify_the_a_side_of_the_relationship_type" );
 
-        for ( String id : selectedList )
-        {
-            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );
-
-            dataElements.add( dataElement );
+            return INPUT;
         }
 
-        programStage.setMinDaysFromStart( minDaysFromStart.intValue() );
-        programStage.setDataElements( dataElements );
+        else
+        {
+            aIsToB = aIsToB.trim();
 
-        programStageService.saveProgramStage( programStage );
+            if ( aIsToB.length() == 0 )
+            {
+                message = i18n.getString( "please_specify_the_a_side_of_the_relationship_type" );
+
+                return INPUT;
+            }
+        }
+
+        if ( bIsToA == null )
+        {
+            message = i18n.getString( "please_specify_the_b_side_of_the_relationship_type" );
+
+            return INPUT;
+        }
+
+        else
+        {
+            bIsToA = bIsToA.trim();
+
+            if ( bIsToA.length() == 0 )
+            {
+                message = i18n.getString( "please_specify_the_b_side_of_the_relationship_type" );
+
+                return INPUT;
+            }
+        }
+
+        if ( description == null )
+        {
+            message = i18n.getString( "please_specify_a_description" );
+
+            return INPUT;
+        }
+
+        else
+        {
+            description = description.trim();
+
+            if ( description.length() == 0 )
+            {
+                message = i18n.getString( "please_specify_a_description" );
+
+                return INPUT;
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // Validation success
+        // ---------------------------------------------------------------------
+
+        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
+
     }
 }

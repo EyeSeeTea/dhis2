@@ -2,7 +2,6 @@
 <a href="index.action"><h2>$i18n.getString( "paitents_and_programs" )</h2></a>
 <ul>
     <li><a href="program.action">$i18n.getString( "program_management" )&nbsp;</a></li>   
-    <li><a href="programStage.action">$i18n.getString( "program_stage_management" )&nbsp;</a></li>
 </ul>
 
 <br>

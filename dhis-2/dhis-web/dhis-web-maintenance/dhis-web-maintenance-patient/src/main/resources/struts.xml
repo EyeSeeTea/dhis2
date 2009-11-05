@@ -14,6 +14,58 @@
       <param name="menu">/dhis-web-maintenance-patient/menu.vm</param> 
     </action>	  
     
+    <!-- Patient Relationship -->
+    
+    <action name="relationshipType" class="org.hisp.dhis.patient.action.relationship.GetRelationshipTypeListAction">      
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/relationshipType.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>        
+      <param name="javascripts">javascript/relationshipType.js</param>            
+    </action>
+    
+    <action name="getRelationshipType" class="org.hisp.dhis.patient.action.relationship.GetRelationshipTypeAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseRelationshipType.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>
+    
+    <action name="removeRelationshipType" class="org.hisp.dhis.patient.action.relationship.RemoveRelationshipTypeAction">      
+      <result name="success" type="redirect">relationshipType.action</result>      
+      <param name="requiredAuthorities">F_RELATIONSHIPTYPE_DELETE</param>      
+    </action>
+    
+    <action name="addRelationshipType" class="org.hisp.dhis.patient.action.relationship.AddRelationshipTypeAction">
+      <result name="success" type="redirect">relationshipType.action</result>
+      <param name="requiredAuthorities">F_RELATIONSHIPTYPE_ADD</param>
+    </action>
+    
+    <action name="showAddRelationshipTypeForm" class="org.hisp.dhis.patient.action.NoAction">      
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/addRelationshipTypeForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>      
+      <param name="javascripts">javascript/relationshipType.js</param>
+      <param name="requiredAuthorities">F_RELATIONSHIPTYPE_ADD</param>      
+    </action>
+    
+    <action name="showUpdateRelationshipTypeForm" class="org.hisp.dhis.patient.action.relationship.GetRelationshipTypeAction">      
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/updateRelationshipTypeForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>      
+      <param name="javascripts">javascript/relationshipType.js</param>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>      
+    </action>
+    
+    <action name="updateRelationshipType" class="org.hisp.dhis.patient.action.relationship.UpdateRelationshipTypeAction">      
+      <result name="success" type="redirect">relationshipType.action</result>
+      <param name="requiredAuthorities">F_RELATIONSHIPTYPE_UPDATE</param>
+    </action>
+    
+    <action name="validateRelationshipType" class="org.hisp.dhis.patient.action.relationship.ValidateRelationshipTypeAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>
+    
     <!-- PatientAttribute -->   
     
     <action name="patientAttribute" class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeListAction">      

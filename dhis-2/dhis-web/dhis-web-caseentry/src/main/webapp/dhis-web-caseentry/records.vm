@@ -1,3 +1,7 @@
+<p align="right">
+    <input type="button" value="$i18n.getString( "close" )" onclick="window.close()" style="width:10em">
+</p>
+
 <table>
     <tr>
         <td><strong>$i18n.getString( "full_name" ):</strong></td>
@@ -26,7 +30,7 @@
 
 </table>
 
-<h4>$i18n.getString( "records_for" ) $encoder.htmlEncode( $programStageInstance.programStage.name </h4>
+<h4>$i18n.getString( "records_for" ) $encoder.htmlEncode( $programStageInstance.programStage.name ) </h4>
 
 <table class="mainPageTable">
     <col id="noCol">
@@ -55,7 +59,7 @@
                 
         <tr #if( $mark == 0 ) style="background-color:#dddddd" #end>
             ##dataElementRowCount
-            <td style="text-align:right">$dataElementRowCount</td>
+            <td style="text-align:center">$dataElementRowCount</td>
                 
             ##data element name
             <td>
@@ -63,7 +67,7 @@
             </td>        
                
             ##value        
-            <td>        
+            <td style="text-align:center">        
                 #if( $patientDataValue.dataElement.type == "bool" )
                     #if( $patientDataValue.value == "true" )
                         $i18n.getString( "yes" ) 
@@ -80,7 +84,7 @@
             </td> 
           
             ##providedByAnotherFacility                
-            <td>            
+            <td style="text-align:center">            
                 #if( $patientDataValue.providedByAnotherFacility )
                     $i18n.getString( "yes" )  
                 #end                         

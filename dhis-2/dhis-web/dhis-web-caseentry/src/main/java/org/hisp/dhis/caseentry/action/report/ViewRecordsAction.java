@@ -61,18 +61,18 @@ public class ViewRecordsAction
         this.patientDataValueService = patientDataValueService;
     }
 
-    private ProgramStageInstanceService programStageInstanceService;
-
-    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
-    {
-        this.programStageInstanceService = programStageInstanceService;
-    }
-
     private DataElementCategoryService dataElementCategoryService;
 
     public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
     {
         this.dataElementCategoryService = dataElementCategoryService;
+    }
+
+    private ProgramStageInstanceService programStageInstanceService;
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     // -------------------------------------------------------------------------
@@ -121,7 +121,6 @@ public class ViewRecordsAction
     public String execute()
         throws Exception
     {
-        System.out.println( id );
 
         programStageInstance = programStageInstanceService.getProgramStageInstance( id );
 

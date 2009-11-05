@@ -24,52 +24,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patientattributevalue;
+package org.hisp.dhis.relationship;
 
 import java.io.Serializable;
-
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class PatientAttributeValue
+public class RelationshipType
     implements Serializable
 {
+    private int id;
 
-    public static final String UNKNOWN = " ";
+    private String aIsToB;
+
+    private String bIsToA;
     
-    private PatientAttribute patientAttribute;
-
-    private Patient patient;
-
-    private String value;
+    private String description;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public PatientAttributeValue()
+    public RelationshipType()
     {
     }
 
-    public PatientAttributeValue( PatientAttribute patientAttribute, Patient patient )
+    public RelationshipType( String aIsToB, String bIsToA )
     {
-        this.patientAttribute = patientAttribute;
-        this.patient = patient;
-    }
-
-    public PatientAttributeValue( PatientAttribute patientAttribute, Patient patient, String value )
-    {
-        this.patientAttribute = patientAttribute;
-        this.patient = patient;
-        this.value = value;
+        this.aIsToB = aIsToB;
+        this.bIsToA = bIsToA;
     }
 
     // -------------------------------------------------------------------------
-    // hashCode and equals
+    // hashCode, equals and toString
     // -------------------------------------------------------------------------
 
     @Override
@@ -85,15 +74,15 @@ public class PatientAttributeValue
             return false;
         }
 
-        if ( !(o instanceof PatientAttributeValue) )
+        if ( !(o instanceof RelationshipType) )
         {
             return false;
         }
 
-        final PatientAttributeValue other = (PatientAttributeValue) o;
+        final RelationshipType other = (RelationshipType) o;
 
-        return patientAttribute.equals( other.getPatientAttribute() ) && patient.equals( other.getPatient() );
-            
+        return aIsToB.equals( other.getaIsToB() ) && bIsToA.equals( other.getbIsToA() );
+
     }
 
     @Override
@@ -102,9 +91,9 @@ public class PatientAttributeValue
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + patientAttribute.hashCode();
-        result = result * prime + patient.hashCode();
-        
+        result = result * prime + aIsToB.hashCode();
+        result = result * prime + bIsToA.hashCode();
+
         return result;
     }
 
@@ -112,33 +101,68 @@ public class PatientAttributeValue
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public PatientAttribute getPatientAttribute()
+    /**
+     * @return the id
+     */
+    public int getId()
     {
-        return patientAttribute;
+        return id;
     }
 
-    public void setPatientAttribute( PatientAttribute patientAttribute )
+    /**
+     * @param id the id to set
+     */
+    public void setId( int id )
     {
-        this.patientAttribute = patientAttribute;
+        this.id = id;
     }
 
-    public Patient getPatient()
+    /**
+     * @return the aIsToB
+     */
+    public String getaIsToB()
     {
-        return patient;
+        return aIsToB;
     }
 
-    public void setPatient( Patient patient )
+    /**
+     * @param aIsToB the aIsToB to set
+     */
+    public void setaIsToB( String aIsToB )
     {
-        this.patient = patient;
+        this.aIsToB = aIsToB;
     }
 
-    public String getValue()
+    /**
+     * @return the bIsToA
+     */
+    public String getbIsToA()
     {
-        return value;
+        return bIsToA;
     }
 
-    public void setValue( String value )
+    /**
+     * @param bIsToA the bIsToA to set
+     */
+    public void setbIsToA( String bIsToA )
     {
-        this.value = value;
+        this.bIsToA = bIsToA;
     }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription()
+    {
+        return description;
+    }
+
 }

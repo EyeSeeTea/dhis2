@@ -2,53 +2,48 @@
 // View details
 // -----------------------------------------------------------------------------
 
-function showPatientAttributeDetails( patientAttributeId )
+function showRelationshipTypeDetails( relationshipTypeId )
 {
     var request = new Request();
-    request.setResponseTypeXML( 'patientAttribute' );
-    request.setCallbackSuccess( patientAttributeReceived );
-    request.send( 'getPatientAttribute.action?id=' + patientAttributeId );
+    request.setResponseTypeXML( 'relationshipType' );
+    request.setCallbackSuccess( relationshipTypeReceived );
+    request.send( 'getRelationshipTYpe.action?id=' + relationshipTypeId );
 }
 
-function patientAttributeReceived( patientAttributeElement )
+function relationshipTypeReceived( relationshipTypeElement )
 {
-	setFieldValue( 'idField', getElementValue( patientAttributeElement, 'id' ) );
-	setFieldValue( 'nameField', getElementValue( patientAttributeElement, 'name' ) );	
-    setFieldValue( 'descriptionField', getElementValue( patientAttributeElement, 'description' ) );
-    
-    var valueTypeMap = { 'int':i18n_number, 'bool':i18n_yes_no, 'string':i18n_text, 'date':i18n_date };
-    var valueType = getElementValue( patientAttributeElement, 'valueType' );    
-    
-    setFieldValue( 'valueTypeField', valueTypeMap[valueType] );    
+	setFieldValue( 'idField', getElementValue( relationshipTypeElement, 'id' ) );
+	setFieldValue( 'aIsToBField', getElementValue( relationshipTypeElement, 'aIsToB' ) );	
+	setFieldValue( 'bIsToAField', getElementValue( relationshipTypeElement, 'bIsToA' ) );       
+	setFieldValue( 'descriptionField', getElementValue( programElement, 'description' ) );
    
     showDetails();
 }
 
 // -----------------------------------------------------------------------------
-// Remove Patient Attribute
-// -----------------------------------------------------------------------------
-
-function removePatientAttribute( patientAttributeId, name )
+// Remove RelationshipType
+// -----------------------------------------------------------------------------		 
+function removeRelationshipType( relationshipTypeId, aIsToB, bIsToA )
 {
-    var result = window.confirm( i18n_confirm_delete + '\n\n' + name );
+    var result = window.confirm( i18n_confirm_delete + '\n\n' + aIsToB + ' ' + bIsToA );
     
     if ( result )
     {
     	var request = new Request();
         request.setResponseTypeXML( 'message' );
-        request.setCallbackSuccess( removePatientAttributeCompleted );
-        window.location.href = 'removePatientAttribute.action?id=' + patientAttributeId;
+        request.setCallbackSuccess( removeRelationshipTypeCompleted );
+        window.location.href = 'removeRelationshipType.action?id=' + relationshipTypeId;
     }
 }
 
-function removePatientAttributeCompleted( messageElement )
+function removeRelationshipTypeCompleted( messageElement )
 {
     var type = messageElement.getAttribute( 'type' );
     var message = messageElement.firstChild.nodeValue;
     
     if ( type == 'success' )
     {
-        window.location.href = 'patientAttribute.action';
+        window.location.href = 'relationshipType.action';
     }
     else if ( type = 'error' )
     {
@@ -59,14 +54,15 @@ function removePatientAttributeCompleted( messageElement )
 }
 
 // -----------------------------------------------------------------------------
-// Add Patient Attribute
+// Add RelationshipType
 // -----------------------------------------------------------------------------
 
-function validateAddPatientAttribute()
+function validateAddRelationshipType()
 {
 	
-	var url = 'validatePatientAttribute.action?' +
-			'nameField=' + getFieldValue( 'nameField' ) +			
+	var url = 'validateRelationshipType.action?' +
+			'aIsToB=' + getFieldValue( 'aIsToB' ) +			
+	        '&bIsToA=' + getFieldValue( 'bIsToA' ) +
 	        '&description=' + getFieldValue( 'description' );
 	
 	var request = new Request();
@@ -84,7 +80,7 @@ function addValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-        var form = document.getElementById( 'addPatientAttributeForm' );        
+        var form = document.getElementById( 'addRelationshipTypeForm' );        
         form.submit();
     }
     else if ( type == 'error' )
@@ -98,15 +94,16 @@ function addValidationCompleted( messageElement )
     }
 }
 // -----------------------------------------------------------------------------
-// Update Patient Attribute
+// Update RelationshipTYpe
 // -----------------------------------------------------------------------------
 
-function validateUpdatePatientAttribute()
+function validateUpdateRelationshipType()
 {
 	
-    var url = 'validatePatientAttribute.action?' + 
+    var url = 'validateRelationshipType.action?' + 
     		'id=' + getFieldValue( 'id' ) +
-    		'&nameField=' + getFieldValue( 'nameField' ) +			
+    		'&aIsToB=' + getFieldValue( 'aIsToB' ) +			
+	        '&bIsToA=' + getFieldValue( 'bIsToA' ) +
 	        '&description=' + getFieldValue( 'description' );
 	
 	var request = new Request();
@@ -125,7 +122,7 @@ function updateValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {
-    	var form = document.getElementById( 'updatePatientAttributeForm' );        
+    	var form = document.getElementById( 'updateRelationshipTypeForm' );        
         form.submit();
     }
     else if ( type == 'error' )

@@ -25,18 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.programstage;
+package org.hisp.dhis.patient.action.relationship;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.relationship.RelationshipType;
+import org.hisp.dhis.relationship.RelationshipTypeService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -44,32 +36,18 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class AddProgramStageAction
+public class UpdateRelationshipTypeAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private RelationshipTypeService relationshipTypeService;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
     {
-        this.programStageService = programStageService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
+        this.relationshipTypeService = relationshipTypeService;
     }
 
     // -------------------------------------------------------------------------
@@ -78,42 +56,30 @@ public class AddProgramStageAction
 
     private int id;
 
-    public int getId()
-    {
-        return id;
-    }
-
     public void setId( int id )
     {
         this.id = id;
     }
 
-    private String nameField;
+    private String aIsToB;
 
-    public void setNameField( String nameField )
+    public void setaIsToB( String aIsToB )
     {
-        this.nameField = nameField;
+        this.aIsToB = aIsToB;
     }
 
+    private String bIsToA;
+
+    public void setbIsToA( String bIsToA )
+    {
+        this.bIsToA = bIsToA;
+    }
+    
     private String description;
 
     public void setDescription( String description )
     {
         this.description = description;
-    }
-
-    private Integer minDaysFromStart;
-
-    public void setMinDaysFromStart( Integer minDaysFromStart )
-    {
-        this.minDaysFromStart = minDaysFromStart;
-    }
-
-    private Collection<String> selectedList = new HashSet<String>();
-
-    public void setSelectedList( Collection<String> selectedList )
-    {
-        this.selectedList = selectedList;
     }
 
     // -------------------------------------------------------------------------
@@ -123,33 +89,13 @@ public class AddProgramStageAction
     public String execute()
         throws Exception
     {
+        RelationshipType relationshipType = relationshipTypeService.getRelationshipType( id );
 
-        ProgramStage programStage = new ProgramStage();
+        relationshipType.setaIsToB( aIsToB );
+        relationshipType.setbIsToA( bIsToA );      
+        relationshipType.setDescription( description );
 
-        Program program = programService.getProgram( id );        
-
-        programStage.setProgram( program );
-        programStage.setName( nameField );
-        programStage.setDescription( description );
-
-        if ( minDaysFromStart == null )
-        {
-            minDaysFromStart = 0;
-        }
-       
-        Set<DataElement> dataElements = new HashSet<DataElement>();
-
-        for ( String id : selectedList )
-        {
-            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );
-
-            dataElements.add( dataElement );
-        }
-
-        programStage.setMinDaysFromStart( minDaysFromStart.intValue() );
-        programStage.setDataElements( dataElements );
-
-        programStageService.saveProgramStage( programStage );
+        relationshipTypeService.updateRelationshipType( relationshipType );
 
         return SUCCESS;
     }

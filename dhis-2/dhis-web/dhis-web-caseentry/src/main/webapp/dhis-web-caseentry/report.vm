@@ -23,12 +23,12 @@
                         <td>$encoder.htmlEncode( $programInstance.patient.getFullName() )</td>                    
                         #foreach( $programStageInstance in $programInstance.programStageInstances )
                             #if( $programStageInstance.executionDate )
-                                <td style="text-align:center">
+                                <td style="text-align:center" bgcolor="#00ff00">
                                     <a href="javascript:viewRecords( $programStageInstance.id )">
                                     $format.formatDate( $programStageInstance.executionDate )
                                 </td>
                             #else
-                                <td style="text-align:center">$format.formatDate( $programStageInstance.dueDate )</td>
+                                <td style="text-align:center" bgcolor="$colorMap.get( $programStageInstance.id )">$format.formatDate( $programStageInstance.dueDate ) </td>
                             #end
                         #end
                     </tr>
