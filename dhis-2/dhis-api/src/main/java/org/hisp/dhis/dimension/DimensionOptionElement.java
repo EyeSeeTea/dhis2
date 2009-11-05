@@ -27,28 +27,10 @@ package org.hisp.dhis.dimension;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.common.IdentifiableObject;
-
 /**
  * @author Lars Helge Overland
  */
-public abstract class Dimension
-    extends IdentifiableObject
+public interface DimensionOptionElement
 {
-    public abstract List<? extends DimensionOption> getDimensionOptions();
-
-    public DimensionOption getDimensionOption( DimensionOptionElement dimensionOptionElement )
-    {
-        for ( DimensionOption dimensionOption : getDimensionOptions() )
-        {
-            if ( dimensionOption.getDimensionOptionElements().contains( dimensionOptionElement ) )
-            {
-                return dimensionOption;
-            }
-        }
-        
-        return null;
-    }
+    String getName();
 }
