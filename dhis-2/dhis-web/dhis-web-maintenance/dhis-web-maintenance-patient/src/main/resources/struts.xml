@@ -14,7 +14,7 @@
       <param name="menu">/dhis-web-maintenance-patient/menu.vm</param> 
     </action>	  
     
-    <!-- Patient Relationship -->
+    <!-- Patient RelationshipType -->
     
     <action name="relationshipType" class="org.hisp.dhis.patient.action.relationship.GetRelationshipTypeListAction">      
       <result name="success" type="velocity">/main.vm</result>
@@ -29,12 +29,12 @@
     </action>
     
     <action name="removeRelationshipType" class="org.hisp.dhis.patient.action.relationship.RemoveRelationshipTypeAction">      
-      <result name="success" type="redirect">relationshipType.action</result>      
+      <result name="success" type="redirect">relationship.action</result>      
       <param name="requiredAuthorities">F_RELATIONSHIPTYPE_DELETE</param>      
     </action>
     
     <action name="addRelationshipType" class="org.hisp.dhis.patient.action.relationship.AddRelationshipTypeAction">
-      <result name="success" type="redirect">relationshipType.action</result>
+      <result name="success" type="redirect">relationship.action</result>
       <param name="requiredAuthorities">F_RELATIONSHIPTYPE_ADD</param>
     </action>
     
@@ -42,7 +42,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/addRelationshipTypeForm.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>      
-      <param name="javascripts">javascript/relationshipType.js</param>
+      <param name="javascripts">javascript/relationship.js</param>
       <param name="requiredAuthorities">F_RELATIONSHIPTYPE_ADD</param>      
     </action>
     
@@ -50,7 +50,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updateRelationshipTypeForm.vm</param>
       <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>      
-      <param name="javascripts">javascript/relationshipType.js</param>
+      <param name="javascripts">javascript/relationship.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>      
     </action>
     
@@ -65,6 +65,28 @@
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
+    
+    <!-- Relationship -->    
+    
+    <action name="showRelationshipList" class="org.hisp.dhis.patient.action.relationship.RelationshipListAction">      
+      <result name="success" type="velocity">/popup.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>            
+      <param name="javascripts">javascript/relationship.js</param>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_UPDATE</param>      
+    </action>
+    
+    <action name="showAddRelationshipForm" class="org.hisp.dhis.patient.action.relationship.ShowAddRelationshipFormAction">      
+      <result name="success" type="velocity">/popup.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/addRelationshipForm.vm</param>            
+      <param name="javascripts">javascript/relationship.js</param>
+      <param name="requiredAuthorities">F_RELATIONSHIP_ADD</param>      
+    </action>
+    
+    <action name="saveRelationship" class="org.hisp.dhis.patient.action.relationship.SaveRelationshipAction">      
+      <result name="success" type="velocity">status.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+      <param name="requiredAuthorities">F_RELATIONSHIP_ADD,F_RELATIONSHIP_UPDATE,F_RELATIONSHIP_DELETE</param>
+    </action>   
     
     <!-- PatientAttribute -->   
     

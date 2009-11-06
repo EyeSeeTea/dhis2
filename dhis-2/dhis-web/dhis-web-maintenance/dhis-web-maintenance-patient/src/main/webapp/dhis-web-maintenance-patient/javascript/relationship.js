@@ -94,7 +94,7 @@ function addValidationCompleted( messageElement )
     }
 }
 // -----------------------------------------------------------------------------
-// Update RelationshipTYpe
+// Update RelationshipType
 // -----------------------------------------------------------------------------
 
 function validateUpdateRelationshipType()
@@ -134,4 +134,13 @@ function updateValidationCompleted( messageElement )
         document.getElementById( 'message' ).innerHTML = message;
         document.getElementById( 'message' ).style.display = 'block';
     }
+}
+
+//------------------------------------------------------------------------------
+//Add Relationship
+//------------------------------------------------------------------------------
+
+function addRelationship( patientId )
+{
+	window.location = "showAddRelationshipForm.action?id=" + patientId;
 }

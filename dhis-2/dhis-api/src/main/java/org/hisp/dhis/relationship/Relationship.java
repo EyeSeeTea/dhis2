@@ -27,6 +27,7 @@
 package org.hisp.dhis.relationship;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.hisp.dhis.patient.Patient;
 
@@ -45,6 +46,8 @@ public class Relationship
     private RelationshipType relationshipType;
 
     private Patient patientB;
+    
+    private Date startDate;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -169,6 +172,22 @@ public class Relationship
     public void setPatientB( Patient patientB )
     {
         this.patientB = patientB;
+    }
+
+    /**
+     * @param date the date to set
+     */
+    public void setStartDate( Date startDate )
+    {
+        this.startDate = startDate;
+    }
+
+    /**
+     * @return the date
+     */
+    public Date getStartDate()
+    {
+        return startDate;
     }
 
 }

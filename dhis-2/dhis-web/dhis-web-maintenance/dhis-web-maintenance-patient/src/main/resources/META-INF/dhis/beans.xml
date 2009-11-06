@@ -58,6 +58,27 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">    
   </bean>
   
+  <!-- Relationship -->
+  
+  <bean id="org.hisp.dhis.patient.action.relationship.RelationshipListAction"
+    class="org.hisp.dhis.patient.action.relationship.RelationshipListAction" 
+    scope="prototype">    
+    <property name="relationshipService"
+      ref="org.hisp.dhis.relationship.RelationshipService"/>
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>           
+  </bean> 
+  
+  <bean id="org.hisp.dhis.patient.action.relationship.ShowAddRelationshipFormAction"
+    class="org.hisp.dhis.patient.action.relationship.ShowAddRelationshipFormAction" 
+    scope="prototype">    
+    <property name="relationshipTypeService"
+      ref="org.hisp.dhis.relationship.RelationshipTypeService"/>
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>           
+  </bean>
+  
+  
   <!-- PatientAttribute -->
   
   <bean id="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeListAction"

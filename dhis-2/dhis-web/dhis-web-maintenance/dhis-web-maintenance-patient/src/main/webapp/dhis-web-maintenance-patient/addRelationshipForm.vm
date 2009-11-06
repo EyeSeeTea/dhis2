@@ -1,0 +1,59 @@
+
+<p align="right">
+    <input type="button" value="$i18n.getString( "close" )" onclick="window.close()" style="width:10em">
+</p>
+
+<h3>$i18n.getString( "adding_new_relationship_for" )</h3>
+
+<form id="relationshipSelectForm" name="relationshipSelectForm" method="post" action="showProgramEnrollmentForm.action">
+
+<div>
+    <input type="hidden" id="patientAId" name="patientAId" value="$patient.id">    
+</div>
+
+<table>
+    <tr>
+        <td><strong>$i18n.getString( "full_name" ):</strong></td>
+        <td>           
+            $encoder.htmlEncode( $patient.getFullName() )  
+        </td>
+    </tr>
+    <tr>
+        <td><strong>$i18n.getString( "gender" ):</strong></td>
+        <td>            
+            $encoder.htmlEncode( $patient.gender )
+        </td>
+    </tr>    
+    <tr>
+        <td><strong>$i18n.getString( "date_of_birth" ):</strong></td>
+        <td>            
+            $format.formatDate( $patient.birthDate )
+        </td>
+    </tr>
+    <tr>
+        <td><strong>$i18n.getString( "age" ):</strong></td>
+        <td>            
+            $encoder.htmlEncode( $patient.getAge() )
+        </td>
+    </tr>    
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+    
+    <tr>
+        <td>$i18n.getString( "relationship" )</td>
+        <td>
+            <select id="relationshipTypeId" name="relationshipTypeId" onchange="document.getElementById( 'relationshipSelectForm' ).submit();" #if( $relationshipTypes.size() == 0 ) disabled="disabled" #end>
+                <option value="0">[$i18n.getString( "select" )]</option>
+                #foreach( $relationshipType in $relationshipTypes )
+                    <option value="$relationshipType.id" #if( $relationshipTypeId && $relationshipType.id == $relationshipTypeId ) selected="selected" #end>$encoder.htmlEncode( $relationshipType.aIsToB )/$encoder.htmlEncode( $relationshipType.bIsToA )</option>
+                #end
+            </select>
+        </td>
+    </tr>   
+        
+</table>
+
+</form>
+
+<span id="message"></span>
