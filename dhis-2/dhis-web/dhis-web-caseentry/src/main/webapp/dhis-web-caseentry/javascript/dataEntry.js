@@ -58,10 +58,10 @@ function showPatientDetails( patientId )
 }
 
 function patientReceived( patientElement )
-{   
- var identifiers = patientElement.getElementsByTagName( "identifier" );   
+{
+	var identifiers = patientElement.getElementsByTagName( "identifier" );   
  
- var identifierText = '';
+	var identifierText = '';
 	
 	for ( var i = 0; i < identifiers.length; i++ )
 	{		
@@ -72,7 +72,7 @@ function patientReceived( patientElement )
 	
 	var attributes = patientElement.getElementsByTagName( "attribute" );   
  
- var attributeValues = '';
+	var attributeValues = '';
 	
 	for ( var i = 0; i < attributes.length; i++ )
 	{		
@@ -81,9 +81,9 @@ function patientReceived( patientElement )
 	
 	setFieldValue( 'attributeField', attributeValues );
  
- var programs = patientElement.getElementsByTagName( "program" );   
+	var programs = patientElement.getElementsByTagName( "program" );   
  
- var programName = '';
+	var programName = '';
 	
 	for ( var i = 0; i < programs.length; i++ )
 	{		
@@ -92,7 +92,7 @@ function patientReceived( patientElement )
 	
 	setFieldValue( 'programField', programName );
 
- showDetails();
+	showDetails();
  
 }
 
@@ -106,17 +106,16 @@ function saveExecutionDate( programStageInstanceId, programStageInstanceName )
 	
 	field.style.backgroundColor = '#ffffcc';
 	
-	var dateSaver = new DateSaver( programStageInstanceId, field.value, '#ccffcc' );
-	dateSaver.save();
+	var executionDateSaver = new ExecutionDateSaver( programStageInstanceId, field.value, '#ccffcc' );
+	executionDateSaver.save();
   
 }
-
 
 //-----------------------------------------------------------------------------
 // Date Saver objects
 //-----------------------------------------------------------------------------
 
-function DateSaver( programStageInstanceId_, executionDate_, resultColor_ )
+function ExecutionDateSaver( programStageInstanceId_, executionDate_, resultColor_ )
 {
 	var SUCCESS = '#ccffcc';
 	var ERROR = '#ffcc00';
@@ -165,6 +164,72 @@ function DateSaver( programStageInstanceId_, executionDate_, resultColor_ )
 	}
 }
 
+//------------------------------------------------------------------------------
+//Save Execution Date
+//------------------------------------------------------------------------------
+
+function saveDateValue( dataElementId, dataElementName )
+{
+	var field = document.getElementById( 'value[' + dataElementId + '].date' );    
+    var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
+ 
+	var dateSaver = new DateSaver( dataElementId, field.value, providedByAnotherFacility, '#ccffcc' );
+	dateSaver.save();
+	
+}
+
+//-----------------------------------------------------------------------------
+//Date Saver objects
+//-----------------------------------------------------------------------------
+
+function DateSaver( dataElementId_, value_, providedByAnotherFacility_, resultColor_ )
+{
+	var SUCCESS = '#ccffcc';
+	var ERROR = '#ffcc00';
+	
+	var dataElementId = dataElementId_;	
+	var value = value_;
+	var providedByAnotherFacility = providedByAnotherFacility_;
+	var resultColor = resultColor_;		
+
+	this.save = function()
+	{
+		var request = new Request();
+		request.setCallbackSuccess( handleResponse );
+		request.setCallbackError( handleHttpError );
+		request.setResponseTypeXML( 'status' );		
+		request.send( 'saveDateValue.action?dataElementId=' + dataElementId + '&value=' + value + '&providedByAnotherFacility=' + providedByAnotherFacility );
+	};
+
+	function handleResponse( rootElement )
+	{
+		var codeElement = rootElement.getElementsByTagName( 'code' )[0];
+		var code = parseInt( codeElement.firstChild.nodeValue );
+
+		if ( code == 0 )
+		{
+			markValue( resultColor );                   
+		}
+		else
+		{
+			markValue( ERROR );
+			window.alert( i18n_invalid_date );
+		}
+	}
+
+	function handleHttpError( errorCode )
+	{
+		markValue( ERROR );
+		window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+	}   
+
+	function markValue( color )
+	{
+		var element = document.getElementById( 'value[' + dataElementId + '].date' );
+        
+		element.style.backgroundColor = color;
+	}
+}
 
 //------------------------------------------------------------------------------
 //Save providing facility

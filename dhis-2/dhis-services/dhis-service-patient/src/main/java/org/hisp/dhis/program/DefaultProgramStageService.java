@@ -28,7 +28,7 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericNameStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +45,9 @@ public class DefaultProgramStageService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericNameStore<ProgramStage> programStageStore;
+    private GenericIdentifiableObjectStore<ProgramStage> programStageStore;
 
-    public void setProgramStageStore( GenericNameStore<ProgramStage> programStageStore )
+    public void setProgramStageStore( GenericIdentifiableObjectStore<ProgramStage> programStageStore )
     {
         this.programStageStore = programStageStore;
     }

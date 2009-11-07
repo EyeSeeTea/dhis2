@@ -28,7 +28,7 @@ package org.hisp.dhis.patient;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericNameStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -43,9 +43,9 @@ public class DefaultPatientIdentifierTypeService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericNameStore<PatientIdentifierType> patientIdentifierTypeStore;
+    private GenericIdentifiableObjectStore<PatientIdentifierType> patientIdentifierTypeStore;
 
-    public void setPatientIdentifierTypeStore( GenericNameStore<PatientIdentifierType> patientIdentifierTypeStore )
+    public void setPatientIdentifierTypeStore( GenericIdentifiableObjectStore<PatientIdentifierType> patientIdentifierTypeStore )
     {
         this.patientIdentifierTypeStore = patientIdentifierTypeStore;
     }

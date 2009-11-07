@@ -54,7 +54,7 @@ public class DataElementStoreTest
     extends DhisSpringTest
 {
     private DataElementStore dataElementStore;
-
+    
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -64,6 +64,8 @@ public class DataElementStoreTest
         throws Exception
     {
         dataElementStore = (DataElementStore) getBean( DataElementStore.ID );
+        
+        dataElementService = (DataElementService) getBean( DataElementService.ID );
     }
 
     // -------------------------------------------------------------------------
@@ -80,6 +82,8 @@ public class DataElementStoreTest
         dataElement.setDescription( "DataElementDescription" + uniqueCharacter );
         dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
         dataElement.setType( DataElement.VALUE_TYPE_INT );
+        dataElement.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
+        
         return dataElement;
     }
     
@@ -132,13 +136,13 @@ public class DataElementStoreTest
         DataElement dataElementA = createDataElement( 'A' );
         int idA = dataElementStore.addDataElement( dataElementA );
         dataElementA = dataElementStore.getDataElement( idA );
-        assertEquals( DataElement.VALUE_TYPE_INT, dataElementA.getValueType() );
+        assertEquals( DataElement.VALUE_TYPE_INT, dataElementA.getType() );
 
-        dataElementA.setValueType( DataElement.VALUE_TYPE_BOOL );
+        dataElementA.setType( DataElement.VALUE_TYPE_BOOL );
         dataElementStore.updateDataElement( dataElementA );
         dataElementA = dataElementStore.getDataElement( idA );
-        assertNotNull( dataElementA.getValueType() );
-        assertEquals( DataElement.VALUE_TYPE_BOOL, dataElementA.getValueType() );
+        assertNotNull( dataElementA.getType() );
+        assertEquals( DataElement.VALUE_TYPE_BOOL, dataElementA.getType() );
     }
 
     @Test
@@ -331,10 +335,10 @@ public class DataElementStoreTest
         DataElement dataElementC = createDataElement( 'C' );
         DataElement dataElementD = createDataElement( 'D' );
         
-        dataElementA.setValueType( DataElement.VALUE_TYPE_INT );
-        dataElementB.setValueType( DataElement.VALUE_TYPE_BOOL );
-        dataElementC.setValueType( DataElement.VALUE_TYPE_STRING );
-        dataElementD.setValueType( DataElement.VALUE_TYPE_INT );
+        dataElementA.setType( DataElement.VALUE_TYPE_INT );
+        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
+        dataElementC.setType( DataElement.VALUE_TYPE_STRING );
+        dataElementD.setType( DataElement.VALUE_TYPE_INT );
 
         dataElementStore.addDataElement( dataElementA );
         dataElementStore.addDataElement( dataElementB );
@@ -413,31 +417,31 @@ public class DataElementStoreTest
     }
     
     @Test
-    public void testGetDataElementsByType()
+    public void testGetDataElementsByDomainType()
     {
-        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.TYPE_AGGREGATE ).size() );
-        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.TYPE_PATIENT ).size() );
+        assertEquals( 0, dataElementStore.getDataElementsByDomainType( DataElement.DOMAIN_TYPE_AGGREGATE ).size() );
+        assertEquals( 0, dataElementStore.getDataElementsByDomainType( DataElement.DOMAIN_TYPE_PATIENT ).size() );
 
         DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.TYPE_AGGREGATE );
+        dataElementA.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
         DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.TYPE_PATIENT );
+        dataElementB.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
         DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.TYPE_PATIENT );
+        dataElementC.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
         DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.TYPE_PATIENT );
+        dataElementD.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
 
         dataElementStore.addDataElement( dataElementA );
         dataElementStore.addDataElement( dataElementB );
         dataElementStore.addDataElement( dataElementC );
         dataElementStore.addDataElement( dataElementD );
 
-        assertEquals( 1, dataElementStore.getDataElementsByType( DataElement.TYPE_AGGREGATE ).size() );
-        assertEquals( 3, dataElementStore.getDataElementsByType( DataElement.TYPE_PATIENT ).size() );
+        assertEquals( 1, dataElementStore.getDataElementsByDomainType( DataElement.DOMAIN_TYPE_AGGREGATE ).size() );
+        assertEquals( 3, dataElementStore.getDataElementsByDomainType( DataElement.DOMAIN_TYPE_PATIENT ).size() );
     }
 
     @Test
-    public void testGetDataElementsByValueType()
+    public void testGetDataElementsByType()
     {
         assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
         assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
@@ -473,6 +477,33 @@ public class DataElementStoreTest
         assertNotNull( dataElementStore.getDataElement( idA ).getAggregationLevels() );
         assertEquals( 2, dataElementStore.getDataElement( idA ).getAggregationLevels().size() );
         assertEquals( aggregationLevels, dataElementStore.getDataElement( idA ).getAggregationLevels() );
+    }
+    
+    @Test
+    public void testGetDataElementsWithGroupSets()
+    {
+        DataElementGroupSet groupSetA = createDataElementGroupSet( 'A' );
+        
+        dataElementService.addDataElementGroupSet( groupSetA );
+        
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+        DataElement dataElementC = createDataElement( 'C' );
+        DataElement dataElementD = createDataElement( 'D' );
+        
+        dataElementB.getGroupSets().add( groupSetA );
+        dataElementD.getGroupSets().add( groupSetA );
+        
+        dataElementStore.addDataElement( dataElementA );
+        dataElementStore.addDataElement( dataElementB );
+        dataElementStore.addDataElement( dataElementC );
+        dataElementStore.addDataElement( dataElementD );
+        
+        Collection<DataElement> dataElements = dataElementStore.getDataElementsWithGroupSets();
+        
+        assertEquals( 2, dataElements.size() );
+        assertTrue( dataElements.contains( dataElementB ) );
+        assertTrue( dataElements.contains( dataElementD ) );        
     }
 
     // -------------------------------------------------------------------------

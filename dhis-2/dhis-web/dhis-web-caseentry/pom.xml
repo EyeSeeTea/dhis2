@@ -34,7 +34,7 @@
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-core</artifactId>
     </dependency>
-	<dependency>
+    <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-patient</artifactId>
 	  <version>${version}</version>

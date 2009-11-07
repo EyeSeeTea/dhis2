@@ -41,11 +41,11 @@
 		</td>
 	</tr>
 	<tr>
-		<td><label for="type">$i18n.getString( "type" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><label for="domainType">$i18n.getString( "domain_type" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
-			<select id="type" name="type" style="min-width:20em">
-				<option value="aggregate" #if( $dataElement.type == 'aggregate' ) selected="selected" #end>$i18n.getString( "aggregate" )</option>
-				<option value="patient" #if( $dataElement.type == 'patient' ) selected="selected" #end>$i18n.getString( "patient" )</option>				
+			<select id="domainType" name="domainType" style="min-width:20em">
+				<option value="aggregate" #if( $dataElement.getDomainTypeNullSafe() == 'aggregate' ) selected="selected" #end>$i18n.getString( "aggregate" )</option>
+				<option value="patient" #if( $dataElement.getDomainTypeNullSafe() == 'patient' ) selected="selected" #end>$i18n.getString( "patient" )</option>				
 			</select>
 		</td>
 	</tr>
@@ -53,10 +53,10 @@
 		<td><label for="valueType">$i18n.getString( "value_type" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select id="valueType" name="valueType" style="min-width:20em">
-				<option value="int" #if( $dataElement.valueType == 'int' ) selected="selected" #end>$i18n.getString( "number" )</option>
-				<option value="string" #if( $dataElement.valueType == 'string' ) selected="selected" #end>$i18n.getString( "text" )</option>
-				<option value="bool" #if( $dataElement.valueType == 'bool' ) selected="selected" #end>$i18n.getString( "yes_no" )</option>
-				<option value="date" #if( $dataElement.valueType == 'date' ) selected="selected" #end>$i18n.getString( "date" )</option>
+				<option value="int" #if( $dataElement.type == 'int' ) selected="selected" #end>$i18n.getString( "number" )</option>
+				<option value="string" #if( $dataElement.type == 'string' ) selected="selected" #end>$i18n.getString( "text" )</option>
+				<option value="bool" #if( $dataElement.type == 'bool' ) selected="selected" #end>$i18n.getString( "yes_no" )</option>
+				<option value="date" #if( $dataElement.type == 'date' ) selected="selected" #end>$i18n.getString( "date" )</option>
 			</select>
 		</td>
 	</tr>
@@ -153,6 +153,53 @@
 	</tr>
 </table>
 #end
+
+<table>
+    <tr>
+        <td style="height:10px" colspan="2"></td>
+    </tr>
+    <tr>
+        <td style="width:200px">$i18n.getString( "data_element_group_sets" )</td>
+        <td><input type="checkbox" onclick="toggleById( 'dataElementGroupSetContainer' )"></td>
+    </tr>
+</table>
+
+<div id="dataElementGroupSetContainer" style="border:1px solid #808080; padding:10px; width:465px; display:none;">
+
+<table>
+    <tr>
+        <th style="width:450px">$i18n.getString( "available_data_element_group_sets" )</th>
+    </tr>
+    <tr>
+        <td>
+            <select multiple size="4" id="availableDataElementGroupSets" style="width:450px" ondblclick="moveSelectedById( 'availableDataElementGroupSets', 'dataElementGroupSets' )">
+            #foreach( $groupSet in $dataElementGroupSets )
+                <option value="$groupSet.id">$encoder.htmlEncode( $groupSet.name )</option>
+            #end
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="$i18n.getString( 'add_selected' )" title="$i18n.getString( 'add' )" style="width:120px" onclick="moveSelectedById( 'availableDataElementGroupSets', 'dataElementGroupSets' )"><input 
+                   type="button" value="$i18n.getString( 'remove_selected' )" title="$i18n.getString( 'remove' )" style="width:120px" onclick="moveSelectedById( 'dataElementGroupSets', 'availableDataElementGroupSets' )">
+        </td>
+    </tr>
+    <tr>
+        <th style="width:450px">$i18n.getString( "selected_data_element_group_sets" )</th>
+    </tr>
+    </tr>
+        <td>
+            <select multiple size="4" id="dataElementGroupSets" name="dataElementGroupSets" style="width:450px" ondblclick="moveSelectedById( 'dataElementGroupSets', 'availableDataElementGroupSets' )">
+            #foreach( $groupSet in $dataElement.groupSets )
+            	<option value="$groupSet.id">$encoder.htmlEncode( $groupSet.name )</option>
+            #end
+            </select>
+        </td>
+    </tr>
+</table>
+
+</div>
 
 <table>
     <tr>

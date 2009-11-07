@@ -115,7 +115,27 @@ public class Indicator
     {
         return new ArrayList<DimensionOption>( groups );
     }
-
+    
+    public List<? extends DimensionOptionElement> getDimensionOptionElements()
+    {
+        List<DimensionOptionElement> dimensionOptionElements = new ArrayList<DimensionOptionElement>();
+        
+        for ( Dimension dimension : getDimensions() )
+        {
+            for ( DimensionOption dimensionOption : dimension.getDimensionOptions() )
+            {
+                dimensionOptionElements.addAll( dimensionOption.getDimensionOptionElements() );
+            }
+        }
+        
+        return dimensionOptionElements;
+    }
+    
+    public String getDimensionSetType()
+    {
+        return Indicator.class.getSimpleName().toUpperCase();
+    }
+    
     public boolean isDimensionSet()
     {
         return groupSets != null && groupSets.size() > 0;

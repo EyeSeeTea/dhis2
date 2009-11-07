@@ -89,6 +89,11 @@
       <param name="onExceptionReturn">plainTextError</param>      
     </action>
     
+    <action name="saveDateValue" class="org.hisp.dhis.caseentry.action.caseentry.SaveDateValueAction">
+      <result name="success" type="velocity">status.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>
+    
     <action name="saveProvidingFacility" class="org.hisp.dhis.caseentry.action.caseentry.SaveProvidingFacilityAction">
       <result name="success" type="velocity">status.vm</result>
       <result name="input" type="velocity">status.vm</result>

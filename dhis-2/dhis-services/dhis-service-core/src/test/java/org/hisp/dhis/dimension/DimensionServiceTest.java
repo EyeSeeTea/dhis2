@@ -27,15 +27,16 @@ package org.hisp.dhis.dimension;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import java.util.Collection;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.junit.Test;
-
-import static junit.framework.Assert.*;
 
 /**
  * @author Lars Helge Overland
@@ -49,6 +50,9 @@ public class DimensionServiceTest
     private DataElementGroupSet dataElementGroupSetA;
     private DataElementGroupSet dataElementGroupSetB;
     
+    private DataElement dataElementA;    
+    private DataElement dataElementB;
+    
     @Override
     public void setUpTest()
     {
@@ -60,17 +64,24 @@ public class DimensionServiceTest
         dataElementGroupSetB = new DataElementGroupSet( "DataElementGroupSetB" );
         
         dataElementService.addDataElementGroupSet( dataElementGroupSetA );
-        dataElementService.addDataElementGroupSet( dataElementGroupSetB );        
+        dataElementService.addDataElementGroupSet( dataElementGroupSetB );
+        
+        dataElementA = createDataElement( 'A' );
+        dataElementB = createDataElement( 'B' );
+        
+        dataElementA.getGroupSets().add( dataElementGroupSetA );
+        dataElementA.getGroupSets().add( dataElementGroupSetA );
+        
+        dataElementService.addDataElement( dataElementA );
+        dataElementService.addDataElement( dataElementB );
     }
     
     @Test
     public void getDimensions()
     {
-        Collection<Dimension> dimensions = dimensionService.getAllDimensions();
+        Collection<DimensionSet> dimensionSets = dimensionService.getAllDimensionSets();
         
-        assertNotNull( dimensions );
-        assertEquals( 3, dimensions.size() ); // Including default
-        assertTrue( dimensions.contains( dataElementGroupSetA ) );
-        assertTrue( dimensions.contains( dataElementGroupSetB ) );
+        assertTrue( dimensionSets.contains( dataElementA ) );
+        assertFalse( dimensionSets.contains( dataElementB ) );
     }
 }

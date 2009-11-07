@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.common.GenericNameStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,9 +47,9 @@ public class DefaultProgramService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericNameStore<Program> programStore;
+    private GenericIdentifiableObjectStore<Program> programStore;
 
-    public void setProgramStore( GenericNameStore<Program> programStore )
+    public void setProgramStore( GenericIdentifiableObjectStore<Program> programStore )
     {
         this.programStore = programStore;
     }

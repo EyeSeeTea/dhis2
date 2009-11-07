@@ -1,4 +1,5 @@
-package org.hisp.dhis.dd.action.dataelementgroupset;
+package org.hisp.dhis.common.comparator;
+
 /*
  * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
@@ -26,54 +27,18 @@ package org.hisp.dhis.dd.action.dataelementgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.dataelement.DataElementService;
+import java.util.Comparator;
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.IdentifiableObject;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id$
+ * @author Lars Helge Overland
  */
-public class GetDataElementGroupSetAction
-   implements Action
+public class IdentifiableObjectNameComparator
+    implements Comparator<IdentifiableObject>
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
+    public int compare( IdentifiableObject object0, IdentifiableObject object1 )
     {
-        this.dataElementService = dataElementService;
-    }
-       
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-    
-    private DataElementGroupSet dataElementGroupSet;
-    
-    public DataElementGroupSet getDataElementGroupSet()
-    {
-        return dataElementGroupSet;
-    }
-
-    public String execute()
-        throws Exception
-    {
-
-        dataElementGroupSet = dataElementService.getDataElementGroupSet( id  );       
-       
-
-        return SUCCESS;
+        return object0.getName().compareTo( object1.getName() );
     }
 }

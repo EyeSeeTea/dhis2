@@ -130,7 +130,8 @@ public class ViewRecordsAction
 
         for ( PatientDataValue patientDataValue : patientDataValues )
         {
-            if ( patientDataValue.getDataElement().getType().equalsIgnoreCase( "string" ) )
+            if ( patientDataValue.getDataElement().getType().equalsIgnoreCase( "string" )
+                && patientDataValue.getDataElement().isMultiDimensional() )
             {
                 DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
                     .getDataElementCategoryOptionCombo( Integer.parseInt( patientDataValue.getValue() ) );
