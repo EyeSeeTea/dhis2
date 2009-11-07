@@ -26,10 +26,7 @@
  */
 package org.hisp.dhis.reportexcel.item.action;
 
-import java.util.Set;
 
-import org.amplecode.quick.StatementManager;
-import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
 import org.hisp.dhis.reportexcel.ReportExcelService;
 
@@ -47,8 +44,6 @@ public class AddReportExcelItemAction
     // -------------------------------------------
 
     private ReportExcelService reportService;
-
-    private StatementManager statementManager;
 
     // -------------------------------------------
     // Input & Output
@@ -79,12 +74,7 @@ public class AddReportExcelItemAction
     public void setReportService( ReportExcelService reportService )
     {
         this.reportService = reportService;
-    }
-
-    public void setStatementManager( StatementManager statementManager )
-    {
-        this.statementManager = statementManager;
-    }
+    }   
 
     public void setSheetNo( Integer sheetNo )
     {
@@ -138,8 +128,7 @@ public class AddReportExcelItemAction
 
     public String execute()
         throws Exception
-    {
-        statementManager.initialise();
+    {        
 
         reportItem = new ReportExcelItem();
         reportItem.setName( name );
@@ -152,19 +141,8 @@ public class AddReportExcelItemAction
         reportItem.setReportExcel( reportService.getReportExcel( reportId ) );
         
 
-        reportService.addReportExcelItem( reportItem );
-//
-//        ReportExcel reportExcel = reportService.getReportExcel( reportId );
-//
-//        Set<ReportExcelItem> reportItems = reportExcel.getReportExcelItems();
-//
-//        reportItems.add( reportItem );
-//
-//        reportExcel.setReportExcelItems( reportItems );
-//
-//        reportService.updateReportExcel( reportExcel );
-        
-        statementManager.destroy();
+        reportService.addReportExcelItem( reportItem );        
+       
 
         return SUCCESS;
     }

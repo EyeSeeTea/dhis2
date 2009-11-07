@@ -30,8 +30,10 @@ package org.hisp.dhis.dataelement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.common.DimensionOption;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
 
 /**
  * @author Abyot Asalefew
@@ -60,6 +62,24 @@ public class DataElementCategoryOption
     public DataElementCategoryOption( String name )
     {
     	this.name = name;
+    }
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    public List<? extends DimensionOptionElement> getDimensionOptionElements()
+    {
+        return categoryOptionCombos;
+    }
+
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public Dimension getDimension()
+    {
+        return category;
     }
     
     // -------------------------------------------------------------------------

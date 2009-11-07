@@ -29,8 +29,10 @@ package org.hisp.dhis.indicator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.UUIdUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +55,27 @@ public class DefaultIndicatorService
     {
         this.indicatorStore = indicatorStore;
     }
+    
+    private GenericIdentifiableObjectStore<IndicatorType> indicatorTypeStore;
+    
+    public void setIndicatorTypeStore( GenericIdentifiableObjectStore<IndicatorType> indicatorTypeStore )
+    {
+        this.indicatorTypeStore = indicatorTypeStore;
+    }
+
+    private GenericIdentifiableObjectStore<IndicatorGroup> indicatorGroupStore;
+
+    public void setIndicatorGroupStore( GenericIdentifiableObjectStore<IndicatorGroup> indicatorGroupStore )
+    {
+        this.indicatorGroupStore = indicatorGroupStore;
+    }
+
+    private GenericIdentifiableObjectStore<IndicatorGroupSet> indicatorGroupSetStore;
+
+    public void setIndicatorGroupSetStore( GenericIdentifiableObjectStore<IndicatorGroupSet> indicatorGroupSetStore )
+    {
+        this.indicatorGroupSetStore = indicatorGroupSetStore;
+    }
 
     private I18nService i18nService;
 
@@ -72,6 +95,8 @@ public class DefaultIndicatorService
             indicator.setUuid( UUIdUtils.getUUId() );            
         }
         
+        indicator.setLastUpdated( new Date() );
+        
         int id = indicatorStore.addIndicator( indicator );
         
         i18nService.addObject( indicator );
@@ -81,6 +106,8 @@ public class DefaultIndicatorService
 
     public void updateIndicator( Indicator indicator )
     {
+        indicator.setLastUpdated( new Date() );
+        
         indicatorStore.updateIndicator( indicator );
         
         i18nService.verify( indicator );
@@ -151,7 +178,7 @@ public class DefaultIndicatorService
 
     public int addIndicatorType( IndicatorType indicatorType )
     {
-        int id = indicatorStore.addIndicatorType( indicatorType );
+        int id = indicatorTypeStore.save( indicatorType );
         
         i18nService.addObject( indicatorType );
         
@@ -160,7 +187,7 @@ public class DefaultIndicatorService
     
     public void updateIndicatorType( IndicatorType indicatorType )
     {
-        indicatorStore.updateIndicatorType( indicatorType );
+        indicatorTypeStore.update( indicatorType );
         
         i18nService.verify( indicatorType );
     }
@@ -169,12 +196,12 @@ public class DefaultIndicatorService
     {
         i18nService.removeObject( indicatorType );
         
-        indicatorStore.deleteIndicatorType( indicatorType );
+        indicatorTypeStore.delete( indicatorType );
     }
 
     public IndicatorType getIndicatorType( int id )
     {
-        return indicatorStore.getIndicatorType( id );
+        return indicatorTypeStore.get( id );
     }
     
     public Collection<IndicatorType> getIndicatorTypes( Collection<Integer> identifiers )
@@ -196,12 +223,12 @@ public class DefaultIndicatorService
     
     public Collection<IndicatorType> getAllIndicatorTypes()
     {
-        return indicatorStore.getAllIndicatorTypes();
+        return indicatorTypeStore.getAll();
     }
     
     public IndicatorType getIndicatorTypeByName( String name )
     {
-        return indicatorStore.getIndicatorTypeByName( name );
+        return indicatorTypeStore.getByName( name );
     }    
 
     // -------------------------------------------------------------------------
@@ -215,7 +242,7 @@ public class DefaultIndicatorService
             indicatorGroup.setUuid( UUIdUtils.getUUId() );
         }
         
-        int id = indicatorStore.addIndicatorGroup( indicatorGroup );
+        int id = indicatorGroupStore.save( indicatorGroup );
         
         i18nService.addObject( indicatorGroup );
         
@@ -224,7 +251,7 @@ public class DefaultIndicatorService
     
     public void updateIndicatorGroup( IndicatorGroup indicatorGroup )
     {
-        indicatorStore.updateIndicatorGroup( indicatorGroup );
+        indicatorGroupStore.update( indicatorGroup );
         
         i18nService.verify( indicatorGroup );
     }
@@ -233,12 +260,12 @@ public class DefaultIndicatorService
     {
         i18nService.removeObject( indicatorGroup );
         
-        indicatorStore.deleteIndicatorGroup( indicatorGroup );
+        indicatorGroupStore.delete( indicatorGroup );
     }
     
     public IndicatorGroup getIndicatorGroup( int id )
     {
-        return indicatorStore.getIndicatorGroup( id );
+        return indicatorGroupStore.get( id );
     }
     
     public Collection<IndicatorGroup> getIndicatorGroups( Collection<Integer> identifiers )
@@ -260,17 +287,17 @@ public class DefaultIndicatorService
     
     public IndicatorGroup getIndicatorGroup( String uuid )
     {
-        return indicatorStore.getIndicatorGroup( uuid );
+        return indicatorGroupStore.getByUuid( uuid );
     }
     
     public Collection<IndicatorGroup> getAllIndicatorGroups()
     {
-        return indicatorStore.getAllIndicatorGroups();
+        return indicatorGroupStore.getAll();
     }
     
     public IndicatorGroup getIndicatorGroupByName( String name )
     {
-        return indicatorStore.getIndicatorGroupByName( name );
+        return indicatorGroupStore.getByName( name );
     }
 
     public Collection<IndicatorGroup> getGroupsContainingIndicator( Indicator indicator )
@@ -290,5 +317,56 @@ public class DefaultIndicatorService
         }
         
         return groups;       
+    }
+
+    // -------------------------------------------------------------------------
+    // IndicatorGroupSet
+    // -------------------------------------------------------------------------
+
+    public int addIndicatorGroupSet( IndicatorGroupSet groupSet )
+    {
+        return indicatorGroupSetStore.save( groupSet );
+    }
+    
+    public void updateIndicatorGroupSet( IndicatorGroupSet groupSet )
+    {
+        indicatorGroupSetStore.update( groupSet );
+    }
+    
+    public void deleteIndicatorGroupSet( IndicatorGroupSet groupSet )
+    {
+        indicatorGroupSetStore.delete( groupSet );
+    }
+    
+    public IndicatorGroupSet getIndicatorGroupSet( int id )
+    {
+        return indicatorGroupSetStore.get( id );
+    }
+
+    public IndicatorGroupSet getIndicatorGroupSetByName( String name )
+    {
+        return indicatorGroupSetStore.getByName( name );
+    }
+    
+    public Collection<IndicatorGroupSet> getAllIndicatorGroupSets()
+    {
+        return indicatorGroupSetStore.getAll();
+    }
+    
+    public Collection<IndicatorGroupSet> getIndicatorGroupSets( Collection<Integer> identifiers )
+    {
+        if ( identifiers == null )
+        {
+            return getAllIndicatorGroupSets();
+        }
+        
+        Collection<IndicatorGroupSet> groupSets = new ArrayList<IndicatorGroupSet>();
+        
+        for ( Integer id : identifiers )
+        {
+            groupSets.add( getIndicatorGroupSet( id ) );
+        }
+        
+        return groupSets;       
     }
 }

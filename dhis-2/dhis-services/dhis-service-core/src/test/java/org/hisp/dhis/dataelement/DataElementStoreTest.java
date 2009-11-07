@@ -79,7 +79,7 @@ public class DataElementStoreTest
         dataElement.setCode( "Code" + uniqueCharacter );
         dataElement.setDescription( "DataElementDescription" + uniqueCharacter );
         dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
-        dataElement.setType( DataElement.TYPE_INT );
+        dataElement.setType( DataElement.VALUE_TYPE_INT );
         return dataElement;
     }
     
@@ -132,13 +132,13 @@ public class DataElementStoreTest
         DataElement dataElementA = createDataElement( 'A' );
         int idA = dataElementStore.addDataElement( dataElementA );
         dataElementA = dataElementStore.getDataElement( idA );
-        assertEquals( DataElement.TYPE_INT, dataElementA.getType() );
+        assertEquals( DataElement.VALUE_TYPE_INT, dataElementA.getValueType() );
 
-        dataElementA.setType( DataElement.TYPE_BOOL );
+        dataElementA.setValueType( DataElement.VALUE_TYPE_BOOL );
         dataElementStore.updateDataElement( dataElementA );
         dataElementA = dataElementStore.getDataElement( idA );
-        assertNotNull( dataElementA.getType() );
-        assertEquals( DataElement.TYPE_BOOL, dataElementA.getType() );
+        assertNotNull( dataElementA.getValueType() );
+        assertEquals( DataElement.VALUE_TYPE_BOOL, dataElementA.getValueType() );
     }
 
     @Test
@@ -331,10 +331,10 @@ public class DataElementStoreTest
         DataElement dataElementC = createDataElement( 'C' );
         DataElement dataElementD = createDataElement( 'D' );
         
-        dataElementA.setType( DataElement.TYPE_INT );
-        dataElementB.setType( DataElement.TYPE_BOOL );
-        dataElementC.setType( DataElement.TYPE_STRING );
-        dataElementD.setType( DataElement.TYPE_INT );
+        dataElementA.setValueType( DataElement.VALUE_TYPE_INT );
+        dataElementB.setValueType( DataElement.VALUE_TYPE_BOOL );
+        dataElementC.setValueType( DataElement.VALUE_TYPE_STRING );
+        dataElementD.setValueType( DataElement.VALUE_TYPE_INT );
 
         dataElementStore.addDataElement( dataElementA );
         dataElementStore.addDataElement( dataElementB );
@@ -411,29 +411,53 @@ public class DataElementStoreTest
         assertEquals( 3, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
             .size() );
     }
-
+    
     @Test
     public void testGetDataElementsByType()
     {
-        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.TYPE_INT ).size() );
-        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.TYPE_BOOL ).size() );
+        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.TYPE_AGGREGATE ).size() );
+        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.TYPE_PATIENT ).size() );
 
         DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.TYPE_INT );
+        dataElementA.setType( DataElement.TYPE_AGGREGATE );
         DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.TYPE_BOOL );
+        dataElementB.setType( DataElement.TYPE_PATIENT );
         DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.TYPE_BOOL );
+        dataElementC.setType( DataElement.TYPE_PATIENT );
         DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.TYPE_BOOL );
+        dataElementD.setType( DataElement.TYPE_PATIENT );
 
         dataElementStore.addDataElement( dataElementA );
         dataElementStore.addDataElement( dataElementB );
         dataElementStore.addDataElement( dataElementC );
         dataElementStore.addDataElement( dataElementD );
 
-        assertEquals( 1, dataElementStore.getDataElementsByType( DataElement.TYPE_INT ).size() );
-        assertEquals( 3, dataElementStore.getDataElementsByType( DataElement.TYPE_BOOL ).size() );
+        assertEquals( 1, dataElementStore.getDataElementsByType( DataElement.TYPE_AGGREGATE ).size() );
+        assertEquals( 3, dataElementStore.getDataElementsByType( DataElement.TYPE_PATIENT ).size() );
+    }
+
+    @Test
+    public void testGetDataElementsByValueType()
+    {
+        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
+        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
+
+        DataElement dataElementA = createDataElement( 'A' );
+        dataElementA.setType( DataElement.VALUE_TYPE_INT );
+        DataElement dataElementB = createDataElement( 'B' );
+        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
+        DataElement dataElementC = createDataElement( 'C' );
+        dataElementC.setType( DataElement.VALUE_TYPE_BOOL );
+        DataElement dataElementD = createDataElement( 'D' );
+        dataElementD.setType( DataElement.VALUE_TYPE_BOOL );
+
+        dataElementStore.addDataElement( dataElementA );
+        dataElementStore.addDataElement( dataElementB );
+        dataElementStore.addDataElement( dataElementC );
+        dataElementStore.addDataElement( dataElementD );
+
+        assertEquals( 1, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
+        assertEquals( 3, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
     }
 
     @Test
@@ -528,183 +552,5 @@ public class DataElementStoreTest
         dataElements.add(deE);
         cdes = dataElementStore.getCalculatedDataElementsByDataElements( dataElements );
         assertEquals( 2, cdes.size() );
-    }
-    
-    // -------------------------------------------------------------------------
-    // DataElementGroup
-    // -------------------------------------------------------------------------
-
-    @Test
-    public void testAddDataElementGroup()
-    {
-        DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
-        DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
-        DataElementGroup dataElementGroupC = new DataElementGroup( "DataElementGroupC" );
-        DataElementGroup dataElementGroupD = new DataElementGroup( "DataElementGroupA" );
-        
-        int idA = dataElementStore.addDataElementGroup( dataElementGroupA );
-        int idB = dataElementStore.addDataElementGroup( dataElementGroupB );
-        int idC = dataElementStore.addDataElementGroup( dataElementGroupC );
-
-        try
-        {
-            // Should give unique constraint violation
-            dataElementStore.addDataElementGroup( dataElementGroupD );
-            fail();
-        }
-        catch ( Exception e )
-        {
-            // Expected
-        }
-
-        dataElementGroupA = dataElementStore.getDataElementGroup( idA );
-        assertNotNull( dataElementGroupA );
-        assertEquals( idA, dataElementGroupA.getId() );
-        assertEquals( "DataElementGroupA", dataElementGroupA.getName() );
-
-        dataElementGroupB = dataElementStore.getDataElementGroup( idB );
-        assertNotNull( dataElementGroupB );
-        assertEquals( idB, dataElementGroupB.getId() );
-        assertEquals( "DataElementGroupB", dataElementGroupB.getName() );
-
-        dataElementGroupC = dataElementStore.getDataElementGroup( idC );
-        assertNotNull( dataElementGroupC );
-        assertEquals( idC, dataElementGroupC.getId() );
-        assertEquals( "DataElementGroupC", dataElementGroupC.getName() );
-    }
-
-    @Test
-    public void testUpdateDataElementGroup()
-    {
-        DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
-        DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
-        DataElementGroup dataElementGroupC = new DataElementGroup( "DataElementGroupC" );
-
-        int idA = dataElementStore.addDataElementGroup( dataElementGroupA );
-        int idB = dataElementStore.addDataElementGroup( dataElementGroupB );
-        int idC = dataElementStore.addDataElementGroup( dataElementGroupC );
-
-        dataElementGroupA = dataElementStore.getDataElementGroup( idA );
-        assertNotNull( dataElementGroupA );
-        assertEquals( idA, dataElementGroupA.getId() );
-        assertEquals( "DataElementGroupA", dataElementGroupA.getName() );
-
-        dataElementGroupA.setName( "DataElementGroupAA" );
-        dataElementStore.updateDataElementGroup( dataElementGroupA );
-
-        dataElementGroupA = dataElementStore.getDataElementGroup( idA );
-        assertNotNull( dataElementGroupA );
-        assertEquals( idA, dataElementGroupA.getId() );
-        assertEquals( "DataElementGroupAA", dataElementGroupA.getName() );
-
-        dataElementGroupB = dataElementStore.getDataElementGroup( idB );
-        assertNotNull( dataElementGroupB );
-        assertEquals( idB, dataElementGroupB.getId() );
-        assertEquals( "DataElementGroupB", dataElementGroupB.getName() );
-
-        dataElementGroupC = dataElementStore.getDataElementGroup( idC );
-        assertNotNull( dataElementGroupC );
-        assertEquals( idC, dataElementGroupC.getId() );
-        assertEquals( "DataElementGroupC", dataElementGroupC.getName() );
-    }
-
-    @Test
-    public void testDeleteAndGetDataElementGroup()
-    {
-        DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
-        DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
-        DataElementGroup dataElementGroupC = new DataElementGroup( "DataElementGroupC" );
-        DataElementGroup dataElementGroupD = new DataElementGroup( "DataElementGroupD" );
-
-        int idA = dataElementStore.addDataElementGroup( dataElementGroupA );
-        int idB = dataElementStore.addDataElementGroup( dataElementGroupB );
-        int idC = dataElementStore.addDataElementGroup( dataElementGroupC );
-        int idD = dataElementStore.addDataElementGroup( dataElementGroupD );
-
-        assertNotNull( dataElementStore.getDataElementGroup( idA ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idB ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idC ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idD ) );
-
-        dataElementStore.deleteDataElementGroup( dataElementGroupA );
-        assertNull( dataElementStore.getDataElementGroup( idA ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idB ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idC ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idD ) );
-
-        dataElementStore.deleteDataElementGroup( dataElementGroupB );
-        assertNull( dataElementStore.getDataElementGroup( idA ) );
-        assertNull( dataElementStore.getDataElementGroup( idB ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idC ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idD ) );
-
-        dataElementStore.deleteDataElementGroup( dataElementGroupC );
-        assertNull( dataElementStore.getDataElementGroup( idA ) );
-        assertNull( dataElementStore.getDataElementGroup( idB ) );
-        assertNull( dataElementStore.getDataElementGroup( idC ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idD ) );
-
-        dataElementStore.deleteDataElementGroup( dataElementGroupD );
-        assertNull( dataElementStore.getDataElementGroup( idA ) );
-        assertNull( dataElementStore.getDataElementGroup( idB ) );
-        assertNull( dataElementStore.getDataElementGroup( idC ) );
-        assertNull( dataElementStore.getDataElementGroup( idD ) );
-    }
-
-    @Test
-    public void testGetDataElementGroupByUUID()
-    {
-        String uuid = UUIdUtils.getUUId();
-        
-        DataElementGroup groupA = new DataElementGroup( "groupA" );
-        groupA.setUuid( uuid );
-        
-        dataElementStore.addDataElementGroup( groupA );
-        
-        groupA = dataElementStore.getDataElementGroup( uuid );
-        
-        assertNotNull( groupA );
-        assertEquals( groupA.getUuid(), uuid );
-    }
-
-    @Test
-    public void testGetDataElementGroupByName()
-    {
-        DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
-        DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
-        int idA = dataElementStore.addDataElementGroup( dataElementGroupA );
-        int idB = dataElementStore.addDataElementGroup( dataElementGroupB );
-
-        assertNotNull( dataElementStore.getDataElementGroup( idA ) );
-        assertNotNull( dataElementStore.getDataElementGroup( idB ) );
-
-        dataElementGroupA = dataElementStore.getDataElementGroupByName( "DataElementGroupA" );
-        assertNotNull( dataElementGroupA );
-        assertEquals( idA, dataElementGroupA.getId() );
-        assertEquals( "DataElementGroupA", dataElementGroupA.getName() );
-
-        dataElementGroupB = dataElementStore.getDataElementGroupByName( "DataElementGroupB" );
-        assertNotNull( dataElementGroupB );
-        assertEquals( idB, dataElementGroupB.getId() );
-        assertEquals( "DataElementGroupB", dataElementGroupB.getName() );
-
-        DataElementGroup dataElementGroupC = dataElementStore.getDataElementGroupByName( "DataElementGroupC" );
-        assertNull( dataElementGroupC );
-    }
-
-    @Test
-    public void testGetAllDataElementGroups()
-        throws Exception
-    {
-        DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
-        DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
-        dataElementStore.addDataElementGroup( dataElementGroupA );
-        dataElementStore.addDataElementGroup( dataElementGroupB );
-
-        Collection<DataElementGroup> groups = dataElementStore.getAllDataElementGroups();
-        
-        assertTrue( groups.size() == 2 );
-        assertTrue( groups.contains( dataElementGroupA ) );
-        assertTrue( groups.contains( dataElementGroupB ) );
     }
 }

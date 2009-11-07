@@ -107,6 +107,8 @@ public class IndicatorBatchHandler
         statementBuilder.setColumn( "denominatordescription" );
         statementBuilder.setColumn( "denominatoraggregationtype" );
         statementBuilder.setColumn( "extendeddataelementid" );
+        statementBuilder.setColumn( "sortorder" );
+        statementBuilder.setColumn( "lastUpdated" );
     }
     
     protected void setValues( Indicator indicator )
@@ -126,5 +128,7 @@ public class IndicatorBatchHandler
         statementBuilder.setValue( indicator.getDenominatorDescription() );
         statementBuilder.setValue( indicator.getDenominatorAggregationOperator() );
         statementBuilder.setValue( indicator.getExtended() != null ? indicator.getExtended().getId() : null );
+        statementBuilder.setValue( indicator.getSortOrder() );
+        statementBuilder.setValue( indicator.getLastUpdated() );
     }
 }

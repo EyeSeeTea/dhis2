@@ -37,10 +37,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hisp.dhis.common.GenericNameStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.system.util.UUIdUtils;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.system.util.UUIdUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -55,23 +55,23 @@ public class DefaultDataElementCategoryService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericNameStore<DataElementCategory> dataElementCategoryStore;
+    private GenericIdentifiableObjectStore<DataElementCategory> dataElementCategoryStore;
 
-    public void setDataElementCategoryStore( GenericNameStore<DataElementCategory> dataElementCategoryStore )
+    public void setDataElementCategoryStore( GenericIdentifiableObjectStore<DataElementCategory> dataElementCategoryStore )
     {
         this.dataElementCategoryStore = dataElementCategoryStore;
     }    
 
-    private GenericStore<DataElementCategoryOption> dataElementCategoryOptionStore;
+    private GenericIdentifiableObjectStore<DataElementCategoryOption> dataElementCategoryOptionStore;
 
-    public void setDataElementCategoryOptionStore( GenericStore<DataElementCategoryOption> dataElementCategoryOptionStore )
+    public void setDataElementCategoryOptionStore( GenericIdentifiableObjectStore<DataElementCategoryOption> dataElementCategoryOptionStore )
     {
         this.dataElementCategoryOptionStore = dataElementCategoryOptionStore;
     }
 
-    private GenericNameStore<DataElementCategoryCombo> dataElementCategoryComboStore;
+    private GenericIdentifiableObjectStore<DataElementCategoryCombo> dataElementCategoryComboStore;
 
-    public void setDataElementCategoryComboStore( GenericNameStore<DataElementCategoryCombo> dataElementCategoryComboStore )
+    public void setDataElementCategoryComboStore( GenericIdentifiableObjectStore<DataElementCategoryCombo> dataElementCategoryComboStore )
     {
         this.dataElementCategoryComboStore = dataElementCategoryComboStore;
     }    
@@ -192,6 +192,11 @@ public class DefaultDataElementCategoryService
     public DataElementCategoryOption getDataElementCategoryOption( int id )
     {
         return dataElementCategoryOptionStore.get( id );
+    }
+    
+    public DataElementCategoryOption getDataElementCategoryOptionByName( String name )
+    {
+        return dataElementCategoryOptionStore.getByName( name );
     }
     
     public Collection<DataElementCategoryOption> getDataElementCategoryOptions( Collection<Integer> identifiers )

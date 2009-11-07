@@ -31,10 +31,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.Dimension;
-import org.hisp.dhis.common.DimensionOption;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -52,7 +53,7 @@ public abstract class Source
     public static Dimension DIMENSION = new SourceDimension();
     
     public static class SourceDimension
-        implements Dimension
+        extends Dimension
     {
         private static final String NAME = "Source";
         
@@ -62,11 +63,6 @@ public abstract class Source
         }
         
         public List<? extends DimensionOption> getDimensionOptions()
-        {
-            return null;
-        }
-
-        public DimensionOption getDimensionOption( Object object )
         {
             return null;
         }
@@ -105,6 +101,16 @@ public abstract class Source
         {
             return "[" + NAME + "]";
         }
+    }
+
+    public List<? extends DimensionOptionElement> getDimensionOptionElements()
+    {
+        return null;
+    }
+
+    public Dimension getDimension()
+    {
+        return DIMENSION;
     }
     
     // -------------------------------------------------------------------------

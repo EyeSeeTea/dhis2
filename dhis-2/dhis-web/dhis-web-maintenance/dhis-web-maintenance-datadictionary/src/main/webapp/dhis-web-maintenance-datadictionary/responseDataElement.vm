@@ -8,7 +8,9 @@
 	<description>$!encoder.xmlEncode( $dataElement.description )</description>
 	<active>$dataElement.active</active>
 	<type>$dataElement.type</type>
+	<valueType>$dataElement.valueType</valueType>
 	<aggregationOperator>$dataElement.aggregationOperator</aggregationOperator>
 	<url>$!encoder.xmlEncode( $dataElement.url )</url>
-	<categoryCombo>$dataElement.categoryCombo.name</categoryCombo>
+	<lastUpdated>$!format.formatDate( $dataElement.lastUpdated )</lastUpdated>
+	<categoryCombo>$!encoder.xmlEncode( $dataElement.categoryCombo.name )</categoryCombo>
 </dataElement>

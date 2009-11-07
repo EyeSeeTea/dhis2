@@ -32,12 +32,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hisp.dhis.common.Dimension;
-import org.hisp.dhis.common.DimensionOption;
-import org.hisp.dhis.common.DimensionSet;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionSet;
+import org.hisp.dhis.dimension.Measure;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.source.Source;
 
@@ -46,7 +46,7 @@ import org.hisp.dhis.source.Source;
  * @version $Id: DataValue.java 4638 2008-02-25 10:06:47Z larshelg $
  */
 public class DataValue
-    implements Serializable
+    implements Serializable, Measure
 {
     public static final String TRUE = "true";
     public static final String FALSE = "false";
@@ -155,9 +155,9 @@ public class DataValue
         
         if ( optionCombo != null && !optionCombo.isDefault() )
         {
-            for ( DataElementCategoryOption categoryOption : optionCombo.getCategoryOptions() )
+            for ( DimensionOption dimensionOption : optionCombo.getDimensionOptions() )
             {
-                dimensions.put( categoryOption.getCategory(), categoryOption );
+                dimensions.put( dimensionOption.getDimension(), dimensionOption );
             }
         }
         
@@ -174,6 +174,11 @@ public class DataValue
         }
         
         return dimensions;
+    }
+    
+    public String getMeasure()
+    {
+        return value;
     }
     
     // -------------------------------------------------------------------------

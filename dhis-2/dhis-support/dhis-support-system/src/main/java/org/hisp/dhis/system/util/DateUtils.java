@@ -77,14 +77,28 @@ public class DateUtils
      * Formats a Date to the format YYYY-MM-DD.
      * 
      * @param date the Date to parse.
-     * @return A formatted date string.
+     * @return A formatted date string. Null if argument is null.
      */
     public static String getMediumDateString( Date date )
     {
         final SimpleDateFormat format = new SimpleDateFormat();
-        format.applyPattern( "yyyy-MM-dd" );
+
+        format.applyPattern( DEFAULT_DATE_FORMAT );
 
         return date != null ? format.format( date ) : null;
+    }
+
+    /**
+     * Formats a Date to the format YYYY-MM-DD.
+     * 
+     * @param date the Date to parse.
+     * @param defaultValue the return value if the date argument is null.
+     * @return A formatted date string. The defaultValue argument if date
+     *         argument is null.
+     */
+    public static String getMediumDateString( Date date, String defaultValue )
+    {
+        return date != null ? getMediumDateString( date ) : defaultValue;
     }
 
     /**
@@ -108,9 +122,11 @@ public class DateUtils
         try
         {
             final SimpleDateFormat format = new SimpleDateFormat();
-            format.applyPattern( "yyyy-MM-dd" );
 
-            return dateString != null ? format.parse( dateString ) : null;
+            format.applyPattern( DEFAULT_DATE_FORMAT );
+
+            return dateString != null && dateIsValid( dateString ) ? format.parse( dateString ) : null;
+
         }
         catch ( ParseException ex )
         {
@@ -321,7 +337,7 @@ public class DateUtils
     }
 
     /**
-     * This method adds days to a date 
+     * This method adds days to a date
      * 
      */
     public static Date getDateAfterAddition( Date date, int days )

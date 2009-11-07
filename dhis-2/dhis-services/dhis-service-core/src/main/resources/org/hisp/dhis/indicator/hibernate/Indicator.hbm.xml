@@ -58,5 +58,12 @@
 
     <property name="url"/>
     
+    <property name="lastUpdated"/>
+    
+    <set name="groups" table="indicatorgroupmembers" inverse="true">
+	  <key column="indicatorid"/>
+	  <many-to-many class="org.hisp.dhis.indicator.IndicatorGroup" column="indicatorgroupid"/>
+    </set>
+		
   </class>
 </hibernate-mapping>

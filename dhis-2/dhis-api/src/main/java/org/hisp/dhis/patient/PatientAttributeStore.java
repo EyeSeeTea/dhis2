@@ -29,14 +29,14 @@ package org.hisp.dhis.patient;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericNameStore;
+import org.hisp.dhis.common.GenericStore;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public interface PatientAttributeStore
-    extends GenericNameStore<PatientAttribute>
+    extends GenericStore<PatientAttribute>
 {
     String ID = PatientAttributeStore.class.getName(); 
     

@@ -82,6 +82,7 @@ public class NextPeriodsAction
         throws Exception
     {
         selectionManager.setSeletedYear( selectionManager.getSelectedYear() + 1 );
+        
         selectedStateManager.nextPeriodSpan();
 
         periods = new ArrayList<Period>( selectedStateManager.getPeriodList() );

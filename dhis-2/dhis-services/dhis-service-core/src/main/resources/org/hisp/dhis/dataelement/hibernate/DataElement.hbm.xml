@@ -36,7 +36,9 @@
 
     <property name="active"/>
 
-    <property name="type" column="valuetype" length="16" not-null="true"/>
+    <property name="valueType" column="valuetype" length="16" not-null="true"/>
+    
+    <property name="type" column="type" length="16" not-null="true"/>
 		
     <property name="aggregationOperator" not-null="true" column="aggregationtype" length="16"/>
 
@@ -49,7 +51,14 @@
     <property name="sortOrder"/>
     
     <property name="url"/>
+	
+	<property name="lastUpdated"/>
     
+	<set name="groups" table="dataelementgroupmembers" inverse="true">
+      <key column="dataelementid"/>
+	  <many-to-many class="org.hisp.dhis.dataelement.DataElementGroup" column="dataelementgroupid"/>
+	</set>
+	
     <set name="dataSets" table="datasetmembers" inverse="true">
       <key column="dataelementid"/>
       <many-to-many class="org.hisp.dhis.dataset.DataSet" column="datasetid"/>

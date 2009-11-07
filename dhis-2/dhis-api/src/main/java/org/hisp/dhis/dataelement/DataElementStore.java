@@ -156,11 +156,20 @@ public interface DataElementStore
     Collection<DataElement> getDataElementsByAggregationOperator( String aggregationOperator );
 
     /**
+     * Returns all DataElements with the given value type.
+     * 
+     * @param valueType the valueType.
+     * @return all DataElements with the given valueType.
+     */
+    Collection<DataElement> getDataElementsByValueType( String valueType );
+    
+    /**
      * Returns all DataElements with the given type.
      * 
      * @param type the type.
      * @return all DataElements with the given type.
      */
+    
     Collection<DataElement> getDataElementsByType( String type );
     
     /**
@@ -201,62 +210,4 @@ public interface DataElementStore
      *          if there are no CalculcatedDataELements
      */
     Collection<CalculatedDataElement> getAllCalculatedDataElements();
-    
-    // -------------------------------------------------------------------------
-    // DataElementGroup
-    // -------------------------------------------------------------------------
-
-    /**
-     * Adds a DataElementGroup.
-     * 
-     * @param dataElementGroup the DataElementGroup to add.
-     * @return a generated unique id of the added DataElementGroup.
-     */
-    int addDataElementGroup( DataElementGroup dataElementGroup );
-
-    /**
-     * Updates a DataElementGroup.
-     * 
-     * @param dataElementGroup the DataElementGroup to update.
-     */
-    void updateDataElementGroup( DataElementGroup dataElementGroup );
-
-    /**
-     * Deletes a DataElementGroup.
-     * 
-     * @param dataElementGroup the DataElementGroup to delete.
-     */
-    void deleteDataElementGroup( DataElementGroup dataElementGroup );
-
-    /**
-     * Returns a DataElementGroup.
-     * 
-     * @param id the id of the DataElementGroup to return.
-     * @return the DataElementGroup with the given id, or null if no match.
-     */
-    DataElementGroup getDataElementGroup( int id );
-
-    /**
-     * Returns the DataElementGroup with the given UUID.
-     * 
-     * @param id the UUID.
-     * @return the DataElementGroup with the given uuid, or null if no match.
-     */
-    DataElementGroup getDataElementGroup( String uuid );
-
-    /**
-     * Returns a DataElementGroup with a given name.
-     * 
-     * @param name the name of the DataElementGroup to return.
-     * @return the DataElementGroup with the given name, or null if no match.
-     */
-    DataElementGroup getDataElementGroupByName( String name );
-
-    /**
-     * Returns all DataElementGroups.
-     * 
-     * @return a collection of all DataElementGroups, or an empty collection if
-     *         no DataElementGroups exist.
-     */
-    Collection<DataElementGroup> getAllDataElementGroups();
 }

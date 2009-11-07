@@ -1,0 +1,69 @@
+<body>
+#if($!fileExcel)
+<div id="messageUpload"> $!message </div>
+ <span id="message" style="top:70px;right:5px;position:fixed;width:200px;z-index:100009" onclick="hideById(this.id);"></span>
+<input type="hidden" name="uploadFileName" id="uploadFileName" value="$!fileExcel">
+<!-- <input type="hidden" name="uploadFileName" id="uploadFileName">-->
+ #end
+   
+ <table width="50%">
+<h2>$i18n.getString('import_data')</h2>
+<form name="importingParam" id="importingParam" action="getImportingParams.action" method="post" enctype="multipart/form-data">
+   
+  <tr>
+     <td width="18%" style=" width:25% ">$i18n.getString( 'select_excel_file' )</td>
+      <td width="82%">
+          <input type="file" id="upload" name="upload" value="$!fileExcel;" >
+          <input name="submit" type="submit" value="$i18n.getString( 'upload_file' )" />      </td>
+   
+  </tr>
+  </form>
+  <tr>
+    <td>$i18n.getString( 'excelitem_group' )</td>
+    <td><select type="text" id="excelItemGroupId" name="excelItemGroupId"  onChange="getPeriodsByPeriodTypeName(this.value); getPreviewImportData('$!fileExcel.getName()')"; style="min-width:20em; width:100%" >
+	<!-- onChange="getPeriodsByPeriodTypeName(this.value);" -->
+	  <option value="">$i18n.getString('select')</option>
+	  #foreach($excelItemGroup in $excelItemGroups)
+		<option value="$!excelItemGroup.id">$!encoder.htmlEncode($!excelItemGroup.name)</option>
+	  #end
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>$i18n.getString( 'period' )</td>
+    <td>
+	<input type="button" value="<<" id="lastYear" name="lastYear" onclick="lastPeriod();"  />
+	<input type="button" value=">>" id="nextYear" name="nextYear" onclick="nextPeriod()"  />
+	<select name="period" id="period" style="min-width:20em; width:100%" type="text">
+    	</select></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  
+</table>
+	 
+<hr>
+<input type="button" name="import" id="import" onClick="javascript: importData();" value="$i18n.getString('import')" >
+<br><br>
+	<div id="showValue" style="display:none; width:100%" >
+		<table id="showExcelItemValues" width="100%">
+		<tr>
+		<th width="20px"><input type="checkbox" name="selectAll" id="selectAll" onClick="javascript: selectAll();"/></th>
+		<th>$i18n.getString('report')</th>
+		<th>$i18n.getString('value')</th>
+		</tr>
+		<tbody>
+		
+		</tbody>
+		</table>
+	</div>
+
+<script language="javascript">
+	if(byId('excelItemGroupId').value != '' && byId('period').value >= 0){
+		getPreviewImportData('$!fileExcel.getName()');
+	}
+</script>
+</body>
+

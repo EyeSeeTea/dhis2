@@ -28,19 +28,24 @@ package org.hisp.dhis.indicator;
  */
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.hisp.dhis.common.Dimension;
-import org.hisp.dhis.common.DimensionSet;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
+import org.hisp.dhis.dimension.DimensionSet;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: Indicator.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 public class Indicator
-    extends IdentifiableObject implements DimensionSet
+    extends IdentifiableObject implements DimensionSet, DimensionOptionElement
 {
     private Boolean annualized;
 
@@ -63,7 +68,11 @@ public class Indicator
     private Integer sortOrder;
 
     private String url;
-        
+
+    private Date lastUpdated;
+    
+    private Set<IndicatorGroup> groups =  new HashSet<IndicatorGroup>();
+    
     private List<IndicatorGroupSet> groupSets = new ArrayList<IndicatorGroupSet>();
     
     // -------------------------------------------------------------------------
@@ -100,6 +109,25 @@ public class Indicator
     public List<? extends Dimension> getDimensions()
     {
         return groupSets;
+    }
+
+    public List<? extends DimensionOption> getDimensionOptions()
+    {
+        return new ArrayList<DimensionOption>( groups );
+    }
+
+    public boolean isDimensionSet()
+    {
+        return groupSets != null && groupSets.size() > 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public boolean isAnnualized()
+    {
+        return annualized != null && annualized;
     }
     
     // -------------------------------------------------------------------------
@@ -245,6 +273,16 @@ public class Indicator
         this.sortOrder = sortOrder;
     }
 
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
+    }
+
     public String getUrl()
     {
         return url;
@@ -253,6 +291,16 @@ public class Indicator
     public void setUrl( String url )
     {
         this.url = url;
+    }
+
+    public Set<IndicatorGroup> getGroups()
+    {
+        return groups;
+    }
+
+    public void setGroups( Set<IndicatorGroup> groups )
+    {
+        this.groups = groups;
     }
 
     public List<IndicatorGroupSet> getGroupSets()

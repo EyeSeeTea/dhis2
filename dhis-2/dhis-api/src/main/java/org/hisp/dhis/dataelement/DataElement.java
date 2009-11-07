@@ -30,16 +30,18 @@ package org.hisp.dhis.dataelement;
 // import java.io.Serializable;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.Dimension;
-import org.hisp.dhis.common.DimensionOption;
-import org.hisp.dhis.common.DimensionSet;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
+import org.hisp.dhis.dimension.DimensionSet;
 import org.hisp.dhis.period.PeriodType;
 
 /**
@@ -52,19 +54,32 @@ import org.hisp.dhis.period.PeriodType;
  * Hiearchies of DataElements are used to give more fine- or course-grained
  * representations of the entities.
  * 
+ * DataElement acts as a DimensionSet in the dynamic dimensional model, and as a
+ * DimensionOption in the static DataElement dimension.
+ * 
  * @author Kristian Nordal
  * @version $Id: DataElement.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 public class DataElement
-    extends IdentifiableObject implements DimensionOption, DimensionSet
+    extends IdentifiableObject
+    implements DimensionSet, DimensionOption, DimensionOptionElement
 {
-    public static final String TYPE_STRING = "string";
-    public static final String TYPE_INT = "int";
-    public static final String TYPE_BOOL = "bool";
-    public static final String TYPE_DATE = "date";
+    public static final String VALUE_TYPE_STRING = "string";
+
+    public static final String VALUE_TYPE_INT = "int";
+
+    public static final String VALUE_TYPE_BOOL = "bool";
+
+    public static final String VALUE_TYPE_DATE = "date";
+
+    public static final String TYPE_AGGREGATE = "aggregate";
+
+    public static final String TYPE_PATIENT = "patient";
 
     public static final String AGGREGATION_OPERATOR_SUM = "sum";
-    public static final String AGGREGATION_OPERATOR_AVERAGE ="average";    
+
+    public static final String AGGREGATION_OPERATOR_AVERAGE = "average";
+
     public static final String AGGREGATION_OPERATOR_COUNT = "count";
 
     /**
@@ -73,10 +88,16 @@ public class DataElement
     private boolean active;
 
     /**
-     * The type of this DataElement; e.g. DataElement.TYPE_INT or
-     * DataElement.TYPE_BOOL.
+     * The type of this DataElement; e.g. DataElement.TYPE_AGGREGATE or
+     * DataElement.TYPE_PATIENT.
      */
     private String type;
+
+    /**
+     * The value type of this DataElement; e.g. DataElement.VALUE_TYPE_INT or
+     * DataElement.VALUE_TYPE_BOOL.
+     */
+    private String valueType;
 
     /**
      * The aggregation operator of this DataElement; e.g. DataElement.SUM og
@@ -93,7 +114,7 @@ public class DataElement
      * The parent DataElement for this DataElement.
      */
     private DataElement parent;
-    
+
     /**
      * Extended information about the DataElement.
      */
@@ -101,34 +122,44 @@ public class DataElement
 
     /**
      * A combination of categories to capture data.
-     */    
+     */
     private DataElementCategoryCombo categoryCombo;
-    
+
     /**
      * Defines a custom sort order.
      */
     private Integer sortOrder;
-    
+
     /**
      * URL for lookup of additional information on the web.
      */
     private String url;
+
+    /**
+     * The date this data element was last updated.
+     */
+    private Date lastUpdated;
+
+    /**
+     * The data element groups which this  
+     */
+    private Set<DataElementGroup> groups = new HashSet<DataElementGroup>();
     
     /**
      * The data sets which this data element is a member of.
      */
     private Set<DataSet> dataSets = new HashSet<DataSet>();
-    
+
     /**
      * The lower organisation unit levels for aggregation.
      */
     private List<Integer> aggregationLevels = new ArrayList<Integer>();
-    
+
     /**
      * A Set of DataElementGroupSets.
      */
     private List<DataElementGroupSet> groupSets = new ArrayList<DataElementGroupSet>();
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -136,38 +167,33 @@ public class DataElement
     public DataElement()
     {
     }
-    
+
     public DataElement( String name )
     {
         this.name = name;
     }
-    
+
     // -------------------------------------------------------------------------
     // Dimension
     // -------------------------------------------------------------------------
 
     public static Dimension DIMENSION = new DataElementDimension();
-    
+
     public static class DataElementDimension
-        implements Dimension
+        extends Dimension
     {
         private static final String NAME = "DataElement";
-        
+
         public String getName()
         {
             return NAME;
         }
-        
+
         public List<? extends DimensionOption> getDimensionOptions()
         {
             return null;
         }
 
-        public DimensionOption getDimensionOption( Object object )
-        {
-            return null;
-        }
-        
         @Override
         public boolean equals( Object o )
         {
@@ -175,22 +201,22 @@ public class DataElement
             {
                 return true;
             }
-            
+
             if ( o == null )
             {
                 return false;
             }
-            
-            if ( !( o instanceof DataElementDimension ) )
+
+            if ( !(o instanceof DataElementDimension) )
             {
                 return false;
             }
-            
+
             final DataElementDimension other = (DataElementDimension) o;
-            
+
             return NAME.equals( other.getName() );
         }
-        
+
         @Override
         public int hashCode()
         {
@@ -203,12 +229,32 @@ public class DataElement
             return "[" + NAME + "]";
         }
     }
-    
+
     public List<? extends Dimension> getDimensions()
     {
         return groupSets;
     }
+
+    public List<? extends DimensionOptionElement> getDimensionOptionElements()
+    {
+        return null;
+    }
     
+    public List<? extends DimensionOption> getDimensionOptions()
+    {
+        return new ArrayList<DimensionOption>( groups );
+    }
+
+    public Dimension getDimension()
+    {
+        return DIMENSION;
+    }
+    
+    public boolean isDimensionSet()
+    {
+        return groupSets != null && groupSets.size() > 0;
+    }
+
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -260,28 +306,29 @@ public class DataElement
     {
         return dataSets != null && dataSets.size() > 0 ? dataSets.iterator().next().getPeriodType() : null;
     }
-    
+
     /**
-     * Tests whether a PeriodType can be defined for the DataElement, which requires
-     * that the DataElement is registered for DataSets with the same PeriodType.
+     * Tests whether a PeriodType can be defined for the DataElement, which
+     * requires that the DataElement is registered for DataSets with the same
+     * PeriodType.
      */
     public boolean periodTypeIsValid()
     {
         PeriodType periodType = null;
-        
+
         for ( DataSet dataSet : dataSets )
         {
             if ( periodType != null && !periodType.equals( dataSet.getPeriodType() ) )
             {
                 return false;
             }
-            
+
             periodType = dataSet.getPeriodType();
         }
-        
+
         return true;
     }
-    
+
     /**
      * Tests whether more than one aggregation level exists for the DataElement.
      */
@@ -289,11 +336,11 @@ public class DataElement
     {
         return aggregationLevels != null && aggregationLevels.size() > 0;
     }
-    
+
     /**
-     * Tests whether the DataElement is associated with a DataELementCategoryCombo
-     * with more than one DataElementCategory, or any DataElementCategory with more
-     * than one DataElementCategoryOption.
+     * Tests whether the DataElement is associated with a
+     * DataELementCategoryCombo with more than one DataElementCategory, or any
+     * DataElementCategory with more than one DataElementCategoryOption.
      */
     public boolean isMultiDimensional()
     {
@@ -303,7 +350,7 @@ public class DataElement
             {
                 return true;
             }
-            
+
             for ( DataElementCategory category : categoryCombo.getCategories() )
             {
                 if ( category.getCategoryOptions().size() > 1 )
@@ -312,10 +359,10 @@ public class DataElement
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -338,6 +385,16 @@ public class DataElement
     public void setType( String type )
     {
         this.type = type;
+    }
+
+    public String getValueType()
+    {
+        return valueType;
+    }
+
+    public void setValueType( String valueType )
+    {
+        this.valueType = valueType;
     }
 
     public String getAggregationOperator()
@@ -379,7 +436,6 @@ public class DataElement
     {
         this.extended = extended;
     }
-    
 
     public DataElementCategoryCombo getCategoryCombo()
     {
@@ -409,6 +465,26 @@ public class DataElement
     public void setUrl( String url )
     {
         this.url = url;
+    }
+
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public Set<DataElementGroup> getGroups()
+    {
+        return groups;
+    }
+
+    public void setGroups( Set<DataElementGroup> groups )
+    {
+        this.groups = groups;
     }
 
     public Set<DataSet> getDataSets()

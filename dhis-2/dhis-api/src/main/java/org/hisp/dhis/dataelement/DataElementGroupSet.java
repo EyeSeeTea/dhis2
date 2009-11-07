@@ -30,9 +30,8 @@ package org.hisp.dhis.dataelement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.common.Dimension;
-import org.hisp.dhis.common.DimensionOption;
-import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
 
 /**
  * DataElementGroupSet is a set of DataElementGroups. It is by default exclusive,
@@ -42,8 +41,7 @@ import org.hisp.dhis.common.IdentifiableObject;
  * @author Lars Helge Overland
  */
 public class DataElementGroupSet
-    extends IdentifiableObject
-    implements Dimension
+    extends Dimension
 {
     private List<DataElementGroup> members = new ArrayList<DataElementGroup>();
 
@@ -67,19 +65,6 @@ public class DataElementGroupSet
     public List<? extends DimensionOption> getDimensionOptions()
     {
         return members;
-    }
-    
-    public DimensionOption getDimensionOption( Object object )
-    {
-        for ( DataElementGroup group : members )
-        {
-            if ( group.getMembers().contains( object ) )
-            {
-                return group;
-            }
-        }
-        
-        return null;
     }
     
     // -------------------------------------------------------------------------

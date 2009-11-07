@@ -27,26 +27,27 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.DimensionOption;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
 
 /**
  * @author Kristian Nordal
  * @version $Id: DataElementGroup.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 public class DataElementGroup
-    extends IdentifiableObject
-    implements DimensionOption
+    extends IdentifiableObject implements DimensionOption
 {
-
-    /**
-     * The members of the DataElementGroup.
-     */
     private Set<DataElement> members = new HashSet<DataElement>();
 
+    private DataElementGroupSet groupSet;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -60,6 +61,20 @@ public class DataElementGroup
         this.name = name;
     }
 
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public List<? extends DimensionOptionElement> getDimensionOptionElements()
+    {
+        return new ArrayList<DataElement>( members );
+    }
+    
+    public Dimension getDimension()
+    {
+        return groupSet;
+    }
+    
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -103,7 +118,6 @@ public class DataElementGroup
     // Getters and setters
     // -------------------------------------------------------------------------
 
-
     public Set<DataElement> getMembers()
     {
         return members;
@@ -112,5 +126,15 @@ public class DataElementGroup
     public void setMembers( Set<DataElement> members )
     {
         this.members = members;
+    }
+
+    public DataElementGroupSet getGroupSet()
+    {
+        return groupSet;
+    }
+
+    public void setGroupSet( DataElementGroupSet groupSet )
+    {
+        this.groupSet = groupSet;
     }
 }

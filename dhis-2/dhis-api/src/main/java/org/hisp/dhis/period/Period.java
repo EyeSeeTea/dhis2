@@ -31,8 +31,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import org.hisp.dhis.common.Dimension;
-import org.hisp.dhis.common.DimensionOption;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
 
 /**
  * @author Kristian Nordal
@@ -85,7 +86,7 @@ public class Period
     public static Dimension DIMENSION = new PeriodDimension();
     
     public static class PeriodDimension
-        implements Dimension
+        extends Dimension
     {
         private static final String NAME = "Period";
         
@@ -95,11 +96,6 @@ public class Period
         }
         
         public List<? extends DimensionOption> getDimensionOptions()
-        {
-            return null;
-        }
-        
-        public DimensionOption getDimensionOption( Object object )
         {
             return null;
         }
@@ -138,6 +134,16 @@ public class Period
         {
             return "[" + NAME + "]";
         }
+    }
+
+    public List<? extends DimensionOptionElement> getDimensionOptionElements()
+    {
+        return null;
+    }
+
+    public Dimension getDimension()
+    {
+        return DIMENSION;
     }
     
     // -------------------------------------------------------------------------

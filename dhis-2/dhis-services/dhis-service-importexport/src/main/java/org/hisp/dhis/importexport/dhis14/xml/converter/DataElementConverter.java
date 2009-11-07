@@ -32,6 +32,7 @@ import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertAg
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertBooleanFromDhis14;
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertBooleanToDhis14;
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertTypeToDhis14;
+import static org.hisp.dhis.system.util.ConversionUtils.parseInt;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,6 +52,7 @@ import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.converter.AbstractDataElementConverter;
+import org.hisp.dhis.importexport.dhis14.util.Dhis14DateUtil;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14ObjectMappingUtil;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14ParsingUtils;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
@@ -161,7 +163,7 @@ public class DataElementConverter
                 writer.openElement( ELEMENT_NAME );
                 
                 writer.writeElement( FIELD_ID, String.valueOf( object.getId() ) );
-                writer.writeElement( FIELD_SORT_ORDER, String.valueOf( object.getId() ) );
+                writer.writeElement( FIELD_SORT_ORDER, object.getSortOrder() != null ? String.valueOf( object.getSortOrder() ) : EMPTY );
                 writer.writeElement( FIELD_CODE, object.getCode() );
                 writer.writeElement( FIELD_NAME, object.getName() );
                 writer.writeElement( FIELD_SHORT_NAME, object.getShortName() );
@@ -180,7 +182,7 @@ public class DataElementConverter
                 writer.writeElement( FIELD_AGGREGATION_OPERATOR, convertAggregationOperatorToDhis14( object.getAggregationOperator() ) );
                 writer.writeElement( FIELD_SELECTED, String.valueOf( 0 ) );
                 writer.writeElement( FIELD_LAST_USER, String.valueOf( 1 ) );
-                writer.writeElement( FIELD_LAST_UPDATED, String.valueOf( VALID_FROM ) );
+                writer.writeElement( FIELD_LAST_UPDATED, Dhis14DateUtil.getDateString( object.getLastUpdated() ) );
                 
                 writer.closeElement();
                 
@@ -208,9 +210,12 @@ public class DataElementConverter
             element.setShortName( values.get( FIELD_SHORT_NAME ) );
             element.setDescription( Dhis14ParsingUtils.removeNewLine( values.get( FIELD_DESCRIPTION ) ) );
             element.setActive( true );        
-            element.setType( Dhis14ObjectMappingUtil.getDataElementTypeMap().get( Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );
+            element.setValueType( Dhis14ObjectMappingUtil.getDataElementValueTypeMap().get( Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );
+            element.setType( DataElement.TYPE_AGGREGATE );
             element.setAggregationOperator( convertAggregationOperatorFromDhis14( values.get( FIELD_AGGREGATION_OPERATOR ) ) );
-            element.getCategoryCombo().setId( 1 );
+            element.setSortOrder( parseInt( values.get( FIELD_SORT_ORDER ) ) );
+            element.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
+            element.getCategoryCombo().setId( 1 ); //TODO hack
             element.setSaved( convertBooleanFromDhis14( values.get( FIELD_SAVE_CALCULATED ) ) );
             element.setExpression( new Expression( expressionMap.get( element.getId() ), null, new HashSet<DataElement>() ) );
             
@@ -229,9 +234,12 @@ public class DataElementConverter
             element.setShortName( values.get( FIELD_SHORT_NAME ) );
             element.setDescription( Dhis14ParsingUtils.removeNewLine( values.get( FIELD_DESCRIPTION ) ) );
             element.setActive( true );        
-            element.setType( Dhis14ObjectMappingUtil.getDataElementTypeMap().get( Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );
+            element.setValueType( Dhis14ObjectMappingUtil.getDataElementValueTypeMap().get( Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );
+            element.setType( DataElement.TYPE_AGGREGATE );
             element.setAggregationOperator( convertAggregationOperatorFromDhis14( values.get( FIELD_AGGREGATION_OPERATOR ) ) );
-            element.getCategoryCombo().setId( 1 );
+            element.setSortOrder( parseInt( values.get( FIELD_SORT_ORDER ) ) );
+            element.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
+            element.getCategoryCombo().setId( 1 ); //TODO hack
             
             NameMappingUtil.addDataElementAggregationOperatorMapping( element.getId(), element.getAggregationOperator() );
             

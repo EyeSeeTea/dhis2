@@ -27,23 +27,27 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.DimensionOption;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: IndicatorGroup.java 5296 2008-05-29 16:06:14Z larshelg $
  */
 public class IndicatorGroup
-    extends IdentifiableObject     
-    implements DimensionOption 
+    extends IdentifiableObject implements DimensionOption 
 {
-
     private Set<Indicator> members = new HashSet<Indicator>();
 
+    private IndicatorGroupSet groupSet;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -57,6 +61,20 @@ public class IndicatorGroup
         this.name = name;
     }
 
+    // -------------------------------------------------------------------------
+    // Dimension
+    // -------------------------------------------------------------------------
+
+    public List<? extends DimensionOptionElement> getDimensionOptionElements()
+    {
+        return new ArrayList<Indicator>( members );
+    }
+
+    public Dimension getDimension()
+    {
+        return groupSet;
+    }
+    
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -100,7 +118,6 @@ public class IndicatorGroup
     // Getters and setters
     // -------------------------------------------------------------------------
 
-
     public Set<Indicator> getMembers()
     {
         return members;
@@ -109,5 +126,15 @@ public class IndicatorGroup
     public void setMembers( Set<Indicator> members )
     {
         this.members = members;
+    }
+
+    public IndicatorGroupSet getGroupSet()
+    {
+        return groupSet;
+    }
+
+    public void setGroupSet( IndicatorGroupSet groupSet )
+    {
+        this.groupSet = groupSet;
     }
 }

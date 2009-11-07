@@ -96,6 +96,7 @@ public class GenerateReportExcelFlowAction
     public Integer getSheetId()
     {
         return sheetId;
+
     }
 
     public void setSheetId( Integer sheetId )
@@ -116,6 +117,7 @@ public class GenerateReportExcelFlowAction
     public String execute()
         throws Exception
     {
+    	
         ReportExcel reportExcel = reportService.getReportExcel( reportId );
 
         Period period = periodService.getPeriod( periodId );
@@ -123,7 +125,7 @@ public class GenerateReportExcelFlowAction
         selectionManager.setSelectedPeriod( period );
 
         selectionManager.setSelectedReportExcelId( reportId );
-
+        
         return reportExcel.getReportType();
     }
 
