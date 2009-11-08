@@ -82,6 +82,14 @@
       <param name="requiredAuthorities">F_RELATIONSHIP_ADD</param>      
     </action>
     
+    <action name="validateSearch"
+      class="org.hisp.dhis.patient.action.relationship.ValidateSearchAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
     <action name="saveRelationship" class="org.hisp.dhis.patient.action.relationship.SaveRelationshipAction">      
       <result name="success" type="velocity">status.vm</result>
       <param name="onExceptionReturn">plainTextError</param>

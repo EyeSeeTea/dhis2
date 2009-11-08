@@ -41,7 +41,7 @@ import static junit.framework.Assert.*;
  * @author Lars Helge Overland
  * @version $Id$
  */     
-public class ProgramStoreTest
+public class ProgramServiceTest
     extends DhisSpringTest
 {    
     private ProgramStore programStore;

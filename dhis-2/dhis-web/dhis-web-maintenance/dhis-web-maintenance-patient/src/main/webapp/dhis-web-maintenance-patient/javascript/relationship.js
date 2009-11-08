@@ -140,7 +140,77 @@ function updateValidationCompleted( messageElement )
 //Add Relationship
 //------------------------------------------------------------------------------
 
-function addRelationship( patientId )
+function showAddRelationship( patientId )
 {
-	window.location = "showAddRelationshipForm.action?id=" + patientId;
+	window.location = "showAddRelationshipForm.action?patientAId=" + patientId;
 }
+
+//-----------------------------------------------------------------------------
+//Search Relationship Partner
+//-----------------------------------------------------------------------------
+
+function validateSearchPartner()
+{	
+	
+	var url = 'validateSearch.action?' +
+			'searchText=' + getFieldValue( 'searchText' );	
+	
+	var request = new Request();
+	request.setResponseTypeXML( 'message' );
+	request.setCallbackSuccess( searchValidationCompleted );    
+	request.send( url );        
+
+	return false;
+}
+
+function searchValidationCompleted( messageElement )
+{
+	var type = messageElement.getAttribute( 'type' );
+	var message = messageElement.firstChild.nodeValue;
+	
+	if ( type == 'success' )
+	{
+		var form = document.getElementById( 'relationshipSelectForm' );        
+		form.submit();
+	}
+	else if ( type == 'error' )
+	{
+		window.alert( i18n_searching_patient_failed + ':' + '\n' + message );
+	}
+	else if ( type == 'input' )
+	{
+		document.getElementById( 'message' ).innerHTML = message;
+		document.getElementById( 'message' ).style.display = 'block';
+	}
+}
+
+function addRelationship() 
+{	
+	var relationshipType = document.getElementById( 'relationshipTypeId' );
+	var relationshipTypeId = relationshipType.options[relationshipType.selectedIndex].value;
+	
+	var partnerList = document.getElementById( 'availablePartnersList' );
+	var partnerId = -1;
+	
+	if( partnerList.selectedIndex >= 0 )
+	{		
+		partnerId = partnerList.options[partnerList.selectedIndex].value;		
+	}	
+	
+	if( relationshipTypeId == "null" || relationshipTypeId == "" )
+	{
+		window.alert( i18n_please_select_relationship_type );
+		
+		return;
+	}
+	
+	if( partnerId == "null" || partnerId == "" || partnerId < 0 )
+	{
+		window.alert( i18n_please_select_partner );
+		
+		return;
+	}			
+	
+	window.alert( 'the selected partner is:  ' + partnerId + ' and realtionship is:  ' + relationshipTypeId );
+}
+

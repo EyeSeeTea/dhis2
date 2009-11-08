@@ -5,6 +5,10 @@
 
 <h3>$i18n.getString( "relationship_management_for" )</h3>
 
+<div>
+    <input type="hidden" id="patientAId" name="patientAId" value="$patient.id">    
+</div>
+
 <table>
     <tr>
         <td><strong>$i18n.getString( "full_name" ):</strong></td>
@@ -49,7 +53,7 @@
                     <td></td>
                     <td></td> 
                     <td colspan="2" style="text-align:right">                        
-                        <input type="button" value="$i18n.getString( "add_new" )" onclick="javascript:addRelationship( '$patient.id' )">               
+                        <input type="button" value="$i18n.getString( "add_new" )" onclick="javascript:showAddRelationship( '$patient.id' )">               
                     </td>
                 </tr>
           

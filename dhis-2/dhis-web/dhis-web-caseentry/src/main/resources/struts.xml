@@ -24,7 +24,7 @@
       <result name="searchform" type="chain">searchform</result>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/select.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/dataEntryMenu.vm</param>   
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>      
     </action>   
     
@@ -32,7 +32,7 @@
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/search.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/dataEntryMenu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>            
     </action>   
     
@@ -48,7 +48,7 @@
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/listPatient.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/dataEntryMenu.vm</param>    
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>            
     </action>
     
@@ -57,7 +57,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="listAll">true</param>
       <param name="page">/dhis-web-caseentry/listPatient.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/dataEntryMenu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>            
     </action>   
     
@@ -66,7 +66,7 @@
       <result name="dataentryform" type="chain">dataentryform</result>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/dataRecordingSelect.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/dataEntryMenu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js</param>
       <param name="stylesheets">style/patient.css</param>            
     </action>    
@@ -79,7 +79,7 @@
     <action name="dataentryform" class="org.hisp.dhis.caseentry.action.caseentry.DataEntryAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/dataEntryForm.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/dataEntryMenu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataEntry.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js</param>
       <param name="stylesheets">style/patient.css</param>
     </action>
@@ -112,7 +112,7 @@
       <result name="visitplan" type="chain">visitplan</result>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/visitPlanSelect.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/reportsMenu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/visitPlan.js</param>      
     </action>   
     
@@ -120,7 +120,7 @@
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/visitPlan.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>     
+      <param name="menu">/dhis-web-caseentry/reportsMenu.vm</param>  
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/visitPlan.js</param>            
     </action>
     
@@ -130,7 +130,7 @@
       <interceptor-ref name="organisationUnitTreeStack"/>  
       <result name="success" type="velocity">/main.vm</result>     
       <param name="page">/dhis-web-caseentry/reportSelect.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/reportsMenu.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/report.js</param>      
     </action>  
     
@@ -146,7 +146,7 @@
       <interceptor-ref name="organisationUnitTreeStack"/>            
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/report.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>      
+      <param name="menu">/dhis-web-caseentry/reportsMenu.vm</param>    
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/report.js</param>      
     </action>
     

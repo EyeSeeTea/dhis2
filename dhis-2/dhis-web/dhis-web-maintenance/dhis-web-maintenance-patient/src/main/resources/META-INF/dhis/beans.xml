@@ -74,10 +74,20 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">    
     <property name="relationshipTypeService"
       ref="org.hisp.dhis.relationship.RelationshipTypeService"/>
+    <property name="selectionManager"
+      ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager"/>
     <property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>           
+      ref="org.hisp.dhis.patient.PatientService"/>
+    <property name="patientAttributeValueService"
+      ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService"/>
+    <property name="patientAttributeService"
+      ref="org.hisp.dhis.patient.PatientAttributeService"/>            
   </bean>
   
+  <bean id="org.hisp.dhis.patient.action.relationship.ValidateSearchAction"
+    class="org.hisp.dhis.patient.action.relationship.ValidateSearchAction" 
+    scope="prototype">    
+  </bean>  
   
   <!-- PatientAttribute -->
   

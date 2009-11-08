@@ -28,10 +28,17 @@
 package org.hisp.dhis.patient.action.relationship;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 
@@ -56,6 +63,13 @@ public class ShowAddRelationshipFormAction
         this.relationshipTypeService = relationshipTypeService;
     }
 
+    private OrganisationUnitSelectionManager selectionManager;
+
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
+
     private PatientService patientService;
 
     public void setPatientService( PatientService patientService )
@@ -63,20 +77,41 @@ public class ShowAddRelationshipFormAction
         this.patientService = patientService;
     }
 
+    private PatientAttributeService patientAttributeService;
+
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    {
+        this.patientAttributeService = patientAttributeService;
+    }
+
+    private PatientAttributeValueService patientAttributeValueService;
+
+    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
+    {
+        this.patientAttributeValueService = patientAttributeValueService;
+    }
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private OrganisationUnit organisationUnit;
 
-    public Integer getId()
+    public OrganisationUnit getOrganisationUnit()
     {
-        return id;
+        return organisationUnit;
     }
 
-    public void setId( Integer id )
+    private Integer patientAId;
+
+    public Integer getPatientAId()
     {
-        this.id = id;
+        return patientAId;
+    }
+
+    public void setPatientAId( Integer patientAId )
+    {
+        this.patientAId = patientAId;
     }
 
     private Patient patient;
@@ -91,11 +126,49 @@ public class ShowAddRelationshipFormAction
         this.patient = patient;
     }
 
+    private Collection<Patient> patients = new ArrayList<Patient>();
+
+    public Collection<Patient> getPatients()
+    {
+        return patients;
+    }
+
+    Collection<PatientAttribute> patientAttributes;
+
+    public Collection<PatientAttribute> getPatientAttributes()
+    {
+        return patientAttributes;
+    }
+
     private List<RelationshipType> relationshipTypes;
 
     public List<RelationshipType> getRelationshipTypes()
     {
         return relationshipTypes;
+    }
+
+    private String searchText;
+
+    public void setSearchText( String searchText )
+    {
+        this.searchText = searchText;
+    }
+
+    public String getSearchText()
+    {
+        return searchText;
+    }
+
+    private Integer searchingAttributeId;
+
+    public Integer getSearchingAttributeId()
+    {
+        return searchingAttributeId;
+    }
+
+    public void setSearchingAttributeId( Integer searchingAttributeId )
+    {
+        this.searchingAttributeId = searchingAttributeId;
     }
 
     // -------------------------------------------------------------------------
@@ -105,10 +178,32 @@ public class ShowAddRelationshipFormAction
     public String execute()
     {
 
-        patient = patientService.getPatient( id.intValue() );
+        patient = patientService.getPatient( patientAId.intValue() );
 
         relationshipTypes = new ArrayList<RelationshipType>( relationshipTypeService.getAllRelationshipTypes() );
 
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        patientAttributes = patientAttributeService.getAllPatientAttributes();
+
+        if ( searchingAttributeId != null )
+        {
+            PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( searchingAttributeId );
+
+            Collection<PatientAttributeValue> matching = patientAttributeValueService.searchPatientAttributeValue(
+                patientAttribute, searchText );
+
+            for ( PatientAttributeValue patientAttributeValue : matching )
+            {
+                patients.add( patientAttributeValue.getPatient() );
+            }
+
+            return SUCCESS;
+        }
+
+        patients = patientService.getPatients( searchText );
+
         return SUCCESS;
+
     }
 }
