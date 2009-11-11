@@ -31,8 +31,8 @@ import java.util.Collection;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.state.SelectedStateManager;
 import org.hisp.dhis.relationship.Relationship;
-import org.hisp.dhis.relationship.RelationshipService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -40,9 +40,11 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class RelationshipListAction
+public class ShowRelationshipListAction
     implements Action
 {
+    private static final String RELATIONSHIP_LIST = "relationshiplist";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -54,20 +56,20 @@ public class RelationshipListAction
         this.patientService = patientService;
     }
 
-    private RelationshipService relationshipService;
+    private SelectedStateManager selectedStateManager;
 
-    public void setRelationshipService( RelationshipService relationshipService )
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
-        this.relationshipService = relationshipService;
+        this.selectedStateManager = selectedStateManager;
     }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private Integer id;
 
-    public void setId( int id )
+    public void setId( Integer id )
     {
         this.id = id;
     }
@@ -93,10 +95,31 @@ public class RelationshipListAction
     public String execute()
         throws Exception
     {
-        patient = patientService.getPatient( id );
 
-        relationships = relationshipService.getRelationshipsByPatient( patient );
+        // ---------------------------------------------------------------------
+        // Validate selected Patient
+        // ---------------------------------------------------------------------
 
-        return SUCCESS;
+        if ( id != null )
+        {
+            patient = patientService.getPatient( id );
+        }
+
+        if ( id == null )
+        {
+            patient = selectedStateManager.getSelectedPatient();
+        }
+
+        if ( patient == null )
+        {
+
+            selectedStateManager.clearSelectedPatient();
+
+            return SUCCESS;
+        }
+
+        selectedStateManager.setSelectedPatient( patient );
+
+        return RELATIONSHIP_LIST;
     }
 }

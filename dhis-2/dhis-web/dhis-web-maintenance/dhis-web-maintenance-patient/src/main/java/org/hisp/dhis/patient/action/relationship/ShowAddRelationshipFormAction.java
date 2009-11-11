@@ -37,6 +37,7 @@ import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.state.SelectedStateManager;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.relationship.RelationshipType;
@@ -70,6 +71,13 @@ public class ShowAddRelationshipFormAction
         this.selectionManager = selectionManager;
     }
 
+    private SelectedStateManager selectedStateManager;
+
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    {
+        this.selectedStateManager = selectedStateManager;
+    }
+
     private PatientService patientService;
 
     public void setPatientService( PatientService patientService )
@@ -100,19 +108,7 @@ public class ShowAddRelationshipFormAction
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
-    }
-
-    private Integer patientAId;
-
-    public Integer getPatientAId()
-    {
-        return patientAId;
-    }
-
-    public void setPatientAId( Integer patientAId )
-    {
-        this.patientAId = patientAId;
-    }
+    }    
 
     private Patient patient;
 
@@ -178,7 +174,7 @@ public class ShowAddRelationshipFormAction
     public String execute()
     {
 
-        patient = patientService.getPatient( patientAId.intValue() );
+        patient = selectedStateManager.getSelectedPatient();
 
         relationshipTypes = new ArrayList<RelationshipType>( relationshipTypeService.getAllRelationshipTypes() );
 
@@ -202,6 +198,8 @@ public class ShowAddRelationshipFormAction
         }
 
         patients = patientService.getPatients( searchText );
+
+        patients.remove( patient );
 
         return SUCCESS;
 

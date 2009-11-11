@@ -45,16 +45,30 @@ public class HibernateRelationshipStore
 {
 
     @SuppressWarnings( "unchecked" )
-    public Collection<Relationship> getRelationshipsByPatient( Patient patient )
-    {        
-        return getCriteria( 
+    public Collection<Relationship> getRelationshipsForPatient( Patient patient )
+    {
+        return getCriteria(
             Restrictions.disjunction().add( Restrictions.eq( "patientA", patient ) ).add(
-            Restrictions.eq( "patientB", patient ) ) ).list();   
+                Restrictions.eq( "patientB", patient ) ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
     public Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType )
     {
         return getCriteria( Restrictions.eq( "relationshipType", relationshipType ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<Relationship> getRelationships( Patient patientA, RelationshipType relationshipType )
+    {
+        return getCriteria( Restrictions.eq( "patientA", patientA ),
+            Restrictions.eq( "relationshipType", relationshipType ) ).list();
+    }
+
+    public Relationship getRelationship( Patient patientA, Patient patientB, RelationshipType relationshipType )
+    {
+        return (Relationship) getCriteria( Restrictions.eq( "patientA", patientA ),
+            Restrictions.eq( "patientB", patientB ), Restrictions.eq( "relationshipType", relationshipType ) )
+            .uniqueResult();
     }
 }

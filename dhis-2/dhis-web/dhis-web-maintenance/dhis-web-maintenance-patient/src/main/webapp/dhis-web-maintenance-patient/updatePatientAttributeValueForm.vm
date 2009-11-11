@@ -1,4 +1,9 @@
 
+<p align="right">
+    <input type="button" value="$i18n.getString( "close" )" onclick="window.close()" style="width:10em">
+</p>
+
+
 <h3>$i18n.getString( "update_patient_attribute" )</h3>
 
 <form id="updatePatientAttributeValueForm" name="updatePatientAttributeValueForm" action="updatePatientAttribute.action" method="post" onsubmit="return validateUpdatePatientAttribute()">
@@ -81,7 +86,7 @@
         <td>        
             #if( $patientAttribute.valueType == "bool" )
                 <select name="entryselect" id="value[$patientAttribute.id].boolean" onchange="saveBoolean( $patient.id, $patientAttribute.id, this )" style="width:100%" tabindex="$tabIndex">              
-                    <option value="">[$i18n.getString( "select_value" )]</option>
+                    <option value="">[$i18n.getString( "please_select" )]</option>
                     <option value="true" #if( $patientAttributeValue.value == "true" ) selected="selected" #end>$i18n.getString( "yes" )</option>
                     <option value="false" #if( $patientAttributeValue.value == "false" ) selected="selected" #end>$i18n.getString( "no" )</option>
                 </select>                
@@ -103,10 +108,6 @@
     #set( $tabIndex = $tabIndex + 1 )
 #end
 </table>
-
-<p>
-    <input type="button" value="$i18n.getString( "close" )" onclick="window.close()" style="width:10em">
-</p>
 
 </form>     
 

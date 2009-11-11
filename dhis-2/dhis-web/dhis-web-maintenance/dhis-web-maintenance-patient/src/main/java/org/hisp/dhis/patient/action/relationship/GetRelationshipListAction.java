@@ -24,79 +24,73 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.relationship;
+
+package org.hisp.dhis.patient.action.relationship;
 
 import java.util.Collection;
 
 import org.hisp.dhis.patient.Patient;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.patient.state.SelectedStateManager;
+import org.hisp.dhis.relationship.Relationship;
+import org.hisp.dhis.relationship.RelationshipService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew
+ * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-@Transactional
-public class DefaultRelationshipService
-    implements RelationshipService
+public class GetRelationshipListAction
+    implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private RelationshipStore relationshipStore;
+    private SelectedStateManager selectedStateManager;
 
-    public void setRelationshipStore( RelationshipStore relationshipStore )
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
-        this.relationshipStore = relationshipStore;
+        this.selectedStateManager = selectedStateManager;
+    }
+
+    private RelationshipService relationshipService;
+
+    public void setRelationshipService( RelationshipService relationshipService )
+    {
+        this.relationshipService = relationshipService;
     }
 
     // -------------------------------------------------------------------------
-    // Relationship Implementation
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    public void deleteRelationship( Relationship relationship )
+    private Patient patient;
+
+    public Patient getPatient()
     {
-        relationshipStore.delete( relationship );
+        return patient;
     }
 
-    public Collection<Relationship> getAllRelationships()
+    Collection<Relationship> relationships;
+
+    public Collection<Relationship> getRelationships()
     {
-        return relationshipStore.getAll();
+        return relationships;
     }
 
-    public Relationship getRelationship( int id )
-    {
-        return relationshipStore.get( id );
-    }
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-    public Collection<Relationship> getRelationshipsForPatient( Patient patient )
+    public String execute()
+        throws Exception
     {
-        return relationshipStore.getRelationshipsForPatient( patient );
-    }
 
-    public int saveRelationship( Relationship relationship )
-    {
-        return relationshipStore.save( relationship );
-    }
+        patient = selectedStateManager.getSelectedPatient();
 
-    public void updateRelationship( Relationship relationship )
-    {
-        relationshipStore.update( relationship );
-    }
+        relationships = relationshipService.getRelationshipsForPatient( patient );
 
-    public Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType )
-    {
-        return relationshipStore.getRelationshipsByRelationshipType( relationshipType );
-    }
-
-    public Collection<Relationship> getRelationships( Patient patientA, RelationshipType relationshipType )
-    {
-        return relationshipStore.getRelationships( patientA, relationshipType );
-    }
-
-    public Relationship getRelationship( Patient patientA, Patient patientB, RelationshipType relationshipType )
-    {
-        return relationshipStore.getRelationship( patientA, patientB, relationshipType );
+        return SUCCESS;
     }
 }

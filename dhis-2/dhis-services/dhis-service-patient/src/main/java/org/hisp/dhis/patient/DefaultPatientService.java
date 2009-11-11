@@ -166,38 +166,44 @@ public class DefaultPatientService
 
     public Collection<Patient> sortPatientsByAttribute( Collection<Patient> patients, PatientAttribute patientAttribute )
     {
+        SortedMap<String, Patient> patientsSortedByAttribute = new TreeMap<String, Patient>();
+
+        Collection<Patient> sortedPatients = new ArrayList<Patient>();
+
         // ---------------------------------------------------------------------
         // Better to fetch all attribute values at once than fetching the
-        // required attribute values using loop
+        // required attribute value of each patient using loop
         // ---------------------------------------------------------------------
 
         Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
             .getPatientAttributeValues( patients );
 
-        SortedMap<String, Patient> patientsSortedByAttribute = new TreeMap<String, Patient>();
-
         for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
         {
-
             if ( patientAttribute == patientAttributeValue.getPatientAttribute() )
             {
                 patientsSortedByAttribute.put( patientAttributeValue.getValue(), patientAttributeValue.getPatient() );
             }
         }
 
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Make sure all patients are in the sorted list - because all
         // patients might not have required attribute/value
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
+
+        for ( Patient patient : patientsSortedByAttribute.values() )
+        {
+            sortedPatients.add( patient );
+        }
 
         for ( Patient patient : patients )
         {
-            if ( !patientsSortedByAttribute.values().contains( patient ) )
-            {                
-                patientsSortedByAttribute.put( patient.getId().toString(), patient );
+            if ( !sortedPatients.contains( patient ) )
+            {
+                sortedPatients.add( patient );
             }
         }
-        
-        return patientsSortedByAttribute.values();
+
+        return sortedPatients;
     }
 }

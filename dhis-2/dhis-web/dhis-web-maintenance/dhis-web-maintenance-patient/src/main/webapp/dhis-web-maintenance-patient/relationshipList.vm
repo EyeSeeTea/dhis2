@@ -5,8 +5,10 @@
 
 <h3>$i18n.getString( "relationship_management_for" )</h3>
 
+<form id="relationshipList" name="relationshipList">
+
 <div>
-    <input type="hidden" id="patientAId" name="patientAId" value="$patient.id">    
+    <input type="hidden" id="id" name="id" value="$patient.id">    
 </div>
 
 <table>
@@ -52,8 +54,9 @@
                 <tr>
                     <td></td>
                     <td></td> 
-                    <td colspan="2" style="text-align:right">                        
-                        <input type="button" value="$i18n.getString( "add_new" )" onclick="javascript:showAddRelationship( '$patient.id' )">               
+                    <td colspan="2" style="text-align:right">
+                        <input type="button" value="$i18n.getString( "add_new" )" onclick="javascript:showAddRelationship()"><br>                        
+                        <input type="button" value="$i18n.getString( "save_representative" )" onclick="javascript:saveRepresentativeRelationship()">                                       
                     </td>
                 </tr>
           
@@ -67,14 +70,14 @@
                     #foreach( $relationship in $relationships )
                         <tr>              
                             <td#alternate( $mark )>$encoder.htmlEncode( $relationship.relationshipType.bIsToA )</td>                
-                            <td#alternate( $mark )>$encoder.htmlEncode( $relationship.personB.getFullName() )</td>
+                            <td#alternate( $mark )>$encoder.htmlEncode( $relationship.patientB.getFullName() )</td>
                 
                             <td style="text-align:center"#alternate( $mark )>
-                                <a href="showUpdateRelationshipForm.action?id=$relationship.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
+                                <input type="radio" id="representative" name="representative" value="$relationship.id">$i18n.getString( "representative" )                                 
                             </td>                
  
                             <td style="text-align:center"#alternate( $mark )>
-                                <a href="javascript:removeRelationship( '$relationship.id', '$encoder.jsEncode( $relationship.personA.getFullName() )', '$encoder.jsEncode( $relationship.relationshipType.aIsToB )', '$encoder.jsEncode( $relationship.personB.getFullName() )' )" title="$i18n.getString( "remove" )"><img src="../images/delete.png" alt="$i18n.getString( "remove" )"></a>
+                                <a href="javascript:removeRelationship( '$relationship.id', '$encoder.jsEncode( $relationship.patientA.getFullName() )', '$encoder.jsEncode( $relationship.relationshipType.aIsToB )', '$encoder.jsEncode( $relationship.patientB.getFullName() )' )" title="$i18n.getString( "remove" )"><img src="../images/delete.png" alt="$i18n.getString( "remove" )"></a>
                             </td>               
                         </tr>
                         #if( $mark )
@@ -88,4 +91,13 @@
         </td>       
     </tr>    
 </table>
+
+</form>
+
 <span id="message"></span>
+
+<script type="text/javascript">
+    var i18n_confirm_delete_relationship = '$encoder.jsEscape( $i18n.getString( "confirm_delete_relationship" ) , "'" )';
+    var i18n_please_select_a_representative = '$encoder.jsEscape( $i18n.getString( "please_select_a_representative" ) , "'" )';            
+</script>
+

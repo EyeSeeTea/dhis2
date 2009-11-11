@@ -32,9 +32,11 @@ function editWindow( url, patientId )
 	var url = url + '?id=' + patientId;	
 	var width = 800
     var height = 500;
-    var left = parseInt( ( screen.availWidth/2 ) - ( width/2 ) );
-    var top = parseInt( ( screen.availHeight/2 ) - ( height/2 ) );
-    var windowFeatures = 'width=' + width + ',height=' + height + ',scrollbars=yes, resizable=yes,left=' + left + ',top=' + top + 'screenX=' + left + ',screenY=' + top;
+	
+    var left = parseInt( (window.screen.width - width ) / 2 );
+    var top = parseInt( (window.screen.height - height ) / 2 );    
+    
+    var windowFeatures = 'width=' + width + ',height=' + height + ',scrollbars=yes,left=' + left + ',top=' + top;
     
     window.open( url, '_blank_', windowFeatures);
 }

@@ -135,7 +135,7 @@ public class ViewRecordsAction
             {
                 DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
                     .getDataElementCategoryOptionCombo( Integer.parseInt( patientDataValue.getValue() ) );
-                optionValueMap.put( optionCombo.getId(), optionCombo.getName() );
+                optionValueMap.put( patientDataValue.getDataElement().getId(), optionCombo.getName() );
             }
         }
 

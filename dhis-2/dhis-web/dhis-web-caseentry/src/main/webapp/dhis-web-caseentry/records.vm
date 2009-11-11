@@ -74,9 +74,10 @@
                     #elseif( $patientDataValue.value == "false" )
                         $i18n.getString( "no" )
                     #end                                              
-                #elseif( $patientDataValue.dataElement.type == "string"  && $patientDataValue.dataElement.isMultiDimensional() )
-                    #if( $patientDataValue.value )                        
-                        $encoder.htmlEncode( $optionValueMap.get( $patientDataValue.value ) )
+                #elseif( $patientDataValue.dataElement.type == "string"  && $patientDataValue.dataElement.isMultiDimensional() )                    
+                    #if( $patientDataValue.value )                       
+                        #set( $optionValue = $optionValueMap.get( $patientDataValue.dataElement.id ) )
+                        $encoder.htmlEncode( $optionValue )
                     #end                          
                 #else
                     $!encoder.htmlEncode( $patientDataValue.value )

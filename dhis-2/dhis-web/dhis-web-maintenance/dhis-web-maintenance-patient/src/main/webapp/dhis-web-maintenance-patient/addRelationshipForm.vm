@@ -8,7 +8,7 @@
 <form id="relationshipSelectForm" name="relationshipSelectForm" method="post" action="showAddRelationshipForm.action" onsubmit="return validateSearchPartner()">
 
     <div>
-        <input type="hidden" id="patientAId" name="patientAId" value="$patient.id">    
+        <input type="hidden" id="id" name="id" value="$patient.id">    
     </div>
 
 <table>
@@ -47,21 +47,19 @@
     <td style="vertical-align:top">
         <table>        
             <tr>
-                <td>$i18n.getString( "relationship_type" )</td>
+                <td>$encoder.htmlEncode( $patient.getFullName() ) $i18n.getString( "'s" )</td>
             </tr>
             <tr>  
                 <td>
                     <select id="relationshipTypeId" name="relationshipTypeId" #if( $relationshipTypes.size() == 0 ) disabled="disabled" #end>
-                        <option value="">[$i18n.getString( "select" )]</option>
+                        <option value="">[$i18n.getString( "select_relationship" )]</option>
                         #foreach( $relationshipType in $relationshipTypes )
-                            <option value="$relationshipType.id" #if( $relationshipTypeId && $relationshipType.id == $relationshipTypeId ) selected="selected" #end>$encoder.htmlEncode( $relationshipType.aIsToB )/$encoder.htmlEncode( $relationshipType.bIsToA )</option>
+                            <option value="$relationshipType.id">$encoder.htmlEncode( $relationshipType.aIsToB )</option>
+                            <option value="$relationshipType.id">$encoder.htmlEncode( $relationshipType.bIsToA )</option>
                         #end
                     </select>
-                </td>
-            </tr> 
-            <tr>
-                <td>$i18n.getString( "relationship_partner" )</td>                
-            <tr>    
+                </td>$i18n.getString( "is" )
+            </tr>                
             <tr>           
                 <td>
                     <select id="searchingAttributeId" name="searchingAttributeId" #if( $patientAttributes.size() == 0 ) disabled="disabled" #end>
@@ -77,7 +75,7 @@
             </tr>                  
             <tr>  
                 <td> 
-                    $i18n.getString( "partner_matching_the_search_criteria" )
+                    $i18n.getString( "result_matching_the_search_criteria" )
                     #if( $searchText )  
                         $encoder.htmlEncode( $searchText ) 
                     #end

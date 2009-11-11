@@ -22,7 +22,8 @@ function relationshipTypeReceived( relationshipTypeElement )
 
 // -----------------------------------------------------------------------------
 // Remove RelationshipType
-// -----------------------------------------------------------------------------		 
+// -----------------------------------------------------------------------------	
+
 function removeRelationshipType( relationshipTypeId, aIsToB, bIsToA )
 {
     var result = window.confirm( i18n_confirm_delete + '\n\n' + aIsToB + ' ' + bIsToA );
@@ -137,16 +138,16 @@ function updateValidationCompleted( messageElement )
 }
 
 //------------------------------------------------------------------------------
-//Add Relationship
+// Add Relationship
 //------------------------------------------------------------------------------
 
-function showAddRelationship( patientId )
+function showAddRelationship()
 {
-	window.location = "showAddRelationshipForm.action?patientAId=" + patientId;
+	window.location = "showAddRelationshipForm.action";
 }
 
 //-----------------------------------------------------------------------------
-//Search Relationship Partner
+// Search Relationship Partner
 //-----------------------------------------------------------------------------
 
 function validateSearchPartner()
@@ -185,7 +186,7 @@ function searchValidationCompleted( messageElement )
 }
 
 function addRelationship() 
-{	
+{
 	var relationshipType = document.getElementById( 'relationshipTypeId' );
 	var relationshipTypeId = relationshipType.options[relationshipType.selectedIndex].value;
 	
@@ -209,8 +210,104 @@ function addRelationship()
 		window.alert( i18n_please_select_partner );
 		
 		return;
-	}			
+	}
 	
-	window.alert( 'the selected partner is:  ' + partnerId + ' and realtionship is:  ' + relationshipTypeId );
+	var url = 'saveRelationship.action?' + 
+		'patientBId=' + partnerId + 
+		'&relationshipTypeId=' + relationshipTypeId ;
+	
+	var request = new Request();
+	request.setResponseTypeXML( 'message' );
+	request.setCallbackSuccess( saveRelationshipCompleted );    
+	request.send( url );
+	
+	return false;
+	
 }
 
+function saveRelationshipCompleted( messageElement )
+{
+	var type = messageElement.getAttribute( 'type' );
+	var message = messageElement.firstChild.nodeValue;
+	
+	if ( type == 'success' )
+	{
+		window.location = "getRelationshipList.action";
+	}	
+	else if ( type == 'error' )
+	{
+		window.alert( i18n_adding_relationship_failed + ':' + '\n' + message );
+	}
+	else if ( type == 'input' )
+	{
+		document.getElementById( 'message' ).innerHTML = message;
+		document.getElementById( 'message' ).style.display = 'block';
+	}
+}
+
+//------------------------------------------------------------------------------
+// Remove Relationship
+//------------------------------------------------------------------------------
+
+function removeRelationship( relationshipId, patientA, aIsToB, patientB )
+{	
+	
+    var result = window.confirm( i18n_confirm_delete_relationship + '\n\n' + patientA + ' is ' + aIsToB + ' to ' + patientB );
+    
+    if ( result )
+    {
+    	var request = new Request();
+        request.setResponseTypeXML( 'message' );
+        request.setCallbackSuccess( removeRelationshipCompleted );
+        request.send( 'removeRelationship.action?relationshipId=' + relationshipId );         
+    }
+}
+
+function removeRelationshipCompleted( messageElement )
+{
+    var type = messageElement.getAttribute( 'type' );
+    var message = messageElement.firstChild.nodeValue;
+    
+    if ( type == 'success' )
+    {
+    	window.location = "getRelationshipList.action";
+    }
+    else if ( type = 'error' )
+    {
+        setFieldValue( 'warningField', message );
+        
+        showWarning();
+    }
+}
+
+//------------------------------------------------------------------------------
+// Save Representative Relationship
+//------------------------------------------------------------------------------
+function saveRepresentativeRelationship()
+{	
+	var possibleRepresentative = document.relationshipList.representative;
+	
+	var representativeId;
+
+	for( i=0; i < possibleRepresentative.length; i++)
+	{
+		if( possibleRepresentative[i].checked == true )
+		{
+			representativeId = possibleRepresentative[i].value			
+			break;
+		}
+	}
+	
+	if( representativeId == null )
+	{
+		window.alert( i18n_please_select_a_representative );
+		
+		return;
+	}
+	
+	else
+	{
+		window.alert( ' the representing relationship is:  ' + representativeId );
+	}
+	
+}

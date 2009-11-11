@@ -119,6 +119,13 @@ public class VisitPlanAction
         return sortingAttributeId;
     }
 
+    private PatientAttribute sortingAttribute;
+
+    public PatientAttribute getSortingAttribute()
+    {
+        return sortingAttribute;
+    }
+
     private Collection<PatientAttribute> attributes;
 
     public Collection<PatientAttribute> getAttributes()
@@ -204,22 +211,32 @@ public class VisitPlanAction
             {
                 Collection<Patient> patientsToBeVisted = visitsByPatients.keySet();
 
-                // -----------------------------------------------------------------
+                // -------------------------------------------------------------
                 // Get all the attributes of the patients to be visited (in case
                 // users want to make sorting based on attributes
-                // -----------------------------------------------------------------
+                // -------------------------------------------------------------
 
                 attributeValueMap = patientAttributeValueService
                     .getPatientAttributeValueMapForPatients( patientsToBeVisted );
 
-                // -----------------------------------------------------------------
+                // -------------------------------------------------------------
                 // Sort patients to be visited based on the chosen attribute
-                // -----------------------------------------------------------------
+                // -------------------------------------------------------------
+
+                if ( attributes.size() > 0 )
+                {
+                    sortingAttribute = attributes.iterator().next();
+                }
 
                 if ( sortingAttributeId != null )
                 {
-                    sortedPatients.addAll( patientService.sortPatientsByAttribute( patientsToBeVisted,
-                        patientAttributeService.getPatientAttribute( sortingAttributeId ) ) );
+                    sortingAttribute = patientAttributeService.getPatientAttribute( sortingAttributeId );
+                }
+
+                if ( sortingAttribute != null )
+                {
+                    sortedPatients.addAll( patientService
+                        .sortPatientsByAttribute( patientsToBeVisted, sortingAttribute ) );
                 }
                 else
                 {

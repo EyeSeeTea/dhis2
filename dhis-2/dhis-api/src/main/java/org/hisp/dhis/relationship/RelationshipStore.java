@@ -41,7 +41,12 @@ public interface RelationshipStore
 
     String ID = RelationshipStore.class.getName();
 
-    Collection<Relationship> getRelationshipsByPatient( Patient patient );
+    Relationship getRelationship( Patient patientA, Patient patientB, RelationshipType relationshipType );
+
+    // For example a patient might have more than one sibling
+    Collection<Relationship> getRelationships( Patient patientA, RelationshipType relationshipType );
+
+    Collection<Relationship> getRelationshipsForPatient( Patient patient );
 
     Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType );
 

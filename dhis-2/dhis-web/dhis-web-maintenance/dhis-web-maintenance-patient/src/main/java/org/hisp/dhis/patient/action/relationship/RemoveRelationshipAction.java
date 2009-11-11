@@ -24,37 +24,64 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.relationship;
 
-import java.util.Collection;
+package org.hisp.dhis.patient.action.relationship;
 
-import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.relationship.Relationship;
+import org.hisp.dhis.relationship.RelationshipService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew
+ * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public interface RelationshipService
+public class RemoveRelationshipAction
+    implements Action
 {
-    String ID = RelationshipService.class.getName();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    int saveRelationship( Relationship relationship );
+    private RelationshipService relationshipService;
 
-    void deleteRelationship( Relationship relationship );
+    public void setRelationshipService( RelationshipService relationshipService )
+    {
+        this.relationshipService = relationshipService;
+    }
 
-    void updateRelationship( Relationship relationship );
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
 
-    Relationship getRelationship( int id );
-    
-    Relationship getRelationship( Patient patientA, Patient patientB, RelationshipType relationshipType );
+    private int relationshipId;
 
-    Collection<Relationship> getAllRelationships();
+    public void setRelationshipId( int relationshipId )
+    {
+        this.relationshipId = relationshipId;
+    }
 
-    Collection<Relationship> getRelationshipsForPatient( Patient patient );
+    private String message;
 
-    // For example a patient might have more than one sibling
-    Collection<Relationship> getRelationships( Patient patientA, RelationshipType relationshipType );
+    public String getMessage()
+    {
+        return message;
+    }
 
-    Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType );
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        
+        Relationship relationship = relationshipService.getRelationship( relationshipId );
+
+        relationshipService.deleteRelationship( relationship );
+
+        return SUCCESS;
+        
+    }
 
 }

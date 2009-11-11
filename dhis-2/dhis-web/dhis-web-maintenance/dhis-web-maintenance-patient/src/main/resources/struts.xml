@@ -19,8 +19,8 @@
     <action name="relationshipType" class="org.hisp.dhis.patient.action.relationship.GetRelationshipTypeListAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/relationshipType.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>        
-      <param name="javascripts">javascript/relationshipType.js</param>            
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>        
+      <param name="javascripts">javascript/relationship.js</param>            
     </action>
     
     <action name="getRelationshipType" class="org.hisp.dhis.patient.action.relationship.GetRelationshipTypeAction">
@@ -29,19 +29,19 @@
     </action>
     
     <action name="removeRelationshipType" class="org.hisp.dhis.patient.action.relationship.RemoveRelationshipTypeAction">      
-      <result name="success" type="redirect">relationship.action</result>      
+      <result name="success" type="redirect">relationshipType.action</result>      
       <param name="requiredAuthorities">F_RELATIONSHIPTYPE_DELETE</param>      
     </action>
     
     <action name="addRelationshipType" class="org.hisp.dhis.patient.action.relationship.AddRelationshipTypeAction">
-      <result name="success" type="redirect">relationship.action</result>
+      <result name="success" type="redirect">relationshipType.action</result>
       <param name="requiredAuthorities">F_RELATIONSHIPTYPE_ADD</param>
     </action>
     
     <action name="showAddRelationshipTypeForm" class="org.hisp.dhis.patient.action.NoAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/addRelationshipTypeForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
       <param name="javascripts">javascript/relationship.js</param>
       <param name="requiredAuthorities">F_RELATIONSHIPTYPE_ADD</param>      
     </action>
@@ -49,7 +49,7 @@
     <action name="showUpdateRelationshipTypeForm" class="org.hisp.dhis.patient.action.relationship.GetRelationshipTypeAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updateRelationshipTypeForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/relationshipMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
       <param name="javascripts">javascript/relationship.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>      
     </action>
@@ -68,7 +68,15 @@
     
     <!-- Relationship -->    
     
-    <action name="showRelationshipList" class="org.hisp.dhis.patient.action.relationship.RelationshipListAction">      
+    <action name="showRelationshipList" class="org.hisp.dhis.patient.action.relationship.ShowRelationshipListAction">
+      <result name="relationshiplist" type="chain">getRelationshipList</result>      
+      <result name="success" type="velocity">/popup.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>            
+      <param name="javascripts">javascript/relationship.js</param>
+      <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_UPDATE</param>      
+    </action>      
+    
+    <action name="getRelationshipList" class="org.hisp.dhis.patient.action.relationship.GetRelationshipListAction">      
       <result name="success" type="velocity">/popup.vm</result>
       <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>            
       <param name="javascripts">javascript/relationship.js</param>
@@ -91,17 +99,23 @@
     </action>
     
     <action name="saveRelationship" class="org.hisp.dhis.patient.action.relationship.SaveRelationshipAction">      
-      <result name="success" type="velocity">status.vm</result>
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
-      <param name="requiredAuthorities">F_RELATIONSHIP_ADD,F_RELATIONSHIP_UPDATE,F_RELATIONSHIP_DELETE</param>
-    </action>   
+    </action> 
+    
+    <action name="removeRelationship" class="org.hisp.dhis.patient.action.relationship.RemoveRelationshipAction">      
+      <result name="success" type="redirect">getRelationshipList.action</result>      
+      <param name="requiredAuthorities">F_RELATIONSHIP_DELETE</param>      
+    </action>    
     
     <!-- PatientAttribute -->   
     
     <action name="patientAttribute" class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeListAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/patientAttribute.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>        
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>        
       <param name="javascripts">javascript/patientAttribute.js</param>            
     </action>
     
@@ -123,7 +137,7 @@
     <action name="showAddPatientAttributeForm" class="org.hisp.dhis.patient.action.NoAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/addPatientAttributeForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
       <param name="javascripts">javascript/patientAttribute.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTE_ADD</param>      
     </action>
@@ -131,7 +145,7 @@
     <action name="showUpdatePatientAttributeForm" class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributeAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updatePatientAttibuteForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
       <param name="javascripts">javascript/patientAttribute.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTE_UPDATE</param>      
     </action>
@@ -235,7 +249,7 @@
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updatePatientForm.vm</param>   
-      <param name="menu">/dhis-web-maintenance-patient/attributeMenu.vm</param>         
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>         
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/patient.js</param>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>      
     </action> 
@@ -304,7 +318,7 @@
     <action name="program" class="org.hisp.dhis.patient.action.program.GetProgramListAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/programList.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>        
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>        
       <param name="javascripts">javascript/program.js</param>            
     </action>
     
@@ -326,7 +340,7 @@
     <action name="showAddProgramForm" class="org.hisp.dhis.patient.action.program.ShowAddProgramFormAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/addProgramForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
       <param name="javascripts">javascript/program.js</param>
       <param name="requiredAuthorities">F_PROGRAM_ADD</param>      
     </action>
@@ -334,7 +348,7 @@
     <action name="showUpdateProgramForm" class="org.hisp.dhis.patient.action.program.GetProgramAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updateProgramForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
       <param name="javascripts">javascript/program.js</param>
       <param name="requiredAuthorities">F_PROGRAM_UPDATE</param>      
     </action>
@@ -408,7 +422,7 @@
     <action name="programStage" class="org.hisp.dhis.patient.action.programstage.GetProgramStageListAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/programStageList.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
       <param name="javascripts">javascript/programStage.js</param>
     </action>
     
@@ -422,7 +436,7 @@
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>      
       <result name="success" type="velocity">/main.vm</result>      
       <param name="page">/dhis-web-maintenance-patient/addProgramStageForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>      
       <param name="javascripts">javascript/programStage.js</param>
       <param name="requiredAuthorities">F_PROGRAMSTAGE_ADD</param>      
     </action>
@@ -449,7 +463,7 @@
     <action name="showUpdateProgramStageForm" class="org.hisp.dhis.patient.action.programstage.GetProgramStageAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-patient/updateProgramStageForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>     
       <param name="javascripts">javascript/programStage.js</param>
       <param name="requiredAuthorities">F_PROGRAMSTAGE_UPDATE</param>      
     </action>
@@ -463,7 +477,7 @@
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>      
       <result name="success" type="velocity">/main.vm</result>      
       <param name="page">/dhis-web-maintenance-patient/sortProgramStageForm.vm</param>
-      <param name="menu">/dhis-web-maintenance-patient/programMenu.vm</param>      
+      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>     
       <param name="javascripts">javascript/programStage.js</param>
       <param name="requiredAuthorities">F_PROGRAMSTAGE_ADD</param>      
     </action>

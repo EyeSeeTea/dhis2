@@ -47,7 +47,7 @@ public class Relationship
 
     private Patient patientB;
     
-    private Date startDate;
+    private Date startDate;    
 
     // -------------------------------------------------------------------------
     // Constructors

@@ -26,15 +26,14 @@
  */
 package org.hisp.dhis.patient.action.relationship;
 
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
+import org.hisp.dhis.patient.state.SelectedStateManager;
+import org.hisp.dhis.relationship.Relationship;
+import org.hisp.dhis.relationship.RelationshipService;
+import org.hisp.dhis.relationship.RelationshipType;
+import org.hisp.dhis.relationship.RelationshipTypeService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -45,8 +44,6 @@ import com.opensymphony.xwork2.Action;
 public class SaveRelationshipAction
     implements Action
 {
-
-    private static final Log LOG = LogFactory.getLog( SaveRelationshipAction.class );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -59,50 +56,69 @@ public class SaveRelationshipAction
         this.patientService = patientService;
     }
 
-    private PatientAttributeService patientAttributeService;
+    private SelectedStateManager selectedStateManager;
 
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
-        this.patientAttributeService = patientAttributeService;
+        this.selectedStateManager = selectedStateManager;
     }
 
-    private PatientAttributeValueService patientAttributeValueService;
+    private RelationshipTypeService relationshipTypeService;
 
-    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
+    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
     {
-        this.patientAttributeValueService = patientAttributeValueService;
+        this.relationshipTypeService = relationshipTypeService;
+    }
+
+    private RelationshipService relationshipService;
+
+    public void setRelationshipService( RelationshipService relationshipService )
+    {
+        this.relationshipService = relationshipService;
     }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private String value;
+    private Patient patient;
 
-    public void setValue( String value )
+    public Patient getPatient()
     {
-        this.value = value;
+        return patient;
     }
 
-    private int patientId;
+    private Integer patientBId;
 
-    public void setPatientId( int patientId )
+    public void setPatientBId( Integer patientBId )
     {
-        this.patientId = patientId;
+        this.patientBId = patientBId;
     }
 
-    private int patientAttributeId;
-
-    public void setPatientAttributeId( int patientAttributeId )
+    public Integer getPatientBId()
     {
-        this.patientAttributeId = patientAttributeId;
+        return patientBId;
     }
 
-    private int statusCode;
+    private Integer relationshipTypeId;
 
-    public int getStatusCode()
+    public void setRelationshipTypeId( Integer relationshipTypeId )
     {
-        return statusCode;
+        this.relationshipTypeId = relationshipTypeId;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -111,51 +127,35 @@ public class SaveRelationshipAction
 
     public String execute()
         throws Exception
-    {        
+    {
 
-        Patient patient = patientService.getPatient( patientId );
-        
-        PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( patientAttributeId );
-        
-        if( !patient.getAttributes().contains( patientAttribute ) )
+        patient = selectedStateManager.getSelectedPatient();
+
+        Patient patientB = patientService.getPatient( patientBId );
+
+        RelationshipType relationshipType = relationshipTypeService.getRelationshipType( relationshipTypeId );
+
+        Relationship relationship = relationshipService.getRelationship( patient, patientB, relationshipType );
+
+        if ( relationship != null )
         {
-            patient.getAttributes().add( patientAttribute );
-            patientService.updatePatient( patient );
+            message = i18n.getString( "the_relationship_already_exists" );
+
+            return INPUT;
+
         }
 
-        if ( value != null && value.trim().length() == 0 )
-        {
-            value = null;
-        }
+        // ---------------------------------------------------------------------
+        // Validation success
+        // ---------------------------------------------------------------------
 
-        if ( value != null )
-        {
-            value = value.trim();
-        }        
+        relationship = new Relationship();
 
-        PatientAttributeValue patientAttributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );            
+        relationship.setPatientA( patient );
+        relationship.setPatientB( patientB );
+        relationship.setRelationshipType( relationshipType );
 
-        if ( patientAttributeValue == null )
-        {          
-            
-            if ( value != null )
-            {              
-                
-                LOG.debug( "Adding PatientAttributeValue, value added" );                
-
-                patientAttributeValue = new PatientAttributeValue( patientAttribute, patient, value );
-
-                patientAttributeValueService.savePatientAttributeValue( patientAttributeValue );
-            }
-        }
-        else
-        {
-            LOG.debug( "Updating PatientAttributeValue, value added/changed" );
-
-            patientAttributeValue.setValue( value );            
-
-            patientAttributeValueService.updatePatientAttributeValue( patientAttributeValue );
-        }
+        relationshipService.saveRelationship( relationship );
 
         return SUCCESS;
     }
