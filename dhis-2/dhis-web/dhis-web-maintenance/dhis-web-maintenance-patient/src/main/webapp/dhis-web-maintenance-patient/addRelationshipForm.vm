@@ -54,11 +54,12 @@
                     <select id="relationshipTypeId" name="relationshipTypeId" #if( $relationshipTypes.size() == 0 ) disabled="disabled" #end>
                         <option value="">[$i18n.getString( "select_relationship" )]</option>
                         #foreach( $relationshipType in $relationshipTypes )
-                            <option value="$relationshipType.id">$encoder.htmlEncode( $relationshipType.aIsToB )</option>
-                            <option value="$relationshipType.id">$encoder.htmlEncode( $relationshipType.bIsToA )</option>
+                            <option value="$relationshipType.id:$encoder.htmlEncode( $relationshipType.aIsToB )">$encoder.htmlEncode( $relationshipType.aIsToB )</option>
+                            <option value="$relationshipType.id:$encoder.htmlEncode( $relationshipType.bIsToA )">$encoder.htmlEncode( $relationshipType.bIsToA )</option>
                         #end
                     </select>
-                </td>$i18n.getString( "is" )
+                    $i18n.getString( "is" )
+                </td>
             </tr>                
             <tr>           
                 <td>

@@ -3,7 +3,7 @@
     <input type="button" value="$i18n.getString( "close" )" onclick="window.close()" style="width:10em">
 </p>
 
-<h3>$i18n.getString( "relationship_management_for" )</h3>
+<h3>$i18n.getString( "relationship_s_for" )</h3>
 
 <form id="relationshipList" name="relationshipList">
 
@@ -68,10 +68,24 @@
                 <tbody id="list">                
                     #set( $mark = false )
                     #foreach( $relationship in $relationships )
-                        <tr>              
-                            <td#alternate( $mark )>$encoder.htmlEncode( $relationship.relationshipType.bIsToA )</td>                
-                            <td#alternate( $mark )>$encoder.htmlEncode( $relationship.patientB.getFullName() )</td>
-                
+                        <tr>    
+                            #if( $relationship.patientA.id == $patient.id )          
+                                <td#alternate( $mark )>                                
+                                    $encoder.htmlEncode( $relationship.relationshipType.BIsToA )
+                                </td>
+                                            
+                                <td#alternate( $mark )>
+                                    $encoder.htmlEncode( $relationship.patientB.getFullName() )
+                                </td>
+                            #elseif($relationship.patientB.id == $patient.id )
+                                  <td#alternate( $mark )>                                
+                                    $encoder.htmlEncode( $relationship.relationshipType.AIsToB )
+                                </td>
+                                            
+                                <td#alternate( $mark )>
+                                    $encoder.htmlEncode( $relationship.patientA.getFullName() )
+                                </td>
+                            #end    
                             <td style="text-align:center"#alternate( $mark )>
                                 <input type="radio" id="representative" name="representative" value="$relationship.id">$i18n.getString( "representative" )                                 
                             </td>                

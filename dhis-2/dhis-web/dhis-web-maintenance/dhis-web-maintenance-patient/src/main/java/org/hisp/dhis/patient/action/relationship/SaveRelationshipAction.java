@@ -88,16 +88,16 @@ public class SaveRelationshipAction
         return patient;
     }
 
-    private Integer patientBId;
+    private Integer partnerId;
 
-    public void setPatientBId( Integer patientBId )
+    public void setPartnerId( Integer partnerId )
     {
-        this.patientBId = patientBId;
+        this.partnerId = partnerId;
     }
 
-    public Integer getPatientBId()
+    public Integer getPartnerId()
     {
-        return patientBId;
+        return partnerId;
     }
 
     private Integer relationshipTypeId;
@@ -105,6 +105,13 @@ public class SaveRelationshipAction
     public void setRelationshipTypeId( Integer relationshipTypeId )
     {
         this.relationshipTypeId = relationshipTypeId;
+    }
+
+    private String relationshipName;
+
+    public void setRelationshipName( String relationshipName )
+    {
+        this.relationshipName = relationshipName;
     }
 
     private String message;
@@ -131,11 +138,11 @@ public class SaveRelationshipAction
 
         patient = selectedStateManager.getSelectedPatient();
 
-        Patient patientB = patientService.getPatient( patientBId );
+        Patient partner = patientService.getPatient( partnerId );
 
         RelationshipType relationshipType = relationshipTypeService.getRelationshipType( relationshipTypeId );
 
-        Relationship relationship = relationshipService.getRelationship( patient, patientB, relationshipType );
+        Relationship relationship = relationshipService.getRelationship( patient, partner, relationshipType );
 
         if ( relationship != null )
         {
@@ -150,13 +157,26 @@ public class SaveRelationshipAction
         // ---------------------------------------------------------------------
 
         relationship = new Relationship();
-
-        relationship.setPatientA( patient );
-        relationship.setPatientB( patientB );
-        relationship.setRelationshipType( relationshipType );
-
-        relationshipService.saveRelationship( relationship );
-
+        
+        if( relationshipType.getaIsToB().equalsIgnoreCase( relationshipName ) )
+        {
+            relationship.setPatientA( partner );
+            relationship.setPatientB( patient );
+            
+            relationship.setRelationshipType( relationshipType );
+            relationshipService.saveRelationship( relationship );
+            
+        }        
+        else if( relationshipType.getbIsToA().equalsIgnoreCase( relationshipName ) )
+        {
+            relationship.setPatientA( patient );
+            relationship.setPatientB( partner );
+            
+            relationship.setRelationshipType( relationshipType );
+            relationshipService.saveRelationship( relationship );
+        }
+        
+        
         return SUCCESS;
     }
 }

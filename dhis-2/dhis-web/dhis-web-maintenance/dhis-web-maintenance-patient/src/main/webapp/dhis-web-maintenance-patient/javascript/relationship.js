@@ -212,9 +212,13 @@ function addRelationship()
 		return;
 	}
 	
+	var relTypeId = relationshipTypeId.substr( 0, relationshipTypeId.indexOf(':') );
+	var relName = relationshipTypeId.substr( relationshipTypeId.indexOf(':') + 1, relationshipTypeId.length );
+	
 	var url = 'saveRelationship.action?' + 
-		'patientBId=' + partnerId + 
-		'&relationshipTypeId=' + relationshipTypeId ;
+		'partnerId=' + partnerId + 
+		'&relationshipTypeId=' + relTypeId +
+		'&relationshipName=' + relName ;
 	
 	var request = new Request();
 	request.setResponseTypeXML( 'message' );
