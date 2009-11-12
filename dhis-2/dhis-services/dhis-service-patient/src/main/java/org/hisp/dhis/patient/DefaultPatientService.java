@@ -181,14 +181,14 @@ public class DefaultPatientService
         for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
         {
             if ( patientAttribute == patientAttributeValue.getPatientAttribute() )
-            {
-                patientsSortedByAttribute.put( patientAttributeValue.getValue(), patientAttributeValue.getPatient() );
+            {                
+                patientsSortedByAttribute.put( patientAttributeValue.getValue() + "-" + patientAttributeValue.getPatient().getFullName() + "-" + patientAttributeValue.getPatient().getId(), patientAttributeValue.getPatient() );
             }
         }
 
         // ---------------------------------------------------------------------
         // Make sure all patients are in the sorted list - because all
-        // patients might not have required attribute/value
+        // patients might not have the sorting attribute/value
         // ---------------------------------------------------------------------
 
         for ( Patient patient : patientsSortedByAttribute.values() )

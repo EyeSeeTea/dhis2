@@ -34,15 +34,16 @@
                 </td>   
                 <td style="vertical-align:top">
                     <div style="float:right">                        
-                        #foreach( $attribute in $patient.attributes )
-                            #set( $attributeValue = false )
-                            #set( $attributeValue = $patientAttributeValueMap.get( $attribute.id ) )
+                        #set( $attributeValues = false )
+                        #set( $attributeValues = $attributeValueMap.get( $patient.id ) )
+                        #foreach( $attributeValue in $attributeValues )                            
                             <strong>$encoder.htmlEncode( $attributeValue.patientAttribute.name ):</strong>$encoder.htmlEncode( $attributeValue.value )<br>
                         #end                         
                     </div>
                 </td>    
             </tr>            
         </table>
+        #set( $stages = false )
         #set( $stages = $visitsByPatients.get( $patient ) )  
         <table class="listTable">
             <col>
