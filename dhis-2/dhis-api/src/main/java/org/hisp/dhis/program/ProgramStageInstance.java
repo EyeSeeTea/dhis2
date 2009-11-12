@@ -29,7 +29,6 @@ package org.hisp.dhis.program;
 import java.io.Serializable;
 import java.util.Date;
 
-
 /**
  * @author Abyot Asalefew
  * @version $Id$
@@ -37,14 +36,20 @@ import java.util.Date;
 public class ProgramStageInstance
     implements Serializable
 {
-    private int id;    
+    public static final String COLOR_RED = "#ff0000";
+
+    public static final String COLOR_YELLOW = "#ffff00";
+    
+    public static final String COLOR_GREEN = "#00ff00";    
+
+    private int id;
 
     private ProgramInstance programInstance;
-    
+
     private ProgramStage programStage;
-    
+
     private int stageInProgram;
-    
+
     private Date dueDate;
 
     private Date executionDate;
@@ -97,8 +102,8 @@ public class ProgramStageInstance
         final int prime = 31;
         int result = 1;
 
-        result = result * prime + programInstance.hashCode();        
-        result = result * prime + programStage.hashCode();   
+        result = result * prime + programInstance.hashCode();
+        result = result * prime + programStage.hashCode();
 
         return result;
     }
@@ -201,6 +206,6 @@ public class ProgramStageInstance
     public int getStageInProgram()
     {
         return stageInProgram;
-    }   
+    }
 
 }

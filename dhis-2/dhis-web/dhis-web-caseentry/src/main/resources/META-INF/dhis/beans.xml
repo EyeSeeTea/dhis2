@@ -75,14 +75,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="selectedStateManager"
       ref="org.hisp.dhis.caseentry.state.SelectedStateManager"/>
     <property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>
-    <property name="patientIdentifierService"
-      ref="org.hisp.dhis.patient.PatientIdentifierService"/>
+      ref="org.hisp.dhis.patient.PatientService"/>    
     <property name="programService"
       ref="org.hisp.dhis.program.ProgramService"/>
     <property name="programStageService"
       ref="org.hisp.dhis.program.ProgramStageService"/>
-     <property name="programInstanceService"
+    <property name="programInstanceService"
       ref="org.hisp.dhis.program.ProgramInstanceService"/>
     <property name="programStageInstanceService"
       ref="org.hisp.dhis.program.ProgramStageInstanceService"/>              
@@ -97,15 +95,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.caseentry.action.caseentry.DataEntryAction"
     class="org.hisp.dhis.caseentry.action.caseentry.DataEntryAction" 
-    scope="prototype">   
-    <property name="patientService"
-      ref="org.hisp.dhis.patient.PatientService"/>
-    <property name="patientIdentifierService"
-      ref="org.hisp.dhis.patient.PatientIdentifierService"/>
-    <property name="programService"
-      ref="org.hisp.dhis.program.ProgramService"/>
-    <property name="programStageService"
-      ref="org.hisp.dhis.program.ProgramStageService"/>       
+    scope="prototype">       
     <property name="programInstanceService"
       ref="org.hisp.dhis.program.ProgramInstanceService"/>
     <property name="programStageInstanceService"
@@ -215,7 +205,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="programService"
       ref="org.hisp.dhis.program.ProgramService"/>
     <property name="programInstanceService"
-      ref="org.hisp.dhis.program.ProgramInstanceService"/>                 
+      ref="org.hisp.dhis.program.ProgramInstanceService"/>   
+    <property name="programStageInstanceService"
+      ref="org.hisp.dhis.program.ProgramStageInstanceService"/>              
   </bean>
   
   <bean id="org.hisp.dhis.caseentry.action.report.ViewRecordsAction"

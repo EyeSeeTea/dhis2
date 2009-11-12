@@ -26,7 +26,11 @@
  */
 package org.hisp.dhis.program;
 
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,7 +81,7 @@ public class DefaultProgramStageInstanceService
     public ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
     {
         return programStageInstanceStore.getProgramStageInstance( programInstance, programStage );
-    }   
+    }
 
     public Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage )
     {
@@ -87,5 +91,41 @@ public class DefaultProgramStageInstanceService
     public void updateProgramStageInstance( ProgramStageInstance programStageInstance )
     {
         programStageInstanceStore.update( programStageInstance );
-    }    
+    }
+
+    public Map<Integer, String> colorProgramStageInstances( Collection<ProgramStageInstance> programStageInstances )
+    {
+        Map<Integer, String> colorMap = new HashMap<Integer, String>();
+
+        for ( ProgramStageInstance programStageInstance : programStageInstances )
+        {
+            if ( programStageInstance.getExecutionDate() != null )
+            {
+                colorMap.put( programStageInstance.getId(), ProgramStageInstance.COLOR_GREEN );
+            }
+            else
+            {
+                // -------------------------------------------------------------
+                // If a program stage is not provided even a day after its due
+                // date, then that service is alerted red - because we are
+                // getting late
+                // -------------------------------------------------------------
+
+                Calendar dueDateCalendar = Calendar.getInstance();
+                dueDateCalendar.setTime( programStageInstance.getDueDate() );
+                dueDateCalendar.add( Calendar.DATE, 1 );
+
+                if ( dueDateCalendar.getTime().before( new Date() ) )
+                {
+                    colorMap.put( programStageInstance.getId(), ProgramStageInstance.COLOR_RED );
+                }
+                else
+                {
+                    colorMap.put( programStageInstance.getId(), ProgramStageInstance.COLOR_YELLOW );
+                }
+            }
+        }
+
+        return colorMap;
+    }
 }

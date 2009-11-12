@@ -1,40 +1,43 @@
-#parse( "/dhis-web-caseentry/select.vm" )
-        
+       
 <form id="selectRecordingForm" name="selectRecordingForm" method="post" action="selectDataRecording.action">
 
 <div>
     <input type="hidden" id="id" name="id" value="$patient.id">
 </div>
 
-
-<table>
-    <tr>
-        <td><strong>$i18n.getString( "full_name" ):</strong></td>
-        <td>           
-            $encoder.htmlEncode( $patient.getFullName() )  
+<table class="mainPageTable"> 
+    <tr>            
+        <td>
+            <strong>$i18n.getString( "full_name" ):</strong>$encoder.htmlEncode( $patient.getFullName() )<br>
+            <strong>$i18n.getString( "gender" ):</strong>$encoder.htmlEncode( $patient.gender )<br>
+            <strong>$i18n.getString( "date_of_birth" ):</strong>$format.formatDate( $patient.birthDate )<br>
+            <strong>$i18n.getString( "age" ):</strong>$encoder.htmlEncode( $patient.getAge() )
         </td>
-    </tr>
-    <tr>
-        <td><strong>$i18n.getString( "gender" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $patient.gender )
+        <td style="vertical-align:top">
+            #if( $programInstance )
+                <div id="currentSelection" style="float:right">
+                    <h4>$i18n.getString( "program_stages_history_plan" )</h4>
+                    <table>                        
+                        #foreach( $stageInstance in $programInstance.programStageInstances )
+                            <tr>
+                                <td>
+                                    <strong>$encoder.htmlEncode( $stageInstance.programStage.name ):</strong>
+                                </td>
+                                <td style="text-align:center" bgcolor="$colorMap.get( $stageInstance.id )">                                                           
+                                    #if( $stageInstance.executionDate )
+                                        $i18n.getString( "completed_on" )$format.formatDate( $stageInstance.executionDate )
+                                    #else
+                                        $i18n.getString( "scheduled_for" )$format.formatDate( $stageInstance.dueDate )
+                                    #end
+                               </td>
+                            </tr>                            
+                        #end
+                    </table>     
+                </div>
+            #end
         </td>
-    </tr>    
-    <tr>
-        <td><strong>$i18n.getString( "date_of_birth" ):</strong></td>
-        <td>            
-            $format.formatDate( $patient.birthDate )
-        </td>
-    </tr>
-    <tr>
-        <td><strong>$i18n.getString( "age" ):</strong></td>
-        <td>            
-            $encoder.htmlEncode( $patient.getAge() )
-        </td>
-    </tr>    
-
+    </tr>                    
 </table>
-
 
 <hr style="clear:both">
 

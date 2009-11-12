@@ -28,12 +28,12 @@ package org.hisp.dhis.caseentry.action.caseentry;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -102,13 +102,6 @@ public class DataRecordingSelectAction
         this.programStageInstanceService = programStageInstanceService;
     }
 
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }
-
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -156,13 +149,6 @@ public class DataRecordingSelectAction
         return patient;
     }
 
-    private PatientIdentifier patientIdentifier;
-
-    public PatientIdentifier getPatientIdentifier()
-    {
-        return patientIdentifier;
-    }
-
     private Collection<Program> programs = new ArrayList<Program>();
 
     public Collection<Program> getPrograms()
@@ -183,12 +169,26 @@ public class DataRecordingSelectAction
     {
         return organisationUnit;
     }
+    
+    private ProgramInstance programInstance;
+
+    public ProgramInstance getProgramInstance()
+    {
+        return programInstance;
+    }
 
     private ProgramStageInstance programStageInstance;
 
     public ProgramStageInstance getProgramStageInstance()
     {
         return programStageInstance;
+    }
+
+    private Map<Integer, String> colorMap = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getColorMap()
+    {
+        return colorMap;
     }
 
     // -------------------------------------------------------------------------
@@ -220,8 +220,6 @@ public class DataRecordingSelectAction
         }
 
         selectedStateManager.setSelectedPatient( patient );
-
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
 
         // ---------------------------------------------------------------------
         // Load Enrolled Programs
@@ -268,6 +266,18 @@ public class DataRecordingSelectAction
         }
 
         // ---------------------------------------------------------------------
+        // Load the active program instance completed = false we need the
+        // corresponding stage execution date
+        // ---------------------------------------------------------------------
+
+        Collection<ProgramInstance> progamInstances = programInstanceService.getProgramInstances( patient,
+            selectedProgram, false );
+
+        programInstance = progamInstances.iterator().next();
+
+        colorMap = programStageInstanceService.colorProgramStageInstances( programInstance.getProgramStageInstances() );
+
+        // ---------------------------------------------------------------------
         // Load ProgramStages
         // ---------------------------------------------------------------------
 
@@ -303,14 +313,9 @@ public class DataRecordingSelectAction
         }
 
         // ---------------------------------------------------------------------
-        // Load the active program instance completed = false we need the
-        // corresponding stage execution date
+        // Load the programStageInstance we need the corresponding execution
+        // date
         // ---------------------------------------------------------------------
-
-        Collection<ProgramInstance> progamInstances = programInstanceService.getProgramInstances( patient,
-            selectedProgram, false );
-
-        ProgramInstance programInstance = progamInstances.iterator().next();
 
         programStageInstance = programStageInstanceService.getProgramStageInstance( programInstance,
             selectedProgramStage );

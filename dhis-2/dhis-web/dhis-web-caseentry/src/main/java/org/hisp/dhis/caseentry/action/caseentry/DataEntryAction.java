@@ -36,9 +36,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
-import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
@@ -46,9 +43,7 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
-import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -64,20 +59,6 @@ public class DataEntryAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
     private ProgramInstanceService programInstanceService;
 
     public void setProgramInstanceService( ProgramInstanceService programInstanceService )
@@ -85,25 +66,11 @@ public class DataEntryAction
         this.programInstanceService = programInstanceService;
     }
 
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
-
     private ProgramStageInstanceService programStageInstanceService;
 
     public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
         this.programStageInstanceService = programStageInstanceService;
-    }
-
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
     }
 
     private PatientDataValueService patientDataValueService;
@@ -124,24 +91,7 @@ public class DataEntryAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    public Integer getId()
-    {
-        return id;
-    }
-
     private Integer programId;
-
-    public void setProgramId( Integer programId )
-    {
-        this.programId = programId;
-    }
 
     public Integer getProgramId()
     {
@@ -155,24 +105,12 @@ public class DataEntryAction
         return programStageId;
     }
 
-    public void setProgramStageId( Integer programStageId )
-    {
-        this.programStageId = programStageId;
-    }
-
     private Patient patient;
 
     public Patient getPatient()
     {
         return patient;
     }
-
-    private PatientIdentifier patientIdentifier;
-
-    public PatientIdentifier getPatientIdentifier()
-    {
-        return patientIdentifier;
-    }  
 
     private Program program;
 
@@ -186,6 +124,13 @@ public class DataEntryAction
     public ProgramStage getProgramStage()
     {
         return programStage;
+    }
+    
+    private ProgramInstance programInstance;
+
+    public ProgramInstance getProgramInstance()
+    {
+        return programInstance;
     }
 
     private Collection<DataElement> dataElements = new ArrayList<DataElement>();
@@ -208,12 +153,19 @@ public class DataEntryAction
     {
         return patientDataValueMap;
     }
-    
+
     private OrganisationUnit organisationUnit;
 
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
+    }
+    
+    private Map<Integer, String> colorMap = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getColorMap()
+    {
+        return colorMap;
     }
 
     // -------------------------------------------------------------------------
@@ -226,13 +178,15 @@ public class DataEntryAction
 
         organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
 
-        patient = patientService.getPatient( id );
+        patient = selectedStateManager.getSelectedPatient();
 
-        patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );        
+        program = selectedStateManager.getSelectedProgram();
 
-        program = programService.getProgram( programId );
+        programId = program.getId();
 
-        programStage = programStageService.getProgramStage( programStageId );
+        programStage = selectedStateManager.getSelectedProgramStage();
+
+        programStageId = programStage.getId();
 
         dataElements = programStage.getDataElements();
 
@@ -244,7 +198,9 @@ public class DataEntryAction
         Collection<ProgramInstance> progamInstances = programInstanceService.getProgramInstances( patient, program,
             false );
 
-        ProgramInstance programInstance = progamInstances.iterator().next();
+        programInstance = progamInstances.iterator().next();
+        
+        colorMap = programStageInstanceService.colorProgramStageInstances( programInstance.getProgramStageInstances() );
 
         ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance(
             programInstance, programStage );

@@ -39,35 +39,36 @@ import org.hisp.dhis.patient.Patient;
 public interface ProgramInstanceService
 {
     String ID = ProgramInstanceService.class.getName();
-    
+
     int addProgramInstance( ProgramInstance programInstance );
-    
+
     void deleteProgramInstance( ProgramInstance programInstance );
-    
+
     void updateProgramInstance( ProgramInstance programInstance );
-    
+
     ProgramInstance getProgramInstance( int id );
-    
+
     Collection<ProgramInstance> getAllProgramInstances();
-    
-    Collection<ProgramInstance> getProgramInstances( boolean completed );   
-    
+
+    Collection<ProgramInstance> getProgramInstances( boolean completed );
+
     Collection<ProgramInstance> getProgramInstances( Program program );
-    
+
     Collection<ProgramInstance> getProgramInstances( Collection<Program> programs );
-    
+
     Collection<ProgramInstance> getProgramInstances( Program program, boolean completed );
-    
+
     Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, boolean completed );
-    
+
     Collection<ProgramInstance> getProgramInstances( Patient patient );
-    
+
     Collection<ProgramInstance> getProgramInstances( Patient patient, boolean completed );
-    
+
     Collection<ProgramInstance> getProgramInstances( Patient patient, Program program );
-    
+
     Collection<ProgramInstance> getProgramInstances( Patient patient, Program program, boolean completed );
-    
-    Map<Patient, Set<ProgramStageInstance>> getNextVisitsForProgramInstances( Collection<ProgramInstance> programInstances );
-    
+
+    Map<Patient, Set<ProgramStageInstance>> getNextVisitsForProgramInstances(
+        Collection<ProgramInstance> programInstances );  
+
 }

@@ -71,7 +71,7 @@ public class ReportSelectAction
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
-    }    
+    }
 
     private Integer programId;
 
@@ -120,7 +120,7 @@ public class ReportSelectAction
 
         programs = programService.getPrograms( organisationUnit );
 
-     // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Validate selected Program
         // ---------------------------------------------------------------------
 
@@ -143,13 +143,13 @@ public class ReportSelectAction
 
         else
         {
-            programId = null;           
+            programId = null;
 
             selectedStateManager.clearSelectedProgram();
 
             return SUCCESS;
         }
-            
+
         return SUCCESS;
     }
 }

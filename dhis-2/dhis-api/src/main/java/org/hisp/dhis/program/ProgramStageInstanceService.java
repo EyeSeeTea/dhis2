@@ -27,6 +27,7 @@
 package org.hisp.dhis.program;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Abyot Asalefew
@@ -48,5 +49,7 @@ public interface ProgramStageInstanceService
     
     Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage );
     
-    Collection<ProgramStageInstance> getAllProgramStageInstances();        
+    Collection<ProgramStageInstance> getAllProgramStageInstances();     
+    
+    Map<Integer, String> colorProgramStageInstances( Collection<ProgramStageInstance> programStageInstances );
 }

@@ -43,6 +43,7 @@ import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -81,6 +82,13 @@ public class GenerateReportAction
     public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
         this.programInstanceService = programInstanceService;
+    }
+
+    private ProgramStageInstanceService programStageInstanceService;
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     private I18nFormat format;
@@ -188,6 +196,8 @@ public class GenerateReportAction
 
         Collection<ProgramInstance> selectedProgramInstances = programInstanceService.getProgramInstances( program );
 
+        Collection<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();
+
         for ( ProgramInstance programInstance : selectedProgramInstances )
         {
             if ( !programInstance.isCompleted() )
@@ -203,29 +213,10 @@ public class GenerateReportAction
                 }
             }
 
-            for ( ProgramStageInstance programStageInstance : programInstance.getProgramStageInstances() )
-            {
-                // -------------------------------------------------------------
-                // If a program stage is not provided even a day after its due
-                // date, then that service is alerted red - because we are
-                // getting late
-                // -------------------------------------------------------------
-
-                Calendar dueDateCalendar = Calendar.getInstance();
-                dueDateCalendar.setTime( programStageInstance.getDueDate() );
-                dueDateCalendar.add( Calendar.DATE, 1 );
-
-                if ( dueDateCalendar.getTime().before( new Date() ) )
-                {
-                    colorMap.put( programStageInstance.getId(), RED );
-                }
-                else
-                {
-                    colorMap.put( programStageInstance.getId(), YELLOW );
-                }
-            }
-
+            programStageInstances.addAll( programInstance.getProgramStageInstances() );
         }
+
+        colorMap = programStageInstanceService.colorProgramStageInstances( programStageInstances );
 
         return SUCCESS;
     }

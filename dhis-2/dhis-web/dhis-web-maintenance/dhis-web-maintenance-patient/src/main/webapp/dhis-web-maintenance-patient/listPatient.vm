@@ -80,7 +80,7 @@
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>                  
-                  <a href="javascript:editWindow( 'showRelationshipList.action', '$patient.id' )" title="$i18n.getString( "manage_relationship" )"><img src="../images/edit.png" alt="$i18n.getString( "manage_relationship" )"></a>
+                  <a href="javascript:editWindow( 'showRelationshipList.action', '$patient.id' )" title="$i18n.getString( "manage_relationship" )"><img src="images/relationship.gif" alt="$i18n.getString( "manage_relationship" )"></a>
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>
