@@ -39,7 +39,7 @@ import org.hisp.dhis.patient.PatientAttribute;
 public interface PatientAttributeValueService
 {
     String ID = PatientAttributeValueService.class.getName();
-    
+
     void savePatientAttributeValue( PatientAttributeValue patientAttributeValue );
 
     void updatePatientAttributeValue( PatientAttributeValue patientAttributeValue );
@@ -47,20 +47,22 @@ public interface PatientAttributeValueService
     void deletePatientAttributeValue( PatientAttributeValue patientAttributeValue );
 
     int deletePatientAttributeValue( Patient patient );
-    
+
     int deletePatientAttributeValue( PatientAttribute patientAttribute );
-    
-    PatientAttributeValue getPatientAttributeValue( Patient patient, PatientAttribute patientAttribute );   
+
+    PatientAttributeValue getPatientAttributeValue( Patient patient, PatientAttribute patientAttribute );
 
     Collection<PatientAttributeValue> getPatientAttributeValues( Patient patient );
-    
+
     Collection<PatientAttributeValue> getPatientAttributeValues( PatientAttribute patientAttribute );
-    
-    Collection<PatientAttributeValue> getPatientAttributeValues( Collection<Patient> patients );    
-    
+
+    Collection<PatientAttributeValue> getPatientAttributeValues( Collection<Patient> patients );
+
     Collection<PatientAttributeValue> getAllPatientAttributeValues();
-    
+
     Map<Integer, Collection<PatientAttributeValue>> getPatientAttributeValueMapForPatients( Collection<Patient> patients );
-    
-    Collection<PatientAttributeValue> searchPatientAttributeValue( PatientAttribute patientAttribute, String searchText );
+
+    Collection<PatientAttributeValue> searchPatientAttributeValue( PatientAttribute patientAttribute, String searchText );   
+
+    void copyPatientAttributeValues( Patient source, Patient destination );
 }

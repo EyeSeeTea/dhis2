@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<patient>
-  <id>$patient.id</id>  
-  <fullName>$encoder.xmlEncode( $patient.getFullName() )</fullName>
-  <gender>$encoder.xmlEncode( $patient.gender )</gender>
-  <dateOfBirth>$format.formatDate( $patient.birthDate )</dateOfBirth>
-  <age>$encoder.xmlEncode( $patient.getAge() )</age>
-  #foreach( $patientIdentifier in $patient.identifiers )
+<partner>  
+  <partnerIsRepresentative>$partnerIsRepresentative</partnerIsRepresentative>
+  <id>$partner.id</id>  
+  <fullName>$encoder.xmlEncode( $partner.getFullName() )</fullName>
+  <gender>$encoder.xmlEncode( $partner.gender )</gender>
+  <dateOfBirth>$format.formatDate( $partner.birthDate )</dateOfBirth>
+  <age>$encoder.xmlEncode( $partner.getAge() )</age>
+  #foreach( $patientIdentifier in $partner.identifiers )
     <identifier>        
         <identifierText>$encoder.xmlEncode( $patientIdentifier.identifier )</identifierText>
      </identifier>
   #end
-  #foreach( $attribute in $patient.attributes )
+  #foreach( $attribute in $partner.attributes )
     #set( $attributeValue = false )
     #set( $attributeValue = $patientAttributeValueMap.get( $attribute.id ) )             
     <attribute>
@@ -18,10 +19,10 @@
         <value>$encoder.xmlEncode( $attributeValue )</value>
     </attribute> 
   #end  
-  #foreach( $program in $patient.programs )
+  #foreach( $program in $partner.programs )
     <program>
         <name>$encoder.xmlEncode( $program.name )</name>
     </program> 
   #end         
-</patient>
+</partner>
 

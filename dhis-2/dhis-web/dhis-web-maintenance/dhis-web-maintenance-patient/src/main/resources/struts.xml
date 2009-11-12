@@ -68,6 +68,11 @@
     
     <!-- Relationship -->    
     
+    <action name="getPartner" class="org.hisp.dhis.patient.action.relationship.GetPartnerAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responsePartner.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>      
+    </action>
+    
     <action name="showRelationshipList" class="org.hisp.dhis.patient.action.relationship.ShowRelationshipListAction">
       <result name="relationshiplist" type="chain">getRelationshipList</result>      
       <result name="success" type="velocity">/popup.vm</result>
@@ -81,7 +86,7 @@
       <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>            
       <param name="javascripts">javascript/relationship.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_UPDATE</param>      
-    </action>
+    </action>   
     
     <action name="showAddRelationshipForm" class="org.hisp.dhis.patient.action.relationship.ShowAddRelationshipFormAction">      
       <result name="success" type="velocity">/popup.vm</result>
@@ -103,12 +108,26 @@
       <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
-    </action> 
+    </action>  
     
     <action name="removeRelationship" class="org.hisp.dhis.patient.action.relationship.RemoveRelationshipAction">      
       <result name="success" type="redirect">getRelationshipList.action</result>      
       <param name="requiredAuthorities">F_RELATIONSHIP_DELETE</param>      
-    </action>    
+    </action> 
+    
+    <action name="saveRepresentative" class="org.hisp.dhis.patient.action.relationship.SaveRepresentativeAction">      
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="removeRepresentative" class="org.hisp.dhis.patient.action.relationship.RemoveRepresentativeAction">      
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
+      <result name="error" type="velocity-xml">/dhis-web-maintenance-patient/responseError.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-maintenance-patient/responseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action> 
     
     <!-- PatientAttribute -->   
     

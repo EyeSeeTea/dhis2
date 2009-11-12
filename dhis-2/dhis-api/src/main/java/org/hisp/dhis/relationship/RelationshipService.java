@@ -55,6 +55,6 @@ public interface RelationshipService
     // For example a patient might have more than one sibling
     Collection<Relationship> getRelationships( Patient patientA, RelationshipType relationshipType );
 
-    Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType );
+    Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType );   
 
 }

@@ -27,10 +27,13 @@
 
 package org.hisp.dhis.patient.action.relationship;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.state.SelectedStateManager;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 
@@ -54,6 +57,13 @@ public class GetRelationshipListAction
         this.selectedStateManager = selectedStateManager;
     }
 
+    private PatientAttributeValueService patientAttributeValueService;
+
+    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
+    {
+        this.patientAttributeValueService = patientAttributeValueService;
+    }
+
     private RelationshipService relationshipService;
 
     public void setRelationshipService( RelationshipService relationshipService )
@@ -72,6 +82,13 @@ public class GetRelationshipListAction
         return patient;
     }
 
+    Collection<PatientAttributeValue> patientAttributeValues = new ArrayList<PatientAttributeValue>();
+
+    public Collection<PatientAttributeValue> getPatientAttributeValues()
+    {
+        return patientAttributeValues;
+    }
+
     Collection<Relationship> relationships;
 
     public Collection<Relationship> getRelationships()
@@ -88,6 +105,8 @@ public class GetRelationshipListAction
     {
 
         patient = selectedStateManager.getSelectedPatient();
+
+        patientAttributeValues = patientAttributeValueService.getPatientAttributeValues( patient );
 
         relationships = relationshipService.getRelationshipsForPatient( patient );
 

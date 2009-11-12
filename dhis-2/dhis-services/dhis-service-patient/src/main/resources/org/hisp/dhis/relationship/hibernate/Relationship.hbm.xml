@@ -16,9 +16,7 @@
         column="relationshiptypeid" not-null="true" foreign-key="fk_relationship_relationshiptypeid"/>    
     
     <many-to-one name="patientB" class="org.hisp.dhis.patient.Patient"
-        column="patientbid" not-null="true" foreign-key="fk_relationship_patientid"/>
-    
-    <property name="startDate" column="startdate"/>   
+        column="patientbid" not-null="true" foreign-key="fk_relationship_patientid"/>   
 	
   </class>
 </hibernate-mapping>

@@ -72,6 +72,8 @@ public class Patient
 
     private Set<PatientAttribute> attributes = new HashSet<PatientAttribute>();
 
+    private Patient representative;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -267,6 +269,16 @@ public class Patient
         this.attributes = attributes;
     }
 
+    public void setRepresentative( Patient representative )
+    {
+        this.representative = representative;
+    }
+
+    public Patient getRepresentative()
+    {
+        return representative;
+    }
+
     // -------------------------------------------------------------------------
     // Convenience method
     // -------------------------------------------------------------------------
@@ -324,4 +336,5 @@ public class Patient
     {
         return firstName + " " + middleName + " " + lastName;
     }
+
 }

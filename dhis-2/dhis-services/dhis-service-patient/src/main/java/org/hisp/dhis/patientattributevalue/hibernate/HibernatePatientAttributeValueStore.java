@@ -30,6 +30,7 @@ import java.util.Collection;
 
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -94,4 +95,12 @@ public class HibernatePatientAttributeValueStore
         return getCriteria( Restrictions.eq( "patientAttribute", patientAttribute ),
             Restrictions.ilike( "value", "%" + searchText + "%" ) ).list();
     }
+    
+    
+    public int delete( DataElementCategoryOptionCombo optionCombo )
+    {
+        Query query = getQuery( "delete PatientDataValue where optionCombo = :optionCombo" );
+        query.setEntity( "optionCombo", optionCombo );
+        return query.executeUpdate();
+    }  
 }

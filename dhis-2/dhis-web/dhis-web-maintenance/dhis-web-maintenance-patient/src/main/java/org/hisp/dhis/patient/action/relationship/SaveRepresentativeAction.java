@@ -24,11 +24,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.patient.action.relationship;
 
-import org.hisp.dhis.relationship.Relationship;
-import org.hisp.dhis.relationship.RelationshipService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.state.SelectedStateManager;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -36,29 +37,58 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class RemoveRelationshipAction
+public class SaveRepresentativeAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private RelationshipService relationshipService;
+    private PatientService patientService;
 
-    public void setRelationshipService( RelationshipService relationshipService )
+    public void setPatientService( PatientService patientService )
     {
-        this.relationshipService = relationshipService;
+        this.patientService = patientService;
+    }
+
+    private SelectedStateManager selectedStateManager;
+
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    {
+        this.selectedStateManager = selectedStateManager;
+    }
+
+    private PatientAttributeValueService patientAttributeValueService;
+
+    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
+    {
+        this.patientAttributeValueService = patientAttributeValueService;
     }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int relationshipId;
+    private Patient patient;
 
-    public void setRelationshipId( int relationshipId )
+    public Patient getPatient()
     {
-        this.relationshipId = relationshipId;
+        return patient;
+    }
+
+    private Integer representativeId;
+
+    public void setRepresentativeId( Integer representativeId )
+    {
+        this.representativeId = representativeId;
+    }
+
+    private boolean copyAttribute;
+
+    public void setCopyAttribute( boolean copyAttribute )
+    {
+        this.copyAttribute = copyAttribute;
     }
 
     private String message;
@@ -67,7 +97,7 @@ public class RemoveRelationshipAction
     {
         return message;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -75,9 +105,24 @@ public class RemoveRelationshipAction
     public String execute()
         throws Exception
     {
-        Relationship relationship = relationshipService.getRelationship( relationshipId );
 
-        relationshipService.deleteRelationship( relationship );
+        Patient representative = patientService.getPatient( representativeId );
+
+        patient = selectedStateManager.getSelectedPatient();
+
+        patient.setRepresentative( representative );
+
+        if ( copyAttribute )
+        {
+            patient.getAttributes().addAll( representative.getAttributes() );
+        }
+
+        patientService.updatePatient( patient );
+
+        if ( copyAttribute )
+        {
+            patientAttributeValueService.copyPatientAttributeValues( representative, patient );
+        }
 
         return SUCCESS;
     }

@@ -33,10 +33,10 @@
                     <strong>$i18n.getString( "age" ):</strong>$encoder.htmlEncode( $patient.getAge() )
                 </td>   
                 <td style="vertical-align:top">
-                    <div style="float:right">
-                        #set( $attributeValues = false )
-                        #set( $attributeValues = $attributeValueMap.get( $patient.id ) )
-                        #foreach( $attributeValue in $attributeValues )
+                    <div style="float:right">                        
+                        #foreach( $attribute in $patient.attributes )
+                            #set( $attributeValue = false )
+                            #set( $attributeValue = $patientAttributeValueMap.get( $attribute.id ) )
                             <strong>$encoder.htmlEncode( $attributeValue.patientAttribute.name ):</strong>$encoder.htmlEncode( $attributeValue.value )<br>
                         #end                         
                     </div>

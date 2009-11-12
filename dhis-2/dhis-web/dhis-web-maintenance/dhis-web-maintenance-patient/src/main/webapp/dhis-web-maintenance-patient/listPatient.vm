@@ -111,10 +111,10 @@
 				<div style="float:right">
 					<a href="javascript:hideDetails()" title="$i18n.getString( "hide_details" )"><img src="../images/close.png" alt="$i18n.getString( "hide_details" )"></a>
 				</div>			    
-				    <p><label>$i18n.getString( "identifier" ):</label><br><span id="identifierField"></span></p>				    
-				    <p><label>$i18n.getString( "attributes" ):</label><br><span id="attributeField"></span></p>
-				    <p><label>$i18n.getString( "enrolled_in_program" ):</label><br><span id="programField"></span></p>
-			    </div>
+				<p><label>$i18n.getString( "identifier" ):</label><br><span id="identifierField"></span></p>				    
+				<p><label>$i18n.getString( "attributes" ):</label><br><span id="attributeField"></span></p>
+				<p><label>$i18n.getString( "enrolled_in_program" ):</label><br><span id="programField"></span></p>
+			</div>
 
 		</td>
   </tr>

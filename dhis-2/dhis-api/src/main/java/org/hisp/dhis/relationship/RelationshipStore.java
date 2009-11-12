@@ -48,6 +48,6 @@ public interface RelationshipStore
 
     Collection<Relationship> getRelationshipsForPatient( Patient patient );
 
-    Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType );
+    Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType );   
 
 }

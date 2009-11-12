@@ -222,14 +222,14 @@ function addRelationship()
 	
 	var request = new Request();
 	request.setResponseTypeXML( 'message' );
-	request.setCallbackSuccess( saveRelationshipCompleted );    
+	request.setCallbackSuccess( addRelationshipCompleted );    
 	request.send( url );
 	
 	return false;
 	
 }
 
-function saveRelationshipCompleted( messageElement )
+function addRelationshipCompleted( messageElement )
 {
 	var type = messageElement.getAttribute( 'type' );
 	var message = messageElement.firstChild.nodeValue;
@@ -285,33 +285,145 @@ function removeRelationshipCompleted( messageElement )
 }
 
 //------------------------------------------------------------------------------
-// Save Representative Relationship
+// Relationship partner
 //------------------------------------------------------------------------------
-function saveRepresentativeRelationship()
-{	
-	var possibleRepresentative = document.relationshipList.representative;
-	
-	var representativeId;
 
-	for( i=0; i < possibleRepresentative.length; i++)
-	{
-		if( possibleRepresentative[i].checked == true )
-		{
-			representativeId = possibleRepresentative[i].value			
-			break;
-		}
-	}
+function getPartnerDetails( patientId, partnerId )
+{
+    var request = new Request();
+    request.setResponseTypeXML( 'partner' );
+    request.setCallbackSuccess( partnerReceived );
+    request.send( 'getPartner.action?patientId=' + patientId + '&partnerId=' + partnerId );
+}
+
+function partnerReceived( patientElement )
+{		
+	var partnerIsRepresentative = getElementValue( patientElement, 'partnerIsRepresentative' );	
 	
-	if( representativeId == null )
+	var partnerId = '<div><input type="hidden" id="partnerId" name="partnerId" value="' + getElementValue( patientElement, 'id' ) + '"></div>';
+	var labelField;	
+	var buttonFirstField;
+	var buttonSecondField;
+	
+	if( partnerIsRepresentative == 'true' )
 	{
-		window.alert( i18n_please_select_a_representative );
+		labelField = i18n_do_you_want_to_remove_this_one_from_being_representative;
 		
-		return;
+		buttonFirstField = '<input type="button" value="' + i18n_yes + '" onclick="javascript:removeRepresentative()">'; 
+		buttonSecondField = '&nbsp;';
+	}
+	else if( partnerIsRepresentative == 'false' )
+	{
+		labelField = i18n_do_you_want_to_make_this_one_a_representative;
+		
+		buttonFirstField = '<input type="button" value="' + i18n_yes + '" onclick="javascript:saveRepresentative( false )">';
+		buttonSecondField= '<input type="button" value="' + i18n_yes_and_attribute + '" onclick="javascript:saveRepresentative( true )">';
+	}	
+	
+	setFieldValue( 'labelField', labelField );
+	setFieldValue( 'buttonFirstField', buttonFirstField );
+	setFieldValue( 'buttonSecondField', buttonSecondField );
+	setFieldValue( 'partnerIdField', partnerId );	
+	setFieldValue( 'fullNameField', getElementValue( patientElement, 'fullName' ) );
+	setFieldValue( 'genderField', getElementValue( patientElement, 'gender' ) );	
+    setFieldValue( 'dateOfBirthField', getElementValue( patientElement, 'dateOfBirth' ) );    
+    setFieldValue( 'ageField', getElementValue( patientElement, 'age' ) );
+	
+	var attributes = patientElement.getElementsByTagName( "attribute" );   
+    
+    var attributeValues = '';
+	
+	for ( var i = 0; i < attributes.length; i++ )
+	{		
+		attributeValues = attributeValues + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  <strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '</strong><br>';		
 	}
 	
-	else
+	setFieldValue( 'attributeField', attributeValues );   
+   
+    showPartnerDetail( true );
+}
+
+function showPartnerDetail( display )
+{   
+    var node = document.getElementById( 'relationshipPartnerContainer' );
+    
+    node.style.display = (display ? 'block' : 'none');   
+}
+
+
+function hideRelationshipPartnerContainer()
+{   
+    var node = document.getElementById( 'relationshipPartnerContainer' );
+    
+    node.style.display = 'none';   
+}
+
+function saveRepresentative( copyAttribute )
+{	
+	var representativeId = document.getElementById( 'partnerId' );
+	
+	var url = 'saveRepresentative.action?representativeId=' + representativeId.value + '&copyAttribute=' + copyAttribute;	
+	
+	var request = new Request();
+	request.setResponseTypeXML( 'message' );
+	request.setCallbackSuccess( saveRepresentativeCompleted );    
+	request.send( url );        
+
+	return false;
+}
+
+function saveRepresentativeCompleted( messageElement )
+{
+	var type = messageElement.getAttribute( 'type' );
+	var message = messageElement.firstChild.nodeValue;
+	
+	if ( type == 'success' )
 	{
-		window.alert( ' the representing relationship is:  ' + representativeId );
+		window.location = "getRelationshipList.action";
+	}	
+	else if ( type == 'error' )
+	{
+		window.alert( i18n_saving_representative_failed + ':' + '\n' + message );
 	}
+	else if ( type == 'input' )
+	{
+		document.getElementById( 'message' ).innerHTML = message;
+		document.getElementById( 'message' ).style.display = 'block';
+	}
+}
+
+function removeRepresentative()
+{	
+	var representativeId = document.getElementById( 'partnerId' );
+	
+	var url = 'removeRepresentative.action?representativeId=' + representativeId.value;	
+	
+	var request = new Request();
+	request.setResponseTypeXML( 'message' );
+	request.setCallbackSuccess( removeRepresentativeCompleted );    
+	request.send( url );        
+
+	return false;
 	
 }
+
+function removeRepresentativeCompleted( messageElement )
+{
+	var type = messageElement.getAttribute( 'type' );
+	var message = messageElement.firstChild.nodeValue;
+	
+	if ( type == 'success' )
+	{
+		window.location = "getRelationshipList.action";
+	}	
+	else if ( type == 'error' )
+	{
+		window.alert( i18n_removing_representative_failed + ':' + '\n' + message );
+	}
+	else if ( type == 'input' )
+	{
+		document.getElementById( 'message' ).innerHTML = message;
+		document.getElementById( 'message' ).style.display = 'block';
+	}
+}
+

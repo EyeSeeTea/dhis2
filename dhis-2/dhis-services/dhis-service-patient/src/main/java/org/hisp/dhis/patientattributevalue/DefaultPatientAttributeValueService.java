@@ -36,6 +36,7 @@ import java.util.TreeMap;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -114,7 +115,8 @@ public class DefaultPatientAttributeValueService
         patientAttributeValueStore.update( patientAttributeValue );
     }
 
-    public Map<Integer, Collection<PatientAttributeValue>> getPatientAttributeValueMapForPatients( Collection<Patient> patients )
+    public Map<Integer, Collection<PatientAttributeValue>> getPatientAttributeValueMapForPatients(
+        Collection<Patient> patients )
     {
         Map<Integer, Set<PatientAttributeValue>> attributeValueMap = new HashMap<Integer, Set<PatientAttributeValue>>();
 
@@ -133,26 +135,41 @@ public class DefaultPatientAttributeValueService
                 attributeValueMap.put( patientAttributeValue.getPatient().getId(), attributeValues );
             }
         }
-        
+
         Map<Integer, Collection<PatientAttributeValue>> patentAttributeValueMap = new HashMap<Integer, Collection<PatientAttributeValue>>();
-        
-        for( Integer id : attributeValueMap.keySet() )
+
+        for ( Integer id : attributeValueMap.keySet() )
         {
             SortedMap<String, PatientAttributeValue> sortedByAttribute = new TreeMap<String, PatientAttributeValue>();
-            for( PatientAttributeValue patientAttributeValue : attributeValueMap.get( id ) )
+            for ( PatientAttributeValue patientAttributeValue : attributeValueMap.get( id ) )
             {
                 sortedByAttribute.put( patientAttributeValue.getPatientAttribute().getName(), patientAttributeValue );
             }
-            
+
             patentAttributeValueMap.put( id, sortedByAttribute.values() );
-            
+
         }
 
         return patentAttributeValueMap;
     }
-    
-    public Collection<PatientAttributeValue> searchPatientAttributeValue( PatientAttribute patientAttribute, String searchText )
+
+    public Collection<PatientAttributeValue> searchPatientAttributeValue( PatientAttribute patientAttribute,
+        String searchText )
     {
         return patientAttributeValueStore.searchByValue( patientAttribute, searchText );
     }
+
+    public void copyPatientAttributeValues( Patient source, Patient destination )
+    {
+        deletePatientAttributeValue( destination );
+
+        for ( PatientAttributeValue patientAttributeValue : getPatientAttributeValues( source ) )
+        {
+            PatientAttributeValue attributeValue = new PatientAttributeValue( patientAttributeValue
+                .getPatientAttribute(), destination, patientAttributeValue.getValue() );
+
+            savePatientAttributeValue( attributeValue );
+        }
+    }
+
 }

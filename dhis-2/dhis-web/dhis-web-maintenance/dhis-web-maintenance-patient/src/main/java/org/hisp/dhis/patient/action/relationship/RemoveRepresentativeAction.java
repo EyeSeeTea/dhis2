@@ -24,11 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis.patient.action.relationship;
 
-import org.hisp.dhis.relationship.Relationship;
-import org.hisp.dhis.relationship.RelationshipService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.state.SelectedStateManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -36,29 +36,37 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class RemoveRelationshipAction
+public class RemoveRepresentativeAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private RelationshipService relationshipService;
+    private SelectedStateManager selectedStateManager;
 
-    public void setRelationshipService( RelationshipService relationshipService )
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
-        this.relationshipService = relationshipService;
+        this.selectedStateManager = selectedStateManager;
+    }
+
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
     }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int relationshipId;
+    private Patient patient;
 
-    public void setRelationshipId( int relationshipId )
+    public Patient getPatient()
     {
-        this.relationshipId = relationshipId;
+        return patient;
     }
 
     private String message;
@@ -67,7 +75,7 @@ public class RemoveRelationshipAction
     {
         return message;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -75,9 +83,12 @@ public class RemoveRelationshipAction
     public String execute()
         throws Exception
     {
-        Relationship relationship = relationshipService.getRelationship( relationshipId );
 
-        relationshipService.deleteRelationship( relationship );
+        patient = selectedStateManager.getSelectedPatient();
+
+        patient.setRepresentative( null );
+
+        patientService.updatePatient( patient );
 
         return SUCCESS;
     }
