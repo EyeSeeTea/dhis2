@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.importing.period.action;
+package org.hisp.dhis.reportexcel.period.generic.action;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,52 +27,56 @@ package org.hisp.dhis.reportexcel.importing.period.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
 import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.period.generic.PeriodGenericManager;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * @version $Id$
+ * @author Torgeir Lorange Ostby
+ * @version $Id: NextPeriodsAction.java 2966 2007-03-03 14:38:20Z torgeilo $ *
+ * @modifier Dang Duy Hieu
+ * @since 2009-10-14
  */
-public interface SelectedStateManager
+public class NextPeriodsAction
+    implements Action
 {
     // -------------------------------------------------------------------------
-    // OrganisationUnit
+    // Dependencies
     // -------------------------------------------------------------------------
-    
-    OrganisationUnit getSelectedOrganisationUnit();  
 
-    // -------------------------------------------------------------------------
-    // Excel item group
-    // -------------------------------------------------------------------------
-    
-    public void setSelectedExcelItemGroup( ExcelItemGroup excelItemGroup );
+    private PeriodGenericManager periodGenericManager;
 
-    public ExcelItemGroup getSelectedExcelItemGroup();
-
-    public void clearSelectedExcelItemGroup();
-    
-    public Collection<ExcelItemGroup> loadExcelItemGroupsForSelectedOrgUnit( OrganisationUnit organisationUnit );    
+    public void setPeriodGenericManager( PeriodGenericManager periodGenericManager )
+    {
+        this.periodGenericManager = periodGenericManager;
+    }
 
     // -------------------------------------------------------------------------
-    // Period
+    // Output
     // -------------------------------------------------------------------------
-    
-    public void setSelectedPeriodIndex( Integer index );
 
-    public Integer getSelectedPeriodIndex();
+    private List<Period> periods;
 
-    public Period getSelectedPeriod();
+    public List<Period> getPeriods()
+    {
+        return periods;
+    }
 
-    public void clearSelectedPeriod();
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-    public List<Period> getPeriodList();
+    public String execute()
+        throws Exception
+    {
 
-    public void nextPeriodSpan();
+        periodGenericManager.nextPeriodSpan();
 
-    public void previousPeriodSpan();
+        periods = periodGenericManager.getPeriodList();
+
+        return SUCCESS;
+    }
 }

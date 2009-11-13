@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.export.individual.action;
+package org.hisp.dhis.reportexcel.period.db.action;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -26,45 +26,36 @@ package org.hisp.dhis.reportexcel.export.individual.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import java.util.ArrayList;
 import java.util.List;
 
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reportexcel.export.action.SelectionManager;
-import org.hisp.dhis.reportexcel.export.individual.manager.SelectedStateManager;
+import org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: PreviousPeriodsAction.java 2966 2007-03-03 14:38:20Z torgeilo $ *
- * @modifier Dang Duy Hieu
+ * @author Nguyen Tran Do Xuan Thuy
+ * @version $Id$
  * @since 2009-10-14
  */
-public class PreviousPeriodsAction
+
+public class GetPeriodsByPeriodTypeAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependences
     // -------------------------------------------------------------------------
 
-    private SelectedStateManager selectedStateManager;
+    private PeriodDatabaseService periodDatabaseService;
 
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    public void setPeriodDatabaseService( PeriodDatabaseService periodDatabaseService )
     {
-        this.selectedStateManager = selectedStateManager;
-    }
-
-    private SelectionManager selectionManager;
-
-    public void setSelectionManager( SelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
+        this.periodDatabaseService = periodDatabaseService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
     private List<Period> periods;
@@ -74,19 +65,33 @@ public class PreviousPeriodsAction
         return periods;
     }
 
+    private String periodTypeName;
+
+    public void setPeriodTypeName( String periodTypeName )
+    {
+        this.periodTypeName = periodTypeName;
+    }
+
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Implement Action method
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        selectionManager.setSeletedYear( selectionManager.getSelectedYear() - 1 );
-        selectedStateManager.previousPeriodSpan();
+        if ( periodTypeName == null || periodTypeName == "" )
+        {
 
-        periods = new ArrayList<Period>( selectedStateManager.getPeriodList() );
+            periodDatabaseService.setSelectedPeriodTypeName( MonthlyPeriodType.NAME );
+        }
+        else
+        {
+
+            periodDatabaseService.setSelectedPeriodTypeName( periodTypeName );
+        }
+
+        periods = periodDatabaseService.getPeriodList();
 
         return SUCCESS;
     }
-
 }

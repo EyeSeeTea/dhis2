@@ -1,5 +1,3 @@
-package org.hisp.dhis.reportexcel.export.individual.action;
-
 /*
  * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
@@ -26,73 +24,70 @@ package org.hisp.dhis.reportexcel.export.individual.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+package org.hisp.dhis.reportexcel.periodcolumn.action;
 
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.comparator.PeriodComparator;
-import org.hisp.dhis.reportexcel.export.individual.manager.SelectedStateManager;
+import org.hisp.dhis.reportexcel.ReportExcelPeriodColumnListing;
+import org.hisp.dhis.reportexcel.ReportExcelService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Nguyen Tran Do Xuan Thuy
+ * @author Tran Thanh Tri
  * @version $Id$
- * @since 2009-10-14
  */
-
-public class GetPeriodsByPeriodTypeAction
+public class DeletePeriodColumnAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependences
-    // -------------------------------------------------------------------------
+    // -------------------------------------------
+    // Dependency
+    // -------------------------------------------
 
-    private SelectedStateManager selectedStateManager;
+    private ReportExcelService reportService;
 
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
-    {
-        this.selectedStateManager = selectedStateManager;
-    }
-
-    // -------------------------------------------------------------------------
+    // -------------------------------------------
     // Input & Output
-    // -------------------------------------------------------------------------
+    // -------------------------------------------
 
-    private List<Period> periods;
+    private Integer id;
 
-    public List<Period> getPeriods()
+    private Integer reportId;
+
+    // -------------------------------------------
+    // Getter & Setter
+    // -------------------------------------------
+
+    public Integer getReportId()
     {
-        return periods;
+        return reportId;
     }
 
-    private String periodTypeName;
-
-    public void setPeriodTypeName( String periodTypeName )
+    public void setReportId( Integer reportId )
     {
-        this.periodTypeName = periodTypeName;
+        this.reportId = reportId;
     }
 
-    // -------------------------------------------------------------------------
-    // Implement Action method
-    // -------------------------------------------------------------------------
+    public void setReportService( ReportExcelService reportService )
+    {
+        this.reportService = reportService;
+    }
 
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    @Override
     public String execute()
         throws Exception
     {
-        
-        selectedStateManager.setSelectedPeriodTypeName( periodTypeName );
-     
-        periods = new ArrayList<Period>(selectedStateManager.getPeriodList());
+        ReportExcelPeriodColumnListing report = (ReportExcelPeriodColumnListing) reportService
+            .getReportExcel( reportId );
 
-        if ( periods == null )
-        {
-            return ERROR;
-        }
+        report.deletePeriodColumn( reportService.getPeriodColumn( id ) );
 
-        Collections.sort( periods, new PeriodComparator() );
-        
+        reportService.updateReportExcel( report );
+
         return SUCCESS;
     }
+
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.export.individual.manager;
+package org.hisp.dhis.reportexcel.period.generic;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -32,28 +32,25 @@ import java.util.List;
 import org.hisp.dhis.period.Period;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: SelectedStateManager.java 3311 2007-05-18 14:08:01Z torgeilo $
- * @modifier Dang Duy Hieu
- * @since 2009-10-14
+ * @author Chau Thu Tran
+ * @version $Id$
  */
-public interface SelectedStateManager
-{
-    void setSelectedPeriodIndex( Integer index );
-
-    Integer getSelectedPeriodIndex();
-
-    void setSelectedPeriodTypeName( String periodTypeName );
+public interface PeriodGenericManager
+{        
     
-    String getSelectedPeriodTypeName();
+    public void setSelectedPeriodIndex( Integer index );
+
+    public Integer getSelectedPeriodIndex();
+
+    public Period getSelectedPeriod();
     
-    Period getSelectedPeriod();
+    public void setPeriodType( String periodTypeNam );
 
-    void clearSelectedPeriod();
+    public void clearSelectedPeriod();
 
-    List<Period> getPeriodList();
+    public List<Period> getPeriodList();
 
-    void nextPeriodSpan();
+    public void nextPeriodSpan();
 
-    void previousPeriodSpan();
+    public void previousPeriodSpan();
 }

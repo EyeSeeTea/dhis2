@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.importing.period.action;
+package org.hisp.dhis.reportexcel.period.db;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -30,50 +30,27 @@ package org.hisp.dhis.reportexcel.importing.period.action;
 import java.util.List;
 
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reportexcel.importing.period.action.SelectedStateManager;
-
-import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * @version $Id$
+ * @author Torgeir Lorange Ostby
+ * @version $Id: SelectedStateManager.java 3311 2007-05-18 14:08:01Z torgeilo $
+ * @modifier Dang Duy Hieu
+ * @since 2009-10-14
  */
-public class NextPeriodsAction implements Action {
+public interface PeriodDatabaseService
+{ 
 
-	// -------------------------------------------------------------------------
-	// Dependency
-	// -------------------------------------------------------------------------
+    public void setSelectedPeriodTypeName( String periodTypeName ); 
+    
+    public Period getSelectedPeriod();
+    
+    public void setSelectedperiod( Integer periodId );
 
-	private SelectedStateManager selectedStateManager;
+    public void clearSelectedPeriod();
 
-	// -------------------------------------------------------------------------
-	// Output
-	// -------------------------------------------------------------------------
+    public List<Period> getPeriodList();
 
-	private List<Period> periods;
+    public void nextPeriodSpan();
 
-	// -------------------------------------------------------------------------
-	// Getter && Setter
-	// -------------------------------------------------------------------------
-
-	public void setSelectedStateManager(
-			SelectedStateManager selectedStateManager) {
-		this.selectedStateManager = selectedStateManager;
-	}
-
-	public List<Period> getPeriods() {
-		return periods;
-	}
-
-	// -------------------------------------------------------------------------
-	// Action implementation
-	// -------------------------------------------------------------------------
-
-	public String execute() throws Exception {
-		selectedStateManager.nextPeriodSpan();
-
-		periods = selectedStateManager.getPeriodList();
-
-		return SUCCESS;
-	}
+    public void previousPeriodSpan();
 }
