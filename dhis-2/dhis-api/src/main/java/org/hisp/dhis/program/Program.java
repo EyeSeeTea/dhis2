@@ -28,9 +28,7 @@
 package org.hisp.dhis.program;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -46,7 +44,7 @@ public class Program
 
     private String name;
 
-    private String description;    
+    private String description;
 
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
 
@@ -133,7 +131,7 @@ public class Program
     public void setDescription( String description )
     {
         this.description = description;
-    }    
+    }
 
     public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
@@ -169,28 +167,26 @@ public class Program
     // Convenience method
     // -------------------------------------------------------------------------
 
-    public ProgramStage getProgramStageByStage( int stage)
+    public ProgramStage getProgramStageByStage( int stage )
     {
-        if ( programStages.size() == 0 )
+
+        int count = 1;
+
+        for ( ProgramStage programStage : programStages )
         {
-            return null;
+            if ( count == stage )
+            {
+                return programStage;
+            }
+            else
+            {
+                count++;
+            }
+
         }
 
-        Map<Integer, ProgramStage> stageMap = new HashMap<Integer, ProgramStage>( programStages.size() );
-        
-        for( ProgramStage programStage : programStages )
-        {
-            stageMap.put( programStage.getStageInProgram(), programStage );
-        }
-        
-        if( stageMap.containsKey( stage ) )
-        {
-            return stageMap.get( stage );
-        }
-        else
-        {
-            return null;
-        }
+        return null;
+
     }
 
 }

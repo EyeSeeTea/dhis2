@@ -188,6 +188,12 @@ public class SaveDateValueAction
 
                 if ( dateValue != null )
                 {
+                    if ( programStageInstance.getExecutionDate() == null )
+                    {
+                        programStageInstance.setExecutionDate( new Date() );
+                        programStageInstanceService.updateProgramStageInstance( programStageInstance );
+                    }
+                    
                     if ( patientDataValue == null )
                     {
                         if ( value != null )
@@ -204,7 +210,7 @@ public class SaveDateValueAction
                     {
                         LOG.debug( "Updating PatientDataValue, value added/changed" );
 
-                        patientDataValue.setValue( value );                        
+                        patientDataValue.setValue( value );
                         patientDataValue.setProvidedByAnotherFacility( providedByAnotherFacility );
                         patientDataValue.setTimestamp( new Date() );
 

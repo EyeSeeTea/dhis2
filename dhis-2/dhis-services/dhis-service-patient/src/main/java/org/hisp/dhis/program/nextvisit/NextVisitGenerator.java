@@ -26,13 +26,22 @@
  */
 package org.hisp.dhis.program.nextvisit;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStageInstance;
+
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
 public interface NextVisitGenerator
 {
-    String ID = NextVisitGenerator.class.getName();  
-    
-    
+    String ID = NextVisitGenerator.class.getName();
+
+    Map<Patient, Set<ProgramStageInstance>> getNextVisits( Collection<ProgramInstance> programInstances );
+
 }

@@ -29,7 +29,6 @@ package org.hisp.dhis.caseentry.action.visitplan;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -47,6 +46,7 @@ import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.nextvisit.NextVisitGenerator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -102,6 +102,13 @@ public class VisitPlanAction
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
         this.patientAttributeService = patientAttributeService;
+    }
+
+    private NextVisitGenerator nextVisitGenerator;
+
+    public void setNextVisitGenerator( NextVisitGenerator nextVisitGenerator )
+    {
+        this.nextVisitGenerator = nextVisitGenerator;
     }
 
     // -------------------------------------------------------------------------
@@ -206,7 +213,7 @@ public class VisitPlanAction
             // and group these visits based on the patient to be visited
             // -----------------------------------------------------------------
 
-            visitsByPatients = programInstanceService.getNextVisitsForProgramInstances( programInstances );
+            visitsByPatients = nextVisitGenerator.getNextVisits( programInstances );
 
             if ( !visitsByPatients.keySet().isEmpty() )
             {

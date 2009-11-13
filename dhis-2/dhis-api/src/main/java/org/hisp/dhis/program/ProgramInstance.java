@@ -28,9 +28,7 @@ package org.hisp.dhis.program;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.patient.Patient;
@@ -254,27 +252,23 @@ public class ProgramInstance
 
     public ProgramStageInstance getProgramStageInstanceByStage( int stage )
     {
-        if ( programStageInstances.size() == 0 )
-        {
-            return null;
-        }
 
-        Map<Integer, ProgramStageInstance> stageMap = new HashMap<Integer, ProgramStageInstance>( programStageInstances
-            .size() );
+        int count = 1;
 
         for ( ProgramStageInstance programInstanceStage : programStageInstances )
         {
-            stageMap.put( programInstanceStage.getStageInProgram(), programInstanceStage );
+            if ( count == stage )
+            {
+                return programInstanceStage;
+            }
+            else
+            {
+                count++;
+            }
         }
 
-        if ( stageMap.containsKey( stage ) )
-        {
-            return stageMap.get( stage );
-        }
-        else
-        {
-            return null;
-        }
+        return null;
+
     }
 
 }

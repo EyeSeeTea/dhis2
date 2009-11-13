@@ -26,7 +26,20 @@
  */
 package org.hisp.dhis.program.nextvisit;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patientdatavalue.PatientDataValue;
+import org.hisp.dhis.patientdatavalue.PatientDataValueService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 /**
  * @author Abyot Asalefew
@@ -36,6 +49,97 @@ public class DefaultNextVisitGenerator
     implements NextVisitGenerator
 {
 
-   
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
+    private PatientDataValueService patientDataValueService;
+
+    public void setPatientDataValueService( PatientDataValueService patientDataValueService )
+    {
+        this.patientDataValueService = patientDataValueService;
+    }
+
+    private ProgramStageInstanceService programStageInstanceService;
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Next visits implementation
+    // -------------------------------------------------------------------------
+
+    public Map<Patient, Set<ProgramStageInstance>> getNextVisits( Collection<ProgramInstance> programInstances )
+    {
+        Map<Patient, Set<ProgramStageInstance>> visitsByPatients = new HashMap<Patient, Set<ProgramStageInstance>>();
+
+        Set<ProgramStageInstance> programStageInstances = new HashSet<ProgramStageInstance>();
+
+        // -----------------------------------------------------------------
+        // Initially assume to have a first visit for all programInstances
+        // -----------------------------------------------------------------
+
+        Map<Integer, Integer> visitsByProgramInstances = new HashMap<Integer, Integer>();
+
+        for ( ProgramInstance programInstance : programInstances )
+        {
+            programStageInstances.addAll( programInstance.getProgramStageInstances() );
+
+            visitsByProgramInstances.put( programInstance.getId(), 0 );
+        }
+
+        // -----------------------------------------------------------------
+        // For each of these active instances, see at which stage they are
+        // currently (may not necessarily be at the first stage)
+        // -----------------------------------------------------------------
+
+        Collection<PatientDataValue> patientDataValues = patientDataValueService
+            .getPatientDataValues( programStageInstances );
+
+        for ( PatientDataValue patientDataValue : patientDataValues )
+        {
+            if ( visitsByProgramInstances.get( patientDataValue.getProgramStageInstance().getProgramInstance().getId() ) < patientDataValue
+                .getProgramStageInstance().getProgramStage().getStageInProgram() )
+            {
+                visitsByProgramInstances.put( patientDataValue.getProgramStageInstance().getProgramInstance().getId(),
+                    patientDataValue.getProgramStageInstance().getProgramStage().getStageInProgram() );
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // For each of these active instances, based on the current stage
+        // determine the next stage
+        // -----------------------------------------------------------------
+
+        for ( ProgramInstance programInstance : programInstances )
+        {
+            Program program = programInstance.getProgram();
+
+            ProgramStage nextStage = program.getProgramStageByStage( visitsByProgramInstances.get( programInstance
+                .getId() ) + 1 );
+
+            if ( nextStage != null )
+            {
+                ProgramStageInstance nextStageInstance = programStageInstanceService.getProgramStageInstance(
+                    programInstance, nextStage );
+
+                if ( visitsByPatients.containsKey( programInstance.getPatient() ) )
+                {
+                    visitsByPatients.get( programInstance.getPatient() ).add( nextStageInstance );
+                }
+                else
+                {
+                    Set<ProgramStageInstance> programStageInstancess = new HashSet<ProgramStageInstance>();
+
+                    programStageInstancess.add( nextStageInstance );
+
+                    visitsByPatients.put( programInstance.getPatient(), programStageInstancess );
+                }
+            }
+        }
+
+        return visitsByPatients;
+    }
 }

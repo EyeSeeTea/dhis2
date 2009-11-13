@@ -43,8 +43,8 @@
                 </td>    
             </tr>            
         </table>
-        #set( $stages = false )
-        #set( $stages = $visitsByPatients.get( $patient ) )  
+        #set( $stageInstances = false )
+        #set( $stageInstances = $visitsByPatients.get( $patient ) )        
         <table class="listTable">
             <col>
             <col>
@@ -56,11 +56,11 @@
             </tr>
             <tbody id="list">   
                 #set( $mark = false )          
-                #foreach( $stage in $stages )
+                #foreach( $stageInstance in $stageInstances )                    
                     <tr #alternate( $mark )>                
-                        <td>$stage.programInstance.program.name</td>
-                        <td>$stage.programStage.name</td>
-                        <td>$format.formatDate( $stage.dueDate )</td>                
+                        <td>$stageInstance.programInstance.program.name</td>
+                        <td>$stageInstance.programStage.name</td>
+                        <td>$format.formatDate( $stageInstance.dueDate )</td>                
                     </tr>
                     #if( $mark )
                         #set( $mark = false )

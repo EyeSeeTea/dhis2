@@ -125,7 +125,7 @@ public class DataEntryAction
     {
         return programStage;
     }
-    
+
     private ProgramInstance programInstance;
 
     public ProgramInstance getProgramInstance()
@@ -160,7 +160,7 @@ public class DataEntryAction
     {
         return organisationUnit;
     }
-    
+
     private Map<Integer, String> colorMap = new HashMap<Integer, String>();
 
     public Map<Integer, String> getColorMap()
@@ -199,14 +199,14 @@ public class DataEntryAction
             false );
 
         programInstance = progamInstances.iterator().next();
-        
+
         colorMap = programStageInstanceService.colorProgramStageInstances( programInstance.getProgramStageInstances() );
 
         ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance(
             programInstance, programStage );
 
-        Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues(
-            organisationUnit, programStageInstance );
+        Collection<PatientDataValue> patientDataValues = patientDataValueService
+            .getPatientDataValues( programStageInstance );
 
         patientDataValueMap = new HashMap<Integer, PatientDataValue>( patientDataValues.size() );
 

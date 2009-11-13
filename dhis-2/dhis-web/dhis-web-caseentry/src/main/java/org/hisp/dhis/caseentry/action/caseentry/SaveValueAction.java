@@ -197,6 +197,12 @@ public class SaveValueAction
             if ( value != null )
             {
                 LOG.debug( "Adding PatientDataValue, value added" );
+                
+                if ( programStageInstance.getExecutionDate() == null )
+                {
+                    programStageInstance.setExecutionDate( new Date() );
+                    programStageInstanceService.updateProgramStageInstance( programStageInstance );
+                }
 
                 patientDataValue = new PatientDataValue( programStageInstance, dataElement, optionCombo,
                     organisationUnit, new Date(), value, providedByAnotherFacility );
@@ -208,6 +214,12 @@ public class SaveValueAction
         {
             LOG.debug( "Updating PatientDataValue, value added/changed" );
 
+            if ( programStageInstance.getExecutionDate() == null )
+            {
+                programStageInstance.setExecutionDate( new Date() );
+                programStageInstanceService.updateProgramStageInstance( programStageInstance );
+            }
+            
             patientDataValue.setValue( value );
             patientDataValue.setOptionCombo( optionCombo );
             patientDataValue.setProvidedByAnotherFacility( providedByAnotherFacility );
