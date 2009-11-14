@@ -40,6 +40,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.reportexcel.DataElementGroupOrder;
+import org.hisp.dhis.reportexcel.PeriodColumn;
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
 import org.hisp.dhis.reportexcel.ReportExcelStore;
@@ -332,4 +333,19 @@ public class HibernateReportExcelStore
         Session session = sessionFactory.getCurrentSession();
         session.update( arg0 );
     }
+
+    @Override
+    public PeriodColumn getPeriodColumn( Integer id )
+    {     
+        Session session = sessionFactory.getCurrentSession();
+        return (PeriodColumn) session.get( PeriodColumn.class, id );
+    }
+
+    @Override
+    public void updatePeriodColumn( PeriodColumn periodColumn )
+    {
+        Session session = sessionFactory.getCurrentSession();
+        session.update( periodColumn );
+    }
+
 }

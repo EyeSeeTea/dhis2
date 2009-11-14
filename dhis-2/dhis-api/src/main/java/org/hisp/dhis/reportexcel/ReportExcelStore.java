@@ -73,7 +73,7 @@ public interface ReportExcelStore
 
     public void deleteReportExcelItem( int id );
 
-    public ReportExcelItem getReportExcelItem( int id );  
+    public ReportExcelItem getReportExcelItem( int id );
 
     public Collection<ReportExcelItem> getALLReportExcelItem();
 
@@ -88,7 +88,7 @@ public interface ReportExcelStore
     public DataElementGroupOrder getDataElementGroupOrder( Integer id );
 
     public void updateDataElementGroupOrder( DataElementGroupOrder dataElementGroupOrder );
-    
+
     public void deleteDataElementGroupOrder( Integer id );
 
     // --------------------------------------
@@ -96,20 +96,27 @@ public interface ReportExcelStore
     // --------------------------------------
 
     public int saveDataEntryStatus( DataEntryStatus dataStatus );
-    
+
     public void updateDataEntryStatus( DataEntryStatus dataStatus );
 
     public DataEntryStatus getDataEntryStatus( int id );
 
-    public void deleteDataEntryStatus( int id );   
+    public void deleteDataEntryStatus( int id );
 
     public Collection<DataEntryStatus> getALLDataEntryStatus();
 
-    public Collection<DataEntryStatus> getDataEntryStatusDefault();    
+    public Collection<DataEntryStatus> getDataEntryStatusDefault();
 
     Collection<DataEntryStatus> getDataEntryStatusDefaultByDataSets( Collection<DataSet> dataSets );
 
     public int countDataValueOfDataSet( DataSet dataSet, OrganisationUnit organisationUnit, Period period );
-    
+
+    // --------------------------------------
+    // Period Column
+    // --------------------------------------
+
+    public PeriodColumn getPeriodColumn( Integer id );
+
+    public void updatePeriodColumn( PeriodColumn periodColumn );
 
 }

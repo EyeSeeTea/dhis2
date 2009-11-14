@@ -2,24 +2,16 @@
 <table width="100%">
 <tr>
 <td>
-	<input type="button" onclick="copySelectedItem()" value="$i18n.getString('copy_selected_item_to')"/>
+	$i18n.getString( "filter_by_name" ): <input type="text" onkeyup="filterValues( this.value , 1)" style="width:300px"/>
 </td>
-<td align="right">
-	$i18n.getString('filter_by_sheet')
-	<select id="sheetNoFilter" onchange="getReportItemBySheet();">
-		<option value="" >--- ALL ---</option>
-		#foreach($sheet in $sheets)
-		<option value="$sheet" #if($sheetNo==$sheet) selected #end >$sheet</option>
-		#end
-	</select>	
+<td align="right">	
 	<input type="button" onclick="mode='add'; openAddExcelItem()" value="$i18n.getString('add')" style="width:100px"/>
-	<input type="button" onclick="window.location='listReportExcel.action'" value="$i18n.getString('cancel')" style="width:100px"/>
+	<input type="button" onclick="window.location='listAllExcelItemGroup.action'" value="$i18n.getString('cancel')" style="width:100px"/>
 </td>
 </tr>
 </table>
 <table width="100%">
 	<tr>
-		<th><input type="checkbox" onclick="selectALL(this.checked)"/></th>
 		<th>$i18n.getString('name')</th>
 		<th>$i18n.getString('sheetNo')</th>	
 		<th>$i18n.getString('row')</th>		
@@ -28,10 +20,10 @@
 			
 		<th width="70px">$i18n.getString('operations')</th>		
 	</tr>
+	<tbody id="list">
 	#set( $mark = false )
 	#foreach($excelItem in $excelItems)
 		<tr #alternate( $mark )>
-			<td align=center><input type="checkbox" value="$reportItem.id" name="reportItemCheck"/></td>
 			<td>$encoder.htmlEncode( $excelItem.name )</td>
 			<td>$excelItem.sheetNo</td>
 			<td>$excelItem.row</td>
@@ -48,6 +40,7 @@
 			#set( $mark = true )
 		#end
 	#end
+	</tbody>
 </table>
 
 <script type="text/javascript">
@@ -142,12 +135,12 @@
 	
 </script>
 <div id="copyTo" style="position:fixed;display:none;width:450px;z-index:10001;background-color: white;border: medium solid silver;padding:20px;">
-<div id="close" style="position:absolute;top:2px;right:2px;cursor: pointer;color:red;" onclick="hideById('copyTo');">[x]</div>
+<div id="close" style="position:absolute;top:2px;right:2px;cursor: pointer;color:red;" onclick="hideById('copyTo'); deleteDivEffect();">[x]</div>
 <table width="100%">
 	<tr>
 		<td>$i18n.getString('reports')</td>
 		<td>
-			<select id="targetReport">
+			<select id="targetGroup" style="max-width:30em;min-width:30em;">
 			</select>
 		</td>
 	</tr>
@@ -158,6 +151,6 @@
 </table>
 <p align="center">
 <input type="button" value="$i18n.getString('ok')" onclick="saveCopyItems();"/>
-<input type="button" value="$i18n.getString('cancel')" onclick="hideById('copyTo');"/>
+<input type="button" value="$i18n.getString('cancel')" onclick="hideById('copyTo'); deleteDivEffect();"/>
 </p>
 </div>

@@ -38,18 +38,34 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * @author Lars Helge Overland
  * @version $Id$
- * @modifier Dang Duy Hieu
- * @since 2009-10-23
  */
 @Transactional
 public class DefaultTranslationService
     implements TranslationService
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
     private TranslationStore translationStore;
 
     public void setTranslationStore( TranslationStore translationStore )
     {
         this.translationStore = translationStore;
+    }
+
+    // -------------------------------------------------------------------------
+    // Translation
+    // -------------------------------------------------------------------------
+
+    public void addTranslation( Translation translation )
+    {
+        translationStore.addTranslation( translation );
+    }
+
+    public void updateTranslation( Translation translation )
+    {
+        translationStore.updateTranslation( translation );
     }
 
     public Translation getTranslation( String className, int id, Locale locale, String property )
@@ -72,24 +88,9 @@ public class DefaultTranslationService
         return translationStore.getAllTranslations();
     }
 
-    public void addTranslation( Translation translation )
-    {
-        translationStore.addTranslation( translation );
-    }
-
-    public void updateTranslation( Translation translation )
-    {
-        translationStore.updateTranslation( translation );
-    }
-
     public void deleteTranslation( Translation translation )
     {
         translationStore.deleteTranslation( translation );
-    }
-
-    public Collection<Locale> getAvailableLocales()
-    {
-        return translationStore.getAvailableLocales();
     }
 
     public void deleteTranslations( String className, int id )
@@ -97,9 +98,8 @@ public class DefaultTranslationService
         translationStore.deleteTranslations( className, id );
     }
 
-    // -------------------------------------------------------------------------
-    public Collection<Translation> getTranslations( String className, String propertyName, Locale locate )
+    public Collection<Locale> getAvailableLocales()
     {
-        return translationStore.getTranslations( className, propertyName, locate );
+        return translationStore.getAvailableLocales();
     }
 }

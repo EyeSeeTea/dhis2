@@ -27,20 +27,38 @@ package org.hisp.dhis.dimension;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.system.util.ConversionUtils;
 
 /**
+ * The DimensionSet identifier is on the format 
+ * [TYPE]SEPARATOR_TYPE[id]SEPARATOR_ID[id]SEPARATOR[id], for instance
+ * groupSet_1-2-3 and categoryCombo_1 .
+ * 
  * @author Lars Helge Overland
  * @version $Id: Indicator.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 public class DefaultDimensionService
     implements DimensionService
 {
+    final String TYPE_CATEGORY_COMBO = "categoryCombo";
+    final String TYPE_GROUP_SET = "groupSet";
+    final String SEPARATOR_TYPE = "_";
+    final String SEPARATOR_ID = "-";
+    final String SEPARATOR_NAME = ",";
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -70,57 +88,122 @@ public class DefaultDimensionService
     // DimensionService implementation
     // -------------------------------------------------------------------------
     
-    public Collection<DimensionSet> getDataElementDimensionSets()
+    public Map<String, String> getDataElementDimensionSets()
     {
-        Collection<DimensionSet> dimensionSets = new ArrayList<DimensionSet>();
-        dimensionSets.addAll( dataElementService.getDataElementsWithGroupSets() );        
-        dimensionSets.addAll( categoryService.getAllDataElementCategoryCombos() );
+        Map<String, String> dimensions = new HashMap<String, String>();
         
-        return dimensionSets;
+        for ( DataElementCategoryCombo categoryCombo : categoryService.getAllDataElementCategoryCombos() )
+        {            
+            dimensions.put( getCategoryComboIdentifier( categoryCombo ), categoryCombo.getName() );
+        }
+        
+        for ( Set<DataElementGroupSet> dimensionSet : getDistinctDataElemenDimensionSets() )
+        {
+            dimensions.put( getGroupSetIdentifier( dimensionSet ), getGroupSetName( dimensionSet ) );
+        }
+        
+        return dimensions;
     }
     
-    public DimensionSet getDataElementDimensionSetByName( String name )
-    {
-        for ( DimensionSet dimensionSet : getDataElementDimensionSets() )
+    public Collection<DataElement> getDataElements( String identifier )
+    {        
+        if ( identifier != null )
         {
-            if ( dimensionSet.getName().equals( name ) )
+            if ( getDimensionSetType( identifier ).equals( TYPE_CATEGORY_COMBO ) )
             {
-                return dimensionSet;
+                DataElementCategoryCombo categoryCombo = categoryService.getDataElementCategoryCombo( getDimensionSetIdentifiers( identifier )[0] );
+
+                return dataElementService.getDataElementByCategoryCombo( categoryCombo );
+            }
+            else // TYPE_GROUP_SET
+            {
+                Set<DataElementGroupSet> dimensionSet = getDataElementDimensionSet( getDimensionSetIdentifiers( identifier ) );
+                
+                return dataElementService.getDataElementsByGroupSets( dimensionSet );
             }
         }
         
         return null;
     }
 
-    public Collection<DimensionSet> getIndicatorDimensionSets()
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+    
+    private String getDimensionSetType( String identifier )
     {
-        Collection<DimensionSet> dimensionSets = new ArrayList<DimensionSet>();
-        dimensionSets.addAll( indicatorService.getIndicatorsWithGroupSets() );
-        dimensionSets.addAll( categoryService.getAllDataElementCategoryCombos() );
+        return identifier.split( SEPARATOR_TYPE )[0];
+    }
+    
+    private Integer[] getDimensionSetIdentifiers( String identifier )
+    {
+        return ConversionUtils.getIntegerArray( identifier.split( SEPARATOR_TYPE )[1].split( SEPARATOR_ID ) );
+    }
+    
+    private Set<DataElementGroupSet> getDataElementDimensionSet( Integer[] identifiers )
+    {
+        Set<DataElementGroupSet> dimensionSet = new HashSet<DataElementGroupSet>();
+        
+        for ( Integer id : identifiers )
+        {
+            dimensionSet.add( dataElementService.getDataElementGroupSet( id ) );
+        }
+        
+        return dimensionSet;
+    }
+    
+    private Set<Set<DataElementGroupSet>> getDistinctDataElemenDimensionSets()
+    {
+        Set<Set<DataElementGroupSet>> dimensionSets = new HashSet<Set<DataElementGroupSet>>();
+        
+        for ( DataElement dataElement : dataElementService.getDataElementsWithGroupSets() )
+        {
+            dimensionSets.add( new HashSet<DataElementGroupSet>( dataElement.getGroupSets() ) );
+        }
         
         return dimensionSets;
     }
     
-    public DimensionSet getIndicatorDimensionSetByName( String name )
+    private String getCategoryComboIdentifier( DataElementCategoryCombo categoryCombo )
     {
-        for ( DimensionSet dimensionSet : getIndicatorDimensionSets() )
+        return TYPE_CATEGORY_COMBO + SEPARATOR_TYPE + categoryCombo.getId();
+    }
+    
+    private String getGroupSetIdentifier( Set<DataElementGroupSet> groupSets )
+    {
+        StringBuffer identifier = new StringBuffer( TYPE_GROUP_SET + SEPARATOR_TYPE );
+        
+        Iterator<DataElementGroupSet> iterator = groupSets.iterator(); 
+        
+        while ( iterator.hasNext() )
         {
-            if ( dimensionSet.getName().equals( name ) )
+            identifier.append( iterator.next().getId() );
+            
+            if ( iterator.hasNext() )
             {
-                return dimensionSet;
+                identifier.append( SEPARATOR_ID );
             }
         }
         
-        return null;
+        return identifier.toString();
     }
-
-    public Collection<DimensionSet> getAllDimensionSets()
+    
+    private String getGroupSetName( Set<DataElementGroupSet> groupSets )
     {
-        Collection<DimensionSet> dimensionSets = new ArrayList<DimensionSet>();
-        dimensionSets.addAll( dataElementService.getDataElementsWithGroupSets() ); 
-        dimensionSets.addAll( indicatorService.getIndicatorsWithGroupSets() );
-        dimensionSets.addAll( categoryService.getAllDataElementCategoryCombos() );
+        StringBuffer name = new StringBuffer();
         
-        return dimensionSets;
+        Iterator<DataElementGroupSet> iterator = groupSets.iterator(); 
+        
+        while ( iterator.hasNext() )
+        {
+            name.append( iterator.next().getName() );
+            
+            if ( iterator.hasNext() )
+            {
+                name.append( SEPARATOR_NAME );
+            }
+        }
+        
+        return name.toString();
     }
 }

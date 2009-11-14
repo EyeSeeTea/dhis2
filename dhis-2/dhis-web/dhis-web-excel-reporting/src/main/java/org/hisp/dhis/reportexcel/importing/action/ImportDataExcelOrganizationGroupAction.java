@@ -50,7 +50,8 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.reportexcel.action.ActionSupport;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItem;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
-import org.hisp.dhis.reportexcel.importing.period.action.SelectedStateManager;
+import org.hisp.dhis.reportexcel.period.generic.PeriodGenericManager;
+import org.hisp.dhis.reportexcel.state.SelectionManager;
 import org.hisp.dhis.reportexcel.utils.ExcelUtils;
 import org.hisp.dhis.user.CurrentUserService;
 
@@ -59,173 +60,192 @@ import org.hisp.dhis.user.CurrentUserService;
  * @version $Id$
  */
 
-public class ImportDataExcelOrganizationGroupAction extends ActionSupport {
+public class ImportDataExcelOrganizationGroupAction
+    extends ActionSupport
+{
 
-	// --------------------------------------------------------------------
-	// Dependencies
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
+    // Dependencies
+    // --------------------------------------------------------------------
 
-	private DataValueService dataValueService;
+    private DataValueService dataValueService;
 
-	private OrganisationUnitSelectionManager organisationUnitSelectionManager;
+    private OrganisationUnitSelectionManager organisationUnitSelectionManager;
 
-	private ExpressionService expressionService;
+    private ExpressionService expressionService;
 
-	private DataElementService dataElementService;
+    private DataElementService dataElementService;
 
-	private DataElementCategoryService categoryService;
+    private DataElementCategoryService categoryService;
 
-	private CurrentUserService currentUserService;
+    private CurrentUserService currentUserService;
 
-	private ExcelItemService excelItemService;
+    private ExcelItemService excelItemService;
 
-	private OrganisationUnitService organisationUnitService;
+    private OrganisationUnitService organisationUnitService;
 
-	private SelectedStateManager selectedStateManager;
+    private PeriodGenericManager periodGenericManager;
 
-	// --------------------------------------------------------------------
-	// Inputs && Outputs
-	// --------------------------------------------------------------------
+    private SelectionManager selectionManager;
 
-	private String uploadFileName;
+    // --------------------------------------------------------------------
+    // Inputs && Outputs
+    // --------------------------------------------------------------------
 
-	public String[] excelItemIds;
+    public String[] excelItemIds;
 
-	// --------------------------------------------------------------------
-	// Getters and Setters
-	// --------------------------------------------------------------------
-	public void setOrganisationUnitSelectionManager(
-			OrganisationUnitSelectionManager organisationUnitSelectionManager) {
-		this.organisationUnitSelectionManager = organisationUnitSelectionManager;
-	}
+    // --------------------------------------------------------------------
+    // Getters and Setters
+    // --------------------------------------------------------------------
 
-	public void setOrganisationUnitService(
-			OrganisationUnitService organisationUnitService) {
-		this.organisationUnitService = organisationUnitService;
-	}
+    public void setOrganisationUnitSelectionManager( OrganisationUnitSelectionManager organisationUnitSelectionManager )
+    {
+        this.organisationUnitSelectionManager = organisationUnitSelectionManager;
+    }
 
-	public void setExpressionService(ExpressionService expressionService) {
-		this.expressionService = expressionService;
-	}
+    public void setSelectionManager( SelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
 
-	public void setCategoryService(DataElementCategoryService categoryService) {
-		this.categoryService = categoryService;
-	}
+    public void setPeriodGenericManager( PeriodGenericManager periodGenericManager )
+    {
+        this.periodGenericManager = periodGenericManager;
+    }
 
-	public void setCurrentUserService(CurrentUserService currentUserService) {
-		this.currentUserService = currentUserService;
-	}
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
 
-	public void setExcelItemService(ExcelItemService excelItemService) {
-		this.excelItemService = excelItemService;
-	}
+    public void setExpressionService( ExpressionService expressionService )
+    {
+        this.expressionService = expressionService;
+    }
 
-	public void setSelectedStateManager(
-			SelectedStateManager selectedStateManager) {
-		this.selectedStateManager = selectedStateManager;
-	}
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
+    }
 
-	public void setDataValueService(DataValueService dataValueService) {
-		this.dataValueService = dataValueService;
-	}
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
 
-	public void setUploadFileName(String uploadFileName) {
-		this.uploadFileName = uploadFileName;
-	}
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
 
-	public void setExcelItemIds(String[] excelItemIds) {
-		this.excelItemIds = excelItemIds;
-	}
+    public void setDataValueService( DataValueService dataValueService )
+    {
+        this.dataValueService = dataValueService;
+    }
 
-	public void setDataElementService(DataElementService dataElementService) {
-		this.dataElementService = dataElementService;
-	}
+    public void setExcelItemIds( String[] excelItemIds )
+    {
+        this.excelItemIds = excelItemIds;
+    }
 
-	// --------------------------------------------------------------------
-	// Action implementation
-	// --------------------------------------------------------------------
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
 
-	public String execute() throws Exception {
+    // --------------------------------------------------------------------
+    // Action implementation
+    // --------------------------------------------------------------------
 
-		OrganisationUnit organisationUnit = organisationUnitSelectionManager
-				.getSelectedOrganisationUnit();
+    public String execute()
+        throws Exception
+    {
 
-		if (organisationUnit != null) {
+        OrganisationUnit organisationUnit = organisationUnitSelectionManager.getSelectedOrganisationUnit();
 
-			File upload = new File(uploadFileName);
-			WorkbookSettings ws = new WorkbookSettings();
-			ws.setLocale(new Locale("en", "EN"));
-			Workbook templateWorkbook = Workbook.getWorkbook(upload, ws);
+        if ( excelItemIds == null )
+        {
+            message = i18n.getString( "choose_excelItem" );
 
-			Period period = selectedStateManager.getSelectedPeriod();
+            return ERROR;
+        }
 
-			for (int i = 0; i < excelItemIds.length; i++) {
+        if ( organisationUnit != null )
+        {
 
-				int orgunitId = Integer.parseInt(excelItemIds[i].split("-")[0]);
+            File upload = new File( selectionManager.getUploadFilePath() );
+            WorkbookSettings ws = new WorkbookSettings();
+            ws.setLocale( new Locale( "en", "EN" ) );
+            Workbook templateWorkbook = Workbook.getWorkbook( upload, ws );
 
-				OrganisationUnit o = organisationUnitService
-						.getOrganisationUnit(orgunitId);
+            Period period = periodGenericManager.getSelectedPeriod();
 
-				int row = Integer.parseInt(excelItemIds[i].split("-")[1]);
+            for ( int i = 0; i < excelItemIds.length; i++ )
+            {
 
-				int excelItemId = Integer
-						.parseInt(excelItemIds[i].split("-")[2]);
+                int orgunitId = Integer.parseInt( excelItemIds[i].split( "-" )[0] );
 
-				ExcelItem exelItem = excelItemService.getExcelItem(excelItemId);
+                OrganisationUnit o = organisationUnitService.getOrganisationUnit( orgunitId );
 
-				if (exelItem.getId() == excelItemId) {
+                int row = Integer.parseInt( excelItemIds[i].split( "-" )[1] );
 
-					writeDataValue(exelItem, templateWorkbook, row, o, period);
+                int excelItemId = Integer.parseInt( excelItemIds[i].split( "-" )[2] );
 
-				}// end if( exelItem ...
+                ExcelItem exelItem = excelItemService.getExcelItem( excelItemId );
 
-			}// end for (int i ...
+                if ( exelItem.getId() == excelItemId )
+                {
 
-		}// end if (organisationUnit ...
+                    writeDataValue( exelItem, templateWorkbook, row, o, period );
 
-		message = i18n.getString("success");
+                }// end if( exelItem ...
 
-		return SUCCESS;
-	}
+            }// end for (int i ...
 
-	private void writeDataValue(ExcelItem exelItem, Workbook templateWorkbook,
-			int row, OrganisationUnit o, Period period) {
+        }// end if (organisationUnit ...
 
-		Sheet sheet = templateWorkbook.getSheet(exelItem.getSheetNo() - 1);
+        message = i18n.getString( "success" );
 
-		String value = ExcelUtils.readValue(exelItem.getRow() + row, exelItem
-				.getColumn(), sheet);
+        return SUCCESS;
+    }
 
-		if (value.length() > 0) {
+    private void writeDataValue( ExcelItem exelItem, Workbook templateWorkbook, int row, OrganisationUnit o,
+        Period period )
+    {
 
-			Operand operand = expressionService.getOperandsInExpression(
-					exelItem.getExpression()).iterator().next();
+        Sheet sheet = templateWorkbook.getSheet( exelItem.getSheetNo() - 1 );
 
-			DataElement dataElement = dataElementService.getDataElement(operand
-					.getDataElementId());
+        String value = ExcelUtils.readValue( exelItem.getRow() + row, exelItem.getColumn(), sheet );
 
-			DataElementCategoryOptionCombo optionCombo = categoryService
-					.getDataElementCategoryOptionCombo(operand
-							.getOptionComboId());
+        if ( value.length() > 0 )
+        {
 
-			String storedBy = currentUserService.getCurrentUsername();
+            Operand operand = expressionService.getOperandsInExpression( exelItem.getExpression() ).iterator().next();
 
-			DataValue dataValue = dataValueService.getDataValue(o, dataElement,
-					period, optionCombo);
+            DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
 
-			if (dataValue == null) {
-				dataValue = new DataValue(dataElement, period, o, value + "",
-						storedBy, new Date(), null, optionCombo);
-				dataValueService.addDataValue(dataValue);
-			} else {
-				dataValue.setValue(value + "");
-				dataValue.setTimestamp(new Date());
-				dataValue.setStoredBy(storedBy);
+            DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( operand
+                .getOptionComboId() );
 
-				dataValueService.updateDataValue(dataValue);
+            String storedBy = currentUserService.getCurrentUsername();
 
-			}
-		}
-	}
+            DataValue dataValue = dataValueService.getDataValue( o, dataElement, period, optionCombo );
+
+            if ( dataValue == null )
+            {
+                dataValue = new DataValue( dataElement, period, o, value + "", storedBy, new Date(), null, optionCombo );
+                dataValueService.addDataValue( dataValue );
+            }
+            else
+            {
+                dataValue.setValue( value + "" );
+                dataValue.setTimestamp( new Date() );
+                dataValue.setStoredBy( storedBy );
+
+                dataValueService.updateDataValue( dataValue );
+
+            }
+        }
+    }
 
 }

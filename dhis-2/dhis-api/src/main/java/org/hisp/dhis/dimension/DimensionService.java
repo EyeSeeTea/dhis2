@@ -28,6 +28,9 @@ package org.hisp.dhis.dimension;
  */
 
 import java.util.Collection;
+import java.util.Map;
+
+import org.hisp.dhis.dataelement.DataElement;
 
 /**
  * @author Lars Helge Overland
@@ -36,13 +39,7 @@ public interface DimensionService
 {
     final String ID = DimensionService.class.getName();
     
-    Collection<DimensionSet> getAllDimensionSets();
+    Map<String, String> getDataElementDimensionSets();
     
-    Collection<DimensionSet> getDataElementDimensionSets();
-    
-    DimensionSet getDataElementDimensionSetByName( String name );
-    
-    Collection<DimensionSet> getIndicatorDimensionSets();
-
-    DimensionSet getIndicatorDimensionSetByName( String name );
+    Collection<DataElement> getDataElements( String identifier );
 }

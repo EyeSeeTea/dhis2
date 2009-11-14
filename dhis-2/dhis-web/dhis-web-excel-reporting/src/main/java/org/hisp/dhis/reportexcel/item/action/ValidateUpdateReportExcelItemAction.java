@@ -26,6 +26,8 @@
  */
 package org.hisp.dhis.reportexcel.item.action;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
 import org.hisp.dhis.reportexcel.ReportExcelService;
@@ -38,6 +40,7 @@ import org.hisp.dhis.reportexcel.action.ActionSupport;
 public class ValidateUpdateReportExcelItemAction
     extends ActionSupport
 {
+    private static final Log log = LogFactory.getLog( ValidateUpdateReportExcelItemAction.class );
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
@@ -51,6 +54,8 @@ public class ValidateUpdateReportExcelItemAction
 
     private Integer reportItemId;
 
+    private Integer sheetNo;
+
     private String name;
 
     private String expression;
@@ -58,6 +63,11 @@ public class ValidateUpdateReportExcelItemAction
     private Integer row;
 
     private Integer column;
+
+    public void setSheetNo( Integer sheetNo )
+    {
+        this.sheetNo = sheetNo;
+    }
 
     public void setReportItemId( Integer reportItemId )
     {
@@ -107,33 +117,44 @@ public class ValidateUpdateReportExcelItemAction
             message = i18n.getString( "name_is_null" );
             return ERROR;
         }
-        ReportExcel reportExcel = reportService.getReportExcel( reportId );
-        
-        ReportExcelItem reportItem = reportExcel.getReportExcelItem( name );        
-
-        ReportExcelItem temp = reportService.getReportExcelItem( reportItemId );
-
-        if ( (!temp.equals( reportItem )) && reportExcel.getReportExcelItems().contains( reportItem ) )
-        {
-            message = i18n.getString( "name_ready_exist" );
-            return ERROR;
-        }       
 
         if ( expression == null )
         {
-            message = i18n.getString( "name_is_null" );
+            message = i18n.getString( "expression_is_null" );
             return ERROR;
         }
+
         if ( expression.trim().length() == 0 )
         {
             message = i18n.getString( "expression_is_null" );
             return ERROR;
         }
+
+        if ( sheetNo == null )
+        {
+            message = i18n.getString( "please_enter_sheet_no" );
+            return ERROR;
+        }
+
+        ReportExcel reportExcel = reportService.getReportExcel( reportId );
+
+        ReportExcelItem reportItem = reportExcel.getReportExcelItem( name, sheetNo );
+
+        ReportExcelItem temp = reportService.getReportExcelItem( reportItemId );   
+
+        
+        if ( reportItem!=null && !reportItem.equals( temp ))
+        {     
+            message = i18n.getString( "name_ready_exist" );
+            return ERROR;
+        }
+
         if ( row == null )
         {
             message = i18n.getString( "row_is_null" );
             return ERROR;
         }
+
         if ( column == null )
         {
             message = i18n.getString( "column_is_null" );

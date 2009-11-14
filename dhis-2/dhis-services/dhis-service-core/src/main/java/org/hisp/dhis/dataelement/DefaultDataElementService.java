@@ -31,8 +31,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +43,8 @@ import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.UUIdUtils;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.hisp.dhis.i18n.I18nUtils.*;
 
 /**
  * @author Kristian Nordal
@@ -122,17 +126,17 @@ public class DefaultDataElementService
 
     public DataElement getDataElement( int id )
     {
-        return dataElementStore.getDataElement( id );
+        return i18n( i18nService, dataElementStore.getDataElement( id ) );
     }
 
     public DataElement getDataElement( String uuid )
     {
-        return dataElementStore.getDataElement( uuid );
+        return i18n( i18nService, dataElementStore.getDataElement( uuid ) );
     }
     
     public Collection<DataElement> getAllDataElements()
     {
-        return dataElementStore.getAllDataElements();
+        return i18n( i18nService, dataElementStore.getAllDataElements() );
     }
     
     public Collection<CalculatedDataElement> getCalculatedDataElements()
@@ -211,57 +215,72 @@ public class DefaultDataElementService
 
     public Collection<DataElement> getAggregateableDataElements()
     {
-        return dataElementStore.getAggregateableDataElements();
+        return i18n( i18nService, dataElementStore.getAggregateableDataElements() );
     }
 
     public Collection<DataElement> getAllActiveDataElements()
     {
-        return dataElementStore.getAllActiveDataElements();
+        return i18n( i18nService, dataElementStore.getAllActiveDataElements() );
     }
 
     public DataElement getDataElementByName( String name )
     {
-        return dataElementStore.getDataElementByName( name );
+        return i18n( i18nService, dataElementStore.getDataElementByName( name ) );
     }
 
     public DataElement getDataElementByAlternativeName( String alternativeName )
     {
-        return dataElementStore.getDataElementByAlternativeName( alternativeName );
+        return i18n( i18nService, dataElementStore.getDataElementByAlternativeName( alternativeName ) );
     }
 
     public DataElement getDataElementByShortName( String shortName )
     {
-        return dataElementStore.getDataElementByShortName( shortName );
+        return i18n( i18nService, dataElementStore.getDataElementByShortName( shortName ) );
     }
 
     public DataElement getDataElementByCode( String code )
     {
-        return dataElementStore.getDataElementByCode( code );
+        return i18n( i18nService, dataElementStore.getDataElementByCode( code ) );
     }
 
     public Collection<DataElement> getDataElementsByAggregationOperator( String aggregationOperator )
     {
-        return dataElementStore.getDataElementsByAggregationOperator( aggregationOperator );
+        return i18n( i18nService, dataElementStore.getDataElementsByAggregationOperator( aggregationOperator ) );
     }
 
     public Collection<DataElement> getDataElementsByType( String type )
     {
-        return dataElementStore.getDataElementsByType( type );
+        return i18n( i18nService, dataElementStore.getDataElementsByType( type ) );
     }
     
     public Collection<DataElement> getDataElementsByDomainType( String domainType )
     {
-        return dataElementStore.getDataElementsByDomainType( domainType );
+        return i18n( i18nService, dataElementStore.getDataElementsByDomainType( domainType ) );
     }
     
     public Collection<DataElement> getDataElementByCategoryCombo( DataElementCategoryCombo categoryCombo )
     {
-        return dataElementStore.getDataElementByCategoryCombo( categoryCombo );
+        return i18n( i18nService, dataElementStore.getDataElementByCategoryCombo( categoryCombo ) );
     }
     
     public Collection<DataElement> getDataElementsWithGroupSets()
     {
-        return dataElementStore.getDataElementsWithGroupSets();
+        return i18n( i18nService, dataElementStore.getDataElementsWithGroupSets() );
+    }
+    
+    public Collection<DataElement> getDataElementsByGroupSets( Set<DataElementGroupSet> groupSets )
+    {
+        Collection<DataElement> dataElements = new HashSet<DataElement>();
+        
+        for ( DataElement dataElement : getDataElementsWithGroupSets() )
+        {
+            if ( dataElement.getGroupSets() != null && new HashSet<DataElementGroupSet>( dataElement.getGroupSets() ).equals( groupSets ) )
+            {
+                dataElements.add( dataElement );
+            }
+        }
+        
+        return dataElements;
     }
     
     // -------------------------------------------------------------------------
@@ -270,18 +289,18 @@ public class DefaultDataElementService
 
     public Collection<CalculatedDataElement> getAllCalculatedDataElements()
     {
-        return dataElementStore.getAllCalculatedDataElements();
+        return i18n( i18nService, dataElementStore.getAllCalculatedDataElements() );
     }
 
     public CalculatedDataElement getCalculatedDataElementByDataElement( DataElement dataElement )
     {
-        return dataElementStore.getCalculatedDataElementByDataElement( dataElement );
+        return i18n( i18nService, dataElementStore.getCalculatedDataElementByDataElement( dataElement ) );
     }
 
     public Collection<CalculatedDataElement> getCalculatedDataElementsByDataElements(
         Collection<DataElement> dataElements )
     {
-        return dataElementStore.getCalculatedDataElementsByDataElements( dataElements );
+        return i18n( i18nService, dataElementStore.getCalculatedDataElementsByDataElements( dataElements ) );
     }
 
     public Map<DataElement, Integer> getDataElementFactors( CalculatedDataElement calculatedDataElement )
@@ -410,7 +429,7 @@ public class DefaultDataElementService
 
     public DataElementGroup getDataElementGroup( int id )
     {
-        return dataElementGroupStore.get( id );
+        return i18n( i18nService, dataElementGroupStore.get( id ) );
     }
     
     public Collection<DataElementGroup> getDataElementGroups( Collection<Integer> identifiers )
@@ -432,17 +451,17 @@ public class DefaultDataElementService
 
     public DataElementGroup getDataElementGroup( String uuid )
     {
-        return dataElementGroupStore.getByUuid( uuid );
+        return i18n( i18nService, dataElementGroupStore.getByUuid( uuid ) );
     }
 
     public Collection<DataElementGroup> getAllDataElementGroups()
     {
-        return dataElementGroupStore.getAll();
+        return i18n( i18nService, dataElementGroupStore.getAll() );
     }
 
     public DataElementGroup getDataElementGroupByName( String name )
     {
-        return dataElementGroupStore.getByName( name );
+        return i18n( i18nService, dataElementGroupStore.getByName( name ) );
     }
 
     public Collection<DataElementGroup> getGroupsContainingDataElement( DataElement dataElement )
@@ -468,32 +487,40 @@ public class DefaultDataElementService
 
     public int addDataElementGroupSet( DataElementGroupSet groupSet )
     {
-        return dataElementGroupSetStore.save( groupSet );
+        int id =  dataElementGroupSetStore.save( groupSet );
+        
+        i18nService.addObject( groupSet );
+        
+        return id;
     }
     
     public void updateDataElementGroupSet( DataElementGroupSet groupSet )
     {
         dataElementGroupSetStore.update( groupSet );
+        
+        i18nService.verify( groupSet );
     }
     
     public void deleteDataElementGroupSet( DataElementGroupSet groupSet )
     {
+        i18nService.removeObject( groupSet );
+        
         dataElementGroupSetStore.delete( groupSet );
     }
     
     public DataElementGroupSet getDataElementGroupSet( int id )
     {
-        return dataElementGroupSetStore.get( id );
+        return i18n( i18nService, dataElementGroupSetStore.get( id ) );
     }
     
     public DataElementGroupSet getDataElementGroupSetByName( String name )
     {
-        return dataElementGroupSetStore.getByName( name );
+        return i18n( i18nService, dataElementGroupSetStore.getByName( name ) );
     }
     
     public Collection<DataElementGroupSet> getAllDataElementGroupSets()
     {
-        return dataElementGroupSetStore.getAll();
+        return i18n( i18nService, dataElementGroupSetStore.getAll() );
     }
 
     public Collection<DataElementGroupSet> getDataElementGroupSets( Collection<Integer> identifiers )
@@ -512,5 +539,4 @@ public class DefaultDataElementService
         
         return groupSets;
     }
-   
 }

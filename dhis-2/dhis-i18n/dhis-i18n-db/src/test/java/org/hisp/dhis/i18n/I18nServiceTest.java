@@ -27,6 +27,9 @@ package org.hisp.dhis.i18n;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -39,10 +42,7 @@ import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import static junit.framework.Assert.*;
 
 /**
  * @author Oyvind Brucker
@@ -82,9 +82,8 @@ public class I18nServiceTest
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
-
+    
     @Test
-    @Ignore
     public void testUpdateTranslation()
         throws Exception
     {
@@ -144,7 +143,7 @@ public class I18nServiceTest
         translations1.put( "comment", "Just another orgunit" );
         i18nService.updateTranslation( className1, id3, Locale.UK, translations1 );
 
-        i18nService.internationaliseCollection( orgunits );
+        i18nService.internationalise( orgunits );
 
         for ( int i = 0; i < orgunits.size(); i++ )
         {
@@ -155,7 +154,6 @@ public class I18nServiceTest
     }
 
     @Test
-    @Ignore
     public void testAddObject()
         throws Exception
     {
@@ -199,7 +197,6 @@ public class I18nServiceTest
     }
 
     @Test
-    @Ignore
     public void testVerify()
         throws Exception
     {
@@ -251,7 +248,6 @@ public class I18nServiceTest
     }
 
     @Test
-    @Ignore
     public void testGetAvailableLocales()
         throws Exception
     {
@@ -269,33 +265,13 @@ public class I18nServiceTest
 
         Collection<Locale> availableLocales = i18nService.getAvailableLocales();
 
-        if ( !availableLocales.contains( Locale.UK ) | !availableLocales.contains( Locale.FRANCE )
-            | !availableLocales.contains( Locale.US ) )
-        {
-            fail( "Failed to get available locales" );
-        }
+        assertEquals( 3, availableLocales.size() );
+        assertTrue( availableLocales.contains( Locale.UK ) );
+        assertTrue( availableLocales.contains( Locale.FRANCE ) );
+        assertTrue( availableLocales.contains( Locale.US ) );
     }
 
     @Test
-    @Ignore
-    public void testAddTranslation()
-        throws Exception
-    {
-        OrganisationUnit organisationUnit1 = new OrganisationUnit( "orgunit", "shortName1", "organisationUnitCode1",
-            new Date(), new Date(), true, "comment" );
-        organisationUnit1.setId( id1 );
-
-        i18nService.addTranslation( organisationUnit1, "name", "orgunit-1", Locale.UK );
-
-        localeManager.setCurrentLocale( Locale.UK );
-
-        i18nService.internationalise( organisationUnit1 );
-
-        assertEquals( "orgunit-1", organisationUnit1.getName() );
-    }
-
-    @Test
-    @Ignore
     public void testSetToFallback()
         throws Exception
     {

@@ -110,7 +110,7 @@ public class DefaultReportExcelService
         {
             return this.getReportsByGroup( group );
         }
-        
+
         else
         {
             Collection<ReportExcel> reports = new ArrayList<ReportExcel>();
@@ -240,6 +240,18 @@ public class DefaultReportExcelService
     {
 
         reportStore.updateDataEntryStatus( arg0 );
+    }
+
+    @Override
+    public PeriodColumn getPeriodColumn( Integer id )
+    {        
+        return reportStore.getPeriodColumn( id );
+    }
+
+    @Override
+    public void updatePeriodColumn( PeriodColumn periodColumn )
+    {
+        reportStore.updatePeriodColumn( periodColumn );
     }
 
 }

@@ -37,13 +37,12 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.i18n.util.LocaleUtils;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationStore;
 
 /**
  * @author Oyvind Brucker
- * @modifier Dang Duy Hieu
- * @since 2009-10-23
  */
 public class HibernateTranslationStore
     implements TranslationStore
@@ -88,6 +87,8 @@ public class HibernateTranslationStore
         criteria.add( Restrictions.eq( "locale", locale.toString() ) );
         criteria.add( Restrictions.eq( "property", property ) );
 
+        criteria.setCacheable( true );
+        
         return (Translation) criteria.uniqueResult();
     }
 
@@ -103,7 +104,7 @@ public class HibernateTranslationStore
         criteria.add( Restrictions.eq( "locale", locale.toString() ) );
 
         criteria.setCacheable( true );
-
+        
         return criteria.list();
     }
 
@@ -117,6 +118,8 @@ public class HibernateTranslationStore
         criteria.add( Restrictions.eq( "className", className ) );
         criteria.add( Restrictions.eq( "locale", locale.toString() ) );
 
+        criteria.setCacheable( true );
+        
         return criteria.list();
     }
 
@@ -127,6 +130,8 @@ public class HibernateTranslationStore
 
         Criteria criteria = session.createCriteria( Translation.class );
 
+        criteria.setCacheable( true );
+        
         return criteria.list();
     }
 
@@ -167,62 +172,11 @@ public class HibernateTranslationStore
 
         for ( Object object : objlist )
         {
-            Locale locale = getLocale( object.toString() );
+            Locale locale = LocaleUtils.getLocale( object.toString() );
 
             locales.add( locale );
         }
 
         return locales;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    /**
-     * Creates a Locale object based on the input String
-     * 
-     * @param localestr String to parse
-     * @return A locale object or null if not valid
-     */
-    private Locale getLocale( String localestr )
-    {
-        String[] parts = localestr.split( "_" );
-
-        Locale thisLocale;
-
-        if ( parts.length == 1 )
-        {
-            thisLocale = new Locale( parts[0] );
-        }
-        else if ( parts.length == 2 )
-        {
-            thisLocale = new Locale( parts[0], parts[1] );
-        }
-        else if ( parts.length == 3 )
-        {
-            thisLocale = new Locale( parts[0], parts[1], parts[2] );
-        }
-        else
-        {
-            return null;
-        }
-
-        return thisLocale;
-    }
-
-    // -------------------------------------------------------------------------
-    @SuppressWarnings( "unchecked" )
-    public Collection<Translation> getTranslations( String className, String propertyName, Locale locate )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Translation.class );
-
-        criteria.add( Restrictions.eq( "className", className ) );
-        criteria.add( Restrictions.eq( "property", propertyName ) );
-        criteria.add( Restrictions.eq( "locale", locate.toString() ) );
-
-        return criteria.list();
     }
 }

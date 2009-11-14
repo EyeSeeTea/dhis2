@@ -90,22 +90,10 @@ public class DataElementServiceTest
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
         DataElement dataElementC = createDataElement( 'C' );
-        DataElement dataElementD = createDataElement( 'A' );
 
         int idA = dataElementService.addDataElement( dataElementA );
         int idB = dataElementService.addDataElement( dataElementB );
         int idC = dataElementService.addDataElement( dataElementC );
-
-        try
-        {
-            // Should give unique constraint violation
-            dataElementService.addDataElement( dataElementD );
-            fail();
-        }
-        catch ( Exception e )
-        {
-            // Expected
-        }
 
         dataElementA = dataElementService.getDataElement( idA );
         assertNotNull( dataElementA );
@@ -464,6 +452,41 @@ public class DataElementServiceTest
         assertEquals( 3, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
     }
 
+    @Test
+    public void testGetDataElementsByGroupSets()
+    {
+        DataElementGroupSet groupSetA = createDataElementGroupSet( 'A' );
+        DataElementGroupSet groupSetB = createDataElementGroupSet( 'B' );
+        
+        dataElementService.addDataElementGroupSet( groupSetA );
+        dataElementService.addDataElementGroupSet( groupSetB );
+        
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+        DataElement dataElementC = createDataElement( 'C' );
+        DataElement dataElementD = createDataElement( 'D' );
+        
+        dataElementB.getGroupSets().add( groupSetA );
+        dataElementB.getGroupSets().add( groupSetB );
+        dataElementD.getGroupSets().add( groupSetA );
+        dataElementD.getGroupSets().add( groupSetB );
+        
+        dataElementService.addDataElement( dataElementA );
+        dataElementService.addDataElement( dataElementB );
+        dataElementService.addDataElement( dataElementC );
+        dataElementService.addDataElement( dataElementD );
+        
+        Set<DataElementGroupSet> groupSets = new HashSet<DataElementGroupSet>();
+        groupSets.add( groupSetA );
+        groupSets.add( groupSetB );
+        
+        Collection<DataElement> dataElements = dataElementService.getDataElementsByGroupSets( groupSets );
+        
+        assertEquals( 2, dataElements.size() );
+        assertTrue( dataElements.contains( dataElementB ) );
+        assertTrue( dataElements.contains( dataElementD ) );
+    }
+
     // -------------------------------------------------------------------------
     // CalculatedDataElements
     // -------------------------------------------------------------------------
@@ -562,22 +585,10 @@ public class DataElementServiceTest
         DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
         DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
         DataElementGroup dataElementGroupC = new DataElementGroup( "DataElementGroupC" );
-        DataElementGroup dataElementGroupD = new DataElementGroup( "DataElementGroupA" );
 
         int idA = dataElementService.addDataElementGroup( dataElementGroupA );
         int idB = dataElementService.addDataElementGroup( dataElementGroupB );
         int idC = dataElementService.addDataElementGroup( dataElementGroupC );
-
-        try
-        {
-            // Should give unique constraint violation
-            dataElementService.addDataElementGroup( dataElementGroupD );
-            fail();
-        }
-        catch ( Exception e )
-        {
-            // Expected
-        }
 
         dataElementGroupA = dataElementService.getDataElementGroup( idA );
         assertNotNull( dataElementGroupA );
