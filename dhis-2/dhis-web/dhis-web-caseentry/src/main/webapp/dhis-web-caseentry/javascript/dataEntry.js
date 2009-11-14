@@ -76,7 +76,7 @@ function patientReceived( patientElement )
 	
 	for ( var i = 0; i < attributes.length; i++ )
 	{		
-		attributeValues = attributeValues + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  <strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '</strong><br>';		
+		attributeValues = attributeValues + '<strong>' + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  </strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '<br>';		
 	}
 	
 	setFieldValue( 'attributeField', attributeValues );

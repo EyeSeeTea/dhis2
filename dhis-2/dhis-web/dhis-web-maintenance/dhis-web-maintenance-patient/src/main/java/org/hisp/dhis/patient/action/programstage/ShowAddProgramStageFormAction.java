@@ -129,7 +129,7 @@ public class ShowAddProgramStageFormAction
 
         program = programService.getProgram( id.intValue() );
 
-        dataElements = new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() );
+        dataElements = new ArrayList<DataElement>( dataElementService.getDataElementsByDomainType( DataElement.DOMAIN_TYPE_PATIENT ) );
 
         return SUCCESS;
     }

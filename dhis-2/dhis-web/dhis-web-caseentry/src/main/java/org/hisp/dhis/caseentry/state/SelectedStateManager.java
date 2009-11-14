@@ -37,8 +37,7 @@ import org.hisp.dhis.program.ProgramStage;
  * @version $Id$
  */
 public interface SelectedStateManager
-{    
-
+{
     OrganisationUnit getSelectedOrganisationUnit(); 
     
     void setSelectedPatient( Patient patient );
@@ -59,4 +58,21 @@ public interface SelectedStateManager
 
     void clearSelectedProgramStage();
     
+    void setListAll( boolean listAll );
+    
+    boolean getListAll();
+    
+    void clearListAll();
+    
+    void setSearchingAttributeId( int searchingAttributeId );
+    
+    Integer getSearchingAttributeId();
+    
+    void clearSearchingAttributeId();
+    
+    void setSearchText( String searchText );
+    
+    String getSearchText();
+    
+    void clearSearchTest();    
 }

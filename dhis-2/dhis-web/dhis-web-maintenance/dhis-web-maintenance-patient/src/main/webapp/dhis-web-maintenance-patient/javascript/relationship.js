@@ -28,7 +28,7 @@ function removeRelationshipType( relationshipTypeId, aIsToB, bIsToA )
 {
     var result = window.confirm( i18n_confirm_delete + '\n\n' + aIsToB + ' ' + bIsToA );
     
-    if ( result )
+    if( result )
     {
     	var request = new Request();
         request.setResponseTypeXML( 'message' );
@@ -42,11 +42,11 @@ function removeRelationshipTypeCompleted( messageElement )
     var type = messageElement.getAttribute( 'type' );
     var message = messageElement.firstChild.nodeValue;
     
-    if ( type == 'success' )
+    if( type == 'success' )
     {
         window.location.href = 'relationshipType.action';
     }
-    else if ( type = 'error' )
+    else if( type = 'error' )
     {
         setFieldValue( 'warningField', message );
         
@@ -79,16 +79,16 @@ function addValidationCompleted( messageElement )
     var type = messageElement.getAttribute( 'type' );
     var message = messageElement.firstChild.nodeValue;
     
-    if ( type == 'success' )
+    if( type == 'success' )
     {
         var form = document.getElementById( 'addRelationshipTypeForm' );        
         form.submit();
     }
-    else if ( type == 'error' )
+    else if( type == 'error' )
     {
         window.alert( i18n_adding_patient_atttibute_failed + ':' + '\n' + message );
     }
-    else if ( type == 'input' )
+    else if( type == 'input' )
     {
         document.getElementById( 'message' ).innerHTML = message;
         document.getElementById( 'message' ).style.display = 'block';
@@ -121,16 +121,16 @@ function updateValidationCompleted( messageElement )
     var type = messageElement.getAttribute( 'type' );
     var message = messageElement.firstChild.nodeValue;
     
-    if ( type == 'success' )
+    if( type == 'success' )
     {
     	var form = document.getElementById( 'updateRelationshipTypeForm' );        
         form.submit();
     }
-    else if ( type == 'error' )
+    else if( type == 'error' )
     {
         window.alert( i18n_saving_program_failed + ':' + '\n' + message );
     }
-    else if ( type == 'input' )
+    else if( type == 'input' )
     {
         document.getElementById( 'message' ).innerHTML = message;
         document.getElementById( 'message' ).style.display = 'block';
@@ -169,16 +169,16 @@ function searchValidationCompleted( messageElement )
 	var type = messageElement.getAttribute( 'type' );
 	var message = messageElement.firstChild.nodeValue;
 	
-	if ( type == 'success' )
+	if( type == 'success' )
 	{
 		var form = document.getElementById( 'relationshipSelectForm' );        
 		form.submit();
 	}
-	else if ( type == 'error' )
+	else if( type == 'error' )
 	{
 		window.alert( i18n_searching_patient_failed + ':' + '\n' + message );
 	}
-	else if ( type == 'input' )
+	else if( type == 'input' )
 	{
 		document.getElementById( 'message' ).innerHTML = message;
 		document.getElementById( 'message' ).style.display = 'block';
@@ -234,15 +234,15 @@ function addRelationshipCompleted( messageElement )
 	var type = messageElement.getAttribute( 'type' );
 	var message = messageElement.firstChild.nodeValue;
 	
-	if ( type == 'success' )
+	if( type == 'success' )
 	{
 		window.location = "getRelationshipList.action";
 	}	
-	else if ( type == 'error' )
+	else if( type == 'error' )
 	{
 		window.alert( i18n_adding_relationship_failed + ':' + '\n' + message );
 	}
-	else if ( type == 'input' )
+	else if( type == 'input' )
 	{
 		document.getElementById( 'message' ).innerHTML = message;
 		document.getElementById( 'message' ).style.display = 'block';
@@ -258,7 +258,19 @@ function removeRelationship( relationshipId, patientA, aIsToB, patientB )
 	
     var result = window.confirm( i18n_confirm_delete_relationship + '\n\n' + patientA + ' is ' + aIsToB + ' to ' + patientB );
     
-    if ( result )
+    if( result )
+    {
+    	window.location = 'removeRelationship.action?relationshipId=' + relationshipId;   	         
+    }
+}
+
+
+/*function removeRelationship( relationshipId, patientA, aIsToB, patientB )
+{	
+	
+    var result = window.confirm( i18n_confirm_delete_relationship + '\n\n' + patientA + ' is ' + aIsToB + ' to ' + patientB );
+    
+    if( result )
     {
     	var request = new Request();
         request.setResponseTypeXML( 'message' );
@@ -270,33 +282,33 @@ function removeRelationship( relationshipId, patientA, aIsToB, patientB )
 function removeRelationshipCompleted( messageElement )
 {
     var type = messageElement.getAttribute( 'type' );
-    var message = messageElement.firstChild.nodeValue;
+    var message = messageElement.firstChild.nodeValue;    
     
-    if ( type == 'success' )
-    {
-    	window.location = "getRelationshipList.action";
-    }
-    else if ( type = 'error' )
+    if( type == 'success' )
+	{
+		window.location = "getRelationshipList.action";
+	}	
+	else if( type = 'error' )
     {
         setFieldValue( 'warningField', message );
         
         showWarning();
     }
-}
+}*/
 
 //------------------------------------------------------------------------------
 // Relationship partner
 //------------------------------------------------------------------------------
 
-function getPartnerDetails( patientId, partnerId )
+function manageRepresentative( patientId, partnerId )
 {
     var request = new Request();
     request.setResponseTypeXML( 'partner' );
-    request.setCallbackSuccess( partnerReceived );
+    request.setCallbackSuccess( representativeReceived );
     request.send( 'getPartner.action?patientId=' + patientId + '&partnerId=' + partnerId );
 }
 
-function partnerReceived( patientElement )
+function representativeReceived( patientElement )
 {		
 	var partnerIsRepresentative = getElementValue( patientElement, 'partnerIsRepresentative' );	
 	
@@ -333,9 +345,9 @@ function partnerReceived( patientElement )
     
     var attributeValues = '';
 	
-	for ( var i = 0; i < attributes.length; i++ )
+	for( var i = 0; i < attributes.length; i++ )
 	{		
-		attributeValues = attributeValues + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  <strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '</strong><br>';		
+		attributeValues = attributeValues + '<strong>' + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  </strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '<br>';		
 	}
 	
 	setFieldValue( 'attributeField', attributeValues );   
@@ -377,15 +389,15 @@ function saveRepresentativeCompleted( messageElement )
 	var type = messageElement.getAttribute( 'type' );
 	var message = messageElement.firstChild.nodeValue;
 	
-	if ( type == 'success' )
+	if( type == 'success' )
 	{
 		window.location = "getRelationshipList.action";
 	}	
-	else if ( type == 'error' )
+	else if( type == 'error' )
 	{
 		window.alert( i18n_saving_representative_failed + ':' + '\n' + message );
 	}
-	else if ( type == 'input' )
+	else if( type == 'input' )
 	{
 		document.getElementById( 'message' ).innerHTML = message;
 		document.getElementById( 'message' ).style.display = 'block';
@@ -412,15 +424,15 @@ function removeRepresentativeCompleted( messageElement )
 	var type = messageElement.getAttribute( 'type' );
 	var message = messageElement.firstChild.nodeValue;
 	
-	if ( type == 'success' )
+	if( type == 'success' )
 	{
 		window.location = "getRelationshipList.action";
 	}	
-	else if ( type == 'error' )
+	else if( type == 'error' )
 	{
 		window.alert( i18n_removing_representative_failed + ':' + '\n' + message );
 	}
-	else if ( type == 'input' )
+	else if( type == 'input' )
 	{
 		document.getElementById( 'message' ).innerHTML = message;
 		document.getElementById( 'message' ).style.display = 'block';

@@ -61,13 +61,6 @@ public class RemoveRelationshipAction
         this.relationshipId = relationshipId;
     }
 
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------

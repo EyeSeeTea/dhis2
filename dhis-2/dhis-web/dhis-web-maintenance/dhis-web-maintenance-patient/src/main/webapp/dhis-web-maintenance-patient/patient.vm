@@ -12,7 +12,6 @@
 
 <hr style="clear:both">
 
-
 <form id="searchPatientForm" action="searchPatient.action" method="post" onsubmit="return validateSearchPatient()">
 
 <table>	

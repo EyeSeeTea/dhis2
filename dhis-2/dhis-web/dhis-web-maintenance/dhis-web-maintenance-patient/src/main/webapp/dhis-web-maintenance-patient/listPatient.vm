@@ -72,20 +72,20 @@
                 </td>
 				
 				<td style="text-align:center"#alternate( $mark )>
-                  <a href="javascript:editWindow( 'showProgramEnrollmentForm.action', '$patient.id' )" title="$i18n.getString( "manage_program_enrollment" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_program_enrollment" )"></a>                  
+                  <a href="showProgramEnrollmentForm.action?id=$patient.id" title="$i18n.getString( "manage_program_enrollment" )"><img src="../images/assign.png" alt="$i18n.getString( "manage_program_enrollment" )"></a>                  
                 </td>                
                 
                 <td style="text-align:center"#alternate( $mark )>                  
-                  <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
-                </td>
-                
-                <td style="text-align:center"#alternate( $mark )>                  
-                  <a href="javascript:editWindow( 'showRelationshipList.action', '$patient.id' )" title="$i18n.getString( "manage_relationship" )"><img src="images/relationship.gif" alt="$i18n.getString( "manage_relationship" )"></a>
+                  <a href="showUpdatePatientForm.action?id=$patient.id" title="$i18n.getString( "edit_profile" )"><img src="images/edit_profile.png" alt="$i18n.getString( "edit_profile" )"></a>
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>
-                  <a href="javascript:editWindow( 'showUpdatePatientAttributeValueForm.action', '$patient.id' )" title="$i18n.getString( "edit_attribute_values" )"><img src="../images/custom_value.png" alt="$i18n.getString( "edit_attribute_values" )"></a>
-                </td>                
+                  <a href="showUpdatePatientAttributeValueForm.action?id=$patient.id" title="$i18n.getString( "edit_attribute_values" )"><img src="images/attribute_value.png" alt="$i18n.getString( "edit_attribute_values" )"></a>
+                </td>
+                
+                <td style="text-align:center"#alternate( $mark )>                  
+                  <a href="showRelationshipList.action?id=$patient.id" title="$i18n.getString( "manage_relationship" )"><img src="images/relationship.gif" alt="$i18n.getString( "manage_relationship" )"></a>
+                </td>                                
  
                 <td style="text-align:center"#alternate( $mark )>
                   <a href="javascript:removePatient( '$patient.id', '$encoder.jsEncode( $patient.getFullName() )' )" title="$i18n.getString( "remove" )"><img src="../images/delete.png" alt="$i18n.getString( "remove" )"></a>

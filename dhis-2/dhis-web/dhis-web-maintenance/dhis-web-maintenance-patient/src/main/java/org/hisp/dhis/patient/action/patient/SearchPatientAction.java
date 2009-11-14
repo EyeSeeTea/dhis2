@@ -36,6 +36,7 @@ import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.state.SelectedStateManager;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 
@@ -58,6 +59,13 @@ public class SearchPatientAction
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
+    }
+
+    private SelectedStateManager selectedStateManager;
+
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    {
+        this.selectedStateManager = selectedStateManager;
     }
 
     private PatientService patientService;
@@ -122,7 +130,7 @@ public class SearchPatientAction
     {
         this.searchingAttributeId = searchingAttributeId;
     }
-    
+
     Collection<PatientAttribute> patientAttributes;
 
     public Collection<PatientAttribute> getPatientAttributes()
@@ -149,11 +157,16 @@ public class SearchPatientAction
         // ---------------------------------------------------------------------
 
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
-        
+
         patientAttributes = patientAttributeService.getAllPatientAttributes();
 
         if ( listAll )
         {
+            selectedStateManager.setListAll( listAll );
+
+            selectedStateManager.clearSearchingAttributeId();
+            selectedStateManager.clearSearchTest();
+
             patients = patientService.getPatientsByOrgUnit( organisationUnit );
 
             searchText = "list_all_patients";
@@ -161,23 +174,72 @@ public class SearchPatientAction
             return SUCCESS;
         }
 
-        if ( searchingAttributeId != null )
+        if ( searchingAttributeId != null && searchText != null )
         {
+            selectedStateManager.clearListAll();
+
+            selectedStateManager.setSearchingAttributeId( searchingAttributeId );
+            selectedStateManager.setSearchText( searchText );
+
             PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( searchingAttributeId );
 
             Collection<PatientAttributeValue> matching = patientAttributeValueService.searchPatientAttributeValue(
                 patientAttribute, searchText );
-            
-            for( PatientAttributeValue patientAttributeValue : matching )
+
+            for ( PatientAttributeValue patientAttributeValue : matching )
             {
                 patients.add( patientAttributeValue.getPatient() );
             }
-            
+
             return SUCCESS;
         }
 
-        patients = patientService.getPatients( searchText );
+        if ( searchingAttributeId == null && searchText != null )
+        {
+            selectedStateManager.clearListAll();
+            selectedStateManager.clearSearchingAttributeId();
 
+            selectedStateManager.setSearchText( searchText );
+
+            patients = patientService.getPatients( searchText );
+
+            return SUCCESS;
+        }
+
+        listAll = selectedStateManager.getListAll();
+        
+        if ( listAll )
+        {
+            patients = patientService.getPatientsByOrgUnit( organisationUnit );
+
+            searchText = "list_all_patients";
+
+            return SUCCESS;
+
+        }
+        
+        searchingAttributeId = selectedStateManager.getSearchingAttributeId();
+        searchText = selectedStateManager.getSearchText();
+        
+        if ( searchingAttributeId != null && searchText != null )
+        {
+            
+            PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( searchingAttributeId );
+
+            Collection<PatientAttributeValue> matching = patientAttributeValueService.searchPatientAttributeValue(
+                patientAttribute, searchText );
+
+            for ( PatientAttributeValue patientAttributeValue : matching )
+            {
+                patients.add( patientAttributeValue.getPatient() );
+            }
+
+            return SUCCESS;
+        }
+        
+        patients = patientService.getPatients( searchText ); 
+        
         return SUCCESS;
+
     }
 }

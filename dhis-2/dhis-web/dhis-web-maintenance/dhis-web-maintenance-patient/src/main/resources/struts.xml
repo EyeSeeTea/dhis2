@@ -74,24 +74,30 @@
     </action>
     
     <action name="showRelationshipList" class="org.hisp.dhis.patient.action.relationship.ShowRelationshipListAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="relationshiplist" type="chain">getRelationshipList</result>      
-      <result name="success" type="velocity">/popup.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>            
-      <param name="javascripts">javascript/relationship.js</param>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>            
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/relationship.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_UPDATE</param>      
     </action>      
     
-    <action name="getRelationshipList" class="org.hisp.dhis.patient.action.relationship.GetRelationshipListAction">      
-      <result name="success" type="velocity">/popup.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>            
-      <param name="javascripts">javascript/relationship.js</param>
+    <action name="getRelationshipList" class="org.hisp.dhis.patient.action.relationship.GetRelationshipListAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>      
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/relationshipList.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>            
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/relationship.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_UPDATE</param>      
     </action>   
     
-    <action name="showAddRelationshipForm" class="org.hisp.dhis.patient.action.relationship.ShowAddRelationshipFormAction">      
-      <result name="success" type="velocity">/popup.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/addRelationshipForm.vm</param>            
-      <param name="javascripts">javascript/relationship.js</param>
+    <action name="showAddRelationshipForm" class="org.hisp.dhis.patient.action.relationship.ShowAddRelationshipFormAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>      
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/addRelationshipForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>           
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/relationship.js</param>
       <param name="requiredAuthorities">F_RELATIONSHIP_ADD</param>      
     </action>
     
@@ -113,7 +119,7 @@
     <action name="removeRelationship" class="org.hisp.dhis.patient.action.relationship.RemoveRelationshipAction">      
       <result name="success" type="redirect">getRelationshipList.action</result>      
       <param name="requiredAuthorities">F_RELATIONSHIP_DELETE</param>      
-    </action> 
+    </action>    
     
     <action name="saveRepresentative" class="org.hisp.dhis.patient.action.relationship.SaveRepresentativeAction">      
       <result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSuccess.vm</result>
@@ -183,10 +189,12 @@
     
     <!-- PatientAttributeValue -->    
     
-    <action name="showUpdatePatientAttributeValueForm" class="org.hisp.dhis.patient.action.patientattribute.ShowUpdatePatientAttributeValueAction">      
-      <result name="success" type="velocity">/popup.vm</result>
-      <param name="page">/dhis-web-maintenance-patient/updatePatientAttributeValueForm.vm</param>            
-      <param name="javascripts">javascript/patientAttributeValue.js</param>
+    <action name="showUpdatePatientAttributeValueForm" class="org.hisp.dhis.patient.action.patientattribute.ShowUpdatePatientAttributeValueAction">
+      <interceptor-ref name="organisationUnitTreeStack"/>      
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-patient/updatePatientAttributeValueForm.vm</param>
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>            
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patientAttributeValue.js</param>
       <param name="requiredAuthorities">F_PATIENTATTRIBUTEVALUE_UPDATE</param>      
     </action>
     
@@ -271,6 +279,12 @@
       <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>         
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/patient.js</param>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>      
+    </action>
+    
+    <action name="updatePatient"
+      class="org.hisp.dhis.patient.action.patient.UpdatePatientAction">
+      <result name="success" type="redirect">searchPatient.action</result>
+      <param name="requiredAuthorities">F_PATIENT_UPDATE</param>
     </action> 
     
     <action name="validatePatient"
@@ -281,18 +295,13 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>    
     
-    <!-- Patient-Program Enrollment -->  
-    
-    <action name="updatePatient"
-      class="org.hisp.dhis.patient.action.patient.UpdatePatientAction">
-      <result name="success" type="redirect">patientform.action</result>
-      <param name="requiredAuthorities">F_PATIENT_UPDATE</param>
-    </action>
+    <!-- Patient-Program Enrollment -->     
     
     <action name="showProgramEnrollmentForm" class="org.hisp.dhis.patient.action.patient.ProgramEnrollmentSelectAction">
       <interceptor-ref name="organisationUnitTreeStack"/>
       <result name="enrollmentform" type="chain">enrollmentform</result>
-      <result name="success" type="velocity">/popup.vm</result>
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>
       <param name="page">/dhis-web-maintenance-patient/programEnrollmentSelectForm.vm</param>           
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/patient.js</param>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>      
@@ -300,7 +309,8 @@
     
     <action name="enrollmentform" class="org.hisp.dhis.patient.action.patient.ProgramEnrollmentAction">    
       <interceptor-ref name="organisationUnitTreeStack"/>
-      <result name="success" type="velocity">/popup.vm</result>           
+      <result name="success" type="velocity">/main.vm</result>  
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>         
       <param name="page">/dhis-web-maintenance-patient/programEnrollmentForm.vm</param>      
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/patient.js</param>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>            
@@ -316,7 +326,8 @@
     
     <action name="saveProgramEnrollment" class="org.hisp.dhis.patient.action.patient.SaveProgramEnrollmentAction">
       <interceptor-ref name="organisationUnitTreeStack"/>      
-      <result name="success" type="velocity">/popup.vm</result>      
+      <result name="success" type="velocity">/main.vm</result>  
+      <param name="menu">/dhis-web-maintenance-patient/patientMenu.vm</param>    
       <param name="page">/dhis-web-maintenance-patient/programEnrollmentForm.vm</param>           
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/calendar/calendar.js,../dhis-web-commons/calendar/calendar-lang.js,../dhis-web-commons/calendar/calendar-setup.js,javascript/patient.js</param>            
     </action>
