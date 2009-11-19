@@ -17,8 +17,7 @@
     
     <property name="minDaysFromStart" column="mindaysfromstart"/>   
     
-    <many-to-one name="program" class="org.hisp.dhis.program.Program"
-        column="programid" not-null="true"/>    
+    <many-to-one name="program" class="org.hisp.dhis.program.Program" column="programid"/>    
     
     <set name="dataElements" table="programstage_dataelements">
       <key column="programstageid"/>

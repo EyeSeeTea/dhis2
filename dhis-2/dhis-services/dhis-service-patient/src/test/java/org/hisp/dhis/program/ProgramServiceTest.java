@@ -44,7 +44,7 @@ import static junit.framework.Assert.*;
 public class ProgramServiceTest
     extends DhisSpringTest
 {    
-    private ProgramStore programStore;
+    private ProgramService programService;
     
     private ProgramStageService programStageService;
     
@@ -56,7 +56,6 @@ public class ProgramServiceTest
     private ProgramStage programStageB;    
     private ProgramStage programStageC;
     
-    
     @Override
     public void setUpTest()
     {
@@ -64,7 +63,7 @@ public class ProgramServiceTest
         
         organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );       
         
-        programStore = (ProgramStore) getBean( ProgramStore.ID );
+        programService = (ProgramService) getBean( ProgramService.ID );
         
         organisationUnit = createOrganisationUnit( 'A' );
         
@@ -89,8 +88,6 @@ public class ProgramServiceTest
         
         program.setName( "Program" + uniqueCharacter );
         program.setDescription( "Description" + uniqueCharacter );
-        program.setNumberOfDays( 5 );
-        program.setOrganisationUnit( organisationUnit );
         program.setProgramStages( programStages );
         
         return program;
@@ -104,7 +101,6 @@ public class ProgramServiceTest
         stage.setDescription( "Description" + uniqueCharacter );
         stage.setStageInProgram( 2 );
         stage.setMinDaysFromStart( 5 );
-        stage.setMaxDaysFromStart( 10 );
         
         return stage;
     }
@@ -115,20 +111,11 @@ public class ProgramServiceTest
         Program programA = createProgram( 'A', programStages, organisationUnit );
         Program programB = createProgram( 'B', programStages, organisationUnit );
         
-        int idA = programStore.save( programA );
-        int idB = programStore.save( programB );
+        int idA = programService.saveProgram( programA );
+        int idB = programService.saveProgram( programB );
         
-        assertEquals( programA, programStore.get( idA ) );
-        assertEquals( programB, programStore.get( idB ) );
-
-        assertEquals( programA.getOrganisationUnit(), programStore.get( idA ).getOrganisationUnit() );
-        assertEquals( programB.getOrganisationUnit(), programStore.get( idB ).getOrganisationUnit() );
-        
-        assertEquals( programStages.size(), programStore.get( idA ).getProgramStages().size() );
-        assertEquals( programStages.size(), programStore.get( idB ).getProgramStages().size() );
-                
-        assertTrue( programStore.get( idA ).getProgramStages().containsAll( programStages ) );
-        assertTrue( programStore.get( idB ).getProgramStages().containsAll( programStages ) );
+        assertEquals( programA, programService.getProgram( idA ) );
+        assertEquals( programB, programService.getProgram( idB ) );
     }    
 }
 

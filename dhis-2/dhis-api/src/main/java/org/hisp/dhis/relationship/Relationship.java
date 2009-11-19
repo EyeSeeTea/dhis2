@@ -27,7 +27,6 @@
 package org.hisp.dhis.relationship;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import org.hisp.dhis.patient.Patient;
 

@@ -30,7 +30,7 @@ package org.hisp.dhis.patientdatavalue.aggregation;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
@@ -42,6 +42,7 @@ import org.junit.Test;
  * @author Lars Helge Overland
  * @version $Id$
  */   
+@SuppressWarnings( "unused" ) //TODO
 public class PatientDataValueAggregationEngineTest
     extends DhisSpringTest
 {
@@ -71,7 +72,7 @@ public class PatientDataValueAggregationEngineTest
         
         dataElementService = (DataElementService) getBean( DataElementService.ID );
         
-        categoryOptionComboService = (DataElementCategoryOptionComboService) getBean( DataElementCategoryOptionComboService.ID );
+        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
         
         patientService = (PatientService) getBean( PatientService.ID );
         
@@ -89,12 +90,7 @@ public class PatientDataValueAggregationEngineTest
         patientService.savePatient( patientA );
         patientService.savePatient( patientB );
         
-        categoryOptionCombo = categoryOptionComboService.getDefaultDataElementCategoryOptionCombo();
-        
-        valueA = new PatientDataValue( patientA, dataElementA, categoryOptionCombo, getDate( 2000, 2, 1 ), "10" );
-        valueB = new PatientDataValue( patientA, dataElementB, categoryOptionCombo, getDate( 2000, 2, 3 ), "10" );
-        valueC = new PatientDataValue( patientB, dataElementA, categoryOptionCombo, getDate( 2000, 2, 7 ), "10" );
-        valueD = new PatientDataValue( patientB, dataElementB, categoryOptionCombo, getDate( 2000, 2, 12 ), "10" );
+        categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
     }
 
     protected static Patient createPatient( char uniqueChar )
@@ -113,9 +109,6 @@ public class PatientDataValueAggregationEngineTest
     @Test
     public void aggregate()
     {
-        patientDataValueStore.saveVoid( valueA );
-        patientDataValueStore.saveVoid( valueB );
-        patientDataValueStore.saveVoid( valueC );
-        patientDataValueStore.saveVoid( valueD );        
+         
     }
 }
