@@ -1,5 +1,3 @@
-package org.hisp.dhis.reportexcel.export.advance.action;
-
 /*
  * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
@@ -27,6 +25,8 @@ package org.hisp.dhis.reportexcel.export.advance.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.reportexcel.export.advance.action;
+
 import java.util.Collection;
 import java.util.Set;
 
@@ -35,21 +35,22 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reportexcel.ReportExcel;
-import org.hisp.dhis.reportexcel.ReportExcelCategory;
+import org.hisp.dhis.reportexcel.PeriodColumn;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
+import org.hisp.dhis.reportexcel.ReportExcelPeriodColumnListing;
 import org.hisp.dhis.reportexcel.export.action.GenerateReportSupport;
 import org.hisp.dhis.reportexcel.utils.ExcelUtils;
+import org.hisp.dhis.system.util.MathUtils;
 
 /**
  * @author Chau Thu Tran
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class GenerateAdvancedReportExcelOrganisationGroupListingAction
+
+public class GenerateAdvancedReportPeriodColumnListingAction
     extends GenerateReportSupport
 {
-
     // ---------------------------------------------------------------------
     // Dependency
     // ---------------------------------------------------------------------
@@ -86,13 +87,13 @@ public class GenerateAdvancedReportExcelOrganisationGroupListingAction
         statementManager.initialise();
 
         OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService
-            .getOrganisationUnitGroup( organisationGroupId );
+            .getOrganisationUnitGroup( organisationGroupId.intValue() );
 
         Period period = periodDatabaseService.getSelectedPeriod();
         this.installPeriod( period );
 
-        ReportExcelCategory reportExcel = (ReportExcelCategory) reportService.getReportExcel( selectionManager
-            .getSelectedReportId() );
+        ReportExcelPeriodColumnListing reportExcel = (ReportExcelPeriodColumnListing) reportService
+            .getReportExcel( selectionManager.getSelectedReportId() );
 
         this.installReadTemplateFile( reportExcel, period, organisationUnitGroup );
 
@@ -102,7 +103,8 @@ public class GenerateAdvancedReportExcelOrganisationGroupListingAction
 
             Collection<ReportExcelItem> reportExcelItems = reportExcel.getReportItemBySheet( sheetNo );
 
-            this.generateOutPutFile( reportExcel, reportExcelItems, organisationUnitGroup.getMembers(), sheet );
+            this.generateOutPutFile( reportExcel.getPeriodColumns(), reportExcelItems, organisationUnitGroup
+                .getMembers(), sheet );
 
         }
 
@@ -113,66 +115,41 @@ public class GenerateAdvancedReportExcelOrganisationGroupListingAction
         return SUCCESS;
     }
 
-    private void generateOutPutFile( ReportExcel reportExcel, Collection<ReportExcelItem> reportExcelItems,
-        Set<OrganisationUnit> organisationUnits, HSSFSheet sheet )
+    private void generateOutPutFile( Collection<PeriodColumn> periodColumns,
+        Collection<ReportExcelItem> reportExcelItems, Set<OrganisationUnit> organisationUnits, HSSFSheet sheet )
     {
         for ( ReportExcelItem reportItem : reportExcelItems )
         {
-            int rowBegin = reportItem.getRow();
-            int chapperNo = 0;
-
-            int beginChapter = rowBegin;
-
-            chapperNo++;
-            rowBegin++;
-            int serial = 1;
-
-            for ( OrganisationUnit o : organisationUnits )
+            int i = 0;
+            for ( PeriodColumn p : periodColumns )
             {
-                if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.ORGANISATION ) )
+                if ( p.getPeriodType().equals( reportItem.getPeriodType() ) )
                 {
-                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), o.getName(), ExcelUtils.TEXT, sheet,
-                        this.csTextChapterLeft );
-                }
-                else if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.SERIAL ) )
-                {
-                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( serial ),
-                        ExcelUtils.NUMBER, sheet, this.csNumber );
-                }
-                else if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.DATAELEMENT ) )
-                {
-                    double value = this.getDataValue( reportItem, o );
+                    double value = 0.0;
 
-                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( value ),
-                        ExcelUtils.NUMBER, sheet, this.csNumber );
-                }
-                else if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.INDICATOR ) )
-                {
-                    double value = this.getIndicatorValue( reportItem, o );
+                    for ( OrganisationUnit organisationUnit : organisationUnits )
+                    {
 
-                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( value ),
-                        ExcelUtils.NUMBER, sheet, this.csNumber );
-                }
-                else if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.FORMULA_EXCEL ) )
-                {
-                    ExcelUtils.writeFormulaByPOI( rowBegin, reportItem.getColumn(), reportItem.getExpression(), sheet,
-                        this.csNumber );
-                }
+                        if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.DATAELEMENT ) )
+                        {
+                            value += MathUtils.calculateExpression( generateExpression( reportItem, p.getStartdate(), p
+                                .getEnddate(), organisationUnit ) );
+                        }
+                        else if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.INDICATOR ) )
+                        {
+                            value += MathUtils.calculateExpression( generateExpression( reportItem, p.getStartdate(), p
+                                .getEnddate(), organisationUnit ) );
+                        }
 
-                rowBegin++;
-                serial++;
+                    }
+
+                    ExcelUtils.writeValueByPOI( reportItem.getRow(), p.getColumn(), String.valueOf( value ),
+                        ExcelUtils.NUMBER, sheet, this.csNumber );
+
+                    i++;
+                }
             }
-
-            if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.DATAELEMENT )
-                && (!organisationUnits.isEmpty()) )
-            {
-                String columnName = ExcelUtils.convertColNumberToColName( reportItem.getColumn() );
-                String formula = "SUM(" + columnName + (beginChapter + 1) + ":" + columnName + (rowBegin - 1) + ")";
-                ExcelUtils.writeFormulaByPOI( beginChapter, reportItem.getColumn(), formula, sheet, this.csNumber );
-            }
-
         }
 
     }
-
 }
