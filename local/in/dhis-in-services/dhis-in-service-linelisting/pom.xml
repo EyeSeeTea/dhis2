@@ -12,20 +12,7 @@
   <artifactId>dhis-in-service-linelisting</artifactId>
   <packaging>jar</packaging>
   <name>DHIS Linelisting</name>
-  
-  <build>
-    <finalName>dhis-in-service-linelisting</finalName>
-	<plugins>
-      <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <configuration>
-          <contextPath>/</contextPath>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  
+    
   <dependencies>
     
     <!-- DHIS -->
@@ -74,19 +61,8 @@
       <artifactId>jxl</artifactId>
     </dependency>
     
-	<!-- Web -->
-    
-    <dependency>
-      <groupId>com.opensymphony</groupId>
-      <artifactId>webwork</artifactId>
-    </dependency>
-    
     <!-- Other -->
     
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring</artifactId>
-    </dependency>
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>

@@ -73,6 +73,7 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-aggregationengine-default</artifactId>
+	  <version>${version}</version>
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
@@ -81,18 +82,21 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-support-system</artifactId>
-    </dependency>	  
-    <dependency>
+    </dependency>
+    	  
+    <!--<dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-support-webwork</artifactId>
-    </dependency>
+	  <version>${version}</version>
+    </dependency>-->
     
       <!-- Web -->
     
-    <dependency>
+    <!--<dependency>
       <groupId>com.opensymphony</groupId>
       <artifactId>webwork</artifactId>
-    </dependency>
+	  <version>${version}</version>
+    </dependency>-->
     
     <!-- Other -->
      

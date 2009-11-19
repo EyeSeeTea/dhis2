@@ -13,9 +13,38 @@ function removeSurvey( surveyId, surveyName )
 
   if ( result )
   {
-    window.location.href = 'delSurvey.action?surveyId=' + surveyId;
+    //window.location.href = 'delSurvey.action?surveyId=' + surveyId;
+    
+    var request = new Request();
+    request.setResponseTypeXML( 'message' );
+    request.setCallbackSuccess( removeSurveyCompleted );
+    
+    var requestString = 'delSurvey.action?surveyId=' + surveyId;
+                      
+    request.send( requestString ); 
   }
 }
+
+
+function removeSurveyCompleted( messageElement )
+{
+  var type = messageElement.getAttribute( 'type' );
+  var message = messageElement.firstChild.nodeValue;
+  
+  if ( type == 'error' )
+  {
+    //document.getElementById( 'message' ).innerHTML = message;
+    //document.getElementById( 'message' ).style.display = 'block';
+    setFieldValue( 'warningField', message );
+        
+    showWarning();
+  }
+  else
+  {
+  	window.location.href = 'index.action';
+  }
+}
+
 
 function validateAddSurvey()
 {
@@ -245,6 +274,7 @@ function surveyRecieved( surveyElement )
   setFieldValue( 'idField', getElementValue( surveyElement, 'id' ) );
   setFieldValue( 'nameField', getElementValue( surveyElement, 'name' ) ); 
   setFieldValue( 'indicatorCountField', getElementValue( surveyElement, 'indicatorCount' ) );
+  setFieldValue( 'descriptionField', getElementValue( surveyElement, 'description' ) );
   var urlOrg = getElementValue( surveyElement, 'url' );
  
   if( urlOrg == null || urlOrg.length <=0 )

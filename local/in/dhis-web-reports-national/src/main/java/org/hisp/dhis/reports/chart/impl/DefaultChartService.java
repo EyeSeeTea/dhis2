@@ -45,8 +45,6 @@ import org.apache.commons.math.stat.regression.SimpleRegression;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
-import org.hisp.dhis.chart.ChartStore;
-import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.comparator.IndicatorNameComparator;
@@ -97,11 +95,12 @@ public class DefaultChartService
         this.dataMartStore = dataMartStore;
     }
 */
-    private ChartStore chartStore;
+   
+    private ChartService chartService;
 
-    public void setChartStore( ChartStore chartStore )
+    public void setChartService( ChartService chartService )
     {
-        this.chartStore = chartStore;
+        this.chartService = chartService;
     }
 
     private AggregationService aggregationService;
@@ -421,31 +420,31 @@ public class DefaultChartService
 
     public int saveChart( Chart chart )
     {
-        return chartStore.saveChart( chart );
+        return chartService.saveChart( chart );
     }
     
     public void saveOrUpdate( Chart chart )
     {
-        chartStore.saveOrUpdate( chart );
+        chartService.saveOrUpdate( chart );
     }
     
     public Chart getChart( int id )
     {
-        return chartStore.getChart( id );
+        return chartService.getChart( id );
     }
     
     public void deleteChart( Chart chart )
     {
-        chartStore.deleteChart( chart );
+        chartService.deleteChart( chart );
     }
     
     public Collection<Chart> getAllCharts()
     {
-        return chartStore.getAllCharts();
+        return chartService.getAllCharts();
     }
     
     public Chart getChartByTitle( String name )
     {
-        return chartStore.getChartByTitle( name );
+        return chartService.getChartByTitle( name );
     }
 }

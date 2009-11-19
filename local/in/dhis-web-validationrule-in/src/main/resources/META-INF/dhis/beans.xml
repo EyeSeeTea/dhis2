@@ -226,9 +226,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
     <bean id="org.hisp.dhis.validationrule.action.ValidationByAverageActionIN"
     class="org.hisp.dhis.validationrule.action.ValidationByAverageActionIN" scope="prototype">
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>    
+    <property name="statementManager" ref="statementManager"/>    
     <property name="validationRuleService">
       <ref bean="org.hisp.dhis.validation.ValidationRuleService"/>
     </property>
@@ -256,9 +254,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.validationrule.action.DetailedValidationAnalysisResultAction" 
       scope="prototype">
     
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>    
+    <property name="statementManager" ref="statementManager"/>   
     <property name="validationRuleService">
       <ref bean="org.hisp.dhis.validation.ValidationRuleService"/>
     </property>
@@ -277,9 +273,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="periodService">
       <ref bean="org.hisp.dhis.period.PeriodService"/>      
     </property>
-		<property name="aggregationService">
-			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
-		</property>             
+	<property name="aggregationService">
+		<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
+	</property>             
   </bean>
       
 <!-- Export to Excel -->

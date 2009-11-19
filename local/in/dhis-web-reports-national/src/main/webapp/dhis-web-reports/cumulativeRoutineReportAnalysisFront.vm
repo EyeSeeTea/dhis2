@@ -111,7 +111,7 @@
                           <input type="hidden" name="ouLevelTB" id="ouLevelTB">
                           <input type="hidden" name="reportModelTB" id="reportModelTB">
                           <input type="hidden" name="reportFileNameTB" id="reportFileNameTB">
-                          <input type="hidden" name="reportListFileNameTB" id="reportListFileNameTB" value="routineReportsList.xml">
+                          <input type="hidden" name="reportListFileNameTB" id="reportListFileNameTB" value="goiReportsList.xml">
                         </td>
                   </tr>
             </table>

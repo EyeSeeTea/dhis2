@@ -35,6 +35,7 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.amplecode.quick.StatementManager;
 import org.apache.velocity.tools.generic.MathTool;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -42,13 +43,12 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -86,11 +86,11 @@ public class GenerateImmChildGradingReportAction extends ActionSupport
         this.statementManager = statementManager;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
     
     private PeriodService periodService;
@@ -1157,7 +1157,7 @@ public class GenerateImmChildGradingReportAction extends ActionSupport
      */
     public PeriodType getDataElementPeriodType( DataElement de )
     {
-        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
         Iterator it = dataSetList.iterator();
         while ( it.hasNext() )
         {

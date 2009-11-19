@@ -32,6 +32,14 @@
    	</head>
 	<body>
 
+#if( "$!ouMapDataStatusResult" == "" || $ouMapDataStatusResult.isEmpty() || $ouMapDataStatusResult.size() == 0 )
+	
+	<div align="center" class="NormalB">Selected OrgUnit and its Children are Not assigned to $selDataSet.name</div>
+
+#else
+
+
+
 		<form id="form1" name="form1" action="exportDataStatusToExcel.action" method="post" onsubmit="return exportDataStatusResultToWorkBook()" target="_newtab">
 			<input type="hidden" name="htmlCode" id="htmlCode" />
 			<div align="right" class="NormalB">
@@ -110,5 +118,7 @@
 			      
 		</div>
 				</form>
+				
+#end				
     </body>
 </html>

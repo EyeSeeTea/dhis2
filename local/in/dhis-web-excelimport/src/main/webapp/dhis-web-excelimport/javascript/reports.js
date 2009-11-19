@@ -1,4 +1,43 @@
 
+
+/*
+function validateExcelImport()
+{
+  var request = new Request();
+  request.setResponseTypeXML( 'message' );
+  request.setCallbackSuccess( excelImportCompleted ); 
+  
+  reportFileNameTB
+  checkerFileNameTB
+  reportModelTB
+  reportList
+  riRadio
+  ouIDTB
+  
+  
+  var requestString = 'excelResultForm.action';
+
+  request.send( requestString );
+
+  return false;
+}
+
+function excelImportCompleted( messageElement )
+{
+  var type = messageElement.getAttribute( 'type' );
+  var message = messageElement.firstChild.nodeValue;
+
+    document.getElementById( 'message' ).innerHTML = message;
+    document.getElementById( 'message' ).style.display = 'block';  	
+  
+}
+
+
+*/
+
+
+
+
 function getOUDetails(orgUnitIds)
 {
 	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds;

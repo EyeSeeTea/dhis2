@@ -42,8 +42,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import jxl.CellType;
 import jxl.Workbook;
 import jxl.format.Alignment;
@@ -52,20 +54,21 @@ import jxl.format.BorderLineStyle;
 import jxl.format.CellFormat;
 import jxl.format.VerticalAlignment;
 import jxl.write.Formula;
-import jxl.write.Label;
 import jxl.write.Number;
+import jxl.write.Label;
 import jxl.write.WritableCell;
 import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-import org.hisp.dhis.jdbc.StatementManager;
+
+import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.indicator.Indicator;
@@ -89,6 +92,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -181,11 +185,11 @@ public class GenerateOrgunitGroupsetReportsResultAction
             this.indicatorService = indicatorService;
         }
         
-        private DataSetStore dataSetStore;
+        private DataSetService dataSetService;
 
-        public void setDataSetStore( DataSetStore dataSetStore )
+        public void setDataSetService( DataSetService dataSetService )
         {
-            this.dataSetStore = dataSetStore;
+            this.dataSetService = dataSetService;
         }
   
         // -------------------------------------------------------------------------------------------------------------------------------------
@@ -199,12 +203,14 @@ public class GenerateOrgunitGroupsetReportsResultAction
             return inputStream;
         }
 
+        /*
         private String contentType;
 
         public String getContentType()
         {
             return contentType;
         }
+        */
 
         private String fileName;
 
@@ -213,12 +219,14 @@ public class GenerateOrgunitGroupsetReportsResultAction
             return fileName;
         }
 
+        /*
         private int bufferSize;
 
         public int getBufferSize()
         {
             return bufferSize;
         }
+        */
 
         /*
         private MathTool mathTool;
@@ -1133,7 +1141,7 @@ public class GenerateOrgunitGroupsetReportsResultAction
            
         public PeriodType getDataElementPeriodType( DataElement de )
         {
-            List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+            List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
             Iterator<DataSet> it = dataSetList.iterator();
             while ( it.hasNext() )
             {

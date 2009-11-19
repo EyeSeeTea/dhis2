@@ -6,9 +6,8 @@ target
 ./taret
 ./target
 ./target/classes
-./target/classes
 target/**
 *.settings
 .metadata
 build.sh
-target
+.springBeans

@@ -34,6 +34,7 @@ import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.Operand;
 import org.hisp.dhis.datavalue.DataValue;
@@ -55,6 +56,28 @@ public interface DataMartStore
     // ----------------------------------------------------------------------
     // AggregatedDataValue
     // ----------------------------------------------------------------------
+    
+    /**
+     * Gets the total aggregated value from the datamart table for the given parameters.
+     * 
+     * @param dataElement The DataElement.
+     * @param period The Period.
+     * @param organisationUnit The OrganisationUnit.
+     * @return the aggregated value.
+     */
+    Double getTotalAggregatedValue( DataElement dataElement, Period period, OrganisationUnit organisationUnit );
+
+    /**
+     * Gets the total aggregated value from the datamart table for the given parameters.
+     * 
+     * @param dataElement The DataElement.
+     * @param categoryOption the DataElementCategoryOption.
+     * @param period The Period.
+     * @param organisationUnit The OrganisationUnit.
+     * @return the aggregated value.
+     */
+    Double getTotalAggregatedValue( final DataElement dataElement, 
+        final DataElementCategoryOption categoryOption, final Period period, final OrganisationUnit organisationUnit );
     
     /**
      * Gets the aggregated value from the datamart table for the given parameters.

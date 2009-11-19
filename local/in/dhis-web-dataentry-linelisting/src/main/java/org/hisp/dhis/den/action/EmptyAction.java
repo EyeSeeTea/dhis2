@@ -33,6 +33,7 @@ import com.opensymphony.xwork2.Action;
  * @author Torgeir Lorange Ostby
  * @version $Id: EmptyAction.java 2974 2007-03-03 22:11:13Z torgeilo $
  */
+
 public class EmptyAction
     implements Action
 {

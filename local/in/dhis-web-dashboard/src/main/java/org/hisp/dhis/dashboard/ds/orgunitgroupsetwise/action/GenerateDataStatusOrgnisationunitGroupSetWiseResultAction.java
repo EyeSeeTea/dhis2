@@ -26,11 +26,9 @@
  */
 package org.hisp.dhis.dashboard.ds.orgunitgroupsetwise.action;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,21 +36,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hisp.dhis.dashboard.util.DBConnection;
 import org.hisp.dhis.dashboard.util.DashBoardService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
-import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.source.Source;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.opensymphony.xwork2.Action;
 
@@ -67,6 +67,14 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
     // ---------------------------------------------------------------
     // Dependencies
     // ---------------------------------------------------------------
+
+    private JdbcTemplate jdbcTemplate;
+
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -86,23 +94,23 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
 
-    public DataSetStore getDataSetStore()
+    public DataSetService getDataSetService()
     {
-        return dataSetStore;
+        return dataSetService;
     }
 
     private DashBoardService dashBoardService;
@@ -112,24 +120,27 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
         this.dashBoardService = dashBoardService;
     }
 
-    private DBConnection dbConnection;
+    private DisplayPropertyHandler displayPropertyHandler;
 
-    public void setDbConnection( DBConnection dbConnection )
+    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
     {
-        this.dbConnection = dbConnection;
+        this.displayPropertyHandler = displayPropertyHandler;
     }
 
-    private DataValueService dataValueService;
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
+    /*
+     * private DBConnection dbConnection;
+     * 
+     * public void setDbConnection( DBConnection dbConnection ) {
+     * this.dbConnection = dbConnection; }
+     * 
+     * private DataValueService dataValueService;
+     * 
+     * public void setDataValueService( DataValueService dataValueService ) {
+     * this.dataValueService = dataValueService; }
+     */
     // ---------------------------------------------------------------
     // Output Parameters
     // ---------------------------------------------------------------
-
     private Map<OrganisationUnitGroup, Map<Integer, Integer>> ougMapDataStatusResult;
 
     public Map<OrganisationUnitGroup, Map<Integer, Integer>> getOugMapDataStatusResult()
@@ -205,11 +216,13 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
     }
 
     private List<String> periodNameList;
-    
-    public List<String> getPeriodNameList() 
+
+    public List<String> getPeriodNameList()
     {
         return periodNameList;
     }
+    
+    private List<OrganisationUnit> orgUnitList1;
 
     // ---------------------------------------------------------------
     // Input Parameters
@@ -245,7 +258,21 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
     {
         return eDateLB;
     }
+    
+    private String ouNameTB;
+    
+    public void setOuNameTB( String ouNameTB )
+    {
+        this.ouNameTB = ouNameTB;
+    }
+    
+    private int ouIDTB;
 
+    public void setOuIDTB( int ouIDTB )
+    {
+        this.ouIDTB = ouIDTB;
+    }
+    
     private List<String> orgUnitListCB;
 
     public void setOrgUnitListCB( List<String> orgUnitListCB )
@@ -293,7 +320,21 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
         return selectedOrgUnitGroup;
     }
 
-    private Connection con = null;
+    private String includeZeros;
+
+    public void setIncludeZeros( String includeZeros )
+    {
+        this.includeZeros = includeZeros;
+    }
+    
+    private List<OrganisationUnit> orgUnits;
+    
+    public List<OrganisationUnit> getOrgUnits()
+    {
+        return orgUnits;
+    }
+
+    // private Connection con = null;
 
     String orgUnitInfo;
 
@@ -312,10 +353,10 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
         throws Exception
     {
 
-        con = dbConnection.openConnection();
-        con.setAutoCommit( false );
-        PreparedStatement ps1 = null;
-        ResultSet rs1 = null;
+        // con = dbConnection.openConnection();
+        // con.setAutoCommit( false );
+        // PreparedStatement ps1 = null;
+        // ResultSet rs1 = null;
         String query = "";
 
         orgUnitCount = 0;
@@ -333,16 +374,16 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
         dataSetList = new ArrayList<DataSet>();
 
         deInfo = "-1";
-        DataSet dSet = dataSetStore.getDataSet( Integer.parseInt( selectedDataSets ) );
+        DataSet dSet = dataSetService.getDataSet( Integer.parseInt( selectedDataSets ) );
         selDataSet = dSet;
         for ( DataElement de : dSet.getDataElements() )
             deInfo += "," + de.getId();
 
         // Period Related Info
-        Period startPeriod = periodStore.getPeriod( sDateLB );
-        Period endPeriod = periodStore.getPeriod( eDateLB );
+        Period startPeriod = periodService.getPeriod( sDateLB );
+        Period endPeriod = periodService.getPeriod( eDateLB );
 
-        selectedPeriodList = new ArrayList<Period>( periodStore.getIntersectingPeriods( startPeriod.getStartDate(),
+        selectedPeriodList = new ArrayList<Period>( periodService.getIntersectingPeriods( startPeriod.getStartDate(),
             endPeriod.getEndDate() ) );
 
         periodInfo = "-1";
@@ -366,7 +407,7 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
 
         dataSetPeriodType = selDataSet.getPeriodType();
 
-        periodList = periodStore.getIntersectingPeriodsByPeriodType( dataSetPeriodType, startPeriod.getStartDate(),
+        periodList = periodService.getIntersectingPeriodsByPeriodType( dataSetPeriodType, startPeriod.getStartDate(),
             endPeriod.getEndDate() );
 
         // Dataset source
@@ -386,6 +427,10 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
         }
 
         System.out.println( "orgUnitGroupList:" + orgUnitGroupList );
+        
+        //OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( ouIDTB );
+        
+        orgUnitList1 = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitWithChildren( ouIDTB )  );
 
         // --------------------------------------------------------------------------------
         selectedOrgUnitGroup = new OrganisationUnitGroup();
@@ -399,7 +444,13 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
             // OrgUnit Related Info
 
             orgUnitList = new ArrayList<OrganisationUnit>();
-            List<OrganisationUnit> orgUnits = new ArrayList<OrganisationUnit>( selectedOrgUnitGroup.getMembers() );
+            orgUnits = new ArrayList<OrganisationUnit>( selectedOrgUnitGroup.getMembers() );
+            
+            orgUnits.retainAll( orgUnitList1 );
+           
+            Collections.sort( orgUnits, new OrganisationUnitNameComparator() );
+
+            displayPropertyHandler.handle( orgUnits );
 
             Iterator<OrganisationUnit> orgUnitsIterator = orgUnits.iterator();
             while ( orgUnitsIterator.hasNext() )
@@ -434,6 +485,8 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
             System.out.println( "After :" + orgUnitList.size() );
 
             Iterator orgUnitListIterator = orgUnitList.iterator();
+            
+            
             OrganisationUnit o;
             Set<Source> dso = new HashSet<Source>();
             Iterator periodIterator = null;
@@ -479,16 +532,34 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
                         orgUnitCount = 0;
                         getOrgUnitInfo( o, dso );
 
-                        query = "SELECT COUNT(*) FROM datavalue WHERE dataelementid IN (" + deInfo
-                            + ") AND sourceid IN (" + orgUnitInfo + ") AND periodid IN (" + periodInfo + ")";
-                        ps1 = con.prepareStatement( query );
-                        rs1 = ps1.executeQuery();
+                        /*
+                         * query = "SELECT COUNT(*) FROM datavalue WHERE
+                         * dataelementid IN (" + deInfo + ") AND sourceid IN (" +
+                         * orgUnitInfo + ") AND periodid IN (" + periodInfo +
+                         * ")";
+                         */
 
-                        if ( rs1.next() )
+                        if ( includeZeros == null )
+                        {
+                            query = "SELECT COUNT(*) FROM datavalue WHERE dataelementid IN (" + deInfo
+                                + ") AND sourceid IN (" + orgUnitInfo + ") AND periodid IN (" + periodInfo
+                                + ") and value <> 0";
+                        }
+                        else
+                        {
+                            query = "SELECT COUNT(*) FROM datavalue WHERE dataelementid IN (" + deInfo
+                                + ") AND sourceid IN (" + orgUnitInfo + ") AND periodid IN (" + periodInfo + ")";
+                        }
+
+                        // ps1 = con.prepareStatement( query );
+                        // rs1 = ps1.executeQuery();
+                        SqlRowSet sqlResultSet = jdbcTemplate.queryForRowSet( query );
+
+                        if ( sqlResultSet.next() )
                         {
                             try
                             {
-                                dataStatusPercentatge = ((double) rs1.getInt( 1 ) / (double) (dataSetMemberCount1 * orgUnitCount)) * 100.0;
+                                dataStatusPercentatge = ((double) sqlResultSet.getInt( 1 ) / (double) (dataSetMemberCount1 * orgUnitCount)) * 100.0;
                             }
                             catch ( Exception e )
                             {
@@ -512,16 +583,34 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
                     }
 
                     orgUnitInfo = "" + o.getId();
-                    query = "SELECT COUNT(*) FROM datavalue WHERE dataelementid IN (" + deInfo + ") AND sourceid IN ("
-                        + orgUnitInfo + ") AND periodid IN (" + periodInfo + ")";
-                    ps1 = con.prepareStatement( query );
-                    rs1 = ps1.executeQuery();
 
-                    if ( rs1.next() )
+                    /*
+                     * query = "SELECT COUNT(*) FROM datavalue WHERE
+                     * dataelementid IN (" + deInfo + ") AND sourceid IN (" +
+                     * orgUnitInfo + ") AND periodid IN (" + periodInfo + ")";
+                     */
+
+                    if ( includeZeros == null )
+                    {
+                        query = "SELECT COUNT(*) FROM datavalue WHERE dataelementid IN (" + deInfo
+                            + ") AND sourceid IN (" + orgUnitInfo + ") AND periodid IN (" + periodInfo
+                            + ") and value <> 0";
+                    }
+                    else
+                    {
+                        query = "SELECT COUNT(*) FROM datavalue WHERE dataelementid IN (" + deInfo
+                            + ") AND sourceid IN (" + orgUnitInfo + ") AND periodid IN (" + periodInfo + ")";
+                    }
+
+                    // ps1 = con.prepareStatement( query );
+                    // rs1 = ps1.executeQuery();
+                    SqlRowSet sqlResultSet = jdbcTemplate.queryForRowSet( query );
+
+                    if ( sqlResultSet.next() )
                     {
                         try
                         {
-                            dataStatusPercentatge = ((double) rs1.getInt( 1 ) / (double) dataSetMemberCount1) * 100.0;
+                            dataStatusPercentatge = ((double) sqlResultSet.getInt( 1 ) / (double) dataSetMemberCount1) * 100.0;
                         }
                         catch ( Exception e )
                         {
@@ -544,6 +633,7 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
                     pcount++;
                 }// Period loop end
                 ouMapDataStatusResult.put( o, dsResults );
+                System.out.println("The OrgUnit is :" + o.getName() );
             }// Orgunit loop end
 
             for ( int i = 0; i < periodList.size(); i++ )
@@ -589,15 +679,15 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
         {
             try
             {
-                con.setAutoCommit( true );
+                // con.setAutoCommit( true );
 
-                if ( rs1 != null )
-                    rs1.close();
-                if ( ps1 != null )
-                    ps1.close();
+                // if ( rs1 != null )
+                // rs1.close();
+                // if ( ps1 != null )
+                // ps1.close();
 
-                if ( con != null )
-                    con.close();
+                // if ( con != null )
+                // con.close();
                 // dashBoardService.deleteDataTable( dataTableName );
             }
             catch ( Exception e )
@@ -698,4 +788,5 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseResultAction
     {
         return periodList;
     }
+  
 }

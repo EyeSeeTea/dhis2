@@ -60,7 +60,8 @@ function getmsg()
     if(detarget.selectedIndex >=0) detarget.options[detarget.selectedIndex].selected = false ;
     if ( deID != null )
     {
-        var url = "getmessage.action?id=" + deID ;
+        var url = "getmessage.action?id=" + deID;
+        
         var request = new Request();
         request.setResponseTypeXML('dataElement');
         request.setCallbackSuccess( getMsgReceived );

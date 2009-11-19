@@ -28,26 +28,28 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 
+import org.amplecode.quick.StatementManager;
 import org.apache.velocity.tools.generic.MathTool;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.excelimport.util.ReportService;
-import org.hisp.dhis.hibernate.HibernateSessionManager;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.user.CurrentUserService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -55,10 +57,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Action;
 
 public class ExcelImportResultAction
-    extends ActionSupport
+    implements Action
 {
     private static final String NULL_REPLACEMENT = "0";
 
@@ -74,11 +76,11 @@ public class ExcelImportResultAction
         this.statementManager = statementManager;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
 
     private ReportService reportService;
@@ -129,11 +131,18 @@ public class ExcelImportResultAction
         this.dataElementCategoryOptionComboService = dataElementCategoryOptionComboService;
     }
 
-    private HibernateSessionManager sessionManager;
+    private CurrentUserService currentUserService;
 
-    public void setSessionManager( HibernateSessionManager sessionManager )
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        this.sessionManager = sessionManager;
+        this.currentUserService = currentUserService;
+    }
+
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory( SessionFactory sessionFactory )
+    {
+        this.sessionFactory = sessionFactory;
     }
 
     private I18nFormat format;
@@ -143,9 +152,28 @@ public class ExcelImportResultAction
         this.format = format;
     }
 
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     // -------------------------------------------------------------------------
-    // Properties
+    // Input/Output
     // -------------------------------------------------------------------------
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setMessage( String message )
+    {
+        this.message = message;
+    }
+
     private PeriodStore periodStore;
 
     public void setPeriodStore( PeriodStore periodStore )
@@ -205,6 +233,13 @@ public class ExcelImportResultAction
     public Period getSelectedPeriod()
     {
         return selectedPeriod;
+    }
+
+    private String storedBy;
+
+    public String getStoredBy()
+    {
+        return storedBy;
     }
 
     private List<String> dataValueList;
@@ -425,13 +460,48 @@ public class ExcelImportResultAction
         return excelValidator;
     }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
+    private String checkerSheetNumber;
+
+    public String getCheckerSheetNumber()
+    {
+        return checkerSheetNumber;
+    }
+
+    private String rowStart;
+
+    public String getRowStart()
+    {
+        return rowStart;
+    }
+
+    private String rowEnd;
+
+    public String getRowEnd()
+    {
+        return rowEnd;
+    }
+
+    private String columnStart;
+
+    public String getColumnStart()
+    {
+        return columnStart;
+    }
+
+    private String columnEnd;
+
+    public String getColumnEnd()
+    {
+        return columnEnd;
+    }
 
     public String execute()
         throws Exception
     {
+
+        // -------------------------------------------------------------------------
+        // Action implementation
+        // -------------------------------------------------------------------------
 
         statementManager.initialise();
         // Initialization
@@ -458,38 +528,62 @@ public class ExcelImportResultAction
         sheetList = new ArrayList<Integer>();
         rowList = new ArrayList<Integer>();
         colList = new ArrayList<Integer>();
-        
+
+        checkerSheetNumber = "";
+        rowStart = "";
+        rowEnd = "";
+        columnStart = "";
+        columnEnd = "";
+
         String excelImportFolderName = "excelimport";
 
         inputStream = new BufferedInputStream( new FileInputStream( file ) );
 
-        String excelTemplatePath = System.getenv( "DHIS2_HOME" ) + File.separator + raFolderName + File.separator
-            + "template" + File.separator + reportFileNameTB;
+        // path = newpath + File.separator + raFolderName + File.separator +
+        // excelImportFolderName
+        // + File.separator + fileName;
 
-        String excelFilePath = System.getenv( "DHIS2_HOME" ) + File.separator + excelImportFolderName + File.separator
-        + "pending" + File.separator + fileName;
+        String excelTemplatePath = System.getenv( "DHIS2_HOME" ) + File.separator + raFolderName + File.separator
+            + excelImportFolderName + File.separator + "template" + File.separator + reportFileNameTB;
+
+        System.out.println( excelTemplatePath );
+
+        String excelFilePath = System.getenv( "DHIS2_HOME" ) + File.separator + raFolderName + File.separator
+            + excelImportFolderName + File.separator + "pending" + File.separator + fileName;
 
         file.renameTo( new File( excelFilePath ) );
-        
-        //if ( file.renameTo( new File( excelFilePath ) ) )
-        //{
-        //    System.out.println( "FILE PATH : \t" + file.getAbsolutePath() + "\t name " + file.getName() );
-        //}
 
-        moveFile (file, new File (excelFilePath));
-        
+        // if ( file.renameTo( new File( excelFilePath ) ) )
+        // {
+        // System.out.println( "FILE PATH : \t" + file.getAbsolutePath() + "\t
+        // name " + file.getName() );
+        // }
+
+        moveFile( file, new File( excelFilePath ) );
+
         WorkbookSettings ws = new WorkbookSettings();
         ws.setLocale( new Locale( "en", "EN" ) );
 
-        Workbook excelImportFile = Workbook.getWorkbook( file );
+        String fileType = fileName.substring(fileName.indexOf( '.' )+1, fileName.length());
         
-        Workbook excelTemplateFile = Workbook.getWorkbook( new File (excelTemplatePath) );
+        if (!fileType.equalsIgnoreCase( "xls" ))
+        {
+            message = "The file you are trying to import is not an excel file";
+            
+            return SUCCESS;
+        }
+        
+        Workbook excelImportFile = Workbook.getWorkbook( file );
 
-        excelValidator = validateReport( deCodesCheckerXMLFileName, excelImportFile, excelTemplateFile);
+        Workbook excelTemplateFile = Workbook.getWorkbook( new File( excelTemplatePath ) );
+
+        excelValidator = validateReport( deCodesImportXMLFileName, excelImportFile, excelTemplateFile );
 
         if ( excelValidator == false )
         {
-            return NOT_VALID;
+            message = "The file you are trying to import is not the correct format";
+
+            return SUCCESS;
         }
 
         if ( reportModelTB.equalsIgnoreCase( "STATIC" ) )
@@ -545,6 +639,8 @@ public class ExcelImportResultAction
 
                 DataElement currentDataElement = new DataElement();
 
+                storedBy = currentUserService.getCurrentUsername();
+
                 DataElementCategoryOptionCombo currentOptionCombo = new DataElementCategoryOptionCombo();
 
                 String value = "";
@@ -566,6 +662,7 @@ public class ExcelImportResultAction
                 dataValue.setSource( currentOrgUnit );
                 dataValue.setOptionCombo( currentOptionCombo );
                 dataValue.setTimestamp( new Date() );
+                dataValue.setStoredBy( storedBy );
 
                 Sheet sheet = excelImportFile.getSheet( sheetNo );
 
@@ -591,10 +688,7 @@ public class ExcelImportResultAction
                 {
                     try
                     {
-                        DataValue dValue = new DataValue( currentDataElement, selectedPeriod, currentOrgUnit, value,
-                            null, new Date(), null, currentOptionCombo );
-
-                        dataValueService.addDataValue( dValue );
+                        dataValueService.addDataValue( dataValue );
                     }
 
                     catch ( Exception ex )
@@ -607,14 +701,14 @@ public class ExcelImportResultAction
                 else if ( oldValue != null && (!riRadio.equalsIgnoreCase( "reject" )) )
                 {
 
-                    dataValueService.deleteDataValue( dataValue );
-
                     try
                     {
-                        DataValue dValue = new DataValue( currentDataElement, selectedPeriod, currentOrgUnit, value,
-                            null, new Date(), null, currentOptionCombo );
 
-                        dataValueService.addDataValue( dValue );
+                        oldValue.setValue( value );
+                        oldValue.setTimestamp( new Date() );
+                        oldValue.setStoredBy( storedBy );
+
+                        dataValueService.updateDataValue( oldValue );
                     }
 
                     catch ( Exception ex )
@@ -629,7 +723,6 @@ public class ExcelImportResultAction
                 {
                     count1++;
 
-                    System.out.println( "Not entering data because it is reject" );
                     continue;
                 }
 
@@ -643,6 +736,8 @@ public class ExcelImportResultAction
         excelImportFile.close();
 
         statementManager.destroy();
+
+        message = "The report has been imported successfully";
 
         return SUCCESS;
     }
@@ -818,14 +913,23 @@ public class ExcelImportResultAction
         rowList.clear();
         colList.clear();
 
-        String path = System.getProperty( "user.home" ) + File.separator + "dhis" + File.separator + excelImportFolderName
-            + File.separator + fileName;
+        // String excelTemplatePath = System.getenv( "DHIS2_HOME" ) +
+        // File.separator + raFolderName + File.separator
+        // + excelImportFolderName + File.separator + reportFileNameTB;
+
+        // String excelFilePath = System.getenv( "DHIS2_HOME" ) + File.separator
+        // + raFolderName + excelImportFolderName
+        // + File.separator + "pending" + File.separator + fileName;
+
+        String path = System.getProperty( "user.home" ) + File.separator + "dhis" + File.separator + raFolderName
+            + File.separator + excelImportFolderName + File.separator + fileName;
         try
         {
             String newpath = System.getenv( "DHIS2_HOME" );
             if ( newpath != null )
             {
-                path = newpath + File.separator + excelImportFolderName + File.separator + fileName;
+                path = newpath + File.separator + raFolderName + File.separator + excelImportFolderName
+                    + File.separator + fileName;
             }
         }
 
@@ -880,13 +984,82 @@ public class ExcelImportResultAction
         return deCodes;
     }// getDECodes end
 
+    public List<String> getCheckerDECodes( String fileName )
+    {
+
+        String excelImportFolderName = "excelimport";
+
+        List<String> rangeList = new ArrayList<String>();
+
+        String path = System.getProperty( "user.home" ) + File.separator + "dhis" + File.separator + raFolderName
+            + File.separator + excelImportFolderName + File.separator + fileName;
+        try
+        {
+            String newpath = System.getenv( "DHIS2_HOME" );
+            if ( newpath != null )
+            {
+                path = newpath + File.separator + raFolderName + File.separator + excelImportFolderName
+                    + File.separator + fileName;
+            }
+        }
+
+        catch ( NullPointerException npe )
+        {
+            // do nothing, but we might be using this somewhere without
+            // USER_HOME set, which will throw a NPE
+        }
+
+        try
+        {
+            DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse( new File( path ) );
+            if ( doc == null )
+            {
+                // System.out.println( "There is no DECodes related XML file in
+                // the user home" );
+                return null;
+            }
+
+            NodeList listOfDRanges = doc.getElementsByTagName( "range-info" );
+            int ranges = listOfDRanges.getLength();
+
+            for ( int s = 0; s < ranges; s++ )
+            {
+                Element deCodeElement = (Element) listOfDRanges.item( s );
+                NodeList textDECodeList = deCodeElement.getChildNodes();
+                checkerSheetNumber = (((Node) textDECodeList.item( 0 )).getNodeValue().trim());
+                rowStart = deCodeElement.getAttribute( "rowStart" );
+                rowEnd = deCodeElement.getAttribute( "rowEnd" );
+                columnStart = deCodeElement.getAttribute( "columnStart" );
+                columnEnd = deCodeElement.getAttribute( "columnEnd" );
+
+            }// end of for loop with s var
+        }// try block end
+        catch ( SAXParseException err )
+        {
+            System.out.println( "** Parsing error" + ", line " + err.getLineNumber() + ", uri " + err.getSystemId() );
+            System.out.println( " " + err.getMessage() );
+        }
+        catch ( SAXException e )
+        {
+            Exception x = e.getException();
+            ((x == null) ? e : x).printStackTrace();
+        }
+        catch ( Throwable t )
+        {
+            t.printStackTrace();
+        }
+        return rangeList;
+    }// getCheckerDECodes end
+
     /*
      * Returns the PeriodType Object for selected DataElement, If no PeriodType
      * is found then by default returns Monthly Period type
      */
     public PeriodType getDataElementPeriodType( DataElement de )
     {
-        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
         Iterator it = dataSetList.iterator();
         while ( it.hasNext() )
         {
@@ -902,52 +1075,60 @@ public class ExcelImportResultAction
 
     } // getDataElementPeriodType end
 
-    public boolean validateReport( String xmlCheckerFileName, Workbook excelImportFile, Workbook excelTemplateFile )
+    public boolean validateReport( String deCodesImportXMLFileName, Workbook excelImportFile, Workbook excelTemplateFile )
     {
 
         boolean validator = true;
 
         List<String> checkerDeCodes = new ArrayList<String>();
 
-        checkerDeCodes = getDECodes( xmlCheckerFileName );
+        checkerDeCodes = getCheckerDECodes( deCodesImportXMLFileName );
 
-        Iterator checkerIterator = checkerDeCodes.iterator();
+        int sheetNumber = Integer.valueOf( checkerSheetNumber );
+        int firstRow = Integer.valueOf( rowStart );
+        int lastRow = Integer.valueOf( rowEnd );
+        int firstColumn = Integer.valueOf( columnStart );
+        int lastColumn = Integer.valueOf( columnEnd );
 
-        int count1 = 0;
-        int count = 0;
-
-        while ( checkerIterator.hasNext() && validator == true )
+        if ( excelImportFile.getSheet( sheetNumber ).getRows() == excelTemplateFile
+            .getSheet( sheetNumber ).getRows() )
         {
 
-            String xmlText = (String) checkerIterator.next();
-
-            int checkerRowNo = rowList.get( count1 );
-            int checkerColNo = colList.get( count1 );
-            int checkerSheetNo = sheetList.get( count1 );
-
-            Sheet sheet = excelImportFile.getSheet( checkerSheetNo );
-
-            String cellContent = sheet.getCell( checkerColNo, checkerRowNo ).getContents();
-            
-            String templateContent =  sheet.getCell( checkerColNo, checkerRowNo ).getContents();
-
-            if ( xmlText.equalsIgnoreCase( cellContent ) && cellContent.equalsIgnoreCase( templateContent ) )
+            for ( int c = firstColumn; c <= lastColumn; c++ )
             {
-                count1++;
-                continue;
-            }
-            
-            else
-            {
-                validator = false;
-                break;
+                for ( int r = firstRow; r <= lastRow; r++ )
+                {
 
-            }
+                    Sheet importFileSheet = excelImportFile.getSheet( sheetNumber );
+                    Sheet templateFileSheet = excelTemplateFile.getSheet( sheetNumber );
 
+                    String cellContent = importFileSheet.getCell( c, r ).getContents();
+
+                    String templateContent = importFileSheet.getCell( c, r ).getContents();
+
+                    if ( templateContent.equalsIgnoreCase( cellContent )
+                        && cellContent.equalsIgnoreCase( templateContent ) )
+                    {
+                        continue;
+                    }
+
+                    else
+                    {
+                        validator = false;
+                        break;
+
+                    }
+                }
+            }
+        }
+        
+        else
+        {
+            validator = false;
         }
 
-        System.out.println("Getting out with validator : \t" + validator);
-        
+        System.out.println( "Getting out with validator : \t" + validator );
+
         return validator;
     }// validateReport end
 
@@ -1013,7 +1194,7 @@ public class ExcelImportResultAction
 
     private final Period reloadPeriod( Period period )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         if ( session.contains( period ) )
         {

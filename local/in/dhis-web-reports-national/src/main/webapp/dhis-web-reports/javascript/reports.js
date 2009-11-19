@@ -11,6 +11,17 @@ function getOUDetails(orgUnitIds)
 	getReports();
 }
 
+function getOUDetailsForOuWiseProgressReport(orgUnitIds)
+{
+	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds;
+
+	var request = new Request();
+	request.setResponseTypeXML( 'orgunit' );
+	request.setCallbackSuccess( getOUDetailsRecevied );
+	request.send( url );
+
+}
+
 function getOUDetailsRecevied(xmlObject)
 {
 		

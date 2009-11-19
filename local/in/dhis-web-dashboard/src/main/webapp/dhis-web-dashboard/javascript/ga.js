@@ -86,18 +86,20 @@ function riradioSelection(evt)
 	    document.ChartGenerationForm.dataElementGroupId.disabled = false;
 	    document.ChartGenerationForm.availableDataElements.disabled = false;
 	    document.ChartGenerationForm.selectedDataElements.disabled = false;
+            document.ChartGenerationForm.deSelection.disabled = false;
 	    
 	    document.ChartGenerationForm.aggDataCB.disabled = false;
   	}// if block end
 	else
 	{
-		document.ChartGenerationForm.indicatorGroupId.disabled = false;
+            document.ChartGenerationForm.indicatorGroupId.disabled = false;
 	    document.ChartGenerationForm.availableIndicators.disabled = false;
 	    document.ChartGenerationForm.selectedIndicators.disabled = false;
 	    
 	    document.ChartGenerationForm.dataElementGroupId.disabled = true;
 	    document.ChartGenerationForm.availableDataElements.disabled = true;
 	    document.ChartGenerationForm.selectedDataElements.disabled = true;
+            document.ChartGenerationForm.deSelection.disabled = true;
 	    
 	    document.ChartGenerationForm.aggDataCB.checked = true;
 	    document.ChartGenerationForm.aggDataCB.disabled = true;

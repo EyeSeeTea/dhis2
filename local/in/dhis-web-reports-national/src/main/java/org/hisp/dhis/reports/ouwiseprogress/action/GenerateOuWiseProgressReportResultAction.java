@@ -5,7 +5,6 @@
 
 package org.hisp.dhis.reports.ouwiseprogress.action;
 
-import com.opensymphony.xwork2.ActionSupport;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +35,7 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.amplecode.quick.StatementManager;
 import org.apache.velocity.tools.generic.MathTool;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -43,14 +43,11 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitShortNameComparator;
 import org.hisp.dhis.period.Period;
@@ -65,6 +62,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import com.opensymphony.xwork2.ActionSupport;
 /**
  *
  * @author Administrator
@@ -84,18 +83,11 @@ public class GenerateOuWiseProgressReportResultAction extends ActionSupport{
         this.statementManager = statementManager;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
-    }
-
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
+        this.dataSetService = dataSetService;
     }
 
     private ReportService reportService;
@@ -138,13 +130,6 @@ public class GenerateOuWiseProgressReportResultAction extends ActionSupport{
         this.aggregationService = aggregationService;
     }
 
-    private IndicatorService indicatorService;
-
-    public void setIndicatorService( IndicatorService indicatorService )
-    {
-        this.indicatorService = indicatorService;
-    }
-
     private DataValueService dataValueService;
 
     public void setDataValueService( DataValueService dataValueService )
@@ -184,12 +169,14 @@ public class GenerateOuWiseProgressReportResultAction extends ActionSupport{
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -198,12 +185,14 @@ public class GenerateOuWiseProgressReportResultAction extends ActionSupport{
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
 
     private MathTool mathTool;
 
@@ -466,14 +455,14 @@ public class GenerateOuWiseProgressReportResultAction extends ActionSupport{
             orgUnitList.add( selectedOrgUnit );
 
         }
-        System.out.println(orgUnitList.size());
+        //System.out.println(orgUnitList.size());
 
         // Period Info
         sDate = format.parseDate( startDate );
         eDate = format.parseDate( endDate );
         
 
-        System.out.println(sDate.getTime() + " "+ eDate.getTime());
+        //System.out.println(sDate.getTime() + " "+ eDate.getTime());
         List<String> deCodesList = getDECodes( deCodesXMLFileName );
 
         Iterator it = orgUnitList.iterator();
@@ -713,7 +702,7 @@ public class GenerateOuWiseProgressReportResultAction extends ActionSupport{
      */
     public PeriodType getDataElementPeriodType( DataElement de )
     {
-        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
         Iterator it = dataSetList.iterator();
         while ( it.hasNext() )
         {

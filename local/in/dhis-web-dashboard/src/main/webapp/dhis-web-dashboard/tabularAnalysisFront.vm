@@ -9,7 +9,7 @@
 	var yearlyPeriodTypeName = '$yearlyPeriodTypeName';
 	
 	var maxOrgUnitLevels = $maxOrgUnitLevels;
-	var selOrgUnitId;
+	var selOrgUnitId="NONE";
 	
 	var monthNames = new Array("Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar");
 	var quarterNames = new Array("Q1","Q2","Q3","Q4");

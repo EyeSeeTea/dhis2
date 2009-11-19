@@ -16,6 +16,12 @@
         </script>   
     </head>
     <body>
+    
+    #if( "$!ouMapDataStatusResult" == "" || $ouMapDataStatusResult.isEmpty() || $ouMapDataStatusResult.size() == 0 )
+	
+		<div align="center" class="NormalB">Selected OrgUnit and its Children are Not assigned to $selDataSet.name</div>
+
+	#else
 
      <form id="form1" name="form1" action="exportDataStatusToExcel.action" method="post" onsubmit="return exportDataStatusResultToWorkBook()" target="_newtab">
             <input type="hidden" name="htmlCode" id="htmlCode" />
@@ -80,11 +86,18 @@
                 #end
             #end
         </tr>
-        #foreach($chiildorgUnit in $selectedOrgUnitGroup.getMembers())           
+        
+        
+      #foreach($chiildorgUnit in $selectedOrgUnitGroup.getMembers() )
+      #set($dsresultList = "")
+      	#set($dsresultList = $ouMapDataStatusResult.get($chiildorgUnit))
+      	#if("$!dsresultList" == "")
+      	
+      	#else           
             <tr class="TableHeadingCellStyles">
                 <td>&nbsp;</td>
                 <td><a href="#" >$chiildorgUnit.name</a></td>
-                #set($dsresultList = $ouMapDataStatusResult.get($chiildorgUnit))
+                
                 #foreach($result in $dsresultList)
                     #if($result < 0)
     				    <td  bgcolor="white">&nbsp;</td>
@@ -97,12 +110,14 @@
                     #else
                         <td align="center" bgcolor="#905090"><font color="#ffffff">$result</font></td>
                     #end
-                #end
+                #end 
             </tr>
+		#end
 		#end
      </table>                 
     #end
          </div>
       </form>
+   #end
    </body>
 </html>

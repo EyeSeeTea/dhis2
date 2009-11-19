@@ -26,19 +26,26 @@
  */
 package org.hisp.dhis.dashboard.ds.orgunitgroupsetwise.action;
 
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.period.Period;
+
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -46,26 +53,35 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 
-public class GenerateDataStatusOrgnisationunitGroupSetWiseFormAction implements Action 
+public class GenerateDataStatusOrgnisationunitGroupSetWiseFormAction
+    implements Action
 {
 
     /* Dependencies */
-     
+
     private OrganisationUnitGroupService organisationUnitGroupService;
-    
+
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
-        
-    private DataSetStore dataSetStore;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    private DataSetService dataSetService;
+
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
 
-    
+    private SelectionTreeManager selectionTreeManager;
+
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    {
+        this.selectionTreeManager = selectionTreeManager;
+    }
+
+    private List<OrganisationUnitGroup> orgUnitGroupNameOwnershipMembers;
+
     /* Output Parameters */
     private List<DataSet> dataSetList;
 
@@ -87,7 +103,7 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseFormAction implements 
     {
         return simpleDateFormat;
     }
-    
+
     private Collection<OrganisationUnit> organisationUnits;
 
     public Collection<OrganisationUnit> getOrganisationUnits()
@@ -102,19 +118,59 @@ public class GenerateDataStatusOrgnisationunitGroupSetWiseFormAction implements 
         return organisationUnitGroupSets;
     }
 
+    private Collection<OrganisationUnit> selectedOrganisationUnits;
+
+    public void setSelectedOrganisationUnits( Collection<OrganisationUnit> selectedOrganisationUnits )
+    {
+        this.selectedOrganisationUnits = selectedOrganisationUnits;
+    }
+
     public String execute()
         throws Exception
     {
-    	
-    	/* OrganisationUnit */
+
+        /* OrganisationUnit */
         organisationUnitGroupSets = organisationUnitGroupService.getAllOrganisationUnitGroupSets();
-        
+
+        OrganisationUnitGroupSet organisationUnitGroupSet1 = organisationUnitGroupService
+            .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
+
+        List<OrganisationUnitGroup> orgUnitGroupMembers = new ArrayList<OrganisationUnitGroup>(
+            organisationUnitGroupSet1.getOrganisationUnitGroups() );
+
+        OrganisationUnitGroupSet organisationUnitGroupSet2 = organisationUnitGroupService
+            .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_OWNERSHIP );
+
+        orgUnitGroupNameOwnershipMembers = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupSet2
+            .getOrganisationUnitGroups() );
+
+        orgUnitGroupMembers.addAll( orgUnitGroupNameOwnershipMembers );
+
         /* DataSet List */
-        dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+        dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
+
+        Iterator dataSetListIterator = dataSetList.iterator();
+
+        while ( dataSetListIterator.hasNext() )
+        {
+            DataSet d = (DataSet) dataSetListIterator.next();
+
+            if ( d.getSources().size() <= 0 )
+
+                dataSetListIterator.remove();
+        }
         Collections.sort( dataSetList, new DataSetNameComparator() );
+
+        Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
+
+        Set<OrganisationUnit> unitsInTheTree = new HashSet<OrganisationUnit>();
+
+        selectedOrganisationUnits = selectionTreeManager.getSelectedOrganisationUnits();
+
+        orgUnitGroupMembers.retainAll( selectedOrganisationUnits );
 
         return SUCCESS;
     }
- 
+
 }// class end
 

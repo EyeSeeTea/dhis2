@@ -41,6 +41,13 @@ import com.opensymphony.xwork2.Action;
 public class UpdateSurveyAction
     implements Action
 {
+	private int surveyId;
+
+    public void setSurveyId( int surveyId )
+    {
+        this.surveyId = surveyId;
+    }
+    
     private String name;
 
     public void setName( String name )
@@ -61,19 +68,17 @@ public class UpdateSurveyAction
     {
         this.url = url;
     }    
-    
+       
     private String description;
 
     public void setDescription( String description )
     {
         this.description = description;
     }
-
-    private int surveyId;
-
-    public void setSurveyId( int surveyId )
+    
+    public String getDescription()
     {
-        this.surveyId = surveyId;
+        return description;
     }
 
     private Collection<String> selectedList = new HashSet<String>();
@@ -122,6 +127,7 @@ public class UpdateSurveyAction
         survey.setName( name );
         survey.setShortName( shortName );
         survey.setUrl( url );
+        survey.setDescription( description );
         Collection<Indicator> updatedIndicatorList = new HashSet<Indicator>();
 
         for ( String id : selectedList )

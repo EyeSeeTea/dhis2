@@ -26,11 +26,21 @@
           <input type="button" value="&gt;&gt;" title="$i18n.getString('later_periods')" onclick="window.location.href='nextPeriods.action'" #if( $periods.size() == 0 ) disabled="disabled" #end><br>
 		  <select id="selectedPeriodIndex" name="selectedPeriodIndex" style="min-width:350px" onchange="document.getElementById( 'reportForm' ).submit();" #if( $periods.size() == 0 ) disabled="disabled" #end>
               <option value="null">[ $i18n.getString( "select" ) ]</option>
-			    #foreach( $period in $periods )
-				#set( $index = $velocityCount - 1 )
-				<option value="$index" #if( $index && $selectedPeriodIndex && $index == $selectedPeriodIndex ) selected="selected" #end>$format.formatPeriod( $period )</option>
-			    #end
-          </select>
+			    
+			    
+			    #if($yearlyPeriodType)
+			    	#foreach( $periodName in $periodNameList )
+						#set( $index = $velocityCount - 1 )
+						<option value="$index" #if( $index && $selectedPeriodIndex && $index == $selectedPeriodIndex ) selected="selected" #end>$periodName</option>
+			    	#end
+				#else
+			    	#foreach( $period in $periods )
+						#set( $index = $velocityCount - 1 )
+						<option value="$index" #if( $index && $selectedPeriodIndex && $index == $selectedPeriodIndex ) selected="selected" #end>$format.formatPeriod( $period )</option>
+			    	#end
+                            #end
+				
+				          </select>
       </td>
   </tr>
   <tr> 

@@ -30,7 +30,6 @@ package org.hisp.dhis.reports.api.impl;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDate;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;

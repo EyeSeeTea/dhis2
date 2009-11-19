@@ -57,7 +57,7 @@ public class UnselectAllAction
         throws Exception
     {
         selectionTreeManager.clearSelectedOrganisationUnits();
-        
+
         return SUCCESS;
-    }   
+    }
 }

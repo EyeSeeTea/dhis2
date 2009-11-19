@@ -31,6 +31,8 @@ package org.hisp.dhis.den.comments;
  * @author Torgeir Lorange Ostby
  * @version $Id: StandardCommentsManagerException.java 2869 2007-02-20 14:26:09Z andegje $
  */
+
+@SuppressWarnings("serial")
 public class StandardCommentsManagerException
     extends Exception
 {

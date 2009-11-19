@@ -28,7 +28,7 @@
                     	<td class="NormalB" width="325">&nbsp;</td>
                     </tr>
                     <tr>
-                    	
+
     			<td class="NormalB">$i18n.getString( "nr_filter_by_degroup" )<br>
                             <select id="dataElementGroupId" name="dataElementGroupId" style="width:325px" onchange="getDataElementsWithOutOptionCombo()" >
                             <option value="$ALL">[ Select DataElementGroup / All ]</option>
@@ -72,33 +72,39 @@
                     <tr>
                         <td>
                             <table>
-                                <td class="NormalB">$i18n.getString( "nr_orgunit" ) : <br />
+                                <tr>
+                                    <td class="NormalB">
 
-                                    <input type="checkbox" id="ouSelCB" name="ouSelCB" onchange="ouSelCBChange()" value="ON" > Selected<br />
-                                    $i18n.getString( "ga_orgunit" )<br>
-                                    <select name="orgUnitListCB" id="orgUnitListCB" multiple size="7" style="width: 175px;" ondblclick="remOUFunction()" disabled >
-                                    </select>
-                                </td>
-                                <td class="NormalB">&nbsp;</td>
-                                <td class="NormalB">
-                                    <br>
-                                    OrgUnit Levels:<br>
-                                    <select name="orgUnitLevelCB" id="orgUnitLevelCB" size="7" style="width: 150px;">
-                                </select>
-                                </td>
+                                        <input type="checkbox" id="ouSelCB" name="ouSelCB" onchange="ouSelCBChange()" value="ON" > Selected<br />
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="NormalB">
+                                        $i18n.getString( "ga_orgunit" ) <br>
+                                        <select name="orgUnitListCB" id="orgUnitListCB" multiple size="7" style="width: 175px;" ondblclick="remOUFunction()" disabled >
+                                        </select>
+                                    </td>
+                                    <td class="NormalB">&nbsp;</td>
+                                    <td class="NormalB">
+                                        OrgUnit Levels:<br>
+                                        <select name="orgUnitLevelCB" id="orgUnitLevelCB" size="7" style="width: 150px;">
+                                        </select>
+                                    </td>
+                                </tr>
                             </table>
                         </td>
-                            <td>&nbsp;</td>
-                            <td class="NormalB">
-                            <table>
-                                
+                        <td>&nbsp;</td>
+                        <td class="NormalB">
+                        <table>
+                            <tr>
                     		<td class="NormalB">$i18n.getString( "nr_from" )<br>
                                     <select id="sDateLB" name="sDateLB">
                                     #foreach($period in $monthlyPeriods)
                                         <option value="$period.id">$simpleDateFormat.format($period.startDate)</option>
                                     #end
                                     </select>
-                                    <br /><br />
+
                     		</td>
                    		<td align="right" class="NormalB">$i18n.getString( "nr_to" )<br>
                                     <select id="eDateLB" name="eDateLB">
@@ -106,15 +112,25 @@
                                         <option value="$period.id">$simpleDateFormat.format($period.endDate)</option>
                                     #end
                                     </select>
-                                    <br /><br />
+
 			  	</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><input type="submit" name="View Null Reporter" value="$i18n.getString( 'nr_viewnullreporter' )" style="width: 120; height: 25; font-family:Arial; font-weight:bold; color:#000000"> </td>
+                            </tr>
                            </table>
                        </td>
                     </tr>
- 
+
                     <tr>
                     	<td class="NormalB" align="center" colspan="3" >
-                            <input type="submit" name="View Null Reporter" value="$i18n.getString( 'nr_viewnullreporter' )" style="width: 120; height: 25; font-family:Arial; font-weight:bold; color:#000000">
+
                             <input type="hidden" name="ouIDTB" id="ouIDTB">
                     	</td>
                     </tr>

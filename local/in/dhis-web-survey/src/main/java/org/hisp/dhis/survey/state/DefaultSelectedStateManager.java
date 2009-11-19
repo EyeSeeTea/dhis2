@@ -112,14 +112,8 @@ public class DefaultSelectedStateManager
     // Support methods
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings( "unchecked" )
-    private static final Map<Object, Object> getSession()
+    private static final Map<String, Object> getSession()
     {
         return ActionContext.getContext().getSession();
-    }
-
- 
-   
-
-   
+    }   
 }

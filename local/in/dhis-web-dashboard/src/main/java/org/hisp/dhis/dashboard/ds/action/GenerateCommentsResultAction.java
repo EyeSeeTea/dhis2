@@ -13,12 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hisp.dhis.dashboard.util.DBConnection;
 import org.hisp.dhis.dashboard.util.DashBoardService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -26,7 +25,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitShortNameComparator;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.source.Source;
 
@@ -57,23 +56,23 @@ public class GenerateCommentsResultAction implements Action
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
 
-    public DataSetStore getDataSetStore()
+    public DataSetService getDataSetService()
     {
-        return dataSetStore;
+        return dataSetService;
     }
 
     private DashBoardService dashBoardService;
@@ -83,6 +82,7 @@ public class GenerateCommentsResultAction implements Action
         this.dashBoardService = dashBoardService;
     }
 
+    @SuppressWarnings("unused")
     private DataValueService dataValueService;
 
     public void setDataValueService( DataValueService dataValueService )
@@ -248,10 +248,11 @@ public class GenerateCommentsResultAction implements Action
     // ---------------------------------------------------------------
     // Action Implementation
     // ---------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public String execute()
         throws Exception
     {
-        con = (new DBConnection()).openConnection();
+        //con = (new DBConnection()).openConnection();
         orgUnitCount = 0;
         dataTableName = "";
         
@@ -341,8 +342,8 @@ public class GenerateCommentsResultAction implements Action
         }    
             
         // Period Related Info
-        Period startPeriod = periodStore.getPeriod( sDateLB );
-        Period endPeriod = periodStore.getPeriod( eDateLB );
+        Period startPeriod = periodService.getPeriod( sDateLB );
+        Period endPeriod = periodService.getPeriod( eDateLB );
 
         selectedPeriodList = dashBoardService.getMonthlyPeriods( startPeriod.getStartDate(), endPeriod.getEndDate() );
         
@@ -356,7 +357,7 @@ public class GenerateCommentsResultAction implements Action
         deInfo = "-1";
         for(String ds : selectedDataSets)
         {
-            DataSet dSet = dataSetStore.getDataSet( Integer.parseInt( ds ) );
+            DataSet dSet = dataSetService.getDataSet( Integer.parseInt( ds ) );
             for(DataElement de : dSet.getDataElements())
                 deInfo += "," + de.getId();
         }
@@ -365,7 +366,7 @@ public class GenerateCommentsResultAction implements Action
         System.out.println(deInfo);
         System.out.println(periodInfo);
         
-        dataTableName = dashBoardService.createDataTableForComments(orgUnitInfo, deInfo, periodInfo);
+        //dataTableName = dashBoardService.createDataTableForComments(orgUnitInfo, deInfo, periodInfo);
         
         dataSetPeriods = new HashMap<DataSet, Collection<Period>>();
         Iterator dataSetIterator = selectedDataSets.iterator();
@@ -377,14 +378,14 @@ public class GenerateCommentsResultAction implements Action
         
         while ( dataSetIterator.hasNext() )
         {            
-            ds = dataSetStore.getDataSet( Integer.parseInt( (String) dataSetIterator.next() ) );
+            ds = dataSetService.getDataSet( Integer.parseInt( (String) dataSetIterator.next() ) );
             dataSetList.add( ds );
             dataElements = ds.getDataElements();
             deInfo = getDEInfo(dataElements);
                         
             dataSetPeriodType = ds.getPeriodType();
             
-            periodList = periodStore.getIntersectingPeriodsByPeriodType( dataSetPeriodType,
+            periodList = periodService.getIntersectingPeriodsByPeriodType( dataSetPeriodType,
                 startPeriod.getStartDate(), endPeriod.getEndDate() );
             dataSetPeriods.put( ds, periodList );
 
@@ -409,6 +410,7 @@ public class GenerateCommentsResultAction implements Action
                 periodIterator = periodList.iterator();
                 
                 Period p;
+                @SuppressWarnings("unused")
                 Collection dataValueResult;
                 double dataStatusPercentatge;
                 
@@ -440,8 +442,10 @@ public class GenerateCommentsResultAction implements Action
                         {
                             OrganisationUnit ou = organisationUnitService.getOrganisationUnit( rs1.getInt( 1 ) );
                             DataElement de = dataElementService.getDataElement( rs1.getInt( 2 ));
-                            Period per = periodStore.getPeriod( rs1.getInt(3) );
+                            @SuppressWarnings("unused")
+                            Period per = periodService.getPeriod( rs1.getInt(3) );
                             
+                            @SuppressWarnings("unused")
                             String tempStr = ou.getShortName() + " --- " + de.getName(); 
                         }                            
                         
@@ -530,12 +534,13 @@ public class GenerateCommentsResultAction implements Action
             }
         }// finally block end
 
-        dashBoardService.deleteDataTable( dataTableName );
+        //dashBoardService.deleteDataTable( dataTableName );
         
         return SUCCESS;
     }
 
     // Returns the OrgUnitTree for which Root is the orgUnit
+    @SuppressWarnings("unchecked")
     public List<OrganisationUnit> getChildOrgUnitTree( OrganisationUnit orgUnit )
     {
         List<OrganisationUnit> orgUnitTree = new ArrayList<OrganisationUnit>();

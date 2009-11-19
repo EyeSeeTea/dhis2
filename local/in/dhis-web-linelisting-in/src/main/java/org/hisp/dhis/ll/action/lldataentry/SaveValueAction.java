@@ -26,7 +26,7 @@ package org.hisp.dhis.ll.action.lldataentry;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import com.opensymphony.webwork.ServletActionContext;
+import org.apache.struts2.ServletActionContext;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;

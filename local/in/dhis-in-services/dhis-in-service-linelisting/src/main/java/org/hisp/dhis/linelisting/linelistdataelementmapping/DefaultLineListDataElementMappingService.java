@@ -11,12 +11,12 @@ import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.linelisting.LineListElement;
 import org.hisp.dhis.linelisting.LineListGroup;
 import org.hisp.dhis.linelisting.LineListOption;
-import org.hisp.dhis.linelisting.linelistdataelementmapping.hibernate.HibernateLineListDataElementMappingStore;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class DefaultLineListDataElementMappingService
     implements LineListDataElementMappingService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -42,16 +42,16 @@ public class DefaultLineListDataElementMappingService
     public int addLineListDataElementMapping( LineListDataElementMapping lineListDataElementMapping )
     {
         int id = lineListDataElementMappingStore.addLineListDataElementMapping( lineListDataElementMapping );
-        
+
         i18nService.addObject( lineListDataElementMapping );
-        
+
         return id;
     }
 
     public void deleteLineListDataElementMapping( LineListDataElementMapping lineListDataElementMapping )
     {
         i18nService.removeObject( lineListDataElementMapping );
-        
+
         lineListDataElementMappingStore.deleteLineListDataElementMapping( lineListDataElementMapping );
     }
 

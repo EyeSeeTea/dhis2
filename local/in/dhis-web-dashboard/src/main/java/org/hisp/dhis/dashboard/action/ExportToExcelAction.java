@@ -10,8 +10,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.hisp.dhis.external.location.LocationManager;
-
 import jxl.CellType;
 import jxl.Workbook;
 import jxl.format.Alignment;
@@ -26,8 +24,10 @@ import jxl.write.WritableImage;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.external.location.LocationManager;
+
 import com.keypoint.PngEncoder;
-import com.opensymphony.webwork.ServletActionContext;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -68,12 +68,14 @@ public class ExportToExcelAction extends ActionSupport
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -82,12 +84,14 @@ public class ExportToExcelAction extends ActionSupport
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
 
     private String viewSummary;
     

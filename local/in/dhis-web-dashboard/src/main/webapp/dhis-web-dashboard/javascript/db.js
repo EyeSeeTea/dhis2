@@ -8,6 +8,7 @@ function getOUDeatilsForAA(orgUnitIds)
 	request.send( url );	    
 }
 
+/*
 function getOUDetailsForNR(orgUnitIds)
 {
 	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds;
@@ -17,7 +18,7 @@ function getOUDetailsForNR(orgUnitIds)
 	request.setCallbackSuccess( getOUDetailsForNRRecevied );
 	request.send( url );	    
 }
-
+*/
 function getOUDetailsForAARecevied(xmlObject)
 {
 	var orgUnits = xmlObject.getElementsByTagName("orgunit");
@@ -30,7 +31,7 @@ function getOUDetailsForAARecevied(xmlObject)
 		document.ChartGenerationForm.ouNameTB.value = orgUnitName;
     }    		
 }
-
+/*
 function getOUDetailsForNRRecevied(xmlObject)
 {
 	var orgUnits = xmlObject.getElementsByTagName("orgunit");
@@ -45,7 +46,7 @@ function getOUDetailsForNRRecevied(xmlObject)
     }
         		
 }
-
+*/
 
 function getOUDeatilsForGA(orgUnitIds)
 {
@@ -314,6 +315,22 @@ function getIndicators()
 	    request.setCallbackSuccess( getIndicatorsReceived );
 	    request.send( url );	    
 	}
+}
+
+function getSurveyIndicators()
+{
+  var indicatorGroupList = document.getElementById( "indicatorGroupId" );
+  var indicatorGroupId = indicatorGroupList.options[ indicatorGroupList.selectedIndex ].value;
+  
+  if ( indicatorGroupId != null )
+  {
+    var url = "getIndicators.action?id=" + indicatorGroupId+"&surveyflag=yes";
+    
+    var request = new Request();
+      request.setResponseTypeXML( 'indicator' );
+      request.setCallbackSuccess( getIndicatorsReceived );
+      request.send( url );      
+  }
 }
 
 function getIndicatorsReceived( xmlObject )

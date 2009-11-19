@@ -32,26 +32,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
-import org.hisp.dhis.dashboard.util.PeriodStartDateComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
-import org.hisp.dhis.dataelement.comparator.DataElementNameComparator;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
-import org.hisp.dhis.indicator.comparator.IndicatorNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.comparator.PeriodComparator;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -76,13 +76,14 @@ public class GenerateGraphicalAnalyserFormAction
         this.dataElementService = dataElementService;
     }
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
+    @SuppressWarnings("unused")
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -101,6 +102,7 @@ public class GenerateGraphicalAnalyserFormAction
     // Comparator
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("unused")
     private Comparator<DataElementGroup> dataElementGroupComparator;
 
     public void setDataElementGroupComparator( Comparator<DataElementGroup> dataElementGroupComparator )
@@ -214,8 +216,19 @@ public class GenerateGraphicalAnalyserFormAction
         Collections.sort(indicatorGroups, new IndicatorGroupNameComparator());
         
         /* Monthly Periods */
-        monthlyPeriods = new ArrayList<Period>( periodStore.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
-        Collections.sort( monthlyPeriods, new PeriodStartDateComparator() );
+        monthlyPeriods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
+        Iterator<Period> periodIterator = monthlyPeriods.iterator();
+        while( periodIterator.hasNext() )
+        {
+            Period p1 = periodIterator.next();
+            
+            if ( p1.getStartDate().compareTo( new Date() ) > 0 )
+            {
+                periodIterator.remove( );
+            }
+            
+        }
+        Collections.sort( monthlyPeriods, new PeriodComparator() );
         simpleDateFormat = new SimpleDateFormat( "MMM-yyyy" );
 
         return SUCCESS;

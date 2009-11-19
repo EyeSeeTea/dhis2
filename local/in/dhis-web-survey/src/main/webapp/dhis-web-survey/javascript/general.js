@@ -30,20 +30,21 @@ function saveValue( indicatorId )
     field.style.backgroundColor = '#ffffcc';   
     
     
-    if ( field.value != '' )
+    //if ( field.value != '' )
     {
+    	
         if ( type == 'int' )        
         {
         	var value = new Number( field.value );       	        	
         	 
-        	if( value * 1 == 0 )
-        	{
-        		window.alert( i18n_saving_zero_values_unnecessary  );
-        		field.select();
-   	        field.focus(); 
+        	//if( value * 1 == 0 )
+        	//{
+        	//	window.alert( i18n_saving_zero_values_unnecessary  );
+        	//	field.select();
+   	      //  field.focus(); 
    	                   		
-				    return;				    	
-        	}
+				  //  return;				    	
+        	//}
         	
             if ( !isInt( field.value ))
             {
@@ -63,7 +64,6 @@ function saveValue( indicatorId )
             }
         }
     }
-
 }
 
 

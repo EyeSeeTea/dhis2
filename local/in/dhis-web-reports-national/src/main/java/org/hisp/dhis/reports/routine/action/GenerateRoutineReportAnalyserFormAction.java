@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrgUnitTypePopulator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -122,9 +122,15 @@ public class GenerateRoutineReportAnalyserFormAction
         }
         
         
-        OrganisationUnitGroupSet organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSetByName( OrgUnitTypePopulator.ORGUNIT_TYPE_NAME );
+        OrganisationUnitGroupSet organisationUnitGroupSet1 = organisationUnitGroupService.getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
         
-        orgUnitGroupMembers = new ArrayList<OrganisationUnitGroup>(organisationUnitGroupSet.getOrganisationUnitGroups());
+        orgUnitGroupMembers = new ArrayList<OrganisationUnitGroup>(organisationUnitGroupSet1.getOrganisationUnitGroups());
+        
+        OrganisationUnitGroupSet organisationUnitGroupSet2 = organisationUnitGroupService.getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_OWNERSHIP );
+        
+        orgUnitGroupMembers.addAll( new ArrayList<OrganisationUnitGroup>(organisationUnitGroupSet2.getOrganisationUnitGroups() ) );
+        
+        
         return SUCCESS;
     }
 

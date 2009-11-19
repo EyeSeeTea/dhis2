@@ -34,6 +34,7 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.amplecode.quick.StatementManager;
 import org.apache.velocity.tools.generic.MathTool;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -41,15 +42,13 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.period.Period;
@@ -86,20 +85,13 @@ public class GenerateFeedbackReportAnalyserResultAction
         this.statementManager = statementManager;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
-
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
-
+    
     private ReportService reportService;
 
     public void setReportService( ReportService reportService )
@@ -201,12 +193,14 @@ public class GenerateFeedbackReportAnalyserResultAction
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -215,12 +209,14 @@ public class GenerateFeedbackReportAnalyserResultAction
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
 
     private MathTool mathTool;
 
@@ -740,9 +736,12 @@ public class GenerateFeedbackReportAnalyserResultAction
             while ( it1.hasNext() )
             {
                 String deCodeString = (String) it1.next();
+                
+                System.out.println(deCodeString);
 
                 String deType = (String) deCodeType.get( count1 );
                 String sType = (String) serviceType.get( count1 );
+                System.out.println(sType);
                 int count = 0;
                 double sum = 0.0;
                 int flag1 = 0;
@@ -1298,9 +1297,9 @@ public class GenerateFeedbackReportAnalyserResultAction
                                 .getTime(), currentOrgUnit.getParent() );
                         }
                     }
-                    if ( sType.equalsIgnoreCase( "survey" ) )
+                    else if ( sType.equalsIgnoreCase( "survey" ) )
                     {
-                            tempStr = getResultSurveyValue( deCodeString, currentOrgUnit.getParent() );
+                            tempStr = getResultSurveyValue( deCodeString, currentOrgUnit );
                     }
                     
                     else if ( sType.equalsIgnoreCase( "dataelement-boolean" ) )
@@ -1828,7 +1827,7 @@ public class GenerateFeedbackReportAnalyserResultAction
      */
     public PeriodType getDataElementPeriodType( DataElement de )
     {
-        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
         Iterator it = dataSetList.iterator();
         while ( it.hasNext() )
         {
@@ -2543,6 +2542,7 @@ public class GenerateFeedbackReportAnalyserResultAction
 
     private String getResultSurveyValue( String formula, OrganisationUnit organisationUnit )
     {
+        System.out.println("Inside SurveyValue  method : "+ formula + " : " + organisationUnit.getName());
         try
         {
 
@@ -2555,14 +2555,17 @@ public class GenerateFeedbackReportAnalyserResultAction
 
             while ( matcher.find() )
             {
+                                
                 String replaceString = matcher.group();
 
                 replaceString = replaceString.replaceAll( "[\\[\\]]", "" );
                 
-                replaceString = replaceString.substring( 0, replaceString.indexOf( '.' ) );
-
                 String surveyIdString = replaceString.substring( replaceString.indexOf( '.' ) + 1, replaceString
                     .length() );
+                
+                replaceString = replaceString.substring( 0, replaceString.indexOf( '.' ) );
+
+                
 
                 int indicatorId = Integer.parseInt( replaceString );
                 
@@ -2571,6 +2574,8 @@ public class GenerateFeedbackReportAnalyserResultAction
                 Indicator indicator = indicatorService.getIndicator( indicatorId );
                 
                 Survey survey = surveyService.getSurvey( surveyId );
+                
+                System.out.println(surveyId + " : " + indicatorId + " ----1 ");
 
                 if ( indicator == null || survey == null)
                 {
@@ -2580,6 +2585,8 @@ public class GenerateFeedbackReportAnalyserResultAction
 
                 }
 
+                System.out.println(survey.getName() + " : " + indicator.getName() + " ----2 ");
+                
                 //double aggregatedValue = aggregationService.getAggregatedIndicatorValue( indicator, startDate, endDate,
                 //    organisationUnit );
                 
@@ -2587,17 +2594,29 @@ public class GenerateFeedbackReportAnalyserResultAction
                 
                 surveyDataValue = surveyDataValueService.getSurveyDataValue(organisationUnit, survey, indicator);
 
-                Double surveyValue = Double.valueOf( surveyDataValue.getValue() );
+                if ( surveyDataValue == null )
+                {
+                    replaceString = "";
+                    matcher.appendReplacement( buffer, replaceString );
+                    continue;
+
+                }
                 
-                if ( surveyValue == AggregationService.NO_VALUES_REGISTERED )
-                {
-                    replaceString = NULL_REPLACEMENT;
-                }
-                else
-                {
-                    replaceString = String.valueOf( surveyValue );
-                    deFlag2 = 1;
-                }
+                
+                    Double surveyValue = Double.valueOf( surveyDataValue.getValue() );
+                    
+                    System.out.println(survey.getName() + " : " + indicator.getName() + " : " + surveyValue );
+                
+                    if ( surveyValue == AggregationService.NO_VALUES_REGISTERED )
+                    {
+                        replaceString = NULL_REPLACEMENT;
+                    }
+                    else
+                    {
+                        replaceString = String.valueOf( surveyValue );
+                        deFlag2 = 1;
+                    }
+                
                 matcher.appendReplacement( buffer, replaceString );
             }
 
@@ -2632,6 +2651,7 @@ public class GenerateFeedbackReportAnalyserResultAction
             {
                 resultValue = buffer.toString();
             }
+            System.out.println("Result in Survey : "+ resultValue);
             return resultValue;
         }
         catch ( NumberFormatException ex )

@@ -33,6 +33,7 @@ import java.io.Serializable;
  * @author Margrethe Store
  * @version $Id: ValidationResult.java 5277 2008-05-27 15:48:42Z larshelg $
  */
+@SuppressWarnings("serial")
 public class ValidationResult
     implements Serializable
 {

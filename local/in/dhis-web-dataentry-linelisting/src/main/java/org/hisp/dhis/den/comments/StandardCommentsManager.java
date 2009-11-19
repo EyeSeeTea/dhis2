@@ -33,6 +33,7 @@ import java.util.List;
  * @author Torgeir Lorange Ostby
  * @version $Id: StandardCommentsManager.java 2869 2007-02-20 14:26:09Z andegje $
  */
+
 public interface StandardCommentsManager
 {
     String ID = StandardCommentsManager.class.getName();

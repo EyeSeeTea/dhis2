@@ -1,3 +1,5 @@
+package org.hisp.dhis.survey;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,131 +26,136 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.survey;
 
 import java.util.Collection;
 import java.util.List;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.source.Source;
 
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.source.Source;
 
 /**
  * @author Brajesh Murari
  * @version $Id$
  */
-public interface SurveyService  
+public interface SurveyService
 {
-        String ID = SurveyService.class.getName();
+    String ID = SurveyService.class.getName();
 
-        // -------------------------------------------------------------------------
-        // Survey
-        // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Survey
+    // -------------------------------------------------------------------------
 
-        /**
-         * Adds a Survey.
-         * 
-         * @param survey The Survey to add.
-         * @return The generated unique identifier for this Survey.
-         */
-        int addSurvey( Survey survey );
+    /**
+     * Adds a Survey.
+     * 
+     * @param survey The Survey to add.
+     * @return The generated unique identifier for this Survey.
+     */
+    int addSurvey( Survey survey );
 
-        /**
-         * Updates a Survey.
-         * 
-         * @param survey The Survey to update.
-         */
-        void updateSurvey( Survey survey );
+    /**
+     * Updates a Survey.
+     * 
+     * @param survey The Survey to update.
+     */
+    void updateSurvey( Survey survey );
 
-        /**
-         * Deletes a Survey.
-         * 
-         * @param survey The Survey to delete.
-         */
-        void deleteSurvey( Survey survey );
+    /**
+     * Deletes a Survey.
+     * 
+     * @param survey The Survey to delete.
+     */
+    int deleteSurvey( Survey survey );
 
-        /**
-         * Get a Survey
-         * 
-         * @param id The unique identifier for the Survey to get.
-         * @return The Survey with the given id or null if it does not exist.
-         */
-        Survey getSurvey( int id );
+    /**
+     * Get a Survey
+     * 
+     * @param id The unique identifier for the Survey to get.
+     * @return The Survey with the given id or null if it does not exist.
+     */
+    Survey getSurvey( int id );
 
-        /**
-         * Returns a Survey with the given name.
-         * 
-         * @param name The name.
-         * @return A Survey with the given name.
-         */
-        Survey getSurveyByName( String name );
+    /**
+     * Returns a Survey with the given name.
+     * 
+     * @param name The name.
+     * @return A Survey with the given name.
+     */
+    Survey getSurveyByName( String name );
 
-        /**
-         * Returns the Survey with the given short name.
-         * 
-         * @param shortName The short name.
-         * @return The Survey with the given short name.
-         */
-        Survey getSurveyByShortName( String shortName );
-                
-        /**
-         * Returns all Survey associated with the specified source.
-         */
-        Collection<Survey> getSurveysBySource( Source source );
-        
-        /**
-         * Returns all Survey associated with the specified indicator.
-         */
-        Collection<Survey> getSurveysByIndicator( Indicator indicator );
+    /**
+     * Returns the Survey with the given short name.
+     * 
+     * @param shortName The short name.
+     * @return The Survey with the given short name.
+     */
+    Survey getSurveyByShortName( String shortName );
 
-        /**
-         * Returns all Survey associated with the specified sources.
-         */
-        Collection<Survey> getSurveysBySources( Collection<? extends Source> sources );
-        
-        /**
-         * Returns the number of Sources among the specified Sources associated with
-         * the specified Survey.
-         */
-        int getSourcesAssociatedWithSurvey( Survey survey, Collection<? extends Source> sources );
-        
-        /**
-         * Get all Surveys.
-         * 
-         * @return A collection containing all Surveys.
-         */
-        Collection<Survey> getAllSurveys();
-        
-        /**
-         * Get all Survey with corresponding identifiers.
-         * 
-         * @param identifiers the collection of identifiers.
-         * @return a collection of survey.
-         */
-        Collection<Survey> getSurveys( Collection<Integer> identifiers );
+    /**
+     * Returns all Survey associated with the specified source.
+     */
+    Collection<Survey> getSurveysBySource( Source source );
 
-        /**
-         * Get list of available ie. unassigned surveys.
-         * 
-         * @return A List containing all available Survey.
-         */
-        List<Survey> getAvailableSurveys();
+    /**
+     * Returns all Survey associated with the specified indicator.
+     */
+    Collection<Survey> getSurveysByIndicator( Indicator indicator );
 
-        /**
-         * Get list of assigned (ie. which had corresponding data entry form) surveys.
-         * 
-         * @return A List containing assigned Surveys.
-         */
-        List<Survey> getAssignedSurveys();
-        
-        /**
-         * Returns a distinct collection of indicators associated with the survey
-         * with the given corresponding survey identifiers.
-         * 
-         * @param surveyIdentifiers the Survey identifiers.
-         * @return a distinct collection of indicators.
-         */
-        Collection<Indicator> getDistinctIndicators( Collection<Integer> surveyIdentifiers );
+    /**
+     * Returns all Survey associated with the specified sources.
+     */
+    Collection<Survey> getSurveysBySources( Collection<? extends Source> sources );
 
-  }
+    /**
+     * Returns the number of Sources among the specified Sources associated with
+     * the specified Survey.
+     */
+    int getSourcesAssociatedWithSurvey( Survey survey, Collection<? extends Source> sources );
+
+    /**
+     * Get all Surveys.
+     * 
+     * @return A collection containing all Surveys.
+     */
+    Collection<Survey> getAllSurveys();
+
+    /**
+     * Get all Survey with corresponding identifiers.
+     * 
+     * @param identifiers the collection of identifiers.
+     * @return a collection of survey.
+     */
+    Collection<Survey> getSurveys( Collection<Integer> identifiers );
+
+    /**
+     * Get list of available ie. unassigned surveys.
+     * 
+     * @return A List containing all available Survey.
+     */
+    List<Survey> getAvailableSurveys();
+
+    /**
+     * Get list of assigned (ie. which had corresponding data entry form)
+     * surveys.
+     * 
+     * @return A List containing assigned Surveys.
+     */
+    List<Survey> getAssignedSurveys();
+
+    /**
+     * Returns a distinct collection of indicators associated with the survey
+     * with the given corresponding survey identifiers.
+     * 
+     * @param surveyIdentifiers the Survey identifiers.
+     * @return a distinct collection of indicators.
+     */
+    Collection<Indicator> getDistinctIndicators( Collection<Integer> surveyIdentifiers );
+    
+    /**
+     * Returns Collection of Indicators that are associated with atleast one survey.
+     * 
+     * @return List of Indicators
+     */
+    List<Indicator> getAllSurveyIndicators();
+
+}

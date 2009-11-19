@@ -5,6 +5,7 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 	
 	<!-- Import Form -->
+	
 	<bean id="org.hisp.dhis.excelimport.action.ExcelImportFormAction"
 		class="org.hisp.dhis.excelimport.action.ExcelImportFormAction"
 		scope="prototype">
@@ -14,23 +15,20 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="organisationUnitService">
 			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitService"/>
 		</property>
-    <property name="reportService">
-       <ref bean="org.hisp.dhis.excelimport.util.ReportService"/>
-    </property>
-		
+        <property name="reportService">
+            <ref bean="org.hisp.dhis.excelimport.util.ReportService"/>
+        </property>
 	</bean>
 	
 	<!-- Import Result -->
+	
 	<bean id="org.hisp.dhis.excelimport.action.ExcelImportResultAction"
 		class="org.hisp.dhis.excelimport.action.ExcelImportResultAction"
-		scope="prototype">
-		
-	  <property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>
-		<property name="dataElementCategoryOptionComboService">
+		scope="prototype">		
+	    <property name="statementManager" ref="statementManager"/>
+	    <property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
-		</property>		
+	    </property>
 		<property name="periodService">
 			<ref bean="org.hisp.dhis.period.PeriodService"/>
 		</property>
@@ -40,8 +38,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="dataValueService">
 			<ref bean="org.hisp.dhis.datavalue.DataValueService"/>
@@ -49,25 +47,23 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.excelimport.util.ReportService"/>
 		</property>
-		<property name="sessionManager">
-			<ref bean="org.hisp.dhis.hibernate.HibernateSessionManager"/>
+		<property name="currentUserService">
+			<ref bean="org.hisp.dhis.user.CurrentUserService"/>
 		</property>
+		<property name="sessionFactory" ref="sessionFactory"/>
 		
 	</bean>
 	
 	<!-- Get Data Elements -->
 	<bean id="org.hisp.dhis.excelimport.action.GetDataElementsAction"
 		class="org.hisp.dhis.excelimport.action.GetDataElementsAction"
-		scope="prototype">
-		
+		scope="prototype">		
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
 		<property name="dataElementCategoryOptionComboService">
-			<ref
-				bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
+			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>
-		
 	</bean>
 	
 	<!-- Get Periods -->
@@ -77,7 +73,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="periodService">
 			<ref bean="org.hisp.dhis.period.PeriodService"/>
 		</property>
-		
 	</bean>
 	
 	<!-- Get Organisation Units -->
@@ -96,8 +91,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.excelimport.util.ReportService"/>
-		</property>
-		
+		</property>		
 	</bean>
 	
 	<!-- Get Reports -->
@@ -114,22 +108,19 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	
 	<!-- Report Service -->
 	<bean id="org.hisp.dhis.excelimport.util.ReportService"
-		class="org.hisp.dhis.excelimport.util.ReportService" scope="prototype">
-		
-		<property name="periodStore">
-			<ref bean="org.hisp.dhis.period.PeriodStore"/>
+		class="org.hisp.dhis.excelimport.util.ReportService" scope="prototype">		
+		<property name="periodService">
+			<ref bean="org.hisp.dhis.period.PeriodService"/>
 		</property>
-		<property name="dbConnection">
-			<ref bean="org.hisp.dhis.excelimport.util.DBConnection"/>
-		</property>
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>	  
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -138,14 +129,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			<ref bean="org.hisp.dhis.datavalue.DataValueService"/>
 		</property>
 		<property name="dataElementCategoryOptionComboService">
-			<ref
-				bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
+			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>
-	</bean>
-	<bean id="org.hisp.dhis.excelimport.util.DBConnection"
-		class="org.hisp.dhis.excelimport.util.DBConnection" scope="prototype">
-		<property name="provider"
-			ref="org.hisp.dhis.system.database.DatabaseInfoProvider"/>
+		<property name="configurationService">
+			<ref bean="org.hisp.dhis.config.ConfigurationService"/>
+		</property>
 	</bean>
 	
 </beans>

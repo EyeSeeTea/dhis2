@@ -270,9 +270,9 @@ function formValidations()
     
 
     if(selOUListLength <= 0) {alert("Please Select OrganisationUnit");return false;}
-    else if( selXAxis <= 0 )	 {alert("Please Select Indicator for X-Axis");return false;}
-    else if( selYAxis <= 0 ) {alert("Please Select Indicator for Y-Axis");return false;}
-    else if( selZAxis <= 0 ) {alert("Please Select Dataelement for Z-Axis");return false;}
+    else if( selXAxis < 0 )	 {alert("Please Select Indicator for X-Axis");return false;}
+    else if( selYAxis < 0 ) {alert("Please Select Indicator for Y-Axis");return false;}
+    else if( selZAxis < 0 ) {alert("Please Select Dataelement for Z-Axis");return false;}
     else if( sDate == null || sDate == "" ) {alert("Please Enter Starting Period");return false;}
     else if( eDate == null || eDate == "" ) {alert("Please Enter Ending Period");return false;}    
     else if(sDate > eDate) {alert("Starting Date is Greater");return false;}

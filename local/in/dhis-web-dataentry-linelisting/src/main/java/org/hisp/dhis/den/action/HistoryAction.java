@@ -45,6 +45,7 @@ import com.opensymphony.xwork2.Action;
  * @author Torgeir Lorange Ostby
  * @version $Id: HistoryAction.java 4735 2008-03-13 15:59:15Z larshelg $
  */
+
 public class HistoryAction
     implements Action
 {

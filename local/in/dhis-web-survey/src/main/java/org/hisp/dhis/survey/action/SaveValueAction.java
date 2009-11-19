@@ -133,11 +133,11 @@ public class SaveValueAction
 
     public String execute()    
     {    	
+    	System.out.println("inside action");
         OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
         
         Survey survey = selectedStateManager.getSelectedSurvey();
         
-
         Indicator indicator = indicatorService.getIndicator( indicatorId );
 
         storedBy = currentUserService.getCurrentUsername();       
@@ -160,8 +160,7 @@ public class SaveValueAction
         // ---------------------------------------------------------------------
         // Save or update
         // ---------------------------------------------------------------------      
-        
-            
+                  
         SurveyDataValue dataValue = surveyDataValueService.getSurveyDataValue( organisationUnit, survey, indicator );
 
         if ( dataValue == null )
@@ -176,14 +175,16 @@ public class SaveValueAction
             }
         }
         else
-        {
-            LOG.debug( "Updating DataValue, value added/changed" );
-
-            dataValue.setValue( value );
-            dataValue.setTimestamp( new Date() );
-            dataValue.setStoredBy( storedBy );
-
-            surveyDataValueService.updateSurveyDataValue( dataValue );
+        { 	
+	        LOG.debug( "Updating DataValue, value added/changed" );
+	
+	        dataValue.setValue( value );
+	        dataValue.setTimestamp( new Date() );
+	        dataValue.setStoredBy( storedBy );
+	
+	        surveyDataValueService.updateSurveyDataValue( dataValue );  
+	        System.out.println("check value : "+value);
+	        
         }
        
         if ( dataValue != null )
@@ -193,6 +194,5 @@ public class SaveValueAction
         }
         
         return SUCCESS;        
-    } 
-   
+    }   
 }

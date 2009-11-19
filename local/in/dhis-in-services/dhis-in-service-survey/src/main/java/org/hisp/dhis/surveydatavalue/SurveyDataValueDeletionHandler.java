@@ -1,3 +1,5 @@
+package org.hisp.dhis.surveydatavalue; 
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,22 +26,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.surveydatavalue;
 
-import org.hisp.dhis.survey.SurveyService;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
  * @author Brajesh Murari
  * @version $Id$
  */
-public class SurveyDataValueDeletionHandler extends DeletionHandler
-{
 
+public class SurveyDataValueDeletionHandler 
+    extends DeletionHandler
+{
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("unused")
     private SurveyDataValueService surveyDataValueService;
     
     public void setSurveyDataValueService( SurveyDataValueService surveyDataValueService )
@@ -50,11 +52,10 @@ public class SurveyDataValueDeletionHandler extends DeletionHandler
     // -------------------------------------------------------------------------
     // DeletionHandler implementation
     // -------------------------------------------------------------------------
+    
     @Override
     protected String getClassName()
     {
-        // TODO Auto-generated method stub
         return null;
     }
-
 }

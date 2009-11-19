@@ -57,12 +57,14 @@ public class ExportToExcelAverageVAAction  extends ActionSupport
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -71,12 +73,14 @@ public class ExportToExcelAverageVAAction  extends ActionSupport
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
     
     // -------------------------------------------------------------------------
     // Action implementation

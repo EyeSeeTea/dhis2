@@ -26,6 +26,24 @@
         <param name="page">/dhis-web-maintenance-in/welcome.vm</param>
         <param name="menu">/dhis-web-maintenance-in/menu.vm</param>
     </action>
+
+<!-- MySQL Backup --> 	  	  	  
+	<action name="takeMysqlBackupResult" class="org.hisp.dhis.config.action.TakeMySqlBackupAction">
+		<result name="success" type="velocity">/main.vm</result>
+        <param name="page">/dhis-web-maintenance-in/takeMysqlBackupResult.vm</param>
+        <param name="menu">/dhis-web-maintenance-in/menu.vm</param>
+        <param name="stylesheets">css/StylesForTags.css</param>
+        <param name="requiredAuthorities">F_CONFIGURE_DOWNLOAD_BACKUP</param>
+    </action>
+
+    <action name="streamMySQLBackup" class="org.hisp.dhis.config.action.StreamMySqlBackupAction">
+		<result name="success" type="stream">
+			<param name="contentType">application/zip</param>
+            <param name="inputName">inputStream</param>
+            <param name="contentDisposition">filename="${fileName}"</param>
+            <param name="bufferSize">1024</param>
+        </result>
+    </action>
 	  	  
   </package>
 </struts>

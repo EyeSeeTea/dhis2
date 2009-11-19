@@ -7,7 +7,7 @@
 		<tr>
 			<td class="NormalB">
 				$i18n.getString( "ga_filter_by_indicatorgroup" )<br />
-				<select id="indicatorGroupId" name="indicatorGroupId" style="width:325px" onchange="getIndicators()">
+				<select id="indicatorGroupId" name="indicatorGroupId" style="width:325px" onchange="getSurveyIndicators()">
 					<option value="$ALL">[ Select IndicatorGroup / All ]</option>
 					#foreach ( $group in $indicatorGroups )
 						<option value="$group.id">$group.name</option>

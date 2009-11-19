@@ -1,5 +1,5 @@
 
-<h3>$i18n.getString( "ranking_report_form" )</h3>
+<h3>$i18n.getString( "ranking_report_form" )</h3><hr /><br />
 
 <form id="reportForm" name="reportForm" action="generateRankingReport.action" method="post" onsubmit="return formValidations()" target="_blank">
 	

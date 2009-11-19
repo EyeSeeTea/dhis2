@@ -53,11 +53,11 @@ public class DefaultInitializePOIStylesManager
 
     private static final String STYLE_DEFAULT_FONT_NAME = "Tahoma";
 
-    private static final short STYLE_DEFAULT_FONT_HEIGHT = 8;
+    private static final short STYLE_DEFAULT_FONT_HEIGHT = 11;
 
     private static final short STYLE_DEFAULT_FONT_WEIGHT = HSSFFont.BOLDWEIGHT_NORMAL;
 
-    private static final short STYLE_DEFAULT_FONT_COLOR = new HSSFColor.WHITE().getIndex();
+    private static final short STYLE_DEFAULT_FONT_COLOR = HSSFColor.DARK_YELLOW.index;
 
     private static final short STYLE_DEFAULT_BACK_FORE_GROUND_COLOR = HSSFColor.WHITE.index;
 

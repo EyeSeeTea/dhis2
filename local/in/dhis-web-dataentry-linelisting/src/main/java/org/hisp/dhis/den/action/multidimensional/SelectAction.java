@@ -53,14 +53,15 @@ import com.opensymphony.xwork2.ActionSupport;
  * @author Abyot Asalefew, abyota@yahoo.com
  * @version $Id$
  */
+
+@SuppressWarnings( "serial" )
 public class SelectAction
     extends ActionSupport
 {
-	
-	private static final String DEFAULT_FORM = "defaultform";
-    
-    private static final String MULTI_DIMENSIONAL_FORM = "multidimensionalform";
 
+    private static final String DEFAULT_FORM = "defaultform";
+
+    private static final String MULTI_DIMENSIONAL_FORM = "multidimensionalform";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -79,14 +80,14 @@ public class SelectAction
     {
         this.dataSetService = dataSetService;
     }
-    
+
     private DataElementService dataElementService;
-    
+
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -116,7 +117,7 @@ public class SelectAction
     {
         return selectedStateManager;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
@@ -158,15 +159,15 @@ public class SelectAction
     }
 
     private Collection<Integer> calculatedDataElementIds;
-    
+
     public Collection<Integer> getCalculatedDataElementIds()
     {
         return calculatedDataElementIds;
     }
-    
-    private Map<CalculatedDataElement,Map<DataElement,Integer>> calculatedDataElementMap;
-    
-    public Map<CalculatedDataElement,Map<DataElement,Integer>> getCalculatedDataElementMap()
+
+    private Map<CalculatedDataElement, Map<DataElement, Integer>> calculatedDataElementMap;
+
+    public Map<CalculatedDataElement, Map<DataElement, Integer>> getCalculatedDataElementMap()
     {
         return calculatedDataElementMap;
     }
@@ -182,14 +183,14 @@ public class SelectAction
     {
         return multiDimensionalEntry;
     }
-    
+
     private Integer isMultiDimensional;
-    
+
     public Integer getIsMultiDimensional()
     {
-    	return isMultiDimensional;
+        return isMultiDimensional;
     }
-    
+
     public void setIsMultiDimensional( Integer isMultiDimensional )
     {
         this.isMultiDimensional = isMultiDimensional;
@@ -206,8 +207,8 @@ public class SelectAction
         // Validate selected OrganisationUnit
         // ---------------------------------------------------------------------
 
-    	isMultiDimensional = 0;
-    	
+        isMultiDimensional = 0;
+
         organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
 
         if ( organisationUnit == null )
@@ -229,13 +230,13 @@ public class SelectAction
 
         for ( DataSet dataSet : dataSetService.getAllDataSets() )
         {
-            if ( dataSet.getSources().contains( organisationUnit ) && 
-                dataSet.getPeriodType() instanceof CalendarPeriodType )
+            if ( dataSet.getSources().contains( organisationUnit )
+                && dataSet.getPeriodType() instanceof CalendarPeriodType )
             {
                 dataSets.add( dataSet );
             }
         }
-        
+
         Collections.sort( dataSets, new DataSetNameComparator() );
 
         // ---------------------------------------------------------------------
@@ -268,26 +269,24 @@ public class SelectAction
 
             return SUCCESS;
         }
-        
+
         // ---------------------------------------------------------------------
         // Prepare for multidimensional dataentry
         // ---------------------------------------------------------------------
         Collection<DataElementCategoryCombo> decbo = new ArrayList<DataElementCategoryCombo>();
         DataSet dataSet = selectedStateManager.getSelectedDataSet();
-        
-        for (DataElement de : dataSet.getDataElements() )
+
+        for ( DataElement de : dataSet.getDataElements() )
         {
-        	if ( de.getCategoryCombo() != null )
-        	{
-        		decbo.add(de.getCategoryCombo());	
-        	}        	
+            if ( de.getCategoryCombo() != null )
+            {
+                decbo.add( de.getCategoryCombo() );
+            }
         }
         if ( decbo.size() > 0 )
         {
-        	isMultiDimensional = 1;
+            isMultiDimensional = 1;
         }
-        
-        
 
         // ---------------------------------------------------------------------
         // Generate Periods
@@ -319,11 +318,11 @@ public class SelectAction
         // ---------------------------------------------------------------------
         // Prepare CalculatedDataElementInformation
         // ---------------------------------------------------------------------
-        
-        calculatedDataElementIds = new HashSet<Integer> ();
-        calculatedDataElementMap = new HashMap<CalculatedDataElement,Map<DataElement,Integer>> ();
+
+        calculatedDataElementIds = new HashSet<Integer>();
+        calculatedDataElementMap = new HashMap<CalculatedDataElement, Map<DataElement, Integer>>();
         CalculatedDataElement cde;
-        
+
         for ( DataElement dataElement : selectedDataSet.getDataElements() )
         {
             if ( dataElement instanceof CalculatedDataElement )
@@ -335,20 +334,17 @@ public class SelectAction
                 {
                     continue;
                 }
-                
-                calculatedDataElementMap.put( cde, dataElementService.getDataElementFactors(cde) );
 
+                calculatedDataElementMap.put( cde, dataElementService.getDataElementFactors( cde ) );
             }
         }
-        
-        if( multiDimensionalEntry != null )
-        {        	
-        	return MULTI_DIMENSIONAL_FORM;
+
+        if ( multiDimensionalEntry != null )
+        {
+            return MULTI_DIMENSIONAL_FORM;
         }
         else
-        	
-        	return DEFAULT_FORM;
 
-
+            return DEFAULT_FORM;
     }
 }

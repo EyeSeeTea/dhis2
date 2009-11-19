@@ -31,9 +31,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
-import org.hisp.dhis.dashboard.util.PeriodStartDateComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -47,11 +48,13 @@ import org.hisp.dhis.indicator.comparator.IndicatorNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.comparator.PeriodComparator;
 
 import com.opensymphony.xwork2.ActionSupport;
 
+@SuppressWarnings("serial")
 public class GenerateAnnualAnalyserFormAction
     extends ActionSupport
 {
@@ -74,13 +77,14 @@ public class GenerateAnnualAnalyserFormAction
         this.dataElementService = dataElementService;
     }
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
+    @SuppressWarnings("unused")
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -155,6 +159,13 @@ public class GenerateAnnualAnalyserFormAction
     {
         return yearlyPeriods;
     }
+    
+    private List<String> periodNameList;
+
+    public List<String> getPeriodNameList()
+    {
+        return periodNameList;
+    }
 
     private SimpleDateFormat simpleDateFormat;
 
@@ -192,9 +203,28 @@ public class GenerateAnnualAnalyserFormAction
         
         /* Yearly Periods */
         PeriodType yearlyPeriodType = PeriodType.getPeriodTypeByName( "Yearly" );
-        yearlyPeriods = new ArrayList<Period>( periodStore.getPeriodsByPeriodType( yearlyPeriodType ) );
-        Collections.sort( yearlyPeriods, new PeriodStartDateComparator() );
+        yearlyPeriods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( yearlyPeriodType ) );
+        Iterator<Period> periodIterator = yearlyPeriods.iterator();
+        while( periodIterator.hasNext() )
+        {
+            Period p1 = periodIterator.next();
+            
+            if ( p1.getStartDate().compareTo( new Date() ) > 0 )
+            {
+                periodIterator.remove( );
+            }
+            
+        }
+        Collections.sort( yearlyPeriods, new PeriodComparator() );
         simpleDateFormat = new SimpleDateFormat( "yyyy" );
+        periodNameList = new ArrayList<String>();
+        int year;
+        for ( Period p1 : yearlyPeriods )
+        {
+            year = Integer.parseInt( simpleDateFormat.format( p1.getStartDate() ) ) + 1;
+            periodNameList.add( simpleDateFormat.format( p1.getStartDate() ) + "-" + year );
+        }
+        
 
         /* Month Names */
         monthNames = new ArrayList<String>();

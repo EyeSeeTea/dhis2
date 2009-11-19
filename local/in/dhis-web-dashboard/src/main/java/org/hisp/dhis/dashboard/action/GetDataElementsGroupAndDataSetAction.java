@@ -29,19 +29,14 @@ package org.hisp.dhis.dashboard.action;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -59,11 +54,11 @@ public class GetDataElementsGroupAndDataSetAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
 
     private DataElementService dataElementService;
@@ -77,6 +72,7 @@ public class GetDataElementsGroupAndDataSetAction
     // DisplayPropertyHandler
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("unused")
     private DisplayPropertyHandler displayPropertyHandler;
 
     public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
@@ -113,6 +109,7 @@ public class GetDataElementsGroupAndDataSetAction
         return SUCCESS;
     }
 
+    @SuppressWarnings("unchecked")
     public List<DataElementGroup> getApplicableDataElementGroups( Integer dataSetId )
     {
 
@@ -128,7 +125,7 @@ public class GetDataElementsGroupAndDataSetAction
 
             List<DataElement> dataSetMembers = new ArrayList<DataElement>();
 
-            dataSetMembers.addAll( dataSetStore.getDataSet( 0 ).getDataElements() );
+            dataSetMembers.addAll( dataSetService.getDataSet( 0 ).getDataElements() );
 
             List<DataElementGroup> allDataElementGroups = new ArrayList<DataElementGroup>( dataElementService
                 .getAllDataElementGroups() );

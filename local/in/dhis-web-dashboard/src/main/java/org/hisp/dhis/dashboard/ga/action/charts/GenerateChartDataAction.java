@@ -46,8 +46,9 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.amplecode.quick.StatementManager;
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregationService;
-import org.hisp.dhis.dashboard.util.DBConnection;
 import org.hisp.dhis.dashboard.util.DashBoardService;
 import org.hisp.dhis.dashboard.util.SurveyData;
 import org.hisp.dhis.dataelement.DataElement;
@@ -60,15 +61,15 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitShortNameComparator;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -76,7 +77,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.opensymphony.webwork.ServletActionContext;
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -84,18 +84,9 @@ public class GenerateChartDataAction
     implements Action
 {
 
-    /* Dependencies */
-    
-    /*
-
-    private TargetService targetService;
-
-    public void setTargetService( TargetService targetService )
-    {
-        this.targetService = targetService;
-    }
-    
-    */
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
     
     private DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
 
@@ -112,11 +103,11 @@ public class GenerateChartDataAction
         this.organisationUnitService = organisationUnitService;
     }
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
     private IndicatorService indicatorService;
@@ -162,13 +153,12 @@ public class GenerateChartDataAction
     }
 
     private DataValueService dataValueService;
-    
+
     public void setDataValueService( DataValueService dataValueService )
     {
         this.dataValueService = dataValueService;
     }
 
-    
     // -------------------------------------------------------------------------
     // Comparator
     // -------------------------------------------------------------------------
@@ -191,6 +181,7 @@ public class GenerateChartDataAction
     // DisplayPropertyHandler
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings( "unused" )
     private DisplayPropertyHandler displayPropertyHandler;
 
     public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
@@ -202,13 +193,12 @@ public class GenerateChartDataAction
     // Parameters
     // --------------------------------------------------------------------------
     private HttpSession session;
-    
+
     public HttpSession getSession()
     {
         return session;
     }
 
-    
     private Period startPeriod;
 
     private Period endPeriod;
@@ -322,10 +312,9 @@ public class GenerateChartDataAction
     }
 
     List<List<String>> numList;
+
     List<List<String>> denList;
-    
-    
-    
+
     List<String> xseriesList;
 
     public List<String> getXseriesList()
@@ -339,19 +328,13 @@ public class GenerateChartDataAction
     {
         return yseriesList;
     }
-
-    /*
-    Map<Indicator, List<Target>> indicatorTargetList;
-
-    public Map<Indicator, List<Target>> getIndicatorTargetList()
-    {
-        return indicatorTargetList;
-    }
-     */
+    
     Map<Indicator, List<SurveyData>> indicatorSurveyList;
+
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
     
-    
-    /* Input Parameters */
     private String ougSetCB;
 
     public void setOugSetCB( String ougSetCB )
@@ -360,12 +343,12 @@ public class GenerateChartDataAction
     }
 
     private String aggDataCB;
-    
+
     public void setAggDataCB( String aggDataCB )
     {
         this.aggDataCB = aggDataCB;
     }
-    
+
     private String deSelection;
 
     public void setDeSelection( String deSelection )
@@ -466,12 +449,13 @@ public class GenerateChartDataAction
         return indicatorSurveyList;
     }
 
+    @SuppressWarnings( "unchecked" )
     public String execute()
         throws Exception
     {
         statementManager.initialise();
 
-        //indicatorTargetList = new HashMap<Indicator, List<Target>>();
+        // indicatorTargetList = new HashMap<Indicator, List<Target>>();
         indicatorSurveyList = new HashMap<Indicator, List<SurveyData>>();
         dataList = new ArrayList<List<String>>();
         numList = new ArrayList<List<String>>();
@@ -492,7 +476,6 @@ public class GenerateChartDataAction
                 .parseInt( orgUnitListCB.get( 0 ) ) );
         }
 
-        
         // Service Related Info
         int count1 = 0;
         numeratorDEList = new ArrayList<String>();
@@ -591,11 +574,13 @@ public class GenerateChartDataAction
         }
 
         // Period Related Info
-        startPeriod = periodStore.getPeriod( sDateLB );
-        endPeriod = periodStore.getPeriod( eDateLB );
+        startPeriod = periodService.getPeriod( sDateLB );
+        endPeriod = periodService.getPeriod( eDateLB );
+        System.out.println(sDateLB +" : "+ eDateLB);
 
+        /*        
         int monthlyPeriodTypeId = 0;
-        Collection periodTypes = periodStore.getAllPeriodTypes();
+        Collection periodTypes = periodService.getAllPeriodTypes();
         PeriodType monthlyPeriodType = null;
         Iterator iter = periodTypes.iterator();
         while ( iter.hasNext() )
@@ -613,11 +598,12 @@ public class GenerateChartDataAction
             // monthlyPeriodType.getId() );
             monthlyPeriodTypeId = monthlyPeriodType.getId();
         }
-        /*
-         * else { System.out.println( "Monthly Period Type is NULL" ); }
-         */
-
-        selectedPeriodList = dashBoardService.getMonthlyPeriods( startPeriod.getStartDate(), endPeriod.getEndDate() );
+        */
+        
+        PeriodType monthlyPeriodType = new MonthlyPeriodType();
+        //selectedPeriodList = dashBoardService.getMonthlyPeriods( startPeriod.getStartDate(), endPeriod.getEndDate() );
+        selectedPeriodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType( monthlyPeriodType, startPeriod.getStartDate(), endPeriod.getEndDate() ) );
+        System.out.println("PeriodList Size: "+ selectedPeriodList.size() );
 
         if ( categoryLB.equals( "facility" ) && facilityLB.equals( "random" ) )
         {
@@ -633,8 +619,8 @@ public class GenerateChartDataAction
             }
             else
             {
-                chartTitle += "\n OrganisationUnit : --- \nPeriod : "
-                    + startPeriod.getStartDate() + " To " + endPeriod.getEndDate();
+                chartTitle += "\n OrganisationUnit : --- \nPeriod : " + startPeriod.getStartDate() + " To "
+                    + endPeriod.getEndDate();
             }
         }
 
@@ -664,7 +650,7 @@ public class GenerateChartDataAction
             xseriesList.add( categories1[count1] );
             count1++;
         }
-        
+
         // if(selectedButton.equals("ViewSummary")) return "ViewSummary";
 
         ActionContext ctx = ActionContext.getContext();
@@ -693,6 +679,7 @@ public class GenerateChartDataAction
      * jan2006,feb2006,mar2006 and service2 - jan2006,feb2006,mar2006 for the
      * selected orgunit
      */
+    @SuppressWarnings( "unchecked" )
     public Double[][] getServiceValuesByPeriod()
     {
         Double[][] serviceValues = new Double[selectedServiceList.size()][selectedPeriodList.size()];
@@ -700,6 +687,7 @@ public class GenerateChartDataAction
 
         int countForServiceList = 0;
         int countForPeriodList = 0;
+        @SuppressWarnings( "unused" )
         int targetFlag = 0;
         Indicator ind = new Indicator();
         DataElement dElement = new DataElement();
@@ -721,7 +709,7 @@ public class GenerateChartDataAction
             List<String> numValues = new ArrayList<String>();
             List<String> denValues = new ArrayList<String>();
             List<String> dataValues = new ArrayList<String>();
-            //List<Target> targetList = new ArrayList<Target>();
+            // List<Target> targetList = new ArrayList<Target>();
             List<SurveyData> surveyList = new ArrayList<SurveyData>();
 
             if ( riRadio.equals( "indicatorsRadio" ) )
@@ -732,36 +720,42 @@ public class GenerateChartDataAction
                 series2[countForServiceList] = ind.getName() + "(Target)";
                 yseriesList.add( ind.getName() );
 
-                List<Period> tempPeriodList = new ArrayList<Period>( periodStore.getIntersectingPeriods( startPeriod
+                List<Period> tempPeriodList = new ArrayList<Period>( periodService.getIntersectingPeriods( startPeriod
                     .getStartDate(), endPeriod.getEndDate() ) );
                 Iterator tempPeriodListIterator = tempPeriodList.iterator();
                 while ( tempPeriodListIterator.hasNext() )
                 {
+                    @SuppressWarnings( "unused" )
                     Period tempPeriod = (Period) tempPeriodListIterator.next();
                     if ( ougSetCB == null )
                     {
-                        //List<Target> tempTarget = new ArrayList<Target>( targetService.getTargets( ind, tempPeriod, selectedOrgUnit ) );
-                        List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList(ind, selectedOrgUnit));
+                        // List<Target> tempTarget = new ArrayList<Target>(
+                        // targetService.getTargets( ind, tempPeriod,
+                        // selectedOrgUnit ) );
+                        List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList( ind, selectedOrgUnit ) );
                         surveyList = new ArrayList<SurveyData>();
-                        //if ( tempTarget != null )
-                        //    targetList.addAll( tempTarget );
-                        if(tempSurvey !=null && tempSurvey.size() > 0)
+                        // if ( tempTarget != null )
+                        // targetList.addAll( tempTarget );
+                        if ( tempSurvey != null && tempSurvey.size() > 0 )
                             surveyList.addAll( tempSurvey );
                     }
                     else
                     {
-                        //List<Target> tempTarget = new ArrayList<Target>( targetService.getTargets( ind, tempPeriod,
-                        //    selectedOrgUnitGroup.getMembers().iterator().next() ) );
-                        //if ( tempTarget != null )
-                        //    targetList.addAll( tempTarget );
-                        List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList(ind, selectedOrgUnitGroup.getMembers().iterator().next()));
+                        // List<Target> tempTarget = new ArrayList<Target>(
+                        // targetService.getTargets( ind, tempPeriod,
+                        // selectedOrgUnitGroup.getMembers().iterator().next() )
+                        // );
+                        // if ( tempTarget != null )
+                        // targetList.addAll( tempTarget );
+                        List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList( ind,
+                            selectedOrgUnitGroup.getMembers().iterator().next() ) );
                         surveyList = new ArrayList<SurveyData>();
-                        if(tempSurvey !=null && tempSurvey.size() > 0)
-                            surveyList.addAll( tempSurvey );                        
+                        if ( tempSurvey != null && tempSurvey.size() > 0 )
+                            surveyList.addAll( tempSurvey );
                     }
 
                 }
-                //indicatorTargetList.put( ind, targetList );
+                // indicatorTargetList.put( ind, targetList );
                 indicatorSurveyList.put( ind, surveyList );
             }
             else
@@ -770,14 +764,16 @@ public class GenerateChartDataAction
                 if ( deSelection.equalsIgnoreCase( "optioncombo" ) )
                 {
                     decoc = selectedOptionComboList.get( countForServiceList );
-                    /*if ( dElement.getAlternativeName() != null )
-                    {
-                        series1[countForServiceList] = dElement.getAlternativeName() + " : "
-                            + dataElementCategoryOptionComboService.getOptionNames( decoc );
-                        series2[countForServiceList] = dElement.getAlternativeName() + " : "
-                            + dataElementCategoryOptionComboService.getOptionNames( decoc ) + " (Target)";
-                    }
-                    else*/
+                    /*
+                     * if ( dElement.getAlternativeName() != null ) {
+                     * series1[countForServiceList] =
+                     * dElement.getAlternativeName() + " : " +
+                     * dataElementCategoryOptionComboService.getOptionNames(
+                     * decoc ); series2[countForServiceList] =
+                     * dElement.getAlternativeName() + " : " +
+                     * dataElementCategoryOptionComboService.getOptionNames(
+                     * decoc ) + " (Target)"; } else
+                     */
                     {
                         series1[countForServiceList] = dElement.getName() + " : "
                             + dataElementCategoryOptionComboService.getOptionNames( decoc );
@@ -790,12 +786,12 @@ public class GenerateChartDataAction
                 else
                 {
                     /*
-                    if ( dElement.getAlternativeName() != null )
-                    {
-                        series1[countForServiceList] = dElement.getAlternativeName();
-                        series2[countForServiceList] = dElement.getAlternativeName() + " (Target)";
-                    }
-                    else*/
+                     * if ( dElement.getAlternativeName() != null ) {
+                     * series1[countForServiceList] =
+                     * dElement.getAlternativeName();
+                     * series2[countForServiceList] =
+                     * dElement.getAlternativeName() + " (Target)"; } else
+                     */
                     {
                         series1[countForServiceList] = dElement.getName();
                         series2[countForServiceList] = dElement.getName() + " (Target)";
@@ -821,9 +817,12 @@ public class GenerateChartDataAction
 
                     if ( ougSetCB == null )
                     {
-                            serviceValues[countForServiceList][countForPeriodList] = aggregationService.getAggregatedIndicatorValue( ind, p.getStartDate(), p.getEndDate(), selectedOrgUnit );
-                            numVal = aggregationService.getAggregatedNumeratorValue( ind, p.getStartDate(), p.getEndDate(), selectedOrgUnit );
-                            denVal = aggregationService.getAggregatedDenominatorValue( ind, p.getStartDate(), p.getEndDate(), selectedOrgUnit );
+                        serviceValues[countForServiceList][countForPeriodList] = aggregationService
+                            .getAggregatedIndicatorValue( ind, p.getStartDate(), p.getEndDate(), selectedOrgUnit );
+                        numVal = aggregationService.getAggregatedNumeratorValue( ind, p.getStartDate(), p.getEndDate(),
+                            selectedOrgUnit );
+                        denVal = aggregationService.getAggregatedDenominatorValue( ind, p.getStartDate(), p
+                            .getEndDate(), selectedOrgUnit );
                     }
                     else
                     {
@@ -840,10 +839,13 @@ public class GenerateChartDataAction
                                 .getEndDate(), ou );
                             double tempden = aggregationService.getAggregatedDenominatorValue( ind, p.getStartDate(), p
                                 .getEndDate(), ou );
-                            if(tempd == -1) tempd = 0.0;
-                            if(tempnum == -1) tempnum = 0.0;
-                            if(tempden == -1) tempden = 0.0;
-                            
+                            if ( tempd == -1 )
+                                tempd = 0.0;
+                            if ( tempnum == -1 )
+                                tempnum = 0.0;
+                            if ( tempden == -1 )
+                                tempden = 0.0;
+
                             aggValue += tempd;
                             numVal += tempnum;
                             denVal += tempden;
@@ -859,49 +861,55 @@ public class GenerateChartDataAction
                     {
                         if ( ougSetCB == null )
                         {
-                            if( aggDataCB == null )
+                            if ( aggDataCB == null )
                             {
                                 DataValue dv1 = dataValueService.getDataValue( selectedOrgUnit, dElement, p, decoc );
-                                if( dv1 != null )
-                                    serviceValues[countForServiceList][countForPeriodList] = Double.parseDouble( dv1.getValue() );
+                                if ( dv1 != null )
+                                    serviceValues[countForServiceList][countForPeriodList] = Double.parseDouble( dv1
+                                        .getValue() );
                                 else
                                     serviceValues[countForServiceList][countForPeriodList] = 0.0;
                             }
                             else
                             {
-                                serviceValues[countForServiceList][countForPeriodList] = aggregationService.getAggregatedDataValue( dElement, decoc, p.getStartDate(), p.getEndDate(), selectedOrgUnit );
+                                serviceValues[countForServiceList][countForPeriodList] = aggregationService
+                                    .getAggregatedDataValue( dElement, decoc, p.getStartDate(), p.getEndDate(),
+                                        selectedOrgUnit );
                             }
                         }
                         else
                         {
-                            if( aggDataCB == null )
+                            if ( aggDataCB == null )
                             {
                                 double aggValue = 0.0;
-                                List<OrganisationUnit> orgUnits = new ArrayList<OrganisationUnit>( selectedOrgUnitGroup.getMembers() );
+                                List<OrganisationUnit> orgUnits = new ArrayList<OrganisationUnit>( selectedOrgUnitGroup
+                                    .getMembers() );
                                 Iterator<OrganisationUnit> orgUnitsIterator = orgUnits.iterator();
                                 while ( orgUnitsIterator.hasNext() )
                                 {
                                     OrganisationUnit ou = (OrganisationUnit) orgUnitsIterator.next();
-                                    
+
                                     double tempd = -1.0;
                                     DataValue dv1 = dataValueService.getDataValue( ou, dElement, p, decoc );
-                                    if( dv1 != null )
-                                        tempd = Double.parseDouble( dv1.getValue() );                                            
+                                    if ( dv1 != null )
+                                        tempd = Double.parseDouble( dv1.getValue() );
                                     if ( tempd == -1.0 )
                                         tempd = 0.0;
                                     aggValue += tempd;
                                 }
-                                serviceValues[countForServiceList][countForPeriodList] = aggValue;                                
+                                serviceValues[countForServiceList][countForPeriodList] = aggValue;
                             }
                             else
                             {
                                 double aggValue = 0.0;
-                                List<OrganisationUnit> orgUnits = new ArrayList<OrganisationUnit>( selectedOrgUnitGroup.getMembers() );
+                                List<OrganisationUnit> orgUnits = new ArrayList<OrganisationUnit>( selectedOrgUnitGroup
+                                    .getMembers() );
                                 Iterator<OrganisationUnit> orgUnitsIterator = orgUnits.iterator();
                                 while ( orgUnitsIterator.hasNext() )
                                 {
                                     OrganisationUnit ou = (OrganisationUnit) orgUnitsIterator.next();
-                                    double tempd = aggregationService.getAggregatedDataValue( dElement, decoc, p.getStartDate(), p.getEndDate(), ou );
+                                    double tempd = aggregationService.getAggregatedDataValue( dElement, decoc, p
+                                        .getStartDate(), p.getEndDate(), ou );
                                     if ( tempd == -1 )
                                         tempd = 0.0;
                                     aggValue += tempd;
@@ -927,18 +935,22 @@ public class GenerateChartDataAction
 
                             if ( ougSetCB == null )
                             {
-                                if( aggDataCB == null )
+                                if ( aggDataCB == null )
                                 {
-                                   DataValue dv1 = dataValueService.getDataValue( selectedOrgUnit, dElement, p, decoc1 );
-                                   if( dv1 != null ) aggDataValue = Double.parseDouble( dv1.getValue() );
-                                   else aggDataValue = 0.0;
+                                    DataValue dv1 = dataValueService
+                                        .getDataValue( selectedOrgUnit, dElement, p, decoc1 );
+                                    if ( dv1 != null )
+                                        aggDataValue = Double.parseDouble( dv1.getValue() );
+                                    else
+                                        aggDataValue = 0.0;
                                 }
                                 else
                                 {
-                                    aggDataValue = aggregationService.getAggregatedDataValue( dElement, decoc1, p.getStartDate(), p.getEndDate(), selectedOrgUnit );
-                                    //System.out.println("AggValue for DE : "+dElement.getName()+" Period: "+p.getStartDate()+" -- "+p.getEndDate()+" and OrgUnit : "+selectedOrgUnit.getName()+" is : "+aggDataValue);
+                                    aggDataValue = aggregationService.getAggregatedDataValue( dElement, decoc1, p
+                                        .getStartDate(), p.getEndDate(), selectedOrgUnit );
+                                    // System.out.println("AggValue for DE : "+dElement.getName()+" Period: "+p.getStartDate()+" -- "+p.getEndDate()+" and OrgUnit : "+selectedOrgUnit.getName()+" is : "+aggDataValue);
                                 }
-                                
+
                             }
                             else
                             {
@@ -949,14 +961,16 @@ public class GenerateChartDataAction
                                 {
                                     OrganisationUnit ou = (OrganisationUnit) orgUnitsIterator.next();
                                     double tempd = 0.0;
-                                    if( aggDataCB == null )
+                                    if ( aggDataCB == null )
                                     {
                                         DataValue dv1 = dataValueService.getDataValue( ou, dElement, p, decoc1 );
-                                        if( dv1 != null ) tempd = Double.parseDouble( dv1.getValue() );
+                                        if ( dv1 != null )
+                                            tempd = Double.parseDouble( dv1.getValue() );
                                     }
                                     else
                                     {
-                                        tempd = aggregationService.getAggregatedDataValue( dElement, decoc1, p.getStartDate(), p.getEndDate(), ou );                                        
+                                        tempd = aggregationService.getAggregatedDataValue( dElement, decoc1, p
+                                            .getStartDate(), p.getEndDate(), ou );
                                     }
                                     if ( tempd == -1 )
                                         tempd = 0.0;
@@ -974,17 +988,19 @@ public class GenerateChartDataAction
                     / Math.pow( 10, 2 );
                 numVal = Math.round( numVal * Math.pow( 10, 2 ) ) / Math.pow( 10, 2 );
                 denVal = Math.round( denVal * Math.pow( 10, 2 ) ) / Math.pow( 10, 2 );
-                
+
                 if ( serviceValues[countForServiceList][countForPeriodList] == -1 )
                     serviceValues[countForServiceList][countForPeriodList] = 0.0;
-                
-                //categories1[countForPeriodList] = p.getStartDate().toString();
-                //categories2[countForPeriodList] = p.getStartDate().toString();
+
+                // categories1[countForPeriodList] =
+                // p.getStartDate().toString();
+                // categories2[countForPeriodList] =
+                // p.getStartDate().toString();
 
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "MMM-yyyy" );
                 categories1[countForPeriodList] = simpleDateFormat.format( p.getStartDate() );
                 categories2[countForPeriodList] = simpleDateFormat.format( p.getStartDate() );
-                
+
                 if ( riRadio.equals( "indicatorsRadio" ) )
                     data2[countForServiceList][countForPeriodList] = (targetValues.get( "" + ind.getId() ))
                         .doubleValue();
@@ -1001,8 +1017,8 @@ public class GenerateChartDataAction
                 else
                 {
                     dataValues.add( "" + serviceValues[countForServiceList][countForPeriodList] );
-                    numValues.add(""+ numVal);
-                    denValues.add(""+ denVal);
+                    numValues.add( "" + numVal );
+                    denValues.add( "" + denVal );
                 }
 
                 countForPeriodList++;
@@ -1022,9 +1038,10 @@ public class GenerateChartDataAction
      * returns the period aggregated values for service1 - child1, child2,
      * child3 service2 - child2, child2, child3 for the selected orgunit
      */
+    @SuppressWarnings( { "unchecked", "unchecked" } )
     public Double[][] getServiceValuesByFacility()
     {
-        
+
         int countForServiceList = 0;
         int countForChildOrgUnitList = 0;
         // int noOfPeriods = selectedPeriodList.size();
@@ -1039,18 +1056,19 @@ public class GenerateChartDataAction
         {
             if ( ougSetCB == null )
             {
-                childOrgUnitList = new ArrayList<Object>( dashBoardService.getAllChildren( selectedOrgUnit ) );                
+                childOrgUnitList = new ArrayList<Object>( dashBoardService.getAllChildren( selectedOrgUnit ) );
             }
             else
             {
-                //childOrgUnitList = new ArrayList<Object>( selectedOrgUnitGroup.getMembers() );
+                // childOrgUnitList = new ArrayList<Object>(
+                // selectedOrgUnitGroup.getMembers() );
                 childOrgUnitList = new ArrayList<Object>();
                 Iterator orgUnitGroupIte = orgUnitListCB.iterator();
                 while ( orgUnitGroupIte.hasNext() )
                 {
                     OrganisationUnitGroup oug = organisationUnitGroupService.getOrganisationUnitGroup( Integer
                         .parseInt( (String) orgUnitGroupIte.next() ) );
-                    List<OrganisationUnit> tempOUList = new ArrayList<OrganisationUnit>(oug.getMembers());
+                    List<OrganisationUnit> tempOUList = new ArrayList<OrganisationUnit>( oug.getMembers() );
                     Collections.sort( tempOUList, new OrganisationUnitShortNameComparator() );
                     childOrgUnitList.addAll( tempOUList );
                 }
@@ -1090,11 +1108,11 @@ public class GenerateChartDataAction
         while ( serviceListIterator.hasNext() )
         {
             int noOfChildren = 1;
-            
+
             List<String> numValues = new ArrayList<String>();
             List<String> denValues = new ArrayList<String>();
             List<String> dataValues = new ArrayList<String>();
-            //List<Target> targetList = new ArrayList<Target>();
+            // List<Target> targetList = new ArrayList<Target>();
             List<SurveyData> surveyList = new ArrayList<SurveyData>();
             if ( riRadio.equals( "indicatorsRadio" ) )
             {
@@ -1104,34 +1122,40 @@ public class GenerateChartDataAction
                 series2[countForServiceList] = ind.getName() + "(Target)";
                 yseriesList.add( ind.getName() );
 
-                List<Period> tempPeriodList = new ArrayList<Period>( periodStore.getIntersectingPeriods( startPeriod
+                List<Period> tempPeriodList = new ArrayList<Period>( periodService.getIntersectingPeriods( startPeriod
                     .getStartDate(), endPeriod.getEndDate() ) );
                 Iterator tempPeriodListIterator = tempPeriodList.iterator();
                 while ( tempPeriodListIterator.hasNext() )
                 {
+                    @SuppressWarnings( "unused" )
                     Period tempPeriod = (Period) tempPeriodListIterator.next();
                     if ( ougSetCB == null )
                     {
                         if ( facilityLB.equals( "children" ) )
                         {
-                            //List<Target> tempTarget = new ArrayList<Target>( targetService.getTargets( ind, tempPeriod,
-                            //    selectedOrgUnit ) );
-                            //if ( tempTarget != null )
-                            //    targetList.addAll( tempTarget );
-                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList(ind, selectedOrgUnit));
+                            // List<Target> tempTarget = new ArrayList<Target>(
+                            // targetService.getTargets( ind, tempPeriod,
+                            // selectedOrgUnit ) );
+                            // if ( tempTarget != null )
+                            // targetList.addAll( tempTarget );
+                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList( ind,
+                                selectedOrgUnit ) );
                             surveyList = new ArrayList<SurveyData>();
-                            if(tempSurvey !=null && tempSurvey.size() > 0)
+                            if ( tempSurvey != null && tempSurvey.size() > 0 )
                                 surveyList.addAll( tempSurvey );
                         }
                         else
                         {
-                            //List<Target> tempTarget = new ArrayList<Target>( targetService.getTargets( ind, tempPeriod,
-                            //    (OrganisationUnit) childOrgUnitList.iterator().next() ) );
-                            //if ( tempTarget != null )
-                            //    targetList.addAll( tempTarget );
-                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList(ind, (OrganisationUnit) childOrgUnitList.iterator().next()));
+                            // List<Target> tempTarget = new ArrayList<Target>(
+                            // targetService.getTargets( ind, tempPeriod,
+                            // (OrganisationUnit)
+                            // childOrgUnitList.iterator().next() ) );
+                            // if ( tempTarget != null )
+                            // targetList.addAll( tempTarget );
+                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList( ind,
+                                (OrganisationUnit) childOrgUnitList.iterator().next() ) );
                             surveyList = new ArrayList<SurveyData>();
-                            if(tempSurvey !=null && tempSurvey.size() > 0)
+                            if ( tempSurvey != null && tempSurvey.size() > 0 )
                                 surveyList.addAll( tempSurvey );
                         }
                     }
@@ -1139,54 +1163,61 @@ public class GenerateChartDataAction
                     {
                         if ( facilityLB.equals( "children" ) )
                         {
-                            //List<Target> tempTarget = new ArrayList<Target>( targetService.getTargets( ind, tempPeriod,
-                            //    selectedOrgUnitGroup.getMembers().iterator().next() ) );
-                            //if ( tempTarget != null )
-                            //    targetList.addAll( tempTarget );
-                            
-                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList(ind, selectedOrgUnitGroup.getMembers().iterator().next()));
+                            // List<Target> tempTarget = new ArrayList<Target>(
+                            // targetService.getTargets( ind, tempPeriod,
+                            // selectedOrgUnitGroup.getMembers().iterator().next()
+                            // ) );
+                            // if ( tempTarget != null )
+                            // targetList.addAll( tempTarget );
+
+                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList( ind,
+                                selectedOrgUnitGroup.getMembers().iterator().next() ) );
                             surveyList = new ArrayList<SurveyData>();
-                            if(tempSurvey !=null && tempSurvey.size() > 0)
+                            if ( tempSurvey != null && tempSurvey.size() > 0 )
                                 surveyList.addAll( tempSurvey );
 
                         }
                         else
                         {
                             OrganisationUnitGroup oug = (OrganisationUnitGroup) childOrgUnitList.iterator().next();
-                            //List<Target> tempTarget = new ArrayList<Target>( targetService.getTargets( ind, tempPeriod,
-                            //    oug.getMembers().iterator().next() ) );
-                            //if ( tempTarget != null )
-                            //    targetList.addAll( tempTarget );
-                            
-                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList(ind, oug.getMembers().iterator().next()));
+                            // List<Target> tempTarget = new ArrayList<Target>(
+                            // targetService.getTargets( ind, tempPeriod,
+                            // oug.getMembers().iterator().next() ) );
+                            // if ( tempTarget != null )
+                            // targetList.addAll( tempTarget );
+
+                            List<SurveyData> tempSurvey = new ArrayList<SurveyData>( getSurveyList( ind, oug
+                                .getMembers().iterator().next() ) );
                             surveyList = new ArrayList<SurveyData>();
-                            if(tempSurvey !=null && tempSurvey.size() > 0)
+                            if ( tempSurvey != null && tempSurvey.size() > 0 )
                                 surveyList.addAll( tempSurvey );
-                            
+
                         }
 
                     }
                 }
-                //indicatorTargetList.put( ind, targetList );
+                // indicatorTargetList.put( ind, targetList );
                 indicatorSurveyList.put( ind, surveyList );
 
             }
             else
-            {                
-                
+            {
+
                 dElement = (DataElement) serviceListIterator.next();
-                                                
+
                 if ( deSelection.equalsIgnoreCase( "optioncombo" ) )
                 {
                     decoc = selectedOptionComboList.get( countForServiceList );
-                    /*if ( dElement.getAlternativeName() != null )
-                    {
-                        series1[countForServiceList] = dElement.getAlternativeName() + " : "
-                            + dataElementCategoryOptionComboService.getOptionNames( decoc );
-                        series2[countForServiceList] = dElement.getAlternativeName() + " : "
-                            + dataElementCategoryOptionComboService.getOptionNames( decoc ) + " (Target)";
-                    }
-                    else*/
+                    /*
+                     * if ( dElement.getAlternativeName() != null ) {
+                     * series1[countForServiceList] =
+                     * dElement.getAlternativeName() + " : " +
+                     * dataElementCategoryOptionComboService.getOptionNames(
+                     * decoc ); series2[countForServiceList] =
+                     * dElement.getAlternativeName() + " : " +
+                     * dataElementCategoryOptionComboService.getOptionNames(
+                     * decoc ) + " (Target)"; } else
+                     */
                     {
                         series1[countForServiceList] = dElement.getName() + " : "
                             + dataElementCategoryOptionComboService.getOptionNames( decoc );
@@ -1198,12 +1229,13 @@ public class GenerateChartDataAction
                 }
                 else
                 {
-                    /*if ( dElement.getAlternativeName() != null )
-                    {
-                        series1[countForServiceList] = dElement.getAlternativeName();
-                        series2[countForServiceList] = dElement.getAlternativeName() + "(Target)";
-                    }
-                    else*/
+                    /*
+                     * if ( dElement.getAlternativeName() != null ) {
+                     * series1[countForServiceList] =
+                     * dElement.getAlternativeName();
+                     * series2[countForServiceList] =
+                     * dElement.getAlternativeName() + "(Target)"; } else
+                     */
                     {
                         series1[countForServiceList] = dElement.getName();
                         series2[countForServiceList] = dElement.getName() + "(Target)";
@@ -1242,11 +1274,13 @@ public class GenerateChartDataAction
                             .getAggregatedIndicatorValue( ind, startPeriod.getStartDate(), endPeriod.getEndDate(),
                                 childOrgUnit )
                             / noOfPeriods;
-                        numVal = aggregationService.getAggregatedNumeratorValue( ind, startPeriod.getStartDate(), endPeriod.getEndDate(),
-                            childOrgUnit )/ noOfPeriods;
-                        denVal = aggregationService.getAggregatedDenominatorValue( ind, startPeriod.getStartDate(), endPeriod.getEndDate(),
-                            childOrgUnit )/ noOfPeriods;
-                        
+                        numVal = aggregationService.getAggregatedNumeratorValue( ind, startPeriod.getStartDate(),
+                            endPeriod.getEndDate(), childOrgUnit )
+                            / noOfPeriods;
+                        denVal = aggregationService.getAggregatedDenominatorValue( ind, startPeriod.getStartDate(),
+                            endPeriod.getEndDate(), childOrgUnit )
+                            / noOfPeriods;
+
                     }
                     else
                     {
@@ -1263,9 +1297,12 @@ public class GenerateChartDataAction
                                 .getStartDate(), endPeriod.getEndDate(), ou );
                             double tempden = aggregationService.getAggregatedDenominatorValue( ind, startPeriod
                                 .getStartDate(), endPeriod.getEndDate(), ou );
-                            if ( tempd == -1 ) tempd = 0.0;
-                            if( tempnum == -1 ) tempnum = 0.0;
-                            if( tempden == -1 ) tempden = 0.0;
+                            if ( tempd == -1 )
+                                tempd = 0.0;
+                            if ( tempnum == -1 )
+                                tempnum = 0.0;
+                            if ( tempden == -1 )
+                                tempden = 0.0;
                             aggValue += tempd;
                             numVal += numVal;
                             denVal += denVal;
@@ -1281,23 +1318,25 @@ public class GenerateChartDataAction
                 else
                 {
 
-                    DataElementGroup deg = dataElementService.getDataElementGroupByName( "Annual State Baseline data (%)" );                
-                    if(deg != null && deg.getMembers().contains( dElement ))
+                    DataElementGroup deg = dataElementService
+                        .getDataElementGroupByName( "Annual State Baseline data (%)" );
+                    if ( deg != null && deg.getMembers().contains( dElement ) )
                     {
                         if ( facilityLB.equals( "children" ) )
                         {
                             noOfChildren = 1;
                         }
                         else
-                        {                        
+                        {
                             if ( ougSetCB == null )
                             {
-                                noOfChildren = dashBoardService.getAllChildren( (OrganisationUnit) childOrgUnit ).size();
+                                noOfChildren = dashBoardService.getAllChildren( (OrganisationUnit) childOrgUnit )
+                                    .size();
                             }
                             else
                             {
                                 noOfChildren = childOrgUnitGroup.getMembers().size();
-                            }                        
+                            }
                         }
                     }
 
@@ -1305,22 +1344,24 @@ public class GenerateChartDataAction
                     {
                         if ( ougSetCB == null || facilityLB.equals( "children" ) )
                         {
-                            if( aggDataCB == null )
+                            if ( aggDataCB == null )
                             {
-                                Collection<Period> pList = periodStore.getIntersectingPeriods( startPeriod.getStartDate(), endPeriod.getEndDate() );
+                                Collection<Period> pList = periodService.getIntersectingPeriods( startPeriod
+                                    .getStartDate(), endPeriod.getEndDate() );
                                 double tempAggValue = 0.0;
-                                for( Period p1 : pList)
+                                for ( Period p1 : pList )
                                 {
                                     DataValue dv1 = dataValueService.getDataValue( childOrgUnit, dElement, p1, decoc );
-                                    if( dv1 != null ) tempAggValue += Double.parseDouble( dv1.getValue() );                                       
+                                    if ( dv1 != null )
+                                        tempAggValue += Double.parseDouble( dv1.getValue() );
                                 }
-                                serviceValues[countForServiceList][countForChildOrgUnitList] = tempAggValue;   
+                                serviceValues[countForServiceList][countForChildOrgUnitList] = tempAggValue;
                             }
                             else
                             {
                                 serviceValues[countForServiceList][countForChildOrgUnitList] = aggregationService
-                                .getAggregatedDataValue( dElement, decoc, startPeriod.getStartDate(), endPeriod
-                                    .getEndDate(), childOrgUnit );                                
+                                    .getAggregatedDataValue( dElement, decoc, startPeriod.getStartDate(), endPeriod
+                                        .getEndDate(), childOrgUnit );
                             }
                         }
                         else
@@ -1331,24 +1372,27 @@ public class GenerateChartDataAction
                             Iterator<OrganisationUnit> orgUnitsIterator = orgUnits.iterator();
                             while ( orgUnitsIterator.hasNext() )
                             {
-                                OrganisationUnit ou = (OrganisationUnit) orgUnitsIterator.next();                                
+                                OrganisationUnit ou = (OrganisationUnit) orgUnitsIterator.next();
                                 double tempd = 0.0;
-                                if( aggDataCB == null )
+                                if ( aggDataCB == null )
                                 {
-                                    Collection<Period> pList = periodStore.getIntersectingPeriods( startPeriod.getStartDate(), endPeriod.getEndDate() );
+                                    Collection<Period> pList = periodService.getIntersectingPeriods( startPeriod
+                                        .getStartDate(), endPeriod.getEndDate() );
                                     double tempAggValue = 0.0;
-                                    for( Period p1 : pList)
+                                    for ( Period p1 : pList )
                                     {
                                         DataValue dv1 = dataValueService.getDataValue( ou, dElement, p1, decoc );
-                                        if( dv1 != null ) tempAggValue += Double.parseDouble( dv1.getValue() );                                       
+                                        if ( dv1 != null )
+                                            tempAggValue += Double.parseDouble( dv1.getValue() );
                                     }
                                     tempd = tempAggValue;
                                 }
                                 else
                                 {
-                                    tempd = aggregationService.getAggregatedDataValue( dElement, decoc, startPeriod.getStartDate(), endPeriod.getEndDate(), ou );    
+                                    tempd = aggregationService.getAggregatedDataValue( dElement, decoc, startPeriod
+                                        .getStartDate(), endPeriod.getEndDate(), ou );
                                 }
-                                
+
                                 if ( tempd == -1 )
                                     tempd = 0.0;
                                 aggValue += tempd;
@@ -1373,20 +1417,24 @@ public class GenerateChartDataAction
                                 .next();
                             if ( ougSetCB == null || facilityLB.equals( "children" ) )
                             {
-                                if( aggDataCB == null )
+                                if ( aggDataCB == null )
                                 {
-                                    Collection<Period> pList = periodStore.getIntersectingPeriods( startPeriod.getStartDate(), endPeriod.getEndDate() );
+                                    Collection<Period> pList = periodService.getIntersectingPeriods( startPeriod
+                                        .getStartDate(), endPeriod.getEndDate() );
                                     double tempAggValue = 0.0;
-                                    for( Period p1 : pList)
+                                    for ( Period p1 : pList )
                                     {
-                                        DataValue dv1 = dataValueService.getDataValue( childOrgUnit, dElement, p1, decoc1 );
-                                        if( dv1 != null ) tempAggValue += Double.parseDouble( dv1.getValue() );                                       
+                                        DataValue dv1 = dataValueService.getDataValue( childOrgUnit, dElement, p1,
+                                            decoc1 );
+                                        if ( dv1 != null )
+                                            tempAggValue += Double.parseDouble( dv1.getValue() );
                                     }
-                                    aggDataValue = tempAggValue;   
+                                    aggDataValue = tempAggValue;
                                 }
                                 else
                                 {
-                                    aggDataValue = aggregationService.getAggregatedDataValue( dElement, decoc1, startPeriod.getStartDate(), endPeriod.getEndDate(), childOrgUnit );
+                                    aggDataValue = aggregationService.getAggregatedDataValue( dElement, decoc1,
+                                        startPeriod.getStartDate(), endPeriod.getEndDate(), childOrgUnit );
                                 }
                             }
                             else
@@ -1396,25 +1444,28 @@ public class GenerateChartDataAction
                                 Iterator<OrganisationUnit> orgUnitsIterator = orgUnits.iterator();
                                 while ( orgUnitsIterator.hasNext() )
                                 {
-                                    OrganisationUnit ou = (OrganisationUnit) orgUnitsIterator.next();                                                                        
+                                    OrganisationUnit ou = (OrganisationUnit) orgUnitsIterator.next();
                                     double tempd = 0.0;
-                                    
-                                    if( aggDataCB == null )
+
+                                    if ( aggDataCB == null )
                                     {
-                                        Collection<Period> pList = periodStore.getIntersectingPeriods( startPeriod.getStartDate(), endPeriod.getEndDate() );
+                                        Collection<Period> pList = periodService.getIntersectingPeriods( startPeriod
+                                            .getStartDate(), endPeriod.getEndDate() );
                                         double tempAggValue = 0.0;
-                                        for( Period p1 : pList)
+                                        for ( Period p1 : pList )
                                         {
                                             DataValue dv1 = dataValueService.getDataValue( ou, dElement, p1, decoc1 );
-                                            if( dv1 != null ) tempAggValue += Double.parseDouble( dv1.getValue() );                                       
+                                            if ( dv1 != null )
+                                                tempAggValue += Double.parseDouble( dv1.getValue() );
                                         }
-                                        tempd = tempAggValue;   
+                                        tempd = tempAggValue;
                                     }
                                     else
                                     {
-                                        tempd = aggregationService.getAggregatedDataValue( dElement, decoc1, startPeriod.getStartDate(), endPeriod.getEndDate(), ou );
+                                        tempd = aggregationService.getAggregatedDataValue( dElement, decoc1,
+                                            startPeriod.getStartDate(), endPeriod.getEndDate(), ou );
                                     }
-                                    
+
                                     if ( tempd == -1 )
                                         tempd = 0.0;
                                     aggDataValue += tempd;
@@ -1430,10 +1481,10 @@ public class GenerateChartDataAction
                 serviceValues[countForServiceList][countForChildOrgUnitList] = Math
                     .round( serviceValues[countForServiceList][countForChildOrgUnitList] * Math.pow( 10, 2 ) )
                     / Math.pow( 10, 2 );
-            
+
                 numVal = Math.round( numVal * Math.pow( 10, 2 ) ) / Math.pow( 10, 2 );
                 denVal = Math.round( denVal * Math.pow( 10, 2 ) ) / Math.pow( 10, 2 );
-            
+
                 if ( serviceValues[countForServiceList][countForChildOrgUnitList] == -1 )
                     serviceValues[countForServiceList][countForChildOrgUnitList] = 0.0;
                 if ( ougSetCB == null || facilityLB.equals( "children" ) )
@@ -1462,8 +1513,8 @@ public class GenerateChartDataAction
                 else
                 {
                     dataValues.add( "" + serviceValues[countForServiceList][countForChildOrgUnitList] );
-                    numValues.add( ""+numVal );
-                    denValues.add( ""+denVal );
+                    numValues.add( "" + numVal );
+                    denValues.add( "" + denVal );
                 }
                 countForChildOrgUnitList++;
             }// childOrgUnitList loop end
@@ -1499,11 +1550,10 @@ public class GenerateChartDataAction
                     flag = 2;
                     int itemp = Integer.parseInt( temp1 );
                     DataElement de = dataElementService.getDataElement( itemp );
-                    /*if ( de.getAlternativeName() != null )
-                    {
-                        deNames += de.getAlternativeName() + ",<br>";
-                    }
-                    else*/
+                    /*
+                     * if ( de.getAlternativeName() != null ) { deNames +=
+                     * de.getAlternativeName() + ",<br>"; } else
+                     */
                     {
                         deNames += de.getName() + ",<br>";
                     }
@@ -1524,6 +1574,7 @@ public class GenerateChartDataAction
     /*
      * Assigns the Indicator Target values in the list.
      */
+    @SuppressWarnings( "unchecked" )
     public void getTargetValues()
     {
         Connection con = null;
@@ -1532,8 +1583,8 @@ public class GenerateChartDataAction
 
         try
         {
-            DBConnection dbc = new DBConnection();
-            con = dbc.openConnection();
+            //DBConnection dbc = new DBConnection();
+            //con = dbc.openConnection();
 
             String query = "SELECT target FROM indicator WHERE indicatorid = ?";
             pst = con.prepareStatement( query );
@@ -1580,19 +1631,19 @@ public class GenerateChartDataAction
 
     } // getTargetValues end
 
-    
-    private List<SurveyData> getSurveyList(Indicator ind, OrganisationUnit selectedOrgUnit)
+    private List<SurveyData> getSurveyList( Indicator ind, OrganisationUnit selectedOrgUnit )
     {
         List<SurveyData> resultList = new ArrayList<SurveyData>();
-        
+
         String path = System.getProperty( "user.home" ) + File.separator + "dhis" + File.separator + "db"
-        + File.separator + "surveyDataMapping.xml";
+            + File.separator + "surveyDataMapping.xml";
         try
         {
             String newpath = System.getenv( "USER_HOME" );
             if ( newpath != null )
             {
-                path = newpath + File.separator + "dhis" + File.separator + "db" + File.separator + "surveyDataMapping.xml";
+                path = newpath + File.separator + "dhis" + File.separator + "db" + File.separator
+                    + "surveyDataMapping.xml";
             }
         }
         catch ( NullPointerException npe )
@@ -1619,31 +1670,31 @@ public class GenerateChartDataAction
             for ( int s = 0; s < totalSurveys; s++ )
             {
                 Element surveyElement = (Element) listOfSurveys.item( s );
-                int indId = Integer.parseInt(surveyElement.getAttribute( "indicatorid" ));
-                int ouId = Integer.parseInt(surveyElement.getAttribute( "orgunitid" ));
+                int indId = Integer.parseInt( surveyElement.getAttribute( "indicatorid" ) );
+                int ouId = Integer.parseInt( surveyElement.getAttribute( "orgunitid" ) );
                 String dlhs = surveyElement.getAttribute( "dlhs" );
                 String nfhs = surveyElement.getAttribute( "nfhs" );
-                if(indId == ind.getId() && ouId==selectedOrgUnit.getId())
+                if ( indId == ind.getId() && ouId == selectedOrgUnit.getId() )
                 {
-                    if(dlhs.equalsIgnoreCase( "na" ))
+                    if ( dlhs.equalsIgnoreCase( "na" ) )
                     {
-                    
+
                     }
                     else
                     {
-                        SurveyData sd = new SurveyData("DLHS", dlhs);
+                        SurveyData sd = new SurveyData( "DLHS", dlhs );
                         resultList.add( sd );
                     }
-                    if(nfhs.equalsIgnoreCase( "na" ))
+                    if ( nfhs.equalsIgnoreCase( "na" ) )
                     {
-                    
+
                     }
                     else
                     {
-                        SurveyData sd = new SurveyData("NFHS", nfhs);
+                        SurveyData sd = new SurveyData( "NFHS", nfhs );
                         resultList.add( sd );
-                    }                    
-                }            
+                    }
+                }
             }// end of for loop with s var
         }// try block end
         catch ( SAXParseException err )
@@ -1660,12 +1711,8 @@ public class GenerateChartDataAction
         {
             t.printStackTrace();
         }
-        
+
         return resultList;
     }
-
-
-    
-
 
 }// class end

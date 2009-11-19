@@ -4,7 +4,7 @@
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-   <bean id="org.hisp.dhis.sandbox.mobileimport.action.MobileHomePageAction"
+    <bean id="org.hisp.dhis.sandbox.mobileimport.action.MobileHomePageAction"
 		class="org.hisp.dhis.sandbox.mobileimport.action.MobileHomePageAction"
 		scope="prototype">
 	</bean>
@@ -19,8 +19,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   		<property name="userStore">
 			<ref bean="org.hisp.dhis.user.UserStore"/>
 		</property>
-  		<property name="periodStore">
-			<ref bean="org.hisp.dhis.period.PeriodStore"/>
+  		<property name="periodService">
+			<ref bean="org.hisp.dhis.period.PeriodService"/>
 		</property>
 	</bean>
 	         

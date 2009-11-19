@@ -42,6 +42,16 @@
     cursor: default;    
 }
 
+.NormalBHeading {
+    font-family: arial, georgia, tahoma;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    cursor: default;
+    color:#ffffff;
+    background-color: #808080;
+}
+
 .TableDataCellStyles {
     font-family: arial, georgia, tahoma;
     font-size: 10px;    

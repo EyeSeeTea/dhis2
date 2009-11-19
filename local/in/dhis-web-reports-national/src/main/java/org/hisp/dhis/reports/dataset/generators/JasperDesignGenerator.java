@@ -38,12 +38,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.servlet.ServletContext;
 
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
 import org.hisp.dhis.reports.dataset.utils.FileUtils;
-import com.opensymphony.webwork.ServletActionContext;
 
 /**
  * @author Nguyen Dang Quang

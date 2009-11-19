@@ -1,16 +1,10 @@
 <h3>$i18n.getString( "Survey Data Entry" )</h3>
 
-<div id="currentSelection">
-	#if ( $organisationUnit ) $encoder.htmlEncode( $organisationUnit.name )#else $i18n.getString( "no_organisationunit_selected" ) #end <br>				
-	<span id="currentIndicator">$i18n.getString( "no_survey_selected" )</span>	
-</div>
-
 <br>
 
 <form id="selectForm" name="selectForm" method="post" action="select.action">
 
-    <table>
-	
+    <table>	
 	   <tr>
     		<td><label>$i18n.getString( "organisation_unit" )</label></td>
     		<td><input type="text" readonly="readonly" #if( $organisationUnit ) value="$encoder.htmlEncode( $organisationUnit.name )" #else value="[$i18n.getString( "select" )]" #end style="min-width:350px"></td>
@@ -29,10 +23,8 @@
     			    #end
     			</select>
     		</td>
-	   </tr>
-	
+	   </tr>	
     </table>
-
 </form>
 
 <hr style="clear:both">

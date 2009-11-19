@@ -50,12 +50,14 @@ public class ExportToExcelDetailedVAAction extends ActionSupport
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -64,12 +66,14 @@ public class ExportToExcelDetailedVAAction extends ActionSupport
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
     
     // -------------------------------------------------------------------------
     // Action implementation

@@ -37,6 +37,7 @@ import org.hisp.dhis.period.Period;
  * @author Torgeir Lorange Ostby
  * @version $Id: SelectedStateManager.java 3311 2007-05-18 14:08:01Z torgeilo $
  */
+
 public interface SelectedStateManager
 {
     OrganisationUnit getSelectedOrganisationUnit();

@@ -46,14 +46,14 @@ public class Report
 
     }
 
-    public Report( String id, String name, String type, String model, String fileName, String checkerFileName )
+    public Report( String id, String name, String type, String model, String fileName )
     {
         this.id = id;
         this.name = name;
         this.type = type;
         this.model = model;
         this.fileName = fileName;
-        this.chckerFileName = checkerFileName;
+        //this.chckerFileName = checkerFileName;
     }
 
     // -------------------------------------------------------------------------

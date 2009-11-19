@@ -1,3 +1,5 @@
+package org.hisp.dhis.survey;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.survey;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -41,6 +42,7 @@ import org.hisp.dhis.source.Source;
  * @version $Id$
  */
 
+@SuppressWarnings("serial")
 public class Survey implements Serializable
 {
     /**

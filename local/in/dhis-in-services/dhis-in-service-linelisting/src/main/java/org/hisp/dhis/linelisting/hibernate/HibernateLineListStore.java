@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateSessionManager;
 import org.hisp.dhis.linelisting.LineListElement;
 import org.hisp.dhis.linelisting.LineListGroup;
 import org.hisp.dhis.linelisting.LineListOption;
@@ -17,16 +17,15 @@ import org.hisp.dhis.source.Source;
 public class HibernateLineListStore
     implements LineListStore
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private HibernateSessionManager sessionManager;
+    private SessionFactory sessionFactory;
 
-    public void setSessionManager( HibernateSessionManager sessionManager )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.sessionManager = sessionManager;
+        this.sessionFactory = sessionFactory;
     }
 
     private PeriodStore periodStore;
@@ -46,14 +45,14 @@ public class HibernateLineListStore
 
         lineListGroup.setPeriodType( periodType );
 
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Integer) session.save( lineListGroup );
     }
 
     public void deleteLineListGroup( LineListGroup lineListGroup )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.delete( lineListGroup );
 
@@ -62,7 +61,7 @@ public class HibernateLineListStore
     @SuppressWarnings( "unchecked" )
     public Collection<LineListGroup> getAllLineListGroups()
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return session.createCriteria( LineListGroup.class ).list();
 
@@ -70,7 +69,7 @@ public class HibernateLineListStore
 
     public LineListGroup getLineListGroup( int id )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (LineListGroup) session.get( LineListGroup.class, id );
 
@@ -78,7 +77,7 @@ public class HibernateLineListStore
 
     public LineListGroup getLineListGroupByName( String name )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListGroup.class );
         criteria.add( Restrictions.eq( "name", name ) );
@@ -88,7 +87,7 @@ public class HibernateLineListStore
 
     public LineListGroup getLineListGroupByShortName( String shortName )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListGroup.class );
         criteria.add( Restrictions.eq( "shortName", shortName ) );
@@ -99,7 +98,7 @@ public class HibernateLineListStore
     @SuppressWarnings( "unchecked" )
     public Collection<LineListGroup> getLineListGroupsBySource( Source source )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListGroup.class );
         criteria.createAlias( "sources", "s" );
@@ -111,7 +110,7 @@ public class HibernateLineListStore
     @SuppressWarnings( "unchecked" )
     public Collection<LineListGroup> getLineListGroupsByElement( LineListElement lineListElement )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListGroup.class );
         criteria.createAlias( "lineListElement", "l" );
@@ -127,7 +126,7 @@ public class HibernateLineListStore
 
         lineListGroup.setPeriodType( periodType );
         
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.update( lineListGroup );
 
@@ -139,15 +138,14 @@ public class HibernateLineListStore
 
     public int addLineListElement( LineListElement lineListElement )
     {
-
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Integer) session.save( lineListElement );
     }
 
     public void deleteLineListElement( LineListElement lineListElement )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.delete( lineListElement );
 
@@ -156,7 +154,7 @@ public class HibernateLineListStore
     @SuppressWarnings( "unchecked" )
     public Collection<LineListElement> getAllLineListElements()
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return session.createCriteria( LineListElement.class ).list();
 
@@ -164,7 +162,7 @@ public class HibernateLineListStore
 
     public LineListElement getLineListElement( int id )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (LineListElement) session.get( LineListElement.class, id );
 
@@ -172,7 +170,7 @@ public class HibernateLineListStore
 
     public LineListElement getLineListElementByName( String name )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListElement.class );
         criteria.add( Restrictions.eq( "name", name ) );
@@ -182,7 +180,7 @@ public class HibernateLineListStore
 
     public LineListElement getLineListElementByShortName( String shortName )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         
         Criteria criteria = session.createCriteria( LineListElement.class );
         criteria.add( Restrictions.eq( "shortName", shortName ) );
@@ -193,7 +191,7 @@ public class HibernateLineListStore
     @SuppressWarnings( "unchecked" )
     public Collection<LineListElement> getLineListElementsByOption( LineListOption lineListOption )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListElement.class );
         criteria.createAlias( "lineListOption", "l" );
@@ -205,7 +203,7 @@ public class HibernateLineListStore
 
     public void updateLineListElement( LineListElement lineListElement )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.update( lineListElement );
 
@@ -217,14 +215,14 @@ public class HibernateLineListStore
 
     public int addLineListOption( LineListOption lineListOption )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Integer) session.save( lineListOption );
     }
 
     public void deleteLineListOption( LineListOption lineListOption )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.delete( lineListOption );
 
@@ -233,7 +231,7 @@ public class HibernateLineListStore
     @SuppressWarnings( "unchecked" )
     public Collection<LineListOption> getAllLineListOptions()
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return session.createCriteria( LineListOption.class ).list();
 
@@ -241,7 +239,7 @@ public class HibernateLineListStore
 
     public LineListOption getLineListOption( int id )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (LineListOption) session.get( LineListOption.class, id );
 
@@ -249,7 +247,7 @@ public class HibernateLineListStore
 
     public LineListOption getLineListOptionByName( String name )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListOption.class );
         criteria.add( Restrictions.eq( "name", name ) );
@@ -259,7 +257,7 @@ public class HibernateLineListStore
 
     public LineListOption getLineListOptionByShortName( String shortName )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListOption.class );
         criteria.add( Restrictions.eq( "shortName", shortName ) );
@@ -269,10 +267,8 @@ public class HibernateLineListStore
 
     public void updateLineListOption( LineListOption lineListOption )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.update( lineListOption );
-
     }
-
 }

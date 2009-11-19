@@ -24,7 +24,7 @@
 				/dhis-web-dashboard/graphicalAnalysisFront.vm</param>
 			<param name="menu">/dhis-web-dashboard/menuWithTreeForGA.vm</param>
 			<param name="javascripts">
-				../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/lists/lists.js,javascript/db.js,javascript/ga.js,javascript/hashtable.js,javascript/date.js</param>
+				../dhis-web-commons/ouwt/ouwt.js,javascript/db.js,javascript/ga.js,javascript/hashtable.js,javascript/date.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
 			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
@@ -48,7 +48,6 @@
 		javascript/hashtable.js
 		</param>
 		<param name="stylesheets">css/StylesForTags.css</param>
-		<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		-->
 		
@@ -64,7 +63,7 @@
 			class="org.hisp.dhis.dashboard.action.GetSortedDataAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/responseSortedData.vm</result>
-			<interceptor-ref name="transactionStack"/>
+			<!--<interceptor-ref name="transactionStack"/>-->
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -76,7 +75,7 @@
 			<param name="page">/dhis-web-dashboard/annualAnalysisFront.vm</param>
 			<param name="menu">/dhis-web-dashboard/menuWithTreeForTTA.vm</param>
 			<param name="javascripts">
-				../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/lists/lists.js,javascript/db.js,javascript/aa.js,javascript/hashtable.js</param>
+				../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/util/lists.js,javascript/db.js,javascript/aa.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
 			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
@@ -129,7 +128,6 @@
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,javascript/ga.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		<!-- DataStatus Module Stuff -->
@@ -153,7 +151,6 @@
 			<param name="javascripts">
 				javascript/ds.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		<action name="summaryStatusResult"
@@ -163,7 +160,6 @@
 			<param name="javascripts">
 				javascript/ds.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		<action name="groupWiseDataStatusResult"
@@ -173,7 +169,6 @@
 			<param name="javascripts">
 				javascript/ds.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		<action name="exportDataStatusToExcel"
@@ -181,8 +176,7 @@
 			<result name="success" type="stream">
 				<param name="contentType">application/vnd.ms-excel</param>
 				<param name="inputName">inputStream</param>
-				<param name="contentDisposition">
-					attachment;filename="${fileName}"</param>
+				<param name="contentDisposition">attachment;filename="${fileName}"</param>
 				<param name="bufferSize">1024</param>
 			</result>
 		</action>
@@ -205,7 +199,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">
 				/dhis-web-dashboard/dataStatusOrgnisationunitGroupSetWiseFront.vm</param>
-			<param name="menu">/dhis-web-dashboard/menu.vm</param>
+			<param name="menu">/dhis-web-dashboard/menuWithTreeForOrgUnitGroupWiseDS.vm</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/lists/lists.js,javascript/ds.js,javascript/db.js,javascript/date.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
@@ -219,7 +213,6 @@
 			<param name="javascripts">
 				javascript/ds.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		<action name="exportDataStatusToExcel"
@@ -260,13 +253,12 @@
 		<action name="NullReporterResult"
 			class="org.hisp.dhis.dashboard.nr.action.GenerateNullReporterResultAction">
 			<result name="success" type="velocity">
-				/dhis-web-dashboard/NullReporterResult.vm</result>
+				/dhis-web-dashboard/nullReporterResult.vm</result>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,javascript/nr.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
-		
+		<!--
 		<action name="exportNullReporterToExcel"
 			class="org.hisp.dhis.dashboard.nr.action.ExportToExcelAction">
 			<result name="success" type="stream">
@@ -277,8 +269,19 @@
 				<param name="bufferSize">1024</param>
 			</result>
 		</action>
+      -->
 		
-		<!-- Maintenance -->
+    <action name="exportNullReporterToExcel"
+			class="org.hisp.dhis.dashboard.nr.action.ExportToExcelAction">
+			<result name="success" type="stream">
+				<param name="contentType">application/vnd.ms-excel</param>
+				<param name="inputName">inputStream</param>
+				<param name="contentDisposition">filename="${fileName}"</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>
+    
+		<!-- Maintenance 
 		<action name="maintenanceForm"
 			class="org.hisp.dhis.dashboard.maintenance.action.InConfigurationsFormAction">
 			<result name="success" type="velocity">/main.vm</result>
@@ -325,12 +328,13 @@
 		<action name="streamMySQLBackup"
 			class="org.hisp.dhis.dashboard.maintenance.action.StreamMySqlBackupAction">
 			<result name="success" type="stream">
-				<param name="contentType">application/zip</param>
+				<param name="contentType">application/vnd.ms-excel</param>
 				<param name="inputName">inputStream</param>
 				<param name="contentDisposition">filename="${fileName}"</param>
 				<param name="bufferSize">1024</param>
 			</result>
 		</action>
+			-->
 		
 		<!-- DashBoard Matrix
 		
@@ -341,7 +345,6 @@
 		<param name="menu">/dhis-web-dashboard/menuWithTreeForDM.vm</param>
 		<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/lists/lists.js,javascript/dmfr.js,javascript/db.js,javascript/hashtable.js</param>
 		<param name="stylesheets">css/StylesForTags.css</param>
-		<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		<action name="dashBoardMatrixResult"
@@ -349,7 +352,6 @@
 		<result name="success" type="velocity">/dhis-web-dashboard/dashBoardMatrixResult.vm</result>			
 		<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dmfr.js,javascript/db.js,javascript/hashtable.js</param>
 		<param name="stylesheets">css/StylesForTags.css</param>
-		<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		-->
@@ -374,7 +376,6 @@
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/tabularAnalysisResult.vm</result>
 			<param name="menu">/dhis-web-dashboard/menuWithTreeForTA.vm</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 			-->
 		
@@ -396,7 +397,7 @@
 			class="org.hisp.dhis.dashboard.action.GetDataElementsAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/responseDataElement.vm</result>
-			<interceptor-ref name="transactionStack"/>
+			<!--<interceptor-ref name="transactionStack"/>-->
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -404,7 +405,7 @@
 			class="org.hisp.dhis.dashboard.action.GetOrgUnitsAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/responseOrgUnit.vm</result>
-			<interceptor-ref name="transactionStack"/>
+			<!--<interceptor-ref name="transactionStack"/>-->
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -412,7 +413,7 @@
 			class="org.hisp.dhis.dashboard.action.GetIndicatorsAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/responseIndicator.vm</result>
-			<interceptor-ref name="transactionStack"/>
+			<!--<interceptor-ref name="transactionStack"/>-->
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -420,7 +421,7 @@
 			class="org.hisp.dhis.dashboard.action.GetOrgUnitGroupsAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/responseOrgUnitGroup.vm</result>
-			<interceptor-ref name="transactionStack"/>
+			<!--<interceptor-ref name="transactionStack"/>-->
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -428,7 +429,7 @@
 			class="org.hisp.dhis.dashboard.action.GetPeriodsAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/responsePeriod.vm</result>
-			<interceptor-ref name="transactionStack"/>
+			<!--<interceptor-ref name="transactionStack"/>-->
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -436,7 +437,7 @@
 			class="org.hisp.dhis.dashboard.action.GetDataSetPeriodsAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/dSetResponsePeriod.vm</result>
-			<interceptor-ref name="transactionStack"/>
+			<!--<interceptor-ref name="transactionStack"/>-->
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -459,14 +460,12 @@
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,javascript/tta.js,javascript/hashtable.js</param>
 			<param name="stylesheets">css/StylesForTags.css</param>
-			<interceptor-ref name="organisationUnitTreeStack"/>
 		</action>
 		
 		<action name="getOptionCombos"
 			class="org.hisp.dhis.dashboard.topten.action.GetOptionCombosAction">
 			<result name="success" type="velocity">
 				/dhis-web-dashboard/responseOptionCombo.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		

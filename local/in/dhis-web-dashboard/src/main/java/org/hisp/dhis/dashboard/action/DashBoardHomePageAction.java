@@ -32,10 +32,10 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
+import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
@@ -147,6 +147,7 @@ public class DashBoardHomePageAction
         }        
     }
 
+    @SuppressWarnings("unused")
     private void getIndicatorValues()
     {
         // OrgUnit Info

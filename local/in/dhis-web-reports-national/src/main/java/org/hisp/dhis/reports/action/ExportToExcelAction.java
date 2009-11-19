@@ -23,12 +23,14 @@ public class ExportToExcelAction extends ActionSupport
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -37,12 +39,14 @@ public class ExportToExcelAction extends ActionSupport
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
 
     private String htmlCode;
     

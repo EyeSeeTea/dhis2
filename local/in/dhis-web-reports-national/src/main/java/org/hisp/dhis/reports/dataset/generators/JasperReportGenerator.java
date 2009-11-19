@@ -56,11 +56,11 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
 import org.hisp.dhis.reports.dataset.report.ChartElement;
 import org.hisp.dhis.reports.dataset.utils.FileUtils;
-import com.opensymphony.webwork.ServletActionContext;
 
 /**
  * @author Lars Helge Overland

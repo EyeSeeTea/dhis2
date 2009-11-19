@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dashboard.util.MotionChart;
 import org.hisp.dhis.dataelement.DataElement;
@@ -17,7 +18,6 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -201,6 +201,7 @@ public class MotionChartResultAction
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public String execute()
         throws Exception
     {
@@ -390,6 +391,7 @@ public class MotionChartResultAction
         return SUCCESS;
     }
 
+    @SuppressWarnings("unchecked")
     public PeriodType getDataElementPeriodType( DataElement de )
     {
         List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );

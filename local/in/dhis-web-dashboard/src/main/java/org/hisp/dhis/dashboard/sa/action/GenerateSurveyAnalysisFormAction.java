@@ -31,20 +31,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
-import org.hisp.dhis.dashboard.util.PeriodStartDateComparator;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.comparator.PeriodComparator;
+import org.hisp.dhis.survey.SurveyService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -61,27 +59,20 @@ public class GenerateSurveyAnalysisFormAction extends ActionSupport
         this.indicatorService = indicatorService;
     }
 
-    private DataElementService dataElementService;
+    private PeriodService periodService;
 
-    public void setDataElementService( DataElementService dataElementService )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.dataElementService = dataElementService;
+        this.periodService = periodService;
     }
 
-    private PeriodStore periodStore;
+    private SurveyService surveyService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setSurveyService( SurveyService surveyService )
     {
-        this.periodStore = periodStore;
+        this.surveyService = surveyService;
     }
-
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
@@ -107,7 +98,12 @@ public class GenerateSurveyAnalysisFormAction extends ActionSupport
         return INDICATORVALUE;
     }
 
-    /* Parameters */
+    // -------------------------------------------------------------------------
+    // Parameters
+    // -------------------------------------------------------------------------
+       
+
+    /*
     private Collection<DataElement> dataElements;
 
     public Collection<DataElement> getDataElements()
@@ -121,7 +117,7 @@ public class GenerateSurveyAnalysisFormAction extends ActionSupport
     {
         return dataElementGroups;
     }
-
+     */
     private Collection<Indicator> indicators;
 
     public Collection<Indicator> getIndicators()
@@ -136,13 +132,14 @@ public class GenerateSurveyAnalysisFormAction extends ActionSupport
         return indicatorGroups;
     }
 
+    /*
     private Collection<OrganisationUnit> organisationUnits;
 
     public Collection<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
     }
-
+*/
     private List<Period> monthlyPeriods;
 
     public List<Period> getMonthlyPeriods()
@@ -161,19 +158,31 @@ public class GenerateSurveyAnalysisFormAction extends ActionSupport
         throws Exception
     {
         /* OrganisationUnit */
-        organisationUnits = organisationUnitService.getAllOrganisationUnits();
+        //organisationUnits = organisationUnitService.getAllOrganisationUnits();
 
         /* DataElements and Groups */
-        dataElements = dataElementService.getAllDataElements();
-        dataElementGroups = dataElementService.getAllDataElementGroups();
+        //dataElements = dataElementService.getAllDataElements();
+        //dataElementGroups = dataElementService.getAllDataElementGroups();
 
         /* Indicators and Groups */
-        indicators = indicatorService.getAllIndicators();
+        //indicators = indicatorService.getAllIndicators();
         indicatorGroups = indicatorService.getAllIndicatorGroups();
+        indicators = surveyService.getAllSurveyIndicators();
 
         /* Monthly Periods */
-        monthlyPeriods = new ArrayList<Period>( periodStore.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
-        Collections.sort( monthlyPeriods, new PeriodStartDateComparator() );
+        monthlyPeriods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
+        Iterator<Period> periodIterator = monthlyPeriods.iterator();
+        while( periodIterator.hasNext() )
+        {
+            Period p1 = periodIterator.next();
+            
+            if ( p1.getStartDate().compareTo( new Date() ) > 0 )
+            {
+                periodIterator.remove( );
+            }
+            
+        }
+        Collections.sort( monthlyPeriods, new PeriodComparator() );
         simpleDateFormat = new SimpleDateFormat( "MMM-yyyy" );
 
         return SUCCESS;

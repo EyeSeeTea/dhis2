@@ -32,7 +32,6 @@
     <action name="addReport"
       class="org.hisp.dhis.reports.action.AddReportAction">
       <result name="success" type="redirect">reportManagement.action</result>
-      <interceptor-ref name="transactionStack"/>      
     </action>
 	  
 <!-- Report Updation -->	  
@@ -45,7 +44,6 @@
     <action name="editReport"
       class="org.hisp.dhis.reports.action.UpdateReportAction">
       <result name="success" type="redirect">reportManagement.action</result>
-      <interceptor-ref name="transactionStack"/>      
     </action>
 	  	  
 <!-- Report Validation -->
@@ -54,7 +52,6 @@
       class="org.hisp.dhis.reports.action.ValidateReportAction">
       <result name="success" type="velocity-xml">/dhis-web-reports-in/responseSuccess.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-reports-in/responseInput.vm</result>
-      <interceptor-ref name="transactionStack"/>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     
@@ -62,7 +59,6 @@
     <action name="delReport"
       class="org.hisp.dhis.reports.action.DelReportAction">
       <result name="success" type="redirect">reportManagement.action</result>
-      <interceptor-ref name="transactionStack"/>      
     </action>
 	  
 
@@ -71,7 +67,6 @@
     <action name="getReport"
       class="org.hisp.dhis.reports.action.GetReportAction">
       <result name="success" type="velocity-xml">/dhis-web-reports-in/responseReportObject.vm</result>
-      <interceptor-ref name="transactionStack"/>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
@@ -87,13 +82,11 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reports-in/reportAssociations.vm</param>
       <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/associations.js</param>
-      <interceptor-ref name="transactionStack"/>
     </action>
     
     <action name="defineReportAssociations"
       class="org.hisp.dhis.reports.action.DefineReportAssociationsAction">
       <result name="success" type="redirect">reportManagement.action</result>
-      <interceptor-ref name="transactionStack"/>
     </action>
     
     <action name="selectLevel"
@@ -120,8 +113,7 @@
       class="org.hisp.dhis.reports.action.GetReportAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reports-in/reportAssociations.vm</param>
-      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/associations.js</param>
-      <interceptor-ref name="transactionStack"/>      
+      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/associations.js</param>      
     </action>
 
 <!-- Routine Reports -->
@@ -132,7 +124,6 @@
         <param name="menu">/dhis-web-reports-in/menuWithTree.vm</param>
         <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/lists/lists.js,javascript/report.js</param>
         <param name="stylesheets">css/StylesForTags.css</param>
-        <interceptor-ref name="organisationUnitTreeStack"/>
     </action>
 	  
     <action name="generateRoutineReport"
@@ -149,13 +140,11 @@
 <!-- AJAX Requests -->
     <action name="getPeriods" class="org.hisp.dhis.reports.action.GetPeriodsAction">
         <result name="success" type="velocity">/dhis-web-reports-in/responsePeriod.vm</result>
-        <interceptor-ref name="transactionStack"/>
         <param name="onExceptionReturn">plainTextError</param>
     </action>
 
     <action name="getReports" class="org.hisp.dhis.reports.action.GetReportsAction">
         <result name="success" type="velocity">/dhis-web-reports-in/responseReport.vm</result>
-        <interceptor-ref name="transactionStack"/>
         <param name="onExceptionReturn">plainTextError</param>
     </action>
 	  

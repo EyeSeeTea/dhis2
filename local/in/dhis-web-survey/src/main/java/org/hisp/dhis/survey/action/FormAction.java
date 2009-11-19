@@ -68,6 +68,7 @@ public class FormAction
     {
         this.surveyDataValueService = surveyDataValueService;
     }
+    @SuppressWarnings("unused")
     private I18n i18n;
 
     public void setI18n( I18n i18n )
@@ -79,6 +80,7 @@ public class FormAction
     // DisplayPropertyHandler
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("unused")
     private DisplayPropertyHandler displayPropertyHandler;
 
     public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
@@ -151,16 +153,13 @@ public class FormAction
         {
             dataValueMap.put( dataValue.getIndicator().getId(), dataValue );
         }
-
-       
+   
         // ---------------------------------------------------------------------
         // Working on the display of indicators
         // ---------------------------------------------------------------------
 
         orderedIndicators = indicators;
         
-        
-
         //displayPropertyHandler.handle( orderedDataElements );
         
         return SUCCESS;

@@ -25,9 +25,19 @@
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-api</artifactId>
     </dependency>
+	<dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>dhis-in-api</artifactId>
+	  <version>${version}</version>
+    </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-core</artifactId>
+    </dependency>
+	<dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>dhis-in-service-configuration</artifactId>
+      <version>${version}</version>
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
@@ -60,7 +70,8 @@
     </dependency>
 	<dependency>
       <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-service-aggregationengine-default</artifactId>		
+      <artifactId>dhis-service-aggregationengine-default</artifactId>
+      <version>${version}</version>	  
     </dependency>	   
 	<dependency>
       <groupId>org.hisp.dhis</groupId>
@@ -94,6 +105,7 @@
     <dependency>
       <groupId>poi</groupId>
       <artifactId>poi</artifactId>
+	  <version>2.5.1</version>
     </dependency>
     <dependency>
       <groupId>jfree</groupId>
@@ -102,11 +114,11 @@
     <dependency>
       <groupId>eclipse</groupId>
       <artifactId>jdtcore</artifactId>
+	  <version>3.1.0</version>
     </dependency>
 	<dependency>
         <groupId>com.lowagie</groupId>
         <artifactId>itext</artifactId>
-        <version>2.0.6</version>
     </dependency>
     
     <!-- Other -->

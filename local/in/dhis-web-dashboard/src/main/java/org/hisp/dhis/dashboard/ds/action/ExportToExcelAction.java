@@ -3,7 +3,6 @@ package org.hisp.dhis.dashboard.ds.action;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -24,12 +23,14 @@ public class ExportToExcelAction extends ActionSupport
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -38,13 +39,14 @@ public class ExportToExcelAction extends ActionSupport
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
-
+    */
     
     private String htmlCode;
     

@@ -33,6 +33,7 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.amplecode.quick.StatementManager;
 import org.apache.velocity.tools.generic.MathTool;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -40,15 +41,13 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -80,18 +79,11 @@ public class GenerateProgressAnalyserResultAction
         this.statementManager = statementManager;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
-    }
-
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
+        this.dataSetService = dataSetService;
     }
 
     private ReportService reportService;
@@ -180,12 +172,11 @@ public class GenerateProgressAnalyserResultAction
         return inputStream;
     }
 
-    private String contentType;
-
-    public String getContentType()
-    {
-        return contentType;
-    }
+    /*
+     * private String contentType;
+     * 
+     * public String getContentType() { return contentType; }
+     */
 
     private String fileName;
 
@@ -194,12 +185,11 @@ public class GenerateProgressAnalyserResultAction
         return fileName;
     }
 
-    private int bufferSize;
-
-    public int getBufferSize()
-    {
-        return bufferSize;
-    }
+    /*
+     * private int bufferSize;
+     * 
+     * public int getBufferSize() { return bufferSize; }
+     */
 
     private MathTool mathTool;
 
@@ -411,6 +401,48 @@ public class GenerateProgressAnalyserResultAction
         return monthOrder;
     }
 
+    private Map<Integer, Integer> mapOfTotalValues;
+
+    public void setMapOfTotalValues( Map<Integer, Integer> mapOfTotalValues )
+    {
+        this.mapOfTotalValues = mapOfTotalValues;
+    }
+
+    private int startRowNumber;
+
+    public void setStartRowNumber( int startRowNumber )
+    {
+        this.startRowNumber = startRowNumber;
+    }
+
+    private int totalColumnNumber;
+
+    public void setTotalColumnNumber( int totalColumnNumber )
+    {
+        this.totalColumnNumber = totalColumnNumber;
+    }
+    
+    private int sheetNo;
+    
+    public void setSheetNo( int sheetNo )
+    {
+        this.sheetNo = sheetNo;
+    }
+
+    private int tempColNo;
+    
+    public void setTempColNo( int tempColNo )
+    {
+        this.tempColNo = tempColNo;
+    }
+
+    private int tempRowNo;
+
+    public void setTempRowNo( int tempRowNo )
+    {
+        this.tempRowNo = tempRowNo;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -436,6 +468,7 @@ public class GenerateProgressAnalyserResultAction
         yearFormat = new SimpleDateFormat( "yyyy" );
         simpleYearFormat = new SimpleDateFormat( "yy" );
         deCodesXMLFileName = reportList + "DECodes.xml";
+        mapOfTotalValues = new HashMap<Integer, Integer>();
 
         startMonth = 0;
 
@@ -537,13 +570,13 @@ public class GenerateProgressAnalyserResultAction
         }
 
         String startMonthName = "";
-        
+
         String endMonthName = "";
 
         startMonth = Calendar.MONTH;
-        
+
         startMonthName = monthFormat.format( tempStartMonth.getTime() );
-        
+
         tempEndMonth.setTime( selectedPeriod.getStartDate() );
 
         endMonth = Calendar.MONTH;
@@ -602,9 +635,9 @@ public class GenerateProgressAnalyserResultAction
                 int flag1 = 0;
                 String tempStr = "";
 
-                int tempRowNo = rowList.get( count1 );
-                int tempColNo = colList.get( count1 );
-                int sheetNo = sheetList.get( count1 );
+                tempRowNo = rowList.get( count1 );
+                tempColNo = colList.get( count1 );
+                sheetNo = sheetList.get( count1 );
                 Calendar tempStart = Calendar.getInstance();
                 Calendar tempEnd = Calendar.getInstance();
 
@@ -729,6 +762,8 @@ public class GenerateProgressAnalyserResultAction
                     p = periodService.getPeriod( tempStartDate.getTime(), tempEndDate.getTime(), periodService
                         .getPeriodTypeByName( "Monthly" ) );
 
+                    startRowNumber = tempRowNo;
+
                     if ( p == null )
                     {
                         tempStr = currentMonth;
@@ -762,6 +797,29 @@ public class GenerateProgressAnalyserResultAction
                             tempStr = getResultDataValue( deCodeString, tempStartDate.getTime(), tempEndDate.getTime(),
                                 currentOrgUnit );
                         }
+
+                        int totalRowValue = 0;
+
+                        if ( mapOfTotalValues.get( tempRowNo ) != null )
+                        {
+
+                            totalRowValue = mapOfTotalValues.get( tempRowNo );
+
+                            if ( !(tempStr.equalsIgnoreCase( " " ) || tempStr.equalsIgnoreCase( "" )) )
+                                totalRowValue += Integer.valueOf( tempStr );
+
+                            mapOfTotalValues.put( tempRowNo, totalRowValue );
+
+                        }
+                        else
+                        {
+
+                            if ( !(tempStr.equalsIgnoreCase( " " ) || tempStr.equalsIgnoreCase( "" )) )
+                                totalRowValue += Integer.valueOf( tempStr );
+
+                            mapOfTotalValues.put( tempRowNo, totalRowValue );
+                        }
+
                     }
                     else if ( sType.equalsIgnoreCase( "indicator-parent" ) )
                     {
@@ -823,8 +881,7 @@ public class GenerateProgressAnalyserResultAction
 
                     if ( reportModelTB.equalsIgnoreCase( "PROGRESSIVE-PERIOD" ) )
                     {
-                        if ( deCodeString.equalsIgnoreCase( "FACILITY" )
-                            || deCodeString.equalsIgnoreCase( "FACILITYP" )
+                        if ( deCodeString.equalsIgnoreCase( "FACILITY" ) || deCodeString.equalsIgnoreCase( "FACILITYP" )
                             || deCodeString.equalsIgnoreCase( "FACILITYPP" )
                             || deCodeString.equalsIgnoreCase( "FACILITYPPP" )
                             || deCodeString.equalsIgnoreCase( "FACILITYPPPP" ) )
@@ -867,8 +924,6 @@ public class GenerateProgressAnalyserResultAction
 
                         WritableCell cell = sheet0.getWritableCell( tempColNo, tempRowNo );
 
-                        //CellFormat cellFormat = cell.getCellFormat();
-
                         wCellformat.setBorder( Border.ALL, BorderLineStyle.MEDIUM );
                         wCellformat.setAlignment( Alignment.CENTRE );
                         wCellformat.setWrap( true );
@@ -884,18 +939,6 @@ public class GenerateProgressAnalyserResultAction
                         {
                             System.out.println( "Cannot write to Excel" );
                         }
-
-                        //Period p = new Period();
-
-                        //p = periodService.getPeriod( tempStartDate.getTime(), tempEndDate.getTime(), periodService
-                        //    .getPeriodTypeByName( "Monthly" ) );
-
-                        //if ( p == null )
-
-                        //{
-                        //    done = true;
-
-                        //}
 
                     }
 
@@ -917,6 +960,89 @@ public class GenerateProgressAnalyserResultAction
 
         }// outer while loop end
 
+        //Writing total values begins
+        totalColumnNumber = tempColNo + 1;
+        
+        List<Integer> totalRowList = new ArrayList<Integer>();
+
+        totalRowList.addAll( rowList );
+
+        Iterator<Integer> totalRowListIterator = totalRowList.iterator();
+        
+        String valueToPrint = " ";
+
+        while ( totalRowListIterator.hasNext() )
+        {
+            Integer i = (Integer) totalRowListIterator.next();
+
+            if ( i < startRowNumber )
+                totalRowListIterator.remove(  );
+        }
+
+        Iterator<Integer> rowIterator = totalRowList.iterator();
+
+        while ( rowIterator.hasNext() )
+        {
+            Integer currentRow = (Integer) rowIterator.next();
+
+            int value = 0;
+
+            if ( mapOfTotalValues.containsKey( currentRow ) )
+            {
+                value = mapOfTotalValues.get( currentRow );
+                
+                valueToPrint = String.valueOf( value );
+            }
+            
+            if (value == 0)
+                valueToPrint = " ";
+
+            WritableSheet totalSheet = outputReportWorkbook.getSheet( sheetList.get( 0 ) );
+            WritableCellFormat totalCellformat = new WritableCellFormat();
+
+            WritableCell cell = totalSheet.getWritableCell( totalColumnNumber, currentRow.intValue() );
+
+            totalCellformat.setBorder( Border.ALL, BorderLineStyle.MEDIUM );
+            totalCellformat.setAlignment( Alignment.CENTRE );
+            totalCellformat.setWrap( true );
+
+            try
+            {
+
+                totalSheet.addCell( new Label( totalColumnNumber, currentRow.intValue(), valueToPrint,
+                    totalCellformat ) );
+
+            }
+
+            catch ( Exception e )
+            {
+                System.out.println( "Cannot write to Excel" );
+            }
+
+            WritableSheet totalCellSheet = outputReportWorkbook.getSheet( sheetList.get( 0 ) );
+            WritableCellFormat totalCellformat1 = new WritableCellFormat();
+
+            WritableCell totalCell = totalCellSheet.getWritableCell( totalColumnNumber, startRowNumber );
+
+            totalCellformat1.setBorder( Border.ALL, BorderLineStyle.MEDIUM );
+            totalCellformat1.setAlignment( Alignment.CENTRE );
+            totalCellformat1.setWrap( true );
+
+            try
+            {
+
+                totalCellSheet.addCell( new Label( totalColumnNumber, startRowNumber, "Total", totalCellformat1 ) );
+
+            }
+
+            catch ( Exception e )
+            {
+                System.out.println( "Cannot write to Excel" );
+            }
+            
+            //Writing total values ends
+
+        }
 
         /*
          * ActionContext ctx = ActionContext.getContext(); HttpServletResponse
@@ -1170,7 +1296,7 @@ public class GenerateProgressAnalyserResultAction
      */
     public PeriodType getDataElementPeriodType( DataElement de )
     {
-        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+        List<DataSet> dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
         Iterator it = dataSetList.iterator();
         while ( it.hasNext() )
         {

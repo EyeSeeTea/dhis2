@@ -48,6 +48,7 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-commons-resources</artifactId>
+	  <version>${version}</version>
       <type>war</type>
     </dependency>
     
@@ -56,6 +57,7 @@
      <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-aggregationengine-default</artifactId>
+	  <version>${version}</version>
     </dependency>
   
     

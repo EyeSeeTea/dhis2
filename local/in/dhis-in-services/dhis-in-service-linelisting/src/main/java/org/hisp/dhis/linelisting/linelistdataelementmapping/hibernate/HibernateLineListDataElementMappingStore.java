@@ -3,23 +3,22 @@ package org.hisp.dhis.linelisting.linelistdataelementmapping.hibernate;
 import java.util.Collection;
 
 import org.hibernate.Session;
-import org.hisp.dhis.hibernate.HibernateSessionManager;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.linelisting.linelistdataelementmapping.LineListDataElementMapping;
 import org.hisp.dhis.linelisting.linelistdataelementmapping.LineListDataElementMappingStore;
 
 public class HibernateLineListDataElementMappingStore
     implements LineListDataElementMappingStore
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private HibernateSessionManager sessionManager;
+    private SessionFactory sessionFactory;
 
-    public void setSessionManager( HibernateSessionManager sessionManager )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.sessionManager = sessionManager;
+        this.sessionFactory = sessionFactory;
     }
 
     // -------------------------------------------------------------------------
@@ -28,14 +27,14 @@ public class HibernateLineListDataElementMappingStore
 
     public int addLineListDataElementMapping( LineListDataElementMapping lineListDataElementMapping )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         
         return (Integer) session.save( lineListDataElementMapping );
     }
 
     public void deleteLineListDataElementMapping( LineListDataElementMapping lineListDataElementMapping )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         
         session.delete( lineListDataElementMapping );
     }
@@ -43,23 +42,22 @@ public class HibernateLineListDataElementMappingStore
     @SuppressWarnings("unchecked")
     public Collection<LineListDataElementMapping> getAllLineListDataElementMappings()
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         
         return session.createCriteria( LineListDataElementMapping.class ).list();
     }
 
     public LineListDataElementMapping getLineListDataElementMapping( int id )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         
         return (LineListDataElementMapping) session.get( LineListDataElementMapping.class, id );
     }
 
     public void updateLineListDataElementMapping( LineListDataElementMapping lineListDataElementMapping )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         
         session.update( lineListDataElementMapping );
     }
-
 }

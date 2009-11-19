@@ -27,6 +27,8 @@ package org.hisp.dhis.survey.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.survey.Survey;
 import org.hisp.dhis.survey.SurveyService;
 
 import com.opensymphony.xwork2.Action;
@@ -51,6 +53,13 @@ public class DelSurveyAction
         this.surveyService = surveyService;
     }
 
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     // -------------------------------------------------------------------------
     // Getters & setters
     // -------------------------------------------------------------------------
@@ -60,6 +69,20 @@ public class DelSurveyAction
         this.surveyId = surveyId;
     }
 
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private String status;
+
+    public String getStatus()
+    {
+        return status;
+    }
+
     // -------------------------------------------------------------------------
     // Action
     // -------------------------------------------------------------------------
@@ -67,8 +90,22 @@ public class DelSurveyAction
     public String execute()
         throws Exception
     {
-    	surveyService.deleteSurvey( surveyService.getSurvey( surveyId ) );
 
+        status = "success";
+        
+        Survey survey = surveyService.getSurvey( surveyId );
+        
+        int flag = surveyService.deleteSurvey( survey );
+
+        if ( flag < 0 )
+        {
+            status = "error";
+            
+            message = survey.getName() + " not Deleted. Contains Data.";
+
+            return ERROR;
+        }
+        
         return SUCCESS;
     }
 }

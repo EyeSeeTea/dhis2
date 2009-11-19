@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.dataset.DataEntryForm;
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.survey.Survey;
 import org.hisp.dhis.survey.SurveyService;
@@ -51,6 +50,7 @@ public class GetSurveyAction
 
     private List<Indicator> surveyIndicators;
 
+    @SuppressWarnings("unused")
     private DataEntryForm dataEntryForm;
     
     // -------------------------------------------------------------------------
@@ -82,10 +82,27 @@ public class GetSurveyAction
     {
         return survey;
     }
+    
+    public void setSurvey( Survey survey )
+    {
+        this.survey = survey ;
+    }
 
     public List<Indicator> getSurveyIndicators()
     {
         return surveyIndicators;
+    }
+    
+    private String description;
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+    
+    public String getDescription()
+    {
+        return description;
     }
 
     // -------------------------------------------------------------------------

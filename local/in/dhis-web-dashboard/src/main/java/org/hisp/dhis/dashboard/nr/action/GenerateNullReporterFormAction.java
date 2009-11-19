@@ -32,26 +32,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
-import org.hisp.dhis.dashboard.util.PeriodStartDateComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
 import org.hisp.dhis.dataelement.comparator.DataElementNameComparator;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
-import org.hisp.dhis.indicator.comparator.IndicatorNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.comparator.PeriodComparator;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -70,11 +65,10 @@ public class GenerateNullReporterFormAction
         this.dataElementService = dataElementService;
     }
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
-    {
-        this.periodStore = periodStore;
+    public void setPeriodService(PeriodService periodService) {
+        this.periodService = periodService;
     }
 
     @SuppressWarnings("unused")
@@ -84,7 +78,7 @@ public class GenerateNullReporterFormAction
     {
         this.organisationUnitService = organisationUnitService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Comparator
     // -------------------------------------------------------------------------
@@ -97,7 +91,7 @@ public class GenerateNullReporterFormAction
         this.dataElementGroupComparator = dataElementGroupComparator;
     }
 
-    
+
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
@@ -138,7 +132,7 @@ public class GenerateNullReporterFormAction
     {
         return organisationUnits;
     }
-  
+
     private List<Period> monthlyPeriods;
 
     public List<Period> getMonthlyPeriods()
@@ -159,13 +153,26 @@ public class GenerateNullReporterFormAction
         /* DataElements and Groups */
         dataElements = new ArrayList<DataElement>(dataElementService.getAllDataElements());
         dataElementGroups = new ArrayList<DataElementGroup>(dataElementService.getAllDataElementGroups());
-        
+
         Collections.sort( dataElements, new DataElementNameComparator() );
         Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
-        
+
         /* Monthly Periods */
-        monthlyPeriods = new ArrayList<Period>( periodStore.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
-        Collections.sort( monthlyPeriods, new PeriodStartDateComparator() );
+        monthlyPeriods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
+        
+        Iterator<Period> periodIterator = monthlyPeriods.iterator();
+        while( periodIterator.hasNext() )
+        {
+            Period p1 = periodIterator.next();
+            
+            if ( p1.getStartDate().compareTo( new Date() ) > 0 )
+            {
+                periodIterator.remove( );
+            }
+            
+        }
+        
+        Collections.sort( monthlyPeriods, new PeriodComparator() );
         simpleDateFormat = new SimpleDateFormat( "MMM - y" );
 
         return SUCCESS;

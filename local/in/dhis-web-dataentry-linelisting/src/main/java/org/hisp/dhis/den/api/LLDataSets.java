@@ -1,8 +1,34 @@
 package org.hisp.dhis.den.api;
 
+/*
+ * Copyright (c) 2004-2007, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 public class LLDataSets
 {
-
     public static final String LL_BIRTHS = "Line listing Births";
     public static final String LL_DEATHS = "Line listing Deaths";
     public static final String LL_MATERNAL_DEATHS = "Line listing Maternal Deaths";
@@ -120,11 +146,7 @@ public class LLDataSets
     public static final int LLD_CAUSE_DE11 = 1131;
     // 1132 : Not known 1 month to 5 year
     public static final int LLD_CAUSE_DE12 = 1132;
-    
-    
-
-    
-    
+       
     // 1133 : Diarrhoeal disease 5-14 years
     public static final int LLD_CAUSE_DE13 = 1133;
     // 1134 : Tuberculosis 5-14 years
@@ -170,8 +192,7 @@ public class LLDataSets
     public static final int LLD_CAUSE_DE33 = 1203;
     // 1204 : Tuberculosis Below 5 years
     public static final int LLD_CAUSE_DE34 = 1204;
-
-    
+   
     // 1205 : Diarrhoeal disease 15-55 years
     public static final int LLD_CAUSE_DE35 = 1205;
     // 1206 : HIV/AIDS 15-55 years
@@ -196,8 +217,6 @@ public class LLDataSets
     public static final int LLD_CAUSE_DE47 = 1215;
     // 1216 : Stroke and Neurological disease 15-55 years
     public static final int LLD_CAUSE_DE48 = 1216;
-
-    
     
     // 1217 : Diarrhoeal disease over 55 years
     public static final int LLD_CAUSE_DE49 = 1217;
@@ -226,9 +245,7 @@ public class LLDataSets
 
     // 1229 : Immunization reactions 1 month to 5 years
     public static final int LLD_CAUSE_DE63 = 1229;
-    
-    
-    
+        
     // 1230 : Birth Asphyxia under one  day
     public static final int LLD_CAUSE_DE64 = 1230;           
     // 1231 : Sepsis under one  day
@@ -241,9 +258,7 @@ public class LLDataSets
     public static final int LLD_CAUSE_DE68 = 1234;
     // 1235 : Not known under one  day
     public static final int LLD_CAUSE_DE69 = 1235;
-
-    
-    
+   
     // 1236 : Birth Asphyxia under one  week
     public static final int LLD_CAUSE_DE70 = 1236;           
     // 1237 : Sepsis under one  week
@@ -256,9 +271,7 @@ public class LLDataSets
     public static final int LLD_CAUSE_DE74 = 1240;
     // 1241 : Not known under one  week
     public static final int LLD_CAUSE_DE75 = 1241;
-
-    
-    
+   
     // 1242 : Pneumonia 1 month to 1 year
     public static final int LLD_CAUSE_DE76 = 1242;
     // 1243 : Diarrhoeal disease 1 month to 1 year
@@ -276,16 +289,12 @@ public class LLDataSets
     // 1249 : Others 1 month to 1 year
     public static final int LLD_CAUSE_DE83 = 1249;
     // 1250 : Not known 1 month to 1 year
-    public static final int LLD_CAUSE_DE84 = 1250;
-
-    
-    
+    public static final int LLD_CAUSE_DE84 = 1250;   
     
     public static final int LLD_OPTIONCOMBO_DEFAULT = 1;
     public static final int LLD_CAUSE_OPTIONCOMBO_MALE = 8;
     public static final int LLD_CAUSE_OPTIONCOMBO_FEMALE = 7;
-    
-    
+       
     public static final String LLD_ASPHYXIA = "ASPHYXIA";
     public static final String LLD_SEPSIS = "SEPSIS";
     public static final String LLD_LOW_BIRTH_WEIGH = "LOWBIRTHWEIGH";   
@@ -309,10 +318,7 @@ public class LLDataSets
     public static final String LLD_OKCD = "OKCD";
     public static final String LLD_OTHERS = "OTHERS";                                          
     public static final String LLD_NOT_KNOWN = "NK";
-    
-
-    
-    
+       
     //-------------------------------------------------------------------
     // Line listing Maternal Death
     //-------------------------------------------------------------------
@@ -357,9 +363,5 @@ public class LLDataSets
     public static final int LLMD_CAUSE_BACD = 548;
     public static final int LLMD_CAUSE_HFBD = 549;
     public static final int LLMD_CAUSE_HFAD = 550;
-    public static final int LLMD_CAUSE_NK = 551;
-    
-    
-    
-    
+    public static final int LLMD_CAUSE_NK = 551;    
 }

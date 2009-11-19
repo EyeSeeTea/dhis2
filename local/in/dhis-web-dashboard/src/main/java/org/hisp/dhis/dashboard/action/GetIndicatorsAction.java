@@ -36,6 +36,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
+import org.hisp.dhis.survey.SurveyService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -57,6 +58,13 @@ public class GetIndicatorsAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
+    }
+
+    private SurveyService surveyService;
+
+    public void setSurveyService( SurveyService surveyService )
+    {
+        this.surveyService = surveyService;
     }
 
     // -------------------------------------------------------------------------
@@ -92,6 +100,13 @@ public class GetIndicatorsAction
         this.id = id;
     }
 
+    private String surveyflag;
+    
+    public void setSurveyflag( String surveyflag )
+    {
+        this.surveyflag = surveyflag;
+    }
+
     private List<Indicator> indicators;
 
     public List<Indicator> getIndicators()
@@ -124,8 +139,17 @@ public class GetIndicatorsAction
             }
         }
 
-        Collections.sort( indicators, indicatorComparator );
+        // To Filter the indicators that are assigned to any survey
+        
+        if( surveyflag !=null && surveyflag.equalsIgnoreCase( "yes" ) )
+        {
+            List<Indicator> surveyIndicators = new ArrayList<Indicator>( surveyService.getAllSurveyIndicators() );
+            
+            indicators.retainAll( surveyIndicators );
+        }
 
+        Collections.sort( indicators, indicatorComparator );
+        
         displayPropertyHandler.handle( indicators );
 
         return SUCCESS;

@@ -1,11 +1,7 @@
 package org.hisp.dhis.excelimport.action;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.hisp.dhis.excelimport.util.ReportService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -13,12 +9,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -73,6 +63,13 @@ public class ExcelImportFormAction
     // Properties
     // -------------------------------------------------------------------------
 
+    private String message;
+
+    public void setMessage( String message )
+    {
+        this.message = message;
+    }
+    
     private Collection<OrganisationUnit> organisationUnits;
 
     public Collection<OrganisationUnit> getOrganisationUnits()
@@ -111,6 +108,7 @@ public class ExcelImportFormAction
             periods.addAll( periodService.getPeriodsByPeriodType( type ) );
         }
 
+        System.out.println(message);
         return SUCCESS;
     }
 

@@ -26,5 +26,21 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <ref bean="org.hisp.dhis.config.ConfigurationService"/>
       </property>
   </bean>
-			
+
+  <bean id="org.hisp.dhis.config.action.TakeMySqlBackupAction"
+      class="org.hisp.dhis.config.action.TakeMySqlBackupAction"
+      scope="prototype">
+      <property name="configurationService">
+        <ref bean="org.hisp.dhis.config.ConfigurationService"/>
+      </property>
+      <property name="provider">
+        <ref bean="org.hisp.dhis.system.database.DatabaseInfoProvider"/>
+      </property>	  
+  </bean>
+
+  <bean id="org.hisp.dhis.config.action.StreamMySqlBackupAction"
+      class="org.hisp.dhis.config.action.StreamMySqlBackupAction"
+      scope="prototype">
+  </bean>
+					
 </beans>

@@ -28,7 +28,7 @@
     
     <property name="description" type="text"/>
     
-    <property name="url" length = "75"/>
+    <property name="url" length = "160"/>
   
   </class>
   

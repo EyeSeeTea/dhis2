@@ -60,7 +60,7 @@ import org.hisp.dhis.den.comments.StandardCommentsManager;
 import org.hisp.dhis.den.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.minmax.MinMaxDataElement;
-import org.hisp.dhis.minmax.MinMaxDataElementStore;
+import org.hisp.dhis.minmax.MinMaxDataElementService;
 import org.hisp.dhis.order.manager.DataElementOrderManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -71,6 +71,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew
  * @version $Id$
  */
+
 public class FormAction
     implements Action
 {
@@ -120,11 +121,11 @@ public class FormAction
         this.standardCommentsManager = standardCommentsManager;
     }
 
-    private MinMaxDataElementStore minMaxDataElementStore;
+    private MinMaxDataElementService minMaxDataElementService;
 
-    public void setMinMaxDataElementStore( MinMaxDataElementStore minMaxDataElementStore )
+    public void setMinMaxDataElementService( MinMaxDataElementService minMaxDataElementService )
     {
-        this.minMaxDataElementStore = minMaxDataElementStore;
+        this.minMaxDataElementService = minMaxDataElementService;
     }
 
     private SelectedStateManager selectedStateManager;
@@ -165,8 +166,7 @@ public class FormAction
     {
         return lldataValueMap;
     }
-
-    
+   
     private String isLineListing;
     
     public String getIsLineListing()
@@ -484,7 +484,7 @@ public class FormAction
         // ---------------------------------------------------------------------
         // Get the min/max values
         // ---------------------------------------------------------------------
-        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementStore.getMinMaxDataElements(
+        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
             organisationUnit, dataElements );
 
         minMaxMap = new HashMap<Integer, MinMaxDataElement>( minMaxDataElements.size() );

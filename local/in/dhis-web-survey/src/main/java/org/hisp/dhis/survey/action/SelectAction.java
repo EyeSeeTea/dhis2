@@ -44,6 +44,7 @@ import com.opensymphony.xwork2.ActionSupport;
  * @author Torgeir Lorange Ostby
  * @version $Id: SelectAction.java 5930 2008-10-15 03:30:52Z tri $
  */
+@SuppressWarnings("serial")
 public class SelectAction
     extends ActionSupport
 {    

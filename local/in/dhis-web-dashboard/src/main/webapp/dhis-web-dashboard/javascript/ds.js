@@ -102,6 +102,7 @@ function formValidationsForDataStatus()
 {
 	var selOUListIndex = document.ChartGenerationForm.orgUnitListCB.options.length;
 	var selDSListSize  = document.ChartGenerationForm.selectedDataSets.options.length;
+	//var orgunitIdValue = document.ChartGenerationForm.ouIDTB.value;
     sDateIndex    = document.ChartGenerationForm.sDateLB.selectedIndex;
     eDateIndex    = document.ChartGenerationForm.eDateLB.selectedIndex;
     sDateTxt = document.ChartGenerationForm.sDateLB.options[sDateIndex].text;
@@ -114,6 +115,7 @@ function formValidationsForDataStatus()
     else if(sDateIndex < 0) {alert("Please Select Starting Period"); return false;}
     else if(eDateIndex < 0) {alert("Please Select Ending Period"); return false;}
     else if(sDate > eDate) {alert("Starting Date is Greater"); return false;}
+   // else if(orgunitIdValue == null || orgunitIdValue == "") {alert("Please Select OrganisationUnit"); return false;}
 
 	var k=0;
 	
@@ -158,13 +160,29 @@ function getdSetPeriodsReceived( xmlObject )
 	var sDateLB = document.getElementById( "sDateLB" );
 	var eDateLB = document.getElementById( "eDateLB" );
 	
-	clearList( sDateLB );
-	clearList( eDateLB );
+	
 	
 	var periods = xmlObject.getElementsByTagName( "period" );
 	
 	for ( var i = 0; i < periods.length; i++)
 	{
+		var periodType = periods[ i ].getElementsByTagName( "periodtype" )[0].firstChild.nodeValue;
+		
+		if(i ==0 )
+		{
+		  if( periodType == curPeriodType )
+		  {
+			   break;
+		  }
+		  else
+		  {
+			   curPeriodType = periodType;
+			   clearList( sDateLB );
+               clearList( eDateLB );
+		  }
+		}
+		
+		
 		var id = periods[ i ].getElementsByTagName( "id" )[0].firstChild.nodeValue;
 		var periodName = periods[ i ].getElementsByTagName( "periodname" )[0].firstChild.nodeValue;
 							
@@ -181,4 +199,33 @@ function getdSetPeriodsReceived( xmlObject )
 	}
 	
 	
+}
+
+function getOrgUDetails(orgUnitIds)
+{
+	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds;
+	
+	var request = new Request();
+	request.setResponseTypeXML( 'orgunit' );
+	request.setCallbackSuccess( getOrgUDetailsRecevied );
+	request.send( url );
+
+	//getReports();
+}
+
+function getOrgUDetailsRecevied(xmlObject)
+{
+		
+	var orgUnits = xmlObject.getElementsByTagName("orgunit");
+
+    for ( var i = 0; i < orgUnits.length; i++ )
+    {
+        var id = orgUnits[ i ].getElementsByTagName("id")[0].firstChild.nodeValue;
+        var orgUnitName = orgUnits[ i ].getElementsByTagName("name")[0].firstChild.nodeValue;
+		var level = orgUnits[ i ].getElementsByTagName("level")[0].firstChild.nodeValue;
+		
+		
+		document.ChartGenerationForm.ouNameTB.value = orgUnitName;
+		//document.reportForm.ouLevelTB.value = level;	
+    }    		
 }

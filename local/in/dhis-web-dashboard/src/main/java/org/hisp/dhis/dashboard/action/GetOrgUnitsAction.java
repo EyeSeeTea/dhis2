@@ -32,6 +32,13 @@ public class GetOrgUnitsAction
     {
         this.orgUnitId = orgUnitId;
     }
+    
+    private String type;
+    
+    public void setType( String type )
+    {
+        this.type = type;
+    }
 
     private OrganisationUnit orgUnit;
 
@@ -58,8 +65,6 @@ public class GetOrgUnitsAction
     // Action implementation
     // -------------------------------------------------------------------------
 
-
-
     public String execute()
         throws Exception
     {
@@ -71,7 +76,11 @@ public class GetOrgUnitsAction
 
         orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
         maxOrgUnitLevel = orgUnitLevel;
-
+        
+        // Hardcoded : if it is Tabular Analysis, Null Reporter
+        if(type!=null && type.equalsIgnoreCase( "ta" ))
+        {
+        
         List<OrganisationUnit> orgUnitTree = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitWithChildren( orgUnitId ) );
         
         for( OrganisationUnit ou : orgUnitTree )
@@ -81,15 +90,15 @@ public class GetOrgUnitsAction
                 maxOrgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( ou );
             }
         }
-
-        /*if ( orgUnit.getChildren() == null || orgUnit.getChildren().size() == 0 )
-        {
-            orgUnitLevel = organisationUnitService.getNumberOfOrganisationalLevels();
         }
-*/
+        
+            
+       
         System.out.println( "OrgUnitLevel : " + orgUnitLevel + " Name : " + orgUnit.getShortName() + " MaxLevel : "+ maxOrgUnitLevel );
 
         return SUCCESS;
     }
+
+    
 
 }

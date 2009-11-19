@@ -1,3 +1,5 @@
+package org.hisp.dhis.survey;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,11 +26,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.survey;
 
 import java.util.Collection;
 
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.source.Source;
 
@@ -39,7 +39,7 @@ import org.hisp.dhis.source.Source;
 
 public interface SurveyStore
 {
-    String ID = SurveyService.class.getName();
+    String ID = SurveyStore.class.getName();
 
     // -------------------------------------------------------------------------
     // Survey
@@ -65,7 +65,7 @@ public interface SurveyStore
      * 
      * @param survey The Survey to delete.
      */
-    void deleteSurvey( Survey survey );
+    int deleteSurvey( Survey survey );
 
     /**
      * Get a Survey

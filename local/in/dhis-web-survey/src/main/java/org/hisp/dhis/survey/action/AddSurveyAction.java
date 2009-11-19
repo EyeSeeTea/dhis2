@@ -34,8 +34,6 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.survey.Survey;
 import org.hisp.dhis.survey.SurveyService;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.UserStore;
 
 import com.opensymphony.xwork2.Action;
 
@@ -43,6 +41,7 @@ import com.opensymphony.xwork2.Action;
  * @author Kristian
  * @version $Id: AddDataSetAction.java 6255 2008-11-10 16:01:24Z larshelg $
  */
+
 public class AddSurveyAction
     implements Action
 {
@@ -62,20 +61,6 @@ public class AddSurveyAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
-    private UserStore userStore;
-
-    public void setUserStore( UserStore userStore )
-    {
-        this.userStore = userStore;
     }
 
     // -------------------------------------------------------------------------
@@ -107,7 +92,7 @@ public class AddSurveyAction
 
     public void setDescription( String description )
     {
-        this.url = description;
+        this.description = description;
     }    
 
     private Collection<String> selectedList = new HashSet<String>();

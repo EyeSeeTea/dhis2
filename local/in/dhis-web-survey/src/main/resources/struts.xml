@@ -13,7 +13,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-survey/surveyList.vm</param>
 			<param name="menu">/dhis-web-survey/menu.vm</param>
-			<param name="javascripts">javascript/survey.js</param>
+			<param name="javascripts">javascript/survey.js,javascript/filterTable.js</param>
 		</action>
 		
 		<!-- Edit Survey Form  -->
@@ -23,8 +23,7 @@
 			<result name="success" type="chain">
 				<param name="actionName">indicatorGroupListEditChain</param>
 			</result>
-			<interceptor-ref name="transactionStack"/>
-			<param name="requiredAuthorities">F_SURVEY_UPDATE</param>
+			<!--<param name="requiredAuthorities">F_SURVEY_UPDATE</param>-->
 		</action>
 		
 		<action name="indicatorGroupListEditChain"
@@ -32,8 +31,7 @@
 			<result name="success" type="chain">
 				<param name="actionName">getSurveyEditChain</param>
 			</result>
-			<interceptor-ref name="transactionStack"/>
-			<param name="requiredAuthorities">F_SURVEY_UPDATE</param>
+			<!--<param name="requiredAuthorities">F_SURVEY_UPDATE</param>-->
 		</action>
 		
 		<action name="getSurveyEditChain"
@@ -42,17 +40,15 @@
 			<param name="page">/dhis-web-survey/editSurvey.vm</param>
 			<param name="javascripts">
 				javascript/survey.js,javascript/IndicatorList.js </param>
-			<interceptor-ref name="transactionStack"/>
-			<param name="requiredAuthorities">F_SURVEY_UPDATE</param>
+			<!--<param name="requiredAuthorities">F_SURVEY_UPDATE</param>-->
 		</action>
 		
 		<action name="updateSurvey"
 			class="org.hisp.dhis.survey.action.UpdateSurveyAction">
 			<result name="success" type="redirect">index.action</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="javascripts">
 				javascript/survey.js,javascript/IndicatorList.js </param>
-			<param name="requiredAuthorities">F_DATASET_UPDATE</param>
+			<!--<param name="requiredAuthorities">F_DATASET_UPDATE</param>-->
 		</action>
 		
 		<action name="validateSurvey"
@@ -61,7 +57,6 @@
 				/dhis-web-survey/responseSuccess.vm</result>
 			<result name="input" type="velocity-xml">
 				/dhis-web-survey/responseInput.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -83,15 +78,12 @@
 			<param name="page">/dhis-web-survey/addSurvey.vm</param>
 			<param name="menu">/dhis-web-survey/menu.vm</param>
 			<param name="javascripts">javascript/survey.js</param>
-			
 		</action>
 		
 		<action name="addSurvey"
 			class="org.hisp.dhis.survey.action.AddSurveyAction">
 			<result name="success" type="redirect">index.action</result>
 			<param name="javascripts">javascript/survey.js</param>
-			<interceptor-ref name="transactionStack"/>
-			
 		</action>
 		
 		<!-- Delete Survey -->
@@ -99,15 +91,15 @@
 		<action name="delSurvey"
 			class="org.hisp.dhis.survey.action.DelSurveyAction">
 			<result name="success" type="redirect">index.action</result>
-			<interceptor-ref name="transactionStack"/>
-			<param name="requiredAuthorities">F_DATASET_DELETE</param>
+			<result name="error" type="velocity-xml">
+				/dhis-web-survey/responseNone.vm</result>
+			<!--<param name="requiredAuthorities">F_DATASET_DELETE</param>-->
 		</action>
 		
 		<action name="filterAvailableIndicatorsByIndicatorGroup"
 			class="org.hisp.dhis.survey.action.IndicatorListFilteredByGroup">
 			<result name="success" type="velocity-xml">
 				/dhis-web-survey/responseIndicatorGroup.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 			<param name="javascripts">javascript/survey.js</param>
 		</action>
@@ -118,7 +110,7 @@
 			class="org.hisp.dhis.survey.action.GetNumberOfLevelsAction">
 			<result name="success" type="chain">
 				defineSurveyAssociationsFormChain</result>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="defineSurveyAssociationsFormChain"
@@ -127,42 +119,40 @@
 			<param name="page">/dhis-web-survey/surveyAssociations.vm</param>
 			<param name="javascripts">
 				../dhis-web-commons/oust/oust.js,javascript/IndicatorList.js,javascript/associations.js</param>
-			<interceptor-ref name="transactionStack"/>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="defineSurveyAssociations"
 			class="org.hisp.dhis.survey.action.DefineSurveyAssociationsAction">
 			<result name="success" type="redirect">index.action</result>
-			<interceptor-ref name="transactionStack"/>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="selectLevel"
 			class="org.hisp.dhis.survey.action.SelectLevelAction">
 			<result name="success" type="chain">
 				getNumberOfLevelsSelectLevelChain</result>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="unselectLevel"
 			class="org.hisp.dhis.survey.action.UnselectLevelAction">
 			<result name="success" type="chain">
 				getNumberOfLevelsSelectLevelChain</result>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="unselectAll"
 			class="org.hisp.dhis.survey.action.UnselectAllAction">
 			<result name="success" type="chain">
 				getNumberOfLevelsSelectLevelChain</result>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="getNumberOfLevelsSelectLevelChain"
 			class="org.hisp.dhis.survey.action.GetNumberOfLevelsAction">
 			<result name="success" type="chain">getSurveySelectLevelChain</result>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="getSurveySelectLevelChain"
@@ -171,15 +161,13 @@
 			<param name="page">/dhis-web-survey/surveyAssociations.vm</param>
 			<param name="javascripts">
 				../dhis-web-commons/oust/oust.js,javascript/IndicatorsList.js,javascript/associations.js</param>
-			<interceptor-ref name="transactionStack"/>
-			<param name="requiredAuthorities">F_DATASET_ASSIGN</param>
+			<!--<param name="requiredAuthorities">F_DATASET_ASSIGN</param>-->
 		</action>
 		
 		<action name="getSurvey"
 			class="org.hisp.dhis.survey.action.GetSurveyAction">
 			<result name="success" type="velocity-xml">
 				/dhis-web-survey/responseSurveyObject.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -220,12 +208,13 @@
 		
 		<action name="saveValue"
 			class="org.hisp.dhis.survey.action.SaveValueAction">
-			<interceptor-ref name="transactionStack"/>
 			<result name="success" type="velocity">status.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
-			<param name="requiredAuthorities">
-				F_DATAVALUE_ADD,F_DATAVALUE_UPDATE,F_DATAVALUE_DELETE</param>
+			<!--<param name="requiredAuthorities">
+			F_DATAVALUE_ADD,F_DATAVALUE_UPDATE,F_DATAVALUE_DELETE</param>-->
 		</action>
+		
+		<!--Target Mapping-->
 		
 		<action name="generateTarget"
 			class="org.hisp.dhis.target.action.GenerateTargetAction">
@@ -234,14 +223,12 @@
 			<param name="menu">/dhis-web-survey/menu.vm</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,javascript/target.js</param>
-			
 		</action>
 		
 		<action name="saveMapping"
 			class="org.hisp.dhis.target.action.SaveMappingAction">
 			<result name="success" type="velocity">
 				/dhis-web-survey/responseDe.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -249,7 +236,6 @@
 			class="org.hisp.dhis.target.action.DelMappingAction">
 			<result name="success" type="velocity">
 				/dhis-web-survey/responseDe.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -259,7 +245,6 @@
 			class="org.hisp.dhis.target.action.GetDataElementsAction">
 			<result name="success" type="velocity">
 				/dhis-web-survey/responseDataElement.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
@@ -267,9 +252,7 @@
 			class="org.hisp.dhis.target.action.GetMesageAction">
 			<result name="success" type="velocity">
 				/dhis-web-survey/responseDe.vm</result>
-			<interceptor-ref name="transactionStack"/>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
-		
 	</package>
 </struts>

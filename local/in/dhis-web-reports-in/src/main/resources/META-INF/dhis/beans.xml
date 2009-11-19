@@ -25,10 +25,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        <property name="periodService">
           <ref bean="org.hisp.dhis.period.PeriodService"/>
        </property>
-       <property name="periodStore">
-          <ref bean="org.hisp.dhis.period.PeriodStore"/>
-       </property>	   
-   </bean>
+    </bean>
 	
    <bean id="org.hisp.dhis.reports.action.AddReportAction"
 		class="org.hisp.dhis.reports.action.AddReportAction"

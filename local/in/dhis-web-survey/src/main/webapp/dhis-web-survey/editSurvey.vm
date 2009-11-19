@@ -25,11 +25,11 @@
       </tr>     
       <tr>
         <td><label>$i18n.getString( "url" )</label></td>
-        <td><input type="text" id="url" name="url" maxlength="20" style="width:20em" value="$!encoder.htmlEncode( $survey.url )"></td>
+        <td><input type="text" id="url" name="url" style="width:20em" value="$!encoder.htmlEncode( $survey.url )"></td>
       </tr>
        <tr>
         <td><label>$i18n.getString( "description" )</label></td>
-        <td><TEXTAREA id="description" NAME="description" COLS=41 ROWS=4></TEXTAREA></td>
+         <td><textarea id="description" name="description" cols=41 rows=4>$!encoder.htmlEncode( $survey.description )</textarea></td>
       </tr>	  
       <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
     </tbody>
@@ -58,7 +58,7 @@
             #end
           </select>
         </td>
-        <td>$i18n.getString( "group" )</td>
+        <td>Group</td>
         <td></td>
       </tr>
       

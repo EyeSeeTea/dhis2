@@ -81,6 +81,7 @@
 	<dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-aggregationengine-default</artifactId>		
+      <version>${version}</version>
     </dependency>	  
     <dependency>
       <groupId>net.sourceforge.jexcelapi</groupId>
@@ -107,6 +108,7 @@
     <dependency>
       <groupId>poi</groupId>
       <artifactId>poi</artifactId>
+      <version>2.5.1</version>
     </dependency>
     <dependency>
       <groupId>jfree</groupId>
@@ -115,6 +117,7 @@
     <dependency>
       <groupId>eclipse</groupId>
       <artifactId>jdtcore</artifactId>
+      <version>3.1.0</version>
     </dependency>
     
     

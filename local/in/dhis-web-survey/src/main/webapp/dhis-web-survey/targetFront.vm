@@ -1,9 +1,4 @@
 
-<html>
-	<head>
-		        <title>Target</title>
-        		
-        		
 		        <script>
 		            // Global Variables
 		            var selriRadioButton = "indicatorsRadio";
@@ -11,8 +6,6 @@
 		            var selFacility = "";
 		            			            			            			            
 			    </script>
-	    </head>
-	    <body>
 	        <h1>Target Mapping</h1>
 	        <hr />	        
 	        <form id="GenerateTargetForm" name="GenerateTargetForm" action="generateTarget.action" method="post" onsubmit="return formValidations()" target="chartWindow1">	
@@ -82,12 +75,9 @@
 							</tr>
                 			<tr>
     			                <td colspan="3">
-                                <input type="button" onclick="getsave()" value="save" style="width:10em">
-                                <input type="button"
-                                    onclick="window.location.href='index.action'" value="cancel" style="width:10em">
+                                <input type="button" onclick="getsave()" value="Save" style="width:10em">
+                                <input type="button" onclick="window.location.href='index.action'" value="Cancel" style="width:10em">
                                 </td>
 							</tr>
                     </table>							
         </form>
-    </body>
-</html>            

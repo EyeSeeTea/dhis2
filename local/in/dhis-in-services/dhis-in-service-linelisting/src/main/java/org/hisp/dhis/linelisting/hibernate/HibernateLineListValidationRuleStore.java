@@ -31,8 +31,8 @@ import java.util.Collection;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateSessionManager;
 import org.hisp.dhis.linelisting.LineListValidationRule;
 import org.hisp.dhis.linelisting.LineListValidationRuleStore;
 
@@ -47,11 +47,11 @@ public class HibernateLineListValidationRuleStore
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private HibernateSessionManager sessionManager;
+    private SessionFactory sessionFactory;
 
-    public void setSessionManager( HibernateSessionManager sessionManager )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.sessionManager = sessionManager;
+        this.sessionFactory = sessionFactory;
     }
 
     // -------------------------------------------------------------------------
@@ -60,28 +60,28 @@ public class HibernateLineListValidationRuleStore
 
     public int addLineListValidationRule( LineListValidationRule LineListValidationRule )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Integer) session.save( LineListValidationRule );
     }
 
     public void deleteLineListValidationRule( LineListValidationRule LineListValidationRule )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.delete( LineListValidationRule );
     }
 
     public void updateLineListValidationRule( LineListValidationRule LineListValidationRule )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.update( LineListValidationRule );
     }
     
     public LineListValidationRule getLineListValidationRule( int id )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (LineListValidationRule) session.get( LineListValidationRule.class, id );
     }
@@ -89,20 +89,18 @@ public class HibernateLineListValidationRuleStore
     @SuppressWarnings( "unchecked" )
     public Collection<LineListValidationRule> getAllLineListValidationRules()
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return session.createCriteria( LineListValidationRule.class ).list();
     }
 
     public LineListValidationRule getLineListValidationRuleByName( String name )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( LineListValidationRule.class );
         criteria.add( Restrictions.eq( "name", name ) );
 
         return (LineListValidationRule) criteria.uniqueResult();
     }
-
-   
 }

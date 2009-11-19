@@ -41,9 +41,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.routine.action.GenerateRoutineReportAnalyserResultAction"
 		scope="prototype">
 
-	  <property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>
+	 <property name="statementManager" ref="statementManager"/>
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -59,8 +57,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -100,9 +98,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.reports.auto.action.GenerateAutoReportAnalyserResultAction"
     scope="prototype">
 
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>
+    <property name="statementManager" ref="statementManager"/>
     <property name="dataElementCategoryOptionComboService">
       <ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
     </property>   
@@ -118,8 +114,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="indicatorService">
       <ref bean="org.hisp.dhis.indicator.IndicatorService"/>
     </property>
-    <property name="dataSetStore">
-      <ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+    <property name="dataSetService">
+      <ref bean="org.hisp.dhis.dataset.DataSetService"/>
     </property>
     <property name="aggregationService">
       <ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -156,9 +152,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.reports.routine.cumulative.action.GenerateCumulativeRoutineReportAnalyserResultAction"
     scope="prototype">
 
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>
+    <property name="statementManager" ref="statementManager"/>
     <property name="dataElementCategoryOptionComboService">
       <ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
     </property>   
@@ -174,8 +168,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="indicatorService">
       <ref bean="org.hisp.dhis.indicator.IndicatorService"/>
     </property>
-    <property name="dataSetStore">
-      <ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+    <property name="dataSetService">
+      <ref bean="org.hisp.dhis.dataset.DataSetService"/>
     </property>
     <property name="aggregationService">
       <ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -186,10 +180,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="reportService">
       <ref bean="org.hisp.dhis.reports.util.ReportService"/>
     </property>
-    <property name="organisationUnitGroupService">
-      <ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
-    </property>
-    
+     
   </bean>
 
 		<!-- Feedback Reports -->
@@ -215,9 +206,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.feedback.action.GenerateFeedbackReportAnalyserResultAction"
 		scope="prototype">
 
-	  <property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>
+	    <property name="statementManager" ref="statementManager"/>
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -233,8 +222,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -244,10 +233,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
-		</property>
-		<property name="organisationUnitGroupService">
-			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
-		</property>
+		</property>		
 		<property name="surveyService">
 			<ref bean="org.hisp.dhis.survey.SurveyService"/>
 		</property>
@@ -281,9 +267,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.upward.action.GenerateUpwardReportAnalyserResultAction"
 		scope="prototype">
 
-	  <property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>
+	    <property name="statementManager" ref="statementManager"/>
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -299,8 +283,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -310,9 +294,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
-		</property>
-		<property name="organisationUnitGroupService">
-			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
 		</property>
 		
 	</bean>
@@ -323,8 +304,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.linelisting.action.GenerateLinelistingReportAnalyserFormAction"
 		scope="prototype">
 		
-		<property name="periodStore">
-			<ref bean="org.hisp.dhis.period.PeriodStore"/>
+		<property name="periodService">
+			<ref bean="org.hisp.dhis.period.PeriodService"/>
 		</property>
 	</bean>
 
@@ -333,9 +314,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.linelisting.action.GenerateLinelistingReportAnalyserResultAction"
 		scope="prototype">
 
-	  <property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>
+	    <property name="statementManager" ref="statementManager"/>
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -351,8 +330,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -362,12 +341,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
-		</property>
-		<property name="organisationUnitGroupService">
-			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
-		</property>
-		<property name="dbConnection">
-			<ref bean="org.hisp.dhis.reports.util.DBConnection"/>
 		</property>
 		
 	</bean>
@@ -448,9 +421,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.progress.action.GenerateProgressAnalyserResultAction"
 		scope="prototype">
 
-	  <property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>
+	    <property name="statementManager" ref="statementManager"/>
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -466,8 +437,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -478,14 +449,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
 		</property>
-		<property name="organisationUnitGroupService">
-			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
-		</property>
 	
   </bean>
 
 
-<!-- Oruunit wise Progress Reports -->
+    <!-- Oruunit wise Progress Reports -->
     <bean id="org.hisp.dhis.reports.ouwiseprogress.action.GenerateOuWiseProgressReportFormAction"
     class="org.hisp.dhis.reports.ouwiseprogress.action.GenerateOuWiseProgressReportFormAction"
     scope="prototype">
@@ -499,9 +467,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	class="org.hisp.dhis.reports.ouwiseprogress.action.GenerateOuWiseProgressReportResultAction"
 	scope="prototype">
 
-	  <property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>
+	    <property name="statementManager" ref="statementManager"/>
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>
@@ -514,11 +480,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
-		<property name="indicatorService">
-			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
-		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -529,9 +492,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
 		</property>
-		<property name="organisationUnitGroupService">
-			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
-		</property>
+		
     </bean>
 	<!-- Advanced Reports -->
 
@@ -551,9 +512,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.advanced.action.GenerateAdvancedReportResultAction"
 		scope="prototype">
   
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>    
+    <property name="statementManager" ref="statementManager"/>   
     <property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
 		</property>
@@ -569,19 +528,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>	
     </property>	 
-    <property name="dataValueService">
-			<ref bean="org.hisp.dhis.datavalue.DataValueService"/>	
-    </property>	 
     <property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>	
     </property>	  
     <property name="periodService">
 			<ref bean="org.hisp.dhis.period.PeriodService"/>	
     </property>	 
-    <property name="periodStore">
-			<ref bean="org.hisp.dhis.period.PeriodStore"/>	
-    </property>	
-  
+     
 	</bean>
 			
     <!-- NLEP Reports -->
@@ -602,9 +555,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         class="org.hisp.dhis.reports.leprosy.action.LeprosyReportResultAction"
         scope="prototype">
   
-		<property name="statementManager">
-			<ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>    
+		<property name="statementManager" ref="statementManager"/>    
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
 		</property>
@@ -620,19 +571,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>  
 		</property>  
-		<property name="dataValueService">
-			<ref bean="org.hisp.dhis.datavalue.DataValueService"/>  
-		</property>  
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>   
 		</property>   
 		<property name="periodService">
 			<ref bean="org.hisp.dhis.period.PeriodService"/>    
 		</property>  
-		<property name="periodStore">
-			<ref bean="org.hisp.dhis.period.PeriodStore"/>  
-		</property> 
-  
+		 
     </bean>
 
     <!-- Malaria Reports -->
@@ -653,9 +598,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         class="org.hisp.dhis.reports.malarya.action.GenerateMalaryaReportResultAction"
         scope="prototype">
   
-        <property name="statementManager">
-            <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-        </property>    
+        <property name="statementManager" ref="statementManager"/>   
         <property name="reportService">
             <ref bean="org.hisp.dhis.reports.util.ReportService"/>
         </property>
@@ -671,19 +614,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="dataElementService">
             <ref bean="org.hisp.dhis.dataelement.DataElementService"/>  
         </property>  
-        <property name="dataValueService">
-            <ref bean="org.hisp.dhis.datavalue.DataValueService"/>  
-        </property>  
         <property name="dataElementCategoryOptionComboService">
             <ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>   
         </property>   
         <property name="periodService">
             <ref bean="org.hisp.dhis.period.PeriodService"/>    
         </property>  
-        <property name="periodStore">
-            <ref bean="org.hisp.dhis.period.PeriodStore"/>  
-        </property> 
-  
+        
     </bean>
 	            	
 	<!-- Grading Reports -->
@@ -708,9 +645,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>    
+        <property name="statementManager" ref="statementManager"/>   
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -726,8 +661,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -749,9 +684,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>    
+        <property name="statementManager" ref="statementManager"/>   
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -767,8 +700,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -790,9 +723,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>    
+        <property name="statementManager" ref="statementManager"/>   
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -808,8 +739,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -844,9 +775,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>    
+        <property name="statementManager" ref="statementManager"/>   
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>		
@@ -862,8 +791,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -911,8 +840,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -923,9 +852,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="reportService">
 			<ref bean="org.hisp.dhis.reports.util.ReportService"/>
 		</property>
-		<property name="statementManager">
-		  <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-		</property>    
+		<property name="statementManager" ref="statementManager"/>  
         
 	</bean>
 	
@@ -946,9 +873,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         class="org.hisp.dhis.reports.ranking.action.GenerateRankingReportResultAction"
         scope="prototype">
   
-        <property name="statementManager">
-          <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-        </property>    
+        <property name="statementManager" ref="statementManager"/>    
         <property name="reportService">
           <ref bean="org.hisp.dhis.reports.util.ReportService"/>
         </property>
@@ -970,8 +895,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="periodService">
           <ref bean="org.hisp.dhis.period.PeriodService"/>    
         </property> 
-        <property name="dataSetStore">
-           <ref bean="org.hisp.dhis.dataset.DataSetStore"/>  
+        <property name="dataSetService">
+           <ref bean="org.hisp.dhis.dataset.DataSetService"/>  
         </property> 
   
     </bean>
@@ -1014,8 +939,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="indicatorService">
       <ref bean="org.hisp.dhis.indicator.IndicatorService"/>
     </property>
-    <property name="dataSetStore">
-      <ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+    <property name="dataSetService">
+      <ref bean="org.hisp.dhis.dataset.DataSetService"/>
     </property>
     <property name="aggregationService">
       <ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -1026,9 +951,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="reportService">
       <ref bean="org.hisp.dhis.reports.util.ReportService"/>
     </property>
-    <property name="statementManager">
-      <ref bean="org.hisp.dhis.jdbc.StatementManager"/>
-    </property>
+    <property name="statementManager" ref="statementManager"/>
     <property name="organisationUnitGroupService">
           <ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
       </property>
@@ -1214,20 +1137,18 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.util.ReportService"
 		scope="prototype">
 		
-		<property name="periodStore">
-			<ref bean="org.hisp.dhis.period.PeriodStore"/>
+		<property name="periodService">
+			<ref bean="org.hisp.dhis.period.PeriodService"/>
 		</property>
-		<property name="dbConnection">
-			<ref bean="org.hisp.dhis.reports.util.DBConnection"/>
-		</property>
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>	  
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService"/>
 		</property>
-		<property name="dataSetStore">
-			<ref bean="org.hisp.dhis.dataset.DataSetStore"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 		<property name="aggregationService">
 			<ref bean="org.hisp.dhis.aggregation.AggregationService"/>
@@ -1237,13 +1158,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 		<property name="dataElementCategoryOptionComboService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
+		</property>
+		<property name="configurationService">
+			<ref bean="org.hisp.dhis.config.ConfigurationService"/>
 		</property>		
 	</bean>
-    <bean id="org.hisp.dhis.reports.util.DBConnection"
-       class="org.hisp.dhis.reports.util.DBConnection" scope="prototype">
-       <property name="provider"
-          ref="org.hisp.dhis.system.database.DatabaseInfoProvider"/>
-    </bean>
 
 	<!-- User Population -->
   
@@ -1394,18 +1313,17 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   </bean>
 
 	
-	<bean id="org.hisp.dhis.reports.api.ChartStore"
+  <bean id="org.hisp.dhis.reports.api.ChartStore"
     class="org.hisp.dhis.chart.hibernate.HibernateChartStore">
-    <property name="sessionManager"
-      ref="org.hisp.dhis.hibernate.HibernateSessionManager"/>
+    
   </bean>
 		
 	
 	
 	<bean id="org.hisp.dhis.chart.ChartService"
     class="org.hisp.dhis.reports.chart.impl.DefaultChartService"> 
-    <property name="chartStore"
-      ref="org.hisp.dhis.chart.ChartStore"/>
+    <property name="chartService"
+      ref="org.hisp.dhis.chart.ChartService"/>
 	<property name="aggregationService" 
         ref="org.hisp.dhis.aggregation.AggregationService"/>
   </bean> 
@@ -1416,9 +1334,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reports.action.GetDataElementsAction" scope="prototype">
 		<property name="dataElementService">
 		  <ref bean="org.hisp.dhis.dataelement.DataElementService"/>
-		</property>
-		<property name="dataElementCategoryOptionComboService">
-		  <ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboService"/>
 		</property>
 	</bean>
 	
@@ -1461,6 +1376,147 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.reports.action.ExportToExcelAction"
     class="org.hisp.dhis.reports.action.ExportToExcelAction"
     scope="prototype">
+  </bean>
+	
+	<!--Table Creator -->
+	
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetTableOptionsAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetTableOptionsAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+    <property name="dataElementService"
+      ref="org.hisp.dhis.dataelement.DataElementService"/>
+    <property name="categoryComboService"
+      ref="org.hisp.dhis.dataelement.DataElementCategoryComboService"/>
+    <property name="indicatorService"
+      ref="org.hisp.dhis.indicator.IndicatorService"/>
+    <property name="periodService"
+      ref="org.hisp.dhis.period.PeriodService"/>
+    <property name="organisationUnitService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/>
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.SaveTableAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.SaveTableAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+    <property name="dataElementService"
+      ref="org.hisp.dhis.dataelement.DataElementService"/>
+    <property name="categoryComboService"
+      ref="org.hisp.dhis.dataelement.DataElementCategoryComboService"/>
+    <property name="indicatorService"
+      ref="org.hisp.dhis.indicator.IndicatorService"/>
+    <property name="periodService"
+      ref="org.hisp.dhis.period.PeriodService"/>
+    <property name="organisationUnitService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/>
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.CreateTableAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.CreateTableAction"
+    scope="prototype">
+        <property name="processCoordinator"
+      ref="processCoordinator"/>
+    <property name="currentUserService"
+      ref="org.hisp.dhis.user.CurrentUserService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetReportParamsAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetReportParamsAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+    <property name="reportService"
+      ref="org.hisp.dhis.report.ReportService"/>
+    <property name="organisationUnitService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetAllTablesAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetAllTablesAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.RemoveTableAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.RemoveTableAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetTableAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetTableAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetStatusAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetStatusAction"
+    scope="prototype">
+    <property name="processCoordinator"
+      ref="processCoordinator"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.ValidateTableAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.ValidateTableAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetTableDataExportAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetTableDataExportAction"
+    scope="prototype">
+    <property name="serviceManager"
+      ref="org.hisp.dhis.importexport.ImportExportServiceManager"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GenerateTableDataWorkbookAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GenerateTableDataWorkbookAction"
+    scope="prototype">
+    <property name="workbookService"
+      ref="org.hisp.dhis.workbook.WorkbookService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetTableDataAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetTableDataAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetDisplayTableOptionsAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.GetDisplayTableOptionsAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.SaveDisplayTableAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.SaveDisplayTableAction"
+    scope="prototype">
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.reporting.tablecreator.action.AddReportTableToDashboardAction"
+    class="org.hisp.dhis.reporting.tablecreator.action.AddReportTableToDashboardAction"
+    scope="prototype">
+    <property name="currentUserService"
+      ref="org.hisp.dhis.user.CurrentUserService"/>
+    <property name="dashboardService"
+      ref="org.hisp.dhis.dashboard.DashboardService"/>
+    <property name="reportTableService"
+      ref="org.hisp.dhis.reporttable.ReportTableService"/>
   </bean>
 		
 </beans>

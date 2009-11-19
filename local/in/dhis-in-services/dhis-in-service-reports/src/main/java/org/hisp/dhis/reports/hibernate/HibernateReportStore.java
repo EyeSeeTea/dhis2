@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateSessionManager;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.reports.Report_in;
 import org.hisp.dhis.reports.ReportStore;
+import org.hisp.dhis.reports.Report_in;
 import org.hisp.dhis.source.Source;
 
 public class HibernateReportStore
@@ -20,11 +20,11 @@ public class HibernateReportStore
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private HibernateSessionManager sessionManager;
+    private SessionFactory sessionFactory;
 
-    public void setSessionManager( HibernateSessionManager sessionManager )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.sessionManager = sessionManager;
+        this.sessionFactory = sessionFactory;
     }
 
     private PeriodStore periodStore;
@@ -44,14 +44,14 @@ public class HibernateReportStore
 
         report.setPeriodType( periodType );
 
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Integer) session.save( report );
     }
 
     public void deleteReport( Report_in report )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.delete( report );
     }
@@ -62,7 +62,7 @@ public class HibernateReportStore
 
         report.setPeriodType( periodType );
 
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.update( report );
     }
@@ -70,21 +70,21 @@ public class HibernateReportStore
     @SuppressWarnings( "unchecked" )
     public Collection<Report_in> getAllReports()
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return session.createCriteria( Report_in.class ).list();
     }
 
     public Report_in getReport( int id )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Report_in) session.get( Report_in.class, id );
     }
 
     public Report_in getReportByName( String name )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Report_in.class );
         criteria.add( Restrictions.eq( "name", name ) );
@@ -96,7 +96,7 @@ public class HibernateReportStore
     @SuppressWarnings( "unchecked" )
     public Collection<Report_in> getReportBySource( Source source )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Report_in.class );
         criteria.createAlias( "sources", "s" );
@@ -108,7 +108,7 @@ public class HibernateReportStore
     @SuppressWarnings( "unchecked" )
     public Collection<Report_in> getReportsByPeriodAndReportType( PeriodType periodType, String reportType )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Report_in.class );
 
@@ -124,7 +124,7 @@ public class HibernateReportStore
     @SuppressWarnings( "unchecked" )
     public Collection<Report_in> getReportsByPeriodType( PeriodType periodType )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Report_in.class );
 
@@ -138,7 +138,7 @@ public class HibernateReportStore
     @SuppressWarnings( "unchecked" )
     public Collection<Report_in> getReportsByReportType( String reportType )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Report_in.class );
         criteria.add( Restrictions.eq( "reportType", reportType ) );
@@ -150,7 +150,7 @@ public class HibernateReportStore
     @SuppressWarnings( "unchecked" )
     public Collection<Report_in> getReportsByPeriodSourceAndReportType( PeriodType periodType, Source source, String reportType )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Report_in.class );
         
@@ -163,7 +163,5 @@ public class HibernateReportStore
         criteria.add( Restrictions.eq( "reportType", reportType ) );
 
         return criteria.list();
-
     }
-
 }

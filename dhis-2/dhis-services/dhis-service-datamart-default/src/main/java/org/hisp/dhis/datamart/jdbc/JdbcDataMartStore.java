@@ -27,6 +27,7 @@ package org.hisp.dhis.datamart.jdbc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
 import java.sql.ResultSet;
@@ -42,6 +43,7 @@ import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.Operand;
 import org.hisp.dhis.datamart.CrossTabDataValue;
@@ -66,6 +68,15 @@ import org.hisp.dhis.system.objectmapper.ObjectMapper;
 public class JdbcDataMartStore
     implements DataMartStore
 {
+    private static final Map<String, String> functionMap = new HashMap<String, String>();
+    
+    static
+    {
+        functionMap.put( DataElement.AGGREGATION_OPERATOR_SUM, "SUM" );
+        functionMap.put( DataElement.AGGREGATION_OPERATOR_AVERAGE, "AVG" );
+        functionMap.put( DataElement.AGGREGATION_OPERATOR_COUNT, "SUM" );
+    }
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -87,6 +98,34 @@ public class JdbcDataMartStore
     // -------------------------------------------------------------------------
     // AggregatedDataValue
     // -------------------------------------------------------------------------
+    
+    public Double getTotalAggregatedValue( final DataElement dataElement, final Period period, final OrganisationUnit organisationUnit )
+    {
+        final String sql = 
+            "SELECT " + functionMap.get( dataElement.getAggregationOperator() ) + "(value) " +
+            "FROM aggregateddatavalue " +
+            "WHERE dataelementid = " + dataElement.getId() + " " +
+            "AND periodid = " + period.getId() + " " +
+            "AND organisationunitid = " + organisationUnit.getId();
+        
+        return statementManager.getHolder().queryForDouble( sql );
+    }
+
+    public Double getTotalAggregatedValue( final DataElement dataElement, 
+        final DataElementCategoryOption categoryOption, final Period period, final OrganisationUnit organisationUnit )
+    {
+        String ids = getCommaDelimitedString( getIdentifiers( DataElementCategoryOptionCombo.class, categoryOption.getCategoryOptionCombos() ) );
+        
+        final String sql =
+            "SELECT " + functionMap.get( dataElement.getAggregationOperator() ) + "(value)" +
+            "FROM aggregateddatavalue " +
+            "WHERE dataelementid = " + dataElement.getId() + " " +
+            "AND categoryoptioncomboid IN (" + ids + ") " +
+            "AND periodid = " + period.getId() + " " +
+            "AND organisationunitid = " + organisationUnit.getId();
+        
+        return statementManager.getHolder().queryForDouble( sql );
+    }
     
     public double getAggregatedValue( final DataElement dataElement, final Period period, final OrganisationUnit organisationUnit )
     {

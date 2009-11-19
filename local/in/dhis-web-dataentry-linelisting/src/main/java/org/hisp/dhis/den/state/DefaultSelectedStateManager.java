@@ -27,7 +27,6 @@ package org.hisp.dhis.den.state;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +41,7 @@ import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.period.CalendarPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.opensymphony.xwork2.ActionContext;
 
@@ -49,6 +49,8 @@ import com.opensymphony.xwork2.ActionContext;
  * @author Torgeir Lorange Ostby
  * @version $Id: DefaultSelectedStateManager.java 4474 2008-01-31 16:08:01Z abyot $
  */
+
+@Transactional
 public class DefaultSelectedStateManager
     implements SelectedStateManager
 {
@@ -253,7 +255,8 @@ public class DefaultSelectedStateManager
         return basePeriod;
     }
 
-    private static final Map getSession()
+    @SuppressWarnings("unchecked")
+	private static final Map getSession()
     {
         return ActionContext.getContext().getSession();
     }

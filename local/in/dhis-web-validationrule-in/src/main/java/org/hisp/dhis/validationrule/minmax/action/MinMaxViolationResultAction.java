@@ -2,14 +2,11 @@ package org.hisp.dhis.validationrule.minmax.action;
 
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.hibernate.HibernateSessionManager;
-import org.hisp.dhis.minmax.MinMaxDataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -24,11 +21,19 @@ public class MinMaxViolationResultAction implements Action
     // ---------------------------------------------------------------
     // Dependencies
     // ---------------------------------------------------------------
+    /*
     private HibernateSessionManager sessionManager;
 
     public void setSessionManager( HibernateSessionManager sessionManager )
     {
         this.sessionManager = sessionManager;
+    }
+*/
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory( SessionFactory sessionFactory )
+    {
+        this.sessionFactory = sessionFactory;
     }
 
     private OrganisationUnitService organisationUnitService;
@@ -149,7 +154,7 @@ public class MinMaxViolationResultAction implements Action
         throws Exception
     {
 
-        con = sessionManager.getCurrentSession().connection();
+        con = sessionFactory.getCurrentSession().connection();
         
         if(immChildOption!= null && immChildOption.equalsIgnoreCase( "yes" ))
         {

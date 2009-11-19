@@ -1,27 +1,16 @@
 package org.hisp.dhis.dashboard.ds.action;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.hisp.dhis.dashboard.util.PeriodStartDateComparator;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetStore;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
-import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import org.hisp.dhis.period.PeriodService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -30,18 +19,19 @@ public class GenerateDataStatusFormAction
 {
 
     /* Dependencies */
-    private PeriodStore periodStore;
+    @SuppressWarnings("unused")
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
-    public void setDataSetStore( DataSetStore dataSetStore )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataSetStore = dataSetStore;
+        this.dataSetService = dataSetService;
     }
 
     /* Output Parameters */
@@ -71,12 +61,23 @@ public class GenerateDataStatusFormAction
     {
         /* DataSet List */
         
-        dataSetList = new ArrayList<DataSet>( dataSetStore.getAllDataSets() );
+        dataSetList = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
+        
+        Iterator dataSetListIterator = dataSetList.iterator();
+        
+        while(dataSetListIterator.hasNext())
+        {
+            DataSet d = (DataSet)dataSetListIterator.next();
+            
+            if(d.getSources().size() <= 0)
+                
+                dataSetListIterator.remove( );
+        }
         
         Collections.sort( dataSetList, new DataSetNameComparator() );
 
         /* Monthly Periods */
-        //monthlyPeriods = new ArrayList<Period>( periodStore.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
+        //monthlyPeriods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
         //Collections.sort( monthlyPeriods, new PeriodStartDateComparator() );
         //simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
 

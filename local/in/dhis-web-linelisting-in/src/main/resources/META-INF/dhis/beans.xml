@@ -6,15 +6,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
   <!-- Line List Option -->
 
-    <bean
-    id="org.hisp.dhis.ll.action.llOption.GetLineListOptionListAction"
+    <bean id="org.hisp.dhis.ll.action.llOption.GetLineListOptionListAction"
     class="org.hisp.dhis.ll.action.llOption.GetLineListOptionListAction"
     scope="prototype">
-
         <property name="lineListService">
             <ref bean="org.hisp.dhis.linelisting.LineListService"/>
         </property>
     </bean>
+    
     <bean id="org.hisp.dhis.ll.action.llOption.AddLineListOptionAction"
     class="org.hisp.dhis.ll.action.llOption.AddLineListOptionAction" scope="prototype">
         <property name="lineListService">

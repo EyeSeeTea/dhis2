@@ -1,3 +1,5 @@
+package org.hisp.dhis.survey;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,56 +26,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.survey;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.hisp.dhis.i18n.I18nService;
+
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.source.Source;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Brajesh Murari
  * @version $Id$
  */
-public class DefaultSurveyService implements SurveyService
-{
 
- // -------------------------------------------------------------------------
+@Transactional
+public class DefaultSurveyService
+    implements SurveyService
+{
+    // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings("unused")
     private SurveyStore surveyStore;
 
     public void setSurveyStore( SurveyStore surveyStore )
     {
         this.surveyStore = surveyStore;
     }
-    
-    @SuppressWarnings("unused")
-    private I18nService i18nService;
-
-    public void setI18nService( I18nService service )
-    {
-        i18nService = service;
-    }
 
     // -------------------------------------------------------------------------
     // Survey
     // -------------------------------------------------------------------------
-    
+
     public int addSurvey( Survey survey )
     {
-    	return surveyStore.addSurvey( survey );  
+        return surveyStore.addSurvey( survey );
     }
 
-    public void deleteSurvey( Survey survey )
+    public int deleteSurvey( Survey survey )
     {
-        surveyStore.deleteSurvey( survey );
+        return surveyStore.deleteSurvey( survey );
     }
 
     public Collection<Survey> getAllSurveys()
@@ -83,34 +78,34 @@ public class DefaultSurveyService implements SurveyService
 
     public List<Survey> getAssignedSurveys()
     {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
     public List<Survey> getAvailableSurveys()
     {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
     public Collection<Indicator> getDistinctIndicators( Collection<Integer> surveyIdentifiers )
     {
         Collection<Survey> surveys = getSurveys( surveyIdentifiers );
-        
+
         Set<Indicator> indicators = new HashSet<Indicator>();
-        
+
         for ( Survey survey : surveys )
         {
             indicators.addAll( survey.getIndicators() );
         }
-        
+
         return indicators;
     }
 
     public int getSourcesAssociatedWithSurvey( Survey survey, Collection<? extends Source> sources )
     {
         int count = 0;
-        
+
         for ( Source source : sources )
         {
             if ( survey.getSources().contains( source ) )
@@ -118,7 +113,7 @@ public class DefaultSurveyService implements SurveyService
                 count++;
             }
         }
-        
+
         return count;
     }
 
@@ -136,21 +131,21 @@ public class DefaultSurveyService implements SurveyService
     {
         return surveyStore.getSurveyByShortName( shortName );
     }
-    
+
     public Collection<Survey> getSurveys( Collection<Integer> identifiers )
     {
         if ( identifiers == null )
         {
             return getAllSurveys();
-        }        
-        
+        }
+
         Collection<Survey> objects = new ArrayList<Survey>();
-        
+
         for ( Integer id : identifiers )
         {
             objects.add( getSurvey( id ) );
         }
-        
+
         return objects;
     }
 
@@ -158,7 +153,7 @@ public class DefaultSurveyService implements SurveyService
     {
         return surveyStore.getSurveysBySource( source );
     }
-    
+
     public Collection<Survey> getSurveysByIndicator( Indicator indicator )
     {
         return surveyStore.getSurveysByIndicator( indicator );
@@ -167,17 +162,42 @@ public class DefaultSurveyService implements SurveyService
     public Collection<Survey> getSurveysBySources( Collection<? extends Source> sources )
     {
         Set<Survey> surveys = new HashSet<Survey>();
-        
+
         for ( Source source : sources )
         {
             surveys.addAll( surveyStore.getSurveysBySource( source ) );
         }
-        
+
         return surveys;
     }
 
     public void updateSurvey( Survey survey )
     {
-        surveyStore.updateSurvey( survey );        
+        surveyStore.updateSurvey( survey );
     }
+    
+    public List<Indicator> getAllSurveyIndicators()
+    {
+        List<Indicator> surveyIndicatorList = new ArrayList<Indicator>();
+        
+        List<Survey> surveyList = new ArrayList<Survey>( getAllSurveys() );
+        
+        List<Indicator> oneSurveyIndicatorList = new ArrayList<Indicator>(); 
+        
+        for( Survey survey : surveyList )
+        {
+            oneSurveyIndicatorList = new ArrayList<Indicator>( survey.getIndicators() );
+                        
+            for( Indicator indicator : oneSurveyIndicatorList )
+            {
+                if( !surveyIndicatorList.contains( indicator ) )
+                {
+                    surveyIndicatorList.add( indicator );
+                }
+            }
+        }
+                
+        return surveyIndicatorList;
+    }
+    
 }

@@ -52,13 +52,13 @@ public class AddUserAction implements Action
     {
         String email = null;
         String username = null;
-        String rawPassword = "dhis";
+        String rawPassword = "hmis";
         String surname = "NRHM";
         String firstName = "HMIS";
         
-        int userRoles[] = { 0, 1, 1, 3, 6, 6, 5 };
+        int userRoles[] = { 0, 1, 1, 3, 4, 6, 5 };
         int orgUnitLevels = organisationUnitService.getNumberOfOrganisationalLevels();
-        for(int i = 1; i <= orgUnitLevels; i++)
+        for(int i = 4; i <= 4; i++)
         {
             List<OrganisationUnit> ouList = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsAtLevel( i ));
             

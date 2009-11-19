@@ -48,6 +48,7 @@ import com.opensymphony.xwork2.Action;
  * @author Torgeir Lorange Ostby
  * @version $Id: SaveValueAction.java 4482 2008-02-01 19:09:46Z abyot $
  */
+
 public class SaveValueAction
     implements Action
 {
@@ -140,7 +141,7 @@ public class SaveValueAction
 
         Period period = selectedStateManager.getSelectedPeriod();
         
-        System.out.println(period);
+        //System.out.println(period);
 
         String parts[] =  dataElementId.split( ":" );
         
@@ -149,7 +150,7 @@ public class SaveValueAction
         int deId = Integer.parseInt( parts[0] );
         int recordNo = Integer.parseInt( parts[1] );
         
-        System.out.println("DataElemetnid + RecordNo + Value : "+deId+ " : "+recordNo+" *** "+value);
+        //System.out.println("DataElemetnid + RecordNo + Value : "+deId+ " : "+recordNo+" *** "+value);
         DataElement dataElement = dataElementService.getDataElement( deId );
 
         storedBy = currentUserService.getCurrentUsername();
@@ -183,7 +184,7 @@ public class SaveValueAction
                 dataValue = new LLDataValue( dataElement, period, organisationUnit, value, storedBy, new Date(), null, defaultOptionCombo, recordNo );
 
                 dataValueService.addDataValue( dataValue );
-                System.out.println("Successfully Added");
+                //System.out.println("Successfully Added");
             }
         }
         else
@@ -197,7 +198,7 @@ public class SaveValueAction
             dataValue.setStoredBy( storedBy );
 
             dataValueService.updateDataValue( dataValue );
-            System.out.println("Successfully Updated");
+            //System.out.println("Successfully Updated");
         }
 
         if ( dataValue != null )

@@ -4,23 +4,26 @@
   xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-<!-- Store definitions -->
+  <!-- Store definitions -->
 
   <bean id="org.hisp.dhis.linelisting.LineListStore"
     class="org.hisp.dhis.linelisting.hibernate.HibernateLineListStore">
-    <property name="sessionManager"
-      ref="org.hisp.dhis.hibernate.HibernateSessionManager"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
     <property name="periodStore"
       ref="org.hisp.dhis.period.PeriodStore"/>
   </bean>
 
   <bean id="org.hisp.dhis.linelisting.LineListValidationRuleStore"
     class="org.hisp.dhis.linelisting.hibernate.HibernateLineListValidationRuleStore">
-    <property name="sessionManager"
-      ref="org.hisp.dhis.hibernate.HibernateSessionManager"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
-<!-- Service definitions -->
+  <bean id="org.hisp.dhis.linelisting.linelistdataelementmapping.hibernate.HibernateLineListDataElementMappingStore"
+    class="org.hisp.dhis.linelisting.linelistdataelementmapping.hibernate.HibernateLineListDataElementMappingStore">
+    <property name="sessionFactory" ref="sessionFactory"/>  
+  </bean>
+  
+  <!-- Service definitions -->
 
   <bean id="org.hisp.dhis.linelisting.LineListService"
     class="org.hisp.dhis.linelisting.DefaultLineListService">
@@ -36,27 +39,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.linelisting.LineListValidationRuleStore"/>
   </bean>
 
-	<!-- AOP transaction definitions -->
-	
-  <bean class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-    <property name="advice" ref="readOnlyTransactionInterceptor"/>
-    <property name="patterns">
-      <list>
-        <value>.*\.LineListStore\.get.*</value>
-      </list>
-    </property>
+  <bean id="org.hisp.dhis.linelisting.linelistdataelementmapping.DefaultLineListDataElementMappingService"
+    class="org.hisp.dhis.linelisting.linelistdataelementmapping.DefaultLineListDataElementMappingService">
+    <property name="lineListDataElementMappingStore" 
+      ref="org.hisp.dhis.linelisting.linelistdataelementmapping.hibernate.HibernateLineListDataElementMappingStore"/>  
   </bean>
-	
-  <bean class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-    <property name="advice" ref="readWriteTransactionInterceptor"/>
-    <property name="patterns">
-      <list>
-        <value>.*\.LineListStore\.add.*</value>
-        <value>.*\.LineListStore\.update.*</value>
-        <value>.*\.LineListStore\.delete.*</value>
-        <value>.*\.LineListStore\.remove.*</value>
-      </list>
-    </property>
-  </bean>	
-	
+  
 </beans>

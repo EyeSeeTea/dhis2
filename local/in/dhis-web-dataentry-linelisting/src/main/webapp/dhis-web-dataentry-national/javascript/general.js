@@ -116,7 +116,7 @@ function isLLBSexFieldEntered( recordNo )
   var field = document.getElementById( 'value[' + dataElementId + '].value:value[' + recordNo + '].value' );    
   var resVal = field.selectedIndex;
   
-  if(resVal <= 0)
+  if(resVal <= 0 || resVal == "---")
   {
     alert("Please enter SEX");
     
@@ -196,7 +196,7 @@ function validateLLBNameField( dataElementId, recordNo )
       return false;
     }      
     saveLLbirthValue( dataElementId, recordNo );
-    saveLLBSexValue( 1022, recordNo );    
+    //saveLLBSexValue( 1022, recordNo );    
   }
   else
   {     
@@ -239,7 +239,8 @@ function validateLLBSexField( dataElementId, recordNo )
     
   if(isLLBVillageFiledEntered( recordNo ))
   {     
-    if(resVal <= 0)
+    //if(resVal <= 0 || resVal == 'NK' || resVal == '---')
+    if(resVal <= 0 || resVal == "---")
     {    
       alert("Please Select Sex");
       field.options[0].selected = true;
@@ -247,8 +248,11 @@ function validateLLBSexField( dataElementId, recordNo )
       field.focus();
     
       return false;
-    }      
-    saveLLbirthValue( dataElementId, recordNo );    
+    }
+    else
+    {      
+    	saveLLbirthValue( dataElementId, recordNo );
+    } 
   }
   else
   {     
@@ -300,11 +304,21 @@ function validateLLBWeightField( dataElementId, recordNo )
 	    return false;
 	  }
 	
+	  if (isInteger(resVal) && resVal.length != 4)
+	  //else if (resVal.length != 4)
+	  {
+	    alert("Please enter weight in Grams in 4 digits \n eg. 2670 or 0986");
+	    field.value = "";
+	    field.focus();
+	    
+	    return false;
+	  }
 	  if( isInteger(resVal) || resVal.toUpperCase() == "NK" )
 	  {
+	  	//alert("Value is : " + resVal);
 	    saveLLbirthValue( dataElementId, recordNo );
 	  }
-	  else
+	  if (!isInteger(resVal))
 	  {
 	    alert("Please enter weight in Grams");
 	    field.value = "";
@@ -312,6 +326,10 @@ function validateLLBWeightField( dataElementId, recordNo )
 	    
 	    return false;
 	  }
+	  //else
+	  //{
+	  //	;
+	  //}
 	}
 	else
 	{
@@ -509,7 +527,7 @@ function validateLLDNameField( dataElementId, recordNo )
       return false;
     }      
     saveLLbirthValue( dataElementId, recordNo );
-    saveLLBSexValue( 1029, recordNo )
+    //saveLLBSexValue( 1029, recordNo )
         
   }
   else

@@ -63,7 +63,7 @@ public class GenerateOuWiseProgressReportFormAction extends ActionSupport
 
     public void getSelectedReportList()
     {
-        String fileName = "progressReportsList.xml";
+        String fileName = "ouWiseProgressReportsList.xml";
         System.out.println("fileName = "+fileName);
         String path = System.getProperty( "user.home" ) + File.separator + "dhis" + File.separator + raFolderName
             + File.separator + fileName;

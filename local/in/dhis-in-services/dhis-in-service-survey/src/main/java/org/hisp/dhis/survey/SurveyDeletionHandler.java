@@ -1,3 +1,5 @@
+package org.hisp.dhis.survey;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.survey;
 
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
@@ -32,14 +33,16 @@ import org.hisp.dhis.system.deletion.DeletionHandler;
  * @author Brajesh Murari
  * @version $Id$
  */
-public class SurveyDeletionHandler extends DeletionHandler
+public class SurveyDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings( "unused" )
     private SurveyService surveyService;
-    
+
     public void setSurveyService( SurveyService surveyService )
     {
         this.surveyService = surveyService;
@@ -54,7 +57,4 @@ public class SurveyDeletionHandler extends DeletionHandler
     {
         return Survey.class.getSimpleName();
     }
-    
-   
-
 }

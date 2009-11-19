@@ -7,12 +7,12 @@ import java.util.Set;
 
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.source.Source;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class DefaultLineListService
     implements LineListService
 {
-
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------

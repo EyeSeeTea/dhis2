@@ -37,6 +37,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dashboard.util.DashBoardService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -48,10 +49,9 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 
-import com.opensymphony.webwork.ServletActionContext;
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -67,11 +67,11 @@ public class GenerateAnnualAnalysisDataAction
         this.organisationUnitService = organisationUnitService;
     }
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
     private IndicatorService indicatorService;
@@ -324,6 +324,7 @@ public class GenerateAnnualAnalysisDataAction
      * values for 2006 - jan, feb, mar and 2007 - jan, feb, mar for the selected
      * orgunit and selected service
      */
+    @SuppressWarnings("unchecked")
     public Double[][] getServiceValuesByPeriod()
     {
         Double[][] serviceValues = new Double[annualPeriodsListCB.size()][monthlyPeriodsListCB.size()];
@@ -344,9 +345,9 @@ public class GenerateAnnualAnalysisDataAction
         {
             List<Double> dataValues = new ArrayList<Double>();
             int tempYear = Integer.parseInt( (String) iterator1.next() );
-            series1[count1] = "" + tempYear;
+            series1[count1] = "" + tempYear + "-" + (tempYear+1);
             series2[count1] = " ";
-            yseriesList.add( "" + tempYear );
+            yseriesList.add( "" + tempYear + "-" + (tempYear+1));
 
             Iterator iterator2 = monthlyPeriodsListCB.iterator();
             count2 = 0;
@@ -434,7 +435,7 @@ public class GenerateAnnualAnalysisDataAction
         Date lastDay = new Date( cal.getTimeInMillis() );
         System.out.println( lastDay.toString() );
 
-        Period newPeriod = periodStore.getPeriod( firstDay, lastDay, periodType );
+        Period newPeriod = periodService.getPeriod( firstDay, lastDay, periodType );
 
         return newPeriod;
     }
@@ -446,7 +447,7 @@ public class GenerateAnnualAnalysisDataAction
      */
     public PeriodType getPeriodTypeObject( String periodTypeName )
     {
-        Collection<PeriodType> periodTypes = periodStore.getAllPeriodTypes();
+        Collection<PeriodType> periodTypes = periodService.getAllPeriodTypes();
         PeriodType periodType = null;
         Iterator<PeriodType> iter = periodTypes.iterator();
         while ( iter.hasNext() )

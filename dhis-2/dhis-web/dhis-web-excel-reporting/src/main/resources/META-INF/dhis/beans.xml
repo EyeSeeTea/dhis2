@@ -400,8 +400,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelCategoryAction"
-		class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelCategoryAction"
+		id="org.hisp.dhis.reportexcel.export.action.GenerateReportOrganizationGroupListingAction"
+		class="org.hisp.dhis.reportexcel.export.action.GenerateReportOrganizationGroupListingAction"
 		scope="prototype">
 		<property name="selectionManager"
 			ref="org.hisp.dhis.reportexcel.state.SelectionManager" />
@@ -420,11 +420,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />	
 	</bean>
-
+	
 	<bean
-		id="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelNormalAction"
-		class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelNormalAction"
+		id="org.hisp.dhis.reportexcel.export.action.GenerateReportNormalAction"
+		class="org.hisp.dhis.reportexcel.export.action.GenerateReportNormalAction"
 		scope="prototype">
 		<property name="selectionManager"
 			ref="org.hisp.dhis.reportexcel.state.SelectionManager" />
@@ -443,11 +445,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />	
 	</bean>
-
+	
 	<bean
-		id="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelOrganizationGroupListingAction"
-		class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelOrganizationGroupListingAction"
+		id="org.hisp.dhis.reportexcel.export.action.GenerateReportCategoryAction"
+		class="org.hisp.dhis.reportexcel.export.action.GenerateReportCategoryAction"
 		scope="prototype">
 		<property name="selectionManager"
 			ref="org.hisp.dhis.reportexcel.state.SelectionManager" />
@@ -466,11 +470,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />	
 	</bean>
-
+	
+	
 	<bean
-		id="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelPeriodColumnListingAction"
-		class="org.hisp.dhis.reportexcel.export.action.GenerateReportExcelPeriodColumnListingAction"
+		id="org.hisp.dhis.reportexcel.export.action.GenerateReportPeriodColumnListingAction"
+		class="org.hisp.dhis.reportexcel.export.action.GenerateReportPeriodColumnListingAction"
 		scope="prototype">
 		<property name="selectionManager"
 			ref="org.hisp.dhis.reportexcel.state.SelectionManager" />
@@ -489,6 +496,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />	
 	</bean>
 
 	<!-- DATA ENTRY STATUS BEAN -->
@@ -752,8 +761,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
 
 	<bean
-		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelNormalAction"
-		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelNormalAction"
+		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportNormalAction"
+		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportNormalAction"
 		scope="prototype">
 		<property name="organisationUnitGroupService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
@@ -774,11 +783,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />		
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelOrganisationGroupListingAction"
-		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelOrganisationGroupListingAction"
+		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportOrgGroupListingAction"
+		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportOrgGroupListingAction"
 		scope="prototype">
 		<property name="organisationUnitGroupService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
@@ -799,11 +810,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />		
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelPeriodColumnListingAction"
-		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelPeriodColumnListingAction"
+		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportPeriodColumnListingAction"
+		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportPeriodColumnListingAction"
 		scope="prototype">
 		<property name="organisationUnitGroupService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
@@ -824,11 +837,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />		
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelCategoryAction"
-		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportExcelCategoryAction"
+		id="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportCategoryAction"
+		class="org.hisp.dhis.reportexcel.export.advance.action.GenerateAdvancedReportCategoryAction"
 		scope="prototype">
 		<property name="organisationUnitGroupService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
@@ -849,6 +864,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="periodDatabaseService"
 			ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />		
 	</bean>
 
 	<!-- INDIVIDUAL REPORT EXCEL -->
@@ -889,6 +906,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+		<property name="initPOIStylesManager"
+			ref="org.hisp.dhis.reportexcel.preview.manager.InitializePOIStylesManager" />	
 	</bean>
 
 	<!-- Clean up Report Excel module -->

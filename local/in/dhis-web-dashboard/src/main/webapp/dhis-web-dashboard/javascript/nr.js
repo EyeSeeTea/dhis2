@@ -23,9 +23,9 @@ function ouSelCBChange()
 
 }
 
-function getOUDeatilsForNR( orgUnitIds )
+function getOUDetailsForNR( orgUnitIds )
 {
-	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds;
+	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds+"&type=ta";
 
 	var request = new Request();
 	request.setResponseTypeXML( 'orgunit' );

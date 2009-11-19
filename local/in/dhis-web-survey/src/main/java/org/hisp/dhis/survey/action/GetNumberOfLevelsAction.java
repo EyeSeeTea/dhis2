@@ -38,6 +38,7 @@ import com.opensymphony.xwork2.ActionSupport;
  * @author Lars Helge Overland
  * @version $Id$
  */
+@SuppressWarnings("serial")
 public class GetNumberOfLevelsAction
     extends ActionSupport
 {

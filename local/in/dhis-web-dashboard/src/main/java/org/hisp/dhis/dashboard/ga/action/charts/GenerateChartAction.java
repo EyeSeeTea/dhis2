@@ -34,6 +34,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.dashboard.ga.charts.AreaChart;
 import org.hisp.dhis.dashboard.ga.charts.DualAxisChart;
 import org.hisp.dhis.dashboard.ga.charts.Horizontal3DBarChart;
@@ -47,7 +48,6 @@ import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.entity.StandardEntityCollection;
 
-import com.opensymphony.webwork.ServletActionContext;
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 

@@ -40,6 +40,7 @@ import com.thoughtworks.xstream.XStream;
  * @author Torgeir Lorange Ostby
  * @version $Id: DefaultStandardCommentsManager.java 2869 2007-02-20 14:26:09Z andegje $
  */
+
 public class DefaultStandardCommentsManager
     implements StandardCommentsManager
 {

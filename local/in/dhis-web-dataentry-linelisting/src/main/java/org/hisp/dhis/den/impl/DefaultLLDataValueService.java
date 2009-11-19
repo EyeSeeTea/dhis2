@@ -1,5 +1,32 @@
 package org.hisp.dhis.den.impl;
 
+/*
+ * Copyright (c) 2004-2007, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +43,6 @@ import org.hisp.dhis.den.api.LLDataValue;
 import org.hisp.dhis.den.api.LLDataValueService;
 import org.hisp.dhis.den.api.LLDataValueStore;
 import org.hisp.dhis.den.api.LLImportParameters;
-import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.source.Source;
@@ -26,7 +52,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class DefaultLLDataValueService
     implements LLDataValueService
 {
@@ -153,13 +181,11 @@ public class DefaultLLDataValueService
     public Collection<LLDataValue> getDataValues( Collection<DataElementCategoryOptionCombo> optionCombos )
     {
         return dataValueStore.getDataValues( optionCombos );
-
     }
 
     public Collection<LLDataValue> getDataValues( DataElement dataElement )
     {
         return dataValueStore.getDataValues( dataElement );
-
     }
 
     public int getMaxRecordNo()
@@ -181,11 +207,12 @@ public class DefaultLLDataValueService
     {
         return dataValueStore.processLineListMaternalDeaths( organisationUnit, periodL );
     }
-    
+
+    /*
     public void saveLLdataValue( String query )
     {
         dataValueStore.saveLLdataValue( query );
-    }
+    }*/
 
     public List<String> getLLImportFiles()
     {
@@ -207,7 +234,7 @@ public class DefaultLLDataValueService
             System.out.println( "In getImportFiles Method: " + files.length );
 
             fileNames = Arrays.asList( files );
-            
+
             System.out.println( "In getImportFiles Method: " + fileNames.size() );
         }
         catch ( Exception e )
@@ -218,14 +245,12 @@ public class DefaultLLDataValueService
         return fileNames;
     }
 
-    
-    
     public List<LLImportParameters> getLLImportParameters( String fileName )
     {
         List<LLImportParameters> llImportParamList = new ArrayList<LLImportParameters>();
-        
+
         String path = System.getenv( "DHIS2_HOME" ) + File.separator + "lli" + File.separator + fileName;
- 
+
         try
         {
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -243,17 +268,17 @@ public class DefaultLLDataValueService
             for ( int s = 0; s < totalDEcodes; s++ )
             {
                 Element deCodeElement = (Element) listOfDECodes.item( s );
-                NodeList textDECodeList = deCodeElement.getChildNodes();                
+                NodeList textDECodeList = deCodeElement.getChildNodes();
                 String expression = ((Node) textDECodeList.item( 0 )).getNodeValue().trim();
-                
-                int sheetNo = new Integer( deCodeElement.getAttribute( "sheetno" ));
-                int rowNo =  new Integer( deCodeElement.getAttribute( "rowno" ) ) ;
+
+                int sheetNo = new Integer( deCodeElement.getAttribute( "sheetno" ) );
+                int rowNo = new Integer( deCodeElement.getAttribute( "rowno" ) );
                 int colNo = new Integer( deCodeElement.getAttribute( "colno" ) );
-                
+
                 LLImportParameters llImportParameter = new LLImportParameters( sheetNo, rowNo, colNo, expression );
-                
+
                 llImportParamList.add( llImportParameter );
-                    
+
             }// end of for loop with s var
         }// try block end
         catch ( SAXParseException err )
@@ -272,4 +297,9 @@ public class DefaultLLDataValueService
         }
         return llImportParamList;
     }// getDECodes end
+
+    public void removeLLRecord( int recordNo )
+    {
+        dataValueStore.removeLLRecord( recordNo );
+    }
 }

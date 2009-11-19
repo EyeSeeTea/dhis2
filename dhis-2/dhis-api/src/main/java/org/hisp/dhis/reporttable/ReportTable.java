@@ -27,6 +27,9 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.dimension.DimensionSet.TYPE_CATEGORY_COMBO;
+import static org.hisp.dhis.dimension.DimensionSet.TYPE_GROUP_SET;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +41,12 @@ import java.util.regex.Pattern;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.dimension.DimensionOption;
+import org.hisp.dhis.dimension.DimensionOptionElement;
+import org.hisp.dhis.dimension.DimensionSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -72,6 +80,9 @@ public class ReportTable
     public static final String MODE_DATAELEMENTS = "dataelements";
     public static final String MODE_INDICATORS = "indicators";
     public static final String MODE_DATASETS = "datasets";
+
+    public static final String TOTAL_COLUMN_NAME = "total";
+    public static final String TOTAL_COLUMN_PREFIX = "total_";
     
     public static final String REGRESSION_COLUMN_PREFIX = "regression_";
     
@@ -97,8 +108,6 @@ public class ReportTable
 
     private List<DataElement> dataElements = new ArrayList<DataElement>();
     
-    private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
-    
     private List<Indicator> indicators = new ArrayList<Indicator>();
     
     private List<DataSet> dataSets = new ArrayList<DataSet>();
@@ -106,7 +115,13 @@ public class ReportTable
     private List<Period> periods = new ArrayList<Period>();
     
     private List<OrganisationUnit> units = new ArrayList<OrganisationUnit>();
-
+    
+    private String dimensionSetType;
+    
+    private DimensionSet categoryCombo;
+    
+    private List<? extends Dimension> dataElementGroupSets = new ArrayList<DataElementGroupSet>();
+    
     private Boolean doIndicators;
     
     private Boolean doCategoryOptionCombos;
@@ -228,6 +243,26 @@ public class ReportTable
      */
     private String reportingMonthName;
 
+    /**
+     * The category option combos derived from the dimension set.
+     */
+    private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
+    
+    /**
+     * The data elements derived from the dimension set.
+     */
+    private List<DataElement> dimensionalDataElements = new ArrayList<DataElement>();
+    
+    /**
+     * The dimension options.
+     */
+    private List<DimensionOption> dimensionOptions = new ArrayList<DimensionOption>();
+
+    /**
+     * The dimension option column names.
+     */
+    private List<String> dimensionOptionColumns = new ArrayList<String>();
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -260,11 +295,11 @@ public class ReportTable
      * @param dataElements the data elements.
      * @param indicators the indicators.
      * @param dataSets the datasets.
-     * @param categoryOptionCombos the category option combos.
      * @param periods the periods. These periods cannot have the name property set.
      * @param relativePeriods the relative periods. These periods must have the name property set. Not persisted.
      * @param units the organisation units.
      * @param relativeUnits the organisation units. Not persisted.
+     * @param dimensionSet the dimension set. Not persisted.
      * @param doIndicators indicating whether indicators should be crosstabulated.
      * @param doCategoryOptionCombos indicating whether category option combos should be crosstabulated.
      * @param doPeriods indicating whether periods should be crosstabulated.
@@ -279,11 +314,11 @@ public class ReportTable
         List<DataElement> dataElements,
         List<Indicator> indicators,
         List<DataSet> dataSets,
-        List<DataElementCategoryOptionCombo> categoryOptionCombos,
         List<Period> periods,
         List<Period> relativePeriods,
         List<OrganisationUnit> units,
         List<OrganisationUnit> relativeUnits,
+        DimensionSet dimensionSet,
         boolean doIndicators,
         boolean doCategoryOptionCombos,
         boolean doPeriods,
@@ -301,7 +336,6 @@ public class ReportTable
         this.dataElements = dataElements;
         this.indicators = indicators;
         this.dataSets = dataSets;
-        this.categoryOptionCombos = categoryOptionCombos;
         this.periods = periods;
         this.relativePeriods = relativePeriods;
         this.units = units;
@@ -314,24 +348,22 @@ public class ReportTable
         this.reportParams = reportParams;
         this.i18nFormat = i18nFormat;
         this.reportingMonthName = reportingMonthName;
+        
+        this.setDimensionSet( dimensionSet );
     }
 
     // -------------------------------------------------------------------------
     // Init
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings( "unchecked" )
     public void init()
     {
         if ( nonEmptyLists( dataElements, indicators, dataSets ) > 1 )
         {
             throw new IllegalArgumentException( "ReportTable cannot contain more than one out of dataelements, indicators, and datasets" );
         }
-        
-        if ( listIsNonEmpty( categoryOptionCombos ) && ( mode != null && !mode.equalsIgnoreCase( MODE_DATAELEMENTS ) ) )
-        {
-            throw new IllegalArgumentException( "ReportTable cannot contain category option combos when not in dataelement mode" );
-        }
-        
+                
         // ---------------------------------------------------------------------
         // Init tableName, allPeriods and allUnits
         // ---------------------------------------------------------------------
@@ -343,6 +375,35 @@ public class ReportTable
         
         allUnits.addAll( units );
         allUnits.addAll( relativeUnits );
+
+        // ---------------------------------------------------------------------
+        // Init dimensional lists
+        // ---------------------------------------------------------------------
+
+        if ( isDimensional() && dimensionSetType.equals( TYPE_CATEGORY_COMBO ) )
+        {
+            // -----------------------------------------------------------------
+            // CategoryCombo is set, populate CategoryOptionCombos
+            // Unchecked conversion is safe due to dimension set type check
+            // -----------------------------------------------------------------
+
+            categoryOptionCombos = (List<DataElementCategoryOptionCombo>) categoryCombo.getDimensionOptionElements();
+        }
+        else if ( isDimensional() && dimensionSetType.equals( DimensionSet.TYPE_GROUP_SET ) )
+        {
+            // -----------------------------------------------------------------
+            // All DataElements have GroupSets, populate DataElements
+            // -----------------------------------------------------------------
+
+            List<DataElement> elements = new ArrayList<DataElement>();
+                            
+            for ( DataElement element : dataElements )
+            {
+                elements.addAll( element.getDataElements() );
+            }
+            
+            dimensionalDataElements = elements;
+        }
         
         // ---------------------------------------------------------------------
         // Init indexColumns and selectColumns
@@ -354,6 +415,7 @@ public class ReportTable
             crossTabIndicators.addAll( indicators );
             crossTabIndicators.addAll( dataElements );
             crossTabIndicators.addAll( dataSets );
+            crossTabIndicators.addAll( dimensionalDataElements );
             reportIndicators.add( null );
             selectColumns.add( getIdentifier( mode ) );
         }
@@ -364,6 +426,7 @@ public class ReportTable
             reportIndicators.addAll( indicators );
             reportIndicators.addAll( dataElements );
             reportIndicators.addAll( dataSets );
+            reportIndicators.addAll( dimensionalDataElements );
             indexColumns.add( getIdentifier( mode ) );
             indexNameColumns.add( getName( mode ) );
         }
@@ -374,7 +437,7 @@ public class ReportTable
             
             if ( listIsNonEmpty( categoryOptionCombos ) ) // Optional dimension
             {
-                crossTabCategoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( categoryOptionCombos );
+                crossTabCategoryOptionCombos = categoryOptionCombos;
                 selectColumns.add( CATEGORYCOMBO_ID );
             }
             else
@@ -388,7 +451,7 @@ public class ReportTable
             
             if ( listIsNonEmpty( categoryOptionCombos ) ) // Optional dimension
             {
-                reportCategoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( categoryOptionCombos );
+                reportCategoryOptionCombos = categoryOptionCombos;
                 indexColumns.add( CATEGORYCOMBO_ID );
                 indexNameColumns.add( CATEGORYCOMBO_NAME );
             }
@@ -432,7 +495,7 @@ public class ReportTable
 
         for ( IdentifiableObject indicator : crossTabIndicators )
         {
-            for ( DataElementCategoryOptionCombo categoryOptionCombo : crossTabCategoryOptionCombos )
+            for ( DimensionOptionElement categoryOptionCombo : crossTabCategoryOptionCombos )
             {
                 for ( Period period : crossTabPeriods )
                 {
@@ -449,12 +512,50 @@ public class ReportTable
                 }
             }
         }
+
+        // ---------------------------------------------------------------------
+        // Init dimensionOptions and dimensionOptionColumns
+        // ---------------------------------------------------------------------
+
+        if ( doTotal() )
+        {
+            List<? extends Dimension> dimensions = isDimensional( TYPE_CATEGORY_COMBO ) ? categoryCombo.getDimensions() : dataElementGroupSets;
+            
+            for ( Dimension dimension : dimensions )
+            {
+                for ( DimensionOption dimensionOption : dimension.getDimensionOptions() )
+                {
+                    dimensionOptions.add( dimensionOption );
+                    dimensionOptionColumns.add( databaseEncode( TOTAL_COLUMN_PREFIX + dimensionOption.getName() ) );
+                }
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
 
+    /**
+     * Sets the appropriate dimension related properties depending on the dimension 
+     * set type.
+     */
+    public void setDimensionSet( DimensionSet dimensionSet )
+    {
+        if ( dimensionSet != null )
+        {
+            this.dimensionSetType = dimensionSet.getDimensionSetType();
+            this.categoryCombo = dimensionSet.isDimensionSetType( TYPE_CATEGORY_COMBO ) ? dimensionSet : null;
+            this.dataElementGroupSets = dimensionSet.isDimensionSetType( TYPE_GROUP_SET ) ? dimensionSet.getDimensions() : null;
+        }
+    }
+    
+    /**
+     * Returns a list of ReportTableColumns for this ReportTable. Searches for
+     * persisted display columns for each column. If none is found, a
+     * ReportTableColumn is generated based on the pretty-print column name and
+     * inserted in the list.
+     */
     public List<ReportTableColumn> getFilledDisplayColumns()
     {
         List<String> columns = getAllColumns();
@@ -481,6 +582,9 @@ public class ReportTable
         return displayColumns;
     }
     
+    /**
+     * Returns a list of names of all columns for this ReportTable.
+     */
     public List<String> getAllColumns()
     {
         List<String> columns = new ArrayList<String>();
@@ -501,6 +605,9 @@ public class ReportTable
         return columns;
     }
     
+    /**
+     * Tests whether the column with the argument name has a corresponding ReportTableColumn.
+     */
     public boolean hasDisplayColumn( String name )
     {
         for ( ReportTableColumn column : displayColumns )
@@ -514,56 +621,104 @@ public class ReportTable
         return false;
     }
     
+    /**
+     * Generates a pretty-print name of the argument column name.
+     */
     public String prettyPrintColumn( String column )
     {
         column = column.replaceAll( "_", " " );
         return column.substring( 0, 1 ).toUpperCase() + column.substring( 1, column.length() );
     }
     
+    /**
+     * Tests whether this ReportTable contains regression columns.
+     */
     public boolean isRegression()
     {
         return regression != null && regression;
     }
     
+    /**
+     * Updates the existing table name with the current name.
+     */
     public void updateExistingTableName()
     {
         this.existingTableName = generateTableName( name );
     }
     
-    public boolean hasCategoryOptionCombos()
-    {
-        return categoryOptionCombos != null && categoryOptionCombos.size() > 0;
-    }
-    
+    /**
+     * Tests whether the Indicator dimension will be crosstabulated for this ReportTable.
+     */
     public boolean isDoIndicators()
     {
         return doIndicators != null && doIndicators;
     }
-    
+
+    /**
+     * Tests whether the Indicator dimension will be crosstabulated for this ReportTable.
+     */
     public boolean isDoCategoryOptionCombos()
     {
         return doCategoryOptionCombos != null && doCategoryOptionCombos;
     }
-    
+
+    /**
+     * Tests whether the Period dimension will be crosstabulated for this ReportTable.
+     */
     public boolean isDoPeriods()
     {
         return doPeriods != null && doPeriods;
     }
-    
+
+    /**
+     * Tests whether the OrganisationUnit dimension will be crosstabulated for this ReportTable.
+     */
     public boolean isDoUnits()
     {
         return doUnits != null && doUnits;
     }
+
+    /**
+     * Tests whether this ReportTable is multi-dimensional.
+     */
+    public boolean isDimensional()
+    {
+        return dimensionSetType != null;
+    }
     
+    /**
+     * Tests whether this ReportTable is multi-dimensional and of the argument
+     * dimension set type.
+     */
+    public boolean isDimensional( String dimensionSetType )
+    {
+        return isDimensional() && dimensionSetType.equals( dimensionSetType );
+    }
+    
+    /**
+     * Tests whether a total column should be included.
+     */
+    public boolean doTotal()
+    {
+        return !isDoIndicators() && !isDoPeriods() && !isDoUnits() && isDoCategoryOptionCombos() && 
+            isDimensional( DimensionSet.TYPE_CATEGORY_COMBO ) && mode.equals( MODE_DATAELEMENTS );
+    }
+        
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    /**
+     * Generates a prefixed, database encoded name.
+     */
     private String generateTableName( String name )
     {
         return TABLE_PREFIX + databaseEncode( name );
     }
 
+    /**
+     * Returns a mode identifier.
+     */
     private String getIdentifier( String mode )
     {
         if ( mode == null || mode.equals( MODE_INDICATORS ) )
@@ -582,6 +737,9 @@ public class ReportTable
         return null;
     }
     
+    /**
+     * Returns a mode name.
+     */
     private String getName( String mode )
     {
         if ( mode == null || mode.equals( MODE_INDICATORS ) )
@@ -600,6 +758,9 @@ public class ReportTable
         return null;
     }
     
+    /**
+     * Returns the number of empty lists among the argument lists.
+     */
     private int nonEmptyLists( List<?>... lists )
     {
         int nonEmpty = 0;
@@ -615,12 +776,19 @@ public class ReportTable
         return nonEmpty;
     }
     
+    /**
+     * Tests whether the argument list is not null and has no elements.
+     */
     private boolean listIsNonEmpty( List<?> list )
     {
         return list != null && list.size() > 0;
     }
     
-    private String getPrettyColumnName( IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit )
+    /**
+     * Generates a pretty-print column name based on short-names of the argument
+     * objects. Null arguments are ignored in the name.
+     */
+    private String getPrettyColumnName( IdentifiableObject metaObject, DimensionOptionElement categoryOptionCombo, Period period, OrganisationUnit unit )
     {
         StringBuffer buffer = new StringBuffer();
         
@@ -646,42 +814,43 @@ public class ReportTable
         return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SPACE ) ) : buffer.toString();
     }
     
-    private String getColumnName( IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit )
+    /**
+     * Generates a column name based on short-names of the argument objects. Null 
+     * arguments are ignored in the name.
+     */
+    private String getColumnName( IdentifiableObject metaObject, DimensionOptionElement categoryOptionCombo, Period period, OrganisationUnit unit )
     {
         StringBuffer buffer = new StringBuffer();
         
         if ( metaObject != null )
         {
-            buffer.append( databaseEncode( metaObject.getShortName() ) + SEPARATOR );
+            buffer.append( metaObject.getShortName() + SEPARATOR );
         }
         if ( categoryOptionCombo != null )
         {
-            buffer.append( databaseEncode( categoryOptionCombo.getShortName() ) + SEPARATOR );
+            buffer.append( categoryOptionCombo.getShortName() + SEPARATOR );
         }
         if ( period != null )
         {
             String periodName = period.getName() != null ? period.getName() : i18nFormat.formatPeriod( period );
             
-            buffer.append( databaseEncode( periodName ) + SEPARATOR );
+            buffer.append( periodName + SEPARATOR );
         }
         if ( unit != null )
         {
-            buffer.append( databaseEncode( unit.getShortName() ) + SEPARATOR );
+            buffer.append( unit.getShortName() + SEPARATOR );
         }
 
-        // ---------------------------------------------------------------------
-        // Columns cannot start with numeric character
-        // ---------------------------------------------------------------------
-
-        if ( buffer.length() > 0 && buffer.substring( 0, 1 ).matches( REGEX_NUMERIC ) )
-        {
-            buffer.insert( 0, SEPARATOR );
-        }
+        String column = databaseEncode( buffer.toString() );
         
-        return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SEPARATOR ) ) : buffer.toString();
+        return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : column;
     }
-    
-    private String getColumnIdentifier( IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit )
+        
+    /**
+     * Generates a column identifier based on the internal identifiers of the
+     * argument objects. Null arguments are ignored in the identifier. 
+     */
+    private String getColumnIdentifier( IdentifiableObject metaObject, DimensionOptionElement categoryOptionCombo, Period period, OrganisationUnit unit )
     {
         StringBuffer buffer = new StringBuffer();
 
@@ -705,6 +874,12 @@ public class ReportTable
         return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SEPARATOR ) ) : buffer.toString();
     }
     
+    /**
+     * Database encodes the argument string. Remove non-character data from the
+     * string, prefixes the string if it starts with a numeric charater and
+     * truncates the string if it is longer than 255 characters.
+     * 
+     */
     private String databaseEncode( String string )
     {
         if ( string != null )
@@ -729,7 +904,20 @@ public class ReportTable
             string = buffer.toString();
             
             string = string.replaceAll( EMPTY_REPLACEMENT + "+", EMPTY_REPLACEMENT );
-            
+
+            // -----------------------------------------------------------------
+            // Cannot start with numeric character
+            // -----------------------------------------------------------------
+
+            if ( string.length() > 0 && string.substring( 0, 1 ).matches( REGEX_NUMERIC ) )
+            {
+                string = SEPARATOR + string;
+            }
+
+            // -----------------------------------------------------------------
+            // Cannot be longer than 255 characters
+            // -----------------------------------------------------------------
+
             if ( string.length() > 255 )
             {
                 string = string.substring( 0, 255 );
@@ -738,7 +926,7 @@ public class ReportTable
         
         return string;
     }
-    
+
     // -------------------------------------------------------------------------
     // Equals and hashCode
     // -------------------------------------------------------------------------
@@ -902,6 +1090,36 @@ public class ReportTable
         this.units = units;
     }
 
+    public String getDimensionSetType()
+    {
+        return dimensionSetType;
+    }
+
+    public void setDimensionSetType( String dimensionSetType )
+    {
+        this.dimensionSetType = dimensionSetType;
+    }
+
+    public DimensionSet getCategoryCombo()
+    {
+        return categoryCombo;
+    }
+
+    public void setCategoryCombo( DimensionSet categoryCombo )
+    {
+        this.categoryCombo = categoryCombo;
+    }
+
+    public List<? extends Dimension> getDataElementGroupSets()
+    {
+        return dataElementGroupSets;
+    }
+
+    public void setDataElementGroupSets( List<? extends Dimension> dataElementGroupSets )
+    {
+        this.dataElementGroupSets = dataElementGroupSets;
+    }
+
     public Boolean getDoIndicators()
     {
         return doIndicators;
@@ -911,7 +1129,7 @@ public class ReportTable
     {
         this.doIndicators = doIndicators;
     }
-
+    
     public Boolean getDoCategoryOptionCombos()
     {
         return doCategoryOptionCombos;
@@ -921,7 +1139,7 @@ public class ReportTable
     {
         this.doCategoryOptionCombos = doCategoryOptionCombos;
     }
-
+    
     public Boolean getDoPeriods()
     {
         return doPeriods;
@@ -1074,5 +1292,15 @@ public class ReportTable
     public void setReportingMonthName( String reportingMonthName )
     {
         this.reportingMonthName = reportingMonthName;
+    }
+    
+    public List<DimensionOption> getDimensionOptions()
+    {
+        return dimensionOptions;
+    }
+    
+    public List<String> getDimensionOptionColumns()
+    {
+        return dimensionOptionColumns;
     }
 }

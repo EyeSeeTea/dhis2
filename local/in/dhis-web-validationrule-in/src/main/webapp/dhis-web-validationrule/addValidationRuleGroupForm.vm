@@ -31,15 +31,15 @@
     </tr>
     <tr>
         <td>
-            <select id="groupMembers" name="groupMembers" size="2" multiple="multiple" style="min-width:25em; height:25em" ondblclick="removeGroupMembers()" />
-        </td>
-        <td style="text-align:center">
-            <input type="button" value="&lt;" title="$i18n.getString('move_selected')" onclick="addGroupMembers()"><br><br>
-            <input type="button" value="&gt;" title="$i18n.getString('remove_selected')" onclick="removeGroupMembers()">
-        </td>
-        <td>
             <select id="availableValidationRules" size="2" multiple="multiple" style="min-width:25em; height:25em" ondblclick="addGroupMembers()">
             </select>
+        </td>
+        <td style="text-align:center">
+            <input type="button" value="&gt;" title="$i18n.getString('move_selected')" onclick="addGroupMembers()"><br><br>
+            <input type="button" value="&lt;" title="$i18n.getString('remove_selected')" onclick="removeGroupMembers()">
+        </td>
+        <td>
+            <select id="groupMembers" name="groupMembers" size="2" multiple="multiple" style="min-width:25em; height:25em" ondblclick="removeGroupMembers()" />
         </td>
     </tr>
 </table>

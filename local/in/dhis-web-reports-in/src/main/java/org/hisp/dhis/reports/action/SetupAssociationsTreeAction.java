@@ -41,12 +41,12 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Kristian
- * @version $Id: SetupAssociationsTreeAction.java 5652 2008-09-06 13:24:34Z larshelg $
+ * @version $Id: SetupAssociationsTreeAction.java 5652 2008-09-06 13:24:34Z
+ *          larshelg $
  */
 public class SetupAssociationsTreeAction
     implements Action
 {
-
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -61,43 +61,43 @@ public class SetupAssociationsTreeAction
 
     private ReportService reportService;
 
-	public void setReportService(ReportService reportService) 
-	{
-		this.reportService = reportService;
-	}
+    public void setReportService( ReportService reportService )
+    {
+        this.reportService = reportService;
+    }
 
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
-    
-	private int reportId;
-    
-    public int getReportId() 
-    {
-		return reportId;
-	}
 
-	public void setReportId(int reportId) 
-	{
-		this.reportId = reportId;
-	}
+    private int reportId;
+
+    public int getReportId()
+    {
+        return reportId;
+    }
+
+    public void setReportId( int reportId )
+    {
+        this.reportId = reportId;
+    }
 
     private Report_in report;
-    
-	public Report_in getReport() 
-	{
-		return report;
-	}
+
+    public Report_in getReport()
+    {
+        return report;
+    }
 
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
 
-	public String execute()
+    public String execute()
         throws Exception
     {
         report = reportService.getReport( reportId );
-        
+
         selectionTreeManager.setSelectedOrganisationUnits( convert( report.getSources() ) );
 
         return SUCCESS;
@@ -110,12 +110,12 @@ public class SetupAssociationsTreeAction
     private Set<OrganisationUnit> convert( Collection<Source> sources )
     {
         Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
-        
+
         for ( Source source : sources )
-        {        	
+        {
             organisationUnits.add( (OrganisationUnit) source );
-        }       
-        
+        }
+
         return organisationUnits;
     }
 }

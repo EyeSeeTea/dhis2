@@ -44,7 +44,7 @@
 			    return true;
 			}			
 		</script>
-		<h1>AdvancedReport Analyser</h1><hr /><br />
+		<h1>Organisationunit Wise Progress Report</h1><hr /><br />
 	        
 		<form id="reportForm" name="reportForm" action="ouwisegenerateProgressReport.action" method="post" onsubmit="return formValidations()" target="_blank">
             <table align="center" style=" border-collapse: collapse; margin-top: 0;" cellpadding="0" cellspacing="0" width="730" border=0>		                

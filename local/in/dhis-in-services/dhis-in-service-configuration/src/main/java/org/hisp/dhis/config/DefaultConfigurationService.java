@@ -1,10 +1,11 @@
 package org.hisp.dhis.config;
 
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class DefaultConfigurationService
     implements ConfigurationService
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -45,5 +46,4 @@ public class DefaultConfigurationService
     {        
         return configurationStore.getConfigurationByKey( ckey );
     }
-
 }

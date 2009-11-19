@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,7 +47,7 @@ import org.hisp.dhis.period.DailyPeriodType;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.OnChangePeriodType;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.hisp.dhis.period.RelativePeriodType;
@@ -54,6 +55,7 @@ import org.hisp.dhis.period.SixMonthlyPeriodType;
 import org.hisp.dhis.period.TwoYearlyPeriodType;
 import org.hisp.dhis.period.WeeklyPeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
+import org.hisp.dhis.period.comparator.PeriodComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -65,11 +67,11 @@ public class GenerateTabularAnalysisFormAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
-    public void setPeriodStore( PeriodStore periodStore )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
     private DataElementService dataElementService;
@@ -207,7 +209,7 @@ public class GenerateTabularAnalysisFormAction
         indicatorGroups = indicatorService.getAllIndicatorGroups();
 
         /* Monthly Periods */
-        periodTypes = new ArrayList<PeriodType>( periodStore.getAllPeriodTypes() );
+        periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
 
         Iterator<PeriodType> ptIterator = periodTypes.iterator();
         while ( ptIterator.hasNext() )
@@ -222,17 +224,28 @@ public class GenerateTabularAnalysisFormAction
             }
         }
 
-        monthlyPeriods = new ArrayList<Period>( periodStore.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
+        monthlyPeriods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( new MonthlyPeriodType() ) );
         periodNameList = new ArrayList<String>();
-        Collections.sort( monthlyPeriods, new PeriodStartDateComparator() );
+        Collections.sort( monthlyPeriods, new PeriodComparator() );
         simpleDateFormat = new SimpleDateFormat( "MMM-yyyy" );
         monthlyPeriodTypeName = MonthlyPeriodType.NAME;
         quarterlyPeriodTypeName = QuarterlyPeriodType.NAME;
         sixMonthPeriodTypeName = SixMonthlyPeriodType.NAME;
         yearlyPeriodTypeName = YearlyPeriodType.NAME;
 
-        yearlyPeriods = new ArrayList<Period>( periodStore.getPeriodsByPeriodType( new YearlyPeriodType() ) );
-        Collections.sort( yearlyPeriods, new PeriodStartDateComparator() );
+        yearlyPeriods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( new YearlyPeriodType() ) );
+        Iterator<Period> periodIterator = yearlyPeriods.iterator();
+        while( periodIterator.hasNext() )
+        {
+            Period p1 = periodIterator.next();
+            
+            if ( p1.getStartDate().compareTo( new Date() ) > 0 )
+            {
+                periodIterator.remove( );
+            }
+            
+        }
+        Collections.sort( yearlyPeriods, new PeriodComparator() );
         simpleDateFormat = new SimpleDateFormat( "yyyy" );
         System.out.println( monthlyPeriodTypeName );
         int year;

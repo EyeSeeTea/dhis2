@@ -61,20 +61,19 @@ public class GetReportsAction
     }
 
     private String reportListFileName;
-    
+
     public void setReportListFileName( String reportListFileName )
     {
         this.reportListFileName = reportListFileName;
     }
 
-    
     private List<Report> reportList;
 
     public List<Report> getReportList()
     {
         return reportList;
     }
-    
+
     private String ouName;
 
     public String getOuName()
@@ -83,16 +82,16 @@ public class GetReportsAction
     }
 
     private String autogenrep;
-    
+
     public void setAutogenrep( String autogenrep )
     {
         this.autogenrep = autogenrep;
     }
 
-    
     private String orgUnitLevel;
+
     private String raFolderName;
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -102,25 +101,25 @@ public class GetReportsAction
     {
         reportList = new ArrayList<Report>();
         raFolderName = reportService.getRAFolderName();
-        if(ouId != null)
+        if ( ouId != null )
         {
             try
             {
                 OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( Integer.parseInt( ouId ) );
-                
+
                 int ouLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
-                
-                if(autogenrep.equalsIgnoreCase( "1") )
+
+                if ( autogenrep.equalsIgnoreCase( "1" ) )
                     ouLevel++;
-                
-                orgUnitLevel = ""+ouLevel;
+
+                orgUnitLevel = "" + ouLevel;
                 ouName = orgUnit.getShortName();
-                System.out.println(ouName);        
+                System.out.println( ouName );
                 getSelectedReportList( reportListFileName );
             }
-            catch(Exception e)
+            catch ( Exception e )
             {
-                System.out.println("Exception while getting Reports List : "+e.getMessage());
+                System.out.println( "Exception while getting Reports List : " + e.getMessage() );
             }
         }
 
@@ -130,18 +129,26 @@ public class GetReportsAction
     public void getSelectedReportList( String reportListFileName )
     {
         String fileName = reportListFileName;
-        
+
         String excelImportFolderName = "excelimport";
 
-        String path = System.getProperty( "user.home" ) + File.separator + "dhis" + File.separator + excelImportFolderName
-            + File.separator + fileName;
+        String path = System.getProperty( "user.home" ) + File.separator + "dhis" + raFolderName + File.separator
+            + excelImportFolderName + File.separator + fileName;
+
+        // String path = System.getProperty( "user.home" ) + File.separator +
+        // "dhis" + File.separator + excelImportFolderName
+        // + File.separator + fileName;
 
         try
         {
             String newpath = System.getenv( "DHIS2_HOME" );
             if ( newpath != null )
             {
-                path = newpath + File.separator + excelImportFolderName + File.separator + fileName;
+                path = newpath + File.separator + raFolderName + File.separator + excelImportFolderName
+                    + File.separator + fileName;
+
+                // path = newpath + File.separator + excelImportFolderName +
+                // File.separator + fileName;
             }
         }
         catch ( NullPointerException npe )
@@ -156,7 +163,7 @@ public class GetReportsAction
         String reportLevel = "";
         String reportModel = "";
         String reportFileName = "";
-        String checkerFileName = "";
+        // String checkerFileName = "";
         int count = 0;
 
         try
@@ -200,14 +207,18 @@ public class GetReportsAction
                     NodeList textreportFileNameList = reportFileNameElement.getChildNodes();
                     reportFileName = ((Node) textreportFileNameList.item( 0 )).getNodeValue().trim();
 
-                    NodeList reportCheckerList = reportElement.getElementsByTagName( "checkerFileName" );
-                    Element reportCheckerElement = (Element) reportCheckerList.item( 0 );
-                    NodeList textreportCheckerList = reportCheckerElement.getChildNodes();
-                    checkerFileName = ((Node) textreportCheckerList.item( 0 )).getNodeValue().trim();
+                    // NodeList reportCheckerList =
+                    // reportElement.getElementsByTagName( "checkerFileName" );
+                    // Element reportCheckerElement = (Element)
+                    // reportCheckerList.item( 0 );
+                    // NodeList textreportCheckerList =
+                    // reportCheckerElement.getChildNodes();
+                    // checkerFileName = ((Node) textreportCheckerList.item( 0
+                    // )).getNodeValue().trim();
 
                     if ( reportType.equals( periodType ) )
                     {
-                        Report reportObj = new Report(reportId, reportName, reportType, reportModel, reportFileName, checkerFileName);
+                        Report reportObj = new Report( reportId, reportName, reportType, reportModel, reportFileName );
                         reportList.add( count, reportObj );
                         count++;
                         System.out.println( reportName + " : " + reportId );
@@ -235,6 +246,5 @@ public class GetReportsAction
     /**
      * @param autogenrep the autogenrep to set
      */
-   
 
 }

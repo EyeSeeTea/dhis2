@@ -1,9 +1,9 @@
+package org.hisp.dhis.linelisting;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package org.hisp.dhis.linelisting;
 
 /**
  *

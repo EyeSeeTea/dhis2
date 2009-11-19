@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.amplecode.quick.StatementManager;
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -21,7 +23,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitShortNameComparator;
@@ -34,9 +35,12 @@ import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
 
-import com.opensymphony.webwork.ServletActionContext;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
+
+//import com.opensymphony.webwork.ServletActionContext;
+//import com.opensymphony.xwork2.ActionContext;
+//import com.opensymphony.xwork2.ActionSupport;
 
 public class DetailedValidationAnalysisResultAction extends ActionSupport
 {
@@ -262,7 +266,7 @@ public class DetailedValidationAnalysisResultAction extends ActionSupport
             }
             else
             {
-                System.out.println("validationRuleGroupId == "+validationRuleGroupId);
+                //System.out.println("validationRuleGroupId == "+validationRuleGroupId);
                 vrg = validationRuleService.getValidationRuleGroup( validationRuleGroupId );
                 validationRuleList.addAll( (Collection<? extends ValidationRule>) vrg.getMembers() );
             }       
@@ -323,19 +327,19 @@ public class DetailedValidationAnalysisResultAction extends ActionSupport
                     if( rightSide == null ) rightSide = 0.0;
 
                     String tempString = ""+leftSide;
-                    System.out.println("*************************************************");
-                    System.out.println(valRule.getName()+" ---- "+valRule.getOperator());
+                    //System.out.println("*************************************************");
+                    //System.out.println(valRule.getName()+" ---- "+valRule.getOperator());
                     if(valRule.getOperator().equalsIgnoreCase( ValidationRule.OPERATOR_EQUAL ))
                     {
                         if(leftSide.doubleValue() == rightSide.doubleValue())
                         {
                             tempVRColorList.add( "green" );
-                            System.out.print("green green : ");
+                            //System.out.print("green green : ");
                         }
                         else
                         {
                             tempVRColorList.add( "red" );
-                            System.out.print("red red : ");
+                            //System.out.print("red red : ");
                         }
                                                 
                         tempString += "=";
@@ -345,12 +349,12 @@ public class DetailedValidationAnalysisResultAction extends ActionSupport
                         if(leftSide.doubleValue() != rightSide.doubleValue())
                         {
                             tempVRColorList.add( "green" );
-                            System.out.print("green : ");
+                            //System.out.print("green : ");
                         }
                         else
                         {
                             tempVRColorList.add( "red" );
-                            System.out.print("red : ");
+                            //System.out.print("red : ");
                         }
                         tempString += "!=";
                     }
@@ -359,12 +363,12 @@ public class DetailedValidationAnalysisResultAction extends ActionSupport
                         if(leftSide.doubleValue() > rightSide.doubleValue())
                         {
                             tempVRColorList.add( "green" );
-                            System.out.print("green : ");
+                            //System.out.print("green : ");
                         }
                         else
                         {
                             tempVRColorList.add( "red" );
-                            System.out.print("red : ");
+                            //System.out.print("red : ");
                         }
                         tempString += ">";
 
@@ -374,12 +378,12 @@ public class DetailedValidationAnalysisResultAction extends ActionSupport
                         if(leftSide.doubleValue() >= rightSide.doubleValue())
                         {
                             tempVRColorList.add( "green" );
-                            System.out.print("green : ");
+                            //System.out.print("green : ");
                         }
                         else
                         {
                             tempVRColorList.add( "red" );
-                            System.out.print("red : ");
+                            //System.out.print("red : ");
                         }
                         tempString += ">=";
 
@@ -389,12 +393,12 @@ public class DetailedValidationAnalysisResultAction extends ActionSupport
                         if(leftSide.doubleValue() < rightSide.doubleValue())
                         {
                             tempVRColorList.add( "green" );
-                            System.out.print("green : ");
+                            //System.out.print("green : ");
                         }
                         else
                         {
                             tempVRColorList.add( "red" );
-                            System.out.print("red : ");
+                            //System.out.print("red : ");
                         }
                         tempString += "<";
                     }
@@ -403,19 +407,19 @@ public class DetailedValidationAnalysisResultAction extends ActionSupport
                         if(leftSide.doubleValue() <= rightSide.doubleValue())
                         {
                             tempVRColorList.add( "green" );
-                            System.out.print("green : ");
+                            //System.out.print("green : ");
                         }
                         else
                         {
                             tempVRColorList.add( "red" );
-                            System.out.print("red : ");
+                            //System.out.print("red : ");
                         }
                         tempString += "<=";
                     }
                     
                     //System.out.println("Operator : "+valRule.getOperator());
                     tempString += rightSide;
-                    System.out.println(tempString + " : " );
+                    //System.out.println(tempString + " : " );
                     tempVRResultList.add( tempString );
 
                 }// Period While end

@@ -46,6 +46,7 @@ import com.opensymphony.xwork2.Action;
  * @author Torgeir Lorange Ostby
  * @version $Id: SaveCommentAction.java 3113 2007-03-19 20:47:10Z torgeilo $
  */
+
 public class SaveCommentAction
     implements Action
 {

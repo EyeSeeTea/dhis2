@@ -1,3 +1,5 @@
+package org.hisp.dhis.surveydatavalue;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,12 +26,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.surveydatavalue;
 
 import java.util.Collection;
 
 import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.survey.Survey;
 
@@ -94,6 +94,8 @@ public interface SurveyDataValueService
      * @return the number of deleted SurveyDataValues.
      */
     int deleteSurveyDataValuesBySurvey( Survey survey );
+    
+    int deleteSurveyDataValuesBySurveyIndicatorAndSource( Survey survey, Indicator indicator, Source source );
 
     /**
      * Returns a SurveyDataValue.

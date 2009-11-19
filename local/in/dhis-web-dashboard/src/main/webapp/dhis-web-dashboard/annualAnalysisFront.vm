@@ -102,9 +102,13 @@
     			                <td class="NormalB">
     			                    $i18n.getString( "aa_annual_periods" )<br />
                         					<select name="annualPeriodsListCB" id="annualPeriodsListCB" multiple style="width: 325px;height: 100px">
-                        									    #foreach($period in $yearlyPeriods)
-                                <option value="$simpleDateFormat.format($period.startDate)">$simpleDateFormat.format($period.startDate)</option>
-                            #end
+                        					   #set( $count = 0 )
+                        					   #foreach($periodName in $periodNameList)
+                            					   ##<option value="$simpleDateFormat.format($period.startDate)">$simpleDateFormat.format($period.startDate)</option>
+                               						 #set( $period = $yearlyPeriods.get($count) )
+                               						 <option value="$simpleDateFormat.format($period.startDate)">$periodName</option>
+                               						 #set( $count = $count + 1 )	
+                            				#end
                         					</select>                    				                                                
     			                </td>   
                     			<td class="NormalB" align="center">&nbsp;</td>

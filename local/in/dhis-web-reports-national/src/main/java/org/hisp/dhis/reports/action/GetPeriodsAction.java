@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hisp.dhis.period.Period;
@@ -115,7 +117,18 @@ public class GetPeriodsAction
             PeriodType periodType = periodService.getPeriodTypeByName( id );
 
             periods = new ArrayList<Period>( periodService.getPeriodsByPeriodType( periodType ) );
-
+            
+            Iterator<Period> periodIterator = periods.iterator();
+            while( periodIterator.hasNext() )
+            {
+                Period p1 = periodIterator.next();
+                
+                if ( p1.getStartDate().compareTo( new Date() ) > 0 )
+                {
+                    periodIterator.remove( );
+                }
+                
+            }
             Collections.sort( periods, new PeriodComparator() );
 
             if ( periodType.getName().equalsIgnoreCase( "monthly" ) )

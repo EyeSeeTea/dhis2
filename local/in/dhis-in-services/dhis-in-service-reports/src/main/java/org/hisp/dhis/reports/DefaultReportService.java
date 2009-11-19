@@ -28,6 +28,7 @@ import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.util.MathUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -38,7 +39,6 @@ import org.xml.sax.SAXParseException;
 public class DefaultReportService
     implements ReportService
 {
-
     private static final String NULL_REPLACEMENT = "0";
     
     // -------------------------------------------------------------------------
@@ -100,61 +100,71 @@ public class DefaultReportService
     // Report_in
     // -------------------------------------------------------------------------
 
+    @Transactional
     public int addReport( Report_in report )
     {
         return reportStore.addReport( report );
     }
 
+    @Transactional
     public void deleteReport( Report_in report )
     {
         reportStore.deleteReport( report );
     }
 
+    @Transactional
     public void updateReport( Report_in report )
     {
         reportStore.updateReport( report );
     }
 
+    @Transactional
     public Collection<Report_in> getAllReports()
     {
         return reportStore.getAllReports();
     }
 
+    @Transactional
     public Report_in getReport( int id )
     {
         return reportStore.getReport( id );
     }
 
+    @Transactional
     public Report_in getReportByName( String name )
     {
         return reportStore.getReportByName( name );
     }
 
+    @Transactional
     public Collection<Report_in> getReportBySource( Source source )
     {
         return reportStore.getReportBySource( source );
     }
 
+    @Transactional
     public Collection<Report_in> getReportsByPeriodAndReportType( PeriodType periodType, String reportType )
     {
         return reportStore.getReportsByPeriodAndReportType( periodType, reportType );
     }
 
+    @Transactional
     public Collection<Report_in> getReportsByPeriodType( PeriodType periodType )
     {
         return reportStore.getReportsByPeriodType( periodType );
     }
 
+    @Transactional
     public Collection<Report_in> getReportsByReportType( String reportType )
     {
         return reportStore.getReportsByReportType( reportType );
     }
-    
+
+    @Transactional
     public Collection<Report_in> getReportsByPeriodSourceAndReportType( PeriodType periodType, Source source, String reportType )
     {
         return reportStore.getReportsByPeriodSourceAndReportType( periodType, source, reportType );
     }
-
     
     public List<Report_inDesign> getReportDesign( Report_in report )
     {

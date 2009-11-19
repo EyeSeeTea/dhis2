@@ -59,6 +59,8 @@ import com.opensymphony.xwork2.ActionSupport;
  * @author Torgeir Lorange Ostby
  * @version $Id: SelectAction.java 4746 2008-03-13 20:02:29Z abyot $
  */
+
+@SuppressWarnings("serial")
 public class SelectAction
     extends ActionSupport
 {
@@ -287,7 +289,6 @@ public class SelectAction
             }
         }
 
-
         Collections.sort( dataSets, new DataSetNameComparator() );
 
         // ---------------------------------------------------------------------
@@ -422,7 +423,6 @@ public class SelectAction
         else
         {        	
         	return DEFAULT_FORM;
-        }
-            
+        }            
     }
 }

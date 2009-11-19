@@ -30,7 +30,6 @@ package org.hisp.dhis.linelisting.comparator;
 import java.util.Comparator;
 import org.hisp.dhis.linelisting.LineListValidationRule;
 
-
 /**
  * @author Lars Helge Overland
  * @version $Id$

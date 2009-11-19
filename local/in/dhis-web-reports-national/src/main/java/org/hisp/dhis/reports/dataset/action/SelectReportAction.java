@@ -27,6 +27,7 @@ package org.hisp.dhis.reports.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,10 +37,10 @@ import java.util.List;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
-import org.hisp.dhis.organisationunit.OrgUnitTypePopulator;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator;
 import org.hisp.dhis.period.CalendarPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.reports.dataset.state.SelectedStateManager;
@@ -131,6 +132,9 @@ public class SelectReportAction
         return orgUnitGroupMembers;
     }
     
+    private List<OrganisationUnitGroup> orgUnitGroupNameOwnershipMembers;
+    
+       
     
     // -----------------------------------------------------------------------
     // Dependencies
@@ -157,6 +161,19 @@ public class SelectReportAction
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
     
+    private Boolean yearlyPeriodType;
+
+    public Boolean getYearlyPeriodType()
+    {
+        return yearlyPeriodType;
+    }
+
+    private List<String> periodNameList;
+
+    public List<String> getPeriodNameList()
+    {
+        return periodNameList;
+    }
     // -----------------------------------------------------------------------
     // Action implementation
     // -----------------------------------------------------------------------
@@ -181,9 +198,15 @@ public class SelectReportAction
                 iterator.remove();
             }
         }
-        OrganisationUnitGroupSet organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSetByName( OrgUnitTypePopulator.ORGUNIT_TYPE_NAME );
+        OrganisationUnitGroupSet organisationUnitGroupSet1 = organisationUnitGroupService.getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
         
-        orgUnitGroupMembers = new ArrayList<OrganisationUnitGroup>(organisationUnitGroupSet.getOrganisationUnitGroups());
+        orgUnitGroupMembers = new ArrayList<OrganisationUnitGroup>(organisationUnitGroupSet1.getOrganisationUnitGroups());
+        
+        OrganisationUnitGroupSet organisationUnitGroupSet2 = organisationUnitGroupService.getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_OWNERSHIP );
+        
+        orgUnitGroupNameOwnershipMembers = new ArrayList<OrganisationUnitGroup>(organisationUnitGroupSet2.getOrganisationUnitGroups());
+        
+        orgUnitGroupMembers.addAll( orgUnitGroupNameOwnershipMembers );
 
         Collections.sort( dataSets, new DataSetNameComparator() );
         
@@ -227,6 +250,23 @@ public class SelectReportAction
         // ---------------------------------------------------------------------
 
         periods = selectedStateManager.getPeriodList();
+        
+        yearlyPeriodType = false;
+
+        periodNameList = new ArrayList<String>();
+
+        if( selectedDataSet.getPeriodType().getName().equalsIgnoreCase("Yearly") )
+        {
+                yearlyPeriodType = true;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        int year;
+        for( Period p : periods )
+        {
+            year =  Integer.parseInt(sdf.format(p.getStartDate()))+1;
+            periodNameList.add( sdf.format(p.getStartDate()) + "-" +year);
+        }
 
         // ---------------------------------------------------------------------
         // Validate selected Period

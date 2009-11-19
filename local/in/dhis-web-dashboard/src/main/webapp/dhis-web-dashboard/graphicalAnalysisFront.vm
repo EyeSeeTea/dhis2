@@ -51,7 +51,7 @@
                     </td>   
                     			<td class="NormalB">&nbsp;</td>
                     			<td class="NormalB">$i18n.getString( "compare_view" )<br>
-                    				<select id="deSelection" name="deSelection" style="width:325px" onchange="deSelectionChangeFuntion(event)">
+                    				<select id="deSelection" name="deSelection" style="width:325px" onchange="deSelectionChangeFuntion(event)" disabled>
                     					<option value="dataelement" selected>DataElements</option>
                     					<option value="optioncombo">Options in DataElements</option>
                     				</select>

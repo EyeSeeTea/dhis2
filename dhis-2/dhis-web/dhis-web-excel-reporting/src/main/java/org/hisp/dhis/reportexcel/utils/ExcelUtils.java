@@ -40,6 +40,7 @@ import jxl.write.biff.RowsExceededException;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFErrorConstants;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -55,8 +56,6 @@ public class ExcelUtils
     public static final String TEXT = "TEXT";
 
     public static final String NUMBER = "NUMBER";
-
-    public static final String NUMBER_OF_ZERO = "0";
 
     private final static Integer NUMBER_OF_LETTER = new Integer( 26 );
 
@@ -119,11 +118,11 @@ public class ExcelUtils
         }
     }
 
-    public static String readValue( int row, int column, Sheet sheet )
-    {
-        Cell cell = sheet.getCell( column - 1, row - 1 );
-        return cell.getContents();
-    }
+//    public static String readValue( int row, int column, Sheet sheet )
+//    {
+//        Cell cell = sheet.getCell( column - 1, row - 1 );
+//        return cell.getContents();
+//    }
 
     /* POI methods */
     public static void writeValueByPOI( int row, int column, String value, String type, HSSFSheet sheet,
@@ -132,7 +131,7 @@ public class ExcelUtils
         if ( row > 0 && column > 0 )
         {
             HSSFRow rowPOI = sheet.getRow( row - 1 );
-            
+
             if ( rowPOI == null )
             {
                 rowPOI = sheet.createRow( row - 1 );
@@ -147,13 +146,17 @@ public class ExcelUtils
             }
             else if ( type.equalsIgnoreCase( ExcelUtils.NUMBER ) )
             {
-                if ( Double.parseDouble( value ) != 0 )
+                if ( Double.isNaN( Double.valueOf( value ) ) )
                 {
-                    cellPOI.setCellValue( new HSSFRichTextString( value ) );
+                    cellPOI.setCellErrorValue( (byte) HSSFErrorConstants.ERROR_NA );
+                }
+                else if ( Double.isInfinite( Double.valueOf( value ) ) )
+                {
+                    cellPOI.setCellErrorValue( (byte) HSSFErrorConstants.ERROR_NUM );
                 }
                 else
                 {
-                    cellPOI.setCellValue( new HSSFRichTextString( ExcelUtils.NUMBER_OF_ZERO ) );
+                    cellPOI.setCellValue( Double.parseDouble( value ) );
                 }
             }
         }
@@ -203,5 +206,10 @@ public class ExcelUtils
         {
             return -1;
         }
+    }
+
+    public static String readValuePOI( int row, int column, HSSFSheet sheet )
+    {
+        return String.valueOf( sheet.getRow( row - 1 ).getCell( column - 1 ).getNumericCellValue() );
     }
 }

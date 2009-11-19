@@ -1,3 +1,5 @@
+package org.hisp.dhis.survey.hibernate;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,75 +26,95 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.survey.hibernate;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateSessionManager;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.survey.Survey;
 import org.hisp.dhis.survey.SurveyStore;
+import org.hisp.dhis.surveydatavalue.SurveyDataValue;
+import org.hisp.dhis.surveydatavalue.SurveyDataValueService;
 
 /**
  * @author Brajesh Murari
  * @version $Id$
  */
 
-public class HibernateSurveyStore implements SurveyStore
+public class HibernateSurveyStore
+    implements SurveyStore
 {
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private HibernateSessionManager sessionManager;
+    private SessionFactory sessionFactory;
 
-    public void setSessionManager( HibernateSessionManager sessionManager )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.sessionManager = sessionManager;
+        this.sessionFactory = sessionFactory;
     }
-
+    
+    private SurveyDataValueService surveyDataValueService;
+    
+    public void setSurveyDataValueService( SurveyDataValueService surveyDataValueService )
+    {
+        this.surveyDataValueService = surveyDataValueService;
+    }    
+    
     // -------------------------------------------------------------------------
     // Survey
     // -------------------------------------------------------------------------
 
-
     public int addSurvey( Survey survey )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Integer) session.save( survey );
     }
 
-    
-    public void deleteSurvey( Survey survey )
+    public int deleteSurvey( Survey survey )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
-        session.delete( survey );       
+        List<SurveyDataValue> surveyDataValueList = new ArrayList<SurveyDataValue>( surveyDataValueService.getSurveyDataValues( survey ) );
+        
+        if( surveyDataValueList == null || surveyDataValueList.isEmpty() )        
+        {
+            session.delete( survey );
+        }
+        else
+        {            
+            return -1;
+        }
+        
+        return 0;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<Survey> getAllSurveys()
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return session.createCriteria( Survey.class ).list();
     }
 
     public Survey getSurvey( int id )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         return (Survey) session.get( Survey.class, id );
     }
 
     public Survey getSurveyByName( String name )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Survey.class );
         criteria.add( Restrictions.eq( "name", name ) );
@@ -102,7 +124,7 @@ public class HibernateSurveyStore implements SurveyStore
 
     public Survey getSurveyByShortName( String shortName )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Survey.class );
         criteria.add( Restrictions.eq( "shortName", shortName ) );
@@ -110,11 +132,10 @@ public class HibernateSurveyStore implements SurveyStore
         return (Survey) criteria.uniqueResult();
     }
 
-  
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<Survey> getSurveysBySource( Source source )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Survey.class );
         criteria.createAlias( "sources", "s" );
@@ -122,11 +143,11 @@ public class HibernateSurveyStore implements SurveyStore
 
         return criteria.list();
     }
-    
-    @SuppressWarnings("unchecked")
+
+    @SuppressWarnings( "unchecked" )
     public Collection<Survey> getSurveysByIndicator( Indicator indicator )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Survey.class );
         criteria.createAlias( "indicators", "i" );
@@ -137,10 +158,8 @@ public class HibernateSurveyStore implements SurveyStore
 
     public void updateSurvey( Survey survey )
     {
-        Session session = sessionManager.getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
 
         session.update( survey );
-        
     }
-
- }
+}

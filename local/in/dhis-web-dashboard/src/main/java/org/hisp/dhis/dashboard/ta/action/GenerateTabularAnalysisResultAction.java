@@ -51,7 +51,10 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.aggregation.AggregationService;
+import org.hisp.dhis.config.ConfigurationService;
+import org.hisp.dhis.config.Configuration_IN;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
@@ -59,7 +62,6 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
@@ -88,6 +90,7 @@ public class GenerateTabularAnalysisResultAction
         this.statementManager = statementManager;
     }
 
+    @SuppressWarnings("unused")
     private PeriodService periodService;
 
     public void setPeriodService( PeriodService periodService )
@@ -130,6 +133,13 @@ public class GenerateTabularAnalysisResultAction
     {
         this.aggregationService = aggregationService;
     }
+    
+    private ConfigurationService configurationService;
+
+    public void setConfigurationService( ConfigurationService configurationService )
+    {
+        this.configurationService = configurationService;
+    }
 
     private I18nFormat format;
 
@@ -149,12 +159,14 @@ public class GenerateTabularAnalysisResultAction
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -163,12 +175,14 @@ public class GenerateTabularAnalysisResultAction
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
 
     private List<OrganisationUnit> selOUList;
     private List<Date> selStartPeriodList;
@@ -263,10 +277,13 @@ public class GenerateTabularAnalysisResultAction
         int monthDays[] = { 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 30 };
         
         int startRow = 1;
+        @SuppressWarnings("unused")
         int startCol = 0;
         int headerRow = 1;
         int headerCol = 0;
-        String outputReportPath = System.getenv( "DHIS2_HOME" ) + File.separator + "db" + File.separator + "output" + File.separator + UUID.randomUUID().toString() + ".xls";        
+        
+        String raFolderName = configurationService.getConfigurationByKey( Configuration_IN.KEY_REPORTFOLDER ).getValue();
+        String outputReportPath = System.getenv( "DHIS2_HOME" ) + File.separator + raFolderName + File.separator + "output" + File.separator + UUID.randomUUID().toString() + ".xls";        
         WritableWorkbook outputReportWorkbook = Workbook.createWorkbook( new File( outputReportPath ) );
         WritableSheet sheet0 = outputReportWorkbook.createSheet( "TabularAnalysis", 0 );
         
@@ -534,6 +551,7 @@ public class GenerateTabularAnalysisResultAction
                     double pwdenAggValue=0.0;
                     double pwdvAggValue=0.0;
                     double pwdAggIndValue = 0.0;
+                    @SuppressWarnings("unused")
                     String tempStr = "";
                     
                     double tempAggVal;

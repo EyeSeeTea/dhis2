@@ -35,10 +35,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.amplecode.quick.StatementManager;
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
@@ -49,7 +50,6 @@ import org.hisp.dhis.survey.SurveyService;
 import org.hisp.dhis.surveydatavalue.SurveyDataValue;
 import org.hisp.dhis.surveydatavalue.SurveyDataValueService;
 
-import com.opensymphony.webwork.ServletActionContext;
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 

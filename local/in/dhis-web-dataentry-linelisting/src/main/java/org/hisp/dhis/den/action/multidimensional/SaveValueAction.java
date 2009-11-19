@@ -48,6 +48,7 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew
  * @version $Id$
  */
+
 public class SaveValueAction
     implements Action
 {
@@ -160,7 +161,6 @@ public class SaveValueAction
     	this.inputId = inputId;
     }
 
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -168,20 +168,15 @@ public class SaveValueAction
     public String execute()
     {
         OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
-
         Period period = selectedStateManager.getSelectedPeriod();
-        
-        
+            
         dataElementId = Integer.parseInt( inputId.substring( 0, inputId.indexOf(':') ) );
         optionComboId = Integer.parseInt( inputId.substring( inputId.indexOf(':')+1, inputId.length() ) );
                 
         DataElement dataElement = dataElementService.getDataElement( dataElementId );        
-
-        storedBy = currentUserService.getCurrentUsername();        
-        
+        storedBy = currentUserService.getCurrentUsername();               
         DataElementCategoryOptionCombo optionCombo = dataElementCategoryOptionComboService.getDataElementCategoryOptionCombo( optionComboId );
-        
-        
+             
         if ( storedBy == null )
         {
             storedBy = "[unknown]";

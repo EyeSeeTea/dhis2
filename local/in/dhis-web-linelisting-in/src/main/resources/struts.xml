@@ -31,7 +31,6 @@
         <action name="getLineListOption"
       class="org.hisp.dhis.ll.action.llOption.GetLineListOptionAction">
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseLineListOption.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
 
@@ -39,7 +38,6 @@
       class="org.hisp.dhis.ll.action.llOption.RemoveLineListOptionAction">
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseSuccess.vm</result>
             <result name="error" type="velocity-xml">/dhis-web-linelisting-in/responseError.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
             <param name="requiredAuthorities">F_LINELISTOPTION_DELETE</param>
         </action>
@@ -56,7 +54,6 @@
         <action name="addLineListOption"
       class="org.hisp.dhis.ll.action.llOption.AddLineListOptionAction">
             <result name="success" type="redirect">getLineListOptions.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTOPTION_ADD</param>
         </action>
 
@@ -66,14 +63,12 @@
             <param name="page">/dhis-web-linelisting-in/updateLineListOptionForm.vm</param>
             <param name="javascripts">javascript/shortName.js,javascript/lineListOption.js,javascript/updateLoad.js</param>
             <param name="stylesheets">style/dhis-web-linelisting-in.css</param>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTOPTION_UPDATE</param>
         </action>
 
         <action name="updateLineListOption"
       class="org.hisp.dhis.ll.action.llOption.UpdateLineListOptionAction">
             <result name="success" type="redirect">getLineListOptions.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTOPTION_UPDATE</param>
         </action>
 
@@ -82,7 +77,6 @@
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseSuccess.vm</result>
             <result name="error" type="velocity-xml">/dhis-web-linelisting-in/responseError.vm</result>
             <result name="input" type="velocity-xml">/dhis-web-linelisting-in/responseInput.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
 	
@@ -94,7 +88,6 @@
         <action name="getLineListElement"
       class="org.hisp.dhis.ll.action.llelements.GetLineListElementAction">
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseLineListElementObject.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
     
@@ -103,7 +96,6 @@
             <param name="page">/dhis-web-linelisting-in/lineListElements.vm</param>
             <param name="menu">/dhis-web-linelisting-in/menu.vm</param>
             <param name="javascripts">javascript/lineListElement.js,javascript/filterLineListElementTable.js</param>
-            <interceptor-ref name="transactionStack"/>
         </action>
     
     <!-- Show add Line List Element form-->
@@ -113,7 +105,6 @@
             <result name="success" type="velocity">/main.vm</result>
             <param name="page">/dhis-web-linelisting-in/addLineListElementForm.vm</param>
             <param name="javascripts">javascript/lineListElement.js,javascript/lineListElementOptions.js</param>
-            <interceptor-ref name="transactionStack"/>
         </action>
     
     
@@ -122,7 +113,6 @@
         <action name="showEditLineListElementForm"
 			class="org.hisp.dhis.ll.action.llelements.GetLineListElementAction">
             <result name="success" type="chain">editLineListElementForm</result>
-            <interceptor-ref name="transactionStack"/>
         </action>
     
     
@@ -133,7 +123,6 @@
 				/dhis-web-linelisting-in/editLineListElementForm.vm
             </param>
             <param name="javascripts">javascript/lineListElement.js,javascript/lineListElementOptions.js</param>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_DATASET_UPDATE</param>
         </action>
     
@@ -144,28 +133,24 @@
       class="org.hisp.dhis.ll.action.llelements.ValidateLineListElementAction">
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseLineListElementSuccess.vm</result>
             <result name="input" type="velocity-xml">/dhis-web-linelisting-in/responseLineListElementInput.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
     
         <action name="addLineListElement"
       class="org.hisp.dhis.ll.action.llelements.AddLineListElementAction">
             <result name="success" type="redirect">lineListElements.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_DATASET_ADD</param>
         </action>
     
         <action name="updateLineListElement"
       class="org.hisp.dhis.ll.action.llelements.UpdateLineListElementAction">
             <result name="success" type="redirect">lineListElements.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_DATASET_UPDATE</param>
         </action>
     
         <action name="delLineListElement"
       class="org.hisp.dhis.ll.action.llelements.DelLineListElementAction">
             <result name="success" type="redirect">lineListElements.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_DATASET_DELETE</param>
         </action>
 
@@ -201,20 +186,17 @@
             <result name="success" type="velocity">/main.vm</result>
             <param name="page">/dhis-web-linelisting-in/addLineListGroupForm.vm</param>
             <param name="javascripts">javascript/lineListGroupElements.js,javascript/lineListGroup.js</param>
-            <interceptor-ref name="transactionStack"/>
         </action>
 
         <action name="getLineListGroup"
       class="org.hisp.dhis.ll.action.llgroup.GetLineListGroupAction">
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseLineListGroup.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
 
         <action name="removeLineListGroup"
       class="org.hisp.dhis.ll.action.llgroup.RemoveLineListGroupAction">
             <result name="success" type="redirect">getLineListGroups.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
             <param name="requiredAuthorities">F_LINELISTGroup_DELETE</param>
         </action>
@@ -231,8 +213,6 @@
         <action name="addLineListGroup"
       class="org.hisp.dhis.ll.action.llgroup.AddLineListGroupAction">
             <result name="success" type="redirect">getLineListGroups.action</result>
-           
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTGroup_ADD</param>
         </action>
 
@@ -242,14 +222,12 @@
             <param name="page">/dhis-web-linelisting-in/updateLineListGroupForm.vm</param>
             <param name="javascripts">javascript/lineListGroupElements.js,javascript/lineListGroup.js</param>
             <param name="stylesheets">style/dhis-web-linelisting-in.css</param>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTGroup_UPDATE</param>
         </action>
         
         <action name="updateLineListGroup"
       	class="org.hisp.dhis.ll.action.llgroup.UpdateLineListGroupAction">
             <result name="success" type="redirect">getLineListGroups.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTGroup_UPDATE</param>
         </action>
 
@@ -258,7 +236,6 @@
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseSuccess.vm</result>
             <result name="error" type="velocity-xml">/dhis-web-linelisting-in/responseError.vm</result>
             <result name="input" type="velocity-xml">/dhis-web-linelisting-in/responseInput.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
     
@@ -275,14 +252,12 @@
             <result name="success" type="velocity">/main.vm</result>
             <param name="page">/dhis-web-linelisting-in/lineListGroupAssociations.vm</param>
             <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/lineListGroupElements.js,javascript/associations.js</param>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTGroup_ASSIGN</param>
         </action>
     
         <action name="defineLLGroupAssociations"
       class="org.hisp.dhis.ll.action.llgroup.DefineLLGroupAssociationsAction">
             <result name="success" type="redirect">getLineListGroups.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTGroup_ASSIGN</param>
         </action>
     
@@ -315,7 +290,6 @@
             <result name="success" type="velocity">/main.vm</result>
             <param name="page">/dhis-web-linelisting-in/lineListGroupAssociations.vm</param>
             <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/lineListGroupElements.js,javascript/associations.js</param>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTGroup_ASSIGN</param>
         </action>
     
@@ -355,7 +329,6 @@
         <action name="updateLineListEntry"
       	class="org.hisp.dhis.ll.action.lldataentry.SaveValueAction">
             <result name="success" type="redirect">select.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_LINELISTEntry_UPDATE</param>
         </action>
     <!-- Org unit -->
@@ -364,7 +337,6 @@
             <result name="success" type="velocity">
 				/dhis-web-linelisting-in/responseOrgUnit.vm
             </result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
 
@@ -383,19 +355,16 @@
             <param name="menu">/dhis-web-linelisting-in/menu.vm</param>
             <param name="javascripts">javascript/general.js,javascript/validationForm.js,javascript/expression.js</param>
             <param name="stylesheets">style/validationStyle.css</param>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_VALIDATIONRULE_ADD</param>
         </action>
 
         <action name="getFilteredLineListElements" class="org.hisp.dhis.ll.action.llValidation.GetFilteredLineListElementsAction">
             <result name="success" type="velocity">/dhis-web-linelisting-in/responseLineListElement.vm</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
 
         <action name="addValidationRule" class="org.hisp.dhis.ll.action.llValidation.AddLineListValidationRuleAction">
             <result name="success" type="redirect">showValidationRules.action</result>
-            <interceptor-ref name="transactionStack"/>
             <param name="requiredAuthorities">F_VALIDATIONRULE_ADD</param>
         </action>
     <!-- LineList and Data Element Mapping -->
@@ -405,14 +374,12 @@
             <result name="success" type="velocity">selectDataElement.vm</result>
             <result name="input" type="velocity-xml">/dhis-web-linelisting-in/responseInput.vm</result>
             <param name="javascripts">javascript/hashtable.js</param>
-            <interceptor-ref name="transactionStack"/>
         </action>
     
         <action name="getOptionCombos"
       class="org.hisp.dhis.ll.action.lldataelementmapping.GetOptionCombosAction">
             <result name="success" type="velocity-xml">/dhis-web-linelisting-in/responseOptionCombo.vm</result>
             <param name="javascripts">javascript/hashtable.js</param>
-            <interceptor-ref name="transactionStack"/>
         </action>
     
 	<action name="showAddLineListMappingForm" class="org.hisp.dhis.validationrule.action.NoAction">
@@ -420,16 +387,13 @@
       <param name="page">/dhis-web-linelisting-in/addLineListDataElementMappingForm.vm</param>
       <param name="menu">/dhis-web-linelisting-in/menu.vm</param>
       <param name="javascripts">javascript/lineListMapping.js,javascript/expression.js</param>
-      <interceptor-ref name="transactionStack"/>
     </action>    
     
     <action name="addLineListDataElementMapping" class="org.hisp.dhis.ll.action.lldataelementmapping.AddLineListDataElementMapping">
       <result name="success" type="redirect">getAllLineListMappings.action</result>
-      <interceptor-ref name="transactionStack"/>
     </action>
     
     <action name="getAllLineListMappings" class="org.hisp.dhis.ll.action.lldataelementmapping.GetAllLineListMappingsAction">
-      <interceptor-ref name="transactionStack"/>
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-linelisting-in/lineListMappings.vm</param>
       <param name="menu">/dhis-web-linelisting-in/menu.vm</param>

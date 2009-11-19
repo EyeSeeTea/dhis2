@@ -34,17 +34,16 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.amplecode.quick.StatementManager;
 import org.apache.velocity.tools.generic.MathTool;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionComboService;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.jdbc.StatementManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -52,9 +51,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitShortNameComparator;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.reports.util.DBConnection;
 import org.hisp.dhis.reports.util.ReportService;
 import org.hisp.dhis.system.util.MathUtils;
 import org.w3c.dom.Document;
@@ -115,13 +112,6 @@ public class GenerateAdvancedReportResultAction
         this.dataElementService = dataElementService;
     }
 
-    private DataValueService dataValueService;
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
     private DataElementCategoryOptionComboService dataElementCategoryOptionComboService;
 
     public void setDataElementCategoryOptionComboService(
@@ -144,13 +134,6 @@ public class GenerateAdvancedReportResultAction
         this.periodService = periodService;
     }
 
-    private PeriodStore periodStore;
-    
-    public void setPeriodStore( PeriodStore periodStore )
-    {
-        this.periodStore = periodStore;
-    }
-    
     private I18nFormat format;
 
     public void setFormat( I18nFormat format )
@@ -169,12 +152,14 @@ public class GenerateAdvancedReportResultAction
         return inputStream;
     }
 
+    /*
     private String contentType;
 
     public String getContentType()
     {
         return contentType;
     }
+    */
 
     private String fileName;
 
@@ -183,12 +168,14 @@ public class GenerateAdvancedReportResultAction
         return fileName;
     }
 
+    /*
     private int bufferSize;
 
     public int getBufferSize()
     {
         return bufferSize;
     }
+    */
 
     private MathTool mathTool;
 
@@ -904,7 +891,7 @@ public class GenerateAdvancedReportResultAction
         Date lastDay = new Date( cal.getTimeInMillis() );
         //System.out.println( lastDay.toString() );        
         Period newPeriod = new Period();
-        newPeriod = periodStore.getPeriod( firstDay, lastDay, periodType );      
+        newPeriod = periodService.getPeriod( firstDay, lastDay, periodType );      
         return newPeriod;
     }
        

@@ -1,3 +1,5 @@
+package org.hisp.dhis.surveydatavalue;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,19 +26,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.surveydatavalue;
 
 import java.util.Collection;
 
 import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.survey.Survey;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Brajesh Murari
  * @version $Id$
  */
+
+@Transactional
 public class DefaultSurveyDataValueService
     implements SurveyDataValueService
 {
@@ -55,102 +58,92 @@ public class DefaultSurveyDataValueService
     // Basic SurveyDataValue
     // -------------------------------------------------------------------------
 
-   
     public void addSurveyDataValue( SurveyDataValue surveyDataValue )
     {
-        if ( surveyDataValue.getValue() != null  )
+        if ( surveyDataValue.getValue() != null )
         {
             surveyDataValueStore.addSurveyDataValue( surveyDataValue );
         }
     }
 
-    
     public void deleteSurveyDataValue( SurveyDataValue surveyDataValue )
     {
         surveyDataValueStore.deleteSurveyDataValue( surveyDataValue );
     }
 
-    
     public int deleteSurveyDataValuesBySource( Source source )
     {
         return surveyDataValueStore.deleteSurveyDataValuesBySource( source );
     }
 
-   
     public int deleteSurveyDataValuesBySurvey( Survey survey )
     {
         return surveyDataValueStore.deleteSurveyDataValuesBySurvey( survey );
     }
-    
+
     public int deleteSurveyDataValuesByIndicator( Indicator indicator )
     {
         return surveyDataValueStore.deleteSurveyDataValuesByIndicator( indicator );
     }
+    
+    public int deleteSurveyDataValuesBySurveyIndicatorAndSource( Survey survey, Indicator indicator, Source source )
+    {
+    	return surveyDataValueStore.deleteSurveyDataValuesBySurveyIndicatorAndSource(survey, indicator, source);
+    }
 
-   
     public Collection<SurveyDataValue> getAllSurveyDataValues()
     {
         return surveyDataValueStore.getAllSurveyDataValues();
     }
 
-    
     public Collection<SurveyDataValue> getSurveyDataValues( Source source )
     {
         return surveyDataValueStore.getSurveyDataValues( source );
     }
 
-    
     public Collection<SurveyDataValue> getSurveyDataValues( Survey survey, Collection<? extends Source> sources )
     {
         return surveyDataValueStore.getSurveyDataValues( survey, sources );
     }
 
-    
     public SurveyDataValue getSurveyDataValue( Source source, Survey survey )
     {
         return surveyDataValueStore.getSurveyDataValue( source, survey );
     }
 
-   
     public Collection<SurveyDataValue> getSurveyDataValues( Source source, Survey survey )
     {
         return surveyDataValueStore.getSurveyDataValues( source, survey );
     }
 
-    
     public Collection<SurveyDataValue> getSurveyDataValues( Collection<Source> sources, Survey survey )
     {
         return surveyDataValueStore.getSurveyDataValues( sources, survey );
     }
 
-    
     public Collection<SurveyDataValue> getSurveyDataValues( Source source, Collection<Survey> surveys )
     {
         return surveyDataValueStore.getSurveyDataValues( source, surveys );
     }
 
-   
     public Collection<SurveyDataValue> getSurveyDataValues( Collection<Survey> surveys,
         Collection<? extends Source> sources, int firstResult, int maxResults )
     {
         return surveyDataValueStore.getSurveyDataValues( surveys, sources, firstResult, maxResults );
     }
 
-    
     public Collection<SurveyDataValue> getSurveyDataValues( Survey survey )
     {
         return surveyDataValueStore.getSurveyDataValues( survey );
     }
 
-   
     public void updateSurveyDataValue( SurveyDataValue dataValue )
     {
         surveyDataValueStore.updateSurveyDataValue( dataValue );
     }
-    
+
     public SurveyDataValue getSurveyDataValue( Source source, Survey survey, Indicator indicator )
     {
         return surveyDataValueStore.getSurveyDataValue( source, survey, indicator );
     }
-
 }

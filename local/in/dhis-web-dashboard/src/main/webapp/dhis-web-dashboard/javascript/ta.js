@@ -20,7 +20,10 @@ function ouSelCBChange()
 		ouListCDId.disabled = true;
 	}
 	
-	getOUDeatilsForTA( selOrgUnitId );
+	if( selOrgUnitId != null && selOrgUnitId != "NONE" && selOrgUnitId != "")
+	{
+	   getOUDeatilsForTA( selOrgUnitId );
+	}
 	
 }
 
@@ -346,7 +349,7 @@ function getPeriodsReceived( xmlObject )
 
 function getOUDeatilsForTA( orgUnitIds )
 {
-	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds;
+	var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds+"&type=ta";
 	
 	var request = new Request();
 	request.setResponseTypeXML( 'orgunit' );

@@ -420,30 +420,6 @@ function Request()
     </div>
     #end
    
-    #if($riRadio.equals("indicatorsRadio"))    	
-
-<div align="right">
-        #foreach($service in $selectedServiceList)
-        	<br>
-    		<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border-style: dotted">
-        		<tr class="TableHeadingCellStyles">
-            		<td  style="border-style: dotted; border-width: 1">Service Name</td>            	
-            			#set($surveys = $indicatorSurveyList.get($service))
-            			#foreach($survey in $surveys)
-            	    		<td class="TableHeadingCellStyles" align="center" style="border-style: dotted; border-width: 1">$survey.name</td>
-            	    	#end
-            	</tr>            	    	
-        		<tr class="TableHeadingCellStyles">
-            		<td  style="border-style: dotted; border-width: 1">$service.name</td>            	
-            			#foreach($survey in $surveys)
-            	    		<td align="center" style="border-style: dotted; border-width: 1">$survey.value</td>
-            	    	#end
-            	</tr>
-            </table>	    						     
-        #end        
-</div>
-    #end
-    
     #if($selectedButton.equals("ViewSummary"))
    	     <br><br>
    	 #else
