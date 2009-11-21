@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.filter;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -27,18 +27,10 @@ package org.hisp.dhis.system.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.collections.Predicate;
-import org.hisp.dhis.dataelement.DataElement;
-
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
-public class StringTypeDataElementPredicate
-    implements Predicate
+public interface Filter<T>
 {
-    public boolean evaluate( Object object )
-    {
-        return ((DataElement) object).getType().equals( DataElement.VALUE_TYPE_STRING );
-    }
+    boolean retain( T object );
 }
