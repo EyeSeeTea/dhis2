@@ -28,7 +28,6 @@ package org.hisp.dhis.relationship;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericStore;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -44,9 +43,9 @@ public class DefaultRelationshipTypeService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericStore<RelationshipType> relationshipTypeStore;
+    private RelationshipTypeStore relationshipTypeStore;
 
-    public void setRelationshipTypeStore( GenericStore<RelationshipType> relationshipTypeStore )
+    public void setRelationshipTypeStore( RelationshipTypeStore relationshipTypeStore )
     {
         this.relationshipTypeStore = relationshipTypeStore;
     }
@@ -54,7 +53,7 @@ public class DefaultRelationshipTypeService
     // -------------------------------------------------------------------------
     // RelationshipType Implementation
     // -------------------------------------------------------------------------
-    
+
     public void deleteRelationshipType( RelationshipType relationshipType )
     {
         relationshipTypeStore.delete( relationshipType );
@@ -78,5 +77,10 @@ public class DefaultRelationshipTypeService
     public void updateRelationshipType( RelationshipType relationshipType )
     {
         relationshipTypeStore.update( relationshipType );
+    }
+
+    public RelationshipType getRelationshipType( String aIsToB, String bIsToA )
+    {
+        return relationshipTypeStore.getRelationshipType( aIsToB, bIsToA );
     }
 }
