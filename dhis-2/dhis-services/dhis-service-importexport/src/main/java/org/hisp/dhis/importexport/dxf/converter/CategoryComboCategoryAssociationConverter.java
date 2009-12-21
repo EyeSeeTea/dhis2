@@ -44,6 +44,7 @@ import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractGroupMemberConverter;
+import org.hisp.dhis.system.util.Counter;
 
 /**
  * @author Lars Helge Overland
@@ -122,8 +123,8 @@ public class CategoryComboCategoryAssociationConverter
                     
                     for ( DataElementCategory category : categoryCombo.getCategories() )
                     {
-                        if ( categories.contains( category ) )
-                        {
+                    	if ( categories.contains( category ) )
+                    	{
                             writer.openElement( ELEMENT_NAME );
                             
                             writer.writeElement( FIELD_CATEGORY_COMBO, String.valueOf( categoryCombo.getId() ) );
@@ -131,7 +132,7 @@ public class CategoryComboCategoryAssociationConverter
                             writer.writeElement( FIELD_SORT_ORDER, String.valueOf( sortOrder++ ) );
                             
                             writer.closeElement();
-                        }
+                    	}
                     }
                 }
             }
@@ -142,7 +143,7 @@ public class CategoryComboCategoryAssociationConverter
 
     public void read( XMLReader reader, ImportParams params )
     {
-        int sortOrder = 1;
+        Counter counter = new Counter(); // Used for backwards compatibility
         
         while ( reader.moveToStartElement( ELEMENT_NAME, COLLECTION_NAME ) )
         {
@@ -152,8 +153,8 @@ public class CategoryComboCategoryAssociationConverter
             
             association.setGroupId( categoryComboMapping.get( Integer.parseInt( values.get( FIELD_CATEGORY_COMBO ) ) ) );            
             association.setMemberId( categoryMapping.get( Integer.parseInt( values.get( FIELD_CATEGORY ) ) ) );
-            association.setSortOrder( sortOrder++ ); //TODO Fix
-            //association.setSortOrder( values.containsKey( FIELD_SORT_ORDER ) ? categoryMapping.get( Integer.parseInt( values.get( FIELD_SORT_ORDER ) ) ) : 0 );
+            association.setSortOrder( values.containsKey( FIELD_SORT_ORDER ) ? 
+                Integer.parseInt( values.get( FIELD_SORT_ORDER ) ) : counter.count( association.getGroupId() ) );
             
             read( association, GroupMemberType.CATEGORYCOMBO_CATEGORY, params );
         }

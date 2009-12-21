@@ -35,18 +35,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.common.comparator.CategoryComboSizeComparator;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
 import org.springframework.transaction.annotation.Transactional;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * @author Kristian Nordal
@@ -67,17 +71,18 @@ public class DefaultDataElementService
     {
         this.dataElementStore = dataElementStore;
     }
-    
+
     private GenericIdentifiableObjectStore<DataElementGroup> dataElementGroupStore;
-    
+
     public void setDataElementGroupStore( GenericIdentifiableObjectStore<DataElementGroup> dataElementGroupStore )
     {
         this.dataElementGroupStore = dataElementGroupStore;
     }
-    
+
     private GenericIdentifiableObjectStore<DataElementGroupSet> dataElementGroupSetStore;
 
-    public void setDataElementGroupSetStore( GenericIdentifiableObjectStore<DataElementGroupSet> dataElementGroupSetStore )
+    public void setDataElementGroupSetStore(
+        GenericIdentifiableObjectStore<DataElementGroupSet> dataElementGroupSetStore )
     {
         this.dataElementGroupSetStore = dataElementGroupSetStore;
     }
@@ -99,9 +104,9 @@ public class DefaultDataElementService
         {
             dataElement.setUuid( UUIdUtils.getUUId() );
         }
-        
+
         dataElement.setLastUpdated( new Date() );
-        
+
         int id = dataElementStore.addDataElement( dataElement );
 
         i18nService.addObject( dataElement );
@@ -112,17 +117,17 @@ public class DefaultDataElementService
     public void updateDataElement( DataElement dataElement )
     {
         dataElement.setLastUpdated( new Date() );
-        
+
         dataElementStore.updateDataElement( dataElement );
-        
+
         i18nService.verify( dataElement );
     }
 
     public void deleteDataElement( DataElement dataElement )
         throws HierarchyViolationException
-    {        
+    {
         i18nService.removeObject( dataElement );
-        
+
         dataElementStore.deleteDataElement( dataElement );
     }
 
@@ -135,38 +140,38 @@ public class DefaultDataElementService
     {
         return i18n( i18nService, dataElementStore.getDataElement( uuid ) );
     }
-    
+
     public Collection<DataElement> getAllDataElements()
     {
         return i18n( i18nService, dataElementStore.getAllDataElements() );
     }
-    
+
     public Collection<DataElement> getNonCalculatedDataElements()
     {
         Collection<DataElement> dataElements = new ArrayList<DataElement>();
-        
+
         for ( DataElement dataElement : getAllDataElements() )
         {
-            if ( !( dataElement instanceof CalculatedDataElement ) )
+            if ( !(dataElement instanceof CalculatedDataElement) )
             {
                 dataElements.add( dataElement );
             }
         }
-        
+
         return dataElements;
     }
-    
+
     public Collection<DataElement> getDataElements( final Collection<Integer> identifiers )
     {
         Collection<DataElement> dataElements = getAllDataElements();
-        
+
         return identifiers == null ? dataElements : FilterUtils.filter( dataElements, new Filter<DataElement>()
+        {
+            public boolean retain( DataElement dataElement )
             {
-                public boolean retain( DataElement dataElement )
-                {
-                    return identifiers.contains( dataElement.getId() );
-                }
-            } );
+                return identifiers.contains( dataElement.getId() );
+            }
+        } );
     }
 
     public Collection<DataElement> getNonCalculatedDataElements( Collection<Integer> identifiers )
@@ -175,7 +180,7 @@ public class DefaultDataElementService
         {
             return getNonCalculatedDataElements();
         }
-        
+
         return getDataElements( identifiers );
     }
 
@@ -218,37 +223,77 @@ public class DefaultDataElementService
     {
         return i18n( i18nService, dataElementStore.getDataElementsByType( type ) );
     }
-    
+
     public Collection<DataElement> getDataElementsByDomainType( String domainType )
     {
         return i18n( i18nService, dataElementStore.getDataElementsByDomainType( domainType ) );
     }
-    
+
     public Collection<DataElement> getDataElementByCategoryCombo( DataElementCategoryCombo categoryCombo )
     {
         return i18n( i18nService, dataElementStore.getDataElementByCategoryCombo( categoryCombo ) );
     }
-    
+
+    public Map<DataElementCategoryCombo, Collection<DataElement>> getGroupedDataElementsByCategoryCombo(
+        List<DataElement> dataElements )
+    {
+        Map<DataElementCategoryCombo, Collection<DataElement>> mappedDataElements = new HashMap<DataElementCategoryCombo, Collection<DataElement>>();
+
+        for ( DataElement de : dataElements )
+        {
+            if ( mappedDataElements.containsKey( de.getCategoryCombo() ) )
+            {
+                mappedDataElements.get( de.getCategoryCombo() ).add( de );
+            }
+            else
+            {
+                Collection<DataElement> des = new ArrayList<DataElement>();
+                des.add( de );
+
+                mappedDataElements.put( de.getCategoryCombo(), des );
+            }
+        }
+
+        return mappedDataElements;
+    }
+
+    public List<DataElementCategoryCombo> getDataElementCategoryCombos( List<DataElement> dataElements )
+    {
+        Set<DataElementCategoryCombo> setCategoryCombos = new HashSet<DataElementCategoryCombo>();              
+
+        for ( DataElement de : dataElements )
+        {
+            setCategoryCombos.add( de.getCategoryCombo() );           
+        }
+
+        List<DataElementCategoryCombo> listCategoryCombos = new ArrayList<DataElementCategoryCombo>(setCategoryCombos);
+        
+        Collections.sort( listCategoryCombos, new CategoryComboSizeComparator() );
+        
+        return listCategoryCombos;
+    }
+
     public Collection<DataElement> getDataElementsWithGroupSets()
     {
         return i18n( i18nService, dataElementStore.getDataElementsWithGroupSets() );
     }
-    
+
     public Collection<DataElement> getDataElementsByGroupSets( Set<DataElementGroupSet> groupSets )
     {
         Collection<DataElement> dataElements = new HashSet<DataElement>();
-        
+
         for ( DataElement dataElement : getDataElementsWithGroupSets() )
         {
-            if ( dataElement.getGroupSets() != null && new HashSet<DataElementGroupSet>( dataElement.getGroupSets() ).equals( groupSets ) )
+            if ( dataElement.getGroupSets() != null
+                && new HashSet<DataElementGroupSet>( dataElement.getGroupSets() ).equals( groupSets ) )
             {
                 dataElements.add( dataElement );
             }
         }
-        
+
         return dataElements;
     }
-    
+
     // -------------------------------------------------------------------------
     // CalculatedDataElement
     // -------------------------------------------------------------------------
@@ -261,8 +306,9 @@ public class DefaultDataElementService
     public Collection<CalculatedDataElement> getCalculatedDataElements( final Collection<Integer> identifiers )
     {
         Collection<CalculatedDataElement> dataElements = getAllCalculatedDataElements();
-        
-        return identifiers == null ? dataElements : FilterUtils.filter( dataElements, new Filter<CalculatedDataElement>()
+
+        return identifiers == null ? dataElements : FilterUtils.filter( dataElements,
+            new Filter<CalculatedDataElement>()
             {
                 public boolean retain( CalculatedDataElement dataElement )
                 {
@@ -270,7 +316,7 @@ public class DefaultDataElementService
                 }
             } );
     }
-    
+
     public CalculatedDataElement getCalculatedDataElementByDataElement( DataElement dataElement )
     {
         return i18n( i18nService, dataElementStore.getCalculatedDataElementByDataElement( dataElement ) );
@@ -359,18 +405,18 @@ public class DefaultDataElementService
 
         return operands;
     }
-    
+
     public Map<Integer, String> getCalculatedDataElementExpressionMap( Collection<Integer> identifiers )
     {
         Collection<CalculatedDataElement> dataElements = getCalculatedDataElements( identifiers );
 
         Map<Integer, String> map = new HashMap<Integer, String>();
-        
+
         for ( CalculatedDataElement element : dataElements )
-        {            
+        {
             map.put( element.getId(), element.getExpression().getExpression() );
         }
-        
+
         return map;
     }
 
@@ -386,23 +432,23 @@ public class DefaultDataElementService
         }
 
         int id = dataElementGroupStore.save( dataElementGroup );
-        
+
         i18nService.addObject( dataElementGroup );
-        
+
         return id;
     }
 
     public void updateDataElementGroup( DataElementGroup dataElementGroup )
     {
         dataElementGroupStore.update( dataElementGroup );
-        
-        i18nService.verify( dataElementGroup );        
+
+        i18nService.verify( dataElementGroup );
     }
 
     public void deleteDataElementGroup( DataElementGroup dataElementGroup )
-    {        
+    {
         i18nService.removeObject( dataElementGroup );
-        
+
         dataElementGroupStore.delete( dataElementGroup );
     }
 
@@ -410,7 +456,7 @@ public class DefaultDataElementService
     {
         return i18n( i18nService, dataElementGroupStore.get( id ) );
     }
-    
+
     public Collection<DataElementGroup> getDataElementGroups( final Collection<Integer> identifiers )
     {
         Collection<DataElementGroup> groups = getAllDataElementGroups();
@@ -462,37 +508,37 @@ public class DefaultDataElementService
 
     public int addDataElementGroupSet( DataElementGroupSet groupSet )
     {
-        int id =  dataElementGroupSetStore.save( groupSet );
-        
+        int id = dataElementGroupSetStore.save( groupSet );
+
         i18nService.addObject( groupSet );
-        
+
         return id;
     }
-    
+
     public void updateDataElementGroupSet( DataElementGroupSet groupSet )
     {
         dataElementGroupSetStore.update( groupSet );
-        
+
         i18nService.verify( groupSet );
     }
-    
+
     public void deleteDataElementGroupSet( DataElementGroupSet groupSet )
     {
         i18nService.removeObject( groupSet );
-        
+
         dataElementGroupSetStore.delete( groupSet );
     }
-    
+
     public DataElementGroupSet getDataElementGroupSet( int id )
     {
         return i18n( i18nService, dataElementGroupSetStore.get( id ) );
     }
-    
+
     public DataElementGroupSet getDataElementGroupSetByName( String name )
     {
         return i18n( i18nService, dataElementGroupSetStore.getByName( name ) );
     }
-    
+
     public Collection<DataElementGroupSet> getAllDataElementGroupSets()
     {
         return i18n( i18nService, dataElementGroupSetStore.getAll() );
@@ -501,13 +547,14 @@ public class DefaultDataElementService
     public Collection<DataElementGroupSet> getDataElementGroupSets( final Collection<Integer> identifiers )
     {
         Collection<DataElementGroupSet> groupSets = getAllDataElementGroupSets();
-        
+
         return identifiers == null ? groupSets : FilterUtils.filter( groupSets, new Filter<DataElementGroupSet>()
+        {
+            public boolean retain( DataElementGroupSet object )
             {
-                public boolean retain( DataElementGroupSet object )
-                {
-                    return identifiers.contains( object.getId() );
-                }
-            } );
+                return identifiers.contains( object.getId() );
+            }
+        } );
     }
+
 }

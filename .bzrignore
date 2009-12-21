@@ -1,5 +1,6 @@
 target
 *.log
+*.log.*
 .classpath
 *.classpath
 *.project
@@ -11,3 +12,4 @@ target/**
 .metadata
 build.sh
 .springBeans
+nbactions.xml

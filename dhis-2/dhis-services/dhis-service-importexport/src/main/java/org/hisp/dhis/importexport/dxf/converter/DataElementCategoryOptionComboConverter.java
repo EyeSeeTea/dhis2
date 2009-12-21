@@ -133,7 +133,7 @@ public class DataElementCategoryOptionComboConverter
                 // -------------------------------------------------------------
 
                 writer.openElement( SUB_COLLECTION_NAME );
-                
+
                 for ( DataElementCategoryOption categoryOption : categoryOptionCombo.getCategoryOptions() )
                 {
                     writer.openElement( SUB_COLLECTION_ELEMENT_NAME );

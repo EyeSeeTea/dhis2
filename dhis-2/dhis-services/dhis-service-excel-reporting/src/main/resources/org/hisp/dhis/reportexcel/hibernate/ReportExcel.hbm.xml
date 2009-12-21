@@ -15,7 +15,7 @@
 		<property name="organisationColumn" column="organisationcolumn" />
 		<property name="group" column="reportgroup" not-null="true"/>
 
-		<set name="reportExcelItems" lazy="false" cascade="all" inverse="true">
+		<set name="reportExcelItems" lazy="false" cascade="all-delete-orphan" inverse="true">
 			<key column="reportexcelid" />
 			<one-to-many class="org.hisp.dhis.reportexcel.ReportExcelItem" />
 		</set>
@@ -53,8 +53,13 @@
 				<key column="reportexcelid" />
 				<list-index column="grouporder" base="0"/>				
 				<many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnitGroup" column="oganisationunitgroupid"
-				foreign-key="fk_reportexcel_organisationgroup"/>
+				foreign-key="fk_reportexcel_organisationgroup"/>				
 			</list>		
+			<map name="organisationUnitLevels" table="reportexcel_organisationunit_levels">
+				<key column="reportexcelid"/>
+				<index-many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnitGroup" column="organisationunitgroupid" foreign-key="fk_organisationunitgroup_level"/>
+				<many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnitLevel" column="organisationunitlevelid" foreign-key="pk_organisationunitgroup_level"/>
+			</map>
 		</joined-subclass>
 		
 	</class>

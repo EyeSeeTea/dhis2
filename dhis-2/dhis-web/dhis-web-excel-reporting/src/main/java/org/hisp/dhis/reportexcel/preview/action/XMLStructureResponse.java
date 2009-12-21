@@ -307,9 +307,17 @@ public class XMLStructureResponse
 
                             break;
 
+                        // CELL_TYPE_STRING will occur if the formula return a
+                        // string value
+                        case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING:
+
+                            recalculatedValue = cellRef.getRichStringCellValue().getString();
+
+                            break;
+
                         // CELL_TYPE_FORMULA will never occur
                         case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA:
-                            System.out.println( "Place of cell :: [" + cellRef.getRowIndex() + "]["
+                            System.out.println( "Formula into cell :: [" + cellRef.getRowIndex() + "]["
                                 + cellRef.getColumnIndex() + "]" );
                             break;
 
@@ -329,12 +337,12 @@ public class XMLStructureResponse
                     if ( bFormula )
                     {
                         STRUCTURE_DATA_RESPONSE.append( "<![CDATA["
-                            + StringUtils.checkingNumberDecimal( recalculatedValue ) + "]]>" );
+                            + StringUtils.applyPatternDecimalFormat( recalculatedValue ) + "]]>" );
                     }
                     else
                     {
                         STRUCTURE_DATA_RESPONSE.append( "<![CDATA["
-                            + StringUtils.checkingNumberDecimal( cell[j].getContents() ) + "]]>" );
+                            + StringUtils.applyPatternDecimalFormat( cell[j].getContents() ) + "]]>" );
                     }
 
                     STRUCTURE_DATA_RESPONSE.append( "</data>" );

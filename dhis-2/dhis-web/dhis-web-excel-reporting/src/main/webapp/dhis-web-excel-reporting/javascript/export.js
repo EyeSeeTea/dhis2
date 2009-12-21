@@ -1,6 +1,6 @@
 function organisationUnitSelected( orgUnits )
 {	
-	window.location.reload();
+	getReportExcelsByGroup();	
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -26,6 +26,36 @@ function getReportExcelsByGroupReceived( xmlObject ) {
 		var name = item.getElementsByTagName('name')[0].firstChild.nodeValue;
 		addOption('report',name,id);	
 	}
+	
+	var selectedOrganisationUnit = null;
+	
+	try{
+	
+		selectedOrganisationUnit = xmlObject.getElementsByTagName('organisationUnit')[0].firstChild.nodeValue;	
+		
+		enable("group");
+		enable("report");
+		enable("period");
+		enable("generate_report");
+		enable("previewButton");
+		enable("nextPeriod");
+		enable("lastPeriod");		
+	
+	}catch(e){
+		disable("group");
+		disable("report");
+		disable("period");
+		disable("generate_report");
+		disable("previewButton");
+		disable("nextPeriod");
+		disable("lastPeriod");		
+	}
+	
+	byId("selectedOrganisationUnit").innerHTML = selectedOrganisationUnit; 
+	
+	
+	
+	
 }
 
 function lastPeriod() {
