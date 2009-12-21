@@ -2,7 +2,7 @@ Debian package of dhis2.  A bit raw round the edges. Tested on ubuntu 9.10.
 
 To build a deb package:
 1.  modify 1st line of Makefile (if necessary) to point at dhis.war to be packaged.
-2.  Update version information in DEBIAN/control
+2.  Update version information in dhis2/DEBIAN/control
 3.  type 'make clean' to cleanup up any old and temporary files
 4.  type 'make update' to bring in dhis.war and update log4j.properties
 5.  type 'make' to build deb package.
