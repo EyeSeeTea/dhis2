@@ -40,7 +40,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 
 /**
- * 
  * @author Dag Haavi Finstad
  * @author Lars Helge Overland
  */
