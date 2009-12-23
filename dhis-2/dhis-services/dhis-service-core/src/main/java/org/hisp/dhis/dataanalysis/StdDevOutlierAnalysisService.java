@@ -1,4 +1,4 @@
-package org.hisp.dhis.outlieranalysis;
+package org.hisp.dhis.dataanalysis;
 
 /*
  * Copyright (c) 2004-${year}, University of Oslo
@@ -44,17 +44,17 @@ import org.hisp.dhis.period.Period;
  * @author Lars Helge Overland
  */
 public class StdDevOutlierAnalysisService
-    implements OutlierAnalysisService
+    implements DataAnalysisService
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OutlierAnalysisStore outlierAnalysisStore;
+    private DataAnalysisStore dataAnalysisStore;
 
-    public void setOutlierAnalysisStore( OutlierAnalysisStore outlierAnalysisStore )
+    public void setDataAnalysisStore( DataAnalysisStore dataAnalysisStore )
     {
-        this.outlierAnalysisStore = outlierAnalysisStore;
+        this.dataAnalysisStore = dataAnalysisStore;
     }
 
     private OrganisationUnitService organisationUnitService;
@@ -68,7 +68,7 @@ public class StdDevOutlierAnalysisService
     // OutlierAnalysisService implementation
     // -------------------------------------------------------------------------
 
-    public final Collection<DeflatedDataValue> findOutliers( OrganisationUnit organisationUnit,
+    public final Collection<DeflatedDataValue> analyse( OrganisationUnit organisationUnit,
         Collection<DataElement> dataElements, Collection<Period> periods, Double stdDevFactor )
     {
         Collection<OrganisationUnit> units = organisationUnitService.getOrganisationUnitWithChildren( organisationUnit.getId() );
@@ -101,17 +101,17 @@ public class StdDevOutlierAnalysisService
     private Collection<DeflatedDataValue> findOutliers( OrganisationUnit organisationUnit, DataElement dataElement, 
         DataElementCategoryOptionCombo categoryOptionCombo, Collection<Period> periods, Double stdDevFactor )
     {
-        Double stdDev = outlierAnalysisStore.getStandardDeviation( dataElement, categoryOptionCombo, organisationUnit );
+        Double stdDev = dataAnalysisStore.getStandardDeviation( dataElement, categoryOptionCombo, organisationUnit );
                 
         if ( !isEqual( stdDev, 0.0 ) ) // No values found or no outliers exist when 0.0
         {
-            Double avg = outlierAnalysisStore.getAverage( dataElement, categoryOptionCombo, organisationUnit );
+            Double avg = dataAnalysisStore.getAverage( dataElement, categoryOptionCombo, organisationUnit );
             
             double deviation = stdDev * stdDevFactor;        
             Double lowerBound = avg - deviation;
             Double upperBound = avg + deviation;
             
-            return outlierAnalysisStore.getDeflatedDataValues( dataElement, categoryOptionCombo, periods, 
+            return dataAnalysisStore.getDeflatedDataValues( dataElement, categoryOptionCombo, periods, 
                 organisationUnit, dataElement.getPeriodType(), lowerBound.intValue(), upperBound.intValue() );            
         }
         

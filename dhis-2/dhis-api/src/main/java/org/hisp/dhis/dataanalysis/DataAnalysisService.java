@@ -1,7 +1,7 @@
-package org.hisp.dhis.outlieranalysis;
+package org.hisp.dhis.dataanalysis;
 
 /*
- * Copyright (c) 2004-${year}, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,21 +30,18 @@ package org.hisp.dhis.outlieranalysis;
 import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
 
 /**
- * @author Lars Helge Overland
+ * @author Dag Haavi Finstad
+ * @version $Id: StdDevOutlierAnalysisService.java 882 2009-05-14 23:09:31Z daghf $
  */
-public interface OutlierAnalysisStore
+public interface DataAnalysisService
 {
-    Double getStandardDeviation( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, OrganisationUnit organisationUnit );
-    
-    Double getAverage( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, OrganisationUnit organisationUnit );
-    
-    Collection<DeflatedDataValue> getDeflatedDataValues( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo,
-        Collection<Period> periods, OrganisationUnit organisationUnit, PeriodType periodType, int lowerBound, int upperBound );
+    String ID = DataAnalysisService.class.getName();
+
+    Collection<DeflatedDataValue> analyse( OrganisationUnit organisationUnit, Collection<DataElement> dataElements,
+        Collection<Period> periods, Double stdDevFactor );
 }

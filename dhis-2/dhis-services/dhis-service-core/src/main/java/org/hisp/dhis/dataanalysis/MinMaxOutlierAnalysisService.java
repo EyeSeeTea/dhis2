@@ -1,4 +1,4 @@
-package org.hisp.dhis.outlieranalysis;
+package org.hisp.dhis.dataanalysis;
 
 /*
  * Copyright (c) 2004-${year}, University of Oslo
@@ -44,7 +44,7 @@ import org.hisp.dhis.period.Period;
  * @author Lars Helge Overland
  */
 public class MinMaxOutlierAnalysisService
-    implements OutlierAnalysisService
+    implements DataAnalysisService
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -64,18 +64,18 @@ public class MinMaxOutlierAnalysisService
         this.organisationUnitService = organisationUnitService;
     }
     
-    private OutlierAnalysisStore outlierAnalysisStore;
+    private DataAnalysisStore dataAnalysisStore;
 
-    public void setOutlierAnalysisStore( OutlierAnalysisStore outlierAnalysisStore )
+    public void setDataAnalysisStore( DataAnalysisStore dataAnalysisStore )
     {
-        this.outlierAnalysisStore = outlierAnalysisStore;
+        this.dataAnalysisStore = dataAnalysisStore;
     }
-    
+
     // -------------------------------------------------------------------------
     // MinMaxOutlierAnalysisService implementation
     // -------------------------------------------------------------------------
 
-    public final Collection<DeflatedDataValue> findOutliers( OrganisationUnit organisationUnit,
+    public final Collection<DeflatedDataValue> analyse( OrganisationUnit organisationUnit,
         Collection<DataElement> dataElements, Collection<Period> periods, Double stdDevFactor )
     {
         Collection<OrganisationUnit> units = organisationUnitService.getOrganisationUnitWithChildren( organisationUnit.getId() );
@@ -114,7 +114,7 @@ public class MinMaxOutlierAnalysisService
 
         if ( minMaxDataElement != null )
         {
-            return outlierAnalysisStore.getDeflatedDataValues( dataElement, categoryOptionCombo, periods, 
+            return dataAnalysisStore.getDeflatedDataValues( dataElement, categoryOptionCombo, periods, 
                 organisationUnit, dataElement.getPeriodType(), minMaxDataElement.getMin(), minMaxDataElement.getMax() );
         }
         

@@ -1,7 +1,7 @@
-package org.hisp.dhis.outlieranalysis;
+package org.hisp.dhis.dataanalysis;
 
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-${year}, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,37 +30,21 @@ package org.hisp.dhis.outlieranalysis;
 import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-
+import org.hisp.dhis.period.PeriodType;
 
 /**
- * Defines service functionality for finding outlier DataValues.
- * 
- * @author Dag Haavi Finstad
- * @version $Id: StdDevOutlierAnalysisService.java 882 2009-05-14 23:09:31Z daghf $
- * 
+ * @author Lars Helge Overland
  */
-public interface OutlierAnalysisService
+public interface DataAnalysisStore
 {
-    String ID = OutlierAnalysisService.class.getName();
-
-    /**
-     * Finds possible outliers for a collection of sources, dataelements and periods.
-     * 
-     * Checks for every combination in the cartesian product of sources,
-     * dataelements and periods if the corresponding datavalues are possible
-     * outliers.
-     * 
-     * @param organisationUnits The organisation units.
-     * @param dataElement The DataElement.
-     * @param period The period.
-     * @param stdDevFactor The standard deviation factor.
-     * @return A collection of OutlierValue objects. If no values were found, an
-     *         empty collection is returned.
-     */
-    Collection<DeflatedDataValue> findOutliers( OrganisationUnit organisationUnit, Collection<DataElement> dataElements,
-        Collection<Period> periods, Double stdDevFactor );
-
+    Double getStandardDeviation( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, OrganisationUnit organisationUnit );
+    
+    Double getAverage( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, OrganisationUnit organisationUnit );
+    
+    Collection<DeflatedDataValue> getDeflatedDataValues( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo,
+        Collection<Period> periods, OrganisationUnit organisationUnit, PeriodType periodType, int lowerBound, int upperBound );
 }
