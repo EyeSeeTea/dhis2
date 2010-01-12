@@ -54,7 +54,17 @@ public interface ResourceTableService
     void generateCategoryOptionComboNames();
     
     /**
+     * Generates a resource table for all data elements.
+     */
+    void generateDataElementGroupSetTable();
+
+    /**
+     * Generates a resource table for all indicators.
+     */
+    void generateIndicatorGroupSetTable();
+    
+    /**
      * Generates a resource table for all organisation units 
      */
-    void generateExclusiveGroupSetStructures();
+    void generateOrganisationUnitGroupSetTable();
 }

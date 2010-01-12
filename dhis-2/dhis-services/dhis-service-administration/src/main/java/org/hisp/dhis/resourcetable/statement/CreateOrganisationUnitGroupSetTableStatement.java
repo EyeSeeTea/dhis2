@@ -35,24 +35,21 @@ import org.hisp.dhis.system.util.CodecUtils;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
-public class CreateExclusiveGroupSetTableStatement
+public class CreateOrganisationUnitGroupSetTableStatement
     implements Statement
 {
-    public static final String TABLE_NAME = "orgunitgroupsetexclusivestructure";
+    public static final String TABLE_NAME = "_organisationunitgroupsetstructure";
+
+    private static final String LONG_TEXT_COLUMN_TYPE = "VARCHAR (160)";
     
     private List<OrganisationUnitGroupSet> groupSets;
     
-    protected CreateExclusiveGroupSetTableStatement()
-    {   
-    }
-    
-    public CreateExclusiveGroupSetTableStatement( List<OrganisationUnitGroupSet> groupSets )
+    public CreateOrganisationUnitGroupSetTableStatement( List<OrganisationUnitGroupSet> groupSets )
     {
         this.groupSets = groupSets;
     }
-
+    
     public String getStatement()
     {
         StringBuffer buffer = new StringBuffer( "CREATE TABLE " + TABLE_NAME + " ( organisationunitid " );
