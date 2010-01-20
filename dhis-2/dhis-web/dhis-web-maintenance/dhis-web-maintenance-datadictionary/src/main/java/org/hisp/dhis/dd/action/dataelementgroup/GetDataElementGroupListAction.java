@@ -67,7 +67,7 @@ public class GetDataElementGroupListAction
     }
 
     // -------------------------------------------------------------------------
-    // Action implemantation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
