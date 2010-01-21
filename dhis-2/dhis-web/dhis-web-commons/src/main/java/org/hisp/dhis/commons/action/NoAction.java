@@ -36,6 +36,8 @@ import com.opensymphony.xwork2.Action;
 public class NoAction
     implements Action
 {
+    //TODO remove not required with struts2
+    
     public String execute()
     {
         return SUCCESS;
