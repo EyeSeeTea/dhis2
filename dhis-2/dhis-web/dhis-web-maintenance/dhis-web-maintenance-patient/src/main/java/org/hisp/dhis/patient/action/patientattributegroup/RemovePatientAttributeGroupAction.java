@@ -25,35 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientattribute;
+package org.hisp.dhis.patient.action.patientattributegroup;
 
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.patient.PatientAttributeGroup;
+import org.hisp.dhis.patient.PatientAttributeGroupService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Chau Thu Tran
  * @version $Id$
  */
-public class UpdatePatientAttributeAction
+public class RemovePatientAttributeGroupAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private PatientAttributeService patientAttributeService;
+    private PatientAttributeGroupService patientAttributeGroupService;
 
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setPatientAttributeGroupService( PatientAttributeGroupService patientAttributeGroupService )
     {
-        this.patientAttributeService = patientAttributeService;
+        this.patientAttributeGroupService = patientAttributeGroupService;
     }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
-    
+
     private int id;
 
     public void setId( int id )
@@ -61,40 +61,12 @@ public class UpdatePatientAttributeAction
         this.id = id;
     }
 
-    private String nameField;
-
-    public void setNameField( String nameField )
-    {
-        this.nameField = nameField;
-    }
-
-    private String description;
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    private String valueType;
-
-    public void setValueType( String valueType )
-    {
-        this.valueType = valueType;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
     public String execute()
         throws Exception
     {
-        PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( id );
-        patientAttribute.setName( nameField );
-        patientAttribute.setDescription( description );
-        patientAttribute.setValueType( valueType );
+        PatientAttributeGroup patientAttributeGroup = patientAttributeGroupService.getPatientAttributeGroup( id );
 
-        patientAttributeService.updatePatientAttribute( patientAttribute );
+        patientAttributeGroupService.deletePatientAttributeGroup( patientAttributeGroup );
 
         return SUCCESS;
     }
