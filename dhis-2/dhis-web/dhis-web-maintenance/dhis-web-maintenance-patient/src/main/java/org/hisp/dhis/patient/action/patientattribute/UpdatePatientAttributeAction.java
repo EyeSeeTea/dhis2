@@ -53,7 +53,7 @@ public class UpdatePatientAttributeAction
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
-    
+
     private int id;
 
     public void setId( int id )
@@ -82,6 +82,13 @@ public class UpdatePatientAttributeAction
         this.valueType = valueType;
     }
 
+    private boolean mandatory;
+
+    public void setMandatory( boolean mandatory )
+    {
+        this.mandatory = mandatory;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -93,6 +100,7 @@ public class UpdatePatientAttributeAction
         patientAttribute.setName( nameField );
         patientAttribute.setDescription( description );
         patientAttribute.setValueType( valueType );
+        patientAttribute.setMandatory( mandatory );
 
         patientAttributeService.updatePatientAttribute( patientAttribute );
 

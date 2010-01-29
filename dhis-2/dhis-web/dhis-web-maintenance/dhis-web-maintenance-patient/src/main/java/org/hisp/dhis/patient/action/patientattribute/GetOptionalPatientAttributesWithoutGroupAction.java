@@ -25,15 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patient;
+package org.hisp.dhis.patient.action.patientattribute;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
-import org.hisp.dhis.patient.PatientIdentifierService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,28 +39,14 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class ShowAddPatientFormAction
+public class GetOptionalPatientAttributesWithoutGroupAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }
-
-    public PatientAttributeService patientAttributeService;
+    private PatientAttributeService patientAttributeService;
 
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
@@ -70,35 +54,26 @@ public class ShowAddPatientFormAction
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Output
     // -------------------------------------------------------------------------
 
-    private String identifier;
-
-    public String getIdentifier()
-    {
-        return identifier;
-    }
-
-    private Collection<PatientAttribute> patientAttributes;
+    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
 
     public Collection<PatientAttribute> getPatientAttributes()
     {
         return patientAttributes;
     }
 
+   
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        patientAttributes = patientAttributeService.getOptionalPatientAttributesWithoutGroup();
 
-        identifier = patientIdentifierService.getNextIdentifierForOrgUnit( organisationUnit );
-
-        patientAttributes = patientAttributeService.getPatientAttributesByMandatory(true);
-        
         return SUCCESS;
     }
 }
