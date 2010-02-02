@@ -28,6 +28,11 @@ package org.hisp.dhis.completeness;
  */
 
 import java.util.Collection;
+import java.util.Date;
+
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.source.Source;
 
 /**
  * @author Lars Helge Overland
@@ -61,4 +66,8 @@ public interface DataSetCompletenessStore
      * Deletes all datasetcompleteness entries.
      */
     void deleteDataSetCompleteness();
+    
+    int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period );
+    
+    int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline );
 }
