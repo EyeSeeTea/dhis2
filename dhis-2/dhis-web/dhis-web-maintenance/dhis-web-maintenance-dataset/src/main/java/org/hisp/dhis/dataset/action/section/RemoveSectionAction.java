@@ -50,16 +50,11 @@ public class RemoveSectionAction
     // Input & output
     // -------------------------------------------------------------------------
 
-    private Integer sectionId;
+    private Integer id;
 
-    public Integer getSectionId()
+    public void setId( Integer id )
     {
-        return sectionId;
-    }
-
-    public void setSectionId( Integer sectionId )
-    {
-        this.sectionId = sectionId;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
@@ -69,7 +64,7 @@ public class RemoveSectionAction
     public String execute()
         throws Exception
     {
-        Section section = sectionService.getSection( sectionId.intValue() );
+        Section section = sectionService.getSection( id );
         
         sectionService.deleteSection( section );
         
