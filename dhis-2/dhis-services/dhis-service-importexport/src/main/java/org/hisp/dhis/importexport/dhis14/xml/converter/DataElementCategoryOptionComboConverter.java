@@ -29,8 +29,6 @@ package org.hisp.dhis.importexport.dhis14.xml.converter;
 
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.ExportParams;
@@ -39,6 +37,7 @@ import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractDataElementCategoryOptionComboConverter;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
@@ -71,23 +70,9 @@ public class DataElementCategoryOptionComboConverter
     
     public void read( XMLReader reader, ImportParams params )
     {
-        final DataElementCategoryOptionCombo categoryOptionCombo = new DataElementCategoryOptionCombo();
-        
-        categoryOptionCombo.setId( 1 );
-        
-        final DataElementCategoryCombo categoryCombo = new DataElementCategoryCombo();
-        
-        categoryCombo.setId( 1 );
-        categoryCombo.setName( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );
-        
-        categoryOptionCombo.setCategoryCombo( categoryCombo );
-        
-        final DataElementCategoryOption categoryOption = new DataElementCategoryOption();
-        
-        categoryOption.setId( 1 );
-        categoryOption.setName( DataElementCategoryOption.DEFAULT_NAME );
-        
-        categoryOptionCombo.getCategoryOptions().add( categoryOption );
+        DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+
+        NameMappingUtil.addCategoryOptionComboMapping( categoryOptionCombo.getId(), categoryOptionCombo );
         
         read( categoryOptionCombo, GroupMemberType.NONE, params );
     }        
