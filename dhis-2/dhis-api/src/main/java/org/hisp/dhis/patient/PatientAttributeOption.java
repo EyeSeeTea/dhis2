@@ -1,7 +1,5 @@
-package org.hisp.dhis.dataset;
-
 /*
- * Copyright (c) 2004-2007, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,69 +24,35 @@ package org.hisp.dhis.dataset;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.patient;
 
 import java.io.Serializable;
 
-public class DataEntryForm
-    implements Serializable
+/**
+ * @author Viet
+ *
+ * @version $Id$
+ */
+public class PatientAttributeOption  implements Serializable
 {
-    /**
-     * The unique identifier for this DataEntryForm
-     */
     private int id;
-
-    /**
-     * Name of DataEntryForm. Required and unique.
-     */
+    
     private String name;
-
-    /**
-     * HTML Code of DataEntryForm
-     */
-    private String htmlCode;
-
-    /**
-     * The dataSet indicating the list of dataelements that this DataEntryForm
-     * should be used
-     */
-    private DataSet dataSet;
-
+    
+    private PatientAttribute patientAttribute;
+    
     // -------------------------------------------------------------------------
-    // Contructors
+    // Constructors
     // -------------------------------------------------------------------------
 
-    public DataEntryForm()
+    public PatientAttributeOption()
     {
-    }
-
-    public DataEntryForm( String name )
-    {
-        this.name = name;
-    }
-
-    public DataEntryForm( String name, DataSet dataSet )
-    {
-        this.name = name;
-        this.dataSet = dataSet;
-    }
-
-    public DataEntryForm( String name, String htmlCode )
-    {
-        this.name = name;
-        this.htmlCode = htmlCode;
-    }
-
-    public DataEntryForm( String name, String htmlCode, DataSet dataSet )
-    {
-        this.name = name;
-        this.htmlCode = htmlCode;
-        this.dataSet = dataSet;
     }
 
     // -------------------------------------------------------------------------
-    // hashCode and equals
+    // hashCode, equals and toString
     // -------------------------------------------------------------------------
-
+    
     @Override
     public int hashCode()
     {
@@ -108,39 +72,27 @@ public class DataEntryForm
             return false;
         }
 
-        if ( !(o instanceof DataEntryForm) )
+        if ( !(o instanceof PatientAttributeOption) )
         {
             return false;
         }
 
-        final DataEntryForm other = (DataEntryForm) o;
+        final PatientAttributeOption other = (PatientAttributeOption) o;
 
         return name.equals( other.getName() );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[" + name + "]";
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public DataSet getDataSet()
-    {
-        return dataSet;
-    }
-
-    public void setDataSet( DataSet dataSet )
-    {
-        this.dataSet = dataSet;
-    }
-
-    public String getHtmlCode()
-    {
-        return htmlCode;
-    }
-
-    public void setHtmlCode( String htmlCode )
-    {
-        this.htmlCode = htmlCode;
-    }
+    
 
     public int getId()
     {
@@ -162,4 +114,13 @@ public class DataEntryForm
         this.name = name;
     }
 
+    public PatientAttribute getPatientAttribute()
+    {
+        return patientAttribute;
+    }
+
+    public void setPatientAttribute( PatientAttribute patientAttribute )
+    {
+        this.patientAttribute = patientAttribute;
+    }
 }

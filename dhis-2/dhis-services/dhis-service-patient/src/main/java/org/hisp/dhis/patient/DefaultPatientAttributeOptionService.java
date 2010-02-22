@@ -1,7 +1,5 @@
-package org.hisp.dhis.dataset;
-
 /*
- * Copyright (c) 2004-2007, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,66 +24,63 @@ package org.hisp.dhis.dataset;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.patient;
 
 import java.util.Collection;
 
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Bharath Kumar
+ * @author Abyot Asalefew
  * @version $Id$
  */
 @Transactional
-public class DefaultDataEntryFormService
-    implements DataEntryFormService
+public class DefaultPatientAttributeOptionService
+    implements PatientAttributeOptionService
 {
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-    private DataEntryFormStore dataEntryFormStore;
+    private PatientAttributeOptionStore patientAttributeOptionStore;
 
-    public void setDataEntryFormStore( DataEntryFormStore dataEntryFormStore )
+    public void setPatientAttributeOptionStore( PatientAttributeOptionStore patientAttributeOptionStore )
     {
-        this.dataEntryFormStore = dataEntryFormStore;
-    }
-    
-    // ------------------------------------------------------------------------
-    // Implemented Methods
-    // ------------------------------------------------------------------------
-
-    public int addDataEntryForm( DataEntryForm dataEntryForm )
-    {
-        return dataEntryFormStore.addDataEntryForm( dataEntryForm );
+        this.patientAttributeOptionStore = patientAttributeOptionStore;
     }
 
-    public void updateDataEntryForm( DataEntryForm dataEntryForm )
+    // -------------------------------------------------------------------------
+    // PatientAttribute implementation
+    // -------------------------------------------------------------------------
+
+    public void addPatientAttributeOption( PatientAttributeOption option )
     {
-        dataEntryFormStore.updateDataEntryForm( dataEntryForm );
+        patientAttributeOptionStore.save( option );
     }
 
-    public void deleteDataEntryForm( DataEntryForm dataEntryForm )
+    public void deletePatientAttributeOption( PatientAttributeOption option )
     {
-        dataEntryFormStore.deleteDataEntryForm( dataEntryForm );
+        patientAttributeOptionStore.delete( option );
     }
 
-    public DataEntryForm getDataEntryForm( int id )
+    public void updatePatientAttributeOption( PatientAttributeOption option )
     {
-        return dataEntryFormStore.getDataEntryForm( id );
+        patientAttributeOptionStore.update( option );
     }
 
-    public DataEntryForm getDataEntryFormByName( String name )
+    public PatientAttributeOption get( PatientAttribute patientAttribute, String name )
     {
-        return dataEntryFormStore.getDataEntryFormByName( name );
+        return patientAttributeOptionStore.get( patientAttribute, name );
     }
 
-    public DataEntryForm getDataEntryFormByDataSet( DataSet dataSet )
+    public PatientAttributeOption get( int id )
     {
-        return dataEntryFormStore.getDataEntryFormByDataSet( dataSet );
+        return patientAttributeOptionStore.get( id );
     }
 
-    public Collection<DataEntryForm> getAllDataEntryForms()
+    public Collection<PatientAttributeOption> get( PatientAttribute patientAttribute )
     {
-        return dataEntryFormStore.getAllDataEntryForms();
+        return patientAttributeOptionStore.get( patientAttribute );
     }
+
 }

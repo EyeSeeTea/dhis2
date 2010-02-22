@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataset;
+package org.hisp.dhis.dataentryform;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -29,9 +29,11 @@ package org.hisp.dhis.dataset;
 
 import java.util.Collection;
 
-public interface DataEntryFormService
+import org.hisp.dhis.dataset.DataSet;
+
+public interface DataEntryFormStore
 {
-    String ID = DataEntryFormService.class.getName();
+    String ID = DataEntryFormStore.class.getName();
 
     // -------------------------------------------------------------------------
     // DataEntryForm
@@ -90,4 +92,5 @@ public interface DataEntryFormService
      * @return A collection containing all DataEntryForms.
      */
     Collection<DataEntryForm> getAllDataEntryForms();
+    
 }
