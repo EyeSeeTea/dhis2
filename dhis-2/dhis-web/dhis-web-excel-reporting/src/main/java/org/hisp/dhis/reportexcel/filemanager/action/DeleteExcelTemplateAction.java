@@ -29,13 +29,11 @@ package org.hisp.dhis.reportexcel.filemanager.action;
 import java.io.File;
 import java.util.Collection;
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelService;
+import org.hisp.dhis.reportexcel.ReportLocationManager;
+import org.hisp.dhis.reportexcel.action.ActionSupport;
 import org.hisp.dhis.reportexcel.utils.FileUtils;
-
-import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
@@ -43,53 +41,31 @@ import com.opensymphony.xwork2.Action;
  * @since 2010-01-27
  */
 public class DeleteExcelTemplateAction
-    implements Action
+    extends ActionSupport
 {
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
-    private SystemSettingManager systemSettingManager;
+    private ReportLocationManager reportLocationManager;
+
+    public void setReportLocationManager( ReportLocationManager reportLocationManager )
+    {
+        this.reportLocationManager = reportLocationManager;
+    }
 
     private ReportExcelService reportService;
-
-    // -------------------------------------------
-    // Input
-    // -------------------------------------------
-
-    private String fileName;
-
-    // -------------------------------------------
-    // Output
-    // -------------------------------------------
-
-    private String message;
-
-    private I18n i18n;
-
-    // -------------------------------------------
-    // Getter && Setter
-    // -------------------------------------------
-
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
 
     public void setReportService( ReportExcelService reportService )
     {
         this.reportService = reportService;
     }
 
-    public String getMessage()
-    {
-        return message;
-    }
+    // -------------------------------------------
+    // Input
+    // -------------------------------------------
 
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
+    private String fileName;
 
     public void setFileName( String fileName )
     {
@@ -107,27 +83,30 @@ public class DeleteExcelTemplateAction
         message = "";
 
         Collection<ReportExcel> reports = reportService.getALLReportExcel();
-        
+
+        int i = 0;
+
         for ( ReportExcel report : reports )
         {
             String name = report.getExcelTemplateFile();
-            
+
             if ( name.equals( fileName ) )
             {
-                message += " - " + report.getName() + "<br>";
+                message += (i + 1) + ". " + report.getName() + "<br>";
+
+                i++;
             }
         }
 
-        if ( message.length() > 0 )
+        if ( i > 0 )
         {
             message = i18n.getString( "report_user_template" ) + "<br>" + message;
-            
+
             return ERROR;
         }
 
-        String templateDirectory = (String) systemSettingManager
-            .getSystemSetting( SystemSettingManager.KEY_REPORT_TEMPLATE_DIRECTORY );
-        
+        File templateDirectory = reportLocationManager.getReportExcelTemplateDirectory();
+
         FileUtils.delete( templateDirectory + File.separator + fileName );
 
         return SUCCESS;

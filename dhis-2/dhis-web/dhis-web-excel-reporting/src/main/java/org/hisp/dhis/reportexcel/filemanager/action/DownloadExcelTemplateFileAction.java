@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.action;
+package org.hisp.dhis.reportexcel.filemanager.action;
 
 /*
  * Copyright (c) 2004-2007, University of Oslo
@@ -28,25 +28,32 @@ package org.hisp.dhis.reportexcel.action;
  */
 
 import java.io.File;
-import java.util.Iterator;
-import java.util.List;
 
 import org.hisp.dhis.reportexcel.ReportLocationManager;
-import org.hisp.dhis.reportexcel.utils.ExcelFileFilter;
-import org.hisp.dhis.reportexcel.utils.FileUtils;
+import org.hisp.dhis.reportexcel.state.SelectionManager;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Nguyen Tran Do Xuan Thuy
+ * @author Tran Thanh Tri
  * @version $Id$
  */
 
-public class CleanUpReportExcelAction
-    extends ActionSupport
+
+public class DownloadExcelTemplateFileAction
+    implements Action
 {
 
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
+
+    private SelectionManager selectionManager;
+
+    public void setSelectionManager( SelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
 
     private ReportLocationManager reportLocationManager;
 
@@ -56,26 +63,24 @@ public class CleanUpReportExcelAction
     }
 
     // -------------------------------------------
-    // Action implementation
+    // Input
     // -------------------------------------------
 
+    private String fileName;
+
+    public void setFileName( String fileName )
+    {
+        this.fileName = fileName;
+    }
+
+    @Override
     public String execute()
         throws Exception
     {
-        File reportTempDir = reportLocationManager.getReportExcelTempDirectory();
+        File download = new File( reportLocationManager.getReportExcelTemplateDirectory(), fileName );
 
-        List<File> listFile = FileUtils.getListFile( reportTempDir, new ExcelFileFilter() );
-        
-        Iterator<File> iterFile = listFile.iterator();
-
-        while ( iterFile.hasNext() )
-        {
-            iterFile.next().delete();
-        }
-
-        message = i18n.getString( "cleanup_success" );
+        selectionManager.setDownloadFilePath( download.getPath() );
 
         return SUCCESS;
     }
-
 }
