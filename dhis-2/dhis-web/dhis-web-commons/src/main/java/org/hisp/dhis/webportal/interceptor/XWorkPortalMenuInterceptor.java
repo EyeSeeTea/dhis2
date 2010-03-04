@@ -30,31 +30,34 @@ package org.hisp.dhis.webportal.interceptor;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.webportal.menu.MenuState;
+import org.hisp.dhis.webportal.menu.MenuStateManager;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.Interceptor;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: WebWorkPortalUserInterceptor.java 2869 2007-02-20 14:26:09Z andegje $
+ * @version $Id: WebWorkPortalMenuInterceptor.java 2869 2007-02-20 14:26:09Z andegje $
  */
-public class WebWorkPortalUserInterceptor
+public class XWorkPortalMenuInterceptor
     implements Interceptor
 {
+    private static final String KEY_MENU_STATE = "menuState";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private CurrentUserService currentUserService;
+    private MenuStateManager menuStateManager;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
+    public void setMenuStateManager( MenuStateManager menuStateManager )
     {
-        this.currentUserService = currentUserService;
+        this.menuStateManager = menuStateManager;
     }
 
     // -------------------------------------------------------------------------
-    // Interceptor implementation
+    // AroundInterceptor implementation
     // -------------------------------------------------------------------------
 
     public void destroy()
@@ -72,12 +75,18 @@ public class WebWorkPortalUserInterceptor
     public String intercept( ActionInvocation invocation )
         throws Exception
     {
-        Map<String, Object> map = new HashMap<String, Object>( 3 );
+        Map<String, MenuState> menuStateMap = new HashMap<String, MenuState>( 1 );
 
-        map.put( "currentUsername", currentUserService.getCurrentUsername() );
-        map.put( "currentUser", currentUserService.getCurrentUser() );
+        MenuState menuState = menuStateManager.getMenuState();
 
-        invocation.getStack().push( map );
+        if ( menuState == null )
+        {
+            menuState = MenuState.VISIBLE;
+        }
+
+        menuStateMap.put( KEY_MENU_STATE, menuState );
+
+        invocation.getStack().push( menuStateMap );
         
         return invocation.invoke();
     }

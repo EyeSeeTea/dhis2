@@ -39,7 +39,7 @@ import com.opensymphony.xwork2.interceptor.Interceptor;
  * @author Torgeir Lorange Ostby
  * @version $Id: WebWorkPortalModuleInterceptor.java 2869 2007-02-20 14:26:09Z andegje $
  */
-public class WebWorkPortalModuleInterceptor
+public class XWorkPortalModuleInterceptor
     implements Interceptor
 {
     private static final String KEY_MAINTENANCE_MODULES = "maintenanceModules";
