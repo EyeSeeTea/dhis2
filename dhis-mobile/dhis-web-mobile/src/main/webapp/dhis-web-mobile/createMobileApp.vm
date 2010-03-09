@@ -1,78 +1,126 @@
 <link type="text/css" rel="stylesheet" media="screen" href="../dhis-web-commons/util/css/redmond/jquery-ui.css">
 <script type="text/javascript" src="../dhis-web-commons/util/jquery-ui.js"></script>
+<script type="text/javascript" src="javascript/jquery-form.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
-        $("#antDiv").hide();
-        $("#accordion").accordion();
+        $("#mvnDiv").hide();
+        $("#accordion").accordion({
+            collapsible: true
+        });
+        $("#splashUpdate input:radio:first").attr("checked","checked");
+        var options = {
+            url: 'splashUpload.action',
+            target: '#splashUpdate',
+            success: function(){
+                $("#splashUpdate input:radio:first").attr("checked","checked");
+            }
+        }
+        $("#splashForm").ajaxForm(options);
     });
 
     function showPathField(){
-        $("#antDiv").toggle(200);
+        $("#mvnDiv").toggle(200);
     }
+
+    function submitMvnForm(){
+        $("#mvnForm").submit();
+    }
+
+    function submitJarGenerator(){
+        var form = document.createElement("form");
+        form.setAttribute("method", "get");
+        form.setAttribute("action", "jarGenerator.action");
+
+        var aField = document.createElement("input");
+        aField.setAttribute("type", "radio");
+        aField.setAttribute("name", "splash");
+        aField.setAttribute("checked", "checked");
+        aField.setAttribute("value", $('input[name=splash]:checked').val());
+        form.appendChild(aField);
+        var bField = document.createElement("input");
+        bField.setAttribute("type", "text");
+        bField.setAttribute("name", "mvnBin");
+        bField.setAttribute("value", $("#mvnBin").attr("value"));
+        form.appendChild(bField);
+
+        document.body.appendChild(form);
+        form.style.visibility = "hidden";
+        form.submit();
+    }
+
 </script>
 
 <h1>Create Mobile Application</h1>
-<div id="antStatusDiv">
-    #set ($path = "$!antPath")
+<div id="mvnStatusDiv">
+    #set ($path = "$!mvnPath")
     #if($path != "")
-        #set ($status = "$!antStatus")
-        #if($status != "")
-            <span style="color:red">$status</span> <br/>
-        #end
-        <img src="../images/check.png" alt="" /> Using Ant found in PATH at $path (<a href="javascript: showPathField()">Change</a>)<br/><br/>
-        <div id="antDiv"><form method="post">
-            Enter Ant Folder Path: <input name="antPath" type="text" value="$!antPath" maxlength="30" />
-            <input type="submit" value="Submit" />
-        </form></div>
-    #else
-        #set ($status = "$!antStatus")
-        #if($status != "")
-            <span style="color:red">$status</span>
-        #end
-        Ant not found... Please configure Ant location <br/>
-        <form method="post">
-            Enter Ant Folder Path: <input name="antPath" type="text" value="$!antPath" maxlength="30" />
-            <input type="submit" value="Submit" />
+    #set ($status = "$!mvnStatus")
+    #if($status != "")
+    <span style="color:red">$status</span> <br/>
+    #end
+    <img src="../images/check.png" alt="" /> Using mvn found in PATH at $path (<a href="javascript: showPathField()">Change</a>)<br/><br/>
+    <div id="mvnDiv">
+        <form id="mvnForm" method="post">
+            Enter mvn Folder Path: <input name="mvnPath" type="text" value="$!mvnPath" size="40" />
+            <input type="button" value="Set mvn Path" onclick="submitMvnForm()" />
         </form>
+    </div>
+    #else
+    #set ($status = "$!mvnStatus")
+    #if($status != "")
+    <span style="color:red">$status</span>
+    #end
+    mvn not found... Please configure mvn location <br/>
+    <form id="mvnForm" method="post">
+        Enter mvn Folder Path: <input name="mvnPath" type="text" value="$!mvnPath" size="40" />
+        <input type="button" value="Set mvn Path" onclick="submitMvnForm()" />
+    </form>
     #end
 </div>
-<form action="jarGenerator.action" method="post">
-    <input style=" visibility: hidden" name="antBin" value="$path"/>
-    <div id="accordion">
 
-        <h3><a href="#">Step 1: Splash Screen Selection</a></h3>
-        <div id="splashDesigner">
+<input id="mvnBin" style=" visibility: hidden" name="mvnBin" value="$path"/>
+<div id="accordion">
+    <h3><a href="#">Step 1: Splash Screen Selection</a></h3>
+    <div id="splashDesigner" style="height: 180px">
+        <div id="splashUpdate">
             <table>
                 <tr>
+                    #foreach($var in $splashImg)
                     <td>
-                        <div style=" width: 100px; height: 160px; border: dotted; text-align: center;">
-                            <img style="margin-top: 45px" alt="" src="images/intro.gif" width="80" height="80"/>
-                            <input style="bottom: 5px" type="checkbox" />
+                        <div style=" width: 96px; height: 120px; border: dotted; text-align: center;">
+                            <img style="margin-top: 30px" alt="" src="javame_src/src/main/resources/splash/$var" width="60" height="60"/> <br/>
+                            <input style="bottom: 5px" type="radio" name="splash" value="$var" />
                         </div>
                     </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><input type="submit" name="upload" value="Upload Image" /></td>
+                    #end
                 </tr>
             </table>
-        </div>
-        <h3><a href="#">Step 2: Dataset Selection</a></h3>
-        <div id="dataSetSelector">
-            <p>
-
-            </p>
-        </div>
-        <h3><a href="#">Step 3: Select Language Or Translate Data Elements</a></h3>
-        <div id="languageSelector">
-            <p>
-
-            </p>
-        </div>
-        <h3><a href="#">Step 4: Generate Application</a></h3>
-        <div id="jarGenerator">
-            <input type="submit" value="Generate Mobile Application" />
+        </div> <br/>
+        <div>
+            <form id="splashForm" method="post" enctype="multipart/form-data">
+                Splash Image: <input type="file" name="upload" size="40" />
+                <input type="submit" value="Upload Image" />
+            </form>
         </div>
     </div>
-</form>
+    <h3><a href="#">Step 2: Dataset Selection</a></h3>
+    <div id="dataSetSelector">
+        <p>
+
+        </p>
+    </div>
+    <h3><a href="#">Step 3: Select Language Or Translate Data Elements</a></h3>
+    <div id="languageSelector">
+        <table>
+            <tr>
+                <td>English<input type="checkbox" name="langEng" value="English" /></td>
+                <td>Gujarati<input type="checkbox" name="langGuj" value="Gujarati" /></td>
+                <td>Punjabi<input type="checkbox" name="langPun" value="Punjabi" /></td>
+            </tr>
+        </table>
+    </div>
+    <h3><a href="#">Step 4: Generate Application</a></h3>
+        <div id="jarGenerator">
+            <input type="button" value="Generate Mobile Application" onclick="submitJarGenerator()" />
+        </div>
+</div>
