@@ -77,6 +77,9 @@
 .x-btn .icon-pdf {
 	background-image:url(../../../images/pdf.png);
 }
+.x-btn .icon-excel {
+	background-image:url(../../../images/excel.gif);
+}
 .aa_dark button  {
 	font-family:lucida sans unicode,arial;
 	font-weight:normal;
@@ -111,14 +114,14 @@
 	color:#333;
 }
 .window-field-label-first {
-	padding:0px 0 3px 3px;
+	padding:0 0 3px 3px;
 	font:normal 11px lucida sans unicode,arial;
 	color:#888;
 }
 .window-field-label {
-	padding:8px 0 3px 3px;
+	padding:6px 0 2px 3px;
 	font:normal 11px lucida sans unicode,arial;
-	color:#888;
+	color:#888;	
 }
 .window-button {
 	padding:8px 0 0 0;
@@ -149,6 +152,12 @@
 #window-help-title {
 	padding:0 0 3px 22px;
 	background:url('../../../images/help.png') no-repeat 0 0 transparent;
+	font:bold 11px arial;
+	color:#111;
+}
+#window-excel-title {
+	padding:0 0 3px 21px;
+	background:url('../../../images/excel.gif') no-repeat 0 0 transparent;
 	font:bold 11px arial;
 	color:#111;
 }

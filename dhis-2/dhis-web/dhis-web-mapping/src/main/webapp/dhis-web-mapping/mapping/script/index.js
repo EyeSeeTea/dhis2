@@ -584,14 +584,7 @@ Ext.onReady( function() {
                     }
                 ]
             }
-        ],
-		listeners: {
-			'hide': {
-				fn: function() {
-					mapping.relation = false;
-				}
-			}
-		}
+        ]
     });
 	
 	/* EXPORT MAP PANEL */
@@ -607,17 +600,17 @@ Ext.onReady( function() {
 				editable: true,
 				valueField: 'id',
 				displayField: 'text',
+				emptyText: 'Image title',
 				isFormField: true,
 				width: combo_width_fieldset,
 				minListWidth: combo_list_width_fieldset,
 				mode: 'local',
-				triggerAction: 'all',
-				value: 'Image Title'						
+				triggerAction: 'all'						
 			},
 			{
 				xtype: 'combo',
 				id: 'export_image_quality',
-				fieldLabel: 'Image Quality',
+				fieldLabel: 'Image quality',
 				labelSeparator: labelseparator,
 				editable: false,
 				valueField: 'id',
@@ -651,6 +644,7 @@ Ext.onReady( function() {
 				handler: function() {					
 					MASK.msg = 'Exporting image...';
 					MASK.show();
+
 					var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
 					
 					var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
@@ -660,29 +654,30 @@ Ext.onReady( function() {
 					var title = Ext.getCmp('export_image_title').getValue();
 					
 					var q = Ext.getCmp('export_image_quality').getValue();
-					
+
 					var w = objectSVGDocument.getAttribute('width') * q;
 					var h = objectSVGDocument.getAttribute('height') * q;
 					var includeLegend = Ext.getCmp('export_image_include_legend').getValue();
 					var period = Ext.getCmp('period_cb').getValue();
 					var indicator = Ext.getCmp('indicator_cb').getValue();
+
 					Ext.Ajax.request({
 						url: path + 'exportImage' + type,
 						method: 'POST',
-						params: { 
-								title: title,
-								viewBox: viewBox,
-								svg: svg,
-								width: w,
-								height: h,
-								includeLegends: includeLegend,
-								period: period,
-								indicator: indicator,
-								legends: getLegendsJSON()
+						params: {
+							title: title,
+							viewBox: viewBox,
+							svg: svg,
+							width: w,
+							height: h,
+							includeLegends: includeLegend,
+							period: period,
+							indicator: indicator,
+							legends: getLegendsJSON()
 						},
-						success: function( responseObject ) {
+						success: function(r) {
 							MASK.hide();
-							var file =  Ext.util.JSON.decode(responseObject.responseText).file;
+							var file =  Ext.util.JSON.decode(r.responseText).file;
 							window.open(path + "download" + type + "?path=" + file + "&outputFormat=application/image" );
 						}
 					});						
@@ -704,25 +699,26 @@ Ext.onReady( function() {
 				editable: true,
 				valueField: 'id',
 				displayField: 'text',
+				emptyText: 'Map title',
 				isFormField: true,
 				width: combo_width_fieldset,
 				minListWidth: combo_list_width_fieldset,
 				mode: 'local',
-				triggerAction: 'all',
-				value: 'Map Title'						
+				triggerAction: 'all'
 			},	
 			{
 				xtype: 'checkbox',
 				id: 'export_excel_include_legend',
-				fieldLabel: 'Include legend',				
-				isFormField: true							
+				fieldLabel: 'Include legend',
+				labelSeparator: '',
+				isFormField: true
 			},	
 			{
 				xtype: 'checkbox',
 				id: 'export_excel_include_value',
 				fieldLabel: 'Include values',
-				labelSeparator: '',				
-				isFormField: true								
+				labelSeparator: '',
+				isFormField: true
 			},
 			{
 				xtype: 'button',
@@ -736,10 +732,7 @@ Ext.onReady( function() {
 					MASK.msg = 'Exporting excel...';
 					MASK.show();
 					var title = Ext.getCmp('export_excel_title').getValue();
-					
 					var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;	
-					
-					
 					var includeLegend = Ext.getCmp('export_excel_include_legend').getValue();
 					var includeValues = Ext.getCmp('export_excel_include_value').getValue();
 					var period = Ext.getCmp('period_cb').getValue();
@@ -748,20 +741,20 @@ Ext.onReady( function() {
 						url: path + 'exportExcel' + type,
 						method: 'POST',
 						params: { 	
-								title: title,
-								width:500,
-								height:500,
-								svg: svg,							
-								includeLegends: includeLegend,
-								includeValues: includeValues,
-								period: period,
-								indicator: indicator,
-								datavalues: EXPORTVALUES,
-								legends: getLegendsJSON()								
+							title: title,
+							width: 500,
+							height: 500,
+							svg: svg,							
+							includeLegends: includeLegend,
+							includeValues: includeValues,
+							period: period,
+							indicator: indicator,
+							datavalues: EXPORTVALUES,
+							legends: getLegendsJSON()								
 						},
-						success: function( responseObject ) {
+						success: function(r) {
 							MASK.hide();
-							var file =  Ext.util.JSON.decode(responseObject.responseText).file;
+							var file =  Ext.util.JSON.decode(r.responseText).file;
 							window.open(path + "download" + type + "?path=" + file + "&outputFormat=application/ms-excel" );
 						}
 					});						
@@ -774,7 +767,7 @@ Ext.onReady( function() {
 	/* EXPORT MAP WINDOW */
 	var exportMapWindow = new Ext.Window({
         id: 'view_export_map_w',
-        title: '<span id="window-export-map-title">Export Map</span>',
+        title: '<span id="window-excel-title">Export map</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 250,
@@ -791,17 +784,17 @@ Ext.onReady( function() {
                     tabchange: function(panel, tab)
                     {
                         if (tab.id == 'export-image') { 
-                            exportMapWindow.setHeight(220);
+                            exportMapWindow.setHeight(183);
                         }
                         else if (tab.id == 'export-excel') {
-                            exportMapWindow.setHeight(200);
+                            exportMapWindow.setHeight(182);
                         }                        
                     }
                 },
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">Export Image</span>',
+                        title: '<span class="panel-tab-title">Export image</span>',
                         id: 'export-image',
                         items:
                         [
@@ -809,7 +802,7 @@ Ext.onReady( function() {
                         ]
                     },
 					{
-                        title: '<span class="panel-tab-title">Export Excel</span>',
+                        title: '<span class="panel-tab-title">Export to Excel</span>',
                         id: 'export-excel',
                         items:
                         [
@@ -818,14 +811,7 @@ Ext.onReady( function() {
                     }
                 ]
             }
-        ],
-		listeners: {
-			'hide': {
-				fn: function() {
-					mapping.relation = false;
-				}
-			}
-		}
+        ]
     });
     
     /* AUTOMATIC MAP LEGEND SET PANEL */
@@ -1166,7 +1152,7 @@ Ext.onReady( function() {
     
     var automaticMapLegendSetWindow = new Ext.Window({
         id: 'automaticmaplegendset_w',
-        title: '<span id="window-legendset-title">Automatic legend sets</span>',
+        title: '<span id="window-automaticlegendset-title">Automatic legend sets</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 245,
@@ -1185,13 +1171,13 @@ Ext.onReady( function() {
 						var w = Ext.getCmp('automaticmaplegendset_w');
 						
 						if (tab.id == 'automaticmaplegendset0') { 
-							w.setHeight(306);
+							w.setHeight(298);
 						}
 						else if (tab.id == 'automaticmaplegendset1') {
 							w.setHeight(getMultiSelectHeight() + 180);
 						}
 						else if (tab.id == 'automaticmaplegendset2') {
-							w.setHeight(149);
+							w.setHeight(151);
 						}
 					}
 				},
@@ -1359,16 +1345,16 @@ Ext.onReady( function() {
 				cls: 'window-button',
                 handler: function() {
                     var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
-                    var mlsv = Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue();            
-                    var mlev = Ext.getCmp('predefinedmaplegendendvalue_tf').getValue();
+                    var mlsv = Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue() != "0" ? Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue() : 1;
+                    var mlev = Ext.getCmp('predefinedmaplegendendvalue_tf').getValue() != "0" ? Ext.getCmp('predefinedmaplegendendvalue_tf').getValue() : 1;
                     var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
-                    
-                    if (!mln || !mlsv || !mlev || !mlc) {
+					
+					if (!mln || mlsv == "" || mlev == "" || !mlc) {
                         Ext.messageRed.msg('New legend', 'Form is not complete.');
                         return;
                     }
                     
-                    if (validateInput(mln) == false) {
+                    if (!validateInput(mln)) {
                         Ext.messageRed.msg('New legend set', 'Legend name cannot be longer than 25 characters.');
                         return;
                     }
@@ -1384,7 +1370,7 @@ Ext.onReady( function() {
                                     return;
                                 }
                             }
-                            
+
                             Ext.Ajax.request({
                                 url: path + 'addOrUpdateMapLegend' + type,
                                 method: 'POST',
@@ -1550,7 +1536,7 @@ Ext.onReady( function() {
 	
 	var predefinedMapLegendSetWindow = new Ext.Window({
         id: 'predefinedmaplegendset_w',
-        title: '<span id="window-legendset-title">Predefined legend sets</span>',
+        title: '<span id="window-predefinedlegendset-title">Predefined legend sets</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 311,
@@ -1569,16 +1555,16 @@ Ext.onReady( function() {
 						var w = Ext.getCmp('predefinedmaplegendset_w');
 						
 						if (tab.id == 'predefinedmaplegendset0') { 
-							w.setHeight(306);
+							w.setHeight(298);
 						}
 						else if (tab.id == 'predefinedmaplegendset1') {
-							w.setHeight(149);
+							w.setHeight(151);
 						}
 						else if (tab.id == 'predefinedmaplegendset2') {
 							w.setHeight(getMultiSelectHeight() + 180);
 						}
 						else if (tab.id == 'predefinedmaplegendset3') {
-							w.setHeight(149);
+							w.setHeight(151);
 						}
 					}
 				},
@@ -1616,8 +1602,6 @@ Ext.onReady( function() {
 			}
         ]
     });
-    
-
 	
     /* HELP PANEL */
 	function getHelpText(topic, tab) {
@@ -2844,9 +2828,8 @@ Ext.onReady( function() {
             var mlfo = Ext.getCmp('maplayerfillopacity_cb').getRawValue();
             var mlsc = Ext.getCmp('maplayerstrokecolor_cf').getValue();
             var mlsw = Ext.getCmp('maplayerstrokewidth_cb').getRawValue();
-			
 			var mlmsf = Ext.getCmp('maplayermapsourcefile_cb').getValue();
-			var mlwmso = Ext.getCmp('maplayerpathwmsoverlay_tf').getValue();			
+			var mlwmso = Ext.getCmp('maplayerpathwmsoverlay_tf').getValue();
             
             if (!mln) {
                 Ext.messageRed.msg('New overlay', 'Overlay form is not complete.');
@@ -2959,7 +2942,7 @@ Ext.onReady( function() {
             { html: '<div class="panel-fieldlabel">Fill color</div>' }, mapLayerFillColorColorField,
             { html: '<div class="panel-fieldlabel">Fill opacity</div>' }, mapLayerFillOpacityComboBox,
             { html: '<div class="panel-fieldlabel">Stroke color</div>' }, mapLayerStrokeColorColorField,
-            { html: '<div class="panel-fieldlabel">Stroke width</div>' }, mapLayerStrokeWidthComboBox,
+            { html: '<div class="panel-fieldlabel">Stroke width</div>' }, mapLayerStrokeWidthComboBox
         ]
     });
     
@@ -3504,16 +3487,15 @@ Ext.onReady( function() {
 			}
 		}
 		else {
-			Ext.messageRed.msg('Please render the map fist!','Form does not completed');
+			Ext.messageRed.msg('Export map', 'Please render the map first.');
 		}
-		
 	}
 	
 	var exportMapButton = new Ext.Button({
-		iconCls: 'icon-export-map',
+		iconCls: 'icon-excel',
 		tooltip: 'Export map to image/excel',
 		handler: function() {
-			showExportMap();				
+			showExportMap();
 		}
 	});
 	
@@ -3547,8 +3529,8 @@ Ext.onReady( function() {
     var automaticMapLegendSetButton = new Ext.Button({
 		cls: 'x-btn-text-icon',
 		ctCls: 'aa_med',
-		icon: '../../images/color_swatch.png',
-		text: 'Automatic LS',
+		icon: '../../images/color_swatch2.png',
+		text: 'Automatic',
 		tooltip: 'Assign legend sets to indicators',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
@@ -3568,7 +3550,7 @@ Ext.onReady( function() {
 		cls: 'x-btn-text-icon',
 		ctCls: 'aa_med',
 		icon: '../../images/color_swatch.png',
-		text: 'Predefined LS',
+		text: 'Predefined',
 		tooltip: 'Assign legend sets to indicators',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
@@ -3621,12 +3603,12 @@ Ext.onReady( function() {
 			zoomMaxExtentButton,
 			labelsButton,
 			'-',
+			exportMapButton,
 			pdfButton,
 			'-',
 			favoritesButton,
 			'-',
             automaticMapLegendSetButton,
-			'-',
 			predefinedMapLegendSetButton,
 			'-',
 			helpButton,
