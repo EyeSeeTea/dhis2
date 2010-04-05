@@ -1,41 +1,49 @@
-<style type="text/css">
-    .statusBar{
-        color: white;
-        padding: 5px 5px;
-        margin: -16px 0 20px -20px;
-        font-weight: bold;
-    }
-</style>
 <script type="text/javascript">
-    $(document).ready(function(){
-        var statusOptions = {
-            url: 'toggleStatus.action',
-            target: '#serviceStat',
-            success: function(){
-                $("#splashUpdate input:radio:first").attr("checked","checked");
-            }
-        }
-        $("#splashForm").ajaxForm(statusOptions);
-    });
+    function showPending(){
+        $("#pendingItems").toggle();
+    }
+    function showBounced(){
+        $("#bouncedItems").toggle();
+    }
 </script>
 
 #if ($smsServiceStatus)
-<form class="statusBar" style="background-color: olive" >SMS Service:  Started
-    <input type="submit" value="Stop Service" />
-</form>
-#else
-<form class="statusBar" style="background-color: #8FABC7">SMS Service:  Not Started
-    <input type="submit" value="Start Service" />
-</form>
-#end
-<h1>Send SMS</h1>
-
-<div style="float:left">
-    <form action="post">
-        <table>
-            <tr><td>Phone #:</td><td><input type="text"/></td></tr>
-            <tr><td></td><td><textarea cols="50" rows="10"></textarea></td></tr>
-            <tr><td></td><td><input type="submit" value="Send SMS"/></td>
-        </table>
+<div class="header" style="background-color: olive">Receive SMS -
+    <form method="post">SMS Service: Started
+        <input type="submit" name="statAction" value="Stop" />
     </form>
+</div>
+#else
+<div class="header">Receive SMS -
+    <form method="post">SMS Service: Not Started
+        <input type="submit" name="statAction" value="Start" />
+    </form>
+</div>
+#end
+<div class="box">
+
+</div>
+<br>
+<br>
+<div class="header">Import SMS</div>
+<div class="box">
+    <table class="mainTable">
+        <tbody>
+            <tr>
+                <th width="33%">Pending ($pending.size())</th>
+                <th width="33%">Bounced ($bounced.size())</th>
+                <th width="33%">Completed ($completed.size())</th>
+            </tr>
+            <tr>
+                <td><a href="javascript:showPending()">Show/Hide Details</a></td>
+                <td><a href="javascript:showBounced()">Show/Hide Details</a></td>
+                <td>$completed.size() Already Imported</td>
+            </tr>
+            <tr>
+                <td style="display: none" id="pendingItems"><ol>#foreach ($item in $pending)<li>$item</li>#end</ol></td>
+                <td style="display: none" id="bouncedItems"><ol>#foreach ($item in $bounced)<li>$item</li>#end</ol></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
 </div>

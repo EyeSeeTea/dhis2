@@ -1,0 +1,49 @@
+<script type="text/javascript">
+    function showPending(){
+        $("#pendingItems").toggle();
+    }
+    function showBounced(){
+        $("#bouncedItems").toggle();
+    }
+</script>
+
+#if ($smsServiceStatus)
+<div class="header" style="background-color: olive">Receive SMS -
+    <form method="post">SMS Service: Started
+        <input type="submit" name="statAction" value="Stop" />
+    </form>
+</div>
+#else
+<div class="header">Receive SMS -
+    <form method="post">SMS Service: Not Started
+        <input type="submit" name="statAction" value="Start" />
+    </form>
+</div>
+#end
+<div class="box">
+
+</div>
+<br>
+<br>
+<div class="header">Import SMS</div>
+<div class="box">
+    <table class="mainTable">
+        <tbody>
+            <tr>
+                <th width="33%">Pending ($pending.size())</th>
+                <th width="33%">Bounced ($bounced.size())</th>
+                <th width="33%">Completed ($completed.size())</th>
+            </tr>
+            <tr>
+                <td><a href="javascript:showPending()">Show/Hide Details</a></td>
+                <td><a href="javascript:showBounced()">Show/Hide Details</a></td>
+                <td>$completed.size() Already Imported</td>
+            </tr>
+            <tr>
+                <td style="display: none" id="pendingItems"><ol>#foreach ($item in $pending)<li>$item</li>#end</ol></td>
+                <td style="display: none" id="bouncedItems"><ol>#foreach ($item in $bounced)<li>$item</li>#end</ol></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
