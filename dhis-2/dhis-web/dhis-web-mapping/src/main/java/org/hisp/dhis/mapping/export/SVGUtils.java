@@ -43,7 +43,6 @@ import org.apache.batik.transcoder.image.PNGTranscoder;
  */
 public class SVGUtils
 {
-
     public static void convertSVG2PNG( File svgFile, File outputImage, Integer w, Integer h )
         throws TranscoderException, IOException
     {
@@ -68,8 +67,8 @@ public class SVGUtils
 
         // Flush and close the stream.
         ostream.flush();
-            ostream.close();
-      
+        ostream.close();
+
     }
 
 }

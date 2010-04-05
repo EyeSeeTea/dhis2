@@ -82,7 +82,7 @@ public class SVGDocument
 
         if ( this.includeLegends )
         {
-            svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 30, 70 ) + "</svg>" );
+            svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 30, 50 ) + "</svg>" );
         }
 
         return new StringBuffer( svg_ );
@@ -147,7 +147,6 @@ public class SVGDocument
     private String getLegendScript( int x, int y )
     {
         String result = "<g id='legend'>";
-        result += "<text id=\"indicator\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"14\"><tspan>Legends</tspan></text>";
 
         JSONObject legend;
 
@@ -157,20 +156,19 @@ public class SVGDocument
 
         for ( int index = 0; index < jsonLegends.size(); index++ )
         {
-
             legend = jsonLegends.getJSONObject( index );
 
             String label = legend.getString( "label" );
 
             String color = legend.getString( "color" );
 
-            result += "<rect x='" + x + "' y='" + (y + 10) + "' height='10' width='30' fill='" + color
+            result += "<rect x='" + x + "' y='" + (y + 15) + "' height='15' width='30' fill='" + color
                 + "' stroke='#000000' stroke-width='1'/>";
 
-            result += "<text id=\"indicator\" x='" + (x + 35) + "' y='" + (y + 22) + "' font-size=\"12\"><tspan>"
+            result += "<text id=\"indicator\" x='" + (x + 40) + "' y='" + (y + 27) + "' font-size=\"12\"><tspan>"
                 + label + "</tspan></text>";
 
-            y += 10;
+            y += 15;
         }
 
         result += "</g>";
