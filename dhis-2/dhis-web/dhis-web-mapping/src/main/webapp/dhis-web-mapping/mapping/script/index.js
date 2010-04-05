@@ -1452,21 +1452,41 @@ Ext.onReady( function() {
                 handler: function() {
                     var mlsv = Ext.getCmp('predefinedmaplegendsetname_tf').getValue();
                     var mlms = Ext.getCmp('predefinednewmaplegend_ms').getValue();
+					var array = new Array();
+					
+					if (mlms) {
+						array = mlms.split(',');
+						if (array.length > 1) {
+							for (var i = 0; i < array.length; i++) {
+								var sv = predefinedMapLegendStore.getById(array[i]).get('startValue');
+								var ev = predefinedMapLegendStore.getById(array[i]).get('endValue');
+								for (var j = 0; j < array.length; j++) {
+									if (j != i) {
+										var temp_sv = predefinedMapLegendStore.getById(array[j]).get('startValue');
+										var temp_ev = predefinedMapLegendStore.getById(array[j]).get('endValue');
+										for (var k = sv+1; k < ev; k++) {
+											if (k > temp_sv && k < temp_ev) {
+												Ext.messageRed.msg('New legend set', 'Overlapping legends are not allowed.');
+												return;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					else {
+						Ext.messageRed.msg('New legend set', 'Please select at least one legend.');
+                        return;
+					}
 					
                     if (!mlsv) {
-                        Ext.messageRed.msg('New legend set', 'Please select a legend set.');
+                        Ext.messageRed.msg('New legend set', 'Form is not complete.');
                         return;
                     }
                     
-                    if (!mlms) {
-                        Ext.messageRed.msg('New legend set', 'Please select at least one legend.');
-                        return;
-                    }
-                    
-                    var array = new Array();
                     array = mlms.split(',');
                     var params = '?mapLegends=' + array[0];
-                    
                     if (array.length > 1) {
                         for (var i = 1; i < array.length; i++) {
                             array[i] = '&mapLegends=' + array[i];
