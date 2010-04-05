@@ -12,6 +12,7 @@ var ACTIVEPANEL;
 var MASK;
 var LABELS;
 var COLORINTERPOLATION;
+var EXPORTVALUES;
 
 function getUrlParam(strParamName) {
     var output = '';
@@ -640,48 +641,51 @@ Ext.onReady( function() {
 				labelSeparator: labelseparator,
 				hideLabel: false,
 				cls: 'window-button',
-				text: 'Export Image',
-				handler: function() {					
-					MASK.msg = 'Exporting image...';
-					MASK.show();
+				text: 'Export image',
+				handler: function() {
+					if (ACTIVEPANEL == thematicMap
+						&& Ext.getCmp('period_cb').getValue()!='' 
+						&& Ext.getCmp('indicator_cb').getValue()!=''
+						&& Ext.getCmp('map_cb').getValue()!='') {
+					
+						MASK.msg = 'Exporting image...';
+						MASK.show();
 
-					var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
-					
-					var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
-					
-					var viewBox = objectSVGDocument.getAttribute('viewBox');
-					
-					var title = Ext.getCmp('export_image_title').getValue();
-					
-					var q = Ext.getCmp('export_image_quality').getValue();
+						var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
+						var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
+						var viewBox = objectSVGDocument.getAttribute('viewBox');
+						var title = Ext.getCmp('export_image_title').getValue();
+						var q = Ext.getCmp('export_image_quality').getValue();
+						var w = objectSVGDocument.getAttribute('width') * q;
+						var h = objectSVGDocument.getAttribute('height') * q;
+						var includeLegend = Ext.getCmp('export_image_include_legend').getValue();
+						var period = Ext.getCmp('period_cb').getValue();
+						var indicator = Ext.getCmp('indicator_cb').getValue();
 
-					var w = objectSVGDocument.getAttribute('width') * q;
-					var h = objectSVGDocument.getAttribute('height') * q;
-					var includeLegend = Ext.getCmp('export_image_include_legend').getValue();
-					var period = Ext.getCmp('period_cb').getValue();
-					var indicator = Ext.getCmp('indicator_cb').getValue();
-
-					Ext.Ajax.request({
-						url: path + 'exportImage' + type,
-						method: 'POST',
-						params: {
-							title: title,
-							viewBox: viewBox,
-							svg: svg,
-							width: w,
-							height: h,
-							includeLegends: includeLegend,
-							period: period,
-							indicator: indicator,
-							legends: getLegendsJSON()
-						},
-						success: function(r) {
-							MASK.hide();
-							var file =  Ext.util.JSON.decode(r.responseText).file;
-							window.open(path + "download" + type + "?path=" + file + "&outputFormat=application/image" );
-						}
-					});						
-						
+						Ext.Ajax.request({
+							url: path + 'exportImage' + type,
+							method: 'POST',
+							params: {
+								title: title,
+								viewBox: viewBox,
+								svg: svg,
+								width: w,
+								height: h,
+								includeLegends: includeLegend,
+								period: period,
+								indicator: indicator,
+								legends: getLegendsJSON()
+							},
+							success: function(r) {
+								MASK.hide();
+								var file =  Ext.util.JSON.decode(r.responseText).file;
+								window.open(path + "download" + type + "?path=" + file + "&outputFormat=application/image" );
+							}
+						});
+					}
+					else {
+						Ext.messageRed.msg('Export map as image', 'Please render the thematic map first.');
+					}
 				}
 			}	
 		]
@@ -727,91 +731,86 @@ Ext.onReady( function() {
 				labelSeparator: labelseparator,
 				hideLabel: false,
 				cls: 'window-button',
-				text: 'Export Excel',
-				handler: function() {					
-					MASK.msg = 'Exporting excel...';
-					MASK.show();
-					var title = Ext.getCmp('export_excel_title').getValue();
-					var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;	
-					var includeLegend = Ext.getCmp('export_excel_include_legend').getValue();
-					var includeValues = Ext.getCmp('export_excel_include_value').getValue();
-					var period = Ext.getCmp('period_cb').getValue();
-					var indicator = Ext.getCmp('indicator_cb').getValue();					
-					Ext.Ajax.request({
-						url: path + 'exportExcel' + type,
-						method: 'POST',
-						params: { 	
-							title: title,
-							width: 500,
-							height: 500,
-							svg: svg,							
-							includeLegends: includeLegend,
-							includeValues: includeValues,
-							period: period,
-							indicator: indicator,
-							datavalues: EXPORTVALUES,
-							legends: getLegendsJSON()								
-						},
-						success: function(r) {
-							MASK.hide();
-							var file =  Ext.util.JSON.decode(r.responseText).file;
-							window.open(path + "download" + type + "?path=" + file + "&outputFormat=application/ms-excel" );
-						}
-					});						
+				text: 'Export spreadsheet',
+				handler: function() {
+					if (ACTIVEPANEL == thematicMap
+						&& Ext.getCmp('period_cb').getValue()!='' 
+						&& Ext.getCmp('indicator_cb').getValue()!=''
+						&& Ext.getCmp('map_cb').getValue()!='') {
 						
+						MASK.msg = 'Exporting spreadsheet...';
+						MASK.show();
+						var title = Ext.getCmp('export_excel_title').getValue();
+						var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;	
+						var includeLegend = Ext.getCmp('export_excel_include_legend').getValue();
+						var includeValues = Ext.getCmp('export_excel_include_value').getValue();
+						var period = Ext.getCmp('period_cb').getValue();
+						var indicator = Ext.getCmp('indicator_cb').getValue();					
+						Ext.Ajax.request({
+							url: path + 'exportExcel' + type,
+							method: 'POST',
+							params: { 	
+								title: title,
+								width: 500,
+								height: 500,
+								svg: svg,							
+								includeLegends: includeLegend,
+								includeValues: includeValues,
+								period: period,
+								indicator: indicator,
+								datavalues: EXPORTVALUES,
+								legends: getLegendsJSON()								
+							},
+							success: function(r) {
+								MASK.hide();
+								var file =  Ext.util.JSON.decode(r.responseText).file;
+								window.open(path + "download" + type + "?path=" + file + "&outputFormat=application/ms-excel" );
+							}
+						});
+					}
+					else {
+						Ext.messageRed.msg('Export map as Excel spreadsheet', 'Please render the thematic map first.');
+					}
 				}
 			}	
 		]
 	});
 	
-	/* EXPORT MAP WINDOW */
-	var exportMapWindow = new Ext.Window({
-        id: 'view_export_map_w',
-        title: '<span id="window-excel-title">Export map</span>',
+	/* EXPORT MAP WINDOWS */
+	var exportImageWindow = new Ext.Window({
+        id: 'exportimage_w',
+        title: '<span id="window-image-title">Export map as image</span>',
 		layout: 'fit',
         closeAction: 'hide',
+		defaults: {layout: 'fit', bodyStyle: 'padding:8px; border:0px'},
 		width: 250,
-        items:
-        [            
+		height: 155,
+        items: [
 		   {
-                xtype: 'tabpanel',
-                activeTab: 0,
-				layoutOnTabChange: true,
-                deferredRender: false,
-                plain: true,
-                defaults: {layout: 'fit', bodyStyle: 'padding:8px; border:0px'},
-                listeners: {
-                    tabchange: function(panel, tab)
-                    {
-                        if (tab.id == 'export-image') { 
-                            exportMapWindow.setHeight(183);
-                        }
-                        else if (tab.id == 'export-excel') {
-                            exportMapWindow.setHeight(182);
-                        }                        
-                    }
-                },
-                items:
-                [
-                    {
-                        title: '<span class="panel-tab-title">Export image</span>',
-                        id: 'export-image',
-                        items:
-                        [
-							exportImagePanel							
-                        ]
-                    },
-					{
-                        title: '<span class="panel-tab-title">Export to Excel</span>',
-                        id: 'export-excel',
-                        items:
-                        [
-							exportExcelPanel							
-                        ]
-                    }
-                ]
-            }
-        ]
+                xtype: 'panel',
+                items: [
+					exportImagePanel
+				]
+			}
+		]
+    });
+	
+	var exportExcelWindow = new Ext.Window({
+        id: 'exportexcel_w',
+        title: '<span id="window-excel-title">Export map as Excel spreadsheet</span>',
+		layout: 'fit',
+        closeAction: 'hide',
+		defaults: {layout: 'fit', bodyStyle: 'padding:8px; border:0px'},
+		width: 252,
+		height: 155,
+        items: [
+		   {
+                xtype: 'panel',
+                items: [
+					exportExcelPanel
+				]
+			}
+		]
     });
     
     /* AUTOMATIC MAP LEGEND SET PANEL */
@@ -3467,62 +3466,62 @@ Ext.onReady( function() {
 		}
 	});
 	
-	function showExportMap() {		
-	
-		if (ACTIVEPANEL == thematicMap
-			&& Ext.getCmp('period_cb').getValue()!='' 
-			&& Ext.getCmp('indicator_cb').getValue()!=''
-			&& Ext.getCmp('map_cb').getValue()!='') {
-		
+	var exportImageButton = new Ext.Button({
+		iconCls: 'icon-image',
+		tooltip: 'Export map as image (PNG)',
+		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;   
 			
-			exportMapWindow.setPosition(x,y);
+			exportImageWindow.setPosition(x,y);
 
-			if (exportMapWindow.visible) {
-				exportMapWindow.hide();
+			if (exportImageWindow.visible) {
+				exportImageWindow.hide();
 			}
 			else {
-				exportMapWindow.show();
+				exportImageWindow.show();
 			}
-		}
-		else {
-			Ext.messageRed.msg('Export map', 'Please render the map first.');
-		}
-	}
-	
-	var exportMapButton = new Ext.Button({
-		iconCls: 'icon-excel',
-		tooltip: 'Export map to image/excel',
-		handler: function() {
-			showExportMap();
 		}
 	});
 	
-	function showPdf() {
-		var active = ACTIVEPANEL;
-		var printMultiPagePanel = Ext.getCmp('printMultiPage_p');
-		if (printMultiPagePanel.hidden) {
-            printMultiPagePanel.show();
-			printMultiPagePanel.expand();
-        }
-        else {
-			printMultiPagePanel.collapse();
-			printMultiPagePanel.hide();
-			if (active == thematicMap) {
-				choropleth.expand();
+	var exportExcelButton = new Ext.Button({
+		iconCls: 'icon-excel',
+		tooltip: 'Export map as Excel spreadsheet',
+		handler: function() {
+			var x = Ext.getCmp('center').x + 15;
+			var y = Ext.getCmp('center').y + 41;   
+			
+			exportExcelWindow.setPosition(x,y);
+
+			if (exportExcelWindow.visible) {
+				exportExcelWindow.hide();
 			}
-			else if (active == organisationUnitAssignment) {
-				mapping.expand();
+			else {
+				exportExcelWindow.show();
 			}
-        }
-	}
+		}
+	});
 	
 	var pdfButton = new Ext.Button({
 		iconCls: 'icon-pdf',
 		tooltip: 'Show/hide PDF printing panel',
 		handler: function() {
-			showPdf();				
+			var active = ACTIVEPANEL;
+			var printMultiPagePanel = Ext.getCmp('printMultiPage_p');
+			if (printMultiPagePanel.hidden) {
+				printMultiPagePanel.show();
+				printMultiPagePanel.expand();
+			}
+			else {
+				printMultiPagePanel.collapse();
+				printMultiPagePanel.hide();
+				if (active == thematicMap) {
+					choropleth.expand();
+				}
+				else if (active == organisationUnitAssignment) {
+					mapping.expand();
+				}
+			}			
 		}
 	});
 
@@ -3603,7 +3602,8 @@ Ext.onReady( function() {
 			zoomMaxExtentButton,
 			labelsButton,
 			'-',
-			exportMapButton,
+			exportImageButton,
+			exportExcelButton,
 			pdfButton,
 			'-',
 			favoritesButton,
@@ -3927,21 +3927,17 @@ function getExportDataValueJSON( mapvalues ){
 	var json = '{';
 	json += '"datavalues":';
 	json += '[';	
+	
 	for (var i = 0; i < mapvalues.length; i++) {		
 		json += '{';
 		json += '"organisation": "' + mapvalues[i].orgUnitId + '",';
 		json += '"value": "' + mapvalues[i].value + '" ';
-		if(i < mapvalues.length-1){
-			json += '},';
-		}else{
-			json += '}';
-		}
+		json += i < mapvalues.length-1 ? '},' : '}';
 	}
 	json += ']';
 	json += '}';
 	
 	return json;
-	
 }
 
 function getLegendsJSON(){
@@ -3954,13 +3950,8 @@ function getLegendsJSON(){
 		json += '{';
 		json += '"label": "' + legends[i].label + '",';
 		json += '"color": "' + legends[i].color + '" ';
-		if(i < legends.length-1){
-			json += '},';
-		}else{
-			json += '}';
-		}
-	}
-	
+		json += i < legends.length-1 ? '},' : '}';
+	}	
 	json += ']';
 	json += '}';
 	
@@ -3987,6 +3978,7 @@ function getChoroplethData() {
 			var layers = MAP.getLayersByName('Thematic map');
 			var features = layers[0].features;
 			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
+			EXPORTVALUES = getExportDataValueJSON( mapvalues );
 			var mv = new Array();
 			var nameColumn = MAPDATA.nameColumn;
 			var options = {};

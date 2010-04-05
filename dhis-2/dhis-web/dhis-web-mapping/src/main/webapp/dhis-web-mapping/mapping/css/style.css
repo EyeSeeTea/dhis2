@@ -74,11 +74,14 @@
 .x-btn .icon-labels {
 	background-image:url(../../../images/labels.png);
 }
-.x-btn .icon-pdf {
-	background-image:url(../../../images/pdf.png);
+.x-btn .icon-image {
+	background-image:url(../../../images/image.png);
 }
 .x-btn .icon-excel {
 	background-image:url(../../../images/excel.gif);
+}
+.x-btn .icon-pdf {
+	background-image:url(../../../images/pdf.png);
 }
 .aa_dark button  {
 	font-family:lucida sans unicode,arial;
@@ -152,6 +155,12 @@
 #window-help-title {
 	padding:0 0 3px 22px;
 	background:url('../../../images/help.png') no-repeat 0 0 transparent;
+	font:bold 11px arial;
+	color:#111;
+}
+#window-image-title {
+	padding:0 0 3px 21px;
+	background:url('../../../images/image.png') no-repeat 0 0 transparent;
 	font:bold 11px arial;
 	color:#111;
 }
