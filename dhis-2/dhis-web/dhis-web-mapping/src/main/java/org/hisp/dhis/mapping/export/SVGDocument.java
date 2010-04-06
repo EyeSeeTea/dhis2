@@ -60,7 +60,6 @@ public class SVGDocument
 
     public SVGDocument()
     {
-
     }
 
     public StringBuffer getSVGForImage()
@@ -103,8 +102,7 @@ public class SVGDocument
     }
 
     public String getLegendScriptForExcel()    
-    {
-        
+    {        
         JSONObject legend;
 
         JSONObject json = (JSONObject) JSONSerializer.toJSON( this.legends );
@@ -242,5 +240,4 @@ public class SVGDocument
     {
         return this.svg;
     }
-
 }

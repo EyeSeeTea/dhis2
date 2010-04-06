@@ -343,7 +343,6 @@
 				/dhis-web-mapping/jsonGeoJsonFiles.vm</result>
 		</action>
 
-
 		<!-- Export Map -->
 
 		<action name="exportImage" class="org.hisp.dhis.mapping.action.ExportImageAction">

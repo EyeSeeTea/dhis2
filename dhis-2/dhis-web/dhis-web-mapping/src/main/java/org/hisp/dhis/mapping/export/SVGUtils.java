@@ -26,6 +26,7 @@ package org.hisp.dhis.mapping.export;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +40,6 @@ import org.apache.batik.transcoder.image.PNGTranscoder;
 
 /**
  * @author Tran Thanh Tri
- * @version $Id: $
  */
 public class SVGUtils
 {
@@ -47,28 +47,31 @@ public class SVGUtils
         throws TranscoderException, IOException
     {
         if ( w == null )
+        {
             w = 500;
+        }
+        
         if ( h == null )
+        {
             h = 500;
-
+        }
+        
         PNGTranscoder t = new PNGTranscoder();
 
-        // Set the transcoding hints.
+        // Set the transcoding hints
         t.addTranscodingHint( PNGTranscoder.KEY_HEIGHT, new Float( h ) );
         t.addTranscodingHint( PNGTranscoder.KEY_WIDTH, new Float( w ) );
 
         TranscoderInput input = new TranscoderInput( new FileInputStream( svgFile ) );
-        // Create the transcoder output.
+        // Create the transcoder output
         OutputStream ostream = new FileOutputStream( outputImage );
         TranscoderOutput output = new TranscoderOutput( ostream );
 
-        // Save the image.
+        // Save the image
         t.transcode( input, output );
 
-        // Flush and close the stream.
+        // Flush and close the stream
         ostream.flush();
         ostream.close();
-
     }
-
 }

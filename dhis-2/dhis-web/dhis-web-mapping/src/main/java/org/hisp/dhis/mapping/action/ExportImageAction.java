@@ -48,7 +48,6 @@ import com.opensymphony.xwork2.Action;
 public class ExportImageAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -152,7 +151,6 @@ public class ExportImageAction
     public String execute()
         throws Exception
     {
-
         Period p = periodService.getPeriod( period );
 
         p.setName( format.formatPeriod( p ) );
@@ -189,5 +187,4 @@ public class ExportImageAction
 
         return SUCCESS;
     }
-
 }

@@ -223,7 +223,6 @@ public class ExportExcelAction
     public String execute()
         throws Exception
     {
-
         Period p = periodService.getPeriod( period );
 
         p.setName( format.formatPeriod( p ) );
@@ -244,8 +243,7 @@ public class ExportExcelAction
         
         svgDocument.setLegends( this.legends );
         
-        svgDocument.setIncludeLegends( this.includeLegends );
-        
+        svgDocument.setIncludeLegends( this.includeLegends );        
 
         int random = (int) (Math.random() * 1000);
 
@@ -300,9 +298,7 @@ public class ExportExcelAction
         sheet.addCell( new Label( titlePositionCol + 2, titlePositionRow + 1, i.getName(), header ) );
         sheet.addCell( new Label( titlePositionCol, titlePositionRow + 2, i18n.getString( "period" ), header ) );
         sheet.addCell( new Label( titlePositionCol + 2, titlePositionRow + 2, p.getName(), header ) );
-        
-        
-       
+                       
         /* TODO write data values*/
         
         if ( includeValues )
@@ -312,11 +308,9 @@ public class ExportExcelAction
             datavalueHeader.setAlignment( Alignment.CENTRE );
             datavalueHeader.setBackground( Colour.ICE_BLUE );
 
-            sheet
-                .addCell( new Label( orgunitPositionCol, orgunitPositionRow, i18n.getString( "name" ), datavalueHeader ) );
+            sheet.addCell( new Label( orgunitPositionCol, orgunitPositionRow, i18n.getString( "name" ), datavalueHeader ) );
 
-            sheet.addCell( new Label( orgunitPositionCol + 1, orgunitPositionRow, i18n.getString( "value" ),
-                datavalueHeader ) );
+            sheet.addCell( new Label( orgunitPositionCol + 1, orgunitPositionRow, i18n.getString( "value" ), datavalueHeader ) );
 
             WritableCellFormat valCellFormat = new WritableCellFormat();
             valCellFormat.setAlignment( Alignment.LEFT );
@@ -334,7 +328,6 @@ public class ExportExcelAction
 
             for ( int index = 0; index < jsonDataValues.size(); index++ )
             {
-
                 datavalue = jsonDataValues.getJSONObject( index );
 
                 organisationUnit = organisationUnitService.getOrganisationUnit( datavalue.getInt( "organisation" ) );
@@ -346,9 +339,7 @@ public class ExportExcelAction
                 sheet.addCell( new Number( orgunitPositionCol + 1, rowValue, value, valCellFormat ) );
 
                 rowValue++;
-
             }
-
         }
 
         outputReportWorkbook.write();
