@@ -26,8 +26,8 @@
 .x-panel-tbar .x-toolbar {
     padding:0;
 }
-.x-toolbar {
-    padding:0;
+.x-btn-icon .x-btn-center .x-btn-text {
+	height:17px;
 }
 
 /* OpenLayers (include in lib)
