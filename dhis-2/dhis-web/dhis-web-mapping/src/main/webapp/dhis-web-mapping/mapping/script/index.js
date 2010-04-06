@@ -661,6 +661,7 @@ Ext.onReady( function() {
                         
                         var exportForm = document.getElementById('exportForm');
                         exportForm.action = '../exportImage.action';
+                        exportForm.target = '_blank';
                         
                         document.getElementById('titleField').value = title;   
                         document.getElementById('viewBoxField').value = viewBox;  
@@ -729,35 +730,28 @@ Ext.onReady( function() {
 						&& Ext.getCmp('indicator_cb').getValue()!=''
 						&& Ext.getCmp('map_cb').getValue()!='') {
 						
-						MASK.msg = 'Exporting spreadsheet...';
-						MASK.show();
 						var title = Ext.getCmp('export_excel_title').getValue();
 						var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;	
 						var includeLegend = Ext.getCmp('export_excel_include_legend').getValue();
 						var includeValues = Ext.getCmp('export_excel_include_value').getValue();
 						var period = Ext.getCmp('period_cb').getValue();
-						var indicator = Ext.getCmp('indicator_cb').getValue();					
-						Ext.Ajax.request({
-							url: path + 'exportExcel' + type,
-							method: 'POST',
-							params: { 	
-								title: title,
-								width: 500,
-								height: 500,
-								svg: svg,							
-								includeLegends: includeLegend,
-								includeValues: includeValues,
-								period: period,
-								indicator: indicator,
-								datavalues: EXPORTVALUES,
-								legends: getLegendsJSON()								
-							},
-							success: function(r) {
-								MASK.hide();
-								var file =  Ext.util.JSON.decode(r.responseText).file;
-								window.open(path + "download" + type + "?path=" + file + "&outputFormat=application/ms-excel" );
-							}
-						});
+						var indicator = Ext.getCmp('indicator_cb').getValue();	
+											
+                        var exportForm = document.getElementById('exportForm');
+                        exportForm.action = '../exportExcel.action';
+                        
+                        document.getElementById('titleField').value = title;
+                        document.getElementById('svgField').value = svg;  
+                        document.getElementById('widthField').value = 500;  
+                        document.getElementById('heightField').value = 500;  
+                        document.getElementById('includeLegendsField').value = includeLegend;  
+                        document.getElementById('includeValuesField').value = includeValues; 
+                        document.getElementById('periodField').value = period;  
+                        document.getElementById('indicatorField').value = indicator;   
+                        document.getElementById('legendsField').value = getLegendsJSON();
+                        document.getElementById('dataValuesField').value = EXPORTVALUES;
+
+                        exportForm.submit();
 					}
 					else {
 						Ext.messageRed.msg('Export map as Excel spreadsheet', 'Please render the thematic map first.');

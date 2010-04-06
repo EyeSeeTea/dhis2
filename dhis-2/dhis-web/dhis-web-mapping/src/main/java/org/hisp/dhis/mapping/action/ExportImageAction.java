@@ -26,24 +26,18 @@ package org.hisp.dhis.mapping.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.io.File;
 import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.mapping.export.SVGDocument;
 import org.hisp.dhis.mapping.export.SVGUtils;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.system.util.StreamUtils;
 import org.hisp.dhis.util.StreamActionSupport;
-
-import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
@@ -55,13 +49,6 @@ public class ExportImageAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private LocationManager locationManager;
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
 
     private PeriodService periodService;
 
@@ -84,9 +71,9 @@ public class ExportImageAction
         this.format = format;
     }
 
-    // -------------------------------------------
-    // Output & Input
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
+    // Output & input
+    // -------------------------------------------------------------------------
 
     private String svg;
 
@@ -143,29 +130,11 @@ public class ExportImageAction
     {
         this.height = height;
     }
-
-    private String outputFile;
-
-    public String getOutputFile()
-    {
-        return outputFile;
-    }
-    
-    /*
-    StreamUtils.writeContent( svgTemporary, svgDocument.getSVGForImage() );
-
-    File output = new File( temporaryDir, "svg_" + random + ".png" );
-
-    SVGUtils.convertSVG2PNG( svgTemporary, output, width, height );
-
-    outputFile = output.getAbsolutePath();
-    */
-    
+        
     @Override
     protected String execute( HttpServletResponse response, OutputStream out )
         throws Exception
-    {
-        
+    {        
         SVGUtils.convertToPNG( getSvg(), out, width, height );
         
         return SUCCESS;

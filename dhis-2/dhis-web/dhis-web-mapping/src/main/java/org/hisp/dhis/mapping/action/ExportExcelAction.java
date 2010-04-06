@@ -27,7 +27,9 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
+import java.io.OutputStream;
+
+import javax.servlet.http.HttpServletResponse;
 
 import jxl.Workbook;
 import jxl.format.Alignment;
@@ -44,21 +46,18 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
-import org.hisp.dhis.external.location.LocationManager;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.mapping.export.SVGDocument;
 import org.hisp.dhis.mapping.export.SVGUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.system.util.StreamUtils;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.util.StreamActionSupport;
 
 /**
  * @author Tran Thanh Tri
@@ -66,7 +65,7 @@ import com.opensymphony.xwork2.Action;
  */
 
 public class ExportExcelAction
-    implements Action
+    extends StreamActionSupport
 {
     // -------------------------------------------------------------------------
     // Map position in excel
@@ -91,13 +90,6 @@ public class ExportExcelAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private LocationManager locationManager;
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
 
     private OrganisationUnitService organisationUnitService;
 
@@ -211,16 +203,9 @@ public class ExportExcelAction
     // -------------------------------------------
     // Output
     // -------------------------------------------
-
-    private String outputFile;
-
-    public String getOutputFile()
-    {
-        return outputFile;
-    }
-
+    
     @Override
-    public String execute()
+    protected String execute( HttpServletResponse response, OutputStream out )
         throws Exception
     {
         Period p = periodService.getPeriod( period );
@@ -229,47 +214,38 @@ public class ExportExcelAction
 
         Indicator i = indicatorService.getIndicator( indicator );
 
-        /* TODO write map to file */
+        // ---------------------------------------------------------------------
+        // Write map image to byte array
+        // ---------------------------------------------------------------------
 
         SVGDocument svgDocument = new SVGDocument();
 
         svgDocument.setTitle( this.title );
-
         svgDocument.setSvg( this.svg );
-
         svgDocument.setPeriod( p );
-
-        svgDocument.setIndicator( i );
-        
-        svgDocument.setLegends( this.legends );
-        
+        svgDocument.setIndicator( i );        
+        svgDocument.setLegends( this.legends );        
         svgDocument.setIncludeLegends( this.includeLegends );        
 
-        int random = (int) (Math.random() * 1000);
+        ByteArrayOutputStream image = new ByteArrayOutputStream();
+        
+        SVGUtils.convertToPNG( svgDocument.getSVGForExcel(), image, width, height );
 
-        File temporaryDir = locationManager.getFileForWriting( MappingService.MAP_TEMPL_DIR );
+        // ---------------------------------------------------------------------
+        // Write workbook
+        // ---------------------------------------------------------------------
 
-        File svgTemporary = new File( temporaryDir, "svg_" + random + ".svg" );
-
-        StreamUtils.writeContent( svgTemporary, svgDocument.getSVGForExcel() );
-
-        File image = new File( temporaryDir, "svg_" + random + ".png" );
-
-        SVGUtils.convertSVG2PNG( svgTemporary, image, width, height );
-
-        /* TODO write excel to file */
-
-        File output = new File( temporaryDir, "excel_" + random + ".xls" );
-
-        WritableWorkbook outputReportWorkbook = Workbook.createWorkbook( output );
+        WritableWorkbook outputReportWorkbook = Workbook.createWorkbook( out );
 
         WritableSheet sheet = outputReportWorkbook.createSheet( i.getName(), 1 );
 
-        /* TODO add map to excel */
+        // ---------------------------------------------------------------------
+        // Write map image to workbook
+        // ---------------------------------------------------------------------
 
         sheet.mergeCells( mapPositionCol, mapPositionCRow, mapPositionCol + 6, mapPositionCRow + 25 );
 
-        WritableImage map = new WritableImage( mapPositionCol, mapPositionCRow, 7, 26, image );
+        WritableImage map = new WritableImage( mapPositionCol, mapPositionCRow, 7, 26, image.toByteArray() );
 
         sheet.addImage( map );
 
@@ -279,7 +255,9 @@ public class ExportExcelAction
 
         sheet.addCell( new Label( mapPositionCol, mapPositionCRow, "", map_format ) );
 
-        /* TODO add title */
+        // ---------------------------------------------------------------------
+        // Write title to workbook
+        // ---------------------------------------------------------------------
 
         WritableCellFormat header = new WritableCellFormat();
         header.setBackground( Colour.ICE_BLUE );
@@ -298,9 +276,11 @@ public class ExportExcelAction
         sheet.addCell( new Label( titlePositionCol + 2, titlePositionRow + 1, i.getName(), header ) );
         sheet.addCell( new Label( titlePositionCol, titlePositionRow + 2, i18n.getString( "period" ), header ) );
         sheet.addCell( new Label( titlePositionCol + 2, titlePositionRow + 2, p.getName(), header ) );
-                       
-        /* TODO write data values*/
-        
+
+        // ---------------------------------------------------------------------
+        // Write data values to workbook
+        // ---------------------------------------------------------------------
+
         if ( includeValues )
         {
             WritableCellFormat datavalueHeader = new WritableCellFormat();
@@ -346,8 +326,18 @@ public class ExportExcelAction
 
         outputReportWorkbook.close();
 
-        outputFile = output.getAbsolutePath();
-
         return SUCCESS;
+    }
+    
+    @Override
+    protected String getContentType()
+    {
+        return CONTENT_TYPE_EXCEL;
+    }
+
+    @Override
+    protected String getFilename()
+    {
+        return "dhis2-gis-workbook.xls";
     }
 }
