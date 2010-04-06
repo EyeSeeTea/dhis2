@@ -3469,10 +3469,7 @@ Ext.onReady( function() {
 	});
 	
 	var favoritesButton = new Ext.Button({
-		cls: 'x-btn-text-icon',
-		ctCls: 'aa_med',
-		icon: '../../images/favorite_star2.png',
-		text: 'Favorites',
+		iconCls: 'icon-favorite',
 		tooltip: 'Favorite map views',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
@@ -3548,10 +3545,7 @@ Ext.onReady( function() {
 	});
 
     var automaticMapLegendSetButton = new Ext.Button({
-		cls: 'x-btn-text-icon',
-		ctCls: 'aa_med',
-		icon: '../../images/color_swatch2.png',
-		text: 'Automatic',
+		iconCls: 'icon-automaticlegendset',
 		tooltip: 'Create legend sets for legend type "automatic"',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
@@ -3568,10 +3562,7 @@ Ext.onReady( function() {
 	});
 	
 	var predefinedMapLegendSetButton = new Ext.Button({
-		cls: 'x-btn-text-icon',
-		ctCls: 'aa_med',
-		icon: '../../images/color_swatch.png',
-		text: 'Predefined',
+		iconCls: 'icon-predefinedlegendset',
 		tooltip: 'Create legend sets for legend type "predefined"',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
@@ -3620,7 +3611,6 @@ Ext.onReady( function() {
 			' ',' ',' ',' ',' ',
 			zoomInButton,
 			zoomOutButton,
-            ' ',
 			zoomMaxExtentButton,
 			labelsButton,
 			'-',

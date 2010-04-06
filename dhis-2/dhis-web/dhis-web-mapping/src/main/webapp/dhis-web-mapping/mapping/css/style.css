@@ -10,9 +10,6 @@
 .x-btn-left {
 	background:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif) no-repeat scroll 0 0 transparent;
 }
-.x-btn-text-icon .x-btn-center .x-btn-text  {
-    padding:3px 0 2px 16px;
-}
 .x-toolbar .x-btn-over .x-btn-left{
 	background-image:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif);
 }
@@ -104,6 +101,15 @@
 }
 .x-btn .icon-pdf {
 	background-image:url(../../../images/pdf.png);
+}
+.x-btn .icon-favorite {
+	background-image:url(../../../images/favorite_star2.png);
+}
+.x-btn .icon-automaticlegendset {
+	background-image:url(../../../images/color_swatch2.png);
+}
+.x-btn .icon-predefinedlegendset {
+	background-image:url(../../../images/color_swatch.png);
 }
 .aa_dark button  {
 	color:#111;
