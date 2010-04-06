@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringReader;
 
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -73,5 +74,30 @@ public class SVGUtils
         // Flush and close the stream
         ostream.flush();
         ostream.close();
+    }
+    
+    public static void convertToPNG( StringBuffer buffer, OutputStream out, Integer width, Integer height )
+        throws TranscoderException, IOException
+    {
+        if ( width == null )
+        {
+            width = 500;
+        }
+        
+        if ( height == null )
+        {
+            height = 500;
+        }
+        
+        PNGTranscoder t = new PNGTranscoder();
+        
+        t.addTranscodingHint( PNGTranscoder.KEY_HEIGHT, new Float( height ) );
+        t.addTranscodingHint( PNGTranscoder.KEY_WIDTH, new Float( width ) );
+        
+        TranscoderInput input = new TranscoderInput( new StringReader( buffer.toString() ) );
+        
+        TranscoderOutput output = new TranscoderOutput( out );
+        
+        t.transcode( input, output );
     }
 }
