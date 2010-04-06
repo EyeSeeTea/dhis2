@@ -1,14 +1,17 @@
-﻿/* Ext */
+﻿/* Ext override */
 .ext-gecko .x-window-body .x-form-item {
 	overflow:hidden;
 }
 
-/* Ext theme gray-extend */
+/* Ext theme gray-extend override */
 .x-btn-right{
 	background:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif) no-repeat scroll 0 -21px transparent;
 }
 .x-btn-left {
 	background:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif) no-repeat scroll 0 0 transparent;
+}
+.x-btn-text-icon .x-btn-center .x-btn-text  {
+    padding:3px 0 2px 16px;
 }
 .x-toolbar .ytb-sep {
     background-image:url(../../resources/ext-ux/theme/gray-extend-ux/grid-split.png);
@@ -94,30 +97,21 @@
 	background-image:url(../../../images/pdf.png);
 }
 .aa_dark button  {
-	font-family:lucida sans unicode,arial;
-	font-weight:normal;
-	font-size:10px;
 	color:#111;
 }
 .aa_med button  {
-	font-family:lucida sans unicode,arial;
-	font-weight:normal;
-	font-size:10px;
 	color:#333;
 }
 .aa_light button  {
-	font-family:lucida sans unicode,arial;
-	font-weight:bold;
-	font-size:10px;
 	color:#888;
 }
 
 /* Ext Loading Mask */
 .x-mask-loading2 div  {
-	padding:2px 11px 3px 32px;
+	padding:5px 11px 6px 32px;
 	background:#fbfbfb url('../../../images/loader.gif') no-repeat 5px 2px;
 	line-height:20px;
-	font-weight:normal;
+	font:normal 10px lucida sans unicode;
 }
 
 /* Ext Window */
