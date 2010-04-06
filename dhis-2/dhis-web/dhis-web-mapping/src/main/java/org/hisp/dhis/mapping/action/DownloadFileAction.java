@@ -41,7 +41,6 @@ import com.opensymphony.xwork2.Action;
 public class DownloadFileAction
     implements Action
 {
-
     // -------------------------------------------
     // Output & Input
     // -------------------------------------------
