@@ -1344,8 +1344,10 @@ Ext.onReady( function() {
 				cls: 'window-button',
                 handler: function() {
                     var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
-                    var mlsv = Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue() != "0" ? Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue() : 1;
-                    var mlev = Ext.getCmp('predefinedmaplegendendvalue_tf').getValue() != "0" ? Ext.getCmp('predefinedmaplegendendvalue_tf').getValue() : 1;
+					var mlsv = Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue();
+					var mlev = Ext.getCmp('predefinedmaplegendendvalue_tf').getValue();
+                    // var mlsv = Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue() != "0" ? Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue() : 1;
+                    // var mlev = Ext.getCmp('predefinedmaplegendendvalue_tf').getValue() != "0" ? Ext.getCmp('predefinedmaplegendendvalue_tf').getValue() : 1;
                     var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
 					
 					if (!mln || mlsv == "" || mlev == "" || !mlc) {
@@ -3506,7 +3508,7 @@ Ext.onReady( function() {
 	
 	var exportExcelButton = new Ext.Button({
 		iconCls: 'icon-excel',
-		tooltip: 'Export map as Excel spreadsheet',
+		tooltip: 'Export map as Excel spreadsheet (XLS)',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;   
@@ -3524,7 +3526,7 @@ Ext.onReady( function() {
 	
 	var pdfButton = new Ext.Button({
 		iconCls: 'icon-pdf',
-		tooltip: 'Show/hide PDF printing panel',
+		tooltip: 'Export map as PDF',
 		handler: function() {
 			var active = ACTIVEPANEL;
 			var printMultiPagePanel = Ext.getCmp('printMultiPage_p');
@@ -3550,7 +3552,7 @@ Ext.onReady( function() {
 		ctCls: 'aa_med',
 		icon: '../../images/color_swatch2.png',
 		text: 'Automatic',
-		tooltip: 'Assign legend sets to indicators',
+		tooltip: 'Create legend sets for legend type "automatic"',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;    
@@ -3570,7 +3572,7 @@ Ext.onReady( function() {
 		ctCls: 'aa_med',
 		icon: '../../images/color_swatch.png',
 		text: 'Predefined',
-		tooltip: 'Assign legend sets to indicators',
+		tooltip: 'Create legend sets for legend type "predefined"',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;    
@@ -3590,7 +3592,7 @@ Ext.onReady( function() {
 		ctCls: 'aa_med',
 		icon: '../../images/help.png',
 		text: 'Help',
-		tooltip: 'Get help for the active panel',
+		tooltip: 'Get help with GIS',
 		handler: function() {
 			var c = Ext.getCmp('center').x;
 			var e = Ext.getCmp('east').x;

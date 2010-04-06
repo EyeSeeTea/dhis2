@@ -10,6 +10,16 @@
 .x-btn-left {
 	background:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif) no-repeat scroll 0 0 transparent;
 }
+.x-toolbar .ytb-sep {
+    background-image:url(../../resources/ext-ux/theme/gray-extend-ux/grid-split.png);
+    height:25px;
+}
+.x-panel-tbar .x-toolbar {
+    padding:0;
+}
+.x-toolbar {
+    padding:0;
+}
 
 /* OpenLayers (include in lib)
 .olControlOverviewMapElement {
