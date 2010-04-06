@@ -111,6 +111,9 @@
 .x-btn .icon-predefinedlegendset {
 	background-image:url(../../../images/color_swatch.png);
 }
+.x-btn .icon-help {
+	background-image:url(../../../images/help.png);
+}
 .aa_dark button  {
 	color:#111;
 }

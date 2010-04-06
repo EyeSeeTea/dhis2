@@ -3579,10 +3579,7 @@ Ext.onReady( function() {
 	});
 	
 	var helpButton = new Ext.Button({
-		cls: 'x-btn-text-icon',
-		ctCls: 'aa_med',
-		icon: '../../images/help.png',
-		text: 'Help',
+		iconCls: 'icon-help',
 		tooltip: 'Get help with GIS',
 		handler: function() {
 			var c = Ext.getCmp('center').x;
