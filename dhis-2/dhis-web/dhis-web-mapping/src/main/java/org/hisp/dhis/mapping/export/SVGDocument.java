@@ -76,7 +76,7 @@ public class SVGDocument
 
         svg_ = svg_.replaceFirst( "<svg", "<svg " + namespace );
 
-        svg_ = svg_.replaceFirst( "</svg>", title_ + indicator_ + period_ +  "</svg>" );
+        svg_ = svg_.replaceFirst( "</svg>", title_ + indicator_ + period_ + "</svg>" );
 
         if ( this.includeLegends )
         {
@@ -90,37 +90,39 @@ public class SVGDocument
     {
         String svg_ = doctype + this.svg;
 
-        svg_ = svg_.replaceFirst( "<svg", "<svg " + namespace );   
-        
+        svg_ = svg_.replaceFirst( "<svg", "<svg " + namespace );
+
         if ( this.includeLegends )
         {
             svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 10, 10 ) + "</svg>" );
         }
-        
+
         return new StringBuffer( svg_ );
     }
 
-    public String getLegendScriptForExcel()    
-    {        
+    public String getLegendScriptForExcel()
+    {
         JSONObject legend;
 
         JSONObject json = (JSONObject) JSONSerializer.toJSON( this.legends );
 
         JSONArray jsonLegends = json.getJSONArray( "legends" );
-        
+
         String result = doctype;
+        
         result += "<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' ";
+
         result += "xmlns:attrib='http://www.carto.net/attrib/' viewBox='0 0 1 " + jsonLegends.size() + "'>";
-        result += "<g id='legend'>";  
+        
+        result += "<g id='legend'>";
 
         int x = 0;
 
         int y = 0;
 
-        for ( int index = 0; index < jsonLegends.size(); index++ )
+        for ( int i = 0; i < jsonLegends.size(); i++ )
         {
-
-            legend = jsonLegends.getJSONObject( index );
+            legend = jsonLegends.getJSONObject( i );
 
             String label = legend.getString( "label" );
 
@@ -136,6 +138,7 @@ public class SVGDocument
         }
 
         result += "</g>";
+        
         result += "</svg>";
 
         return result;
@@ -149,11 +152,11 @@ public class SVGDocument
 
         JSONObject json = (JSONObject) JSONSerializer.toJSON( this.legends );
 
-        JSONArray jsonLegends = json.getJSONArray( "legends" );   
+        JSONArray jsonLegends = json.getJSONArray( "legends" );
 
-        for ( int index = 0; index < jsonLegends.size(); index++ )
+        for ( int i = 0; i < jsonLegends.size(); i++ )
         {
-            legend = jsonLegends.getJSONObject( index );
+            legend = jsonLegends.getJSONObject( i );
 
             String label = legend.getString( "label" );
 
