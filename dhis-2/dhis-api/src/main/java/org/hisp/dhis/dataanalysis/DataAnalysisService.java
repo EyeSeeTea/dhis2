@@ -42,6 +42,17 @@ public interface DataAnalysisService
 {
     String ID = DataAnalysisService.class.getName();
 
+    /**
+     * Returns a collection of DeflatedDataValues which violates the validation 
+     * criteria. The validation criteria is defined by the AnalysisService
+     * implementation.
+     *  
+     * @param organisationUnit the OrganisationUnit.
+     * @param dataElements the collection of DataElements.
+     * @param periods the collection of Periods.
+     * @param stdDevFactor the standard deviation factor.
+     * @return a collection of DeflatedDataValues.
+     */
     Collection<DeflatedDataValue> analyse( OrganisationUnit organisationUnit, Collection<DataElement> dataElements,
         Collection<Period> periods, Double stdDevFactor );
 }
