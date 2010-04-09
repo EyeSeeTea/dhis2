@@ -22,4 +22,4 @@ cd $DHIS2_DOCS
 mvn package
 echo "Building installer"
 cd $DHIS2_SRC/dhis2-live-installer
-mvn exec:exec
+mvn package

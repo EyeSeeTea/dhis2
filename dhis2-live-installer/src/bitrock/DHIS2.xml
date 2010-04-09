@@ -14,8 +14,16 @@
             <origin>${env(DHIS2_SRC)}/dhis-2/dhis-web/dhis-web-portal/target/dhis.war</origin>
         </copyFile>
         <copyFile>
+            <abortOnError>0</abortOnError>
+            <customErrorMessage>BIRT was not detected. Skipping. </customErrorMessage>
             <destination>${build_project_directory}/temp</destination>
             <origin>${env(BIRT_WAR)}/birt.war</origin>
+            <onErrorActionList>
+                <setInstallerVariable>
+                    <name>installbirt</name>
+                    <value>FALSE</value>
+                </setInstallerVariable>
+            </onErrorActionList>
         </copyFile>
         <copyFile>
             <destination>${build_project_directory}/temp/dhis2-live.jar</destination>
@@ -307,6 +315,14 @@
             <mustExist>0</mustExist>
             <width>40</width>
         </directoryParameter>
+        <booleanParameter>
+            <name>installbirt</name>
+            <description></description>
+            <explanation></explanation>
+            <value></value>
+            <default>TRUE</default>
+            <displayStyle>radiobuttons</displayStyle>
+        </booleanParameter>
     </parameterList>
     <platformOptionsList>
         <platformOptions>

@@ -2,7 +2,7 @@
     <shortName>DHIS2</shortName>
     <fullName>DHIS2</fullName>
     <version>2.0.4</version>
-   <installerFilename>${product_shortname}-${product_version}-${platform_name}-lite-installer.${platform_exec_suffix}</installerFilename> 
+   <installerFilename>${product_shortname}-${product_version}-${platform_name}-demo-installer.${platform_exec_suffix}</installerFilename> 
     <readmeFile>../../resources/files/Readme.txt</readmeFile>
     <licenseFile>../../resources/files/Licence.txt</licenseFile>
     <leftImage>../../resources/images/dhis2-logo-rotated.png</leftImage>
@@ -12,6 +12,18 @@
         <copyFile>
             <destination>${build_project_directory}/temp/</destination>
             <origin>${env(DHIS2_SRC)}/dhis-2/dhis-web/dhis-web-portal/target/dhis.war</origin>
+        </copyFile>
+        <copyFile>
+            <abortOnError>0</abortOnError>
+            <customErrorMessage>BIRT was not detected. Skipping. </customErrorMessage>
+            <destination>${build_project_directory}/temp</destination>
+            <origin>${env(BIRT_WAR)}/birt.war</origin>
+            <onErrorActionList>
+                <setInstallerVariable>
+                    <name>installbirt</name>
+                    <value>FALSE</value>
+                </setInstallerVariable>
+            </onErrorActionList>
         </copyFile>
         <copyFile>
             <destination>${build_project_directory}/temp/dhis2-live.jar</destination>
@@ -160,6 +172,75 @@
             </startMenuShortcutList>
         </component>
         <component>
+            <name>birt</name>
+            <description>Birt Reporting Framework</description>
+            <canBeEdited>1</canBeEdited>
+            <detailedDescription>The Birt Reporting Framework. Install this compoenent if you plan to use BIRT reports.</detailedDescription>
+            <selected>0</selected>
+            <show>1</show>
+            <folderList>
+                <folder>
+                    <description>birt</description>
+                    <destination>${installdir}/webapps/birt</destination>
+                    <name>birt</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>temp/birt.war</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+            </folderList>
+            <postInstallationActionList>
+                <unzip>
+                    <destinationDirectory>${installdir}/webapps/birt/</destinationDirectory>
+                    <explanation>Unpacking BIRT</explanation>
+                    <progressText>Unpacking BIRT</progressText>
+                    <zipFile>${installdir}/webapps/birt/birt.war</zipFile>
+                </unzip>
+                <deleteFile>
+                    <explanation>Cleaning up BIRT.</explanation>
+                    <path>${installdir}/webapps/birt/birt.war</path>
+                    <progressText>Cleaning up BIRT.</progressText>
+                </deleteFile>
+            </postInstallationActionList>
+        </component>
+        <component>
+            <name>demodb</name>
+            <description>Demo database</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>0</selected>
+            <show>1</show>
+            <folderList>
+                <folder>
+                    <description>demodb</description>
+                    <destination>${installdir}/database</destination>
+                    <name>demodb</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../resources/demodb/database.h2.db</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../resources/demodb/database.trace.db</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../resources/demodb/dhis2.12.log.db</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../resources/demodb/dhis2.data.db</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../resources/demodb/dhis2.index.db</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../resources/demodb/dhis2.trace.db</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+            </folderList>
+        </component>
+        <component>
             <name>dhis2core</name>
             <description>DHIS2 Core</description>
             <canBeEdited>0</canBeEdited>
@@ -234,6 +315,14 @@
             <mustExist>0</mustExist>
             <width>40</width>
         </directoryParameter>
+        <booleanParameter>
+            <name>installbirt</name>
+            <description></description>
+            <explanation></explanation>
+            <value></value>
+            <default>TRUE</default>
+            <displayStyle>radiobuttons</displayStyle>
+        </booleanParameter>
     </parameterList>
     <platformOptionsList>
         <platformOptions>
