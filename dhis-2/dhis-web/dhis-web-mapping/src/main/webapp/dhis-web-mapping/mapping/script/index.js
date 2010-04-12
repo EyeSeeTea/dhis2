@@ -111,7 +111,7 @@ function toggleFeatureLabels(classify) {
 			
 Ext.onReady( function() {
 	Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
-    
+/*    
     Ext.override(Ext.layout.FormLayout, {
         renderItem : function(c, position, target) {
             if (c && !c.rendered && c.isFormField && c.inputType != 'hidden') {
@@ -157,9 +157,7 @@ Ext.onReady( function() {
             if(this.inputValue !== undefined) {
                 this.el.dom.value = this.inputValue;
             }
-            /*this.el.addClass('x-hidden');*/
             this.innerWrap = this.el.wrap({
-                /*tabIndex: this.tabIndex,*/
                 cls: this.baseCls+'-wrap-inner'
             });
             
@@ -179,11 +177,7 @@ Ext.onReady( function() {
                     html: this.boxLabel
                 });
             }
-            /*this.imageEl = this.innerWrap.createChild({
-                tag: 'img',
-                src: Ext.BLANK_IMAGE_URL,
-                cls: this.baseCls
-            }, this.el);*/
+
             if(this.checked) {
                 this.setValue(true);
             }
@@ -194,24 +188,19 @@ Ext.onReady( function() {
         },
         afterRender: function() {
             Ext.form.Checkbox.superclass.afterRender.call(this);
-            /*this.wrap[this.checked ? 'addClass' : 'removeClass'](this.checkedCls);*/
             this.imageEl[this.checked ? 'addClass' : 'removeClass'](this.checkedCls);
         },
         initCheckEvents: function() {
-            /*this.innerWrap.removeAllListeners();*/
             this.innerWrap.addClassOnOver(this.overCls);
             this.innerWrap.addClassOnClick(this.mouseDownCls);
             this.innerWrap.on('click', this.onClick, this);
-            /*this.innerWrap.on('keyup', this.onKeyUp, this);*/
         },
         onFocus: function(e) {
             Ext.form.Checkbox.superclass.onFocus.call(this, e);
-            /*this.el.addClass(this.focusCls);*/
             this.innerWrap.addClass(this.focusCls);
         },
         onBlur: function(e) {
             Ext.form.Checkbox.superclass.onBlur.call(this, e);
-            /*this.el.removeClass(this.focusCls);*/
             this.innerWrap.removeClass(this.focusCls);
         },
         onClick: function(e) {
@@ -223,7 +212,6 @@ Ext.onReady( function() {
                     this.toggleValue();
                 }
             }
-            /*e.stopEvent();*/
         },
         onEnable: Ext.form.Checkbox.superclass.onEnable,
         onDisable: Ext.form.Checkbox.superclass.onDisable,
@@ -234,7 +222,6 @@ Ext.onReady( function() {
             if (this.rendered) {
                 this.el.dom.checked = this.checked;
                 this.el.dom.defaultChecked = this.checked;
-                /*this.wrap[this.checked ? 'addClass' : 'removeClass'](this.checkedCls);*/
                 this.imageEl[this.checked ? 'addClass' : 'removeClass'](this.checkedCls);
             }
             if (checked != this.checked) {
@@ -245,10 +232,6 @@ Ext.onReady( function() {
             }
         },
         getResizeEl: function() {
-            /*if(!this.resizeEl){
-                this.resizeEl = Ext.isSafari ? this.wrap : (this.wrap.up('.x-form-element', 5) || this.wrap);
-            }
-            return this.resizeEl;*/
             return this.wrap;
         }
     });
@@ -256,7 +239,7 @@ Ext.onReady( function() {
     Ext.override(Ext.form.Radio, {
         checkedCls: 'x-form-radio-checked'
     });
-    
+*/    
 //    document.body.oncontextmenu = function() { return false; };
 	
 	Ext.QuickTips.init();
@@ -3384,7 +3367,7 @@ Ext.onReady( function() {
         url: 'init',
         featureSelection: false,
         legendDiv: 'choroplethLegend',
-        defaults: {width: 130},
+        // defaults: {width: 130},
         listeners: {
             expand: {
                 fn: function() {
@@ -3602,7 +3585,6 @@ Ext.onReady( function() {
 			'-',
 			exportImageButton,
 			exportExcelButton,
-			pdfButton,
 			'-',
 			favoritesButton,
 			'-',
@@ -3611,7 +3593,8 @@ Ext.onReady( function() {
 			'-',
 			helpButton,
 			'->',
-			exitButton
+			exitButton,
+			' '
 		]
 	});
     
@@ -3633,6 +3616,7 @@ Ext.onReady( function() {
                 region: 'east',
                 id: 'east',
                 collapsible: true,
+				header: false,
                 width: 200,
                 margins: '0 5 0 5',
                 defaults: {
@@ -3683,7 +3667,7 @@ Ext.onReady( function() {
                 region: 'west',
                 id: 'west',
                 split: true,
-				title: '',
+				header: false,
                 collapsible: true,
 				collapseMode: 'mini',
                 width: west_width,
@@ -3769,8 +3753,8 @@ Ext.onReady( function() {
 	MAP.addControl(new OpenLayers.Control.MousePosition({
         displayClass: 'void', 
         div: $('mouseposition'), 
-        prefix: '<span color="#666">x: &nbsp;</span>',
-        separator: '<br/><span color="#666">y: &nbsp;</span>'
+        prefix: '<span style="color:#666;">x: &nbsp;</span>',
+        separator: '<br/><span style="color:#666;">y: &nbsp;</span>'
     }));
 
     MAP.addControl(new OpenLayers.Control.OverviewMap({

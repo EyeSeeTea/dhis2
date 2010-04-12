@@ -2,32 +2,42 @@
 .ext-gecko .x-window-body .x-form-item {
 	overflow:hidden;
 }
+#ext-gen60 {
+	border-top:1px solid #d0d0d0;
+}
+.x-panel-body-noheader, .x-panel-mc .x-panel-body {
+	border-top:0px none;
+}
+.x-panel-body {
+	border:0px;
+}
+.x-form-field {
+	font:10px lucida sans unicode,arial,tahoma,helvetica,sans-serif;
+}
+.x-combo-list {
+	font:10px lucida sans unicode,arial,tahoma,helvetica,sans-serif;
+}
+.x-tree-node {
+	font:10px lucida sans unicode,arial,tahoma,helvetica,sans-serif;
+}
+.x-panel-mc {
+	font:10px lucida sans unicode,arial,tahoma,helvetica,sans-serif;
+}
+.x-tree-node a span, .x-dd-drag-ghost a span {
+	padding:1px 3px 1px 4px;
+}
+.x-tree .x-panel-body {
+	background-color:#F8F8F8;
+}
 
-/* Ext theme gray-extend override */
-.x-btn-right{
-	background:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif) no-repeat scroll 0 -21px transparent;
-}
-.x-btn-left {
-	background:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif) no-repeat scroll 0 0 transparent;
-}
-.x-toolbar .x-btn-over .x-btn-left{
-	background-image:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif);
-}
-.x-toolbar .x-btn-over .x-btn-right{
-	background-image:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif);
-}
-.x-toolbar .x-btn-over .x-btn-center{
-	background-image:url(../../resources/ext-ux/theme/gray-extend-ux/btn-sprite.gif);
-}
-.x-toolbar .ytb-sep {
+
+
+.x-toolbar .xtb-sep {
     background-image:url(../../resources/ext-ux/theme/gray-extend-ux/grid-split.png);
     height:25px;
 }
 .x-panel-tbar .x-toolbar {
     padding:0;
-}
-.x-btn-icon .x-btn-center .x-btn-text {
-	height:17px;
 }
 
 /* OpenLayers (include in lib)
