@@ -14,6 +14,17 @@ var LABELS;
 var COLORINTERPOLATION;
 var EXPORTVALUES;
 
+Ext.override(Ext.form.Field, {
+    showField : function(){
+		this.show();
+		this.container.up('div.x-form-item').setDisplayed( true );
+    },
+    hideField : function(){
+    	this.hide();
+    	this.container.up('div.x-form-item').setDisplayed( false );
+    }
+});
+
 function getUrlParam(strParamName) {
     var output = '';
     var strHref = window.location.href;
@@ -235,11 +246,11 @@ Ext.onReady( function() {
             return this.wrap;
         }
     });
-    
+*/      
     Ext.override(Ext.form.Radio, {
         checkedCls: 'x-form-radio-checked'
     });
-*/    
+  
 //    document.body.oncontextmenu = function() { return false; };
 	
 	Ext.QuickTips.init();
@@ -3367,7 +3378,7 @@ Ext.onReady( function() {
         url: 'init',
         featureSelection: false,
         legendDiv: 'choroplethLegend',
-        // defaults: {width: 130},
+        defaults: {width: 130},
         listeners: {
             expand: {
                 fn: function() {
@@ -3378,7 +3389,7 @@ Ext.onReady( function() {
             }
         }
     });
-    
+	
     mapping = new mapfish.widgets.geostat.Mapping({
         id: 'mapping',
         map: MAP,
@@ -3779,6 +3790,9 @@ Ext.onReady( function() {
             }
         }
     });
+	
+	Ext.getCmp('maplegendset_cb').hideField();
+	Ext.getCmp('bounds').hideField();
 	
     Ext.get('loading').fadeOut({remove: true});
 	
