@@ -1,4 +1,4 @@
-﻿/* Ext override */
+﻿/* Gray-extend theme overrides */
 .ext-gecko .x-window-body .x-form-item {
 	overflow:hidden;
 }
@@ -29,9 +29,13 @@
 .x-tree .x-panel-body {
 	background-color:#F8F8F8;
 }
-
-
-
+.x-btn-tl, .x-btn-tr, .x-btn-tc, .x-btn-ml, .x-btn-mr, .x-btn-mc, .x-btn-bl, .x-btn-br, .x-btn-bc {
+	background-image:url(../../resources/ext-ux/theme/gray-extend-ux/btn.gif);
+}
+.ext-gecko .x-btn button, .ext-webkit .x-btn button {
+	padding-left:7px;
+	padding-right:7px;
+}
 .x-toolbar .xtb-sep {
     background-image:url(../../resources/ext-ux/theme/gray-extend-ux/grid-split.png);
     height:25px;
