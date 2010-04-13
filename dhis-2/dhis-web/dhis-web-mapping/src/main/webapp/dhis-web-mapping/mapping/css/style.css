@@ -43,6 +43,15 @@
 .x-panel-tbar .x-toolbar {
     padding:0;
 }
+.ux-mselect-item {
+	font:10px lucida sans unicode,tahoma,arial,helvetica,sans-serif;
+	padding:1px;
+}
+.x-box-mc {
+	font-family:myriad pro,myriad web,arial,tahoma,helvetica;
+	font-weight:normal;
+}
+
 
 /* OpenLayers (include in lib)
 .olControlOverviewMapElement {
@@ -230,7 +239,7 @@
 /* Msg */
 .x-msg-hl {
 	font-weight:bold;
-	color:#666;
+	color:#555;
 }
 
 /* DHIS Help */
