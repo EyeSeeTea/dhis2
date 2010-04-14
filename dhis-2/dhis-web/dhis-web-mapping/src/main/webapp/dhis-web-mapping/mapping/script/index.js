@@ -329,7 +329,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: viewStore
     });
     
@@ -347,7 +347,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: viewStore
     });
     
@@ -817,7 +817,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
         triggerAction: 'all',
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: new Ext.data.SimpleStore({
             fields: ['value', 'text'],
             data: [[2, 'Distributed values'], [1, 'Equal intervals']]
@@ -836,7 +836,7 @@ Ext.onReady( function() {
         triggerAction: 'all',
 		value: 5,
         width: combo_number_width,
-        minListWidth: combo_number_list_width,
+        minListWidth: combo_number_width,
         store: new Ext.data.SimpleStore({
             fields: ['value'],
             data: [[1], [2], [3], [4], [5], [6], [7], [8]]
@@ -849,7 +849,7 @@ Ext.onReady( function() {
 		hideLabel: true,
         allowBlank: false,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         value: "#FFFF00"
     });
     
@@ -859,7 +859,7 @@ Ext.onReady( function() {
 		hideLabel: true,
         allowBlank: false,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         value: "#FF0000"
     });
         
@@ -887,7 +887,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: automaticMapLegendSetStore,
 		listeners:{
 			'select': {
@@ -954,7 +954,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: automaticMapLegendSetStore
     });
 	
@@ -1228,7 +1228,7 @@ Ext.onReady( function() {
 		hideLabel: true,
 		emptyText: emptytext,
 		width: combo_number_width,
-		minListWidth: combo_number_list_width
+		minListWidth: combo_number_width
 	});
 	
 	var predefinedMapLegendEndValueTextField = new Ext.form.TextField({
@@ -1237,7 +1237,7 @@ Ext.onReady( function() {
 		hideLabel: true,
 		emptyText: emptytext,
 		width: combo_number_width,
-		minListWidth: combo_number_list_width
+		minListWidth: combo_number_width
 	});
 	
     var predefinedMapLegendColorColorPalette = new Ext.ux.ColorField({
@@ -1246,7 +1246,7 @@ Ext.onReady( function() {
 		hideLabel: true,
 		allowBlank: false,
 		width: combo_width,
-		minListWidth: combo_list_width,
+		minListWidth: combo_width,
 		value: "#FFFF00"
 	});
 	
@@ -1264,7 +1264,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: predefinedMapLegendStore
     });
 	
@@ -1302,7 +1302,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: predefinedMapLegendSetStore
     });
 	
@@ -1826,7 +1826,7 @@ Ext.onReady( function() {
 		emptyText: emptytext,
 		hideLabel: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         triggerAction: 'all',
         mode: 'remote',
         store: geojsonStore,
@@ -1966,7 +1966,7 @@ Ext.onReady( function() {
 		emptyText: emptytext,
 		hideLabel: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         triggerAction: 'all',
         mode: 'local',
         value: 'Polygon',
@@ -1984,7 +1984,7 @@ Ext.onReady( function() {
 		emptyText: emptytext,
 		hideLabel: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         triggerAction: 'all',
         mode: 'local',
         store: nameColumnStore,
@@ -2034,7 +2034,7 @@ Ext.onReady( function() {
 		emptyText: emptytext,
 		hideLabel: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         triggerAction: 'all',
         mode: 'local',
         store: nameColumnStore
@@ -2048,7 +2048,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
 		hideLabel: true,
         width: combo_number_width,
-		minListWidth: combo_number_list_width,
+		minListWidth: combo_number_width,
 		triggerAction: 'all',
 		value: BASECOORDINATE.longitude,
 		mode: 'remote',
@@ -2063,7 +2063,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
 		hideLabel: true,
         width: combo_number_width,
-		minListWidth: combo_number_list_width,
+		minListWidth: combo_number_width,
 		triggerAction: 'all',
 		mode: 'remote',
 		store: baseCoordinateStore
@@ -2078,7 +2078,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
 		hideLabel: true,
         width: combo_number_width,
-		minListWidth: combo_number_list_width,
+		minListWidth: combo_number_width,
 		triggerAction: 'all',
 		value: BASECOORDINATE.latitude,
 		mode: 'remote',
@@ -2093,7 +2093,7 @@ Ext.onReady( function() {
         emptyText: emptytext,
 		hideLabel: true,
         width: combo_number_width,
-		minListWidth: combo_number_list_width,
+		minListWidth: combo_number_width,
 		triggerAction: 'all',
 		mode: 'remote',
 		store: baseCoordinateStore
@@ -2106,7 +2106,7 @@ Ext.onReady( function() {
         valueField: 'value',
 		hideLabel: true,
         width: combo_number_width,
-        minListWidth: combo_number_list_width,
+        minListWidth: combo_number_width,
         triggerAction: 'all',
         mode: 'local',
         value: 7,
@@ -2359,7 +2359,7 @@ Ext.onReady( function() {
         triggerAction: 'all',
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: organisationUnitLevelStore,
         listeners: {
             'select': {
@@ -2386,7 +2386,7 @@ Ext.onReady( function() {
         triggerAction: 'all',
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: existingMapsStore,
         listeners: {
             'select': {
@@ -2489,7 +2489,7 @@ Ext.onReady( function() {
         triggerAction: 'all',
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: existingMapsStore
     });
     
@@ -2651,7 +2651,7 @@ Ext.onReady( function() {
 		emptyText: emptytext,
 		hideLabel: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         triggerAction: 'all',
         mode: 'remote',
         store: geojsonStore
@@ -2764,7 +2764,7 @@ Ext.onReady( function() {
         mode: 'local',
         triggerAction: 'all',
         width: combo_number_width,
-        minListWidth: combo_number_list_width,
+        minListWidth: combo_number_width,
         value: 0.5,
         store: new Ext.data.SimpleStore({
             fields: ['value'],
@@ -2789,7 +2789,7 @@ Ext.onReady( function() {
         mode: 'local',
         triggerAction: 'all',
         width: combo_number_width,
-        minListWidth: combo_number_list_width,
+        minListWidth: combo_number_width,
         value: 2,
         store: new Ext.data.SimpleStore({
             fields: ['value'],
@@ -2818,7 +2818,7 @@ Ext.onReady( function() {
 		hideLabel: true,
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: mapLayerStore
     });
     
@@ -3187,7 +3187,7 @@ Ext.onReady( function() {
 						isFormField: true,
 						emptyText: emptytext,
 						width: combo_number_width,
-						minListWidth: combo_number_list_width,
+						minListWidth: combo_number_width,
 						triggerAction: 'all',
 						value: BASECOORDINATE.longitude,
 						mode: 'remote',
@@ -3203,7 +3203,7 @@ Ext.onReady( function() {
 						isFormField: true,
 						emptyText: emptytext,
 						width: combo_number_width,
-						minListWidth: combo_number_list_width,
+						minListWidth: combo_number_width,
 						triggerAction: 'all',
 						value: BASECOORDINATE.latitude,
 						mode: 'remote',
@@ -3604,8 +3604,7 @@ Ext.onReady( function() {
 			'-',
 			helpButton,
 			'->',
-			exitButton,
-			' '
+			exitButton
 		]
 	});
     

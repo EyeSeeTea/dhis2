@@ -235,7 +235,9 @@
 	font:normal 11px lucida sans unicode,arial;
 	color:#333;
 }
-
+.x-btn-text-icon .x-btn-icon-small-left .x-btn-text {
+	padding-left:20px;
+}
 
 /* Msg */
 .x-msg-hl {
