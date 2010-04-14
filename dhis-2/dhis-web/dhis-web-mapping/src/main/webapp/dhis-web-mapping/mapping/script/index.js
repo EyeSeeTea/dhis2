@@ -768,7 +768,7 @@ Ext.onReady( function() {
         closeAction: 'hide',
 		defaults: {layout: 'fit', bodyStyle: 'padding:8px; border:0px'},
 		width: 250,
-		height: 155,
+		height: 157,
         items: [
 		   {
                 xtype: 'panel',
@@ -786,7 +786,7 @@ Ext.onReady( function() {
         closeAction: 'hide',
 		defaults: {layout: 'fit', bodyStyle: 'padding:8px; border:0px'},
 		width: 252,
-		height: 155,
+		height: 157,
         items: [
 		   {
                 xtype: 'panel',
@@ -1782,7 +1782,7 @@ Ext.onReady( function() {
         triggerAction: 'all',
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: organisationUnitStore
     });
     
@@ -1799,7 +1799,7 @@ Ext.onReady( function() {
         triggerAction: 'all',
         selectOnFocus: true,
         width: combo_width,
-        minListWidth: combo_list_width,
+        minListWidth: combo_width,
         store: organisationUnitLevelStore
     });
 
