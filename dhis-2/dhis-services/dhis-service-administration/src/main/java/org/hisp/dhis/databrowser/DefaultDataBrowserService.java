@@ -31,23 +31,33 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.period.CalendarPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
+import org.hisp.dhis.system.util.DateUtils;
 
 /**
  * @author joakibj, briane, eivinhb, jetonm
  * @version $Id$
  */
-public class DefaultDataBrowserService 
+public class DefaultDataBrowserService
     implements DataBrowserService
 {
     private static final String STARTDATE = "1900-01-01";
+
     private static final String ENDDATE = "3000-01-01";
+
+    private static final String SPACE = " ";
+
+    private static final String DASH = " - ";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -105,8 +115,8 @@ public class DefaultDataBrowserService
         List<Integer> betweenPeriodIds = getAllPeriodIdsBetweenDatesOnPeriodType( startDate, endDate, periodType );
 
         return dataBrowserStore.getOrgUnitGroupsBetweenPeriods( betweenPeriodIds );
-    }    
-    
+    }
+
     public DataBrowserTable getOrgUnitsInPeriod( Integer orgUnitParent, String startDate, String endDate,
         PeriodType periodType )
     {
@@ -122,7 +132,9 @@ public class DefaultDataBrowserService
 
         Integer numResults = dataBrowserStore.setCountOrgUnitsBetweenPeriods( table, orgUnitParent, betweenPeriodIds );
         if ( numResults == 0 )
+        {
             table.addZeroColumn();
+        }
 
         return table;
     }
@@ -208,6 +220,54 @@ public class DefaultDataBrowserService
         return table;
     }
 
+    public String convertDate( PeriodType periodType, String dateString, I18nFormat format )
+    {
+        if ( !DateUtils.dateIsValid( dateString ) )
+        {
+            return dateString;
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat( DateUtils.DEFAULT_DATE_FORMAT );
+
+        try
+        {
+            Date date = dateFormat.parse( dateString );
+            CalendarPeriodType calendarPeriodType = (CalendarPeriodType) periodType;
+
+            return format.formatPeriod( calendarPeriodType.createPeriod( date ) );
+        }
+        catch ( ParseException pe )
+        {
+            throw new RuntimeException( "Date string could not be parsed: " + dateString );
+        }
+    }
+
+    public String getFromToDateFormat( PeriodType periodType, String fromDate, String toDate, I18nFormat format )
+    {
+        String stringFormatDate = "";
+        List<Period> periods = new ArrayList<Period>( this.getPeriodsList( periodType, fromDate, toDate ) );
+
+        for ( Period period : periods )
+        {
+            String sTemp = format.formatPeriod( period );
+
+            if ( stringFormatDate.isEmpty() )
+            {
+                stringFormatDate = SPACE + sTemp;
+            }
+            else if ( !stringFormatDate.contains( sTemp ) )
+            {
+                stringFormatDate += DASH + sTemp;
+            }
+        }
+
+        return stringFormatDate;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
     /**
      * Helper-method that finds all PeriodIds between a given period. Uses
      * functionality already in the DHIS. Returns a list with all id's that was
@@ -221,7 +281,7 @@ public class DefaultDataBrowserService
     private List<Integer> getAllPeriodIdsBetweenDatesOnPeriodType( String startDate, String endDate,
         PeriodType periodType )
     {
-        String formatString = "yyyy-MM-dd";
+        String formatString = DateUtils.DEFAULT_DATE_FORMAT;
         SimpleDateFormat sdf = new SimpleDateFormat( formatString );
         Date date1 = new Date();
         Date date2 = new Date();
@@ -250,7 +310,50 @@ public class DefaultDataBrowserService
         {
             betweenPeriodIds.add( -1 );
         }
-        
+
         return betweenPeriodIds;
     }
+
+    /**
+     * This is a helper method for checking if the fromDate is later than the
+     * toDate. This is necessary in case a user sends the dates with HTTP GET.
+     * 
+     * @param fromDate
+     * @param toDate
+     * @return List of Periods
+     */
+    private List<Period> getPeriodsList( PeriodType periodType, String fromDate, String toDate )
+    {
+        String formatString = DateUtils.DEFAULT_DATE_FORMAT;
+        SimpleDateFormat sdf = new SimpleDateFormat( formatString );
+
+        Date date1 = new Date();
+        Date date2 = new Date();
+
+        try
+        {
+            date1 = sdf.parse( fromDate );
+            date2 = sdf.parse( toDate );
+
+            List<Period> periods = new ArrayList<Period>( periodService.getPeriodsBetweenDates( periodType, date1,
+                date2 ) );
+
+            if ( periods.isEmpty() )
+            {
+                CalendarPeriodType calendarPeriodType = (CalendarPeriodType) periodType;
+
+                periods.add( calendarPeriodType.createPeriod( date1 ) );
+                periods.add( calendarPeriodType.createPeriod( date2 ) );
+            }
+
+            Collections.sort( periods, new AscendingPeriodComparator() );
+
+            return periods;
+        }
+        catch ( ParseException e )
+        {
+            return null; // The user hasn't specified any dates
+        }
+    }
+
 }

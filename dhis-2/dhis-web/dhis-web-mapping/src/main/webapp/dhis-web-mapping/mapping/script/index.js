@@ -14,17 +14,6 @@ var LABELS;
 var COLORINTERPOLATION;
 var EXPORTVALUES;
 
-Ext.override(Ext.form.Field, {
-    showField : function(){
-		this.show();
-		this.container.up('div.x-form-item').setDisplayed( true );
-    },
-    hideField : function(){
-    	this.hide();
-    	this.container.up('div.x-form-item').setDisplayed( false );
-    }
-});
-
 function getUrlParam(strParamName) {
     var output = '';
     var strHref = window.location.href;
@@ -56,7 +45,7 @@ function getMultiSelectHeight() {
         return 310;
     }
     else if (h <= 1200) {
-        return 470;
+        return 460;
     }
     else {
         return 900;
@@ -126,6 +115,17 @@ Ext.onReady( function() {
     document.body.oncontextmenu = function() { return false; };
 	
 	Ext.QuickTips.init();
+	
+	Ext.override(Ext.form.Field, {
+        showField : function(){
+            this.show();
+            this.container.up('div.x-form-item').setDisplayed( true );
+        },
+        hideField : function(){
+            this.hide();
+            this.container.up('div.x-form-item').setDisplayed( false );
+        }
+    });
     
     MAP = new OpenLayers.Map({
 		controls: [
@@ -1029,7 +1029,7 @@ Ext.onReady( function() {
 							w.setHeight(298);
 						}
 						else if (tab.id == 'automaticmaplegendset1') {
-							w.setHeight(getMultiSelectHeight() + 180);
+							w.setHeight(getMultiSelectHeight() + 163);
 						}
 						else if (tab.id == 'automaticmaplegendset2') {
 							w.setHeight(151);
@@ -1157,6 +1157,7 @@ Ext.onReady( function() {
         displayField: 'displayString',
         width: multiselect_width,
         height: getMultiSelectHeight(),
+        style: 'padding:0px; margin-bottom:2px;',
         store: predefinedMapLegendStore
     });
 	

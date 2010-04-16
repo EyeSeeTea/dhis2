@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2007, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@ public abstract class GenerateReportSupport
 
     protected static final short CELLSTYLE_BORDER = CellStyle.BORDER_THIN;
 
-    protected static final short CELLSTYLE_BORDER_COLOR = IndexedColors.LIGHT_ORANGE.getIndex();
+    protected static final short CELLSTYLE_BORDER_COLOR = IndexedColors.DARK_BLUE.getIndex();
 
     private static final String NULL_REPLACEMENT = "0";
 

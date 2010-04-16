@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseentry.screen;
 
 /*
- * Copyright (c) 2004-2007, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -986,9 +986,9 @@ public class DefaultDataEntryScreenManager
                 // -------------------------------------------------------------
                 if( patientDataValue != null )
                 {
-                    System.out.println("optioncomboId: "+patientDataValue.getOptionCombo().getId() + " ===name: "+ patientDataValue.getOptionCombo().getName());
+//                    System.out.println("optioncomboId: "+patientDataValue.getOptionCombo().getId() + " ===name: "+ patientDataValue.getOptionCombo().getName());
                     appendCode = appendCode.replace( "id=\"combo["+patientDataValue.getOptionCombo().getId()+"].combo\"", "id=\"combo["+patientDataValue.getOptionCombo().getId()+"].combo\" selected=\"selected\"");
-                    System.out.println("appendCode: "+appendCode);
+//                    System.out.println("appendCode: "+appendCode);
                 }
 
                 appendCode += "</select>";

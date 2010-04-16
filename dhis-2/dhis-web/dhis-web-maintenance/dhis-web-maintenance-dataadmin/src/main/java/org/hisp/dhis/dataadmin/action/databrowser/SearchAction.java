@@ -27,11 +27,8 @@ package org.hisp.dhis.dataadmin.action.databrowser;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -48,8 +45,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.period.CalendarPeriodType;
-import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
@@ -62,6 +58,8 @@ import edu.emory.mathcs.backport.java.util.Collections;
 /**
  * @author espenjac, joakibj, briane, eivinhb
  * @version $Id$
+ * @modifier Dang Duy Hieu
+ * @since 2010-04-06
  */
 public class SearchAction
     implements Action
@@ -77,8 +75,6 @@ public class SearchAction
     private static final String KEY_DATABROWSERPERIODTYPE = "dataBrowserPeriodType";
 
     private static final String KEY_DATABROWSERTABLE = "dataBrowserTableResults";
-
-    private static final String HYPHEN = " - ";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -410,7 +406,7 @@ public class SearchAction
         // date
         if ( fromDate.length() == 0 && toDate.length() == 0 )
         {
-            if ( checkDates( fromDate, toDate ) )
+            if ( DateUtils.checkDates( fromDate, toDate ) )
             {
                 return ERROR;
             }
@@ -462,7 +458,6 @@ public class SearchAction
             }
             else
             {
-
                 dataBrowserTable = dataBrowserService.getDataElementGroupsInPeriod( fromDate, toDate, periodType );
             }
         }
@@ -503,8 +498,9 @@ public class SearchAction
         // Set DataBrowserTable variable for PDF export
         setExportPDFVariables();
 
-        // Get format standard for periods which appropriate with from date, to date and period type
-        fromToDate = getFromToDateFormat( periodType, fromDate, toDate );
+        // Get format standard for periods which appropriate with from date, to
+        // date and period type
+        fromToDate = dataBrowserService.getFromToDateFormat( periodType, fromDate, toDate, format );
 
         if ( fromToDate == null )
         {
@@ -517,42 +513,6 @@ public class SearchAction
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    /**
-     * This is a helper method for checking if the fromDate is later than the
-     * toDate. This is necessary in case a user sends the dates with HTTP GET.
-     * 
-     * @param fromDate
-     * @param toDate
-     * @return boolean
-     */
-    private boolean checkDates( String fromDate, String toDate )
-    {
-        String formatString = "yyyy-MM-dd";
-        SimpleDateFormat sdf = new SimpleDateFormat( formatString );
-
-        Date date1 = new Date();
-        Date date2 = new Date();
-
-        try
-        {
-            date1 = sdf.parse( fromDate );
-            date2 = sdf.parse( toDate );
-        }
-        catch ( ParseException e )
-        {
-            return false; // The user hasn't specified any dates
-        }
-
-        if ( !date1.before( date2 ) )
-        {
-            return true; // Return true if date2 is earlier than date1
-        }
-        else
-        {
-            return false;
-        }
-    }
 
     /**
      * This is a helper method for setting session variables for PDF export
@@ -574,69 +534,11 @@ public class SearchAction
     private void convertColumnNames( DataBrowserTable dataBrowserTable )
     {
         allColumnsConverted = dataBrowserTable.getColumns();
+        PeriodType monthlyPeriodType = periodService.getPeriodTypeByName( MonthlyPeriodType.NAME );
 
         for ( MetaValue col : allColumnsConverted )
         {
-            col.setName( DateUtils.convertDate( col.getName() ) );
+            col.setName( dataBrowserService.convertDate( monthlyPeriodType, col.getName(), format ) );
         }
-    }
-
-    /**
-     * This is a helper method for checking if the fromDate is later than the
-     * toDate. This is necessary in case a user sends the dates with HTTP GET.
-     * 
-     * @param fromDate
-     * @param toDate
-     * @return List of Periods
-     */
-    private List<Period> getPeriodsList( PeriodType periodType, String fromDate, String toDate )
-    {
-        String formatString = "yyyy-MM-dd";
-        SimpleDateFormat sdf = new SimpleDateFormat( formatString );
-
-        Date date1 = new Date();
-        Date date2 = new Date();
-
-        try
-        {
-            date1 = sdf.parse( fromDate );
-            date2 = sdf.parse( toDate );
-
-            List<Period> periods = new ArrayList<Period>( periodService.getPeriodsBetweenDates( periodType, date1,
-                date2 ) );
-
-            if ( periods.isEmpty() )
-            {
-                CalendarPeriodType calendarPeriodType = (CalendarPeriodType) periodType;
-
-                periods.add( calendarPeriodType.createPeriod( date1 ) );
-                periods.add( calendarPeriodType.createPeriod( date2 ) );
-            }
-
-            return periods;
-        }
-        catch ( ParseException e )
-        {
-            return null; // The user hasn't specified any dates
-        }
-    }
-
-    @SuppressWarnings( "unchecked" )
-    private String getFromToDateFormat( PeriodType periodType, String fromDate, String toDate )
-    {
-        String stringFormatDate = "";
-        List<Period> periods = new ArrayList( this.getPeriodsList( periodType, fromDate, toDate ) );
-
-        for ( Period period : periods )
-        {
-            String sTemp = format.formatPeriod( period );
-            
-            if ( !stringFormatDate.contains( sTemp ) )
-            {
-                stringFormatDate += HYPHEN + sTemp;
-            }
-        }
-
-        return stringFormatDate;
     }
 }

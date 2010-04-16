@@ -1,7 +1,7 @@
 package org.hisp.dhis.de.action;
 
 /*
- * Copyright (c) 2004-2007, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,10 +162,10 @@ public class ValidationAction
         // Min-max and outlier analysis
         // ---------------------------------------------------------------------
 
-        Collection<DeflatedDataValue> stdDevs = (Collection<DeflatedDataValue>)stdDevOutlierAnalysisService.
+        Collection<DeflatedDataValue> stdDevs = stdDevOutlierAnalysisService.
             analyse( orgUnit, dataSet.getDataElements(), ListUtils.getCollection( period ), STD_DEV );
 
-        Collection<DeflatedDataValue> minMaxs = (Collection<DeflatedDataValue>)minMaxOutlierAnalysisService.
+        Collection<DeflatedDataValue> minMaxs = minMaxOutlierAnalysisService.
             analyse( orgUnit, dataSet.getDataElements(), ListUtils.getCollection( period ), null );
         
         dataValues = CollectionUtils.union( stdDevs, minMaxs );
