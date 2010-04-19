@@ -905,7 +905,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         if (this.newUrl) {
             URL = this.newUrl;
-            this.newUrl = false;
 				
             if (MAPSOURCE == map_source_type_database) {
                 if (URL == FACILITY_LEVEL) {
@@ -935,7 +934,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		MASK.msg = 'Loading data...';
         MASK.show();
 
-        loadMapData(thematicMap, position);
+		if (!this.newUrl) {
+			loadMapData(thematicMap, position);
+		}
     },
 
     /**

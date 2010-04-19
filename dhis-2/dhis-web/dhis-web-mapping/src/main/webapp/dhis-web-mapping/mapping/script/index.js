@@ -45,7 +45,7 @@ function getMultiSelectHeight() {
         return 310;
     }
     else if (h <= 1200) {
-        return 460;
+        return 470;
     }
     else {
         return 900;
@@ -111,21 +111,21 @@ function toggleFeatureLabels(classify) {
 			
 Ext.onReady( function() {
 	Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
-  
+	
+	Ext.override(Ext.form.Field, {
+		showField : function(){
+			this.show();
+			this.container.up('div.x-form-item').setDisplayed( true );
+		},
+		hideField : function(){
+			this.hide();
+			this.container.up('div.x-form-item').setDisplayed( false );
+		}
+	});
+	
     document.body.oncontextmenu = function() { return false; };
 	
 	Ext.QuickTips.init();
-	
-	Ext.override(Ext.form.Field, {
-        showField : function(){
-            this.show();
-            this.container.up('div.x-form-item').setDisplayed( true );
-        },
-        hideField : function(){
-            this.hide();
-            this.container.up('div.x-form-item').setDisplayed( false );
-        }
-    });
     
     MAP = new OpenLayers.Map({
 		controls: [
@@ -1029,7 +1029,7 @@ Ext.onReady( function() {
 							w.setHeight(298);
 						}
 						else if (tab.id == 'automaticmaplegendset1') {
-							w.setHeight(getMultiSelectHeight() + 163);
+							w.setHeight(getMultiSelectHeight() + 180);
 						}
 						else if (tab.id == 'automaticmaplegendset2') {
 							w.setHeight(151);
@@ -1157,7 +1157,6 @@ Ext.onReady( function() {
         displayField: 'displayString',
         width: multiselect_width,
         height: getMultiSelectHeight(),
-        style: 'padding:0px; margin-bottom:2px;',
         store: predefinedMapLegendStore
     });
 	
@@ -3726,7 +3725,8 @@ function onClickSelectChoropleth(feature) {
 		mapping.relation = feature.attributes[MAPDATA.nameColumn];
     }
 	else {
-		MAP.setCenter(feature.geometry.getBounds().getCenterLonLat(), MAP.getZoom()+1);
+		// MAP.setCenter(feature.geometry.getBounds().getCenterLonLat(), MAP.getZoom()+1);
+		sc(feature.attributes[MAPDATA.nameColumn], Ext.getCmp('indicator_cb').getRawValue());
 	}
 }
 
@@ -3779,10 +3779,9 @@ function loadMapData(redirect, position) {
     Ext.Ajax.request({
         url: path + 'getMapByMapLayerPath' + type,
         method: 'POST',
-        params: { mapLayerPath: URL, format: 'json' },
+        params: { mapLayerPath: URL },
         success: function(r) {
-		
-            MAPDATA = Ext.util.JSON.decode(r.responseText).map[0];	
+			MAPDATA = Ext.util.JSON.decode(r.responseText).map[0];
             
             if (MAPSOURCE == map_source_type_database) {
                 MAPDATA.name = Ext.getCmp('map_cb').getRawValue();
@@ -3833,7 +3832,6 @@ function loadMapData(redirect, position) {
 }
 
 
-
 /*CHOROPLETH*/
 function getChoroplethData() {
 	MASK.msg = 'Creating choropleth...';
@@ -3843,13 +3841,12 @@ function getChoroplethData() {
     var periodId = Ext.getCmp('period_cb').getValue();
     var mapLayerPath = MAPDATA.mapLayerPath;
 	var url = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? 'getMapValuesByMap' : 'getMapValuesByLevel';
-	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodId: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: URL };
+	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodId: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: mapLayerPath };
 
     Ext.Ajax.request({
         url: path + url + type,
         method: 'POST',
         params: params,
-
         success: function(r) {
 			var layers = MAP.getLayersByName('Thematic map');
 			var features = layers[0].features;
@@ -3912,64 +3909,51 @@ function getAssignOrganisationUnitData() {
 	
     var mlp = MAPDATA.mapLayerPath;
     
-    Ext.Ajax.request({
-        url: path + 'getAvailableMapOrganisationUnitRelations' + type,
-        method: 'GET',
-        params: { mapLayerPath: mlp, format: 'json' },
-
-        success: function(r) {
-			var layers = MAP.getLayersByName('Thematic map');
-			features = layers[0]['features'];
-			var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
-			var nameColumn = MAPDATA.nameColumn;
-			var noCls = 1;
-			var noAssigned = 0;
-			var options = {};
-			
-			for (var i = 0; i < features.length; i++) {
-				features[i].attributes['value'] = 0;
-			
-				for (var j = 0; j < relations.length; j++) {
-					if (relations[j].featureId == features[i].attributes[nameColumn]) {
-						features[i].attributes['value'] = 1;
-						noAssigned++;
-						if (noCls < 2) {
-							noCls = 2;
-						}
-						break;
-					}
-				}
-			}
+	var relations =	 Ext.getCmp('grid_gp').getStore();
+	var layers = MAP.getLayersByName('Thematic map');
+	features = layers[0]['features'];
+	var nameColumn = MAPDATA.nameColumn;
+	var noCls = 1;
+	var noAssigned = 0;
+	var options = {};
 	
-			var color = noCls > 1 && noAssigned == features.length ? assigned_row_color : unassigned_row_color;
-			noCls = noCls > 1 && noAssigned == features.length ? 1 : noCls;
-			
-			mapping.indicator = 'value';
-			mapping.indicatorText = 'Indicator';
-			options.indicator = mapping.indicator;
-			
-			options.method = 1;
-			options.numClasses = noCls;
-			
-			var colorA = new mapfish.ColorRgb();
-			colorA.setFromHex(color);
-			var colorB = new mapfish.ColorRgb();
-			colorB.setFromHex(assigned_row_color);
-			options.colors = [colorA, colorB];
-			
-			mapping.coreComp.updateOptions(options);
-			mapping.coreComp.applyClassification();
-			mapping.classificationApplied = true;
-			
-			MASK.hide();
-        },
-        failure: function() {
-            alert( 'Error while retrieving data: getAssignOrganisationUnitData' );
-        } 
-    });
+	for (var i = 0; i < features.length; i++) {
+		features[i].attributes['value'] = 0;
+	
+		for (var j = 0; j < relations.getTotalCount(); j++) {
+			if (relations.getAt(j).data.featureId == features[i].attributes[nameColumn]) {
+				features[i].attributes['value'] = 1;
+				noAssigned++;
+				noCls = noCls < 2 ? 2 : noCls;
+				break;
+			}
+		}
+	}
+
+	var color = noCls > 1 && noAssigned == features.length ? assigned_row_color : unassigned_row_color;
+	noCls = noCls > 1 && noAssigned == features.length ? 1 : noCls;
+	
+	mapping.indicator = 'value';
+	mapping.indicatorText = 'Indicator';
+	options.indicator = mapping.indicator;
+	
+	options.method = 1;
+	options.numClasses = noCls;
+	
+	var colorA = new mapfish.ColorRgb();
+	colorA.setFromHex(color);
+	var colorB = new mapfish.ColorRgb();
+	colorB.setFromHex(assigned_row_color);
+	options.colors = [colorA, colorB];
+	
+	mapping.coreComp.updateOptions(options);
+	mapping.coreComp.applyClassification();
+	mapping.classificationApplied = true;
+	
+	MASK.hide();
 }
 
-/*AUTO MAPPING*/
+/*AUTO-MAPPING*/
 function getAutoAssignOrganisationUnitData(position) {
 	MASK.msg = 'Loading data...';
 	MASK.show();
@@ -3979,8 +3963,7 @@ function getAutoAssignOrganisationUnitData(position) {
     Ext.Ajax.request({
         url: path + 'getOrganisationUnitsAtLevel' + type,
         method: 'POST',
-        params: { level: level, format: 'json' },
-
+        params: { level: level },
         success: function(r) {
 		    var layers = MAP.getLayersByName('Thematic map');
 			var features = layers[0]['features'];
@@ -3989,7 +3972,6 @@ function getAutoAssignOrganisationUnitData(position) {
 			var mlp = MAPDATA.mapLayerPath;
 			var count_match = 0;
 			var relations = '';
-			var featureName, orgunitName;
 			
 			for ( var i = 0; i < features.length; i++ ) {
 				features[i].attributes.compareName = features[i].attributes[nameColumn].split(' ').join('').toLowerCase();
