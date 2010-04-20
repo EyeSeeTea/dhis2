@@ -119,16 +119,14 @@ public class ReportTableDeletionHandler
     }
 
     @Override
-    public boolean allowDeleteSource( Source source )
+    public void deleteSource( Source source )
     {
-        for ( ReportTable reportTable : reportTableService.getAllReportTables() )
+        for(ReportTable reportTable : reportTableService.getAllReportTables())
         {
-            if ( reportTable.getUnits().contains( source ) )
+            if(reportTable.getUnits().remove( source ))
             {
-                return false;
+                reportTableService.updateReportTable( reportTable );
             }
         }
-        
-        return true;
     }
 }

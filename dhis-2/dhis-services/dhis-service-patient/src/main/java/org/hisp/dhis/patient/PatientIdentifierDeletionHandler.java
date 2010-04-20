@@ -1,4 +1,4 @@
-package org.hisp.dhis.chart;
+package org.hisp.dhis.patient;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,29 +27,28 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.period.Period;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Lars Helge Overland
+ * @author Quang Nguyen
  * @version $Id$
  */
-public class ChartDeletionHandler
+public class PatientIdentifierDeletionHandler
     extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ChartService chartService;
+    private PatientIdentifierService patientIdentifierService;
 
-    public void setChartService( ChartService chartService )
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
-        this.chartService = chartService;
+        this.patientIdentifierService = patientIdentifierService;
     }
-
+    
     // -------------------------------------------------------------------------
     // DeletionHandler implementation
     // -------------------------------------------------------------------------
@@ -57,46 +56,15 @@ public class ChartDeletionHandler
     @Override
     public String getClassName()
     {
-        return Chart.class.getSimpleName();
+        return PatientIdentifier.class.getSimpleName();
     }
-    
-    @Override
-    public boolean allowDeleteIndicator( Indicator indicator )
-    {
-        for ( Chart chart : chartService.getAllCharts() )
-        {
-            if ( chart.getIndicators().contains( indicator ) )
-            {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    @Override
-    public boolean allowDeletePeriod( Period period )
-    {
-        for ( Chart chart : chartService.getAllCharts() )
-        {
-            if ( chart.getPeriods().contains( period ) )
-            {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
+
     @Override
     public void deleteSource( Source source )
     {
-        for ( Chart chart : chartService.getAllCharts() )
+        for ( PatientIdentifier patientIdentifier : patientIdentifierService.getPatientIdentifiersByOrgUnit( (OrganisationUnit) source ) )
         {
-            if ( chart.getOrganisationUnits().remove( source ) )
-            {
-                chartService.saveChart( chart );
-            }
+            patientIdentifierService.deletePatientIdentifier( patientIdentifier );
         }
     }
 }

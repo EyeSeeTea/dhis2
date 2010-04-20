@@ -1,4 +1,4 @@
-package org.hisp.dhis.chart;
+package org.hisp.dhis.reportexcel;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,27 +27,25 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Lars Helge Overland
+ * @author Quang Nguyen
  * @version $Id$
  */
-public class ChartDeletionHandler
+public class ReportExcelDeletionHandler
     extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ChartService chartService;
+    private ReportExcelService reportExcelService;
 
-    public void setChartService( ChartService chartService )
+    public void setReportExcelService( ReportExcelService reportExcelService )
     {
-        this.chartService = chartService;
+        this.reportExcelService = reportExcelService;
     }
 
     // -------------------------------------------------------------------------
@@ -57,45 +55,17 @@ public class ChartDeletionHandler
     @Override
     public String getClassName()
     {
-        return Chart.class.getSimpleName();
+        return ReportExcel.class.getSimpleName();
     }
-    
-    @Override
-    public boolean allowDeleteIndicator( Indicator indicator )
-    {
-        for ( Chart chart : chartService.getAllCharts() )
-        {
-            if ( chart.getIndicators().contains( indicator ) )
-            {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    @Override
-    public boolean allowDeletePeriod( Period period )
-    {
-        for ( Chart chart : chartService.getAllCharts() )
-        {
-            if ( chart.getPeriods().contains( period ) )
-            {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
+
     @Override
     public void deleteSource( Source source )
     {
-        for ( Chart chart : chartService.getAllCharts() )
+        for ( ReportExcel reportExcel : reportExcelService.getALLReportExcel() )
         {
-            if ( chart.getOrganisationUnits().remove( source ) )
+            if ( reportExcel.getOrganisationAssocitions().remove( source ) )
             {
-                chartService.saveChart( chart );
+                reportExcelService.updateReportExcel( reportExcel );
             }
         }
     }
