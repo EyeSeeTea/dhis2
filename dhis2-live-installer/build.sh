@@ -7,6 +7,7 @@ export DHIS2_DOCS="/home/wheel/workspace/dhis2-docbook-docs/"
 export DHIS2_SRC="/home/wheel/workspace/dhis2/"
 export MAVEN_OPTS="-Xms256m -Xmx512m"
 
+if [ "$1" = "all" ] ; then
 
 echo "Building DHIS 2 Core..."
 cd $DHIS2_SRC/dhis-2
@@ -23,3 +24,30 @@ mvn package
 echo "Building installer"
 cd $DHIS2_SRC/dhis2-live-installer
 mvn package
+
+fi
+
+if [ "$1" = "docs" ] ; then
+cd $DHIS2_DOCS
+mvn package
+fi
+
+if [ "$1" = "installer" ] ; then
+echo "Building installer"
+cd $DHIS2_SRC/dhis2-live-installer
+mvn package
+fi
+
+if [ "$1" = "dhis2" ] ; then
+
+echo "Building DHIS 2 Core..."
+cd $DHIS2_SRC/dhis-2
+mvn clean install -Dtest=skip -DfailIfNoTests=false
+echo "Building DHIS 2 Web..."
+cd $DHIS2_SRC/dhis-2/dhis-web
+mvn clean install -Dtest=skip -DfailIfNoTests=false
+echo "Builidng DHIS2 Live Package"
+cd $DHIS2_SRC/dhis-live/
+mvn clean package -Dtest=skip -DfailIfNoTests=false
+
+fi
