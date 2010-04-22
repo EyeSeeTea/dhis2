@@ -5,11 +5,11 @@
   
   <parent>
     <groupId>org.hisp.dhis</groupId>
-    <artifactId>dhis-i18n</artifactId>
+    <artifactId>dhis-services</artifactId>
     <version>2.0.5-SNAPSHOT</version>
   </parent>
   
-  <artifactId>dhis-i18n-static</artifactId>
+  <artifactId>dhis-service-i18n</artifactId>
   <packaging>jar</packaging>
   <name>DHIS I18n Static</name>
   

@@ -52,11 +52,7 @@
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-i18n-static</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-i18n-db</artifactId>
+      <artifactId>dhis-service-i18n</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
