@@ -16,7 +16,6 @@
   <modules>
     <module>dhis-i18n-static</module>
     <module>dhis-i18n-db</module>
-    <module>dhis-i18n-upgrader</module>
   </modules>
   
   <dependencies>

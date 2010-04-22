@@ -235,11 +235,6 @@
         <artifactId>dhis-support-external</artifactId>
         <version>${version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.hisp.dhis</groupId>
-        <artifactId>dhis-i18n-upgrader</artifactId>
-        <version>${version}</version>
-      </dependency>
       <!--Other -->
       <dependency>
         <groupId>org.apache.struts</groupId>
