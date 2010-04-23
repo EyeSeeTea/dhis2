@@ -1,4 +1,4 @@
-package org.hisp.dhis.patient;
+package org.hisp.dhis.program;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -28,6 +28,9 @@ package org.hisp.dhis.patient;
  */
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientIdentifier;
+import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
@@ -35,18 +38,18 @@ import org.hisp.dhis.system.deletion.DeletionHandler;
  * @author Quang Nguyen
  * @version $Id$
  */
-public class PatientIdentifierDeletionHandler
+public class ProgramInstanceDeleteHandler
     extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientIdentifierService patientIdentifierService;
+    private ProgramInstanceService programInstanceService;
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
-        this.patientIdentifierService = patientIdentifierService;
+        this.programInstanceService = programInstanceService;
     }
 
     // -------------------------------------------------------------------------
@@ -56,27 +59,15 @@ public class PatientIdentifierDeletionHandler
     @Override
     public String getClassName()
     {
-        return PatientIdentifier.class.getSimpleName();
+        return ProgramInstance.class.getSimpleName();
     }
 
-    @Override
-    public void deleteSource( Source source )
-    {
-        for ( PatientIdentifier patientIdentifier : patientIdentifierService
-            .getPatientIdentifiersByOrgUnit( (OrganisationUnit) source ) )
-        {
-            patientIdentifierService.deletePatientIdentifier( patientIdentifier );
-        }
-    }
-    
     @Override
     public void deletePatient( Patient patient )
     {
-        PatientIdentifier patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
-
-        if ( patientIdentifier != null )
+        for(ProgramInstance programInstance : programInstanceService.getProgramInstances( patient ))
         {
-            patientIdentifierService.deletePatientIdentifier( patientIdentifier );
+            programInstanceService.deleteProgramInstance( programInstance );
         }
     }
 }
