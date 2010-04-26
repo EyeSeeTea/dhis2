@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportexcel.action;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,81 +26,81 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.hisp.dhis.reportexcel.ReportExcel;
+import org.hisp.dhis.reportexcel.ReportExcelService;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserStore;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
  * @version $Id$
  */
 
-public class ReportExcelPeriodColumnListing
-    extends ReportExcel
+public class UpdateReportExcelUserRoleAction
+    implements Action
 {
 
-    private Set<PeriodColumn> periodColumns = new HashSet<PeriodColumn>();
+    // -------------------------------------------
+    // Dependency
+    // -------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
+    private ReportExcelService reportService;
 
-    public ReportExcelPeriodColumnListing()
+    public void setReportService( ReportExcelService reportService )
     {
-        super();
+        this.reportService = reportService;
     }
 
-    public void addPeriodColumn( PeriodColumn periodColumn )
+    private UserStore userStore;
+
+    public void setUserStore( UserStore userStore )
     {
-        periodColumns.add( periodColumn );
+        this.userStore = userStore;
     }
 
-    public void deletePeriodColumn( PeriodColumn periodColumn )
-    {
+    // -------------------------------------------
+    // Input
+    // -------------------------------------------
 
-        periodColumns.remove( periodColumn );
+    private Collection<Integer> userRoles;
+
+    public void setUserRoles( Collection<Integer> userRoles )
+    {
+        this.userRoles = userRoles;
+    }
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
     }
 
     @Override
-    public String getReportType()
+    public String execute()
+        throws Exception
     {
-        return ReportExcel.TYPE.PERIOD_COLUMN_LISTING;
-    }
+        ReportExcel report = reportService.getReportExcel( id );
 
-    
-    public Set<PeriodColumn> getPeriodColumns()
-    {
-        return periodColumns;
-    }
+        Set<UserAuthorityGroup> userAutorities = new HashSet<UserAuthorityGroup>();
 
-    public void setPeriodColumns( Set<PeriodColumn> periodColumns )
-    {
-        this.periodColumns = periodColumns;
-    }
-    
-    @Override
-    public boolean isCategory()
-    {       
-        return false;
-    }
+        for ( Integer i : this.userRoles )
+        {
+            userAutorities.add( userStore.getUserAuthorityGroup( i ) );
+        }
 
-    @Override
-    public boolean isNormal()
-    {       
-        return false;
-    }
+        report.setUserRoles( userAutorities );
 
-    @Override
-    public boolean isOrganisationUnitGroupListing()
-    {       
-        return false;
-    }
+        reportService.updateReportExcel( report );
 
-    @Override
-    public boolean isPeriodColumnListing()
-    {        
-        return true;
+        return SUCCESS;
     }
 
 }
