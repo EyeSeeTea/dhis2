@@ -479,11 +479,12 @@
 			<param name="stylesheets">style/previewStyle.css,
 				style/ui.all.css</param>
 			<param name="javascripts">
-				../dhis-web-commons/ouwt/ouwt.js,
 				javascript/export.js,
 				javascript/commons.js,
 				javascript/preview.js,
-				../dhis-web-commons/util/jquery-ui.js
+				../dhis-web-commons/ouwt/ouwt.js,
+				../dhis-web-commons/util/jquery-ui.js,
+				../dhis-web-commons/util/jquery.jqprint.0.3.js
 			</param>
 		</action>
 
