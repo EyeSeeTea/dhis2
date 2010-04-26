@@ -136,7 +136,8 @@ function validateAddCategoryOption() {
 		{
 			setMessage( xmlObject.firstChild.nodeValue );
 		}
-		else if(mode == "update"){
+		else if ( mode == "update" )
+		{
 			updateCategoryOptionName();
 		}
 		else
