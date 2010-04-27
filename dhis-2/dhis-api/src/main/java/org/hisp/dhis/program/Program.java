@@ -28,10 +28,13 @@
 package org.hisp.dhis.program;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.validation.ValidationCriteria;
 
 /**
  * @author Abyot Asalefew
@@ -64,6 +67,8 @@ public class Program
 
     private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
     
+    private Set<ValidationCriteria> patientValidationCriteria = new HashSet<ValidationCriteria>();
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -77,7 +82,7 @@ public class Program
         this.name = name;
         this.description = description;
     }
-
+    
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -195,13 +200,22 @@ public class Program
         this.dateOfIncidentDescription = dateOfIncidentDescription;
     }
 
+    public Set<ValidationCriteria> getPatientValidationCriteria()
+    {
+        return patientValidationCriteria;
+    }
+
+    public void setPatientValidationCriteria( Set<ValidationCriteria> patientValidationCriteria )
+    {
+        this.patientValidationCriteria = patientValidationCriteria;
+    }
 
     // -------------------------------------------------------------------------
-    // Convenience method
+    // Logic methods
     // -------------------------------------------------------------------------
+    
     public ProgramStage getProgramStageByStage( int stage )
     {
-
         int count = 1;
 
         for ( ProgramStage programStage : programStages )
@@ -218,7 +232,40 @@ public class Program
         }
 
         return null;
-
     }
 
+    @SuppressWarnings("unchecked")
+    public ValidationCriteria isValid( Patient patient )
+    {
+        try
+        {
+            for ( ValidationCriteria criteria : patientValidationCriteria )
+            {                
+                // Get value for the validation criteria property from the Patient
+                
+                Field field = Patient.class.getDeclaredField( criteria.getProperty() );
+                field.setAccessible( true );
+                Object propertyValue = field.get( patient );
+                
+                // Compare property value with compare value
+                
+                int i = ((Comparable)propertyValue).compareTo( (Comparable)criteria.getValue() );
+                
+                // Return validation criteria if criteria is not met
+                
+                if ( i != criteria.getOperator() )
+                {
+                    return criteria;
+                }
+            }
+            
+            // Return null if all criteria are met
+            
+            return null;
+        }
+        catch ( Exception ex )
+        {
+            throw new RuntimeException( ex );
+        }
+    }
 }
