@@ -153,7 +153,6 @@ function validateAddCategoryOption() {
 // ----------------------------------------------------------------------
 
 function updateCategoryOptionName(){
-	validateAddCategoryOption();
 	var request = new Request();
     request.setResponseTypeXML( 'xmlObject' );
     request.setCallbackSuccess( updateCategoryOptionNameReceived );
