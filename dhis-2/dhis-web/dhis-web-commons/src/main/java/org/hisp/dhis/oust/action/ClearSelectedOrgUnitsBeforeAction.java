@@ -1,3 +1,5 @@
+package org.hisp.dhis.oust.action;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,81 +26,59 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
+ * @since 2010-04-27
  */
-
-public class ReportExcelPeriodColumnListing
-    extends ReportExcel
+public class ClearSelectedOrgUnitsBeforeAction
+    implements Action
 {
-
-    private Set<PeriodColumn> periodColumns = new HashSet<PeriodColumn>();
-
     // -------------------------------------------------------------------------
-    // Constructors
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public ReportExcelPeriodColumnListing()
+    private SelectionTreeManager selectionTreeManager;
+
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        super();
+        this.selectionTreeManager = selectionTreeManager;
     }
 
-    public void addPeriodColumn( PeriodColumn periodColumn )
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+    private String message;
+
+    public String getMessage()
     {
-        periodColumns.add( periodColumn );
+        return message;
     }
 
-    public void deletePeriodColumn( PeriodColumn periodColumn )
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+    public String execute()
     {
+        try
+        {
+            selectionTreeManager.clearSelectedOrganisationUnits();
+        }
+        catch ( Exception e )
+        {
+            message = "cannot_clear_selected_orgunits";
 
-        periodColumns.remove( periodColumn );
-    }
+            return ERROR;
+        }
 
-    @Override
-    public String getReportType()
-    {
-        return ReportExcel.TYPE.PERIOD_COLUMN_LISTING;
-    }
+        message = "OK";
 
-    
-    public Set<PeriodColumn> getPeriodColumns()
-    {
-        return periodColumns;
-    }
-
-    public void setPeriodColumns( Set<PeriodColumn> periodColumns )
-    {
-        this.periodColumns = periodColumns;
-    }
-    
-    @Override
-    public boolean isCategory()
-    {       
-        return false;
-    }
-
-    @Override
-    public boolean isNormal()
-    {       
-        return false;
-    }
-
-    @Override
-    public boolean isOrganisationUnitGroupListing()
-    {       
-        return false;
-    }
-
-    @Override
-    public boolean isPeriodColumnListing()
-    {        
-        return true;
+        return SUCCESS;
     }
 
 }

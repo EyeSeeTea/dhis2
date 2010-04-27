@@ -1,3 +1,5 @@
+package org.hisp.dhis.program;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,81 +26,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientIdentifier;
+import org.hisp.dhis.patient.PatientIdentifierService;
+import org.hisp.dhis.source.Source;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Tran Thanh Tri
+ * @author Quang Nguyen
  * @version $Id$
  */
-
-public class ReportExcelPeriodColumnListing
-    extends ReportExcel
+public class ProgramInstanceDeleteHandler
+    extends DeletionHandler
 {
-
-    private Set<PeriodColumn> periodColumns = new HashSet<PeriodColumn>();
-
     // -------------------------------------------------------------------------
-    // Constructors
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public ReportExcelPeriodColumnListing()
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
-        super();
+        this.programInstanceService = programInstanceService;
     }
 
-    public void addPeriodColumn( PeriodColumn periodColumn )
-    {
-        periodColumns.add( periodColumn );
-    }
+    // -------------------------------------------------------------------------
+    // DeletionHandler implementation
+    // -------------------------------------------------------------------------
 
-    public void deletePeriodColumn( PeriodColumn periodColumn )
+    @Override
+    public String getClassName()
     {
-
-        periodColumns.remove( periodColumn );
+        return ProgramInstance.class.getSimpleName();
     }
 
     @Override
-    public String getReportType()
+    public void deletePatient( Patient patient )
     {
-        return ReportExcel.TYPE.PERIOD_COLUMN_LISTING;
+        for(ProgramInstance programInstance : programInstanceService.getProgramInstances( patient ))
+        {
+            programInstanceService.deleteProgramInstance( programInstance );
+        }
     }
-
-    
-    public Set<PeriodColumn> getPeriodColumns()
-    {
-        return periodColumns;
-    }
-
-    public void setPeriodColumns( Set<PeriodColumn> periodColumns )
-    {
-        this.periodColumns = periodColumns;
-    }
-    
-    @Override
-    public boolean isCategory()
-    {       
-        return false;
-    }
-
-    @Override
-    public boolean isNormal()
-    {       
-        return false;
-    }
-
-    @Override
-    public boolean isOrganisationUnitGroupListing()
-    {       
-        return false;
-    }
-
-    @Override
-    public boolean isPeriodColumnListing()
-    {        
-        return true;
-    }
-
 }
