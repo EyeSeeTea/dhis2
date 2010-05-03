@@ -4,8 +4,8 @@
   <artifactId>dhis</artifactId>
   <version>2.0.5-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>DHIS 2 - District Health Information System</name>
-  <url>http://dhis2.com</url>
+  <name>DHIS 2</name>
+  <url>http://dhis2.org</url>
   
   <description>
     The District Health Information System deals with registering,
@@ -59,6 +59,10 @@
       <id>dhis.uio.no</id>
       <name>Dhis2 External Dependencies Repository</name>
       <url>http://dhis.uio.no/maven/external</url>
+    </repository>
+    <repository>
+      <id>JBoss</id>
+      <url>http://repository.jboss.org/maven2</url>
     </repository>
   </repositories>
   
@@ -238,12 +242,12 @@
       <dependency>
         <groupId>org.apache.struts</groupId>
         <artifactId>struts2-core</artifactId>
-        <version>2.1.6</version>
+        <version>2.1.8.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.struts</groupId>
         <artifactId>struts2-spring-plugin</artifactId>
-        <version>2.1.6</version>
+        <version>2.1.8.1</version>
         <exclusions>
           <exclusion>
             <groupId>org.springframework</groupId>
@@ -269,10 +273,17 @@
         <artifactId>velocity-tools</artifactId>
         <version>1.2</version>
       </dependency>
+<!-- TODO: NEED TO DECIDE ON QUICK -->
       <dependency>
         <groupId>org.amplecode</groupId>
         <artifactId>quick</artifactId>
-        <version>1.1.6</version>
+        <version>1.1.7</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring</artifactId>
+          </exclusion>
+        </exclusions>        
       </dependency>
       <dependency>
         <groupId>com.lowagie</groupId>
@@ -281,34 +292,30 @@
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
-        <artifactId>spring</artifactId>
-        <version>2.5.6</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-beans</artifactId>
-        <version>2.5.6</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
         <artifactId>spring-test</artifactId>
-        <version>2.5.6</version>
+        <version>${spring.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
-        <artifactId>spring-core</artifactId>
-        <version>2.5.6</version>
+        <artifactId>spring-orm</artifactId>
+        <version>${spring.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-context</artifactId>
-        <version>2.5.6</version>
+        <version>${spring.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-web</artifactId>
-        <version>2.5.6</version>
+        <version>${spring.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-tx</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.aspectj</groupId>
         <artifactId>aspectjrt</artifactId>
@@ -394,7 +401,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.4</version>
+        <version>4.8.1</version>
       </dependency>
       <dependency>
         <groupId>org.amplecode</groupId>
@@ -416,6 +423,7 @@
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>2.4</version>
+        <scope>provided</scope>
       </dependency>
       <!--DBMS -->
       <dependency>
@@ -433,6 +441,28 @@
         <artifactId>ibatis2-sqlmap</artifactId>
         <version>2.1.7.597</version>
       </dependency>
+
+      <!--dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>3.5.0-Final</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-ehcache</artifactId>
+        <version>3.5.0-Final</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>3.5.0-Final</version>
+      </dependency-->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>1.5.8</version>
+      </dependency>
+
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate</artifactId>
@@ -477,7 +507,7 @@
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-core</artifactId>
-        <version>2.0.5.RELEASE</version>
+        <version>3.0.2.RELEASE</version>
         <exclusions>
           <exclusion>
             <groupId>org.springframework</groupId>
@@ -499,8 +529,13 @@
       </dependency>
       <dependency>
         <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-core-tiger</artifactId>
-        <version>2.0.5.RELEASE</version>
+        <artifactId>spring-security-web</artifactId>
+        <version>3.0.2.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+        <version>3.0.2.RELEASE</version>
       </dependency>
       <!--Reporting -->
       <dependency>
@@ -617,5 +652,6 @@
   <properties>
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring.version>3.0.2.RELEASE</spring.version>  
   </properties>
 </project>

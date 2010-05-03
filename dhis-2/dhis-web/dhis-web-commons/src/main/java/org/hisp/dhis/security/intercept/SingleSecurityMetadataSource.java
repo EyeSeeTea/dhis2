@@ -29,42 +29,41 @@ package org.hisp.dhis.security.intercept;
 
 import java.util.Collection;
 
-import org.springframework.security.ConfigAttributeDefinition;
-import org.springframework.security.intercept.ObjectDefinitionSource;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.SecurityMetadataSource;
 
 /**
- * Generic ObjectDefinitionSource for one single object.
+ * Generic SecurityMetadataSource for one single object.
  * 
  * @author Torgeir Lorange Ostby
- * @version $Id: SingleObjectDefinitionSource.java 6335 2008-11-20 11:11:26Z larshelg $
  */
-public class SingleObjectDefinitionSource
-    implements ObjectDefinitionSource
+public class SingleSecurityMetadataSource
+    implements SecurityMetadataSource
 {
     private Object object;
 
-    private ConfigAttributeDefinition attributes;
+    private Collection<ConfigAttribute> attributes;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public SingleObjectDefinitionSource( Object object )
+    public SingleSecurityMetadataSource( Object object )
     {
         this.object = object;
     }
 
-    public SingleObjectDefinitionSource( Object object, ConfigAttributeDefinition attributes )
+    public SingleSecurityMetadataSource( Object object, Collection<ConfigAttribute> attributes )
     {
         this.object = object;   
         this.attributes = attributes;        
     }
 
     // -------------------------------------------------------------------------
-    // ObjectDefinitionSource implementation
+    // SecurityMetadataSource implementation
     // -------------------------------------------------------------------------
 
-    public ConfigAttributeDefinition getAttributes( Object object )
+    public Collection<ConfigAttribute> getAttributes( Object object )
         throws IllegalArgumentException
     {
         if ( !supports( object.getClass() ) )
@@ -80,14 +79,16 @@ public class SingleObjectDefinitionSource
         return null;
     }
 
-    public Collection<?> getConfigAttributeDefinitions()
-    {
-        return null;
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public boolean supports( Class clazz )
+    @Override
+    public boolean supports( Class<?> clazz )
     {
         return clazz.isAssignableFrom( object.getClass() );
     }
+
+    @Override
+    public Collection<ConfigAttribute> getAllConfigAttributes()
+    {
+        return this.attributes;
+    }
+
 }
