@@ -295,6 +295,23 @@ public class DefaultSelectionTreeManager
         return organisationUnitService.getOrganisationUnit( unit.getId() );
     }
 
+    public Collection<OrganisationUnit> reloadOrganisationUnits( Collection<OrganisationUnit> units )
+    {
+        Set<OrganisationUnit> reloadedUnits = new HashSet<OrganisationUnit>();
+
+        for ( OrganisationUnit unit : units )
+        {
+            OrganisationUnit reloadedUnit = reloadOrganisationUnit( unit );
+
+            if ( reloadedUnit != null )
+            {
+                reloadedUnits.add( reloadedUnit );
+            }
+        }
+
+        return reloadedUnits;
+    }
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
