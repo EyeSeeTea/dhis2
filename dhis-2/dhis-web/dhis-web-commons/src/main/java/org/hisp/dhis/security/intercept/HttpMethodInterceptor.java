@@ -1,13 +1,7 @@
-package org.amplecode.staxwax.framework;
-
-
-import java.io.InputStream;
-import junit.framework.TestCase;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+package org.hisp.dhis.security.intercept;
 
 /*
- * Copyright (c) 2004-2005, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -17,7 +11,7 @@ import org.w3c.dom.NodeList;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
+ * * Neither the name of the HISP project nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -32,52 +26,56 @@ import org.w3c.dom.NodeList;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.ServletActionContext;
+
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.Interceptor;
+
 /**
- *
- * @author bobj
- * @version created 17-Feb-2010
+ * @author Lars Helge Overland
  */
-public class XPathFilterTest extends TestCase
+public class HttpMethodInterceptor
+    implements Interceptor
 {
-
-    private InputStream inputStreamB;
-
-    @Override
-    protected void setUp() throws Exception
+    private static final Log log = LogFactory.getLog( HttpMethodInterceptor.class );
+    
+    private static final String DEFAULT_METHOD = "POST";
+    
+    protected String allowedMethod = DEFAULT_METHOD;
+    
+    public void setAllowedMethod( String allowedMethod )
     {
-        super.setUp();
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        inputStreamB = classLoader.getResourceAsStream( "dataB.xml" );
+        this.allowedMethod = allowedMethod;
     }
 
     @Override
-    public void tearDown()
+    public String intercept( ActionInvocation invocation )
         throws Exception
     {
-        inputStreamB.close();
+        String method = ServletActionContext.getRequest().getMethod();
+        
+        log.info( "Method: " + method );
+        
+        if ( method == null || !method.trim().toLowerCase().equals( allowedMethod.trim().toLowerCase() ) )
+        {
+            log.warn( "HTTP method ' " + allowedMethod + "' only allowed for this request" );
+            
+            return null;
+        }
+        
+        return invocation.invoke();
     }
 
-    public synchronized void testFindText()
+    @Override
+    public void init()
     {
-        String result;
-        result = XPathFilter.findText( inputStreamB,
-            "/dataElements/dataElement[@code='code2']/description" );
-        assertEquals( "description2", result );
     }
 
-    public synchronized void testFindNode()
-    {
-        Node result;
-        result = XPathFilter.findNode( inputStreamB,
-            "/dataElements/dataElement[@code='code2']/description" );
-        assertEquals( "description2", result.getTextContent() );
-    }
-
-    public synchronized void testFindNodes()
-    {
-        NodeList result;
-        result = XPathFilter.findNodes( inputStreamB,
-            "/dataElements/dataElement[(@code='code2') or (@code='code3')]/description" );
-        assertEquals( 2, result.getLength() );
+    @Override
+    public void destroy()
+    {        
     }
 }
