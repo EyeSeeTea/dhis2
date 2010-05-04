@@ -1,0 +1,58 @@
+<script>
+//-----------------------------------------------------------------------
+//init jQuery validation for addPatientAttributeForm
+//-----------------------------------------------------------------------
+	jQuery(document).ready(
+			function()
+			{
+				jQuery("#validationCriteriaForm").validate({
+					 meta:"validate"
+					,errorElement:"td"
+					,submitHandler: function(form)
+									{
+										validateCriteria();
+									}
+				});
+				jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
+				jQuery("#name").focus();
+			}
+	);
+</script>
+<input type="hidden" id="curLocaleCode" value="$locale.getLanguage()_$locale.getCountry()"/>																		
+
+<h3>$i18n.getString( "update_validation_criteria" )</h3>
+<hr>
+<form id="validationCriteriaForm" action="updateValidationCriteria.action" method="post" >
+  <table border="0">
+	<input type='hidden' id='id' name='id' value='$validationCriteria.id'>
+    <tr>
+      <td>$i18n.getString('name')<em title="$i18n.getString( "required" )"  class="required">*</em></td>
+      <td><input type='text' id='name' name='name' style='width: 20em' value="$validationCriteria.name" class="{validate:{required:true,rangelength:[2,160]}}"></td>
+    </tr>
+    <tr>
+      <td>$i18n.getString('description')</td>
+      <td><input type='text' id='description' name='description' style='width: 20em' value="$validationCriteria.description"></td>
+    </tr>
+    <tr>
+      <td>$i18n.getString('criteria')<em title="$i18n.getString( "required" )"  class="required">*</em></td>
+      <td><select id='property' name='property' style='width: 8em'>
+			#foreach($field in $fields)
+			<option value='$field.name' #if("$field.name"=="$validationCriteria.property") selected #end> $field.name - $field.getType().getSimpleName()</option>
+			#end
+      </select>
+        <select id='select2' name='operator' style='width: 3.5em'>
+          <option value='-1' #if( "$validationcriteria.operator"=='-1') selected #end>$i18n.getString('operator_less_then')</option>
+          <option value='0'  #if( "$validationcriteria.operator"=='0') selected #end>$i18n.getString('operator_equal_to')</option>
+          <option value='1'  #if( "$validationcriteria.operator"=='1') selected #end>$i18n.getString('operator_greater_then')</option>
+        </select>
+      <input type='text' id='value3' name='value' style='width: 8em' value="$validationCriteria.value" class="{validate:{required:true,rangelength:[1,160]}}"></td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td><input type="submit" value="$i18n.getString('save')" style="width:10em">
+	  <input type="button" value="$i18n.getString('cancel')" style="width:10em" onClick="validationCriteria.action"></td>
+    </tr>
+  </table>
+
+</form>    
+<span id="message"></span>

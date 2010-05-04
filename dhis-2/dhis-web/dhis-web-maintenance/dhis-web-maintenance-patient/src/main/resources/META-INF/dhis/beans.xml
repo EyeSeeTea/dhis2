@@ -1059,4 +1059,67 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
 		</property>
 	</bean>
+	
+	<!-- Validation Criteria -->
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validationcriteria.AddValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validationcriteria.AddValidationCriteriaAction"
+		scope="prototype">
+		<property name="validationCriteriaService">
+			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validationcriteria.GetPropertiesPatientAction"
+		class="org.hisp.dhis.patient.action.validationcriteria.GetPropertiesPatientAction"
+		scope="prototype">
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaAction"
+		scope="prototype">
+		<property name="validationCriteriaService">
+			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaListAction"
+		class="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaListAction"
+		scope="prototype">
+		<property name="validationCriteriaService">
+			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validationcriteria.RemoveValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validationcriteria.RemoveValidationCriteriaAction"
+		scope="prototype">
+		<property name="validationCriteriaService">
+			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validationcriteria.UpdateValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validationcriteria.UpdateValidationCriteriaAction"
+		scope="prototype">
+		<property name="validationCriteriaService">
+			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validationcriteria.ValidateValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validationcriteria.ValidateValidationCriteriaAction"
+		scope="prototype">
+		<property name="validationCriteriaService">
+			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
+		</property>
+	</bean>
+	
 </beans>
