@@ -29,7 +29,7 @@
     <!-- Hibernate -->
     
 
-    <!--dependency>
+    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
     </dependency>
@@ -40,12 +40,12 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-    </dependency-->
+    </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate</artifactId>
-    </dependency>
+    </dependency-->
     <dependency>
       <groupId>geronimo-spec</groupId>
       <artifactId>geronimo-spec-jta</artifactId>

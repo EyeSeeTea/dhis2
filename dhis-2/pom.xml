@@ -277,7 +277,7 @@
       <dependency>
         <groupId>org.amplecode</groupId>
         <artifactId>quick</artifactId>
-        <version>1.1.7</version>
+        <version>1.1.6</version>
         <exclusions>
           <exclusion>
             <groupId>org.springframework</groupId>
@@ -442,28 +442,28 @@
         <version>2.1.7.597</version>
       </dependency>
 
-      <!--dependency>
+      <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
-        <version>3.5.0-Final</version>
+        <version>3.5.1-Final</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-ehcache</artifactId>
-        <version>3.5.0-Final</version>
+        <version>3.5.1-Final</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-entitymanager</artifactId>
-        <version>3.5.0-Final</version>
-      </dependency-->
+        <version>3.5.1-Final</version>
+      </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
         <version>1.5.8</version>
       </dependency>
 
-      <dependency>
+      <!--dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate</artifactId>
         <version>3.2.6.ga</version>
@@ -477,7 +477,7 @@
             <artifactId>pull-parser</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
+      </dependency-->
       <dependency>
         <groupId>net.sf.ehcache</groupId>
         <artifactId>ehcache</artifactId>
