@@ -5,6 +5,9 @@
 <tr>
 <td valign="top"><div id="helpMenu"></div></td>
 <td valign="top"><div id="helpContent">$i18n.getString( "help_intro" )</div><br/>
-<div id="helpBack" align="right"><input type="button" value="$i18n.getString( 'back' )" style="width:140px"/></div></td>
+	<div id="helpBack" align="right">
+		<input type="button" value="$i18n.getString( 'back' )" onclick="window.location.href='$!backUrl'" style="width:140px"/>
+	</div>
+</td>
 </tr>
 </table>
