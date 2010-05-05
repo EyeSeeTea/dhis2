@@ -545,6 +545,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		id="org.hisp.dhis.patient.action.patient.ValidatePatientProgramEnrollmentAction"
 		class="org.hisp.dhis.patient.action.patient.ValidatePatientProgramEnrollmentAction"
 		scope="prototype">
+		<property name="selectedStateManager"
+			ref="org.hisp.dhis.patient.state.SelectedStateManager" />
 	</bean>
 
 	<!-- Program -->
@@ -604,7 +606,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 	</bean>
-
+	
 	<bean
 		id="org.hisp.dhis.patient.action.program.DefineProgramAssociationsAction"
 		class="org.hisp.dhis.patient.action.program.DefineProgramAssociationsAction"
@@ -652,7 +654,25 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="organisationUnitGroupService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 	</bean>
+	
+	<!-- Program_Criteria Association  -->
 
+	<bean
+		id="org.hisp.dhis.patient.action.program.ShowCriteriaAssociationsFormAction"
+		class="org.hisp.dhis.patient.action.program.ShowCriteriaAssociationsFormAction"
+		scope="prototype">
+		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+		<property name="validationCriteriaService" ref="org.hisp.dhis.validation.ValidationCriteriaService" />
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.program.DefineCriteriaAssociationsAction"
+		class="org.hisp.dhis.patient.action.program.DefineCriteriaAssociationsAction"
+		scope="prototype">
+		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+		<property name="validationCriteriaService" ref="org.hisp.dhis.validation.ValidationCriteriaService" />
+	</bean>
+	
 	<!-- ProgramStage -->
 
 	<bean id="org.hisp.dhis.patient.action.programstage.AddProgramStageAction"

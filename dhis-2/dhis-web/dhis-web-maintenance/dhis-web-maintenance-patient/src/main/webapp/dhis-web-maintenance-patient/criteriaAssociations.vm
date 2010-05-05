@@ -1,0 +1,47 @@
+
+<h3>$i18n.getString( "define_criteria_associations" ) </h3>
+<form>
+<table>
+<input type='hidden' id='programId' name='programId'>
+<tr>
+	<td width="427">
+		<select multiple id='avalableCriteriaIds' name='avalableCriteriaIds' size="15" style="width:20em " ondblclick="moveSelectedById('avalableCriteriaIds', 'criteriaIds');">
+			#foreach($c in $criteria)
+			<option value='$c.id'>$c.name</option>
+			#end
+		</select>
+	</td>
+	<td width="42">
+		<input type="button" value="&gt;" onclick="moveSelectedById('avalableCriteriaIds', 'criteriaIds');" style="width:42px">
+		<input type="button" value="&lt;" onclick="moveSelectedById('criteriaIds', 'avalableCriteriaIds');" style="width:42px"><br>
+		<input type="button" value="&gt;&gt;" onclick="moveAllById('avalableCriteriaIds', 'criteriaIds');" style="width:42px"><br>
+		<input type="button" value="&lt;&lt;" onclick="moveAllById('criteriaIds', 'avalableCriteriaIds');" style="width:42px">
+	</td>
+	<td width="474">
+		<select multiple id='criteriaIds' name='criteriaIds' size="15" style="width:20em " ondblClick="moveSelectedById('criteriaIds', 'avalableCriteriaIds');">
+			#foreach($c in $program.patientValidationCriteria)
+			<option value='$c.id'>$c.name</option>
+			#end
+		</select>
+	</td>
+</tr>
+
+<tr>
+    <td><input type="button" onClick="assignCriteria();" value="$i18n.getString('save')"></td>
+</tr>
+</table>
+
+<script>
+
+	byId('programId').value = getParamByURL('id');
+	
+	function getParamByURL(param){
+		var name = param.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+		var regexS = "[\\?&]"+name+"=([^&#]*)";
+		var regex = new RegExp( regexS );
+		var results = regex.exec( window.location.href );
+
+		return ( results == null ) ? "" : results[1];
+	}
+</script>
+

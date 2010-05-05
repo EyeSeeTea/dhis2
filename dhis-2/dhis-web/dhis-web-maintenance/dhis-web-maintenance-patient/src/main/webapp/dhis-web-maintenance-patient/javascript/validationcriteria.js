@@ -38,5 +38,4 @@ function validationCompleted( xmlObject )
 function removeCriteria( id, name )
 {
 	removeItem( id, name, i18n_confirm_delete, 'removeValidationCriteria.action' );
-	//window.location.reload();
 }
