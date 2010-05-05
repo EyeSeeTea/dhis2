@@ -48,6 +48,8 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Hans S. Toemmerholt
  * @version $Id: AboutAction.java 3255 2007-04-23 09:58:06Z andegje $
+ * @modifier Dang Duy Hieu
+ * @since 2010-05-04
  */
 public class AboutAction
     implements Action
@@ -135,6 +137,18 @@ public class AboutAction
     public String getJavaOpts()
     {
         return javaOpts;
+    }
+    
+    private String backUrl;
+
+    public String getBackUrl()
+    {
+        return backUrl;
+    }
+
+    public void setBackUrl( String backUrl )
+    {
+        this.backUrl = backUrl;
     }
 
     // -------------------------------------------------------------------------
