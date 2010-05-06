@@ -37,7 +37,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -365,48 +364,6 @@ public class HibernateDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<DataValue> getDataValues( Collection<DataElement> dataElements, Collection<Period> periods,
-        Collection<? extends Source> sources, int firstResult, int maxResults )
-    {
-        Collection<Period> storedPeriods = new ArrayList<Period>();
-
-        for ( Period period : periods )
-        {
-            Period storedPeriod = reloadPeriod( period );
-
-            if ( storedPeriod != null )
-            {
-                storedPeriods.add( storedPeriod );
-            }
-        }
-
-        if ( storedPeriods.size() == 0 )
-        {
-            return Collections.emptySet();
-        }
-
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( DataValue.class );
-
-        criteria.add( Restrictions.in( "dataElement", dataElements ) );
-        criteria.add( Restrictions.in( "period", storedPeriods ) );
-        criteria.add( Restrictions.in( "source", sources ) );
-
-        if ( maxResults != 0 )
-        {
-            criteria.addOrder( Order.asc( "dataElement" ) );
-            criteria.addOrder( Order.asc( "period" ) );
-            criteria.addOrder( Order.asc( "source" ) );
-
-            criteria.setFirstResult( firstResult );
-            criteria.setMaxResults( maxResults );
-        }
-
-        return criteria.list();
-    }
-
-    @SuppressWarnings( "unchecked" )
     public Collection<DataValue> getDataValues( Collection<DataElementCategoryOptionCombo> optionCombos )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -427,7 +384,6 @@ public class HibernateDataValueStore
 
         return criteria.list();
     }
-
 
     @Override
     public DataValue getLatestDataValues( DataElement dataElement, PeriodType periodType,
