@@ -39,6 +39,8 @@ public class AggregatedMapValue
     
     private String featureId;
     
+    private int periodId;
+    
     private double value;
     
     private double factor;
@@ -55,11 +57,12 @@ public class AggregatedMapValue
     {   
     }
     
-    public AggregatedMapValue( int organisationUnitId, String organisationUnitName, String featureId, double value, double factor, double numeratorValue, double denominatorValue )
+    public AggregatedMapValue( int organisationUnitId, String organisationUnitName, String featureId, int periodId, double value, double factor, double numeratorValue, double denominatorValue )
     {
         this.organisationUnitId = organisationUnitId;
         this.organisationUnitName = organisationUnitName;
         this.featureId = featureId;
+        this.periodId = periodId;
         this.value = value;
         this.factor = factor;
         this.numeratorValue = numeratorValue;
@@ -110,6 +113,16 @@ public class AggregatedMapValue
     public void setFeatureId( String featureId )
     {
         this.featureId = featureId;
+    }
+
+    public int getPeriodId()
+    {
+        return periodId;
+    }
+
+    public void setPeriodId( int periodId )
+    {
+        this.periodId = periodId;
     }
 
     public double getValue()

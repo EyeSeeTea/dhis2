@@ -120,13 +120,23 @@ public class DefaultMappingService
     // MapValues
     // -------------------------------------------------------------------------
 
-    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, String mapLayerPath )
+    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds,
+        String mapLayerPath )
     {
         Map map = getMapByMapLayerPath( mapLayerPath );
 
         int level = map.getOrganisationUnitLevel().getLevel();
 
-        Collection<AggregatedMapValue> mapValues = dataMartStore.getAggregatedMapValues( indicatorId, periodId, level );
+        Collection<AggregatedMapValue> mapValues;
+
+        if ( periodIds.size() == 1 )
+        {
+            mapValues = dataMartStore.getAggregatedMapValues( indicatorId, periodIds.iterator().next(), level );
+        }
+        else
+        {
+            mapValues = dataMartStore.getAggregatedMapValues( indicatorId, periodIds, level );
+        }
 
         java.util.Map<Integer, String> relations = getOrganisationUnitFeatureMap( getMapOrganisationUnitRelationsByMap( map ) );
 
@@ -664,7 +674,7 @@ public class DefaultMappingService
         Period period = periodService.getPeriod( periodId );
 
         MapLegendSet mapLegendSet = getMapLegendSet( mapLegendSetId );
-        
+
         mapView.setName( name );
         mapView.setIndicatorGroup( indicatorGroup );
         mapView.setIndicator( indicator );
@@ -691,8 +701,8 @@ public class DefaultMappingService
     }
 
     public void addOrUpdateMapView( String name, int indicatorGroupId, int indicatorId, String periodTypeName,
-        int periodId, String mapSource, String mapLegendType, int method, int classes, String colorLow, String colorHigh,
-        int mapLegendSetId, String longitude, String latitude, int zoom )
+        int periodId, String mapSource, String mapLegendType, int method, int classes, String colorLow,
+        String colorHigh, int mapLegendSetId, String longitude, String latitude, int zoom )
     {
         IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( indicatorGroupId );
 
@@ -704,7 +714,7 @@ public class DefaultMappingService
         Period period = periodService.getPeriod( periodId );
 
         MapLegendSet mapLegendSet = getMapLegendSet( mapLegendSetId );
-        
+
         String mapSourceType = (String) userSettingService
             .getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
 

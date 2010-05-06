@@ -182,6 +182,15 @@ public interface DataMartStore
      */
     Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level );
     
+    /**
+     * Retrieves the AggregatedMapValues for the given arguments.
+     * 
+     * @param indicatorId the Indicator identifier.
+     * @param periodId the Period identifier.
+     * @param level the OrganisationUnit level.
+     */
+    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds, int level );
+    
     // ----------------------------------------------------------------------
     // DataValue
     // ----------------------------------------------------------------------

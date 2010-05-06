@@ -3069,21 +3069,33 @@ var featureWindow = new Ext.Window({
         {
             xtype: 'menu',
             id: 'feature_m',
-            floating: false
+            floating: false,
+            items: [
+                {
+                    html: 'Centre in map',
+                    iconCls: 'no-icon',
+                    listeners: {
+                        'click': {
+                            fn: function() {
+                                MAP.setCenter(FEATURE.geometry.getBounds().getCenterLonLat());
+                            }
+                        }
+                    }
+                },
+                {
+                    html: 'Indicator value timeseries',
+                    iconCls: 'no-icon',
+                    listeners: {
+                        'click': {
+                            fn: function() {
+                                alert(1);
+                            }
+                        }
+                    }
+                }
+            ]
         }
     ]
-});
-
-Ext.getCmp('feature_m').add({
-	html: 'Centre',
-	iconCls: 'no-icon',
-	listeners: {
-		'click': {
-			fn: function() {
-				MAP.setCenter(FEATURE.geometry.getBounds().getCenterLonLat());
-			}
-		}
-	}
 });
 
 function onHoverSelectChoropleth(feature) {
@@ -3116,7 +3128,7 @@ function onClickSelectChoropleth(feature) {
 		var feature_popup = new Ext.Window({
 			title: '<span class="panel-title">Assign organisation unit</span>',
 			width: 180,
-			height: 60,
+			height: 65,
 			layout: 'fit',
 			plain: true,
 			html: '<div class="window-orgunit-text">' + feature.attributes[MAPDATA.nameColumn] + '</div>',
@@ -3136,14 +3148,9 @@ function onClickSelectChoropleth(feature) {
 		mapping.relation = feature.attributes[MAPDATA.nameColumn];
     }
 	else {
-        // var x = Ext.getCmp('east').x - 100;
-        // var y = Ext.getCmp('center').y + 41; 
-		// featureMenu.showAt([x,y]);
         featureWindow.setPagePosition(Ext.getCmp('east').x - 120, Ext.getCmp('center').y + 41);
         featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
         featureWindow.show();
-		// MAP.setCenter(feature.geometry.getBounds().getCenterLonLat(), MAP.getZoom()+1);
-		// sc(feature.attributes[MAPDATA.nameColumn], Ext.getCmp('indicator_cb').getRawValue());
 	}
 }
 
@@ -3218,7 +3225,7 @@ function getChoroplethData() {
     var periodId = Ext.getCmp('period_cb').getValue();
     var mapLayerPath = MAPDATA.mapLayerPath;
 	var url = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? 'getMapValuesByMap' : 'getMapValuesByLevel';
-	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodId: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: mapLayerPath };
+	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodIds: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: mapLayerPath };
 
     Ext.Ajax.request({
         url: path + url + type,

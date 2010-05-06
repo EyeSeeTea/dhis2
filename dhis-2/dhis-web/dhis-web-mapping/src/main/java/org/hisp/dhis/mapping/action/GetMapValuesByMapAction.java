@@ -44,7 +44,7 @@ public class GetMapValuesByMapAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private MappingService mappingService;
 
     public void setMappingService( MappingService mappingService )
@@ -63,14 +63,14 @@ public class GetMapValuesByMapAction
         this.indicatorId = indicatorId;
     }
 
-    private int periodId;
+    private Collection<Integer> periodIds;
 
-    public void setPeriodId( int periodId )
+    public void setPeriodIds( Collection<Integer> periodIds )
     {
-        this.periodId = periodId;
+        this.periodIds = periodIds;
     }
 
-    private String mapLayerPath;    
+    private String mapLayerPath;
 
     public void setMapLayerPath( String mapLayerPath )
     {
@@ -89,14 +89,14 @@ public class GetMapValuesByMapAction
     }
 
     // -------------------------------------------------------------------------
-    // Action implemenation
+    // Action implementation
     // -------------------------------------------------------------------------
-    
+
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedMapValues( indicatorId, periodId, mapLayerPath );
-        
+        object = mappingService.getAggregatedMapValues( indicatorId, periodIds, mapLayerPath );
+
         return SUCCESS;
     }
 }
