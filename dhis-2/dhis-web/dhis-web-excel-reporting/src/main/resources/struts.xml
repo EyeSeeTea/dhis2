@@ -165,14 +165,6 @@
 				/dhis-web-excel-reporting/responseError.vm</result>
 		</action>
 
-		<action name="restoreReportExcel"
-			class="org.hisp.dhis.reportexcel.action.RestoreReportExcelAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-excel-reporting/responseError.vm</result>
-		</action>
-
 		<!-- REPORT EXCEL CATEGORY ACTION -->
 
 		<action name="listDataElementGroupOrder"

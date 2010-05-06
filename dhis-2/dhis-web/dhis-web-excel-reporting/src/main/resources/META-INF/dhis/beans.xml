@@ -158,14 +158,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
 	</bean>
 
-	<bean id="org.hisp.dhis.reportexcel.action.RestoreReportExcelAction"
-		class="org.hisp.dhis.reportexcel.action.RestoreReportExcelAction"
-		scope="prototype">
-		<property name="reportExcelService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
-		<property name="selectionManager"
-			ref="org.hisp.dhis.reportexcel.state.SelectionManager" />
-	</bean>
-
 	<!-- REPORT EXCEL ASSOCIATION BEAN -->
 
 	<bean
