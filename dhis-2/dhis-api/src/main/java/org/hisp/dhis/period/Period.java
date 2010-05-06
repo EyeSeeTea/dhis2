@@ -74,13 +74,22 @@ public class Period
     {
     }
 
+    public Period( Period period )
+    {
+        this.id = period.getId();
+        this.periodType = period.getPeriodType();
+        this.startDate = period.getStartDate();
+        this.endDate = period.getEndDate();
+        this.name = period.getName();
+    }
+    
     protected Period( PeriodType periodType, Date startDate, Date endDate )
     {
         this.periodType = periodType;
         this.startDate = startDate;
         this.endDate = endDate;
     }
-
+    
     // -------------------------------------------------------------------------
     // Dimension
     // -------------------------------------------------------------------------
