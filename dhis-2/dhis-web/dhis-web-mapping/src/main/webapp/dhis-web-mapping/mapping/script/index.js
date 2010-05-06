@@ -3063,7 +3063,6 @@ Ext.onReady( function() {
 var popup;
 
 var featureWindow = new Ext.Window({
-    title: 'tittel',
     closeAction: 'hide',
     items: [
         {
@@ -3072,7 +3071,7 @@ var featureWindow = new Ext.Window({
             floating: false,
             items: [
                 {
-                    html: 'Centre in map',
+                    html: 'Centre orgunit in the map',
                     iconCls: 'no-icon',
                     listeners: {
                         'click': {
@@ -3088,9 +3087,87 @@ var featureWindow = new Ext.Window({
                     listeners: {
                         'click': {
                             fn: function() {
-                                alert(1);
+                                periodWindow.show();
                             }
                         }
+                    }
+                }
+            ]
+        }
+    ]
+});
+
+var periodTypeTimeseriesStore = new Ext.data.JsonStore({
+    url: path + 'getAllPeriodTypes' + type,
+    root: 'periodTypes',
+    fields: ['name'],
+    autoLoad: true
+});
+
+var periodTimeseriesStore = new Ext.data.JsonStore({
+    url: path + 'getPeriodsByPeriodType' + type,
+    baseParams: { name: 0 },
+    root: 'periods',
+    fields: ['id', 'name'],
+    autoLoad: false                
+});
+
+var periodWindow = new Ext.Window({
+    title: 'Select periods',
+    closeAction: 'hide',
+    defaults: { bodyStyle: 'padding:8px; border:0px' },
+    width: 250,
+    items: [
+        {
+            xtype: 'panel',
+            items: [
+                { html: '<div class="window-field-label-first">Period type</div>' },
+                {
+                    xtype: 'combo',
+                    id: 'periodtypetimeseries_cb',
+                    fieldLabel: 'Period type',
+                    typeAhead: true,
+                    editable: false,
+                    valueField: 'name',
+                    displayField: 'name',
+                    mode: 'remote',
+                    forceSelection: true,
+                    triggerAction: 'all',
+                    emptyText: emptytext,
+                    labelSeparator: labelseparator,
+                    selectOnFocus: true,
+                    width: combo_width,
+                    store: periodTypeTimeseriesStore,
+                    listeners: {
+                        'select': {
+                            fn: function() {
+                                var pt = Ext.getCmp('periodtypetimeseries_cb').getValue();
+                                periodTimeseriesStore.baseParams = { name: pt };
+                                periodTimeseriesStore.reload();
+                            },
+                            scope: this
+                        }
+                    }
+                },
+                { html: '<div class="window-field-label">Periods</div>' },
+                {
+                    xtype: 'multiselect',
+                    id: 'periodstimeseries_ms',
+                    dataFields: ['id','name'],
+                    valueField: 'id',
+                    displayField: 'name',
+                    width: multiselect_width,
+                    height: getMultiSelectHeight(),
+                    store: periodTimeseriesStore
+                },
+                {
+                    xtype: 'button',
+                    id: 'newview_b',
+                    isFormField: true,
+                    hideLabel: true,
+                    cls: 'window-button',
+                    text: 'Create graph',
+                    handler: function() {
                     }
                 }
             ]
