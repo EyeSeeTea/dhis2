@@ -48,27 +48,27 @@ public class Program
     private String name;
 
     private String description;
-    
+
     /**
-     * Description of Date of Enrollment
-     * This description is differ from each program
+     * Description of Date of Enrollment This description is differ from each
+     * program
      */
     private String dateOfEnrollmentDescription;
-    
+
     /**
-     * Description of Date of Incident
-     * This description is differ from each program
+     * Description of Date of Incident This description is differ from each
+     * program
      */
-    private String dateOfIncidentDescription; 
+    private String dateOfIncidentDescription;
 
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
 
     private Set<ProgramInstance> programInstances = new HashSet<ProgramInstance>();
 
     private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
-    
+
     private Set<ValidationCriteria> patientValidationCriteria = new HashSet<ValidationCriteria>();
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -82,7 +82,7 @@ public class Program
         this.name = name;
         this.description = description;
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -179,7 +179,7 @@ public class Program
     {
         return programStages;
     }
-    
+
     public String getDateOfEnrollmentDescription()
     {
         return dateOfEnrollmentDescription;
@@ -213,7 +213,7 @@ public class Program
     // -------------------------------------------------------------------------
     // Logic methods
     // -------------------------------------------------------------------------
-    
+
     public ProgramStage getProgramStageByStage( int stage )
     {
         int count = 1;
@@ -234,33 +234,42 @@ public class Program
         return null;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public ValidationCriteria isValid( Patient patient )
     {
         try
         {
             for ( ValidationCriteria criteria : patientValidationCriteria )
-            {                
-                // Get value for the validation criteria property from the Patient
-                
-                Field field = Patient.class.getDeclaredField( criteria.getProperty() );
-                field.setAccessible( true );
-                Object propertyValue = field.get( patient );
+            {
+                Object propertyValue;
+
+                if ( criteria.getProperty().equals( "age" ) )
+                {
+                    propertyValue = patient.getIntegerValueOfAge() + "";
+                }
+                else
+                {
+                    // Get value for the validation criteria property from the Patient
+
+                    Field field = Patient.class.getDeclaredField( criteria.getProperty() );
+                    field.setAccessible( true );
+                    propertyValue = field.get( patient );
+                }
                 
                 // Compare property value with compare value
-                
-                int i = ((Comparable)propertyValue).compareTo( (Comparable)criteria.getValue() );
-                
+
+                int i = ((Comparable) propertyValue).compareTo( (Comparable) criteria.getValue() );
+
                 // Return validation criteria if criteria is not met
-                
+
                 if ( i != criteria.getOperator() )
                 {
                     return criteria;
                 }
             }
-            
+
             // Return null if all criteria are met
-            
+
             return null;
         }
         catch ( Exception ex )

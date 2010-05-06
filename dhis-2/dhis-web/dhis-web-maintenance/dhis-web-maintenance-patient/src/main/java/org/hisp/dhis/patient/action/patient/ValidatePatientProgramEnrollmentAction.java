@@ -174,6 +174,15 @@ public class ValidatePatientProgramEnrollmentAction
 
                     return INPUT;
                 }
+                
+                Date DateOfEnrollment = format.parseDate( enrollmentDate );
+System.out.println("\n\n DateOfEnrollment.before( DateOfIncident) : " + DateOfEnrollment.before( DateOfIncident));
+                if ( DateOfEnrollment.before( DateOfIncident))
+                {
+                    message = i18n.getString( "date_of_incident_invalid" );
+
+                    return INPUT;
+                }
             }
         }
 
