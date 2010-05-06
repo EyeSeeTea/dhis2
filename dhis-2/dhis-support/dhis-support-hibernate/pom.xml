@@ -52,7 +52,11 @@
     </dependency>
     <dependency>
       <groupId>net.sf.ehcache</groupId>
-      <artifactId>ehcache</artifactId>
+      <artifactId>ehcache-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.ehcache</groupId>
+      <artifactId>ehcache-terracotta</artifactId>
     </dependency>
     <dependency>
       <groupId>c3p0</groupId>
