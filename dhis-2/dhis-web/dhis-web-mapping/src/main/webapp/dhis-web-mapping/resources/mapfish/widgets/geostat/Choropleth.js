@@ -234,7 +234,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     indicatorStore.reload();
                                 },
                                 failure: function() {
-                                  alert( 'Status', 'Error while retrieving data' );
+                                  alert( i18n_status , i18n_error_while_retrieving_data );
                                 }
                             });
                         }
@@ -382,7 +382,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'mapview_cb',
-            fieldLabel: 'Favorite',
+            fieldLabel: i18n_favorite ,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -390,7 +390,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: 'Optional',
+            emptyText: i18n_optional,
             selectOnFocus: true,
 			labelSeparator: labelseparator,
             width: combo_width,
@@ -451,7 +451,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 indicatorStore.reload();
                             },
                             failure: function() {
-                              alert( 'Status', 'Error while retrieving data' );
+                              alert( i18n_status , i18n_error_while_retrieving_data );
                             } 
                         });
                     },
@@ -465,7 +465,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'indicatorgroup_cb',
-            fieldLabel: 'Indicator group',
+            fieldLabel: i18n_indicator_group ,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -498,7 +498,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'indicator_cb',
-            fieldLabel: 'Indicator',
+            fieldLabel: i18n_indicator ,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -540,7 +540,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             },
                             failure: function()
                             {
-                              alert( 'Status', 'Error while retrieving data' );
+                              alert( i18n_status , i18n_error_while_retrieving_data );
                             } 
                         });
                     },
@@ -552,7 +552,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'periodtype_cb',
-            fieldLabel: 'Period type',
+            fieldLabel: i18n_period_type,
             typeAhead: true,
             editable: false,
             valueField: 'name',
@@ -584,7 +584,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'period_cb',
-            fieldLabel: 'Period',
+            fieldLabel: i18n_period ,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -614,7 +614,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'map_cb',
-            fieldLabel: 'Map',
+            fieldLabel: i18n_map ,
             typeAhead: true,
             editable: false,
             valueField: 'mapLayerPath',
@@ -646,7 +646,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            fieldLabel: 'Legend type',
+            fieldLabel: i18n_legend_type ,
             id: 'maplegendtype_cb',
             editable: false,
             valueField: 'value',
@@ -660,8 +660,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: [
-					[map_legend_type_automatic, 'Automatic'],
-					[map_legend_type_predefined, 'Predefined']
+					[map_legend_type_automatic, i18n_automatic],
+					[map_legend_type_predefined, i18n_predefined]
 				]
             }),
             listeners: {
@@ -705,7 +705,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            fieldLabel: 'Legend set',
+            fieldLabel: i18n_legend_set ,
             id: 'maplegendset_cb',
             editable: false,
             valueField: 'id',
@@ -729,7 +729,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'combo',
-            fieldLabel: 'Method',
+            fieldLabel: i18n_method ,
             id: 'method',
             editable: false,
             valueField: 'value',
@@ -743,9 +743,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: [
-					[1, 'Equal intervals'],
-					[2, 'Equal group count'],
-					[0, 'Fixed breaks']
+					[1, i18n_equal_intervals],
+					[2, i18n_equal_group_count],
+					[0, i18n_fixed_breaks]
 				]
             }),
             listeners: {
@@ -772,9 +772,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'textfield',
             id: 'bounds',
-            fieldLabel: 'Bounds',
+            fieldLabel: i18n_bounds,
 			labelSeparator: labelseparator,
-            emptyText: 'Comma separated values',
+            emptyText: i18n_comma_separated_values,
             isFormField: true,
             width: combo_width,
             hidden: true
@@ -782,7 +782,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            fieldLabel: 'Classes',
+            fieldLabel: i18n_classes ,
 			labelSeparator: labelseparator,
             id: 'numClasses',
             editable: false,
@@ -815,7 +815,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'colorfield',
-            fieldLabel: 'Low color',
+            fieldLabel: i18n_low_color,
 			labelSeparator: labelseparator,
             id: 'colorA_cf',
             allowBlank: false,
@@ -826,7 +826,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'colorfield',
-            fieldLabel: 'High color',
+            fieldLabel: i18n_high_color,
 			labelSeparator: labelseparator,
             id: 'colorB_cf',
             allowBlank: false,
@@ -843,7 +843,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             isFormField: true,
             fieldLabel: '',
             labelSeparator: '',
-            text: 'Refresh',
+            text: i18n_refresh,
             handler: function() {
                 this.layer.setVisibility(true);
                 this.classify(true);
@@ -881,7 +881,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
      *      Called on Ajax request failure.
      */
     requestFailure: function(request) {
-        OpenLayers.Console.error('Ajax request failed');
+        OpenLayers.Console.error( i18n_ajax_request_failed );
     },
     
     /**
@@ -909,7 +909,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
      */
     classify: function(exception, position) {
         if (!this.ready) {
-            Ext.MessageBox.alert('Error', 'Component init not complete');
+            Ext.MessageBox.alert( i18n_error , i18n_component_init_not_complete );
             return;
         }
 		
@@ -943,12 +943,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             !Ext.getCmp('period_cb').getValue() ||
             !Ext.getCmp('map_cb').getValue()) {
                 if (exception) {
-                    Ext.messageRed.msg('Thematic map', 'Form is not complete.');
+                    Ext.messageRed.msg( i18n_thematic_map , i18n_form_is_not_complete );
                 }
                 return;
         }
 
-		MASK.msg = 'Loading data...';
+		MASK.msg = i18n_loading;
         MASK.show();
 
 		if (!this.newUrl) {
