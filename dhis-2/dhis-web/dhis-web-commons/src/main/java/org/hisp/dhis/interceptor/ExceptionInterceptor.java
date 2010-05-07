@@ -30,10 +30,10 @@ package org.hisp.dhis.interceptor;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.security.AccessDeniedException;
-import org.springframework.security.InsufficientAuthenticationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.Interceptor;

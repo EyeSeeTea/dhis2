@@ -27,9 +27,10 @@ package org.hisp.dhis.encoding.velocity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 import org.apache.velocity.VelocityContext;
 
-import com.opensymphony.xwork2.util.TextUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -127,7 +128,7 @@ public class EncoderVelocityContext
 
         private String defaultEncode( String string )
         {
-            return TextUtils.htmlEncode( string );
+            return StringEscapeUtils.escapeHtml( string );
         }
     }
 }

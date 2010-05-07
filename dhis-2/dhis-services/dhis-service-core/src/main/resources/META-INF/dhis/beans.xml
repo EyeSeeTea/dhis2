@@ -704,7 +704,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="authenticationManager"
-    class="org.springframework.security.providers.ProviderManager">
+    class="org.springframework.security.authentication.ProviderManager">
     <property name="providers">
       <list>
         <ref local="daoAuthenticationProvider"/>
@@ -713,7 +713,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="daoAuthenticationProvider"
-    class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+    class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
     <property name="userDetailsService" ref="userDetailsService"/>
     <property name="passwordEncoder" ref="passwordEncoder"/>
     <property name="saltSource" ref="usernameSaltSource"/>
@@ -725,7 +725,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="passwordEncoder"
-    class="org.springframework.security.providers.encoding.Md5PasswordEncoder"/>
+    class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
   
   <bean id="usernameSaltSource"
     class="org.hisp.dhis.security.DefaultUsernameSaltSource"/>
