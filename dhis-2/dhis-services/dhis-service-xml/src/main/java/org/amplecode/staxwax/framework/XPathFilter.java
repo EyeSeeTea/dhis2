@@ -63,7 +63,6 @@ public class XPathFilter
      */
     public static Node findNode( InputStream in, String xpathExpr )
     {
-
         Node result = null;
 
         try
