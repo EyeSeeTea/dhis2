@@ -38,7 +38,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @version $Id: DefaultJDBCConfigurationProvider.java 5714 2008-09-17 13:05:36Z larshelg $
  */
 public class JdbcConfigurationFactoryBean
-    implements FactoryBean
+    implements FactoryBean<JdbcConfiguration>
 {
     private static final String KEY_DIALECT = "hibernate.dialect";
     private static final String KEY_DRIVER = "hibernate.connection.driver_class";
@@ -111,13 +111,13 @@ public class JdbcConfigurationFactoryBean
     // FactoryBean implementation
     // -------------------------------------------------------------------------
     
-    public Object getObject()
+    public JdbcConfiguration getObject()
         throws Exception
     {
         return jdbcConfiguration;
     }
 
-    public Class<?> getObjectType()
+    public Class<JdbcConfiguration> getObjectType()
     {
         return JdbcConfiguration.class;
     }

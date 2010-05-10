@@ -30,7 +30,6 @@ package org.hisp.dhis.system.deletion;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.junit.Test;
-import org.springframework.test.annotation.NotTransactional;
 
 /**
  * @author Lars Helge Overland
@@ -52,7 +51,6 @@ public class DeletionManagerTest
     }
     
     @Test
-    @NotTransactional
     public void testDeletionManager()
     {
         deletionManager.addDeletionHandler( new DummyDeletionHandler() );
