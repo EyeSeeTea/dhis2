@@ -414,16 +414,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 	</bean>
 
-	<bean
-		id="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
-		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
-		scope="prototype">
-		<property name="selectionTreeManager">
-			<ref bean="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		</property>
-		<property name="organisationUnitGroupService">
-			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
-		</property>
+	<bean id="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
+              class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
+              scope="prototype">
+          <property name="selectionTreeManager"
+                    ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
+          <property name="organisationUnitGroupService" 
+                    ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 	</bean>
 
 </beans>
