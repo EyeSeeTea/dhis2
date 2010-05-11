@@ -121,31 +121,41 @@ public class DefaultMappingService
     // -------------------------------------------------------------------------
 
     public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds,
-        String mapLayerPath )
+        String mapLayerPath, String featureId )
     {
-        Map map = getMapByMapLayerPath( mapLayerPath );
+        int level = getMapByMapLayerPath( mapLayerPath ).getOrganisationUnitLevel().getLevel();
 
-        int level = map.getOrganisationUnitLevel().getLevel();
+        int organisationUnitId = getMapOrganisationUnitRelationByFeatureId( featureId, mapLayerPath ).getOrganisationUnit().getId();
 
         Collection<AggregatedMapValue> mapValues;
 
-        if ( periodIds.size() == 1 )
+        if ( periodIds.size() < 2 )
         {
-            mapValues = dataMartStore.getAggregatedMapValues( indicatorId, periodIds.iterator().next(), level );
+            mapValues = dataMartStore.getAggregatedMapValues( indicatorId, periodIds.iterator().next(), level,
+                organisationUnitId );
         }
         else
         {
-            mapValues = dataMartStore.getAggregatedMapValues( indicatorId, periodIds, level );
+            mapValues = dataMartStore.getAggregatedMapValues( indicatorId, periodIds, level, organisationUnitId );
         }
 
-        java.util.Map<Integer, String> relations = getOrganisationUnitFeatureMap( getMapOrganisationUnitRelationsByMap( map ) );
+        // java.util.Map<Integer, String> relations =
+        // getOrganisationUnitFeatureMap( getMapOrganisationUnitRelationsByMap(
+        // map ) );
 
-        for ( AggregatedMapValue value : mapValues )
-        {
-            value.setFeatureId( relations.get( value.getOrganisationUnitId() ) );
-        }
+        // for ( AggregatedMapValue value : mapValues )
+        // {
+        // value.setFeatureId( relations.get( value.getOrganisationUnitId() ) );
+        // }
 
         return mapValues;
+    }
+
+    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, String mapLayerPath )
+    {
+        int level = getMapByMapLayerPath( mapLayerPath ).getOrganisationUnitLevel().getLevel();
+
+        return getAggregatedMapValues( indicatorId, periodId, level );
     }
 
     public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level )

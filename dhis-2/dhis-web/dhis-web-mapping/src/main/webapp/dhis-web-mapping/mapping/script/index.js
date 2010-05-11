@@ -26,6 +26,8 @@ var COLORINTERPOLATION;
 var EXPORTVALUES;
 /* Currently selected vector feature  */
 var FEATURE;
+/* Global chart for show/hide */
+var CHART;
 /* Current legend type and method */
 var LEGEND = new Object();
 LEGEND.type = map_legend_type_automatic;
@@ -3168,11 +3170,57 @@ var periodWindow = new Ext.Window({
                     cls: 'window-button',
                     text: 'Create graph',
                     handler: function() {
+                        var iid = Ext.getCmp('indicator_cb').getValue();
+                        var pids = Ext.getCmp('periodstimeseries_ms').getValue();
+                        
+                        
+                        
+                        setMapValueTimeseriesStore(iid, pids, URL);
+                        mapValueTimeseriesStore.reload();
+                        
+                        // mapValueTimeseriesStore.baseParams = { indicatorId: iid, mapLayerPath: URL, periodIds: params };
+                        // mapValueTimeseriesStore.reload();
                     }
                 }
             ]
         }
     ]
+});
+
+var mapValueTimeseriesStore;
+
+function setMapValueTimeseriesStore(iid, pids, URL) {
+    var array = new Array();
+    array = pids.split(',');
+    var params = array[0];
+
+    if (array.length > 1) {
+        for (var i = 1; i < array.length; i++) {
+            params += '&periodIds=' + array[i];
+        }
+    }
+    
+    mapValueTimeseriesStore = new Ext.data.JsonStore({
+        url: path + 'getMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
+        root: 'mapvalues',
+        fields:[ 'orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
+        sortInfo: { field: 'orgUnitName', direction: 'ASC' },
+        autoLoad: false,
+        listeners: {
+            'load': {
+                fn: function() {
+                    alert(1);
+                    // chartWindow.show();
+                }
+            }
+        }
+    });
+}
+
+var chartWindow = new Ext.Window({
+    closeAction: 'hide',
+    defaults: { bodyStyle: 'padding:8px; border:0px' },
+    items: CHART
 });
 
 function onHoverSelectChoropleth(feature) {
@@ -3232,8 +3280,6 @@ function onClickSelectChoropleth(feature) {
 }
 
 function onClickUnselectChoropleth(feature) {}
-
-
 
 /* Section: map data */
 function loadMapData(redirect, position) {
@@ -3302,7 +3348,7 @@ function getChoroplethData() {
     var periodId = Ext.getCmp('period_cb').getValue();
     var mapLayerPath = MAPDATA.mapLayerPath;
 	var url = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? 'getMapValuesByMap' : 'getMapValuesByLevel';
-	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodIds: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: mapLayerPath };
+	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodId: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: mapLayerPath };
 
     Ext.Ajax.request({
         url: path + url + type,
@@ -3323,7 +3369,7 @@ function getChoroplethData() {
 			}
 
 			for (var i = 0; i < mapvalues.length; i++) {
-				mv[mapvalues[i].featureId] = mapvalues[i].featureId ? mapvalues[i].value : '';
+				mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
 			}
 
 			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {

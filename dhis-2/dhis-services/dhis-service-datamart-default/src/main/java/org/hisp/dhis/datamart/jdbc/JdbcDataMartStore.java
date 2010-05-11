@@ -308,7 +308,38 @@ public class JdbcDataMartStore
         }
     }
     
-    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds, int level )
+    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level, int organisationUnitId )
+    {
+        final StatementHolder holder = statementManager.getHolder();
+        
+        final ObjectMapper<AggregatedMapValue> mapper = new ObjectMapper<AggregatedMapValue>();
+        
+        try
+        {
+            final String sql = 
+                "SELECT o.organisationunitid, o.name, a.value, a.periodid, a.factor, a.numeratorvalue, a.denominatorvalue " +
+                "FROM aggregatedindicatorvalue AS a, organisationunit AS o " +
+                "WHERE a.indicatorid = " + indicatorId + " " +
+                "AND a.periodid = " + periodId + " " +
+                "AND a.level = " + level + " " +
+                "AND a.organisationunitid = o.organisationunitid" + 
+                "AND o.organisationunitid = " + organisationUnitId;
+            
+            final ResultSet resultSet = holder.getStatement().executeQuery( sql );
+            
+            return mapper.getCollection( resultSet, new AggregatedMapValueRowMapper() );
+        }
+        catch ( SQLException ex )
+        {
+            throw new RuntimeException( "Failed to get aggregated map values", ex );
+        }
+        finally
+        {
+            holder.close();
+        }
+    }
+    
+    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds, int level, int organisationUnitId )
     {
         final StatementHolder holder = statementManager.getHolder();
         
@@ -322,7 +353,8 @@ public class JdbcDataMartStore
                 "WHERE a.indicatorid = " + indicatorId + " " +
                 "AND a.periodid IN ( " + getCommaDelimitedString( periodIds ) + " ) " +
                 "AND a.level = " + level + " " +
-                "AND a.organisationunitid = o.organisationunitid";
+                "AND a.organisationunitid = o.organisationunitid " + 
+                "AND o.organisationunitid = " + organisationUnitId;
             
             final ResultSet resultSet = holder.getStatement().executeQuery( sql );
             

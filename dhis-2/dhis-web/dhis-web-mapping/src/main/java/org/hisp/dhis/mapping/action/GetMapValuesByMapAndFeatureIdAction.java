@@ -35,10 +35,10 @@ import org.hisp.dhis.mapping.MappingService;
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetMapValuesByMapAction
+public class GetMapValuesByMapAndFeatureIdAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -63,11 +63,11 @@ public class GetMapValuesByMapAction
         this.indicatorId = indicatorId;
     }
 
-    private int periodId;
+    private Collection<Integer> periodIds;
 
-    public void setPeriodId( int periodId )
+    public void setPeriodIds( Collection<Integer> periodIds )
     {
-        this.periodId = periodId;
+        this.periodIds = periodIds;
     }
 
     private String mapLayerPath;
@@ -75,6 +75,13 @@ public class GetMapValuesByMapAction
     public void setMapLayerPath( String mapLayerPath )
     {
         this.mapLayerPath = mapLayerPath;
+    }
+    
+    private String featureId;
+
+    public void setFeatureId( String featureId )
+    {
+        this.featureId = featureId;
     }
 
     // -------------------------------------------------------------------------
@@ -95,7 +102,7 @@ public class GetMapValuesByMapAction
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedMapValues( indicatorId, periodId, mapLayerPath );
+        object = mappingService.getAggregatedMapValues( indicatorId, periodIds, mapLayerPath, featureId );
 
         return SUCCESS;
     }

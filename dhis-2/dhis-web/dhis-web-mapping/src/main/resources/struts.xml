@@ -78,6 +78,12 @@
 			<result name="success" type="velocity-json">
 				/dhis-web-mapping/jsonAggregatedMapValues.vm</result>
 		</action>
+		
+		<action name="getMapValuesByMapAndFeatureId"
+            class="org.hisp.dhis.mapping.action.GetMapValuesByMapAndFeatureIdAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
 
 		<action name="setMapSourceTypeUserSetting"
 			class="org.hisp.dhis.mapping.action.SetMapSourceTypeUserSettingAction">
