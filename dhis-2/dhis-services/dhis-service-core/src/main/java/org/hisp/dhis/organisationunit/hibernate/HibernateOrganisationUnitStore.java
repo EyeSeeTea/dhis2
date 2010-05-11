@@ -158,7 +158,6 @@ public class HibernateOrganisationUnitStore
      * @param date The date to assign to the organisation unit hierarchy
      * @return Id of the organisation unit hierarchy
      */
-    @SuppressWarnings( "unchecked" )
     public int addOrganisationUnitHierarchy( Date date )
     {
         Session session = sessionFactory.getCurrentSession();

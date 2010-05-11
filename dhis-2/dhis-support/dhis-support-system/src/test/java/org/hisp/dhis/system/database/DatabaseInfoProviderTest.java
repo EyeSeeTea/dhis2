@@ -31,7 +31,6 @@ import static junit.framework.Assert.assertNotNull;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
-import org.springframework.test.annotation.NotTransactional;
 
 /**
  * @author Lars Helge Overland
@@ -57,7 +56,6 @@ public class DatabaseInfoProviderTest
     // -------------------------------------------------------------------------
 
     @Test
-    @NotTransactional
     public void testGetDatabaseInfo()
     {
         DatabaseInfo info = provider.getDatabaseInfo();

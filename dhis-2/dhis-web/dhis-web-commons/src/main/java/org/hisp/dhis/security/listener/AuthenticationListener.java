@@ -38,7 +38,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  * @author Lars Helge Overland
  */
 public class AuthenticationListener
-    implements ApplicationListener
+    implements ApplicationListener<ApplicationEvent>
 {
     private UserAuditService userAuditService;
     

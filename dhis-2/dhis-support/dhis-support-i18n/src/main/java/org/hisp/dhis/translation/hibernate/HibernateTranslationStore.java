@@ -180,7 +180,6 @@ public class HibernateTranslationStore
         return locales;
     }
 
-    @SuppressWarnings( "unchecked" )
     public Translation getTranslation( String className, Locale locale, String property, String value, int nonId )
     {
         Session session = sessionFactory.getCurrentSession();

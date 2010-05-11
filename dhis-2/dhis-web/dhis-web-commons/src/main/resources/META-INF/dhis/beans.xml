@@ -26,8 +26,7 @@
         <sec:filter-chain pattern="/dhis-web-commons/security/**" filters="none"/>
         <sec:filter-chain pattern="/dhis-web-commons/util/**" filters="none"/>
         <sec:filter-chain pattern="/dhis-web-commons/css/**" filters="none"/>
-        <sec:filter-chain pattern="/**"
-            filters="httpSessionContextIntegrationFilter,authenticationProcessingFilter,logoutFilter,automaticAccessFilter,requiredLoginFilter"/>
+        <sec:filter-chain pattern="/**" filters="httpSessionContextIntegrationFilter,authenticationProcessingFilter,logoutFilter,automaticAccessFilter,requiredLoginFilter"/>
         </sec:filter-chain-map>
     </bean>
 		
@@ -286,8 +285,8 @@
 	<bean id="authenticationProcessingFilter"
 		class="org.springframework.security.web.authentication.AuthenticationProcessingFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
-                <property name="authenticationFailureHandler" ref="failureHandler" />
-                <property name="authenticationSuccessHandler" ref="successHandler" />
+        <property name="authenticationFailureHandler" ref="failureHandler" />
+        <property name="authenticationSuccessHandler" ref="successHandler" />
 		<property name="filterProcessesUrl" value="/dhis-web-commons-security/login.action" />
 	</bean>
 
