@@ -36,7 +36,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @version $Id$
  */
 public class HibernatePropertiesFactoryBean
-    implements FactoryBean
+    implements FactoryBean<Properties>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -53,14 +53,13 @@ public class HibernatePropertiesFactoryBean
     // FactoryBean implementation
     // -------------------------------------------------------------------------
 
-    public Object getObject()
+    public Properties getObject()
         throws Exception
     {
         return hibernateConfigurationProvider.getConfiguration().getProperties();
     }
 
-    @SuppressWarnings("unchecked")
-    public Class getObjectType()
+    public Class<Properties> getObjectType()
     {
         return Properties.class;
     }

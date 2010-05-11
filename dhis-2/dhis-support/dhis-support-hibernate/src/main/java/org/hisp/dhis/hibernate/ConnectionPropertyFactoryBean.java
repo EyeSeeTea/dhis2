@@ -34,7 +34,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @version $Id$
  */
 public class ConnectionPropertyFactoryBean
-    implements FactoryBean
+    implements FactoryBean<String>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -58,13 +58,13 @@ public class ConnectionPropertyFactoryBean
     // FactoryBean implementation
     // -------------------------------------------------------------------------
 
-    public Object getObject()
+    public String getObject()
         throws Exception
     {
         return hibernateConfigurationProvider.getConfiguration().getProperty( hibernateProperty );
     }
 
-    public Class<?> getObjectType()
+    public Class<String> getObjectType()
     {
         return String.class;
     }

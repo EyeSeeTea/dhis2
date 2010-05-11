@@ -75,25 +75,13 @@ public class StreamUtils
         return classLoader.getResourceAsStream( name );
     }
 
-    /**
-     * Writes the content of the first File to the second File.
-     * 
-     * @param inFile the input File.
-     * @param outFile the output File.
-     */
-    public static void write( File inFile, File outFile )
+    public static void streamcopy(BufferedInputStream in, BufferedOutputStream out)
     {
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        
         int b = 0;
-        
+
         try
         {
-            in = new BufferedInputStream( new FileInputStream( inFile ) );
-            out = new BufferedOutputStream( new FileOutputStream( outFile ) );
-            
-            while ( ( b = in.read() ) != -1 )
+           while ( ( b = in.read() ) != -1 )
             {
                 out.write( b );
             }
@@ -106,8 +94,35 @@ public class StreamUtils
         {
             closeInputStream( in );
             closeOutputStream( out );
-
         }
+    }
+    /**
+     * Writes the content of the first File to the second File.
+     * 
+     * @param inFile the input File.
+     * @param outFile the output File.
+     */
+    public static void write( File inFile, File outFile )
+    {
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+
+        try {
+            in = new BufferedInputStream( new FileInputStream( inFile ) );
+            out = new BufferedOutputStream( new FileOutputStream( outFile ) );
+
+            streamcopy(in, out);
+        }
+        catch ( IOException ex )
+        {
+            throw new RuntimeException( ex );
+        }
+        finally
+        {
+            closeInputStream( in );
+            closeOutputStream( out );
+        }
+        
     }
 
     /**

@@ -30,11 +30,6 @@ package org.hisp.dhis.security.hibernate;
 import java.util.HashSet;
 import java.util.Set;
 
-import  org.springframework.security.GrantedAuthority;
-import  org.springframework.security.GrantedAuthorityImpl;
-import  org.springframework.security.userdetails.UserDetails;
-import  org.springframework.security.userdetails.UserDetailsService;
-import  org.springframework.security.userdetails.UsernameNotFoundException;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -42,6 +37,12 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -80,7 +81,7 @@ public class HibernateUserDetailsService
 
         GrantedAuthority[] authorities = getGrantedAuthorities( credentials );
 
-        return new  org.springframework.security.userdetails.User( credentials.getUsername(), credentials.getPassword(), true,
+        return new User( credentials.getUsername(), credentials.getPassword(), true,
             true, true, true, authorities );
     }
 
