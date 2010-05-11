@@ -41,20 +41,7 @@ import org.hisp.dhis.user.UserSettingService;
 public class DatabaseLocaleManager
     implements LocaleManager
 {
-
-    private String userSettingKey;
-
-    public void setUserSettingKey( String userSettingKey )
-    {
-        this.userSettingKey = userSettingKey;
-    }
-
-    private Locale defaultLocale;
-
-    public void setDefaultLocale( Locale defaultLocale )
-    {
-        this.defaultLocale = defaultLocale;
-    }
+    private static final String KEY_USER_SETTING = "localeUserSetting";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -74,19 +61,7 @@ public class DatabaseLocaleManager
     @Override
     public Locale getCurrentLocale()
     {
-        Locale locale = getUserSelectedDBLocale();
-
-        if ( locale != null )
-        {
-            return locale;
-        }
-
-        if ( defaultLocale != null )
-        {
-            return defaultLocale;
-        }
-
-        return DHIS_STANDARD_LOCALE;
+        return (Locale) userSettingService.getUserSetting( KEY_USER_SETTING, DHIS_STANDARD_LOCALE );
     }
 
     @Override
@@ -94,7 +69,7 @@ public class DatabaseLocaleManager
     {
         try
         {
-            userSettingService.saveUserSetting( userSettingKey, locale );
+            userSettingService.saveUserSetting( KEY_USER_SETTING, locale );
         }
         catch ( NoCurrentUserException e )
         {
@@ -107,7 +82,7 @@ public class DatabaseLocaleManager
     {
         List<Locale> locales = new ArrayList<Locale>();
 
-        Locale userLocale = getUserSelectedDBLocale();
+        Locale userLocale = (Locale) userSettingService.getUserSetting( KEY_USER_SETTING, null );
 
         if ( userLocale != null )
         {
@@ -124,10 +99,4 @@ public class DatabaseLocaleManager
     {
         return DHIS_STANDARD_LOCALE;
     }
-
-    private Locale getUserSelectedDBLocale()
-    {
-        return (Locale) userSettingService.getUserSetting( this.userSettingKey, null );
-    }
-
 }

@@ -37,7 +37,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.i18n.util.LocaleUtils;
+import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationStore;
 
