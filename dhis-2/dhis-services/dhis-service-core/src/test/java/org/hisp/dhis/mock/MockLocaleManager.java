@@ -1,4 +1,4 @@
-package org.hisp.dhis.i18n.locale;
+package org.hisp.dhis.mock;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -31,31 +31,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.hisp.dhis.i18n.util.LocaleUtils;
+import org.hisp.dhis.i18n.locale.LocaleManager;
 
 /**
  * @author Oyvind Brucker
  */
-public class SessionLocaleManager
+public class MockLocaleManager
     implements LocaleManager
 {
     private Locale locale = null;
 
-    private String systemLocale;
-
-    public void setSystemLocale( String systemLocale )
-    {
-        this.systemLocale = systemLocale;
-    }
+    // -------------------------------------------------------------------------
+    // LocaleManager implementation
+    // -------------------------------------------------------------------------
 
     public Locale getCurrentLocale()
     {
-        if ( locale == null )
-        {
-            return LocaleUtils.getLocale( systemLocale );
-        }
-
-        return locale;
+        return locale != null ? locale : DHIS_STANDARD_LOCALE;
     }
 
     public void setCurrentLocale( Locale locale )
@@ -67,11 +59,11 @@ public class SessionLocaleManager
     {
         List<Locale> locales = new ArrayList<Locale>();
 
-        locales.add( LocaleUtils.getLocale( systemLocale ) );
+        locales.add( DHIS_STANDARD_LOCALE );
 
         if ( locale != null )
         {
-            if ( !locale.equals( LocaleUtils.getLocale( systemLocale ) ) )
+            if ( !locale.equals( DHIS_STANDARD_LOCALE ) )
             {
                 locales.add( locale );
             }
@@ -82,6 +74,6 @@ public class SessionLocaleManager
 
     public Locale getFallbackLocale()
     {
-        return LocaleUtils.getLocale( systemLocale );
+        return DHIS_STANDARD_LOCALE;
     }
 }

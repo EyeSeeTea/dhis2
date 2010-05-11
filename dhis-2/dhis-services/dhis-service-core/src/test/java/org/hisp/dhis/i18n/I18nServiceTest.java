@@ -40,6 +40,7 @@ import java.util.Map;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.i18n.locale.LocaleManager;
+import org.hisp.dhis.mock.MockLocaleManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,8 +64,10 @@ public class I18nServiceTest
         throws Exception
     {
         i18nService = (I18nService) getBean( I18nService.ID );
-
-        localeManager = (LocaleManager) getBean( "org.hisp.dhis.i18n.locale.LocaleManagerDb" );
+        
+        localeManager = new MockLocaleManager(); //(LocaleManager) getBean( "org.hisp.dhis.i18n.locale.LocaleManagerDb" );
+        
+        setDependency( i18nService, "localeManager", localeManager );
     }
 
     // -------------------------------------------------------------------------

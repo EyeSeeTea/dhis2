@@ -42,7 +42,6 @@ import org.junit.Test;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class TranslationServiceTest
     extends DhisSpringTest
@@ -58,7 +57,7 @@ public class TranslationServiceTest
     {
         translationService = (TranslationService) getBean( TranslationService.ID );
     }
-
+    
     // -------------------------------------------------------------------------
     // Testdata
     // -------------------------------------------------------------------------

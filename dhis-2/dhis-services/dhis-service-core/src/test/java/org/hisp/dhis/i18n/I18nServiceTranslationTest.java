@@ -39,6 +39,7 @@ import java.util.Map;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.locale.LocaleManager;
+import org.hisp.dhis.mock.MockLocaleManager;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
 import org.junit.Before;
@@ -78,9 +79,11 @@ public class I18nServiceTranslationTest
     {
         i18nService = (I18nService) getBean( I18nService.ID );
 
-        localeManager = (LocaleManager) getBean( "org.hisp.dhis.i18n.locale.LocaleManagerDb" );
+        localeManager = new MockLocaleManager(); // (LocaleManager) getBean( "org.hisp.dhis.i18n.locale.LocaleManagerDb" );
         
         translationService = (TranslationService) getBean( TranslationService.ID );
+
+        setDependency( i18nService, "localeManager", localeManager );
         
         localeManager.setCurrentLocale( localeA );
         

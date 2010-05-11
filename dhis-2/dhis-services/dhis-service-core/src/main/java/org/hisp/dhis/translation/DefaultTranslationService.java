@@ -1,4 +1,4 @@
-package org.hisp.dhis.translation.impl;
+package org.hisp.dhis.translation;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
