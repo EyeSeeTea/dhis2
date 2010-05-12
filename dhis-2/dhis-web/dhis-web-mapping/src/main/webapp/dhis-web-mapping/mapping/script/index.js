@@ -3090,6 +3090,7 @@ var featureWindow = new Ext.Window({
                     listeners: {
                         'click': {
                             fn: function() {
+                                periodWindow.setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 135);
                                 periodWindow.show();
                             }
                         }
@@ -3111,7 +3112,7 @@ var periodTimeseriesStore = new Ext.data.JsonStore({
     url: path + 'getPeriodsByPeriodType' + type,
     baseParams: { name: 0 },
     root: 'periods',
-    fields: ['id', 'name'],
+    fields: ['id', 'name', 'value'],
     autoLoad: false                
 });
 
@@ -3156,7 +3157,7 @@ var periodWindow = new Ext.Window({
                 {
                     xtype: 'multiselect',
                     id: 'periodstimeseries_ms',
-                    dataFields: ['id','name'],
+                    dataFields: ['id', 'name'],
                     valueField: 'id',
                     displayField: 'name',
                     width: multiselect_width,
@@ -3174,13 +3175,16 @@ var periodWindow = new Ext.Window({
                         var iid = Ext.getCmp('indicator_cb').getValue();
                         var pids = Ext.getCmp('periodstimeseries_ms').getValue();
                         
+                        var pidArray = new Array();
+                        pidArray = pids.split(',');
                         
+                        var pnameArray = new Array();
+                        for (var i = 0; i < pidArray.length; i++) {
+                            pnameArray[i] = periodTimeseriesStore.getById(pidArray[i]).data.name;
+                        }
                         
-                        setMapValueTimeseriesStore(iid, pids, URL);
+                        setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL);
                         mapValueTimeseriesStore.reload();
-                        
-                        // mapValueTimeseriesStore.baseParams = { indicatorId: iid, mapLayerPath: URL, periodIds: params };
-                        // mapValueTimeseriesStore.reload();
                     }
                 }
             ]
@@ -3190,28 +3194,35 @@ var periodWindow = new Ext.Window({
 
 var mapValueTimeseriesStore;
 
-function setMapValueTimeseriesStore(iid, pids, URL) {
-    var array = new Array();
-    array = pids.split(',');
-    var params = array[0];
-
-    if (array.length > 1) {
-        for (var i = 1; i < array.length; i++) {
-            params += '&periodIds=' + array[i];
+function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
+    var params = pidArray[0];
+    if (pidArray.length > 1) {
+        for (var i = 1; i < pidArray.length; i++) {
+            params += '&periodIds=' + pidArray[i];
         }
     }
     
     mapValueTimeseriesStore = new Ext.data.JsonStore({
         url: path + 'getMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
         root: 'mapvalues',
-        fields:[ 'orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
-        sortInfo: { field: 'orgUnitName', direction: 'ASC' },
+        fields:['orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
         autoLoad: false,
         listeners: {
             'load': {
                 fn: function() {
-                    alert(1);
-                    CHART = getChart();
+                    var title = FEATURE.attributes[MAPDATA.nameColumn];
+                    var indicator = Ext.getCmp('indicator_cb').getRawValue();
+                    
+                    var valueArray = new Array();
+                    for (var i = 0; i < pidArray.length; i++) {
+                        for (var j = 0; j < mapValueTimeseriesStore.getCount(); j++) {
+                            if (mapValueTimeseriesStore.getAt(j).data.periodId == pidArray[i]) {
+                                valueArray[i] = parseFloat(mapValueTimeseriesStore.getAt(j).data.value);
+                            }
+                        }
+                    }
+
+                    CHART = getChart(title + ', ' + indicator, pnameArray, FEATURE.attributes[MAPDATA.nameColumn], valueArray);
                     CHART.show();
                 }
             }
@@ -3219,9 +3230,9 @@ function setMapValueTimeseriesStore(iid, pids, URL) {
     });
 }
 
-function getChart() {
+function getChart(title, x, name, valueArray) {
     var chart = new Ext.Window({
-        title: 'Chart',
+        title: 'Indicator value timeseries',
         resizeable: true,
         width: 800,
         height: 450,
@@ -3235,31 +3246,29 @@ function getChart() {
                     chart: {
                         id: 'thechart',
                         defaultSeriesType: 'line',
-                        margin: [50, 150, 60, 80]
+                        margin: [50, 50, 60, 50]
                     },
                     title: {
-                        text: 'title',
+                        text: title,
                         style: {
-                            margin: '10px 100px 0 0' // center it
-                        }
-                    },
-                    subtitle: {
-                        text: '',
-                        style: {
-                            margin: '0 100px 0 0' // center it
+                            margin: '10px 50px 0 0', // center it
+                            font: 'bold 20px arial',
+                            color: '#555'
                         }
                     },
                     xAxis: {
-                        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                        title: {
-                            text: 'Month'
+                        categories: x,
+                        labels: {
+                            rotation: -25,
+                            align: 'right',
+                            style: {
+                                font: 'normal 12px arial,lucida sans unicode',
+                                color: '#555'
+                            }
                         }
                     },
                     yAxis: {
-                        title: {
-                            text: 'Temperature (°C)'
-                        },
+                        title: '',
                         plotLines: [
                             {
                                 value: 0,
@@ -3271,22 +3280,16 @@ function getChart() {
                     tooltip: {
                         formatter: function() {
                             return '<b>'+ this.series.name +'</b><br/>'+
-                                this.x +': '+ this.y +'°C';
+                                this.x +': '+ this.y;
                         }
                     },
                     legend: {
-                        layout: 'vertical',
-                        style: {
-                            left: 'auto',
-                            bottom: 'auto',
-                            right: '10px',
-                            top: '100px'
-                        }
+                        enabled: false
                     },
                     series: [
                         {
-                            name: 'Tokyo',
-                            data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+                            name: name,
+                            data: valueArray
                         }
                     ]
                 }
@@ -3353,9 +3356,10 @@ function onClickSelectChoropleth(feature) {
 		mapping.relation = feature.attributes[MAPDATA.nameColumn];
     }
 	else {
-        featureWindow.setPagePosition(Ext.getCmp('east').x - 120, Ext.getCmp('center').y + 41);
+        featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
         featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
         featureWindow.show();
+        periodWindow.hide();
 	}
 }
 
