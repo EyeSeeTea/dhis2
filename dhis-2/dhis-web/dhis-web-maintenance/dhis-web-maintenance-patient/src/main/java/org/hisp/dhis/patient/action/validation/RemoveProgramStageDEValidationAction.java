@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,79 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.validationcriteria;
+package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.validation.ValidationCriteria;
-import org.hisp.dhis.validation.ValidationCriteriaService;
+import org.hisp.dhis.program.ProgramStageDataElementValidation;
+import org.hisp.dhis.program.ProgramStageDataElementValidationService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version UpdateValidationCriteriaAction.java Apr 29, 2010 10:44:36 AM
+ * @version AddProgramStageDataElementValidation.java May 6, 2010 1:28:06 PM
  */
-public class UpdateValidationCriteriaAction
+public class RemoveProgramStageDEValidationAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ValidationCriteriaService validationCriteriaService;
-
-    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
-    {
-        this.validationCriteriaService = validationCriteriaService;
-    }
+    private ProgramStageDataElementValidationService validationService;
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
     private int id;
-    
-    private String name;
-
-    private String description;
-
-    private String property;
-
-    private int operator;
-
-    private String value;
 
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
 
-    public void setName( String name )
+    public void setValidationService( ProgramStageDataElementValidationService validationService )
     {
-        this.name = name;
+        this.validationService = validationService;
     }
-    
+
     public void setId( int id )
     {
         this.id = id;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    public void setProperty( String property )
-    {
-        this.property = property;
-    }
-
-    public void setOperator( int operator )
-    {
-        this.operator = operator;
-    }
-
-    public void setValue( String value )
-    {
-        this.value = value;
     }
 
     // -------------------------------------------------------------------------
@@ -108,17 +73,10 @@ public class UpdateValidationCriteriaAction
     public String execute()
         throws Exception
     {
-        ValidationCriteria criteria = validationCriteriaService.getValidationCriteria( id );
-
-        criteria.setName( name );
-        criteria.setDescription( description );
-        criteria.setProperty( property );
-        criteria.setOperator( operator );
-        criteria.setValue( value );
-
-        validationCriteriaService.updateValidationCriteria( criteria );
+        ProgramStageDataElementValidation validation = validationService.getProgramStageDataElementValidation( id );
+        
+        validationService.deleteProgramStageDataElementValidation( validation );
 
         return SUCCESS;
     }
-
 }

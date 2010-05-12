@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,51 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.validationcriteria;
+package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.validation.ValidationCriteria;
-import org.hisp.dhis.validation.ValidationCriteriaService;
+import java.util.Collection;
+
+import org.hisp.dhis.program.ProgramStageDataElementValidation;
+import org.hisp.dhis.program.ProgramStageDataElementValidationService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version RemoveValidationCriteriaAction.java Apr 29, 2010 10:45:36 AM
+ * @version GetProgramStageDEValidationListAction.java May 6, 2010 1:28:06 PM
  */
-public class GetValidationCriteriaAction
+public class GetProgramStageDEValidationListAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ValidationCriteriaService validationCriteriaService;
-
-    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
-    {
-        this.validationCriteriaService = validationCriteriaService;
-    }
+    private ProgramStageDataElementValidationService programStageDataElementValidationService;
 
     // -------------------------------------------------------------------------
-    // Input && Output
+    // Out put
     // -------------------------------------------------------------------------
 
-    private int id;
-
-    private ValidationCriteria validationCriteria;
+    private Collection<ProgramStageDataElementValidation> validations;
 
     // -------------------------------------------------------------------------
     // Getter && Setter
     // -------------------------------------------------------------------------
 
-    public void setId( int id )
+    public void setProgramStageDataElementValidationService(
+        ProgramStageDataElementValidationService programStageDataElementValidationService )
     {
-        this.id = id;
+        this.programStageDataElementValidationService = programStageDataElementValidationService;
     }
 
-    public ValidationCriteria getValidationCriteria()
+    public Collection<ProgramStageDataElementValidation> getValidations()
     {
-        return validationCriteria;
+        return validations;
     }
 
     // -------------------------------------------------------------------------
@@ -80,9 +76,8 @@ public class GetValidationCriteriaAction
     public String execute()
         throws Exception
     {
-        validationCriteria = validationCriteriaService.getValidationCriteria( id );
+        validations = programStageDataElementValidationService.getAllProgramStageDataElementValidations();
 
         return SUCCESS;
     }
-
 }

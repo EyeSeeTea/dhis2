@@ -33,7 +33,7 @@
                 </td>
 				
 				<td style="text-align:center"#alternate( $mark )>
-                  <a href="defineCriteriaAssociationsForm.action?id=$program.id" title="$i18n.getString( "define_associations" )"><img src="images/criteria.gif" alt="$i18n.getString( "assign_criteria" )"></a>
+                  <a href="defineValidationAssociationsForm.action?id=$program.id" title="$i18n.getString( "define_associations" )"><img src="images/criteria.gif" alt="$i18n.getString( "assign_criteria" )"></a>
                 </td>
                 
                 <td style="text-align:center"#alternate( $mark )>

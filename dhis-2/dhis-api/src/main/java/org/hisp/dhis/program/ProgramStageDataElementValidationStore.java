@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,62 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.validationcriteria;
+package org.hisp.dhis.program;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
-import org.hisp.dhis.validation.ValidationCriteria;
-import org.hisp.dhis.validation.ValidationCriteriaService;
-import org.hisp.dhis.validation.comparator.ValidationCriteriaComparator;
-
-import com.opensymphony.xwork2.Action;
-
-
+import org.hisp.dhis.common.GenericStore;
 
 /**
  * @author Chau Thu Tran
- * @version AddValidationCriteriaAction.java Apr 29, 2010 10:42:36 AM
+ * @version ProgramStageDataElementValidationStore.java May 7, 2010 10:08:04 AM
  */
-public class GetValidationCriteriaListAction
-    implements Action
+public interface ProgramStageDataElementValidationStore
+    extends GenericStore<ProgramStageDataElementValidation>
 {
-    // -------------------------------------------------------------------------
-    // Dependency
-    // -------------------------------------------------------------------------
-
-    private ValidationCriteriaService validationCriteriaService;
-
-    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
-    {
-        this.validationCriteriaService = validationCriteriaService;
-    }
+    String ID = ProgramStageDataElementValidationStore.class.getName();
 
     // -------------------------------------------------------------------------
-    // Output
+    // ProgramStage - DataElement validation
     // -------------------------------------------------------------------------
 
-    private List<ValidationCriteria> criterias;
+    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( Program program );
 
-    public List<ValidationCriteria> getCriterias()
-    {
-        return criterias;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action Implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        criterias = new ArrayList<ValidationCriteria>( validationCriteriaService.getAllValidationCriterias() );
-
-        Collections.sort( criterias, new ValidationCriteriaComparator() );
-
-        return SUCCESS;
-    }
+    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( ProgramStageDataElement element );
 
 }

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.validationcriteria;
+package org.hisp.dhis.patient.action.validation;
 
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
@@ -34,9 +34,9 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version AddValidationCriteriaAction.java Apr 29, 2010 10:42:36 AM
+ * @version UpdateValidationCriteriaAction.java Apr 29, 2010 10:44:36 AM
  */
-public class AddValidationCriteriaAction
+public class UpdateValidationCriteriaAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -54,6 +54,8 @@ public class AddValidationCriteriaAction
     // Input
     // -------------------------------------------------------------------------
 
+    private int id;
+    
     private String name;
 
     private String description;
@@ -71,6 +73,11 @@ public class AddValidationCriteriaAction
     public void setName( String name )
     {
         this.name = name;
+    }
+    
+    public void setId( int id )
+    {
+        this.id = id;
     }
 
     public void setDescription( String description )
@@ -101,7 +108,7 @@ public class AddValidationCriteriaAction
     public String execute()
         throws Exception
     {
-        ValidationCriteria criteria = new ValidationCriteria();
+        ValidationCriteria criteria = validationCriteriaService.getValidationCriteria( id );
 
         criteria.setName( name );
         criteria.setDescription( description );
@@ -109,7 +116,7 @@ public class AddValidationCriteriaAction
         criteria.setOperator( operator );
         criteria.setValue( value );
 
-        validationCriteriaService.saveValidationCriteria( criteria );
+        validationCriteriaService.updateValidationCriteria( criteria );
 
         return SUCCESS;
     }

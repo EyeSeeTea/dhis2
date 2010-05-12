@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,31 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.validation;
+package org.hisp.dhis.program;
 
 import java.util.Collection;
 
 /**
  * @author Chau Thu Tran
- * @version ValidationCriteriaService.java Apr 28, 2010 10:00:58 PM 
+ * @version ProgramStageDataElementValidationService.java May 6, 2010 10:08:04
+ *          AM
  */
-public interface ValidationCriteriaService
+public interface ProgramStageDataElementValidationService
 {
-    String ID = ValidationCriteriaService.class.getName();
-    
+    String ID = ProgramStageDataElementValidationService.class.getName();
+
     // -------------------------------------------------------------------------
-    // ValidationCriteria
+    // ProgramStage - DataElement validation
     // -------------------------------------------------------------------------
-    
-    int saveValidationCriteria( ValidationCriteria validationCriteria );
 
-    void deleteValidationCriteria( ValidationCriteria validationCriteria );
+    int saveProgramStageDataElementValidation( ProgramStageDataElementValidation validation );
 
-    void updateValidationCriteria( ValidationCriteria validationCriteria );
+    void deleteProgramStageDataElementValidation( ProgramStageDataElementValidation validation );
 
-    ValidationCriteria getValidationCriteria( int id );
-    
-    ValidationCriteria getValidationCriteria(String name);
+    void updateProgramStageDataElementValidation( ProgramStageDataElementValidation validation );
 
-    Collection<ValidationCriteria> getAllValidationCriterias();
+    ProgramStageDataElementValidation getProgramStageDataElementValidation( int id );
+
+    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( Program program );
+
+    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( ProgramStageDataElement element );
+
+    Collection<ProgramStageDataElementValidation> getAllProgramStageDataElementValidations();
 }

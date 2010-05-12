@@ -1,5 +1,3 @@
-package org.hisp.dhis.patient.action.validationcriteria;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,32 +25,51 @@ package org.hisp.dhis.patient.action.validationcriteria;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.ProgramStageDataElementValidation;
+import org.hisp.dhis.program.ProgramStageDataElementValidationService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version GetPropertiesPatientAction.java May 2, 2010 8:23:34 PM
+ * @version AddProgramStageDataElementValidation.java May 6, 2010 1:28:06 PM
  */
-public class GetPropertiesPatientAction
+public class GetProgramStageDEValidationAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Output
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private List<Field> fields;
+    private ProgramStageDataElementValidationService validationService;
 
-    public List<Field> getFields()
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private int id;
+
+    private ProgramStageDataElementValidation validation;
+
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
+
+    public void setValidationService( ProgramStageDataElementValidationService validationService )
     {
-        return fields;
+        this.validationService = validationService;
+    }
+
+    public ProgramStageDataElementValidation getValidation()
+    {
+        return validation;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
@@ -63,18 +80,8 @@ public class GetPropertiesPatientAction
     public String execute()
         throws Exception
     {
-        fields = new ArrayList<Field>();
-
-        Field[] declaredfields = Patient.class.getDeclaredFields();
-        for ( Field field : declaredfields )
-        {
-            if ( !Modifier.isFinal( field.getModifiers() ) && !field.getType().isAssignableFrom( Set.class ))
-            {
-                fields.add( field );
-            }
-        }
+        validation = validationService.getProgramStageDataElementValidation( id );
 
         return SUCCESS;
     }
-
 }

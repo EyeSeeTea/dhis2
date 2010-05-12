@@ -25,31 +25,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.validation;
+package org.hisp.dhis.patient.action.validation;
 
-import java.util.Collection;
+import org.hisp.dhis.validation.ValidationCriteria;
+import org.hisp.dhis.validation.ValidationCriteriaService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version ValidationCriteriaService.java Apr 28, 2010 10:00:58 PM 
+ * @version RemoveValidationCriteriaAction.java Apr 29, 2010 10:45:36 AM
  */
-public interface ValidationCriteriaService
+public class GetValidationCriteriaAction
+    implements Action
 {
-    String ID = ValidationCriteriaService.class.getName();
-    
     // -------------------------------------------------------------------------
-    // ValidationCriteria
+    // Dependency
     // -------------------------------------------------------------------------
-    
-    int saveValidationCriteria( ValidationCriteria validationCriteria );
 
-    void deleteValidationCriteria( ValidationCriteria validationCriteria );
+    private ValidationCriteriaService validationCriteriaService;
 
-    void updateValidationCriteria( ValidationCriteria validationCriteria );
+    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
+    {
+        this.validationCriteriaService = validationCriteriaService;
+    }
 
-    ValidationCriteria getValidationCriteria( int id );
-    
-    ValidationCriteria getValidationCriteria(String name);
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
 
-    Collection<ValidationCriteria> getAllValidationCriterias();
+    private int id;
+
+    private ValidationCriteria validationCriteria;
+
+    // -------------------------------------------------------------------------
+    // Getter && Setter
+    // -------------------------------------------------------------------------
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public ValidationCriteria getValidationCriteria()
+    {
+        return validationCriteria;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action Implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute()
+        throws Exception
+    {
+        validationCriteria = validationCriteriaService.getValidationCriteria( id );
+
+        return SUCCESS;
+    }
+
 }

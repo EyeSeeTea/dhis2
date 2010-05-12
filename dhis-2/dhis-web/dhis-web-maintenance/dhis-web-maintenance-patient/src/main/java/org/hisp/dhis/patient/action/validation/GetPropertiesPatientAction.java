@@ -1,5 +1,7 @@
+package org.hisp.dhis.patient.action.validation;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,44 +27,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.validationcriteria;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-import org.hisp.dhis.validation.ValidationCriteria;
-import org.hisp.dhis.validation.ValidationCriteriaService;
+import org.hisp.dhis.patient.Patient;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran // * @version RemoveValidationCriteriaAction.java Apr
- *         29, 2010 10:45:36 AM
+ * @author Chau Thu Tran
+ * @version GetPropertiesPatientAction.java May 2, 2010 8:23:34 PM
  */
-public class RemoveValidationCriteriaAction
+public class GetPropertiesPatientAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Output
     // -------------------------------------------------------------------------
 
-    private ValidationCriteriaService validationCriteriaService;
+    private List<Field> fields;
 
-    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
+    public List<Field> getFields()
     {
-        this.validationCriteriaService = validationCriteriaService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private int id;
-
-    // -------------------------------------------------------------------------
-    // Setters
-    // -------------------------------------------------------------------------
-
-    public void setId( int id )
-    {
-        this.id = id;
+        return fields;
     }
 
     // -------------------------------------------------------------------------
@@ -73,9 +63,16 @@ public class RemoveValidationCriteriaAction
     public String execute()
         throws Exception
     {
-        ValidationCriteria criteria = validationCriteriaService.getValidationCriteria( id );
+        fields = new ArrayList<Field>();
 
-        validationCriteriaService.deleteValidationCriteria( criteria );
+        Field[] declaredfields = Patient.class.getDeclaredFields();
+        for ( Field field : declaredfields )
+        {
+            if ( !Modifier.isFinal( field.getModifiers() ) && !field.getType().isAssignableFrom( Set.class ))
+            {
+                fields.add( field );
+            }
+        }
 
         return SUCCESS;
     }

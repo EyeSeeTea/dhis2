@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,90 +25,57 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.patient.action.validation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
-import org.hisp.dhis.validation.comparator.ValidationCriteriaComparator;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * @version ShowCriteriaAssociationFormAction.java May 5, 2010 9:35:09 AM
+ * @author Chau Thu Tran // * @version RemoveValidationCriteriaAction.java Apr
+ *         29, 2010 10:45:36 AM
  */
-public class ShowCriteriaAssociationsFormAction
+public class RemoveValidationCriteriaAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
-
-    private ProgramService programService;
 
     private ValidationCriteriaService validationCriteriaService;
-
-    // -------------------------------------------------------------------------
-    // Input && Output
-    // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    private Program program;
-
-    private List<ValidationCriteria> criteria;
-
-    // -------------------------------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------------------------------
-
-    public Program getProgram()
-    {
-        return program;
-    }
-
-    public List<ValidationCriteria> getCriteria()
-    {
-        return criteria;
-    }
 
     public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
     {
         this.validationCriteriaService = validationCriteriaService;
     }
 
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
-    public void setId( Integer id )
+    private int id;
+
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
+
+    public void setId( int id )
     {
         this.id = id;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
-        program = programService.getProgram( id );
+        ValidationCriteria criteria = validationCriteriaService.getValidationCriteria( id );
 
-        criteria = new ArrayList<ValidationCriteria>( validationCriteriaService.getAllValidationCriterias() );
-        
-        criteria.remove( program.getPatientValidationCriteria() );
-        
-        Collections.sort( criteria, new ValidationCriteriaComparator() );
+        validationCriteriaService.deleteValidationCriteria( criteria );
 
         return SUCCESS;
     }

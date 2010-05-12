@@ -25,31 +25,62 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.validation;
+package org.hisp.dhis.patient.action.validation;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.validation.ValidationCriteria;
+import org.hisp.dhis.validation.ValidationCriteriaService;
+import org.hisp.dhis.validation.comparator.ValidationCriteriaComparator;
+
+import com.opensymphony.xwork2.Action;
+
+
 
 /**
  * @author Chau Thu Tran
- * @version ValidationCriteriaService.java Apr 28, 2010 10:00:58 PM 
+ * @version AddValidationCriteriaAction.java Apr 29, 2010 10:42:36 AM
  */
-public interface ValidationCriteriaService
+public class GetValidationCriteriaListAction
+    implements Action
 {
-    String ID = ValidationCriteriaService.class.getName();
-    
     // -------------------------------------------------------------------------
-    // ValidationCriteria
+    // Dependency
     // -------------------------------------------------------------------------
-    
-    int saveValidationCriteria( ValidationCriteria validationCriteria );
 
-    void deleteValidationCriteria( ValidationCriteria validationCriteria );
+    private ValidationCriteriaService validationCriteriaService;
 
-    void updateValidationCriteria( ValidationCriteria validationCriteria );
+    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
+    {
+        this.validationCriteriaService = validationCriteriaService;
+    }
 
-    ValidationCriteria getValidationCriteria( int id );
-    
-    ValidationCriteria getValidationCriteria(String name);
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    Collection<ValidationCriteria> getAllValidationCriterias();
+    private List<ValidationCriteria> criterias;
+
+    public List<ValidationCriteria> getCriterias()
+    {
+        return criterias;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action Implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute()
+        throws Exception
+    {
+        criterias = new ArrayList<ValidationCriteria>( validationCriteriaService.getAllValidationCriterias() );
+
+        Collections.sort( criterias, new ValidationCriteriaComparator() );
+
+        return SUCCESS;
+    }
+
 }

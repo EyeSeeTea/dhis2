@@ -658,11 +658,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<!-- Program_Criteria Association  -->
 
 	<bean
-		id="org.hisp.dhis.patient.action.program.ShowCriteriaAssociationsFormAction"
-		class="org.hisp.dhis.patient.action.program.ShowCriteriaAssociationsFormAction"
+		id="org.hisp.dhis.patient.action.program.ShowValidationAssociationsFormAction"
+		class="org.hisp.dhis.patient.action.program.ShowValidationAssociationsFormAction"
 		scope="prototype">
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="validationCriteriaService" ref="org.hisp.dhis.validation.ValidationCriteriaService" />
+		<property name="validationService" ref="org.hisp.dhis.program.ProgramStageDataElementValidationService" />
 	</bean>
 	
 	<bean
@@ -1080,11 +1081,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 	</bean>
 	
-	<!-- Validation Criteria -->
+	<!-- Validation - PatientValidationCriteria -->
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationcriteria.AddValidationCriteriaAction"
-		class="org.hisp.dhis.patient.action.validationcriteria.AddValidationCriteriaAction"
+		id="org.hisp.dhis.patient.action.validation.AddValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validation.AddValidationCriteriaAction"
 		scope="prototype">
 		<property name="validationCriteriaService">
 			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
@@ -1092,14 +1093,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationcriteria.GetPropertiesPatientAction"
-		class="org.hisp.dhis.patient.action.validationcriteria.GetPropertiesPatientAction"
+		id="org.hisp.dhis.patient.action.validation.GetPropertiesPatientAction"
+		class="org.hisp.dhis.patient.action.validation.GetPropertiesPatientAction"
 		scope="prototype">
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaAction"
-		class="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaAction"
+		id="org.hisp.dhis.patient.action.validation.GetValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validation.GetValidationCriteriaAction"
 		scope="prototype">
 		<property name="validationCriteriaService">
 			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
@@ -1107,8 +1108,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaListAction"
-		class="org.hisp.dhis.patient.action.validationcriteria.GetValidationCriteriaListAction"
+		id="org.hisp.dhis.patient.action.validation.GetValidationCriteriaListAction"
+		class="org.hisp.dhis.patient.action.validation.GetValidationCriteriaListAction"
 		scope="prototype">
 		<property name="validationCriteriaService">
 			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
@@ -1116,8 +1117,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationcriteria.RemoveValidationCriteriaAction"
-		class="org.hisp.dhis.patient.action.validationcriteria.RemoveValidationCriteriaAction"
+		id="org.hisp.dhis.patient.action.validation.RemoveValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validation.RemoveValidationCriteriaAction"
 		scope="prototype">
 		<property name="validationCriteriaService">
 			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
@@ -1125,8 +1126,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationcriteria.UpdateValidationCriteriaAction"
-		class="org.hisp.dhis.patient.action.validationcriteria.UpdateValidationCriteriaAction"
+		id="org.hisp.dhis.patient.action.validationc.UpdateValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validation.UpdateValidationCriteriaAction"
 		scope="prototype">
 		<property name="validationCriteriaService">
 			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
@@ -1134,11 +1135,58 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationcriteria.ValidateValidationCriteriaAction"
-		class="org.hisp.dhis.patient.action.validationcriteria.ValidateValidationCriteriaAction"
+		id="org.hisp.dhis.patient.action.validation.ValidateValidationCriteriaAction"
+		class="org.hisp.dhis.patient.action.validation.ValidateValidationCriteriaAction"
 		scope="prototype">
 		<property name="validationCriteriaService">
 			<ref bean="org.hisp.dhis.validation.ValidationCriteriaService" />
+		</property>
+	</bean>
+	
+	<!-- Validation - ProgramStageDataElementValidation -->
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validation.AddProgramStageDEValidationAction"
+		class="org.hisp.dhis.patient.action.validation.AddProgramStageDEValidationAction"
+		scope="prototype">
+		<property name="validationService">
+			<ref bean="org.hisp.dhis.program.ProgramStageDataElementValidationService" /> 
+		</property>
+		<property name="programStageService">
+			<ref bean="org.hisp.dhis.program.ProgramStageService" /> 
+		</property>
+		<property name="dataElementService">
+			<ref bean="org.hisp.dhis.dataelement.DataElementService" /> 
+		</property>
+		<property name="programStageDataElementService">
+			<ref bean="org.hisp.dhis.program.ProgramStageDataElementService" /> 
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validation.GetProgramStageDEValidationAction"
+		class="org.hisp.dhis.patient.action.validation.GetProgramStageDEValidationAction"
+		scope="prototype">
+		<property name="validationService">
+			<ref bean="org.hisp.dhis.program.ProgramStageDataElementValidationService" /> 
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validation.GetProgramStageDEValidationListAction"
+		class="org.hisp.dhis.patient.action.validation.GetProgramStageDEValidationListAction"
+		scope="prototype">
+		<property name="validationService">
+			<ref bean="org.hisp.dhis.program.ProgramStageDataElementValidationService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.validation.RemoveProgramStageDEValidationAction"
+		class="org.hisp.dhis.patient.action.validation.RemoveProgramStageDEValidationAction"
+		scope="prototype">
+		<property name="validationService">
+			<ref bean="org.hisp.dhis.program.ProgramStageDataElementValidationService" />
 		</property>
 	</bean>
 	
