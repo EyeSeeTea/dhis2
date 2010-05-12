@@ -34,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.cache.HibernateCacheManager;
+import org.hisp.dhis.common.ImportableObject;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
@@ -196,7 +197,7 @@ public class DefaultImportObjectService<T>
     // -------------------------------------------------------------------------
 
     @Transactional
-    public int addImportObject( ImportObjectStatus status, GroupMemberType groupMemberType, Object object )
+    public int addImportObject( ImportObjectStatus status, GroupMemberType groupMemberType, ImportableObject object )
     {
         ImportObject importObject = new ImportObject( status, object.getClass().getName(), groupMemberType, object );
         
@@ -204,7 +205,7 @@ public class DefaultImportObjectService<T>
     }
 
     @Transactional
-    public int addImportObject( ImportObjectStatus status, Object object, Object compareObject )
+    public int addImportObject( ImportObjectStatus status, ImportableObject object, ImportableObject compareObject )
     {
         ImportObject importObject = new ImportObject( status, object.getClass().getName(), object, compareObject );
         
@@ -212,7 +213,7 @@ public class DefaultImportObjectService<T>
     }
 
     @Transactional
-    public int addImportObject( ImportObjectStatus status, GroupMemberType groupMemberType, Object object, Object compareObject )
+    public int addImportObject( ImportObjectStatus status, GroupMemberType groupMemberType, ImportableObject object, ImportableObject compareObject )
     {
         ImportObject importObject = new ImportObject( status, object.getClass().getName(), groupMemberType, object, compareObject );
         
