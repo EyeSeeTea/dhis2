@@ -104,7 +104,7 @@ public class DefaultSelectionTreeManager
             return organisationUnitService.getRootOrganisationUnits();
         }
 
-        return rootUnits;
+        return reloadOrganisationUnits( rootUnits );
     }
     
     public Collection<OrganisationUnit> getLockedRootOrganisationUnits()
@@ -116,7 +116,7 @@ public class DefaultSelectionTreeManager
             return organisationUnitService.getRootOrganisationUnits();
         }
 
-        return rootUnits;
+        return reloadOrganisationUnits( rootUnits );
     }
 
     public OrganisationUnit getRootOrganisationUnitsParent()

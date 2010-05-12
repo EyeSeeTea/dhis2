@@ -169,6 +169,8 @@ public class AddUserAction
 
         Collection<OrganisationUnit> orgUnits = selectionTreeManager.getSelectedOrganisationUnits();
 
+        orgUnits = selectionTreeManager.reloadOrganisationUnits( orgUnits );
+        
         User user = new User();
         user.setSurname( surname );
         user.setFirstName( firstName );

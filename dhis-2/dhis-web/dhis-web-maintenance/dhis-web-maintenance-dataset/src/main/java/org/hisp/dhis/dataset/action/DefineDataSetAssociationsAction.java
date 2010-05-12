@@ -85,8 +85,6 @@ public class DefineDataSetAssociationsAction
     	
         Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
 
-        rootUnits = selectionTreeManager.reloadOrganisationUnits( rootUnits );
-
         Set<OrganisationUnit> unitsInTheTree = new HashSet<OrganisationUnit>();
 
         getUnitsInTheTree( rootUnits, unitsInTheTree );

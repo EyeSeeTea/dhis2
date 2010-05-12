@@ -161,6 +161,8 @@ public class UpdateUserAction
         
         Collection<OrganisationUnit> units = selectionTreeManager.getSelectedOrganisationUnits();
 
+        units = selectionTreeManager.reloadOrganisationUnits( units );
+        
         User user = userStore.getUser( id );
         user.setSurname( surname );
         user.setFirstName( firstName );

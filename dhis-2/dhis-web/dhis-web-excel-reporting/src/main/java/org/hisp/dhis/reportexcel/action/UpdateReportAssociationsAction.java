@@ -26,6 +26,9 @@
  */
 package org.hisp.dhis.reportexcel.action;
 
+import java.util.Collection;
+
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelService;
@@ -80,7 +83,11 @@ public class UpdateReportAssociationsAction
 
         reportExcel.getOrganisationAssocitions().clear();
 
-        reportExcel.getOrganisationAssocitions().addAll( selectionTreeManager.getSelectedOrganisationUnits() );
+        Collection<OrganisationUnit> orgUnits = selectionTreeManager.getSelectedOrganisationUnits();
+
+        orgUnits = selectionTreeManager.reloadOrganisationUnits( orgUnits );
+        
+        reportExcel.getOrganisationAssocitions().addAll( orgUnits );
 
         reportService.updateReportExcel( reportExcel );
 
