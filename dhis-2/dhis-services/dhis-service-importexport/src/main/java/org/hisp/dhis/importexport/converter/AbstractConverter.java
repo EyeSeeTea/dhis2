@@ -33,6 +33,7 @@ import static org.hisp.dhis.importexport.ImportObjectStatus.UPDATE;
 import static org.hisp.dhis.importexport.ImportStrategy.NEW_AND_UPDATES;
 
 import org.amplecode.quick.BatchHandler;
+import org.hisp.dhis.common.ImportableObject;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportDataValue;
@@ -45,7 +46,7 @@ import org.hisp.dhis.importexport.analysis.ImportAnalyser;
  * @author Lars Helge Overland
  * @version $Id: AbstractConverter.java 6298 2008-11-17 17:31:14Z larshelg $
  */
-public abstract class AbstractConverter<T>
+public abstract class AbstractConverter<T extends ImportableObject>
 {
     protected static final String EMPTY = "";
     

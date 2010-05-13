@@ -1,4 +1,4 @@
-package org.hisp.dhis.indicator;
+package org.hisp.dhis.importexport.comparator;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,81 +27,44 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
+import java.util.Comparator;
+
+import org.hisp.dhis.importexport.ImportObject;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: IndicatorType.java 5296 2008-05-29 16:06:14Z larshelg $
  */
-public class IndicatorType
-    extends IdentifiableObject
+public class ImportObjectComparator
+    implements Comparator<ImportObject>
 {
-    private int factor;
-
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
-
-    public IndicatorType()
-    {
-    }
-
-    public IndicatorType( String name, int factor )
-    {
-        this.name = name;
-        this.factor = factor;
-    }
-
-    // -------------------------------------------------------------------------
-    // hashCode and equals
-    // -------------------------------------------------------------------------
-
     @Override
-    public int hashCode()
+    public int compare( ImportObject o0, ImportObject o1 )
     {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
+        if ( o0 == null || o0.getClassName() == null )
         {
-            return true;
+            return 1;
         }
-
-        if ( o == null )
+        
+        if ( o1 == null || o1.getClassName() == null )
         {
-            return false;
+            return -1;
         }
-
-        if ( !(o instanceof IndicatorType) )
+        
+        if ( !o0.getClassName().equalsIgnoreCase( o1.getClassName() ) )
         {
-            return false;
+            return o0.getClassName().compareToIgnoreCase( o1.getClassName() );
         }
-
-        final IndicatorType other = (IndicatorType) o;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
-    }
-
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
-    public int getFactor()
-    {
-        return factor;
-    }
-
-    public void setFactor( int factor )
-    {
-        this.factor = factor;
+        
+        if ( o0.getObject() == null )
+        {
+            return 1;
+        }
+        
+        if ( o1.getObject() == null )
+        {
+            return -1;
+        }
+        
+        return o0.getObject().getName().compareToIgnoreCase( o1.getObject().getName() );
     }
 }
