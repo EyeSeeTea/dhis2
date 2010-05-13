@@ -148,7 +148,7 @@ public class TransformerTask
 
 
     /**
-     * Transforms the foreign xml into dxf
+     * Transforms xml datastream to Pipe 
      *
      * @param dataStream - the xml data
      * @param sheetStream - the stylsheet to perform the translation
@@ -173,7 +173,6 @@ public class TransformerTask
 
             // set result of transform to input of pipe
             StAXResult result = new StAXResult( pipeinput );
-//            tt.transform( source, result, dhisResolver );
             transform( dataSource, result, null );
             log.info( "transform successful - importing dxf" );
 
