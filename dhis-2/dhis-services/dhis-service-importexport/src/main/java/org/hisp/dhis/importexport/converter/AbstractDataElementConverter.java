@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 
@@ -115,5 +116,18 @@ public class AbstractDataElementConverter
         }
         
         return true;
+    }
+    
+    @Override
+    protected boolean ignore( DataElement object, DataElement match )
+    {
+        boolean ignore = object instanceof CalculatedDataElement && !( match instanceof CalculatedDataElement );
+        
+        if ( ignore )
+        {
+            log.warn( "Calculated data element ignored because it matches with a regular data element: " + object );
+        }
+        
+        return ignore;
     }
 }
