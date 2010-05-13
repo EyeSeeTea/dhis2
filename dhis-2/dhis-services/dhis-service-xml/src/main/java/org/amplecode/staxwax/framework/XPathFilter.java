@@ -134,33 +134,6 @@ public class XPathFilter
         return result;
     }
 
-    /**
-     * Find numeric data in stream
-     *
-     * @param in
-     * @param xpathExpr
-     * @return
-     */
-    public static Integer findNumber( InputStream in, String xpathExpr )
-    {
-
-        Integer result = null;
-
-        try
-        {
-            XPathExpression expr = compileXPath(xpathExpr);
-
-            Document doc = parseDocument(in);
-
-            result = (Integer) expr.evaluate( doc, XPathConstants.NUMBER );
-
-        } catch ( Exception ex )
-        {
-            log.info( ex );
-        }
-        return result;
-    }
-
     private static synchronized XPathExpression compileXPath(String xpathString)
     {
         XPathFactory factory = XPathFactory.newInstance();
