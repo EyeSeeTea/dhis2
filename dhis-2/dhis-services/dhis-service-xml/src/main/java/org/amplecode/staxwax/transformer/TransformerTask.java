@@ -91,7 +91,7 @@ public class TransformerTask
     }
 
     /**
-     * pre-compile styleshhet to Templates
+     * Pre-compile styleshhet to Templates
      * @throws TransformerConfigurationException
      */
     public void compile() throws TransformerConfigurationException
