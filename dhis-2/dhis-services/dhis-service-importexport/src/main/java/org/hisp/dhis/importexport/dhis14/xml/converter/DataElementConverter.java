@@ -207,47 +207,32 @@ public class DataElementConverter
         DataElementCategoryCombo proxyCategoryCombo = new DataElementCategoryCombo();
         proxyCategoryCombo.setId( categoryCombo.getId() );
         
+        DataElement element = null;
+        
         if ( calculated )
         {
-            final CalculatedDataElement element = new CalculatedDataElement();
-
-            element.setCategoryCombo( proxyCategoryCombo );
-            
-            element.setId( Integer.valueOf( values.get( FIELD_ID ) ) );
-            element.setName( values.get( FIELD_NAME ) );
-            element.setShortName( values.get( FIELD_SHORT_NAME ) );
-            element.setDescription( Dhis14ParsingUtils.removeNewLine( values.get( FIELD_DESCRIPTION ) ) );
-            element.setActive( true );        
-            element.setType( Dhis14ObjectMappingUtil.getDataElementTypeMap().get( Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );            
-            element.setAggregationOperator( convertAggregationOperatorFromDhis14( values.get( FIELD_AGGREGATION_OPERATOR ) ) );
-            element.setSortOrder( parseInt( values.get( FIELD_SORT_ORDER ) ) );
-            element.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
-            element.setSaved( convertBooleanFromDhis14( values.get( FIELD_SAVE_CALCULATED ) ) );
-            element.setExpression( new Expression( expressionMap.get( element.getId() ), null, new HashSet<DataElement>() ) );
-            
-            NameMappingUtil.addDataElementAggregationOperatorMapping( element.getId(), element.getAggregationOperator() );
-            
-            read( element, GroupMemberType.NONE, params );
+            element = new CalculatedDataElement();
+            ((CalculatedDataElement)element).setSaved( convertBooleanFromDhis14( values.get( FIELD_SAVE_CALCULATED ) ) );
+            ((CalculatedDataElement)element).setExpression( new Expression( expressionMap.get( element.getId() ), null, new HashSet<DataElement>() ) );
         }
         else
         {
-            final DataElement element = new DataElement();
+            element = new DataElement();            
+        }
 
-            element.setCategoryCombo( proxyCategoryCombo );
-            
-            element.setId( Integer.valueOf( values.get( FIELD_ID ) ) );
-            element.setName( values.get( FIELD_NAME ) );
-            element.setShortName( values.get( FIELD_SHORT_NAME ) );
-            element.setDescription( Dhis14ParsingUtils.removeNewLine( values.get( FIELD_DESCRIPTION ) ) );
-            element.setActive( true );        
-            element.setType( Dhis14ObjectMappingUtil.getDataElementTypeMap().get( Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );            
-            element.setAggregationOperator( convertAggregationOperatorFromDhis14( values.get( FIELD_AGGREGATION_OPERATOR ) ) );
-            element.setSortOrder( parseInt( values.get( FIELD_SORT_ORDER ) ) );
-            element.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
-            
-            NameMappingUtil.addDataElementAggregationOperatorMapping( element.getId(), element.getAggregationOperator() );
-            
-            read( element, GroupMemberType.NONE, params );
-        }        
+        element.setCategoryCombo( proxyCategoryCombo );
+        element.setId( Integer.valueOf( values.get( FIELD_ID ) ) );
+        element.setName( values.get( FIELD_NAME ) );
+        element.setShortName( values.get( FIELD_SHORT_NAME ) );
+        element.setDescription( Dhis14ParsingUtils.removeNewLine( values.get( FIELD_DESCRIPTION ) ) );
+        element.setActive( true );        
+        element.setType( Dhis14ObjectMappingUtil.getDataElementTypeMap().get( Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );            
+        element.setAggregationOperator( convertAggregationOperatorFromDhis14( values.get( FIELD_AGGREGATION_OPERATOR ) ) );
+        element.setSortOrder( parseInt( values.get( FIELD_SORT_ORDER ) ) );
+        element.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
+        
+        NameMappingUtil.addDataElementAggregationOperatorMapping( element.getId(), element.getAggregationOperator() );
+        
+        read( element, GroupMemberType.NONE, params );   
     }    
 }
