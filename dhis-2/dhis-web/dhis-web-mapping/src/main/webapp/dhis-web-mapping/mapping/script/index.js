@@ -49,7 +49,6 @@ function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';js
 function getLegendsJSON(){var legends=choropleth.imageLegend;var json='{';json+='"legends":';json+='[';for(var i=0;i<choropleth.imageLegend.length;i++){json+='{';json+='"label": "'+choropleth.imageLegend[i].label+'",';json+='"color": "'+choropleth.imageLegend[i].color+'" ';json+=i<choropleth.imageLegend.length-1?'},':'}'}json+=']';json+='}';return json}
 
 Ext.onReady( function() {
-
 	/* Cookie provider */
 	Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 	/* Ext 3.2.0 override */
@@ -60,7 +59,7 @@ Ext.onReady( function() {
 	Ext.QuickTips.init();
 
     MAP = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
-	MASK = new Ext.LoadMask(Ext.getBody(),{msg:'Loading...',msgCls:'x-mask-loading2'});
+	MASK = new Ext.LoadMask(Ext.getBody(),{msg:i18n_loading,msgCls:'x-mask-loading2'});
 	
     if (getUrlParam('view')){PARAMETER=getUrlParam('view');}	
 	var mapViewParam = PARAMETER ? PARAMETER : 0;
@@ -103,8 +102,8 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [
-            { html: '<div class="window-info">Saving current thematic map selection.</div>' },
-            { html: '<div class="window-field-label-first">Display name</div>' },
+            { html: '<div class="window-info">'+i18n_saving_current_thematic_map_selection+'</div>' },
+            { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
 			viewNameTextField,
 			{
 				xtype: 'button',
@@ -112,7 +111,7 @@ Ext.onReady( function() {
 				isFormField: true,
 				hideLabel: true,
 				cls: 'window-button',
-				text: 'Save',
+				text: i18n_save ,
 				handler: function() {
 					var vn = Ext.getCmp('viewname_tf').getValue();
 					var ig = Ext.getCmp('indicatorgroup_cb').getValue();
@@ -130,17 +129,17 @@ Ext.onReady( function() {
 					var zoom = parseInt(MAP.getZoom());
 					
 					if (!vn) {
-						Ext.messageRed.msg('New map view', 'Map view form is not complete.');
+						Ext.messageRed.msg( i18n_new_map_view , i18n_map_view_form_is_not_complete );
 						return;
 					}
 					
 					if (!ig || !ii || !pt || !p || !ms || !c ) {
-						Ext.messageRed.msg('New map view', 'Thematic map form is not complete.');
+						Ext.messageRed.msg( i18n_new_map_view, i18n_thematic_map_form_is_not_complete );
 						return;
 					}
 					
 					if (validateInput(vn) == false) {
-						Ext.messageRed.msg('New map view', 'Map view name cannot be longer than 25 characters.');
+						Ext.messageRed.msg( i18n_new_map_view , i18n_map_view_name_cannot_be_longer_than_25_characters );
 						return;
 					}
 					
@@ -152,7 +151,7 @@ Ext.onReady( function() {
 							
 							for (var i = 0; i < mapViews.length; i++) {
 								if (mapViews[i].name == vn) {
-									Ext.messageRed.msg('New map view', 'There is already a map view called <span class="x-msg-hl">' + vn + '</span>.');
+									Ext.messageRed.msg(	i18n_new_map_view , i18n_there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>.');
 									return;
 								}
 							}
@@ -163,7 +162,7 @@ Ext.onReady( function() {
 								params: { name: vn, indicatorGroupId: ig, indicatorId: ii, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: 2, classes: c, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
 
 								success: function(r) {
-									Ext.messageBlack.msg('New map view', 'The view <span class="x-msg-hl">' + vn + '</span> was registered.');
+									Ext.messageBlack.msg( i18n_new_map_view, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().reload();
 									Ext.getCmp('mapview_cb').getStore().reload();
 									Ext.getCmp('viewname_tf').reset();
@@ -187,21 +186,21 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">View</div>' },
+            { html: '<div class="window-field-label-first">'+i18n_view+'</div>' },
 			viewComboBox,
 			{
 				xtype: 'button',
                 id: 'deleteview_b',
 				isFormField: true,
 				hideLabel: true,
-				text: 'Delete',
+				text: i18n_delete,
 				cls: 'window-button',
 				handler: function() {
 					var v = Ext.getCmp('view_cb').getValue();
 					var name = Ext.getCmp('view_cb').getStore().getById(v).get('name');
 					
 					if (!v) {
-						Ext.messageRed.msg('Delete map view', 'Please select a map view.');
+						Ext.messageRed.msg( i18n_delete_map_view , i18n_please_select_a_map_view );
 						return;
 					}
 					
@@ -211,13 +210,13 @@ Ext.onReady( function() {
 						params: { id: v },
 
 						success: function(r) {
-							Ext.messageBlack.msg('Delete map view', 'The map view <span class="x-msg-hl">' + name + '</span> was deleted.');
+							Ext.messageBlack.msg( i18n_delete_map_view , 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted );
 							Ext.getCmp('view_cb').getStore().reload();
 							Ext.getCmp('view_cb').reset();
 							Ext.getCmp('mapview_cb').getStore().reload();
 						},
 						failure: function() {
-							alert( 'Status', 'Error while saving data' );
+							alert( i18n_status , i18n_error_while_saving_data );
 						}
 					});
 				}
@@ -230,7 +229,7 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">View</div>' },
+            { html: '<div class="window-field-label-first">'+i18n_view+'</div>' },
 			view2ComboBox,
 			{
 				xtype: 'button',
@@ -244,7 +243,7 @@ Ext.onReady( function() {
 					var nv = Ext.getCmp('view2_cb').getRawValue();
 					
 					if (!v2) {
-						Ext.messageRed.msg('Dashboard map view', 'Please select a map view.');
+						Ext.messageRed.msg( i18n_dashboard_map_view , i18n_please_select_a_map_view );
 						return;
 					}
 					
@@ -254,14 +253,14 @@ Ext.onReady( function() {
 						params: { id: v2 },
 
 						success: function(r) {
-							Ext.messageBlack.msg('Dashboard map view', 'The view <span class="x-msg-hl">' + nv + '</span> was added to dashboard.');
+							Ext.messageBlack.msg( i18n_dashboard_map_view, the_view + ' <span class="x-msg-hl">' + nv + '</span> ' + i18n_was_added_to_dashboard );
 							
 							Ext.getCmp('view_cb').getStore().reload();
 							Ext.getCmp('view_cb').reset();
 							Ext.getCmp('mapview_cb').getStore().reload();
 						},
 						failure: function() {
-							alert( 'Status', 'Error while saving data' );
+							alert( i18n_status , i18n_error_while_saving_data );
 						}
 					});
 				}
@@ -271,7 +270,7 @@ Ext.onReady( function() {
     
 	var viewWindow = new Ext.Window({
         id: 'view_w',
-        title: '<span id="window-favorites-title">Favorites</span>',
+        title: '<span id="window-favorites-title">'+i18n_favorite+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 234,
@@ -301,7 +300,7 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">New</span>',
+                        title: '<span class="panel-tab-title">'+i18n_new+'</span>',
                         id: 'view0',
                         items:
                         [
@@ -309,7 +308,7 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        title: '<span class="panel-tab-title">Delete</span>',
+                        title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
                         id: 'view1',
                         items:
                         [
@@ -317,7 +316,7 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        title: '<span class="panel-tab-title">Add to dashboard</span>',
+                        title: '<span class="panel-tab-title">'+i18n_add_to_dashboard+'</span>',
                         id: 'view2',
                         items:
                         [
@@ -337,7 +336,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'textfield',
 				id: 'exportimagetitle_tf',
-				fieldLabel: 'Image title',
+				fieldLabel: i18n_title,
 				labelSeparator: labelseparator,
 				editable: true,
 				valueField: 'id',
@@ -351,7 +350,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'combo',
 				id: 'exportimageformat_cb',
-				fieldLabel: 'Image format',
+				fieldLabel: i18n_image_format,
 				labelSeparator: labelseparator,
 				editable: false,
 				valueField: 'id',
@@ -370,7 +369,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'combo',
 				id: 'exportimagequality_cb',
-				fieldLabel: 'Image quality',
+				fieldLabel: i18n_image_quality,
 				labelSeparator: labelseparator,
 				editable: false,
 				valueField: 'id',
@@ -383,13 +382,13 @@ Ext.onReady( function() {
 				value: 1,
 				store: new Ext.data.SimpleStore({
 					fields: ['id', 'text'],
-					data: [[1, 'Medium'], [2, 'Large']]
+					data: [[1, i18n_medium], [2, i18n_large]]
 				})					
 			},
 			{
 				xtype: 'checkbox',
 				id: 'exportimageincludelegend_chb',
-				fieldLabel: 'Include legend',
+				fieldLabel: i18n_include_legend,
 				labelSeparator: '',				
 				isFormField: true,
 				checked: true
@@ -401,7 +400,7 @@ Ext.onReady( function() {
 				labelSeparator: labelseparator,
 				hideLabel: false,
 				cls: 'window-button',
-				text: 'Export image',
+				text: i18n_export_image,
 				handler: function() {
 					if (ACTIVEPANEL == thematicMap
 						&& Ext.getCmp('period_cb').getValue()!='' 
@@ -412,35 +411,40 @@ Ext.onReady( function() {
 						var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
 						var viewBox = objectSVGDocument.getAttribute('viewBox');
 						var title = Ext.getCmp('exportimagetitle_tf').getValue();
-						var q = Ext.getCmp('exportimagequality_cb').getValue();
-						var w = objectSVGDocument.getAttribute('width') * q;
-						var h = objectSVGDocument.getAttribute('height') * q;
-						var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
-						var period = Ext.getCmp('period_cb').getValue();
-						var indicator = Ext.getCmp('indicator_cb').getValue();
-						var imageFormat = Ext.getCmp('exportimageformat_cb').getValue();
 						
-						Ext.getCmp('exportimagetitle_tf').reset();
-                        
-                        var exportForm = document.getElementById('exportForm');
-                        exportForm.action = '../exportImage.action';
-                        exportForm.target = '_blank';
-                        
-                        document.getElementById('titleField').value = title;   
-                        document.getElementById('viewBoxField').value = viewBox;  
-                        document.getElementById('svgField').value = svg;  
-                        document.getElementById('widthField').value = w;  
-                        document.getElementById('heightField').value = h;  
-                        document.getElementById('includeLegendsField').value = includeLegend;  
-                        document.getElementById('periodField').value = period;  
-                        document.getElementById('indicatorField').value = indicator;   
-                        document.getElementById('legendsField').value = getLegendsJSON();
-						document.getElementById('imageFormat').value = imageFormat;
+						if(title==''){
+							Ext.messageRed.msg( i18n_export_map_as_image , i18n_please_enter_map_title );
+						}else{						
+							var q = Ext.getCmp('exportimagequality_cb').getValue();
+							var w = objectSVGDocument.getAttribute('width') * q;
+							var h = objectSVGDocument.getAttribute('height') * q;
+							var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
+							var period = Ext.getCmp('period_cb').getValue();
+							var indicator = Ext.getCmp('indicator_cb').getValue();
+							var imageFormat = Ext.getCmp('exportimageformat_cb').getValue();
+							
+							Ext.getCmp('exportimagetitle_tf').reset();
+							
+							var exportForm = document.getElementById('exportForm');
+							exportForm.action = '../exportImage.action';
+							exportForm.target = '_blank';
+							
+							document.getElementById('titleField').value = title;   
+							document.getElementById('viewBoxField').value = viewBox;  
+							document.getElementById('svgField').value = svg;  
+							document.getElementById('widthField').value = w;  
+							document.getElementById('heightField').value = h;  
+							document.getElementById('includeLegendsField').value = includeLegend;  
+							document.getElementById('periodField').value = period;  
+							document.getElementById('indicatorField').value = indicator;   
+							document.getElementById('legendsField').value = getLegendsJSON();
+							document.getElementById('imageFormat').value = imageFormat;
 
-                        exportForm.submit();
+							exportForm.submit();
+						}
 					}
 					else {
-						Ext.messageRed.msg('Export map as image', 'Please render the thematic map first.');
+						Ext.messageRed.msg( i18n_export_map_as_image , i18n_please_render_map_fist );
 					}
 				}
 			}	
@@ -454,7 +458,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'textfield',
 				id: 'exportexceltitle_ft',
-				fieldLabel: 'Map title',
+				fieldLabel: i18n_title,
 				labelSeparator: labelseparator,
 				editable: true,
 				valueField: 'id',
@@ -468,7 +472,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'checkbox',
 				id: 'exportexcelincludelegend_chb',
-				fieldLabel: 'Include legend',
+				fieldLabel: i18n_include_legend,
 				labelSeparator: '',
 				isFormField: true,
 				checked: true
@@ -476,7 +480,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'checkbox',
 				id: 'exportexcelincludevalue_chb',
-				fieldLabel: 'Include values',
+				fieldLabel: i18n_include_values,
 				labelSeparator: '',
 				isFormField: true,
 				checked: true
@@ -488,7 +492,7 @@ Ext.onReady( function() {
 				labelSeparator: labelseparator,
 				hideLabel: false,
 				cls: 'window-button',
-				text: 'Export spreadsheet',
+				text: i18n_export_excel,
 				handler: function() {
 					if (ACTIVEPANEL == thematicMap
 						&& Ext.getCmp('period_cb').getValue()!='' 
@@ -521,15 +525,15 @@ Ext.onReady( function() {
                         exportForm.submit();
 					}
 					else {
-						Ext.messageRed.msg('Export map as Excel spreadsheet', 'Please render the thematic map first.');
+						Ext.messageRed.msg( i18n_export_excel, i18n_please_render_map_fist );
 					}
 				}
 			}	
 		]
 	});
 	
-	var exportImageWindow=new Ext.Window({id:'exportimage_w',title:'<span id="window-image-title">Export map as image</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:250,height:190,items:[{xtype:'panel',items:[exportImagePanel]}]});
-	var exportExcelWindow=new Ext.Window({id:'exportexcel_w',title:'<span id="window-excel-title">Export map as Excel spreadsheet</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:260,height:157,items:[{xtype:'panel',items:[exportExcelPanel]}]});
+	var exportImageWindow=new Ext.Window({id:'exportimage_w',title:'<span id="window-image-title">'+ i18n_export_map_as_image +'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:250,height:190,items:[{xtype:'panel',items:[exportImagePanel]}]});
+	var exportExcelWindow=new Ext.Window({id:'exportexcel_w',title:'<span id="window-excel-title">'+i18n_export_excel+'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:260,height:157,items:[{xtype:'panel',items:[exportExcelPanel]}]});
 	
     /* Section: automatic legend set */
 	var automaticMapLegendSetNameTextField=new Ext.form.TextField({id:'automaticmaplegendsetname_tf',isFormField:true,hideLabel:true,emptyText:emptytext,width:combo_width});
@@ -578,7 +582,7 @@ Ext.onReady( function() {
 							Ext.getCmp('automaticmaplegendsetindicator_ms').setValue(indicatorString);							
 						},
 						failure: function() {
-							alert( 'Status', 'Error while saving data' );
+							alert( i18n_status , i18n_error_while_saving_data );
 						}
 					});
 				}
@@ -595,21 +599,21 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">Display name</div>' },
+            { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
             automaticMapLegendSetNameTextField,
 /*            { html: '<p style="padding-bottom:4px; color:' + MENU_TEXTCOLOR + ';">&nbsp;Method</p>' }, legendSetMethodComboBox, { html: '<br>' },*/
-            { html: '<div class="window-field-label">Classes</div>' },
+            { html: '<div class="window-field-label">'+i18n_classes+'</div>' },
             automaticMapLegendSetClassesComboBox,
-            { html: '<div class="window-field-label">Lowest value color</div>' },
+            { html: '<div class="window-field-label">'+i18n_low_color+'</div>' },
             automaticMapLegendSetLowColorColorPalette,
-            { html: '<div class="window-field-label">Highest value color</div>' },
+            { html: '<div class="window-field-label">'+i18n_high_color+'</div>' },
             automaticMapLegendSetHighColorColorPalette,
             {
                 xtype: 'button',
                 id: 'newautomaticmaplegendset_b',
 				isFormField: true,
 				hideLabel: true,
-                text: 'Save',
+                text: i18n_save,
 				cls: 'window-button',
                 handler: function() {
                     var ln = Ext.getCmp('automaticmaplegendsetname_tf').getValue();
@@ -619,12 +623,12 @@ Ext.onReady( function() {
                     var lhc = Ext.getCmp('automaticmaplegendsethighcolor_cp').getValue();
                     
                     if (!ln || !lc) {
-                        Ext.messageRed.msg('New legend set', 'Form is not complete.');
+                        Ext.messageRed.msg( i18n_new_legend_set, i18n_form_is_not_complete );
                         return;
                     }
                     
                     if (validateInput(ln) == false) {
-                        Ext.messageRed.msg('New legend set', 'Legend set name cannot be longer than 25 characters.');
+                        Ext.messageRed.msg( i18n_new_legend_set,  i18n_name_can_not_longer_than_25 );
                         return;
                     }
                     
@@ -635,7 +639,7 @@ Ext.onReady( function() {
                             var mapLegendSets = Ext.util.JSON.decode(r.responseText).mapLegendSets;
                             for (var i = 0; i < mapLegendSets.length; i++) {
                                 if (ln == mapLegendSets[i].name) {
-                                    Ext.messageRed.msg('New legend set', 'A legend set called <span class="x-msg-hl">' + ln + '</span> already exists.');
+                                    Ext.messageRed.msg( i18n_new_legend_set, i18n_a_legend_set_called+' <span class="x-msg-hl">' + ln + '</span> ' + i18n_already_exists );
                                     return;
                                 }
                             }
@@ -645,7 +649,7 @@ Ext.onReady( function() {
                                 method: 'POST',
                                 params: { name: ln, type: map_legend_type_automatic, method: 2, classes: lc, colorLow: llc, colorHigh: lhc },
                                 success: function(r) {
-                                    Ext.messageBlack.msg('New legend set', 'The legend set <span class="x-msg-hl">' + ln + '</span> was registered.');
+                                    Ext.messageBlack.msg( i18n_new_legend_set , i18n_legend_set + ' <span class="x-msg-hl">' + ln + '</span> ' + i18n_was_registered);
                                     Ext.getCmp('automaticmaplegendset_cb').getStore().reload();
                                     Ext.getCmp('automaticmaplegendsetname_tf').reset();
                                     Ext.getCmp('automaticmaplegendsetclasses_cb').reset();
@@ -653,7 +657,7 @@ Ext.onReady( function() {
                                     Ext.getCmp('automaticmaplegendsethighcolor_cp').reset();
                                 },
                                 failure: function() {
-                                    alert( 'Status', 'Error while saving data' );
+                                    alert( i18n_status , i18n_error_while_saving_data );
                                 }
                             });
                         },
@@ -671,14 +675,14 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px',
         items:
         [   
-            { html: '<div class="window-field-label-first">Legend set</div>' },
+            { html: '<div class="window-field-label-first">'+i18n_legend_set+'</div>' },
             automaticMapLegendSetComboBox,
-            { html: '<div class="window-field-label">Indicators</div>' },
+            { html: '<div class="window-field-label">'+i18n_indicator+'</div>' },
 			automaticMapLegendSetIndicatorMultiSelect,
             {
                 xtype: 'button',
                 id: 'assignautomaticmaplegendset_b',
-                text: 'Assign to indicators',
+                text: i18n_assign_to_indicators,
 				cls: 'window-button',
                 handler: function() {
                     var ls = Ext.getCmp('automaticmaplegendset_cb').getValue();
@@ -686,12 +690,12 @@ Ext.onReady( function() {
                     var lims = Ext.getCmp('automaticmaplegendsetindicator_ms').getValue();
                     
                     if (!ls) {
-                        Ext.messageRed.msg('Assign to indicators', 'Please select a legend set.');
+                        Ext.messageRed.msg( i18n_assign_to_indocator , i18n_please_select_a_legend_set );
                         return;
                     }
                     
                     if (!lims) {
-                        Ext.messageRed.msg('Link legend set to indicator', 'Please select at least one indicator.');
+                        Ext.messageRed.msg( i18n_link_legend_set_to_indicator , i18n_please_select_at_least_one_indicator );
                         return;
                     }
                     
@@ -712,7 +716,7 @@ Ext.onReady( function() {
                         params: { id: ls },
 
                         success: function(r) {
-                            Ext.messageBlack.msg('Assign to indicators', 'The legend set <span class="x-msg-hl">' + lsrw + '</span> was updated.');
+                            Ext.messageBlack.msg( i18n_assign_to_indocator , i18n_legend_set+'<span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             Ext.getCmp('automaticmaplegendset_cb').getStore().reload();
                         },
                         failure: function() {
@@ -729,19 +733,19 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">Legend set</p>' },
+            { html: '<div class="window-field-label-first">'+i18n_legend_set+'</p>' },
             automaticMapLegendSet2ComboBox,
             {
                 xtype: 'button',
                 id: 'deleteautomaticmaplegendset_b',
-                text: 'Delete',
+                text: i18n_delete,
 				cls: 'window-button',
                 handler: function() {
                     var ls = Ext.getCmp('automaticmaplegendset2_cb').getValue();
                     var lsrw = Ext.getCmp('automaticmaplegendset2_cb').getRawValue();
                     
                     if (!ls) {
-                        Ext.messageRed.msg('Delete legend set', 'Please select a legend set.');
+                        Ext.messageRed.msg( i18n_delete + ' ' + i18n_legend_set, i18n_please_select_a_legend_set );
                         return;
                     }
                     
@@ -750,14 +754,14 @@ Ext.onReady( function() {
                         method: 'GET',
                         params: { id: ls },
                         success: function(r) {
-                            Ext.messageBlack.msg('Delete legend set', 'The legend set <span class="x-msg-hl">' + lsrw + '</span> was deleted.');
+                            Ext.messageBlack.msg( i18n_delete + ' ' + i18n_legend_set , i18n_legend_set + ' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_deleted );
                             Ext.getCmp('automaticmaplegendset_cb').getStore().reload();
                             Ext.getCmp('automaticmaplegendset_cb').reset();
 							Ext.getCmp('automaticmaplegendset2_cb').reset();
                             Ext.getCmp('automaticmaplegendsetindicator_ms').reset();
                         },
                         failure: function() {
-                            alert( 'Status', 'Error while saving data' );
+                            alert( i18n_status , i18n_error_while_saving_data );
                         }
                     });
                 }
@@ -767,7 +771,7 @@ Ext.onReady( function() {
     
     var automaticMapLegendSetWindow = new Ext.Window({
         id: 'automaticmaplegendset_w',
-        title: '<span id="window-automaticlegendset-title">Automatic legend sets</span>',
+        title: '<span id="window-automaticlegendset-title">'+i18n_automatic_legend_sets+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 245,
@@ -799,7 +803,7 @@ Ext.onReady( function() {
 				items:
 				[
 					{
-						title: '<span class="panel-tab-title">New</span>',
+						title: '<span class="panel-tab-title">'+i18n_new+'</span>',
 						id: 'automaticmaplegendset0',
 						items:
 						[
@@ -807,7 +811,7 @@ Ext.onReady( function() {
 						]
 					},
 					{
-						title: '<span class="panel-tab-title">Assign to indicators</span>',
+						title: '<span class="panel-tab-title">'+i18n_assign_to_indocator+'</span>',
 						id: 'automaticmaplegendset1',
 						items:
 						[
@@ -815,7 +819,7 @@ Ext.onReady( function() {
 						]
 					},
 					{
-						title: '<span class="panel-tab-title">Delete</span>',
+						title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
 						id: 'automaticmaplegendset2',
 						items:
 						[
@@ -844,20 +848,20 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">Display name</div>' },
+            { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
             predefinedMapLegendNameTextField,
-            { html: '<div class="window-field-label">Start value</div>' },
+            { html: '<div class="window-field-label">'+i18n_start_value+'</div>' },
             predefinedMapLegendStartValueTextField,
-            { html: '<div class="window-field-label">End value</div>' },
+            { html: '<div class="window-field-label">'+i18n_end_value+'</div>' },
             predefinedMapLegendEndValueTextField,
-            { html: '<div class="window-field-label">Color</div>' },
+            { html: '<div class="window-field-label">'+i18n_color+'</div>' },
             predefinedMapLegendColorColorPalette,
             {
                 xtype: 'button',
                 id: 'newpredefinedmaplegend_b',
 				isFormField: true,
 				hideLabel: true,
-                text: 'Save',
+                text: i18n_save,
 				cls: 'window-button',
                 handler: function() {
                     var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
@@ -866,12 +870,12 @@ Ext.onReady( function() {
                     var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
 					
 					if (!mln || mlsv == "" || mlev == "" || !mlc) {
-                        Ext.messageRed.msg('New legend', 'Form is not complete.');
+                        Ext.messageRed.msg(	i18n_new_legend , i18n_form_is_not_complete );
                         return;
                     }
                     
                     if (!validateInput(mln)) {
-                        Ext.messageRed.msg('New legend set', 'Legend name cannot be longer than 25 characters.');
+                        Ext.messageRed.msg( i18n_new_legend, i18n_name_can_not_longer_than_25 );
                         return;
                     }
                     
@@ -882,7 +886,7 @@ Ext.onReady( function() {
                             var mapLegends = Ext.util.JSON.decode(r.responseText).mapLegends;
                             for (var i = 0; i < mapLegends.length; i++) {
                                 if (mln == mapLegends[i].name) {
-                                    Ext.messageRed.msg('New legend', 'A legend called <span class="x-msg-hl">' + ln + '</span> already exists.');
+                                    Ext.messageRed.msg( i18n_new_legend , i18n_legend + '<span class="x-msg-hl">' + ln + '</span> ' + i18n_already_exists);
                                     return;
                                 }
                             }
@@ -892,7 +896,7 @@ Ext.onReady( function() {
                                 method: 'POST',
                                 params: { name: mln, startValue: mlsv, endValue: mlev, color: mlc },
                                 success: function(r) {
-                                    Ext.messageBlack.msg('New legend', 'The legend <span class="x-msg-hl">' + mln + '</span> was registered.');
+                                    Ext.messageBlack.msg(i18n_new_legend, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
                                     Ext.getCmp('predefinedmaplegend_cb').getStore().reload();
                                     Ext.getCmp('predefinedmaplegendname_tf').reset();
                                     Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
@@ -918,19 +922,19 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">Legend</p>' },
+            { html: '<div class="window-field-label-first">'+i18n_legend+'</p>' },
             predefinedMapLegendComboBox,
             {
                 xtype: 'button',
                 id: 'deletepredefinedmaplegend_b',
-                text: 'Delete',
+                text: i18n_delete,
 				cls: 'window-button',
                 handler: function() {
                     var mlv = Ext.getCmp('predefinedmaplegend_cb').getValue();
                     var mlrv = Ext.getCmp('predefinedmaplegend_cb').getRawValue();
                     
                     if (!mlv) {
-                        Ext.messageRed.msg('Delete legend', 'Please select a legend.');
+                        Ext.messageRed.msg( i18n_delete + ' ' + i18n_legend, i18n_please_select_a_legend );
                         return;
                     }
                     
@@ -939,7 +943,7 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: { id: mlv },
                         success: function(r) {
-                            Ext.messageBlack.msg('Delete legend', 'The legend <span class="x-msg-hl">' + mlrv + '</span> was deleted.');
+                            Ext.messageBlack.msg(i18n_delete + ' ' + i18n_legend , i18n_legend+ ' <span class="x-msg-hl">' + mlrv + '</span> ' + i18n_was_deleted);
                             Ext.getCmp('predefinedmaplegend_cb').getStore().reload();
                             Ext.getCmp('predefinedmaplegend_cb').reset();
                         },
@@ -957,14 +961,14 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px',
         items:
         [   
-            { html: '<div class="window-field-label-first">Display name</div>' },
+            { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
             predefinedMapLegendSetNameTextField,
-            { html: '<div class="window-field-label">Legends</div>' },
+            { html: '<div class="window-field-label">'+i18n_legends+'</div>' },
 			predefinedNewMapLegendMultiSelect,
             {
                 xtype: 'button',
                 id: 'newpredefinedmaplegendset_b',
-                text: 'Save',
+                text: i18n_save,
 				cls: 'window-button',
                 handler: function() {
                     var mlsv = Ext.getCmp('predefinedmaplegendsetname_tf').getValue();
@@ -983,7 +987,7 @@ Ext.onReady( function() {
 										var temp_ev = predefinedMapLegendStore.getById(array[j]).get('endValue');
 										for (var k = sv+1; k < ev; k++) {
 											if (k > temp_sv && k < temp_ev) {
-												Ext.messageRed.msg('New legend set', 'Overlapping legends are not allowed.');
+												Ext.messageRed.msg( i18n_new_legend_set , i18n_overlapping_legends_are_not_allowed );
 												return;
 											}
 										}
@@ -993,12 +997,12 @@ Ext.onReady( function() {
 						}
 					}
 					else {
-						Ext.messageRed.msg('New legend set', 'Please select at least one legend.');
+						Ext.messageRed.msg( i18n_new_legend_set , i18n_please_select_at_least_one_legend );
                         return;
 					}
 					
                     if (!mlsv) {
-                        Ext.messageRed.msg('New legend set', 'Form is not complete.');
+                        Ext.messageRed.msg( i18n_new_legend_set, i18n_form_is_not_complete );
                         return;
                     }
                     
@@ -1016,7 +1020,7 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: { name: mlsv, type: map_legend_type_predefined },
                         success: function(r) {
-                            Ext.messageBlack.msg('New legend set', 'The legend set <span class="x-msg-hl">' + mlsv + '</span> was registered.');
+                            Ext.messageBlack.msg( i18n_new_legend_set , i18n_new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + i18n_was_registered );
                             Ext.getCmp('predefinedmaplegendset_cb').getStore().reload();
 							Ext.getCmp('maplegendset_cb').getStore().reload();
 							Ext.getCmp('predefinedmaplegendsetname_tf').reset();
@@ -1036,19 +1040,19 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">Legend set</p>' },
+            { html: '<div class="window-field-label-first">'+i18n_legend_set+'</p>' },
             predefinedMapLegendSetComboBox,
             {
                 xtype: 'button',
                 id: 'deletepredefinedmaplegendset_b',
-                text: 'Delete',
+                text: i18n_delete,
 				cls: 'window-button',
                 handler: function() {
                     var mlsv = Ext.getCmp('predefinedmaplegendset_cb').getValue();
                     var mlsrv = Ext.getCmp('predefinedmaplegendset_cb').getRawValue();
                     
                     if (!mlsv) {
-                        Ext.messageRed.msg('Delete legend set', 'Please select a legend set.');
+                        Ext.messageRed.msg( i18n_delete + ' ' + i18n_legend_set, i18n_please_select_a_legend_set );
                         return;
                     }
                     
@@ -1057,7 +1061,7 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: { id: mlsv },
                         success: function(r) {
-                            Ext.messageBlack.msg('Delete legend set', 'The legend set <span class="x-msg-hl">' + mlsrv + '</span> was deleted.');
+                            Ext.messageBlack.msg(i18n_delete + ' ' + i18n_legend_set, i18n_legend_set + ' <span class="x-msg-hl">' + mlsrv + '</span> ' + i18n_was_deleted);
                             Ext.getCmp('predefinedmaplegendset_cb').getStore().reload();
                             Ext.getCmp('predefinedmaplegendset_cb').reset();
 							Ext.getCmp('maplegendset_cb').getStore().reload();
@@ -1073,7 +1077,7 @@ Ext.onReady( function() {
 	
 	var predefinedMapLegendSetWindow = new Ext.Window({
         id: 'predefinedmaplegendset_w',
-        title: '<span id="window-predefinedlegendset-title">Predefined legend sets</span>',
+        title: '<span id="window-predefinedlegendset-title">'+i18n_predefined_legend_sets+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 311,
@@ -1108,28 +1112,28 @@ Ext.onReady( function() {
 				items:
 				[
 					{
-						title: '<span class="panel-tab-title">New legend</span>',
+						title: '<span class="panel-tab-title">'+i18n_new_legend+'</span>',
 						id: 'predefinedmaplegendset0',
 						items: [
 							newPredefinedMapLegendPanel
 						]
 					},
 					{
-						title: '<span class="panel-tab-title">Delete</span>',
+						title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
 						id: 'predefinedmaplegendset1',
 						items: [
 							deletePredefinedMapLegendPanel
 						]
 					},
 					{
-						title: '<span class="panel-tab-title">New legend set</span>',
+						title: '<span class="panel-tab-title">'+i18n_new_legend_set+'</span>',
 						id: 'predefinedmaplegendset2',
 						items: [
 							newPredefinedMapLegendSetPanel
 						]
 					},
 					{
-						title: '<span class="panel-tab-title">Delete</span>',
+						title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
 						id: 'predefinedmaplegendset3',
 						items: [
 							deletePredefinedMapLegendSetPanel
@@ -1158,7 +1162,7 @@ Ext.onReady( function() {
     
 	var helpWindow = new Ext.Window({
         id: 'help_w',
-        title: '<span id="window-help-title">Help</span>',
+        title: '<span id="window-help-title">'+i18n_help+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 607,
@@ -1204,31 +1208,31 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">Thematic map</span>',
+                        title: '<span class="panel-tab-title">'+i18n_thematic_map+'</span>',
                         id: 'help0'
                     },
                     {
-                        title: '<span class="panel-tab-title">Maps</span>',
+                        title: '<span class="panel-tab-title">'+i18n_map+'</span>',
                         id: 'help1'
                     },
                     {
-                        title: '<span class="panel-tab-title">Assignment</span>',
+                        title: '<span class="panel-tab-title">'+i18n_assignment+'</span>',
                         id: 'help2'
                     },
                     {
-                        title: '<span class="panel-tab-title">Overlays</span>',
+                        title: '<span class="panel-tab-title">'+i18n_overlays+'</span>',
                         id: 'help3'
                     },
                     {
-                        title: '<span class="panel-tab-title">Admin</span>',
+                        title: '<span class="panel-tab-title">'+i18n_administrator+'</span>',
                         id: 'help4'
                     },
                     {
-                        title: '<span class="panel-tab-title">Favorites</span>',
+                        title: '<span class="panel-tab-title">'+i18n_favorite+'</span>',
                         id: 'help5'
                     },
                     {
-                        title: '<span class="panel-tab-title">Legend sets</span>',
+                        title: '<span class="panel-tab-title">'+i18n_legend_set+'</span>',
                         id: 'help6'
                     },
                     {
@@ -1355,7 +1359,7 @@ Ext.onReady( function() {
 	
 	var wmsWindow = new Ext.Window({
 		id: 'wms_w',
-		title: '<span class="panel-title">Geoserver shapefiles</span>',
+		title: '<span class="panel-title">'+i18n_geoserver_shapefiles+'</span>',
 		closeAction: 'hide',
 		width: wmsGrid.width,
 		height: screen.height * 0.4,
@@ -1483,7 +1487,7 @@ Ext.onReady( function() {
     
     var newMapButton = new Ext.Button({
         id: 'newmap_b',
-        text: 'Register new map',
+        text: i18n_register_maps,
 		cls: 'aa_med',
         handler: function()
         {
@@ -1508,37 +1512,37 @@ Ext.onReady( function() {
                     var zoom = Ext.getCmp('newzoom_cb').getValue();
                      
                     if (!nn || !oui || !ouli || !nc || !lon || !lat) {
-						Ext.messageRed.msg('New map', 'Form is not complete.');
+						Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_form_is_not_complete );
 						return;
 					}
 					else if (!mlp && !mlpwms) {
-						Ext.messageRed.msg('New map', 'Form is not complete.');
+						Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_form_is_not_complete );
 						return;
                     }
                     
                     if (validateInput(nn) == false) {
-                        Ext.messageRed.msg('New map', '<span class="x-msg-hl">' + 'Map name' + '</span> cannot have more than 25 characters.');
+                        Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
                         return;
                     }
                     
                     if (!Ext.num(parseFloat(lon), false)) {
-                        Ext.messageRed.msg('New map', '<span class="x-msg-hl">' + 'Longitude' + '</span> must be a number.');
+                        Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_longitude_x + '</span>' + i18n_must_be_a_number);
                         return;
                     }
                     else {
                         if (lon < -180 || lon > 180) {
-                            Ext.messageRed.msg('New map', '<span class="x-msg-hl">' + 'Longitude' + '</span> must be between -180 and 180.');
+                            Ext.messageRed.msg( i18n_new + ' ' + i18n_map , '<span class="x-msg-hl">' + i18n_longitude_x + '</span> ' + i18n_must_be_between_180_and_180);
                             return;
                         }
                     }
                     
                     if (!Ext.num(parseFloat(lat), false)) {
-                        Ext.messageRed.msg('New map', '<span class="x-msg-hl">' + 'Latitude' + '</span> must be a number.');
+                        Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_a_number);
                         return;
                     }
                     else {
                         if (lat < -90 || lat > 90) {
-                            Ext.messageRed.msg('New map', '<span class="x-msg-hl">' + 'Latitude' + '</span> must be between -90 and 90.');
+                            Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_between_90_and_90);
                             return;
                         }
                     }
@@ -1550,11 +1554,11 @@ Ext.onReady( function() {
                             var maps = Ext.util.JSON.decode(r.responseText).maps;
                             for (var i = 0; i < maps.length; i++) {
                                 if (maps[i].name == nn) {
-                                    Ext.messageRed.msg('New map', 'There is already a map called <span class="x-msg-hl">' + nn + '</span>.');
+                                    Ext.messageRed.msg( i18n_new + ' ' + i18n_map, ' <span class="x-msg-hl">' + nn + '</span>.');
                                     return;
                                 }
                                 else if (maps[i].mapLayerPath == mlp) {
-                                    Ext.messageRed.msg('New map', 'The source file <span class="x-msg-hl">' + mlp + '</span> is already registered.');
+                                    Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_the_source_file+' <span class="x-msg-hl">' + mlp + '</span> ' + i18n_already_exists );
                                     return;
                                 }
                             }
@@ -1566,7 +1570,7 @@ Ext.onReady( function() {
                                 method: 'POST',
                                 params: { name: nn, mapLayerPath: source, type: t, sourceType: MAPSOURCE, organisationUnitId: oui, organisationUnitLevelId: ouli, nameColumn: nc, longitude: lon, latitude: lat, zoom: zoom},
                                 success: function(r) {
-                                    Ext.messageBlack.msg('New map', 'The map <span class="x-msg-hl">' + nn + '</span> (<span class="x-msg-hl">' + source + '</span>) was registered.');
+                                    Ext.messageBlack.msg( i18n_new + ' ' + i18n_map, i18n_map+' <span class="x-msg-hl">' + nn + '</span> (<span class="x-msg-hl">' + source + '</span>) ' + i18n_was_registered );
                                     
                                     Ext.getCmp('map_cb').getStore().reload();
                                     Ext.getCmp('maps_cb').getStore().reload();
@@ -1600,7 +1604,7 @@ Ext.onReady( function() {
     
     var editMapButton = new Ext.Button({
         id: 'editmap_b',
-        text: 'Save changes',
+        text: i18n_save,
 		cls: 'aa_med',
         handler: function() {
             var en = Ext.getCmp('editname_tf').getValue();
@@ -1612,12 +1616,12 @@ Ext.onReady( function() {
 			var t = Ext.getCmp('type_cb').getValue();
 			
             if (!en || !em || !nc || !lon || !lat) {
-                Ext.messageRed.msg('New map', 'Form is not complete.');
+                Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_form_is_not_complete );
                 return;
             }
             
             if (validateInput(en) == false) {
-                Ext.messageRed.msg('New map', 'Map name cannot be longer than 25 characters.');
+                Ext.messageRed.msg( i18n_new + ' ' + i18n_map , i18n_name_can_not_longer_than_25 );
                 return;
             }
            
@@ -1627,7 +1631,7 @@ Ext.onReady( function() {
                 params: { name: en, mapLayerPath: em, nameColumn: nc, longitude: lon, latitude: lat, zoom: zoom },
 
                 success: function(r) {
-                    Ext.messageBlack.msg('Edit map', 'The map <span class="x-msg-hl">' + en + '</span> (<span class="x-msg-hl">' + em + '</span>) was updated.');
+                    Ext.messageBlack.msg( i18n_new + ' ' + i18n_map,  i18n_map + ' <span class="x-msg-hl">' + en + '</span> (<span class="x-msg-hl">' + em + '</span>)' + i18n_was_updated );
                     
                     Ext.getCmp('map_cb').getStore().reload();
                     Ext.getCmp('maps_cb').getStore().reload();
@@ -1644,7 +1648,7 @@ Ext.onReady( function() {
                     Ext.getCmp('editzoom_cb').reset();
                 },
                 failure: function() {
-                    alert( 'Status', 'Error while saving data' );
+                    alert( i18n_status, i18n_error_while_saving_data );
                 }
             });
         }
@@ -1652,14 +1656,14 @@ Ext.onReady( function() {
     
     var deleteMapButton = new Ext.Button({
         id: 'deletemap_b',
-        text: 'Delete map',
+        text: i18n_delete + ' ' + i18n_map,
 		cls: 'aa_med',
         handler: function() {
             var mlp = Ext.getCmp('deletemap_cb').getValue();
             var mn = Ext.getCmp('deletemap_cb').getRawValue();
             
             if (!mlp) {
-                Ext.messageRed.msg('Delete map', 'Please select a map.');
+                Ext.messageRed.msg( i18n_delete + ' ' + i18n_map, i18n_please_select_a_map );
                 return;
             }
             
@@ -1668,7 +1672,7 @@ Ext.onReady( function() {
                 method: 'GET',
                 params: { mapLayerPath: mlp },
                 success: function(r) {
-                    Ext.messageBlack.msg('Edit map', 'The map <span class="x-msg-hl">' + mn + '</span> (<span class="x-msg-hl">' + mlp + '</span>) was deleted.');
+                    Ext.messageBlack.msg( i18n_edit + ' ' + i18n_map, i18n_map + ' <span class="x-msg-hl">' + mn + '</span> (<span class="x-msg-hl">' + mlp + '</span>) ' + i18n_was_deleted );
                     
                     Ext.getCmp('map_cb').getStore().reload();
 					
@@ -1685,7 +1689,7 @@ Ext.onReady( function() {
                     Ext.getCmp('mapview_cb').reset();
                 },
                 failure: function() {
-                    alert( 'Status', 'Error while saving data' );
+                     alert( i18n_status, i18n_error_while_saving_data );
                 }
             });
         }
@@ -1845,38 +1849,38 @@ Ext.onReady( function() {
             /*{ html: '<div class="panel-fieldlabel">Map type</div>' }, typeComboBox,
             { html: '<div class="panel-fieldlabel">Organisation unit level</div>' }, newMapComboBox,
             { html: '<div class="panel-fieldlabel">Organisation unit</div>' }, multi,*/
-            { html: '<div class="panel-fieldlabel-first">Display name</div>' }, newNameTextField,
-            { html: '<div class="panel-fieldlabel">Organisation unit level</div>' }, organisationUnitLevelComboBox,
-			{ html: '<div class="panel-fieldlabel">Map source file</div>' }, mapLayerPathComboBox, mapLayerPathWMSTextField,
-            { html: '<div class="panel-fieldlabel">Name column</div>' }, newNameColumnComboBox,
-            { html: '<div class="panel-fieldlabel">Longitude (x)</div>' }, newLongitudeComboBox,
-            { html: '<div class="panel-fieldlabel">Latitude (y)</div>' }, newLatitudeComboBox,
-            { html: '<div class="panel-fieldlabel">Zoom</div>' }, newZoomComboBox
+            { html: '<div class="panel-fieldlabel-first">'+i18n_display_name+'</div>' }, newNameTextField,
+            { html: '<div class="panel-fieldlabel">'+i18n_organisation_unit_level+'</div>' }, organisationUnitLevelComboBox,
+			{ html: '<div class="panel-fieldlabel">'+i18n_map_source_file+'</div>' }, mapLayerPathComboBox, mapLayerPathWMSTextField,
+            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, newNameColumnComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_longitude_x+'</div>' }, newLongitudeComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_latitude_y+'</div>' }, newLatitudeComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_zoom+'</div>' }, newZoomComboBox
         ]
     });
     
     var editMapPanel = new Ext.form.FormPanel({
         id: 'editmap_p',
         items: [
-            { html: '<div class="panel-fieldlabel-first">Map</div>' }, editMapComboBox,
-            { html: '<div class="panel-fieldlabel">Display name</div>' }, editNameTextField,
-            { html: '<div class="panel-fieldlabel">Name column</div>' }, editNameColumnComboBox,
-            { html: '<div class="panel-fieldlabel">Longitude</div>' }, editLongitudeComboBox,
-            { html: '<div class="panel-fieldlabel">Latitude</div>' }, editLatitudeComboBox,
-            { html: '<div class="panel-fieldlabel">Zoom</div>' }, editZoomComboBox
+            { html: '<div class="panel-fieldlabel-first">'+i18n_map+'</div>' }, editMapComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_display_name+'</div>' }, editNameTextField,
+            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, editNameColumnComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_longitude_x+'</div>' }, editLongitudeComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_latitude_y+'</div>' }, editLatitudeComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_zoom+'</div>' }, editZoomComboBox
         ]
     });
     
     var deleteMapPanel = new Ext.form.FormPanel({
         id: 'deletemap_p',
         items: [
-            { html: '<div class="panel-fieldlabel-first">Map</div>' }, deleteMapComboBox
+            { html: '<div class="panel-fieldlabel-first">'+i18n_map+'</div>' }, deleteMapComboBox
         ]
     });
 
     shapefilePanel = new Ext.Panel({
         id: 'shapefile_p',
-        title: '<span class="panel-title">Register maps</span>',
+        title: '<span class="panel-title">'+i18n_register_maps+'</span>',
         items:
         [
             {
@@ -1916,7 +1920,7 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">New</span>',
+                        title: '<span class="panel-tab-title">'+i18n_new+'</span>',
                         id: 'map0',
                         items:
                         [
@@ -1924,7 +1928,7 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        title: '<span class="panel-tab-title">Edit</span>',
+                        title: '<span class="panel-tab-title">'+i18n_edit+'</span>',
                         id: 'map1',
                         items:
                         [
@@ -1932,7 +1936,7 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        title: '<span class="panel-tab-title">Delete</span>',
+                        title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
                         id: 'map2',
                         items:
                         [
@@ -1987,10 +1991,10 @@ Ext.onReady( function() {
 			singleSelect:true
 		}),
         columns: [
-            {header: 'Title', dataIndex: 'title', sortable: true, width: 180},
-            {header: 'Name', dataIndex: 'name', sortable: true, width: 180},
-            {header: 'Queryable', dataIndex: 'queryable', sortable: true, width: 100},
-            {header: 'Description', id: 'description', dataIndex: 'abstract'}
+            {header: i18n_title, dataIndex: 'title', sortable: true, width: 180},
+            {header: name, dataIndex: 'name', sortable: true, width: 180},
+            {header: i18n_queryable, dataIndex: 'queryable', sortable: true, width: 100},
+            {header: i18n_description, id: 'description', dataIndex: 'abstract'}
         ],
         autoExpandColumn: 'description',
         width: 700,
@@ -2006,7 +2010,7 @@ Ext.onReady( function() {
         var layer = record.get('layer').clone();
         
         var wmsOverlayPreviewWindow = new Ext.Window({
-            title: '<span class="panel-title">Preview: ' + record.get("title") + '</span>',
+            title: '<span class="panel-title">'+i18n_preview+': ' + record.get("title") + '</span>',
             width: screen.width * 0.4,
             height: screen.height * 0.4,
             layout: 'fit',
@@ -2041,7 +2045,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'button',
 					id: 'selectwmsoverlay_b',
-					text: 'Select',
+					text: i18n_select,
 					cls: 'aa_med',
 					handler: function() {
 						var name = Ext.getCmp('wmsoverlay_g').getSelectionModel().getSelected().get('name');
@@ -2080,14 +2084,14 @@ Ext.onReady( function() {
     
     var deleteMapLayerButton = new Ext.Button({
         id: 'deletemaplayer_b',
-        text: 'Delete overlay',
+        text: i18n_delete_overlay,
  		cls: 'window-button',
         handler: function() {
             var ml = Ext.getCmp('maplayer_cb').getValue();
             var mln = Ext.getCmp('maplayer_cb').getRawValue();
             
             if (!ml) {
-                Ext.messageRed.msg('Delete overlay', 'Please select an overlay.');
+                Ext.messageRed.msg( i18n_delete_overlay, i18n_please_select_an_overlay );
                 return;
             }
             
@@ -2097,12 +2101,12 @@ Ext.onReady( function() {
                 params: { id: ml },
 
                 success: function(r) {
-                    Ext.messageBlack.msg('Delete overlay', 'The overlay <span class="x-msg-hl">' + mln + '</span> was deleted.');
+                    Ext.messageBlack.msg( i18n_delete_overlay , i18n_overlay + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
                     Ext.getCmp('maplayer_cb').getStore().reload();
                     Ext.getCmp('maplayer_cb').reset();
                 },
                 failure: function() {
-                    alert( 'Status', 'Error while saving data' );
+                    alert( i18n_status , i18n_error_while_saving_data );
                 }
             });
             
@@ -2114,12 +2118,12 @@ Ext.onReady( function() {
         id: 'newmaplayer_p',
         items:
         [
-            { html: '<div class="panel-fieldlabel-first">Display name</div>' }, mapLayerNameTextField,
-            { html: '<div class="panel-fieldlabel">Map source file</div>' }, mapLayerMapSourceFileComboBox, mapLayerPathWMSOverlayTextField,
-            { html: '<div class="panel-fieldlabel">Fill color</div>' }, mapLayerFillColorColorField,
-            { html: '<div class="panel-fieldlabel">Fill opacity</div>' }, mapLayerFillOpacityComboBox,
-            { html: '<div class="panel-fieldlabel">Stroke color</div>' }, mapLayerStrokeColorColorField,
-            { html: '<div class="panel-fieldlabel">Stroke width</div>' }, mapLayerStrokeWidthComboBox,
+            { html: '<div class="panel-fieldlabel-first">'+i18n_display_name+'</div>' }, mapLayerNameTextField,
+            { html: '<div class="panel-fieldlabel">'+i18n_map_source_file+'</div>' }, mapLayerMapSourceFileComboBox, mapLayerPathWMSOverlayTextField,
+            { html: '<div class="panel-fieldlabel">'+i18n_fill_color+'</div>' }, mapLayerFillColorColorField,
+            { html: '<div class="panel-fieldlabel">'+i18n_fill_opacity+'</div>' }, mapLayerFillOpacityComboBox,
+            { html: '<div class="panel-fieldlabel">'+i18n_stroke_color+'</div>' }, mapLayerStrokeColorColorField,
+            { html: '<div class="panel-fieldlabel">'+i18n_stroke_width+'</div>' }, mapLayerStrokeWidthComboBox,
             {
 				xtype: 'button',
 				id: 'newmaplayer_b',
@@ -2135,16 +2139,16 @@ Ext.onReady( function() {
 					var mlwmso = Ext.getCmp('maplayerpathwmsoverlay_tf').getValue();
 					
 					if (!mln) {
-						Ext.messageRed.msg('New overlay', 'Overlay form is not complete.');
+						Ext.messageRed.msg( i18n_new_overlay, i18n_overlay_form_is_not_complete );
 						return;
 					}
 					else if (!mlmsf && !mlwmso) {
-						Ext.messageRed.msg('New overlay', 'Overlay form is not complete.');
+						Ext.messageRed.msg( i18n_new_overlay, i18n_overlay_form_is_not_complete );
 						return;
 					}
 					
 					if (validateInput(mln) == false) {
-						Ext.messageRed.msg('New overlay', 'Overlay name cannot be longer than 25 characters.');
+						Ext.messageRed.msg( i18n_new_overlay , i18n_overlay_name_cannot_be_longer_than_25_characters );
 						return;
 					}
 					
@@ -2156,7 +2160,7 @@ Ext.onReady( function() {
 							
 							for (i in mapLayers) {
 								if (mapLayers[i].name == mln) {
-									Ext.messageRed.msg('New overlay', 'The name <span class="x-msg-hl">' + mln + '</span> is already in use.');
+									Ext.messageRed.msg( i18n_new_overlay , i18n_name + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_is_already_in_use+'.');
 									return;
 								}
 							}
@@ -2168,7 +2172,7 @@ Ext.onReady( function() {
 								method: 'POST',
 								params: { name: mln, type: 'overlay', mapSource: ms, fillColor: mlfc, fillOpacity: mlfo, strokeColor: mlsc, strokeWidth: mlsw },
 								success: function(r) {
-									Ext.messageBlack.msg('New overlay', 'The overlay <span class="x-msg-hl">' + mln + '</span> was registered.');
+									Ext.messageBlack.msg( i18n_new_overlay , 'The overlay <span class="x-msg-hl">' + mln + '</span> '+i18n_was_registered+'.');
 									Ext.getCmp('maplayer_cb').getStore().reload();
 							
 									var mapurl = MAPSOURCE == map_source_type_geojson ? path + 'getGeoJson.action?name=' + mlmsf : path_geoserver + wfs + mlwmso + output;
@@ -2210,14 +2214,14 @@ Ext.onReady( function() {
         id: 'deletemaplayer_p',
         items:
         [
-            { html: '<div class="panel-fieldlabel-first">Overlay</div>' }, mapLayerComboBox,
+            { html: '<div class="panel-fieldlabel-first">'+i18n_overlays+'</div>' }, mapLayerComboBox,
             deleteMapLayerButton
         ]
     });
 
 	var mapLayerWindow = new Ext.Window({
         id: 'maplayer_w',
-        title: '<span id="window-maplayer-title">Overlays</span>',
+        title: '<span id="window-maplayer-title">'+i18n_overlays+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 234,
@@ -2243,7 +2247,7 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">New</span>',
+                        title: '<span class="panel-tab-title">'+i18n_new+'</span>',
                         id: 'maplayer0',
                         items:
                         [
@@ -2251,7 +2255,7 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        title: '<span class="panel-tab-title">Delete</span>',
+                        title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
                         id: 'maplayer1',
                         items:
                         [
@@ -2280,14 +2284,14 @@ Ext.onReady( function() {
     /* Section: administrator */
     var adminPanel = new Ext.form.FormPanel({
         id: 'admin_p',
-        title: '<span class="panel-title">Administrator</span>',
+        title: '<span class="panel-title">'+i18n_administrator+'</span>',
         items:
         [
 			{ html: '<p style="height:5px;">' },
 			{
 				xtype:'fieldset',
 				columnWidth: 0.5,
-				title: '&nbsp;<span class="panel-tab-title">Map source</span>&nbsp;',
+				title: '&nbsp;<span class="panel-tab-title">'+i18n_map_source+'</span>&nbsp;',
 				collapsible: true,
 				animCollapse: true,
 				autoHeight:true,
@@ -2296,7 +2300,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'combo',
 						id: 'mapsource_cb',
-						fieldLabel: 'Map source',
+						fieldLabel: i18n_map_source,
 						labelSeparator: labelseparator,
 						editable: false,
 						valueField: 'id',
@@ -2318,7 +2322,7 @@ Ext.onReady( function() {
 									var msrw = Ext.getCmp('mapsource_cb').getRawValue();
 
 									if (MAPSOURCE == msv) {
-										Ext.messageRed.msg('Map source', '<span class="x-msg-hl">' + msrw + '</span> is already selected.');
+										Ext.messageRed.msg( i18n_map_source , '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_already_selected+'.');
 									}
 									else {
 										Ext.Ajax.request({
@@ -2368,10 +2372,10 @@ Ext.onReady( function() {
 												}
 												addOverlaysToMap();
 												
-												Ext.messageBlack.msg('Map source', '<span class="x-msg-hl">' + msrw + '</span> is saved as map source.');
+												Ext.messageBlack.msg( i18n_map_source, '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_saved_as_map_source+'.');
 											},
 											failure: function() {
-												alert( 'Status', 'Error while saving data' );
+												alert( i18n_status, i18n_error_while_saving_data );
 											}
 										});
 										
@@ -2391,7 +2395,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'checkbox',
 						id: 'register_chb',
-						fieldLabel: 'Admin panels',
+						fieldLabel: i18n_admin_panels,
 						labelSeparator: labelseparator,
 						isFormField: true,
 						listeners: {
@@ -2417,7 +2421,7 @@ Ext.onReady( function() {
 			{
 				xtype:'fieldset',
 				columnWidth: 0.5,
-				title: '&nbsp;<span class="panel-tab-title">Base coordinate</span>&nbsp;',
+				title: '&nbsp;<span class="panel-tab-title">'+i18n_base_coordinate+'</span>&nbsp;',
 				collapsible: true,
 				animCollapse: true,
 				autoHeight:true,
@@ -2426,7 +2430,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'combo',
 						id: 'baselongitude_cb',
-						fieldLabel: 'Longitude (x)',
+						fieldLabel: i18n_longitude_x,
 						valueField: 'longitude',
 						displayField: 'longitude',
 						editable: true,
@@ -2442,7 +2446,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'combo',
 						id: 'baselatitude_cb',
-						fieldLabel: 'Latitude (y)',
+						fieldLabel: i18n_latitude_y,
 						valueField: 'latitude',
 						displayField: 'latitude',
 						editable: true,
@@ -2461,7 +2465,7 @@ Ext.onReady( function() {
 						isFormField: true,
 						fieldLabel: '',
 						labelSeparator: '',
-						text: 'Save coordinate',
+						text: i18n_save_coordinate,
 						cls: 'aa_med',
 						handler: function() {
 							var blo = Ext.getCmp('baselongitude_cb').getRawValue();
@@ -2474,7 +2478,7 @@ Ext.onReady( function() {
 								
 								success: function() {
 									BASECOORDINATE = {longitude:blo, latitude:bla};
-									Ext.messageBlack.msg('Base coordinate','Longitude <span class="x-msg-hl">' + blo + '</span> and latitude <span class="x-msg-hl">' + bla + '</span> was saved as base coordinate');
+									Ext.messageBlack.msg( i18n_base_coordinate , i18n_longitude_x + ' <span class="x-msg-hl">' + blo + '</span> '+i18n_and+' '+i18n_latitude_y+' <span class="x-msg-hl">' + bla + '</span> ' + i18n_was_saved_as_base_coordinate);
 									Ext.getCmp('newlongitude_cb').getStore().reload();
 									Ext.getCmp('newlongitude_cb').setValue(blo);
 									Ext.getCmp('newlatitude_cb').setValue(bla);
@@ -2571,7 +2575,7 @@ Ext.onReady( function() {
 					});
 					
 					treeLayer.events.register('loadstart', null, function() {
-						MASK.msg = 'Loading...';
+						MASK.msg = i18n_loading;
 						MASK.show();
 					});
 					
@@ -2605,7 +2609,7 @@ Ext.onReady( function() {
     }];       
     
     var layerTree = new Ext.tree.TreePanel({
-        title: '<span class="panel-title">Map layers</span>',
+        title: '<span class="panel-title">' + i18n_map_layers + '</span>',
         enableDD: true,
         bodyStyle: 'padding-bottom:5px;',
         rootVisible: false,
@@ -2637,7 +2641,7 @@ Ext.onReady( function() {
         id: 'choropleth',
         map: MAP,
         layer: choroplethLayer,
-		title: '<span class="panel-title">Thematic map</span>',
+		title: '<span class="panel-title">' + i18n_thematic_map + '</span>',
         url: 'init',
         featureSelection: false,
         legendDiv: 'choroplethLegend',
@@ -2657,7 +2661,7 @@ Ext.onReady( function() {
         id: 'mapping',
         map: MAP,
         layer: choroplethLayer,
-        title: '<span class="panel-title">Assign organisation units to map</span>',
+        title: '<span class="panel-title">'+i18n_assign_organisation_units_to_map+'</span>',
         url: 'init',
         featureSelection: false,
         legendDiv: 'choroplethLegend',
@@ -2675,13 +2679,13 @@ Ext.onReady( function() {
 	
 	/* Section: map toolbar */  
 	var mapLabel = new Ext.form.Label({
-		text: 'Map',
+		text: i18n_map,
 		style: 'font:bold 11px arial; color:#333;'
 	});
 	
 	var zoomInButton = new Ext.Button({
 		iconCls: 'icon-zoomin',
-		tooltip: 'Zoom in',
+		tooltip: i18n_zoom_in,
 		handler:function() {
 			MAP.zoomIn();
 		},
@@ -2690,7 +2694,7 @@ Ext.onReady( function() {
 	
 	var zoomOutButton = new Ext.Button({
 		iconCls: 'icon-zoomout',
-		tooltip: 'Zoom out',
+		tooltip: i18n_zoom_out,
 		handler:function() {
 			MAP.zoomOut();
 		},
@@ -2699,7 +2703,7 @@ Ext.onReady( function() {
 	
 	var zoomMaxExtentButton = new Ext.Button({
 		iconCls: 'icon-zoommin',
-		tooltip: 'Zoom to visible extent',
+		tooltip: i18n_zoom_to_visible_extent,
 		handler: function() {
 			MAP.zoomToMaxExtent();
 		},
@@ -2708,7 +2712,7 @@ Ext.onReady( function() {
 		
 	var labelsButton = new Ext.Button({
 		iconCls: 'icon-labels',
-		tooltip: 'Show/hide feature labels',
+		tooltip: i18n_show_hide_labels,
 		handler: function() {
 			toggleFeatureLabels(true);				
 		}
@@ -2716,7 +2720,7 @@ Ext.onReady( function() {
 	
 	var favoritesButton = new Ext.Button({
 		iconCls: 'icon-favorite',
-		tooltip: 'Favorite map views',
+		tooltip: i18n_favorite_map_views,
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;    
@@ -2733,7 +2737,7 @@ Ext.onReady( function() {
 	
 	var exportImageButton = new Ext.Button({
 		iconCls: 'icon-image',
-		tooltip: 'Export map as image',
+		tooltip: i18n_export_map_as_image,
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;   
@@ -2751,7 +2755,7 @@ Ext.onReady( function() {
 	
 	var exportExcelButton = new Ext.Button({
 		iconCls: 'icon-excel',
-		tooltip: 'Export map as Excel spreadsheet (XLS)',
+		tooltip: i18n_export_map_as_excel,
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;   
@@ -2792,7 +2796,7 @@ Ext.onReady( function() {
 
     var automaticMapLegendSetButton = new Ext.Button({
 		iconCls: 'icon-automaticlegendset',
-		tooltip: 'Create legend sets for legend type "automatic"',
+		tooltip: i18n_create_legend_sets_for_legend_type + '"' + i18n_automatic + '"',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;    
@@ -2809,7 +2813,7 @@ Ext.onReady( function() {
 	
 	var predefinedMapLegendSetButton = new Ext.Button({
 		iconCls: 'icon-predefinedlegendset',
-		tooltip: 'Create legend sets for legend type "predefined"',
+		tooltip: i18n_create_legend_sets_for_legend_type + '"' + i18n_predefined + '"',
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;    
@@ -2826,7 +2830,7 @@ Ext.onReady( function() {
 	
 	var helpButton = new Ext.Button({
 		iconCls: 'icon-help',
-		tooltip: 'Get help with GIS',
+		tooltip: i18n_help ,
 		handler: function() {
 			var c = Ext.getCmp('center').x;
 			var e = Ext.getCmp('east').x;
@@ -2836,11 +2840,11 @@ Ext.onReady( function() {
 	});
 	
 	var exitButton = new Ext.Button({
-		text: 'Exit GIS',
+		text: i18n_exit_gis,
 		cls: 'x-btn-text-icon',
 		ctCls: 'aa_med',
 		icon: '../../images/exit.png',
-		tooltip: 'Return to DHIS 2 Dashboard',
+		tooltip: i18n_return_to_DHIS_2_dashboard,
 		handler: function() {
 			window.location.href = '../../dhis-web-portal/redirect.action'
 		}
@@ -2901,11 +2905,11 @@ Ext.onReady( function() {
                 [
                     layerTree,
                     {
-                        title: '<span class="panel-title">Overview map</span>',
+                        title: '<span class="panel-title">'+i18n_overview_map+'</span>',
                         html:'<div id="overviewmap" style="height:97px; padding-top:0px;"></div>'
                     },
                     {
-                        title: '<span class="panel-title">Cursor position</span>',
+                        title: '<span class="panel-title">'+ i18n_cursor_position +'</span>',
                         height: 65,
                         contentEl: 'position',
                         anchor: '100%',
@@ -2913,7 +2917,7 @@ Ext.onReady( function() {
                     },
 					{
 						xtype: 'panel',
-						title: '<span class="panel-title">Feature data</span>',
+						title: '<span class="panel-title">' + i18n_feature_data + '</span>',
 						height: 65,
 						anchor: '100%',
 						bodyStyle: 'padding-left: 4px;',
@@ -2921,13 +2925,13 @@ Ext.onReady( function() {
 						[
 							new Ext.form.Label({
 								id: 'featureinfo_l',
-								text: 'No feature selected.',
+								text: i18n_no_feature_selected,
 								style: 'color:#666'
 							})
 						]
 					},
                     {
-                        title: '<span class="panel-title">Map legend</span>',
+                        title: '<span class="panel-title">'+ i18n_map_legend +'</span>',
                         minHeight: 65,
                         autoHeight: true,
                         contentEl: 'legend',
@@ -3318,7 +3322,7 @@ function onHoverSelectChoropleth(feature) {
 }
 
 function onHoverUnselectChoropleth(feature) {
-    Ext.getCmp('featureinfo_l').setText('<span style="color:#666">No feature selected.</span>', false);
+    Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
 }
 
 function onClickSelectChoropleth(feature) {
@@ -3364,6 +3368,8 @@ function onClickSelectChoropleth(feature) {
 }
 
 function onClickUnselectChoropleth(feature) {}
+
+
 
 /* Section: map data */
 function loadMapData(redirect, position) {
@@ -3417,7 +3423,7 @@ function loadMapData(redirect, position) {
                 getAutoAssignOrganisationUnitData(position); }
         },
         failure: function() {
-            alert( 'Error while retrieving map data: loadMapData' );
+            alert( i18n_error_while_retrieving_data + ': loadMapData' );
         } 
     });
 }
@@ -3425,7 +3431,7 @@ function loadMapData(redirect, position) {
 
 /* Section: choropleth */
 function getChoroplethData() {
-	MASK.msg = 'Creating choropleth...';
+	MASK.msg = i18n_creating_choropleth ;
 	MASK.show();
 	
     var indicatorId = Ext.getCmp('indicator_cb').getValue();
@@ -3447,7 +3453,7 @@ function getChoroplethData() {
 			var options = {};
 			
 			if (mapvalues.length == 0) {
-				Ext.messageRed.msg('Thematic map', 'The selected indicator, period and level returned no data.');
+				Ext.messageRed.msg( i18n_thematic_map ,  i18n_selected_period_level_no_data );
 				MASK.hide();
 				return;
 			}
@@ -3491,7 +3497,7 @@ function getChoroplethData() {
 
 /* Section: mapping */
 function getAssignOrganisationUnitData() {
-	MASK.msg = 'Creating map...';
+	MASK.msg = i18n_creating_map;
 	MASK.show();
 	
     var mlp = MAPDATA.mapLayerPath;
@@ -3537,7 +3543,7 @@ function getAssignOrganisationUnitData() {
 
 /* Section: auto-mapping */
 function getAutoAssignOrganisationUnitData(position) {
-	MASK.msg = 'Loading data...';
+	MASK.msg = i18n_loading ;
 	MASK.show();
 
     var level = MAPDATA.organisationUnitLevel;
@@ -3573,7 +3579,7 @@ function getAutoAssignOrganisationUnitData(position) {
 				}
 			}
 			
-			MASK.msg = count_match == 0 ? 'No organisation units assigned...' : 'Assigning ' + count_match + ' organisation units...';
+			MASK.msg = count_match == 0 ? i18n_no + ' ' + i18n_organisation_units + ' ' +  i18n_assigned +'...' : + i18n_assigning +' ' + count_match + ' '+ i18n_organisation_units + '...';
 			MASK.show();
 
 			Ext.Ajax.request({
@@ -3582,10 +3588,10 @@ function getAutoAssignOrganisationUnitData(position) {
 				params: { mapLayerPath: mlp, relations: relations },
 
 				success: function(r) {
-					MASK.msg = 'Applying organisation units relations...';
+					MASK.msg = i18n_applying_organisation_units_relations ;
 					MASK.show();
 					
-					Ext.messageBlack.msg('Assign organisation units', '<span class="x-msg-hl">' + count_match + '</span> organisation units assigned.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + features.length + '</span>');
+					Ext.messageBlack.msg( i18n_assign + ' ' + i18n_organisation_units, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + features.length + '</span>');
 					
 					Ext.getCmp('grid_gp').getStore().reload();
 					loadMapData(organisationUnitAssignment, position);
@@ -3596,7 +3602,7 @@ function getAutoAssignOrganisationUnitData(position) {
 			});
         },
         failure: function() {
-            alert( 'Status', 'Error while retrieving data' );
+            alert( i18n_status , i18n_error_while_retrieving_data );
         } 
     });
 }
