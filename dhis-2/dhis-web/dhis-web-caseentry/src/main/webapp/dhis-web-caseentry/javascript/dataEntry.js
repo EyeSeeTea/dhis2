@@ -221,11 +221,11 @@ function DateSaver( dataElementId_, value_, providedByAnotherFacility_, resultCo
 			var message = '';
 			for ( var i = 0; i < dataelementList.length; i++ )
 			{
-				message += "\n" + dataelementList[i].firstChild.nodeValue;
+				message += "\n - " + dataelementList[i].firstChild.nodeValue;
 			}
 
 			markValue( ERROR );
-			window.alert( i18n_invalid_date + message);
+			window.alert( i18n_violate_validation + message);
 		}
 		else
 		{

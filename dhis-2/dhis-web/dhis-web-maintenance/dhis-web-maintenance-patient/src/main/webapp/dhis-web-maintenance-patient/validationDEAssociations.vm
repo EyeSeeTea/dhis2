@@ -48,12 +48,15 @@
   <td><select id="rightDataElementId" name="rightDataElementId" style="width:30em "></select></td>
 </tr>
 <tr>
-  <td><input type="button" onClick="validateProgramStageDEValidation();" value="$i18n.getString('save')" style="width:10em"></td>
+  <td>
+  <input type="button" onClick="validateProgramStageDEValidation();" value="$i18n.getString('save')" style="width:10em">
+  <input type="button" onClick="window.location.href = 'program.action';" value="$i18n.getString('cancel')" style="width:10em">
+  </td>
   <td>&nbsp;</td>
   <td></td>
 </tr>
 </table>
-
+<br><br>
 <table class="listTable">
 	<thead>
     <tr>

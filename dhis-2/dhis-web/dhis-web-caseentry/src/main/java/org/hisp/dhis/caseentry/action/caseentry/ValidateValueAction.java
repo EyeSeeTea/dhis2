@@ -27,10 +27,8 @@
 
 package org.hisp.dhis.caseentry.action.caseentry;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
@@ -247,7 +245,7 @@ public class ValidateValueAction
     @SuppressWarnings( "unchecked" )
     private List<ProgramStageDataElementValidation> validation(
         Collection<ProgramStageDataElementValidation> validations, OrganisationUnit organisationUnit,
-        ProgramInstance programInstance, Object value, ProgramStage programStage, DataElement dataElement )
+        ProgramInstance programInstance, String value, ProgramStage programStage, DataElement dataElement )throws Exception
     {
         List<ProgramStageDataElementValidation> result = new ArrayList<ProgramStageDataElementValidation>();
 
@@ -256,9 +254,6 @@ public class ValidateValueAction
 
             for ( ProgramStageDataElementValidation validation : validations )
             {
-                // get right-side value
-                Object objectValue = getObject( validation.getProperty() );
-
                 // Get left-side
                 ProgramStageDataElement leftSide = validation.getLeftProgramStageDataElement();
                 // Get right-side
@@ -271,6 +266,10 @@ public class ValidateValueAction
                 if ( leftSide.getProgramStage().equals( programStage )
                     && leftSide.getDataElement().equals( dataElement ) )
                 {
+                    // get left-side value
+                    Object objectValue = getObject( leftSide.getDataElement().getType(), value );
+
+                    // get program-stage of right-side
                     comparerogramStageInstance = programStageInstanceService.getProgramStageInstance( programInstance,
                         rightSide.getProgramStage() );
 
@@ -280,7 +279,8 @@ public class ValidateValueAction
 
                     if ( patientDataValue != null )
                     {
-                        Object compareValue = patientDataValue.getValue();
+                        String dbValue = patientDataValue.getValue();
+                        Object compareValue = getObject( rightSide.getDataElement().getType(), dbValue );
 
                         i = ((Comparable) objectValue).compareTo( (Comparable) compareValue );
                     }
@@ -288,6 +288,9 @@ public class ValidateValueAction
                 }
                 else
                 {
+                    // get right-side value
+                    Object objectValue = getObject( rightSide.getDataElement().getType(), value );
+                
                     comparerogramStageInstance = programStageInstanceService.getProgramStageInstance( programInstance,
                         leftSide.getProgramStage() );
 
@@ -296,14 +299,13 @@ public class ValidateValueAction
                         comparerogramStageInstance, leftSide.getDataElement(), organisationUnit );
                     if ( patientDataValue != null )
                     {
-                        Object compareValue = patientDataValue.getValue();
+                        String dbValue = patientDataValue.getValue();
+                        Object compareValue = getObject( leftSide.getDataElement().getType(), dbValue );
 
                         i = ((Comparable) compareValue).compareTo( (Comparable) objectValue );
                     }
                 }
-
-                System.out.println( "\n\n\n i = " + i );
-
+                
                 if ( i != validation.getOperator() && i != 2 )
                 {
                     result.add( validation );
@@ -315,38 +317,24 @@ public class ValidateValueAction
         return result;
     }
 
-    @SuppressWarnings( "unchecked" )
-    private Object getObject( String property )
+    private Object getObject( String type, String value )
         throws Exception
     {
-        // Get class
-        Class clazz;
-
-        if ( property.equals( "age" ) )
-        {
-            clazz = int.class;
-        }
-        else
-        {
-            Field field = Patient.class.getDeclaredField( property );
-            clazz = field.getType();
-        }
-
-        // Get value
-        if ( clazz == Integer.class || clazz == Integer.TYPE )
+        if ( type.equals( DataElement.VALUE_TYPE_INT) )
         {
             return Integer.valueOf( value );
         }
-        else if ( clazz.equals( Boolean.class ) || clazz == Boolean.TYPE )
+        else if ( type.equals( DataElement.VALUE_TYPE_BOOL) )
         {
             return Boolean.valueOf( value );
         }
-        else if ( clazz.equals( Date.class ) )
+        else if ( type.equals( DataElement.VALUE_TYPE_DATE) )
         {
             return format.parseDate( value.trim() );
         }
-
+        
         return value;
+        
     }
 
 }
