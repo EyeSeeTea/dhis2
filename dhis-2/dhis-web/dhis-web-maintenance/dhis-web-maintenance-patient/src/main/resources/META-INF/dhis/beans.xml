@@ -1102,12 +1102,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validation.GetPropertiesPatientAction"
-		class="org.hisp.dhis.patient.action.validation.GetPropertiesPatientAction"
-		scope="prototype">
-	</bean>
-	
-	<bean
 		id="org.hisp.dhis.patient.action.validation.GetValidationCriteriaAction"
 		class="org.hisp.dhis.patient.action.validation.GetValidationCriteriaAction"
 		scope="prototype">
