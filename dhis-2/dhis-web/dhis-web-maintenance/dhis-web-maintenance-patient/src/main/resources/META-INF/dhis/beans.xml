@@ -655,15 +655,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 	</bean>
 	
-	<!-- Program_Criteria Association  -->
+	<!-- Program_ValidationCriteria Association  -->
 
 	<bean
-		id="org.hisp.dhis.patient.action.program.ShowValidationAssociationsFormAction"
-		class="org.hisp.dhis.patient.action.program.ShowValidationAssociationsFormAction"
+		id="org.hisp.dhis.patient.action.program.ShowValidationCriteriaAssociationsFormAction"
+		class="org.hisp.dhis.patient.action.program.ShowValidationCriteriaAssociationsFormAction"
 		scope="prototype">
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="validationCriteriaService" ref="org.hisp.dhis.validation.ValidationCriteriaService" />
-		<property name="validationService" ref="org.hisp.dhis.program.ProgramStageDataElementValidationService" />
 	</bean>
 	
 	<bean
@@ -672,6 +671,16 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="validationCriteriaService" ref="org.hisp.dhis.validation.ValidationCriteriaService" />
+	</bean>
+	
+	<!-- Program_ValidationDE Association  -->
+
+	<bean
+		id="org.hisp.dhis.patient.action.program.ShowValidationDEAssociationsFormAction"
+		class="org.hisp.dhis.patient.action.program.ShowValidationDEAssociationsFormAction"
+		scope="prototype">
+		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+		<property name="programStageDEValidationService" ref="org.hisp.dhis.program.ProgramStageDataElementValidationService" />
 	</bean>
 	
 	<!-- ProgramStage -->
@@ -1126,7 +1135,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
-		id="org.hisp.dhis.patient.action.validationc.UpdateValidationCriteriaAction"
+		id="org.hisp.dhis.patient.action.validation.UpdateValidationCriteriaAction"
 		class="org.hisp.dhis.patient.action.validation.UpdateValidationCriteriaAction"
 		scope="prototype">
 		<property name="validationCriteriaService">

@@ -220,11 +220,13 @@ public class ValidateValueAction
 
         if ( resultValidation.size() > 0 )
         {
+            statusCode = 1;
+
             return INPUT;
         }
 
-        // end
-        
+        // end Check validation for dataElement into the Stage
+
         return SUCCESS;
     }
 
@@ -238,7 +240,7 @@ public class ValidateValueAction
         ProgramInstance programInstance, Object value, ProgramStage programStage, DataElement dataElement )
     {
         List<ProgramStageDataElementValidation> result = new ArrayList<ProgramStageDataElementValidation>();
-        System.out.println( "\n\n\n ==== programInstance = " + programInstance.getId() );
+
         if ( validations != null )
         {
 
@@ -258,38 +260,37 @@ public class ValidateValueAction
                 {
                     comparerogramStageInstance = programStageInstanceService.getProgramStageInstance( programInstance,
                         rightSide.getProgramStage() );
-System.out.println("\n\n\n Right comparerogramStageInstance : " + comparerogramStageInstance.getId());
 
                     // Get value into right-right to compare;
                     PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue(
-                        comparerogramStageInstance, dataElement, organisationUnit );
-System.out.println("\n\n\n Right patientDataValue : " + patientDataValue);
+                        comparerogramStageInstance, rightSide.getDataElement(), organisationUnit );
+
                     if ( patientDataValue != null )
                     {
                         Object compareValue = patientDataValue.getValue();
 
                         i = ((Comparable) value).compareTo( (Comparable) compareValue );
                     }
+
                 }
                 else
                 {
                     comparerogramStageInstance = programStageInstanceService.getProgramStageInstance( programInstance,
                         leftSide.getProgramStage() );
-                    
-System.out.println("\n\n\n Left comparerogramStageInstance : " + comparerogramStageInstance.getId());
 
                     // Get value to compare;
                     PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue(
-                        comparerogramStageInstance, dataElement, organisationUnit );
+                        comparerogramStageInstance, leftSide.getDataElement(), organisationUnit );
                     if ( patientDataValue != null )
                     {
                         Object compareValue = patientDataValue.getValue();
 
                         i = ((Comparable) compareValue).compareTo( (Comparable) value );
                     }
-System.out.println("\n\n\n Left patientDataValue : " + patientDataValue);
                 }
-
+                
+System.out.println( "\n\n\n i = " + i );
+                
                 if ( i != validation.getOperator() && i != 2 )
                 {
                     result.add( validation );
@@ -298,7 +299,6 @@ System.out.println("\n\n\n Left patientDataValue : " + patientDataValue);
             }
         }
 
-        System.out.println( "\n\n\n result : " + result );
         return result;
     }
 

@@ -83,7 +83,7 @@
 		<div id="birthDateEstimatedDiv" style="display:none ">
 			<select id='birthDateEstimatedValue' name='birthDateEstimatedValue' onclick="fillValue(this.value);" style="width: 8em">
 				<option value="true">$i18n.getString( "yes" )</option>
-				<option value="false" selected="selected">$i18n.getString( "no" )</option>
+				<option value="false">$i18n.getString( "no" )</option>
 			</select>
 		</div>
 		
@@ -104,18 +104,31 @@
     </tr>
    <tr>
       <td>&nbsp;</td>
-      <td colspan="2"><input type="submit" value="$i18n.getString('save')" style="width:10em">	  <input name="button" type="button" style="width:10em" onClick="validationCriteria.action" value="$i18n.getString('cancel')"></td>
+      <td colspan="2">
+		<input type="submit" value="$i18n.getString('save')" style="width:10em">
+		<input name="button" type="button" style="width:10em" onClick="javascript: window.location.href = 'validationCriteria.action'" value="$i18n.getString('cancel')"></td>
     </tr>
   </table>
 </form>
-   
+
 <span id="message"></span>
 <script language="javascript">
 	
-	var divName = '$validationCriteria.property';
-	byId(divName+ "Div").style.display = 'block';
-	byId(divName+ "Value").value = '$validationCriteria.value';
+	var name = '$validationCriteria.property';
+	var divName = name+ "Div";
+	byId(divName).style.display = 'block';
 	
+	if(divName == 'birthDateDiv'){
+		var year = eval('$validationCriteria.value.getYear()') + 1900;
+		var month = eval('$validationCriteria.value.getMonth()' ) + 1;
+		month = ( month < 10 ) ? ( '0' + month ) : month;
+		var date = '$validationCriteria.value.getDate()';
+		date = ( date < 10 ) ? ( '0' + date ) : date;
+		byId(name + "Value").value = year + '-' + month + '-' + date;
+		byId('value').value = byId(name + "Value").value;
+	}else{
+		byId(name + "Value").value = '$validationCriteria.value';
+	}
 			 
 	function showDivValue(){
 		var divName = byId('property').value;

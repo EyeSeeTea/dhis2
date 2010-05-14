@@ -703,12 +703,32 @@
 			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
 		</action>
 
-		<!-- Program_OrganisationUnit Association -->
+		<!-- Program_ValidationCriteria Association -->
 
-		<action name="defineValidationAssociationsForm"
-			class="org.hisp.dhis.patient.action.program.ShowValidationAssociationsFormAction">
+		<action name="defineValidationCriteriaAssociationsForm"
+			class="org.hisp.dhis.patient.action.program.ShowValidationCriteriaAssociationsFormAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-maintenance-patient/validationAssociations.vm</param>
+			<param name="page">/dhis-web-maintenance-patient/validationCriteriaAssociations.vm</param>
+			<param name="javascripts">
+				../dhis-web-commons/oust/oust.js
+				,javascript/associations.js
+				,javascript/program.js</param>
+			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
+		</action>
+		
+		<action name="defineCriteriaAssociations"
+			class="org.hisp.dhis.patient.action.program.DefineCriteriaAssociationsAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-maintenance-patient/responseSuccess.vm</result>
+			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
+		</action>
+		
+		<!-- Program_ValidationDE Association -->
+
+		<action name="defineValidationDEAssociationsForm"
+			class="org.hisp.dhis.patient.action.program.ShowValidationDEAssociationsFormAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-maintenance-patient/validationDEAssociations.vm</param>
 			<param name="javascripts">
 				../dhis-web-commons/oust/oust.js
 				,javascript/associations.js
@@ -723,7 +743,6 @@
 				/dhis-web-maintenance-patient/responseSuccess.vm</result>
 			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
 		</action>
-
 		<!-- ProgramStage -->
 
 		<action name="programStage"

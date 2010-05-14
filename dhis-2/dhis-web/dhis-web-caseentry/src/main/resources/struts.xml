@@ -92,7 +92,7 @@
     <!-- save value -->
     <action name="saveValue" class="org.hisp.dhis.caseentry.action.caseentry.ValidateValueAction">
       <result name="success" type="chain">saveValueChain</result>
-      <result name="input" type="velocity-xml">/dhis-web-caseentry/responseInput.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-caseentry/status.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action> 
     
@@ -105,7 +105,7 @@
     <!-- save data-value -->
     <action name="saveDateValue" class="org.hisp.dhis.caseentry.action.caseentry.ValidateValueAction">
       <result name="success" type="chain">saveDateValueChain</result>
-      <result name="input" type="velocity-xml">/dhis-web-caseentry/responseInput.vm</result>
+      <result name="input" type="velocity-xml">/dhis-web-caseentry/status.vm</result>
       <param name="onExceptionReturn">plainTextError</param>      
     </action> 
     

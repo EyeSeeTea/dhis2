@@ -27,6 +27,11 @@
 
 package org.hisp.dhis.patient.action.validation;
 
+import java.lang.reflect.Field;
+import java.util.Date;
+
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -45,17 +50,12 @@ public class UpdateValidationCriteriaAction
 
     private ValidationCriteriaService validationCriteriaService;
 
-    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
-    {
-        this.validationCriteriaService = validationCriteriaService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
     private int id;
-    
+
     private String name;
 
     private String description;
@@ -66,15 +66,22 @@ public class UpdateValidationCriteriaAction
 
     private String value;
 
+    private I18nFormat format;
+
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
+
+    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
+    {
+        this.validationCriteriaService = validationCriteriaService;
+    }
 
     public void setName( String name )
     {
         this.name = name;
     }
-    
+
     public void setId( int id )
     {
         this.id = id;
@@ -88,6 +95,11 @@ public class UpdateValidationCriteriaAction
     public void setProperty( String property )
     {
         this.property = property;
+    }
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     public void setOperator( int operator )
@@ -114,11 +126,48 @@ public class UpdateValidationCriteriaAction
         criteria.setDescription( description );
         criteria.setProperty( property );
         criteria.setOperator( operator );
-        criteria.setValue( value );
+        criteria.setValue( getObject() );
 
         validationCriteriaService.updateValidationCriteria( criteria );
 
         return SUCCESS;
     }
 
+    // -------------------------------------------------------------------------
+    // Support method
+    // -------------------------------------------------------------------------
+
+    @SuppressWarnings( "unchecked" )
+    private Object getObject()
+        throws Exception
+    {
+        // Get class
+        Class clazz;
+
+        if ( property.equals( "age" ) )
+        {
+            clazz = int.class;
+        }
+        else
+        {
+            Field field = Patient.class.getDeclaredField( property );
+            clazz = field.getType();
+        }
+
+        // Get value
+        if ( clazz.equals( Integer.class ) || clazz.equals( int.class ) )
+        {
+            return Integer.valueOf( value );
+        }
+        else if ( clazz.equals( Boolean.class ) || clazz.equals( boolean.class ) )
+        {
+            return Boolean.valueOf( value );
+        }
+        else if ( clazz.equals( Date.class ) )
+        {
+            return format.parseDate( value.trim() );
+        }
+
+        return value;
+    }
 }

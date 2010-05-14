@@ -144,32 +144,38 @@ public class AddProgramStageDEValidationAction
         // leftProgramStageDataElement
 
         ProgramStage programStage = programStageService.getProgramStage( leftProgramStageId );
+
         DataElement dataElement = dataElementService.getDataElement( leftDataElementId );
+
         ProgramStageDataElement leftProgramStageDataElement = programStageDataElementService.get( programStage,
             dataElement );
+
         if ( leftProgramStageDataElement == null )
         {
             leftProgramStageDataElement = new ProgramStageDataElement( programStage, dataElement, false );
         }
+
         validation.setLeftProgramStageDataElement( leftProgramStageDataElement );
 
         // rightProgramStageDataElement
 
         programStage = programStageService.getProgramStage( rightProgramStageId );
+
         dataElement = dataElementService.getDataElement( rightDataElementId );
+
         ProgramStageDataElement rightProgramStageDataElement = programStageDataElementService.get( programStage,
             dataElement );
+
         if ( rightProgramStageDataElement == null )
         {
             rightProgramStageDataElement = new ProgramStageDataElement( programStage, dataElement, false );
         }
+
         validation.setRightProgramStageDataElement( rightProgramStageDataElement );
 
         // operator
 
         validation.setOperator( operator );
-        
-        // save Validation object
 
         validationService.saveProgramStageDataElementValidation( validation );
 

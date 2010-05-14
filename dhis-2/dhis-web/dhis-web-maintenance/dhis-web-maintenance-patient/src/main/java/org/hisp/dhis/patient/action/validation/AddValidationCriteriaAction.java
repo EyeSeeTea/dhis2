@@ -27,6 +27,11 @@
 
 package org.hisp.dhis.patient.action.validation;
 
+import java.lang.reflect.Field;
+import java.util.Date;
+
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -45,11 +50,6 @@ public class AddValidationCriteriaAction
 
     private ValidationCriteriaService validationCriteriaService;
 
-    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
-    {
-        this.validationCriteriaService = validationCriteriaService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -64,9 +64,16 @@ public class AddValidationCriteriaAction
 
     private String value;
 
+    private I18nFormat format;
+
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
+
+    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
+    {
+        this.validationCriteriaService = validationCriteriaService;
+    }
 
     public void setName( String name )
     {
@@ -76,6 +83,11 @@ public class AddValidationCriteriaAction
     public void setDescription( String description )
     {
         this.description = description;
+    }
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     public void setProperty( String property )
@@ -107,11 +119,48 @@ public class AddValidationCriteriaAction
         criteria.setDescription( description );
         criteria.setProperty( property );
         criteria.setOperator( operator );
-        criteria.setValue( value );
+        criteria.setValue( getObject() );
 
         validationCriteriaService.saveValidationCriteria( criteria );
 
         return SUCCESS;
     }
 
+    // -------------------------------------------------------------------------
+    // Support method
+    // -------------------------------------------------------------------------
+
+    @SuppressWarnings("unchecked")
+    private Object getObject()
+        throws Exception
+    {
+        // Get class
+        Class clazz;
+
+        if ( property.equals( "age" ) )
+        {
+            clazz = int.class;
+        }
+        else
+        {
+            Field field = Patient.class.getDeclaredField( property );
+            clazz = field.getType();
+        }
+        
+        // Get value
+        if ( clazz == Integer.class || clazz == Integer.TYPE )
+        {
+            return Integer.valueOf( value );
+        }
+        else if ( clazz.equals( Boolean.class ) || clazz.equals( boolean.class ) )
+        {
+            return Boolean.valueOf( value );
+        }
+        else if ( clazz.equals( Date.class ) )
+        {
+            return format.parseDate( value.trim() );
+        }
+
+        return value;
+    }
 }

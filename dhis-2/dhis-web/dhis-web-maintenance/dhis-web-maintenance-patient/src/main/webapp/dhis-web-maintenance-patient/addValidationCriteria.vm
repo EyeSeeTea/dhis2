@@ -61,6 +61,7 @@
 		<!-- gender -->
 		<div id="genderDiv" style="display:none">
 			<select id='genderValue' name='genderValue' onclick="fillValue(this.value);" style="width: 8em">
+				<option value="" selected="selected">[$i18n.getString( "please_select" )]</option>
 				<option value="M" >$i18n.getString( "male" )</option>
 				<option value="F">$i18n.getString( "female" )</option>
 			</select>

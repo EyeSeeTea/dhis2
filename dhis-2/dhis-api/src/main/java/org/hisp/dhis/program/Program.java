@@ -245,7 +245,7 @@ public class Program
 
                 if ( criteria.getProperty().equals( "age" ) )
                 {
-                    propertyValue = patient.getIntegerValueOfAge() + "";
+                    propertyValue = patient.getIntegerValueOfAge();
                 }
                 else
                 {
