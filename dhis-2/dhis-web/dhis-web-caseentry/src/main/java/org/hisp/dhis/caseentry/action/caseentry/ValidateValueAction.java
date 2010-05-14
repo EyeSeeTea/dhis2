@@ -27,13 +27,16 @@
 
 package org.hisp.dhis.caseentry.action.caseentry;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
@@ -86,6 +89,8 @@ public class ValidateValueAction
 
     private int statusCode;
 
+    private I18nFormat format;
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -114,6 +119,11 @@ public class ValidateValueAction
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
+    }
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     public void setProgramInstanceService( ProgramInstanceService programInstanceService )
@@ -231,7 +241,7 @@ public class ValidateValueAction
     }
 
     // -------------------------------------------------------------------------
-    // Support Action
+    // Support metho
     // -------------------------------------------------------------------------
 
     @SuppressWarnings( "unchecked" )
@@ -246,6 +256,9 @@ public class ValidateValueAction
 
             for ( ProgramStageDataElementValidation validation : validations )
             {
+                // get right-side value
+                Object objectValue = getObject( validation.getProperty() );
+
                 // Get left-side
                 ProgramStageDataElement leftSide = validation.getLeftProgramStageDataElement();
                 // Get right-side
@@ -269,7 +282,7 @@ public class ValidateValueAction
                     {
                         Object compareValue = patientDataValue.getValue();
 
-                        i = ((Comparable) value).compareTo( (Comparable) compareValue );
+                        i = ((Comparable) objectValue).compareTo( (Comparable) compareValue );
                     }
 
                 }
@@ -285,12 +298,12 @@ public class ValidateValueAction
                     {
                         Object compareValue = patientDataValue.getValue();
 
-                        i = ((Comparable) compareValue).compareTo( (Comparable) value );
+                        i = ((Comparable) compareValue).compareTo( (Comparable) objectValue );
                     }
                 }
-                
-System.out.println( "\n\n\n i = " + i );
-                
+
+                System.out.println( "\n\n\n i = " + i );
+
                 if ( i != validation.getOperator() && i != 2 )
                 {
                     result.add( validation );
@@ -300,6 +313,40 @@ System.out.println( "\n\n\n i = " + i );
         }
 
         return result;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private Object getObject( String property )
+        throws Exception
+    {
+        // Get class
+        Class clazz;
+
+        if ( property.equals( "age" ) )
+        {
+            clazz = int.class;
+        }
+        else
+        {
+            Field field = Patient.class.getDeclaredField( property );
+            clazz = field.getType();
+        }
+
+        // Get value
+        if ( clazz == Integer.class || clazz == Integer.TYPE )
+        {
+            return Integer.valueOf( value );
+        }
+        else if ( clazz.equals( Boolean.class ) || clazz == Boolean.TYPE )
+        {
+            return Boolean.valueOf( value );
+        }
+        else if ( clazz.equals( Date.class ) )
+        {
+            return format.parseDate( value.trim() );
+        }
+
+        return value;
     }
 
 }
