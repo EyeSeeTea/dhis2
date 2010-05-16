@@ -192,6 +192,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.user.CurrentUserService"/>
   </bean>
     
+  <bean id="org.hisp.dhis.validation.ValidationCriteriaStore"
+	class="org.hisp.dhis.hibernate.HibernateGenericStore">
+	<property name="clazz" value="org.hisp.dhis.validation.ValidationCriteria" />
+	<property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+   
   <!-- Service definitions -->
 
   <bean id="org.hisp.dhis.customvalue.CustomValueService"
@@ -431,6 +437,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   <bean id="org.hisp.dhis.user.UserService"
     class="org.hisp.dhis.user.DefaultUserService">
     <property name="userStore" ref="org.hisp.dhis.user.UserStore"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.validation.ValidationCriteriaService"
+	class="org.hisp.dhis.validation.DefaultValidationCriteriaService">
+	<property name="validationCriteriaStore"
+	  ref="org.hisp.dhis.validation.ValidationCriteriaStore" />
   </bean>
   
   <!-- LocaleManager -->
