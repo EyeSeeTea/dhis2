@@ -796,8 +796,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     class="org.hisp.dhis.dataentryform.DataEntryFormDeletionHandler">
     <property name="dataEntryFormService"
       ref="org.hisp.dhis.dataentryform.DataEntryFormService"/>
-    <property name="deletionManager"
-      ref="org.hisp.dhis.system.deletion.DeletionManager"/>
     <property name="dataEntryFormAssociationService"
       ref="org.hisp.dhis.dataentryform.DataEntryFormAssociationService"/>
   </bean>
@@ -857,16 +855,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     class="org.hisp.dhis.dataset.SectionDeletionHandler">
     <property name="sectionService"
       ref="org.hisp.dhis.dataset.SectionService"/>
-    <property name="deletionManager"
-      ref="org.hisp.dhis.system.deletion.DeletionManager"/>
   </bean>
   
   <bean id="org.hisp.dhis.dataset.FrequencyOverrideAssociationDeletionHandler"
     class="org.hisp.dhis.dataset.FrequencyOverrideAssociationDeletionHandler">
     <property name="dataSetService"
       ref="org.hisp.dhis.dataset.DataSetService"/>
-    <property name="deletionManager"
-      ref="org.hisp.dhis.system.deletion.DeletionManager"/>
   </bean>
   
   <bean id="org.hisp.dhis.expression.ExpressionDeletionHandler"
@@ -879,8 +873,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     class="org.hisp.dhis.indicator.IndicatorDeletionHandler">
     <property name="indicatorService"
       ref="org.hisp.dhis.indicator.IndicatorService"/>
-    <property name="deletionManager"
-      ref="org.hisp.dhis.system.deletion.DeletionManager"/>
   </bean>
   
   <bean id="org.hisp.dhis.indicator.IndicatorGroupDeletionHandler"
@@ -893,16 +885,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     class="org.hisp.dhis.minmax.MinMaxDataElementDeletionHandler">
     <property name="minMaxDataElementService"
       ref="org.hisp.dhis.minmax.MinMaxDataElementService"/>
-    <property name="deletionManager"
-      ref="org.hisp.dhis.system.deletion.DeletionManager"/>
   </bean>
   
   <bean id="org.hisp.dhis.validation.ValidationRuleDeletionHandler"
     class="org.hisp.dhis.validation.ValidationRuleDeletionHandler">
     <property name="validationRuleService"
       ref="org.hisp.dhis.validation.ValidationRuleService"/>
-    <property name="deletionManager"
-      ref="org.hisp.dhis.system.deletion.DeletionManager"/>
   </bean>
   
   <bean id="org.hisp.dhis.validation.ValidationRuleGroupDeletionHandler"
