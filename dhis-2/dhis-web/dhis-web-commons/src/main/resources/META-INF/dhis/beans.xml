@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:sec="http://www.springframework.org/schema/security"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
-						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-						http://www.springframework.org/schema/security
-						http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
 	<!-- Web Portal -->
 
@@ -35,17 +34,12 @@
 		<property name="order">
 			<list>
 				<value>dhis-web-portal</value>
-				<value>dhis-web-maintenance-settings
-				</value>
+				<value>dhis-web-maintenance-settings</value>
 				<value>dhis-web-maintenance-user</value>
-				<value>dhis-web-maintenance-organisationunit
-				</value>
-				<value>dhis-web-maintenance-datadictionary
-				</value>
-				<value>dhis-web-maintenance-dataset
-				</value>
-				<value>dhis-web-maintenance-dataadmin
-				</value>
+				<value>dhis-web-maintenance-organisationunit</value>
+				<value>dhis-web-maintenance-datadictionary</value>
+				<value>dhis-web-maintenance-dataset</value>
+				<value>dhis-web-maintenance-dataadmin</value>
 				<value>dhis-web-dataentry</value>
 			</list>
 		</property>
