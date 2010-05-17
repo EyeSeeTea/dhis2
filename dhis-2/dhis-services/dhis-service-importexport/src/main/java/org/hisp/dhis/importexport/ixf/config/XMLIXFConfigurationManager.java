@@ -76,12 +76,8 @@ public class XMLIXFConfigurationManager
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private LocationManager locationManager;
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
 
     @Autowired
     private ConfigurationManager<IXFConfiguration> configurationManager;

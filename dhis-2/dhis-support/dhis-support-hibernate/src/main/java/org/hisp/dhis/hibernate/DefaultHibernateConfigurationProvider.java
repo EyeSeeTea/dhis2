@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.Configuration;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -74,12 +75,8 @@ public class DefaultHibernateConfigurationProvider
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private LocationManager locationManager;
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
     
     // -------------------------------------------------------------------------
     // Initialise

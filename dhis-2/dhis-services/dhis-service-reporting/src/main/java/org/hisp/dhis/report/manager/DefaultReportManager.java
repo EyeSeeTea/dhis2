@@ -89,12 +89,8 @@ public class DefaultReportManager
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private LocationManager locationManager;
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
 
     @Autowired
     private ConfigurationManager<ReportConfiguration> configurationManager;

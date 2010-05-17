@@ -139,8 +139,6 @@ public abstract class DhisConvenienceTest
 
     protected DbmsManager dbmsManager;
 
-    protected LocationManager locationManager;
-    
     protected ProgramStageService programStageService;
 
     static
@@ -940,8 +938,6 @@ public abstract class DhisConvenienceTest
      */
     public void setExternalTestDir( LocationManager locationManager )
     {
-        this.locationManager = locationManager;
-
         setDependency( locationManager, "externalDir", EXT_TEST_DIR, String.class );
     }
 

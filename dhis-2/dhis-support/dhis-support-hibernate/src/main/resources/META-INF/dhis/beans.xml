@@ -21,10 +21,7 @@
 
   <bean id="org.hisp.dhis.hibernate.HibernateConfigurationProvider"
     class="org.hisp.dhis.hibernate.DefaultHibernateConfigurationProvider"
-    init-method="initialise">
-    <property name="locationManager"
-      ref="org.hisp.dhis.external.location.LocationManager"/>
-  </bean>
+    init-method="initialise"/>
 
   <bean id="sessionFactory"
     class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">

@@ -50,6 +50,7 @@ public class ConfigurationManagerTest
     @Autowired
     private ConfigurationManager<DummyConfiguration> configurationManager;
     
+    @Autowired
     private LocationManager locationManager;
     
     private DummyConfiguration configurationA;
@@ -58,8 +59,6 @@ public class ConfigurationManagerTest
     @Override
     public void setUpTest()
     {
-        locationManager = (LocationManager) getBean( LocationManager.ID );
-        
         configurationA = new DummyConfiguration( "homeA", "directoryA" );
         configurationB = new DummyConfiguration( "homeB", "directoryB" );
     }

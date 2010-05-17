@@ -114,13 +114,6 @@ public abstract class AbstractDataSetCompletenessService
     {
         this.periodService = periodService;
     }
-    
-    protected LocationManager locationManager;
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
 
     protected DataSetCompletenessStore completenessStore;
 
@@ -128,6 +121,9 @@ public abstract class AbstractDataSetCompletenessService
     {
         this.completenessStore = completenessStore;
     }
+
+    @Autowired
+    protected LocationManager locationManager;
 
     @Autowired
     protected ConfigurationManager<DataSetCompletenessConfiguration> configurationManager;

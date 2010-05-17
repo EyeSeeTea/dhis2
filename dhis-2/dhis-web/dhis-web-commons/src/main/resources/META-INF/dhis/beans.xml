@@ -535,10 +535,7 @@
 
 	<!-- DataElement Order -->
 
-	<bean id="org.hisp.dhis.order.store.DataElementOrderStore" class="org.hisp.dhis.order.store.FileDataElementOrderStore">
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
-	</bean>
+	<bean id="org.hisp.dhis.order.store.DataElementOrderStore" class="org.hisp.dhis.order.store.FileDataElementOrderStore"/>
 
 	<bean id="org.hisp.dhis.order.manager.DataElementOrderManager"
 		class="org.hisp.dhis.order.manager.DefaultDataElementOrderManager">
@@ -563,8 +560,6 @@
 
 	<bean id="org.hisp.dhis.about.action.AboutAction" class="org.hisp.dhis.about.action.AboutAction"
 		scope="prototype">
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
 		<property name="provider"
 			ref="org.hisp.dhis.system.database.DatabaseInfoProvider" />
 	</bean>

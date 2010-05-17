@@ -38,6 +38,7 @@ import java.io.OutputStream;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.NotTransactional;
 
 /**
@@ -53,6 +54,9 @@ public class LocationManagerTest
     
     private File file;
 
+    @Autowired
+    private LocationManager locationManager;
+    
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -60,7 +64,7 @@ public class LocationManagerTest
     @Override
     public void setUpTest()
     {
-        setExternalTestDir( (LocationManager) getBean( LocationManager.ID ) );
+        setExternalTestDir( locationManager );
     }
 
     // -------------------------------------------------------------------------

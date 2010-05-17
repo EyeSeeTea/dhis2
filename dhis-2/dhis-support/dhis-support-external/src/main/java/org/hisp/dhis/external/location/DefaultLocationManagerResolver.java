@@ -36,6 +36,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
@@ -51,12 +52,8 @@ public class DefaultLocationManagerResolver
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private LocationManager locationManager;
-
-    public void setLocationManager( LocationManager lm )
-    {
-        locationManager = lm;
-    }
 
     // -------------------------------------------------------------------------
     // URIResolver implementation
