@@ -39,6 +39,7 @@ import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
 import org.hisp.dhis.report.ReportManager;
 import org.hisp.dhis.system.util.CodecUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -95,13 +96,9 @@ public class DefaultReportManager
         this.locationManager = locationManager;
     }
 
+    @Autowired
     private ConfigurationManager<ReportConfiguration> configurationManager;
     
-    public void setConfigurationManager( ConfigurationManager<ReportConfiguration> configurationManager )
-    {
-        this.configurationManager = configurationManager;
-    }
-
     // -------------------------------------------------------------------------
     // ReportManager implementation
     // -------------------------------------------------------------------------

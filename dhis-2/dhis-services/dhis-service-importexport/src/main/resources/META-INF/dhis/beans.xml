@@ -224,8 +224,6 @@
 		<property name="configFile" value="ibatisConfiguration.xml" />
 		<property name="locationManager"
 			ref="org.hisp.dhis.external.location.LocationManager" />
-		<property name="configurationManager"
-			ref="org.hisp.dhis.external.configuration.ConfigurationManager" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -365,8 +363,6 @@
 		<property name="configFile" value="ixfConfiguration.xml" />
 		<property name="locationManager"
 			ref="org.hisp.dhis.external.location.LocationManager" />
-		<property name="configurationManager"
-			ref="org.hisp.dhis.external.configuration.ConfigurationManager" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

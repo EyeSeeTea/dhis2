@@ -52,6 +52,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.source.Source;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -121,19 +122,15 @@ public abstract class AbstractDataSetCompletenessService
         this.locationManager = locationManager;
     }
 
-    protected ConfigurationManager<DataSetCompletenessConfiguration> configurationManager;
-    
-    public void setConfigurationManager( ConfigurationManager<DataSetCompletenessConfiguration> configurationManager )
-    {
-        this.configurationManager = configurationManager;
-    }
-
     protected DataSetCompletenessStore completenessStore;
 
     public void setCompletenessStore( DataSetCompletenessStore completenessStore )
     {
         this.completenessStore = completenessStore;
     }
+
+    @Autowired
+    protected ConfigurationManager<DataSetCompletenessConfiguration> configurationManager;
     
     // -------------------------------------------------------------------------
     // DataSetCompletenessService implementation
