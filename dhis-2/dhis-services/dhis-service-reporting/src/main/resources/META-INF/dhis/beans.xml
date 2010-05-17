@@ -292,7 +292,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   <!-- DeletionManager -->
   
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject" ref="org.hisp.dhis.system.deletion.DeletionManager"/>
+    <property name="targetObject" ref="deletionManager"/>
     <property name="targetMethod" value="addDeletionHandlers"/>
     <property name="arguments">
       <list>

@@ -88,8 +88,6 @@ public abstract class DhisTest
         
         if ( emptyDatabaseAfterTest() )
         {
-            //DbmsManager dbmsManager = (DbmsManager) getBean( DbmsManager.ID );
-                        
             dbmsManager.emptyDatabase();
         }
     }

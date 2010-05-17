@@ -11,13 +11,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.amplecode.cave.process.SpringProcessCoordinator"
     destroy-method="close"/>
 
-  <bean id="org.hisp.dhis.system.deletion.DeletionManager"
-    class="org.hisp.dhis.system.deletion.DefaultDeletionManager"/>
-  
   <bean id="deletionInterceptor"
     class="org.hisp.dhis.system.deletion.DeletionInterceptor">
-    <property name="deletionManager"
-      ref="org.hisp.dhis.system.deletion.DeletionManager"/>
   </bean>
   
   <bean id="org.hisp.dhis.system.database.DatabaseInfoProvider"
