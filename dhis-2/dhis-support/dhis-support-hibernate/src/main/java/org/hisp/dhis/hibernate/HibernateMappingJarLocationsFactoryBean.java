@@ -28,12 +28,15 @@ package org.hisp.dhis.hibernate;
  */
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
+@Component("hibernateMappingJarLocations")
 public class HibernateMappingJarLocationsFactoryBean
     implements FactoryBean<Object[]>
 {
@@ -41,12 +44,8 @@ public class HibernateMappingJarLocationsFactoryBean
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private HibernateConfigurationProvider hibernateConfigurationProvider;
-
-    public void setHibernateConfigurationProvider( HibernateConfigurationProvider hibernateConfigurationProvider )
-    {
-        this.hibernateConfigurationProvider = hibernateConfigurationProvider;
-    }
 
     // -------------------------------------------------------------------------
     // FactoryBean implementation

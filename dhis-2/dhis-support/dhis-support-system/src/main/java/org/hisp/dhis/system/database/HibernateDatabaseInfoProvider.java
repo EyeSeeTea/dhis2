@@ -29,6 +29,7 @@ package org.hisp.dhis.system.database;
 
 import org.hibernate.cfg.Configuration;
 import org.hisp.dhis.hibernate.HibernateConfigurationProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -56,13 +57,9 @@ public class HibernateDatabaseInfoProvider
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private HibernateConfigurationProvider configurationProvider;
     
-    public void setConfigurationProvider( HibernateConfigurationProvider configurationProvider )
-    {
-        this.configurationProvider = configurationProvider;
-    }
-
     public void init()
     {
         Configuration config = configurationProvider.getConfiguration();

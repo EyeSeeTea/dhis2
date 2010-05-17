@@ -23,8 +23,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.system.database.DatabaseInfoProvider"
     class="org.hisp.dhis.system.database.HibernateDatabaseInfoProvider"
     init-method="init">
-    <property name="configurationProvider"
-      ref="org.hisp.dhis.hibernate.HibernateConfigurationProvider"/>
   </bean>
   
 </beans>

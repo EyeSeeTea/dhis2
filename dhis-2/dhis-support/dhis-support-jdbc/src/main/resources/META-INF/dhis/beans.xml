@@ -24,9 +24,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     
   <!-- JdbcConfiguration -->
     
-  <bean id="jdbcConfiguration" class="org.hisp.dhis.jdbc.configuration.JdbcConfigurationFactoryBean" init-method="init">
-    <property name="configurationProvider" ref="org.hisp.dhis.hibernate.HibernateConfigurationProvider"/>   
-  </bean>
+  <bean id="jdbcConfiguration" class="org.hisp.dhis.jdbc.configuration.JdbcConfigurationFactoryBean" init-method="init"/>
     
   <!-- StatementBuilder -->
     

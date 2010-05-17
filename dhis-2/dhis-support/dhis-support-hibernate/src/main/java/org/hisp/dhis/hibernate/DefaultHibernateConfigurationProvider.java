@@ -37,6 +37,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.Configuration;
@@ -46,11 +48,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 /**
  * @author Torgeir Lorange Ostby
  */
+@Component("hibernateConfigurationProvider")
 public class DefaultHibernateConfigurationProvider
     implements HibernateConfigurationProvider
 {
@@ -82,7 +86,8 @@ public class DefaultHibernateConfigurationProvider
     // Initialise
     // -------------------------------------------------------------------------
 
-    public void initialise()
+    @PostConstruct
+    public void init()
         throws Exception
     {
         Configuration configuration = new Configuration();
@@ -227,5 +232,5 @@ public class DefaultHibernateConfigurationProvider
         {
             inputStream.close();
         }
-    }    
+    }
 }
