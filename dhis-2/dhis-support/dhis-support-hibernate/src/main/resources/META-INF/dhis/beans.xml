@@ -67,7 +67,7 @@
       
   <!-- Dbms -->
   
-  <bean id="org.hisp.dhis.dbms.DbmsManager"
+  <bean id="dbmsManager"
     class="org.hisp.dhis.dbms.HibernateDbmsManager">
     <property name="jdbcTemplate" ref="jdbcTemplate"/>
     <property name="sessionFactory" ref="sessionFactory"/>

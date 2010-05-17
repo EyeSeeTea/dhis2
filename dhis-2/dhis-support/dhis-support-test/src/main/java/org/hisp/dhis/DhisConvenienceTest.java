@@ -54,7 +54,6 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
-import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.external.location.LocationManager;
@@ -136,8 +135,6 @@ public abstract class DhisConvenienceTest
     protected ResourceTableService resourceTableService;
 
     protected MappingService mappingService;
-
-    protected DbmsManager dbmsManager;
 
     protected ProgramStageService programStageService;
 

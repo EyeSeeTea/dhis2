@@ -45,7 +45,6 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
-import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
@@ -142,6 +141,7 @@ public class DXFImportServiceTest
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
+    
     @Override
     public void setUpTest() throws LocationManagerException, IOException
     {
@@ -187,8 +187,6 @@ public class DXFImportServiceTest
         importObjectService = (ImportObjectService) getBean( ImportObjectService.ID );
 
         importDataValueService = (ImportDataValueService) getBean( ImportDataValueService.ID );
-
-        dbmsManager = (DbmsManager) getBean( DbmsManager.ID );
 
         setExternalTestDir( locationManager );
 

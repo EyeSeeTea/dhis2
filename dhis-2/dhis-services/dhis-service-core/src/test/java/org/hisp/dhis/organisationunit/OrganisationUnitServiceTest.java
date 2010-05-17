@@ -40,7 +40,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.dbms.DbmsManager;
 import org.junit.Test;
 
 /**
@@ -54,8 +53,6 @@ public class OrganisationUnitServiceTest
 
     private OrganisationUnitGroupService organisationUnitGroupService;
     
-    private DbmsManager dbmsManager;
-
     @Override
     public void setUpTest()
         throws Exception
@@ -65,8 +62,6 @@ public class OrganisationUnitServiceTest
         organisationUnitGroupService = (OrganisationUnitGroupService) getBean( OrganisationUnitGroupService.ID );
         
         organisationUnitService.removeOrganisationUnitHierarchies( OrganisationUnitHierarchyVerifier.START_OF_TIME );
-
-        dbmsManager = (DbmsManager) getBean( DbmsManager.ID );
     }
 
     // -------------------------------------------------------------------------
@@ -940,25 +935,5 @@ public class OrganisationUnitServiceTest
 
         assertNull( organisationUnitService.getOrganisationUnitLevel( idA ) );
         assertNull( organisationUnitService.getOrganisationUnitLevel( idB ) );        
-    }
-
-    @Test
-    public void testRemoveOrganisationUnitLevels()
-    {
-        OrganisationUnitLevel levelA = new OrganisationUnitLevel( 1, "National" );
-        OrganisationUnitLevel levelB = new OrganisationUnitLevel( 2, "District" );
-        
-        int idA = organisationUnitService.addOrganisationUnitLevel( levelA );
-        int idB = organisationUnitService.addOrganisationUnitLevel( levelB );
-
-        assertNotNull( organisationUnitService.getOrganisationUnitLevel( idA ) );
-        assertNotNull( organisationUnitService.getOrganisationUnitLevel( idB ) );
-        
-        organisationUnitService.deleteOrganisationUnitLevels();
-        
-        dbmsManager.clearSession();
-
-        assertNull( organisationUnitService.getOrganisationUnitLevel( idA ) );
-        assertNull( organisationUnitService.getOrganisationUnitLevel( idB ) ); 
     }
 }

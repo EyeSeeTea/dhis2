@@ -35,6 +35,7 @@ import org.hisp.dhis.dbms.DbmsManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -52,12 +53,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public abstract class DhisTest
     extends DhisConvenienceTest implements ApplicationContextAware
 {
+    @Autowired
+    protected DbmsManager dbmsManager;
+    
     // -------------------------------------------------------------------------
     // ApplicationContextAware implementation
     // -------------------------------------------------------------------------
 
     private ApplicationContext context;
-
+    
     public void setApplicationContext( ApplicationContext context )
     {
         this.context = context;
@@ -84,7 +88,7 @@ public abstract class DhisTest
         
         if ( emptyDatabaseAfterTest() )
         {
-            DbmsManager dbmsManager = (DbmsManager) getBean( DbmsManager.ID );
+            //DbmsManager dbmsManager = (DbmsManager) getBean( DbmsManager.ID );
                         
             dbmsManager.emptyDatabase();
         }
