@@ -148,13 +148,6 @@ public class DefaultSelectionTreeManager
         }
 
         // ---------------------------------------------------------------------
-        // Reload the units to ensure it is loaded within the current
-        // transaction
-        // ---------------------------------------------------------------------
-
-        Collection<OrganisationUnit> reloadedSelectedUnits = reloadOrganisationUnits( selectedUnits );
-
-        // ---------------------------------------------------------------------
         // Remove all selected units that are not in the trees
         // ---------------------------------------------------------------------
 
@@ -162,9 +155,9 @@ public class DefaultSelectionTreeManager
 
         if ( rootUnits != null )
         {
-            reloadedSelectedUnits = getUnitsInTree( rootUnits, reloadedSelectedUnits );
+            selectedUnits = getUnitsInTree( rootUnits, selectedUnits );
 
-            saveToSession( SESSION_KEY_SELECTED_ORG_UNITS, reloadedSelectedUnits );
+            saveToSession( SESSION_KEY_SELECTED_ORG_UNITS, selectedUnits );
         }
     }
     
@@ -175,18 +168,13 @@ public class DefaultSelectionTreeManager
             throw new IllegalArgumentException( "Selected locked OrganisationUnits cannot be null" );
         }
       
-        // Reload the units to ensure it is loaded within the current
-        // transaction
-        
-        Collection<OrganisationUnit> reloadedSelectedUnits = reloadOrganisationUnits( selectedUnits );
-        
         Collection<OrganisationUnit> rootUnits = getRootOrganisationUnits();
 
         if ( rootUnits != null )
         {
-            reloadedSelectedUnits = getUnitsInTree( rootUnits, reloadedSelectedUnits );
+            selectedUnits = getUnitsInTree( rootUnits, selectedUnits );
 
-            saveToSession( SESSION_KEY_LOCKED_ORG_UNITS, reloadedSelectedUnits );                      
+            saveToSession( SESSION_KEY_LOCKED_ORG_UNITS, selectedUnits );                      
         }
     }
     
@@ -199,9 +187,14 @@ public class DefaultSelectionTreeManager
             return new HashSet<OrganisationUnit>();
         }
 
-        return reloadOrganisationUnits( selectedUnits );
+        return selectedUnits;
     }
     
+    public Collection<OrganisationUnit> getReloadedSelectedOrganisationUnits()
+    {
+        return reloadOrganisationUnits( getSelectedOrganisationUnits() );
+    }
+
     public Collection<OrganisationUnit> getLockOnSelectedOrganisationUnits()
     {
         Collection<OrganisationUnit> selectedUnits = getCollectionFromSession( SESSION_KEY_LOCKED_ORG_UNITS );
@@ -210,7 +203,7 @@ public class DefaultSelectionTreeManager
         {
             return new HashSet<OrganisationUnit>();
         }
-        return reloadOrganisationUnits( selectedUnits );
+        return selectedUnits;
     }
 
     public void clearSelectedOrganisationUnits()
