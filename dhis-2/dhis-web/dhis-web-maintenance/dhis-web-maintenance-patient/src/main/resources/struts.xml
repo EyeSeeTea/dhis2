@@ -1144,6 +1144,11 @@
 			<param name="requiredAuthorities">F_VALIDATIONCRITERIA_UPDATE</param>
 		</action>
 		
+		<action name="getValidationCriteria"
+			class="org.hisp.dhis.patient.action.validation.GetValidationCriteriaAction">
+			<result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseValidationCriteria.vm</result>
+		</action>
+		
 		<action name="updateValidationCriteria"
 			class="org.hisp.dhis.patient.action.validation.UpdateValidationCriteriaAction">
 			<result name="success" type="redirect">validationCriteria.action</result>
