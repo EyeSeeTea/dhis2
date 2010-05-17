@@ -122,7 +122,6 @@
 		<property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
 		<property name="olapURLService" ref="org.hisp.dhis.olap.OlapURLService" />
 		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 	</bean>
 
 	<bean id="internal-process-ImportPreview" class="org.hisp.dhis.importexport.ImportPreviewInternalProcess"
@@ -160,7 +159,6 @@
 			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
 		<property name="importAnalyser"
 			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 		<property name="converterInvoker"
 			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
 	</bean>
@@ -201,7 +199,6 @@
 		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
 		<property name="importAnalyser"
 			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 	</bean>
 
 	<bean
@@ -234,8 +231,8 @@
 		<property name="importService" ref="org.hisp.dhis.importexport.XMLImportService" />
 	</bean>
 
-	   <bean id="org.hisp.dhis.importexport.DXFConverter"
-          class="org.hisp.dhis.importexport.dxf.converter.DXFConverter" >
+	<bean id="org.hisp.dhis.importexport.DXFConverter"
+         class="org.hisp.dhis.importexport.dxf.converter.DXFConverter" >
         <property name="importObjectService"
                   ref="org.hisp.dhis.importexport.ImportObjectService" />
         <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
@@ -260,7 +257,6 @@
         <property name="batchHandlerFactory" ref="batchHandlerFactory" />
         <property name="objectMappingGenerator"
                   ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-        <property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
         <property name="converterInvoker"
                   ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
     </bean>
@@ -299,7 +295,6 @@
 		<property name="batchHandlerFactory" ref="batchHandlerFactory" />
 		<property name="objectMappingGenerator"
 			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 		<property name="converterInvoker"
 			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
 	</bean>

@@ -57,21 +57,5 @@
     class="org.hisp.dhis.hibernate.ConnectionPropertyFactoryBean">
     <property name="hibernateProperty" value="hibernate.connection.password"/>
   </bean>
-  
-  <!-- Cache -->
-  
-  <bean id="org.hisp.dhis.cache.HibernateCacheManager" 
-    class="org.hisp.dhis.cache.DefaultHibernateCacheManager">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
-      
-  <!-- Dbms -->
-  
-  <bean id="dbmsManager"
-    class="org.hisp.dhis.dbms.HibernateDbmsManager">
-    <property name="jdbcTemplate" ref="jdbcTemplate"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager"/>
-  </bean>
-  
+    
 </beans>

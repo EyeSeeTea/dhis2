@@ -55,6 +55,7 @@ public class DataElementBatchHandlerTest
     @Autowired
     private BatchHandlerFactory batchHandlerFactory;
     
+    @Autowired
     private HibernateCacheManager cacheManager;
 	
     private BatchHandler<DataElement> batchHandler;
@@ -72,8 +73,6 @@ public class DataElementBatchHandlerTest
     @Override
     public void setUpTest()
     {
-    	cacheManager = (HibernateCacheManager) getBean( HibernateCacheManager.ID );
-    	
         dataElementService = (DataElementService) getBean( DataElementService.ID );
         
         batchHandler = batchHandlerFactory.createBatchHandler( DataElementBatchHandler.class );

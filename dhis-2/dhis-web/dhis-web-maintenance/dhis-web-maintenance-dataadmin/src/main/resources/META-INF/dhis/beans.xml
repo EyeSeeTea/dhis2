@@ -195,14 +195,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<!-- Cache -->
 
 	<bean id="org.hisp.dhis.dataadmin.action.cache.ShowCacheAction"
-		class="org.hisp.dhis.dataadmin.action.cache.ShowCacheAction" scope="prototype">
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
-	</bean>
+		class="org.hisp.dhis.dataadmin.action.cache.ShowCacheAction" scope="prototype"/>
 
 	<bean id="org.hisp.dhis.dataadmin.action.cache.ClearCacheAction"
-		class="org.hisp.dhis.dataadmin.action.cache.ClearCacheAction" scope="prototype">
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
-	</bean>
+		class="org.hisp.dhis.dataadmin.action.cache.ClearCacheAction" scope="prototype"/>
 
 	<!-- Data integrity -->
 

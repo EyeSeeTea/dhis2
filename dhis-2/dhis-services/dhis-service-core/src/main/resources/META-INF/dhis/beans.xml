@@ -445,11 +445,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	  ref="org.hisp.dhis.validation.ValidationCriteriaStore" />
   </bean>
   
-  <!-- LocaleManager -->
-  <!--
-  <bean id="org.hisp.dhis.i18n.locale.LocaleManagerDb" class="org.hisp.dhis.i18n.locale.SessionLocaleManager"/>
-  -->
-  
   <bean id="org.hisp.dhis.i18n.locale.LocaleManagerDb" class="org.hisp.dhis.i18n.locale.DatabaseLocaleManager">
 	<property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService"/>
   </bean>
