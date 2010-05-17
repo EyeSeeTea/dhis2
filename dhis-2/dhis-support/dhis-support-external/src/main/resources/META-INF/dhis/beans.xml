@@ -13,16 +13,11 @@
 
   <context:component-scan base-package="org.hisp.dhis"/>
   
-  <!-- Change system environment variable with 'environmentVariable' property --> 
-  
   <bean id="locationManager"
     class="org.hisp.dhis.external.location.DefaultLocationManager"
     init-method="init">
-    <property name="environmentVariable" value="DHIS2_HOME"/>
+    <property name="environmentVariable" value="DHIS2_HOME"/> <!-- Change environment variable -->
     <property name="systemProperty" value="dhis2.home"/>
   </bean>
 
-  <bean id="org.hisp.dhis.external.location.LocationManagerResolver"
-    class="org.hisp.dhis.external.location.DefaultLocationManagerResolver"/>
-   
 </beans>

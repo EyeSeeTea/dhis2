@@ -82,12 +82,8 @@ public class DefaultXMLImportService
     @Autowired
     protected LocationManager locationManager;
     
+    @Autowired
     protected URIResolver dhisResolver;
-
-    public void setDhisResolver( URIResolver dhisResolver )
-    {
-        this.dhisResolver = dhisResolver;
-    }
 
     private DXFConverter converter;
 
