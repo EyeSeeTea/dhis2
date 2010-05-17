@@ -716,13 +716,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="runlevel" value="2"/>
   </bean>
 	  
-  <bean id="org.hisp.dhis.dataelement.OptionsCategoriesDefaultSortOrderPopulator"
-    class="org.hisp.dhis.dataelement.OptionsCategoriesDefaultSortOrderPopulator">
-    <property name="statementManager" ref="statementManager"/>
-    <property name="runlevel" value="1"/>
-	<property name="skipInTests" value="true"/>
-  </bean>
-	
   <bean id="org.hisp.dhis.expression.MultiDimensionExpressionUpgrader"
     class="org.hisp.dhis.expression.MultiDimensionExpressionUpgrader">
     <property name="expressionService"
@@ -764,6 +757,20 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="skipInTests" value="true"/>
   </bean>
     
+  <bean id="org.hisp.dhis.startup.TableCreator"
+    class="org.hisp.dhis.startup.TableCreator">
+    <property name="runlevel" value="3"/>
+    <property name="jdbcTemplate" ref="jdbcTemplate"/>
+    <property name="statementBuilder" ref="statementBuilder"/>
+  </bean>
+    
+  <bean id="org.hisp.dhis.startup.TableAlteror"
+    class="org.hisp.dhis.startup.TableAlteror">
+    <property name="statementManager" ref="statementManager"/>
+    <property name="runlevel" value="1"/>
+	<property name="skipInTests" value="true"/>
+  </bean>
+	
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject"
       ref="org.hisp.dhis.system.startup.StartupRoutineExecutor"/>
@@ -771,8 +778,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="arguments">
       <list>
         <list>
-          <ref local="org.hisp.dhis.dataelement.OptionsCategoriesDefaultSortOrderPopulator"/>
           <ref local="org.hisp.dhis.period.PeriodTypePopulator"/>
+          <ref local="org.hisp.dhis.startup.TableCreator"/>
+          <ref local="org.hisp.dhis.startup.TableAlteror"/>
           <ref local="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator"/>
           <ref local="org.hisp.dhis.expression.MultiDimensionExpressionUpgrader"/>
           <ref local="org.hisp.dhis.dataset.DataSetShortNamePopulator"/>
@@ -1022,26 +1030,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
           <ref local="org.hisp.dhis.user.UserCredentialsDeletionHandler"/>
           <ref local="org.hisp.dhis.user.UserSettingDeletionHandler"/>
         </list>
-      </list>
-    </property>
-  </bean>
-  
-  <!-- Startup -->
-  
-  <bean id="org.hisp.dhis.startup.TableCreator"
-    class="org.hisp.dhis.startup.TableCreator">
-    <property name="runlevel" value="3"/>
-    <property name="jdbcTemplate" ref="jdbcTemplate"/>
-    <property name="statementBuilder" ref="statementBuilder"/>
-  </bean>
-    
-  <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject"
-      ref="org.hisp.dhis.system.startup.StartupRoutineExecutor"/>
-    <property name="targetMethod" value="addStartupRoutines"/>
-    <property name="arguments">
-      <list>
-        <ref local="org.hisp.dhis.startup.TableCreator"/>
       </list>
     </property>
   </bean>
