@@ -746,3 +746,54 @@ function removeItem( itemId, itemName, confirmation, action )
     	);
     }
 }
+
+/**
+ * Create jQuery datepicker for input text with id * * 
+ * @param id the id of input filed which you want enter date *
+ */
+function datePicker( id )
+{
+	$("#" + id).datepicker(
+	{
+		dateFormat:dateFormat,
+		changeMonth: true,
+		changeYear: true,			
+		monthNamesShort: monthNames,
+		dayNamesMin: dayNamesMin,
+		showOn: 'both',
+		buttonImage: '../images/calendar.png',
+		buttonImageOnly: true
+	});
+}
+
+/**
+ * Create jQuery datepicker for start date and end ate text with id * * 
+ * @param startdate the id of input filed which you want enter start date *
+ * @param enddate the id of input filed which you want enter end date *
+ */
+
+function datePickerInRange ( startdate, enddate )
+{
+	var dates = $('#'+startdate+', #' + enddate).datepicker(
+	{
+		dateFormat:dateFormat,
+		defaultDate: "+1w",
+		changeMonth: true,
+		changeYear: true,
+		numberOfMonths: 1,
+		monthNamesShort: monthNames,
+		dayNamesMin: dayNamesMin,
+		showAnim:'',
+		showOn: 'both',
+		buttonImage: '../images/calendar.png',
+		buttonImageOnly: true,
+		onSelect: function(selectedDate)
+		{
+			var option = this.id == startdate ? "minDate" : "maxDate";
+			var instance = $(this).data("datepicker");
+			var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+			dates.not(this).datepicker("option", option, date);
+		}
+	});
+}
+
