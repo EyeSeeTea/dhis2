@@ -243,43 +243,28 @@ public class OrganisationUnitServiceTest
         OrganisationUnit unit4 = new OrganisationUnit( "OU4name", "OU4sname", "OU4code", null, null, true, null );
         OrganisationUnit unit5 = new OrganisationUnit( "OU5name", unit4, "OU5sname", "OU5code", null, null, true, null );
 
-        int id1 = organisationUnitService.addOrganisationUnit( unit1 );
-        int id2 = organisationUnitService.addOrganisationUnit( unit2 );
-        int id3 = organisationUnitService.addOrganisationUnit( unit3 );
-        int id4 = organisationUnitService.addOrganisationUnit( unit4 );
-        int id5 = organisationUnitService.addOrganisationUnit( unit5 );
+        organisationUnitService.addOrganisationUnit( unit1 );
+        organisationUnitService.addOrganisationUnit( unit2 );
+        organisationUnitService.addOrganisationUnit( unit3 );
+        organisationUnitService.addOrganisationUnit( unit4 );
+        organisationUnitService.addOrganisationUnit( unit5 );
 
-        // retrieving the fresh-made organisationUnits
-        Iterator<OrganisationUnit> iterator1 = organisationUnitService.getAllOrganisationUnits().iterator();
+        Collection<OrganisationUnit> units = organisationUnitService.getAllOrganisationUnits();
+        
+        assertNotNull( units );
+        assertEquals( 5, units.size() );
+        assertTrue( units.contains( unit1 ) );
+        assertTrue( units.contains( unit2 ) );
+        assertTrue( units.contains( unit3 ) );
+        assertTrue( units.contains( unit4 ) );
+        assertTrue( units.contains( unit5 ) );
 
-        // assert the list contains the same organisationUnits as the ones added
-        OrganisationUnit organisationUnit1 = iterator1.next();
-        assertTrue( organisationUnit1.getId() == id1 );
+        units = organisationUnitService.getRootOrganisationUnits();
 
-        OrganisationUnit organisationUnit2 = iterator1.next();
-        assertTrue( organisationUnit2.getId() == id2 );
-
-        OrganisationUnit organisationUnit3 = iterator1.next();
-        assertTrue( organisationUnit3.getId() == id3 );
-
-        OrganisationUnit organisationUnit4 = iterator1.next();
-        assertTrue( organisationUnit4.getId() == id4 );
-
-        OrganisationUnit organisationUnit5 = iterator1.next();
-        assertTrue( organisationUnit5.getId() == id5 );
-
-        // retrieving the root organisationUnits
-        Iterator<OrganisationUnit> iterator2 = organisationUnitService.getRootOrganisationUnits().iterator();
-
-        OrganisationUnit rootOrganisationUnit1 = iterator2.next();
-        OrganisationUnit rootOrganisationUnit2 = iterator2.next();
-
-        // assert root organisationUnits not null and id equals id1 and id4
-        assertNotNull( rootOrganisationUnit1 );
-        assertNotNull( rootOrganisationUnit2 );
-
-        assertTrue( rootOrganisationUnit1.getId() == id1 );
-        assertTrue( rootOrganisationUnit2.getId() == id4 );
+        assertNotNull( units );
+        assertEquals( 2, units.size() );
+        assertTrue( units.contains( unit1 ) );
+        assertTrue( units.contains( unit4 ) );
     }
 
     @Test

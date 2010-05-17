@@ -42,6 +42,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -50,10 +51,11 @@ import org.junit.Test;
 public class IndicatorBatchHandlerTest
     extends DhisTest
 {
-    private HibernateCacheManager cacheManager;
-	
+    @Autowired
     private BatchHandlerFactory batchHandlerFactory;
     
+    private HibernateCacheManager cacheManager;
+
     private BatchHandler<Indicator> batchHandler;
     
     private Indicator indicatorA;
@@ -70,8 +72,6 @@ public class IndicatorBatchHandlerTest
     	cacheManager = (HibernateCacheManager) getBean( HibernateCacheManager.ID );
     	
         indicatorService = (IndicatorService) getBean( IndicatorService.ID );
-        
-        batchHandlerFactory = (BatchHandlerFactory) getBean( "batchHandlerFactory" );
         
         batchHandler = batchHandlerFactory.createBatchHandler( IndicatorBatchHandler.class );
 

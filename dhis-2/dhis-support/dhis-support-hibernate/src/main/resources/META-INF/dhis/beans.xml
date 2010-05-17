@@ -11,7 +11,7 @@
    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
    default-autowire="byName">
 
-  <context:component-scan base-package="no.tfs.nf"/>
+  <context:component-scan base-package="org.hisp.dhis"/>
 		   
   <!-- Transactions -->
 
