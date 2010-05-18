@@ -691,3 +691,8 @@ div#headerMessage
   height: 19px;
   background-color: #ebf0f6;
 }
+
+div#ui-datepicker-div{
+	font-size:10pt;
+	z-index:99999999;
+}

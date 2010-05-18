@@ -1219,8 +1219,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-excel-reporting/periodcolumns.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
-			<param name="javascripts">javascript/commons.js,javascript/periodcolumn.js,javascript/ui/ui.datepicker.js</param>
-			<param name="stylesheets">style/ui.datepicker.css,style/jquery-ui.css</param>
+			<param name="javascripts">javascript/commons.js,javascript/periodcolumn.js</param>			
 		</action>
 
 		<action name="savePeriodColumn"
