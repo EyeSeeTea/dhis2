@@ -81,7 +81,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       value="reports"/>
     <property name="reportConfigFile" 
       value="reportConfiguration.xml"/>
-	<property name="jdbcConfiguration" value="jdbcConfiguration"/> 
+	<property name="jdbcConfiguration" ref="jdbcConfiguration"/> 
   </bean>
   
   <!-- Chart -->
