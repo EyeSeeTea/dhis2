@@ -61,6 +61,7 @@ import org.hisp.dhis.system.objectmapper.AggregatedIndicatorValueRowMapper;
 import org.hisp.dhis.system.objectmapper.AggregatedMapValueRowMapper;
 import org.hisp.dhis.system.objectmapper.DataValueRowMapper;
 import org.hisp.dhis.system.objectmapper.DeflatedDataValueRowMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -73,19 +74,11 @@ public class JdbcDataMartStore
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private StatementManager statementManager;
 
-    public void setStatementManager( StatementManager statementManager )
-    {
-        this.statementManager = statementManager;
-    }
-    
+    @Autowired
     private StatementBuilder statementBuilder;
-
-    public void setStatementBuilder( StatementBuilder statementBuilder )
-    {
-        this.statementBuilder = statementBuilder;
-    }
     
     // -------------------------------------------------------------------------
     // AggregatedDataValue

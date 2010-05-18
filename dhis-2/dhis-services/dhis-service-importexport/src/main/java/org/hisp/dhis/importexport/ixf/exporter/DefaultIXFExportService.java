@@ -57,6 +57,7 @@ import org.hisp.dhis.importexport.ixf.converter.SourceConverter;
 import org.hisp.dhis.importexport.ixf.converter.TimePeriodConverter;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -77,12 +78,8 @@ public class DefaultIXFExportService
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
     
     private DataElementCategoryService categoryService;
 
