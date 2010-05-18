@@ -9,194 +9,147 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   <!-- Store definitions -->
   
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormAssociationStore"
-    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormAssociationStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormAssociationStore"/>
   
    <bean id="org.hisp.dhis.dataentryform.DataEntryFormStore"
-    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormStore"/>
 
   <bean id="org.hisp.dhis.customvalue.CustomValueStore"
     class="org.hisp.dhis.customvalue.hibernate.HibernateCustomValueStore">
     <property name="clazz" value="org.hisp.dhis.customvalue.CustomValue"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementStore"
-    class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-	<property name="statementManager" ref="statementManager"/>
-  </bean>
+    class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementStore"/>
   
   <bean id="org.hisp.dhis.dataelement.DataElementGroupStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementGroup"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.dataelement.DataElementGroupSetStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementGroupSet"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.datadictionary.DataDictionaryStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.datadictionary.DataDictionary"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.datavalue.DataValueStore"
     class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="statementManager" ref="statementManager"/>
     <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore"/>
   </bean>
   
   <bean id="org.hisp.dhis.indicator.IndicatorStore"
-    class="org.hisp.dhis.indicator.hibernate.HibernateIndicatorStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.indicator.hibernate.HibernateIndicatorStore"/>
 	
   <bean id="org.hisp.dhis.indicator.IndicatorTypeStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.indicator.IndicatorType"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
     
   <bean id="org.hisp.dhis.indicator.IndicatorGroupStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.indicator.IndicatorGroup"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
     
   <bean id="org.hisp.dhis.indicator.IndicatorGroupSetStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.indicator.IndicatorGroupSet"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
     
   <bean id="org.hisp.dhis.period.PeriodStore"
-    class="org.hisp.dhis.period.hibernate.HibernatePeriodStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.period.hibernate.HibernatePeriodStore"/>
   
   <bean id="org.hisp.dhis.source.SourceStore"
-    class="org.hisp.dhis.source.hibernate.HibernateSourceStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.source.hibernate.HibernateSourceStore"/>
   
   <bean id="org.hisp.dhis.dataset.DataSetStore"
     class="org.hisp.dhis.dataset.hibernate.HibernateDataSetStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="periodStore"
-      ref="org.hisp.dhis.period.PeriodStore"/>
+    <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore"/>
   </bean>
 
   <bean id="org.hisp.dhis.dataset.CompleteDataSetRegistrationStore"
-    class="org.hisp.dhis.dataset.hibernate.HibernateCompleteDataSetRegistrationStore"> 
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="periodService"
-      ref="org.hisp.dhis.period.PeriodService"/>
+    class="org.hisp.dhis.dataset.hibernate.HibernateCompleteDataSetRegistrationStore">
+    <property name="periodService" ref="org.hisp.dhis.period.PeriodService"/>
   </bean>
   
  <bean id="org.hisp.dhis.minmax.MinMaxDataElementStore"
     class="org.hisp.dhis.minmax.hibernate.HibernateMinMaxDataElementStore">
     <property name="clazz" value="org.hisp.dhis.minmax.MinMaxDataElement"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.expression.ExpressionStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.expression.Expression"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.validation.ValidationRuleStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.validation.ValidationRule"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.validation.ValidationRuleGroupStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.validation.ValidationRuleGroup"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
 	
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategory"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>  
   
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOption"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
 	
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryComboStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryCombo"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
 	
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.dataset.SectionStore"
-    class="org.hisp.dhis.dataset.hibernate.HibernateSectionStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.dataset.hibernate.HibernateSectionStore"/>
   
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitStore"
-    class="org.hisp.dhis.organisationunit.hibernate.HibernateOrganisationUnitStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="statementManager" ref="statementManager"/>
-    <property name="jdbcTemplate" ref="jdbcTemplate"/>
-  </bean>
+    class="org.hisp.dhis.organisationunit.hibernate.HibernateOrganisationUnitStore"/>
 
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.organisationunit.OrganisationUnitGroup"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet"/>
-    <property name="sessionFactory" ref="sessionFactory"/>
   </bean>
   
   <bean id="org.hisp.dhis.dataanalysis.jdbc.DataAnalysisStore"
-    class="org.hisp.dhis.dataanalysis.jdbc.JdbcDataAnalysisStore">
-    <property name="statementManager" ref="statementManager"/>
-    <property name="statementBuilder" ref="statementBuilder"/>
-  </bean>
+    class="org.hisp.dhis.dataanalysis.jdbc.JdbcDataAnalysisStore"/>
   
   <bean id="org.hisp.dhis.datavalue.DataValueAuditStore"
-    class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueAuditStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueAuditStore"/>
   
   <bean id="org.hisp.dhis.user.UserStore" 
     class="org.hisp.dhis.user.hibernate.HibernateUserStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-     <property name="currentUserService"
-      ref="org.hisp.dhis.user.CurrentUserService"/>
+     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
   </bean>
     
   <bean id="org.hisp.dhis.validation.ValidationCriteriaStore"
 	class="org.hisp.dhis.hibernate.HibernateGenericStore">
 	<property name="clazz" value="org.hisp.dhis.validation.ValidationCriteria" />
-	<property name="sessionFactory" ref="sessionFactory" />
   </bean>
+   
+  <bean id="org.hisp.dhis.translation.TranslationStore"
+	class="org.hisp.dhis.translation.hibernate.HibernateTranslationStore"/>
    
   <!-- Service definitions -->
 
@@ -439,6 +392,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="userStore" ref="org.hisp.dhis.user.UserStore"/>
   </bean>
   
+  <bean id="org.hisp.dhis.translation.TranslationService"
+	class="org.hisp.dhis.translation.DefaultTranslationService">
+	<property name="translationStore" ref="org.hisp.dhis.translation.TranslationStore" />
+  </bean>
+	
   <bean id="org.hisp.dhis.validation.ValidationCriteriaService"
 	class="org.hisp.dhis.validation.DefaultValidationCriteriaService">
 	<property name="validationCriteriaStore"
@@ -481,18 +439,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</property>
   </bean>
 
-  <!-- Translation -->
-
-  <bean id="org.hisp.dhis.translation.TranslationStore"
-	class="org.hisp.dhis.translation.hibernate.HibernateTranslationStore">
-	<property name="sessionFactory" ref="sessionFactory" />
-  </bean>
-
-  <bean id="org.hisp.dhis.translation.TranslationService"
-	class="org.hisp.dhis.translation.DefaultTranslationService">
-	<property name="translationStore" ref="org.hisp.dhis.translation.TranslationStore" />
-  </bean>
-	
   <!-- I18n object definitions -->
 
   <bean id="I18nDataElement" class="org.hisp.dhis.i18n.I18nObject">
@@ -971,9 +917,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="userDetailsService"
-    class="org.hisp.dhis.security.hibernate.HibernateUserDetailsService">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.security.hibernate.HibernateUserDetailsService"/>
   
   <bean id="passwordEncoder"
     class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
