@@ -39,6 +39,7 @@ import org.hisp.dhis.importexport.ixf.config.IXFConfiguration;
 import org.hisp.dhis.importexport.ixf.config.IXFConfigurationManager;
 import org.hisp.dhis.importexport.ixf.config.IXFCountry;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -49,6 +50,9 @@ public class IXFConfigurationManagerTest
 {
     private IXFConfigurationManager configurationManager;
 
+    @Autowired
+    private LocationManager locationManager;
+    
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -57,7 +61,7 @@ public class IXFConfigurationManagerTest
     public void setUpTest()
         throws Exception
     {
-        setExternalTestDir( (LocationManager) getBean( LocationManager.ID ) );
+        setExternalTestDir( locationManager );
         
         configurationManager = (IXFConfigurationManager) getBean( IXFConfigurationManager.ID );
         

@@ -414,9 +414,7 @@ public class DefaultCaseAggregationMappingService
         
         String tmpFromQuery = "";
         String tmpWhereQuery = " where ";
-        String query = "";
-        
-        
+                
         String curAliasDataValue = null;
         String curAliasProgramStageInstance = null;
         String curAliasPatientAttributeValue = null;

@@ -41,6 +41,7 @@ public class XPathFilterTest extends TestCase
 {
 
     private InputStream inputStreamB;
+    private InputStream inputStreamC;
 
     @Override
     protected void setUp() throws Exception
@@ -48,6 +49,7 @@ public class XPathFilterTest extends TestCase
         super.setUp();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         inputStreamB = classLoader.getResourceAsStream( "dataB.xml" );
+        inputStreamC = classLoader.getResourceAsStream( "dataC.xml" );
     }
 
     @Override
@@ -55,14 +57,7 @@ public class XPathFilterTest extends TestCase
         throws Exception
     {
         inputStreamB.close();
-    }
-
-    public synchronized void testFindNode()
-    {
-        Node result;
-        result = XPathFilter.findNode( inputStreamB,
-            "/dataElements/dataElement[@code='code2']/description" );
-        assertEquals( "description2", result.getTextContent() );
+        inputStreamC.close();
     }
 
     public synchronized void testFindText()
@@ -73,11 +68,27 @@ public class XPathFilterTest extends TestCase
         assertEquals( "description2", result );
     }
 
+    public synchronized void testFindNode()
+    {
+        Node result;
+        result = XPathFilter.findNode( inputStreamB,
+            "/dataElements/dataElement[@code='code2']/description" );
+        assertEquals( "description2", result.getTextContent() );
+    }
+
     public synchronized void testFindNodes()
     {
         NodeList result;
         result = XPathFilter.findNodes( inputStreamB,
             "/dataElements/dataElement[(@code='code2') or (@code='code3')]/description" );
         assertEquals( 2, result.getLength() );
+    }
+
+    public synchronized void testFindNumber()
+    {
+        String result;
+        result = XPathFilter.findText( inputStreamC,
+            "/root/dataElements/@id" );
+        assertEquals( "42", result );
     }
 }

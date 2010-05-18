@@ -818,7 +818,7 @@ public class ActivePlanReportsResultAction implements Action
                                                             Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
                                                             //System.out.println( "psisList size = " + psisList.size() );
                                                             String dename = d1e.getShortName();
-                                                            if ( psisList.size() != 0 )
+                                                            if ( psisList != null && psisList.size() != 0 )
                                                             {
                                                                 for ( ProgramStageInstance programStageInstanceName : psisList )
                                                                 {
@@ -893,7 +893,7 @@ public class ActivePlanReportsResultAction implements Action
                                                             DataElement d1e = dataElementService.getDataElement( Integer.parseInt( deCodeString ) );
                                                             Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
                                                             String dename = d1e.getShortName();
-                                                            if ( psisList.size() != 0 )
+                                                            if ( psisList != null && psisList.size() != 0 )
                                                             {
                                                                 for ( ProgramStageInstance programStageInstanceName : psisList )
                                                                 {

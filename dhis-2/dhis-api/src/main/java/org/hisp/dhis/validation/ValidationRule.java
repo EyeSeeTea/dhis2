@@ -27,12 +27,12 @@ package org.hisp.dhis.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.expression.Expression;
 
 /**
@@ -40,7 +40,7 @@ import org.hisp.dhis.expression.Expression;
  * @version $Id: ValidationRule.java 5434 2008-06-18 18:57:59Z larshelg $
  */
 public class ValidationRule
-    implements Serializable
+    extends IdentifiableObject
 {
     public static final String TYPE_STATISTICAL = "statistical";
     public static final String TYPE_ABSOLUTE = "absolute";
@@ -53,10 +53,6 @@ public class ValidationRule
     public static final String OPERATOR_LESSER_EQUAL = "less_than_or_equal_to";
     
     private static Map<String, String> operatorMap = new HashMap<String, String>();
-    
-    private int id;
-    
-    private String name;
     
     private String description;
     
@@ -133,26 +129,6 @@ public class ValidationRule
     // -------------------------------------------------------------------------
     // Set and get methods
     // -------------------------------------------------------------------------  
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
 
     public String getDescription()
     {

@@ -27,7 +27,6 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +36,8 @@ import java.util.regex.Pattern;
 
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dimension.Dimension;
 import org.hisp.dhis.dimension.DimensionOption;
@@ -56,7 +57,7 @@ import org.hisp.dhis.period.Period;
  * @version $Id$
  */
 public class ReportTable
-    implements Serializable
+    extends IdentifiableObject
 {
     public static final String DATAELEMENT_ID = "dataelementid";
     public static final String DATAELEMENT_NAME = "dataelementname";
@@ -94,16 +95,6 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Persisted properties
     // -------------------------------------------------------------------------
-
-    /**
-     * The internal identifier.
-     */
-    private int id;
-    
-    /**
-     * The name of the ReportTable object.
-     */
-    private String name;
 
     /**
      * The name of the database table corresponding to the ReportTable object name.
@@ -153,17 +144,17 @@ public class ReportTable
     /**
      * The {@link org.hisp.dhis.dimension.DimensionType} for the ReportTable.
      */
-    private DimensionType dimensionType;
+    private String dimensionType;
     
     /**
      * The DataElementCategoryCombo for the ReportTable.
      */
-    private DimensionSet categoryCombo;
+    private DataElementCategoryCombo categoryCombo;
     
     /**
      * The DataElementGropSets for the ReportTable.
      */
-    private List<? extends Dimension> dataElementGroupSets = new ArrayList<Dimension>();
+    private List<DataElementGroupSet> dataElementGroupSets = new ArrayList<DataElementGroupSet>();
     
     /**
      * Whether to crosstabulate on the Indicator dimension, which also represents DataElements and DataSets.
@@ -603,13 +594,14 @@ public class ReportTable
      * Sets the appropriate dimension related properties depending on the dimension 
      * set type.
      */
+    @SuppressWarnings( "unchecked" )
     public void setDimensionSet( DimensionSet dimensionSet )
     {
         if ( dimensionSet != null )
         {
-            dimensionType = dimensionSet.getDimensionType();
-            categoryCombo = dimensionType.equals( DimensionType.CATEGORY ) ? dimensionSet : null;
-            dataElementGroupSets = dimensionType.equals( DimensionType.DATAELEMENTGROUPSET ) ? dimensionSet.getDimensions() : null;
+            dimensionType = dimensionSet.getDimensionType().name();
+            categoryCombo = dimensionType.equals( DimensionType.CATEGORY.name() ) ? (DataElementCategoryCombo)dimensionSet : null;
+            dataElementGroupSets = dimensionType.equals( DimensionType.DATAELEMENTGROUPSET.name() ) ? (List<DataElementGroupSet>)dimensionSet.getDimensions() : null;
             
             verify( dimensionType != null, "Dimension type cannot be null" );
         }
@@ -755,7 +747,7 @@ public class ReportTable
      */
     public boolean isDimensional( DimensionType dimensionType )
     {
-        return isDimensional() && this.dimensionType.equals( dimensionType );
+        return isDimensional() && this.dimensionType.equals( dimensionType.name() );
     }
     
     /**
@@ -1054,26 +1046,6 @@ public class ReportTable
     // Get- and set-methods for persisted properties
     // -------------------------------------------------------------------------
 
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-    
-    public String getName()
-    {
-        return name;
-    }
-    
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
     public String getTableName()
     {
         return tableName;
@@ -1174,32 +1146,32 @@ public class ReportTable
         this.units = units;
     }
 
-    public DimensionType getDimensionType()
+    public String getDimensionType()
     {
         return dimensionType;
     }
 
-    public void setDimensionType( DimensionType dimensionType )
+    public void setDimensionType( String dimensionType )
     {
         this.dimensionType = dimensionType;
     }
 
-    public DimensionSet getCategoryCombo()
+    public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
     }
 
-    public void setCategoryCombo( DimensionSet categoryCombo )
+    public void setCategoryCombo( DataElementCategoryCombo categoryCombo )
     {
         this.categoryCombo = categoryCombo;
     }
 
-    public List<? extends Dimension> getDataElementGroupSets()
+    public List<DataElementGroupSet> getDataElementGroupSets()
     {
         return dataElementGroupSets;
     }
 
-    public void setDataElementGroupSets( List<? extends Dimension> dataElementGroupSets )
+    public void setDataElementGroupSets( List<DataElementGroupSet> dataElementGroupSets )
     {
         this.dataElementGroupSets = dataElementGroupSets;
     }

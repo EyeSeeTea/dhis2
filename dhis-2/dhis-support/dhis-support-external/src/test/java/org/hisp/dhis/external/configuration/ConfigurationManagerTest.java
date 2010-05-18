@@ -37,6 +37,7 @@ import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.NotTransactional;
 
 /**
@@ -46,21 +47,18 @@ import org.springframework.test.annotation.NotTransactional;
 public class ConfigurationManagerTest
     extends DhisSpringTest
 {
+    @Autowired
     private ConfigurationManager<DummyConfiguration> configurationManager;
     
+    @Autowired
     private LocationManager locationManager;
     
     private DummyConfiguration configurationA;
     private DummyConfiguration configurationB;
     
-    @SuppressWarnings( "unchecked" )
     @Override
     public void setUpTest()
     {
-        configurationManager = (ConfigurationManager<DummyConfiguration>) getBean( ConfigurationManager.ID );
-        
-        locationManager = (LocationManager) getBean( LocationManager.ID );
-        
         configurationA = new DummyConfiguration( "homeA", "directoryA" );
         configurationB = new DummyConfiguration( "homeB", "directoryB" );
     }

@@ -35,7 +35,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.source.Source;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +51,7 @@ public class DefaultDataValueService
     implements DataValueService
 {
     private static final Log log = LogFactory.getLog( DefaultDataValueService.class );
-    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -60,9 +62,9 @@ public class DefaultDataValueService
     {
         this.dataValueStore = dataValueStore;
     }
-    
+
     private DataValueAuditService dataValueAuditService;
-    
+
     public void setDataValueAuditService( DataValueAuditService dataValueAuditService )
     {
         this.dataValueAuditService = dataValueAuditService;
@@ -76,10 +78,11 @@ public class DefaultDataValueService
     {
         if ( !dataValue.isNullValue() )
         {
-            if ( dataValue.isZero() && !dataValue.getDataElement().isZeroIsSignificant() &&
-                !dataValue.getDataElement().getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) )
+            if ( dataValue.isZero() && !dataValue.getDataElement().isZeroIsSignificant()
+                && !dataValue.getDataElement().getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) )
             {
-                log.info( "DataValue was ignored as zero values are insignificant for this data element: " + dataValue.getDataElement() );
+                log.info( "DataValue was ignored as zero values are insignificant for this data element: "
+                    + dataValue.getDataElement() );
             }
             else
             {
@@ -96,10 +99,11 @@ public class DefaultDataValueService
         }
         else
         {
-            if ( dataValue.isZero() && !dataValue.getDataElement().isZeroIsSignificant() &&
-                !dataValue.getDataElement().getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) )
+            if ( dataValue.isZero() && !dataValue.getDataElement().isZeroIsSignificant()
+                && !dataValue.getDataElement().getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) )
             {
-                log.info( "DataValue was ignored as zero values are insignificant for this data element: " + dataValue.getDataElement() );
+                log.info( "DataValue was ignored as zero values are insignificant for this data element: "
+                    + dataValue.getDataElement() );
             }
             else
             {
@@ -196,12 +200,6 @@ public class DefaultDataValueService
         return dataValueStore.getDataValues( dataElement, optionCombo, periods, sources );
     }
 
-    public Collection<DataValue> getDataValues( Collection<DataElement> dataElements, Collection<Period> periods,
-        Collection<? extends Source> sources, int firstResult, int maxResults )
-    {
-        return dataValueStore.getDataValues( dataElements, periods, sources, firstResult, maxResults );
-    }
-
     public Collection<DataValue> getDataValues( Collection<DataElementCategoryOptionCombo> optionCombos )
     {
         return dataValueStore.getDataValues( optionCombos );
@@ -211,4 +209,13 @@ public class DefaultDataValueService
     {
         return dataValueStore.getDataValues( dataElement );
     }
+   
+    @Override
+    public DataValue getLatestDataValues( DataElement dataElement, PeriodType periodType,
+        OrganisationUnit organisationUnit )
+    {        
+        return dataValueStore.getLatestDataValues( dataElement, periodType, organisationUnit );
+    }
+
+   
 }

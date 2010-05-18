@@ -67,6 +67,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.process.OutputHolderState;
 import org.hisp.dhis.system.util.StreamUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -137,12 +138,8 @@ public class DefaultIXFImportService
         this.objectMappingGenerator = objectMappingGenerator;
     }
 
+    @Autowired
     private HibernateCacheManager cacheManager;
-
-    public void setCacheManager( HibernateCacheManager cacheManager )
-    {
-        this.cacheManager = cacheManager;
-    }
 
     private ConverterInvoker converterInvoker;
 
