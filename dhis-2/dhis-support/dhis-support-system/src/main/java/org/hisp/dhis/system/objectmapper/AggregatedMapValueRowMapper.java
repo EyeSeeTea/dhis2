@@ -44,14 +44,15 @@ public class AggregatedMapValueRowMapper
         throws SQLException
     {
         final AggregatedMapValue value = new AggregatedMapValue();
-        
+
         value.setOrganisationUnitId( resultSet.getInt( 1 ) );
         value.setOrganisationUnitName( resultSet.getString( 2 ) );
         value.setValue( resultSet.getDouble( 3 ) );
-        value.setNumeratorValue( resultSet.getDouble( 4 ) );
-        value.setDenominatorValue( resultSet.getDouble( 5 ) );
-        value.setFactor( resultSet.getDouble( 6 ) );
-        
+        value.setPeriodId( resultSet.getInt( 4 ) );
+        value.setFactor( resultSet.getDouble( 5 ) );
+        value.setNumeratorValue( resultSet.getDouble( 6 ) );
+        value.setDenominatorValue( resultSet.getDouble( 7 ) );        
+
         return value;
     }
 }

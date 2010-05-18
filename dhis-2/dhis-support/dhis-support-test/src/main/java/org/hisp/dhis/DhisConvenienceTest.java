@@ -54,7 +54,6 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
-import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.external.location.LocationManager;
@@ -137,10 +136,6 @@ public abstract class DhisConvenienceTest
 
     protected MappingService mappingService;
 
-    protected DbmsManager dbmsManager;
-
-    protected LocationManager locationManager;
-    
     protected ProgramStageService programStageService;
 
     static
@@ -940,8 +935,6 @@ public abstract class DhisConvenienceTest
      */
     public void setExternalTestDir( LocationManager locationManager )
     {
-        this.locationManager = locationManager;
-
         setDependency( locationManager, "externalDir", EXT_TEST_DIR, String.class );
     }
 

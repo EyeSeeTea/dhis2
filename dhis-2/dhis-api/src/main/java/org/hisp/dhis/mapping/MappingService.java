@@ -58,6 +58,8 @@ public interface MappingService
     // MapValue
     // -------------------------------------------------------------------------
 
+    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds, String mapLayerPath, String featureId );
+    
     Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, String mapLayerPath );
 
     Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level );

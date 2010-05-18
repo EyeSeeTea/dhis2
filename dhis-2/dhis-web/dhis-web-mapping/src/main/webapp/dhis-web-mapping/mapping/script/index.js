@@ -26,6 +26,8 @@ var COLORINTERPOLATION;
 var EXPORTVALUES;
 /* Currently selected vector feature  */
 var FEATURE;
+/* Global chart for show/hide */
+var CHART;
 /* Current legend type and method */
 var LEGEND = new Object();
 LEGEND.type = map_legend_type_automatic;
@@ -3068,27 +3070,244 @@ Ext.onReady( function() {
 var popup;
 
 var featureWindow = new Ext.Window({
-    title: 'tittel',
     closeAction: 'hide',
     items: [
         {
             xtype: 'menu',
             id: 'feature_m',
-            floating: false
+            floating: false,
+            items: [
+                {
+                    html: 'Centre orgunit in the map',
+                    iconCls: 'no-icon',
+                    listeners: {
+                        'click': {
+                            fn: function() {
+                                MAP.setCenter(FEATURE.geometry.getBounds().getCenterLonLat());
+                            }
+                        }
+                    }
+                },
+                {
+                    html: 'Indicator value timeseries',
+                    iconCls: 'no-icon',
+                    listeners: {
+                        'click': {
+                            fn: function() {
+                                periodWindow.setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 135);
+                                periodWindow.show();
+                            }
+                        }
+                    }
+                }
+            ]
         }
     ]
 });
 
-Ext.getCmp('feature_m').add({
-	html: 'Centre',
-	iconCls: 'no-icon',
-	listeners: {
-		'click': {
-			fn: function() {
-				MAP.setCenter(FEATURE.geometry.getBounds().getCenterLonLat());
-			}
-		}
-	}
+var periodTypeTimeseriesStore = new Ext.data.JsonStore({
+    url: path + 'getAllPeriodTypes' + type,
+    root: 'periodTypes',
+    fields: ['name'],
+    autoLoad: true
+});
+
+var periodTimeseriesStore = new Ext.data.JsonStore({
+    url: path + 'getPeriodsByPeriodType' + type,
+    baseParams: { name: 0 },
+    root: 'periods',
+    fields: ['id', 'name', 'value'],
+    autoLoad: false                
+});
+
+var periodWindow = new Ext.Window({
+    title: 'Select periods',
+    closeAction: 'hide',
+    defaults: { bodyStyle: 'padding:8px; border:0px' },
+    width: 250,
+    items: [
+        {
+            xtype: 'panel',
+            items: [
+                { html: '<div class="window-field-label-first">Period type</div>' },
+                {
+                    xtype: 'combo',
+                    id: 'periodtypetimeseries_cb',
+                    fieldLabel: 'Period type',
+                    typeAhead: true,
+                    editable: false,
+                    valueField: 'name',
+                    displayField: 'name',
+                    mode: 'remote',
+                    forceSelection: true,
+                    triggerAction: 'all',
+                    emptyText: emptytext,
+                    labelSeparator: labelseparator,
+                    selectOnFocus: true,
+                    width: combo_width,
+                    store: periodTypeTimeseriesStore,
+                    listeners: {
+                        'select': {
+                            fn: function() {
+                                var pt = Ext.getCmp('periodtypetimeseries_cb').getValue();
+                                periodTimeseriesStore.baseParams = { name: pt };
+                                periodTimeseriesStore.reload();
+                            },
+                            scope: this
+                        }
+                    }
+                },
+                { html: '<div class="window-field-label">Periods</div>' },
+                {
+                    xtype: 'multiselect',
+                    id: 'periodstimeseries_ms',
+                    dataFields: ['id', 'name'],
+                    valueField: 'id',
+                    displayField: 'name',
+                    width: multiselect_width,
+                    height: getMultiSelectHeight(),
+                    store: periodTimeseriesStore
+                },
+                {
+                    xtype: 'button',
+                    id: 'newview_b',
+                    isFormField: true,
+                    hideLabel: true,
+                    cls: 'window-button',
+                    text: 'Create graph',
+                    handler: function() {
+                        var iid = Ext.getCmp('indicator_cb').getValue();
+                        var pids = Ext.getCmp('periodstimeseries_ms').getValue();
+                        
+                        var pidArray = new Array();
+                        pidArray = pids.split(',');
+                        
+                        var pnameArray = new Array();
+                        for (var i = 0; i < pidArray.length; i++) {
+                            pnameArray[i] = periodTimeseriesStore.getById(pidArray[i]).data.name;
+                        }
+                        
+                        setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL);
+                        mapValueTimeseriesStore.reload();
+                    }
+                }
+            ]
+        }
+    ]
+});
+
+var mapValueTimeseriesStore;
+
+function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
+    var params = pidArray[0];
+    if (pidArray.length > 1) {
+        for (var i = 1; i < pidArray.length; i++) {
+            params += '&periodIds=' + pidArray[i];
+        }
+    }
+    
+    mapValueTimeseriesStore = new Ext.data.JsonStore({
+        url: path + 'getMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
+        root: 'mapvalues',
+        fields:['orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
+        autoLoad: false,
+        listeners: {
+            'load': {
+                fn: function() {
+                    var title = FEATURE.attributes[MAPDATA.nameColumn];
+                    var indicator = Ext.getCmp('indicator_cb').getRawValue();
+                    
+                    var valueArray = new Array();
+                    for (var i = 0; i < pidArray.length; i++) {
+                        for (var j = 0; j < mapValueTimeseriesStore.getCount(); j++) {
+                            if (mapValueTimeseriesStore.getAt(j).data.periodId == pidArray[i]) {
+                                valueArray[i] = parseFloat(mapValueTimeseriesStore.getAt(j).data.value);
+                            }
+                        }
+                    }
+
+                    CHART = getChart(title + ', ' + indicator, pnameArray, FEATURE.attributes[MAPDATA.nameColumn], valueArray);
+                    CHART.show();
+                }
+            }
+        }
+    });
+}
+
+function getChart(title, x, name, valueArray) {
+    var chart = new Ext.Window({
+        title: 'Indicator value timeseries',
+        resizeable: true,
+        width: 800,
+        height: 450,
+        items: [
+            new Ext.ux.HighChart({
+                titleCollapse: true,
+                layout: 'fit',
+                border: true,
+                id: 'thechart',
+                chartConfig: {
+                    chart: {
+                        id: 'thechart',
+                        defaultSeriesType: 'line',
+                        margin: [50, 50, 60, 50]
+                    },
+                    title: {
+                        text: title,
+                        style: {
+                            margin: '10px 50px 0 0', // center it
+                            font: 'bold 20px arial',
+                            color: '#555'
+                        }
+                    },
+                    xAxis: {
+                        categories: x,
+                        labels: {
+                            rotation: -25,
+                            align: 'right',
+                            style: {
+                                font: 'normal 12px arial,lucida sans unicode',
+                                color: '#555'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: '',
+                        plotLines: [
+                            {
+                                value: 0,
+                                width: 1,
+                                color: '#808080'
+                            }
+                        ]
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>'+ this.series.name +'</b><br/>'+
+                                this.x +': '+ this.y;
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    series: [
+                        {
+                            name: name,
+                            data: valueArray
+                        }
+                    ]
+                }
+            })
+        ]
+    });
+    
+    return chart;
+}
+
+var chartWindow = new Ext.Window({
+    closeAction: 'hide',
+    defaults: { bodyStyle: 'padding:8px; border:0px' },
+    items: CHART
 });
 
 function onHoverSelectChoropleth(feature) {
@@ -3119,9 +3338,9 @@ function onClickSelectChoropleth(feature) {
 		}
 		
 		var feature_popup = new Ext.Window({
-			title: '<span class="panel-title">' + i18n_assign_organisation_unit + '</span>',
+			title: '<span class="panel-title">Assign organisation unit</span>',
 			width: 180,
-			height: 60,
+			height: 65,
 			layout: 'fit',
 			plain: true,
 			html: '<div class="window-orgunit-text">' + feature.attributes[MAPDATA.nameColumn] + '</div>',
@@ -3141,14 +3360,10 @@ function onClickSelectChoropleth(feature) {
 		mapping.relation = feature.attributes[MAPDATA.nameColumn];
     }
 	else {
-        // var x = Ext.getCmp('east').x - 100;
-        // var y = Ext.getCmp('center').y + 41; 
-		// featureMenu.showAt([x,y]);
-        featureWindow.setPagePosition(Ext.getCmp('east').x - 120, Ext.getCmp('center').y + 41);
+        featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
         featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
         featureWindow.show();
-		// MAP.setCenter(feature.geometry.getBounds().getCenterLonLat(), MAP.getZoom()+1);
-		// sc(feature.attributes[MAPDATA.nameColumn], Ext.getCmp('indicator_cb').getRawValue());
+        periodWindow.hide();
 	}
 }
 
@@ -3244,7 +3459,7 @@ function getChoroplethData() {
 			}
 
 			for (var i = 0; i < mapvalues.length; i++) {
-				mv[mapvalues[i].featureId] = mapvalues[i].featureId ? mapvalues[i].value : '';
+				mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
 			}
 
 			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {

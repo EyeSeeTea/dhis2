@@ -83,10 +83,8 @@ public class UpdateReportAssociationsAction
 
         reportExcel.getOrganisationAssocitions().clear();
 
-        Collection<OrganisationUnit> orgUnits = selectionTreeManager.getSelectedOrganisationUnits();
+        Collection<OrganisationUnit> orgUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
-        orgUnits = selectionTreeManager.reloadOrganisationUnits( orgUnits );
-        
         reportExcel.getOrganisationAssocitions().addAll( orgUnits );
 
         reportService.updateReportExcel( reportExcel );

@@ -113,6 +113,7 @@ import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.validation.ValidationRuleService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * DXFConverter class
@@ -249,12 +250,8 @@ public class DXFConverter
         this.objectMappingGenerator = objectMappingGenerator;
     }
 
+    @Autowired
     private HibernateCacheManager cacheManager;
-
-    public void setCacheManager( HibernateCacheManager cacheManager )
-    {
-        this.cacheManager = cacheManager;
-    }
 
     private ConverterInvoker converterInvoker;
 

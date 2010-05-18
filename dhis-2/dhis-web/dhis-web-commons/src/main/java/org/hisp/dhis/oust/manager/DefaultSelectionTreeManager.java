@@ -50,6 +50,8 @@ public class DefaultSelectionTreeManager
     private static final String SESSION_KEY_LOCKED_ORG_UNITS = "dhis-oust-locked-org-units";
 
     private static final String SESSION_KEY_ROOT_ORG_UNITS = "dhis-oust-root-org-units";
+    
+    private static final double PERSENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS = 0.3;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -190,6 +192,11 @@ public class DefaultSelectionTreeManager
         return selectedUnits;
     }
     
+    public Collection<OrganisationUnit> getReloadedSelectedOrganisationUnits()
+    {
+        return reloadOrganisationUnits( getSelectedOrganisationUnits() );
+    }
+
     public Collection<OrganisationUnit> getLockOnSelectedOrganisationUnits()
     {
         Collection<OrganisationUnit> selectedUnits = getCollectionFromSession( SESSION_KEY_LOCKED_ORG_UNITS );
@@ -295,20 +302,37 @@ public class DefaultSelectionTreeManager
         return organisationUnitService.getOrganisationUnit( unit.getId() );
     }
 
-    public Collection<OrganisationUnit> reloadOrganisationUnits( Collection<OrganisationUnit> units )
+    private Collection<OrganisationUnit> reloadOrganisationUnits( Collection<OrganisationUnit> units )
     {
         Set<OrganisationUnit> reloadedUnits = new HashSet<OrganisationUnit>();
 
-        for ( OrganisationUnit unit : units )
-        {
-            OrganisationUnit reloadedUnit = reloadOrganisationUnit( unit );
+        int noTotal = organisationUnitService.getNumberOfOrganisationUnits();
+        
+        int noSelected = units.size();
 
-            if ( reloadedUnit != null )
+        if ( (double) noSelected / noTotal > PERSENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS )
+        {
+            Collection<OrganisationUnit> allOrgUnits = organisationUnitService.getAllOrganisationUnits();
+            for ( OrganisationUnit each : allOrgUnits )
             {
-                reloadedUnits.add( reloadedUnit );
+                if ( units.contains( each ) )
+                {
+                    reloadedUnits.add( each );
+                }
             }
         }
+        else
+        {
+            for ( OrganisationUnit unit : units )
+            {
+                OrganisationUnit reloadedUnit = reloadOrganisationUnit( unit );
 
+                if ( reloadedUnit != null )
+                {
+                    reloadedUnits.add( reloadedUnit );
+                }
+            }
+        }
         return reloadedUnits;
     }
 

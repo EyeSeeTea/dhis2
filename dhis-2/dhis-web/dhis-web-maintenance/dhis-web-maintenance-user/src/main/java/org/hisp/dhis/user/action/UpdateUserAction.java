@@ -159,10 +159,8 @@ public class UpdateUserAction
         // Update userCredentials and user
         // ---------------------------------------------------------------------
         
-        Collection<OrganisationUnit> units = selectionTreeManager.getSelectedOrganisationUnits();
+        Collection<OrganisationUnit> units = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
-        units = selectionTreeManager.reloadOrganisationUnits( units );
-        
         User user = userStore.getUser( id );
         user.setSurname( surname );
         user.setFirstName( firstName );

@@ -95,9 +95,7 @@ public class DefineDataSetAssociationsAction
 
         assignedSources.removeAll( convert( unitsInTheTree ) );
 
-        Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager.getSelectedOrganisationUnits();
-
-        selectedOrganisationUnits = selectionTreeManager.reloadOrganisationUnits( selectedOrganisationUnits );
+        Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
         assignedSources.addAll( convert( selectedOrganisationUnits ) );
 

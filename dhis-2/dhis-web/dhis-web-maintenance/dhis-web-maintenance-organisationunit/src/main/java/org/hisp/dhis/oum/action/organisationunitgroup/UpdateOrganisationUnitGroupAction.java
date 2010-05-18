@@ -93,9 +93,7 @@ public class UpdateOrganisationUnitGroupAction
 
         organisationUnitGroup.setName( name );
 
-        Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager.getSelectedOrganisationUnits();
-
-        selectedOrganisationUnits = selectionTreeManager.reloadOrganisationUnits( selectedOrganisationUnits );
+        Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
         organisationUnitGroup.setMembers( new HashSet<OrganisationUnit>( selectedOrganisationUnits ) );
 

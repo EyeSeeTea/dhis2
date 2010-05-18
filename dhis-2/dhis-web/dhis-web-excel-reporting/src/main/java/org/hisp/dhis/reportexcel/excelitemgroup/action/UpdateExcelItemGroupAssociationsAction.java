@@ -88,9 +88,7 @@ public class UpdateExcelItemGroupAssociationsAction
 
         excelItemGroup.getOrganisationAssocitions().clear();
 
-        Collection<OrganisationUnit> orgUnits = selectionTreeManager.getSelectedOrganisationUnits();
-
-        orgUnits = selectionTreeManager.reloadOrganisationUnits( orgUnits );
+        Collection<OrganisationUnit> orgUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
         excelItemGroup.getOrganisationAssocitions().addAll( orgUnits );
 

@@ -356,4 +356,12 @@ public class HibernateOrganisationUnitStore
         
         return (OrganisationUnitLevel) criteria.add( Restrictions.eq( "name", name ) ).uniqueResult();
     }
+
+    @Override
+    public int getNumberOfOrganisationUnits()
+    {
+        final String sql = "SELECT count(*) FROM organisationunit";
+
+        return jdbcTemplate.queryForInt( sql );
+    }
 }

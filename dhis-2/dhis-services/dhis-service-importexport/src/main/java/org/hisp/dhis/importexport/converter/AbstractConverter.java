@@ -33,6 +33,8 @@ import static org.hisp.dhis.importexport.ImportObjectStatus.UPDATE;
 import static org.hisp.dhis.importexport.ImportStrategy.NEW_AND_UPDATES;
 
 import org.amplecode.quick.BatchHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.ImportableObject;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.importexport.GroupMemberType;
@@ -48,6 +50,8 @@ import org.hisp.dhis.importexport.analysis.ImportAnalyser;
  */
 public abstract class AbstractConverter<T extends ImportableObject>
 {
+    protected static final Log log = LogFactory.getLog( AbstractConverter.class );
+    
     protected static final String EMPTY = "";
     
     // -------------------------------------------------------------------------
@@ -105,14 +109,14 @@ public abstract class AbstractConverter<T extends ImportableObject>
             {
                 if ( !params.isPreview() ) // Import object
                 {
-                    if ( !isIdentical( object, match ) ) // Skip if identical
+                    if ( !isIdentical( object, match ) && !ignore( object, match ) ) // Skip if identical or ignore-able
                     {
                         importMatching( object, match );
                     }
                 }
                 else if ( params.isPreview() ) // Preview object. DataValue cannot be match in preview.
                 {
-                    ImportObjectStatus status = isIdentical( object, match ) ? MATCH : UPDATE;
+                    ImportObjectStatus status = !isIdentical( object, match ) && !ignore( object, match ) ? UPDATE : MATCH;
                         
                     importObjectService.addImportObject( status, groupMemberType, object, match ); // Set to match if existing, update otherwise
                 }
@@ -132,6 +136,15 @@ public abstract class AbstractConverter<T extends ImportableObject>
     
     protected abstract boolean isIdentical( T object, T match );
 
+    // -------------------------------------------------------------------------
+    // Override-able methods
+    // -------------------------------------------------------------------------
+
+    protected boolean ignore( T object, T match )
+    {
+        return false;
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------

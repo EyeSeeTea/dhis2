@@ -83,7 +83,7 @@ public class AbstractCalculatedDataElementConverter
         
         if ( calculated != null )
         {
-            calculated.getExpression().getExpression(); // Load Expression into memory
+            calculated.getExpression().getExpression(); // Load Expression in session
         }
         
         return calculated; 
@@ -129,5 +129,18 @@ public class AbstractCalculatedDataElementConverter
         }
         
         return true;
-    }    
+    }   
+    
+    @Override
+    protected boolean ignore( CalculatedDataElement object, CalculatedDataElement match )
+    {
+        boolean ignore = !(object instanceof CalculatedDataElement) && match instanceof CalculatedDataElement;
+        
+        if ( ignore )
+        {
+            log.warn( "Data element ignored because it matches with a calculated data element: " + object );
+        }
+        
+        return ignore;
+    } 
 }

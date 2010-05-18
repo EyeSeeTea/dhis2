@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:sec="http://www.springframework.org/schema/security"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
-						http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-						http://www.springframework.org/schema/security
-						http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
 	<!-- Web Portal -->
 
@@ -35,17 +34,12 @@
 		<property name="order">
 			<list>
 				<value>dhis-web-portal</value>
-				<value>dhis-web-maintenance-settings
-				</value>
+				<value>dhis-web-maintenance-settings</value>
 				<value>dhis-web-maintenance-user</value>
-				<value>dhis-web-maintenance-organisationunit
-				</value>
-				<value>dhis-web-maintenance-datadictionary
-				</value>
-				<value>dhis-web-maintenance-dataset
-				</value>
-				<value>dhis-web-maintenance-dataadmin
-				</value>
+				<value>dhis-web-maintenance-organisationunit</value>
+				<value>dhis-web-maintenance-datadictionary</value>
+				<value>dhis-web-maintenance-dataset</value>
+				<value>dhis-web-maintenance-dataadmin</value>
 				<value>dhis-web-dataentry</value>
 			</list>
 		</property>
@@ -541,10 +535,7 @@
 
 	<!-- DataElement Order -->
 
-	<bean id="org.hisp.dhis.order.store.DataElementOrderStore" class="org.hisp.dhis.order.store.FileDataElementOrderStore">
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
-	</bean>
+	<bean id="org.hisp.dhis.order.store.DataElementOrderStore" class="org.hisp.dhis.order.store.FileDataElementOrderStore"/>
 
 	<bean id="org.hisp.dhis.order.manager.DataElementOrderManager"
 		class="org.hisp.dhis.order.manager.DefaultDataElementOrderManager">
@@ -567,13 +558,7 @@
 
 	<!-- About -->
 
-	<bean id="org.hisp.dhis.about.action.AboutAction" class="org.hisp.dhis.about.action.AboutAction"
-		scope="prototype">
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
-		<property name="provider"
-			ref="org.hisp.dhis.system.database.DatabaseInfoProvider" />
-	</bean>
+	<bean id="org.hisp.dhis.about.action.AboutAction" class="org.hisp.dhis.about.action.AboutAction" scope="prototype"/>
 
 	<bean id="org.hisp.dhis.about.action.HelpAction" class="org.hisp.dhis.about.action.HelpAction"
 		scope="prototype">

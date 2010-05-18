@@ -97,10 +97,8 @@ public class SaveAssignMultiDataSetForOrgunitAction
             assignedSources.removeAll( convert( unitsInTheTree ) );
 
             Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager
-                .getSelectedOrganisationUnits();
+                .getReloadedSelectedOrganisationUnits();
 
-            selectedOrganisationUnits = selectionTreeManager.reloadOrganisationUnits( selectedOrganisationUnits );
-            
             assignedSources.addAll( convert( selectedOrganisationUnits ) );
 
             dataSet.setSources( assignedSources );

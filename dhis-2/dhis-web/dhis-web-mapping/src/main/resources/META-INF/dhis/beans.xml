@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<!-- No -->
 
@@ -61,6 +61,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.mapping.action.GetMapValuesByLevelAction" scope="prototype">
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
 	</bean>
+	
+	<bean id="org.hisp.dhis.mapping.action.GetMapValuesByMapAndFeatureIdAction"
+        class="org.hisp.dhis.mapping.action.GetMapValuesByMapAndFeatureIdAction" scope="prototype">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
 
 	<bean id="org.hisp.dhis.mapping.action.SetMapSourceTypeUserSettingAction"
 		class="org.hisp.dhis.mapping.action.SetMapSourceTypeUserSettingAction"
@@ -304,16 +309,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<!-- GeoJson -->
 
 	<bean id="org.hisp.dhis.mapping.action.GetGeoJsonAction" class="org.hisp.dhis.mapping.action.GetGeoJsonAction"
-		scope="prototype">
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
-	</bean>
+		scope="prototype"/>
 
 	<bean id="org.hisp.dhis.mapping.action.GetGeoJsonFilesAction"
-		class="org.hisp.dhis.mapping.action.GetGeoJsonFilesAction" scope="prototype">
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
-	</bean>
+		class="org.hisp.dhis.mapping.action.GetGeoJsonFilesAction" scope="prototype"/>
 
 	<!-- Export Map -->
 

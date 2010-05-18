@@ -2,8 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<!-- Store definitions -->
 	<bean id="org.hisp.dhis.caseaggregation.CaseAggregationMappingStore"
@@ -98,13 +97,19 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
      <property name="clazz" value="org.hisp.dhis.program.ProgramStageDataElement"/>
      <property name="sessionFactory" ref="sessionFactory"/>
    </bean>
+   
+   <bean id="org.hisp.dhis.program.ProgramStageDataElementValidationStore"
+	class="org.hisp.dhis.program.hibernate.HibernateProgramStageDataElementValidationStore">
+	<property name="clazz" value="org.hisp.dhis.program.ProgramStageDataElementValidation" />
+	<property name="sessionFactory" ref="sessionFactory" />
+   </bean>
 
 	<!-- Service definitions -->
 	
 	<bean id="org.hisp.dhis.caseaggregation.CaseAggregationMappingService"
-    class="org.hisp.dhis.caseaggregation.DefaultCaseAggregationMappingService">
+    	class="org.hisp.dhis.caseaggregation.DefaultCaseAggregationMappingService">
         <property name="caseAggregationMappingStore"
-      ref="org.hisp.dhis.caseaggregation.CaseAggregationMappingStore"/>
+      			ref="org.hisp.dhis.caseaggregation.CaseAggregationMappingStore"/>
         <property name="jdbcTemplate" ref="jdbcTemplate"/>  
     </bean>
 	
@@ -206,7 +211,13 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<property name="patientAttributeGroupStore"
 			ref="org.hisp.dhis.patient.PatientAttributeGroupStore" />
 	</bean>
-
+	
+	<bean id="org.hisp.dhis.program.ProgramStageDataElementValidationService"
+		class="org.hisp.dhis.program.DefaultProgramStageDataElementValidationService">
+		<property name="validationStore"
+	  		ref="org.hisp.dhis.program.ProgramStageDataElementValidationStore" />
+  	</bean>
+  
 	<!-- Aggregation engine -->
 
 	<bean
@@ -232,7 +243,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<!-- DeletionManager -->
   
   	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetObject" ref="org.hisp.dhis.system.deletion.DeletionManager"/>
+		<property name="targetObject" ref="deletionManager"/>
 		<property name="targetMethod" value="addDeletionHandlers"/>
 		<property name="arguments">
 		  <list>

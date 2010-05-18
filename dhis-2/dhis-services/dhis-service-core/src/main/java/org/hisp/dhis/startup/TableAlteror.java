@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement;
+package org.hisp.dhis.startup;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -45,10 +45,10 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class OptionsCategoriesDefaultSortOrderPopulator
+public class TableAlteror
     extends AbstractStartupRoutine
 {
-    private static final Log log = LogFactory.getLog( OptionsCategoriesDefaultSortOrderPopulator.class );
+    private static final Log log = LogFactory.getLog( TableAlteror.class );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -123,7 +123,13 @@ public class OptionsCategoriesDefaultSortOrderPopulator
         executeSql( "ALTER TABLE indicator DROP CONSTRAINT indicator_code_key" );
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_code_key" );
         
-        log.info( "Updated Category sort order and primary keys" );
+        //add mandatory boolean field to patientattribute
+        if ( executeSql( "ALTER TABLE patientattribute ADD mandatory bool" ) >= 0 )
+        {
+            executeSql( "UPDATE patientattribute SET mandatory=false" );
+        }
+        
+        log.info( "Tables updated" );
     }
     
     private List<Integer> getDistinctIdList( String table, String col1 )

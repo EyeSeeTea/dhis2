@@ -41,6 +41,7 @@ import org.hisp.dhis.external.configuration.ConfigurationManager;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
 import org.hisp.dhis.system.util.StreamUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -75,19 +76,11 @@ public class XMLIXFConfigurationManager
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private LocationManager locationManager;
 
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
-
+    @Autowired
     private ConfigurationManager<IXFConfiguration> configurationManager;
-    
-    public void setConfigurationManager( ConfigurationManager<IXFConfiguration> configurationManager )
-    {
-        this.configurationManager = configurationManager;
-    }
 
     // -------------------------------------------------------------------------
     // IXFConfigurationManager implementation

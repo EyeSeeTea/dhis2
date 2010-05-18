@@ -96,10 +96,8 @@ public class DefineProgramAssociationsAction
 
         assignedUnits.removeAll( convert( unitsInTheTree ) );
 
-        Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager.getSelectedOrganisationUnits();
+        Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
-        selectedOrganisationUnits = selectionTreeManager.reloadOrganisationUnits( selectedOrganisationUnits );
-        
         assignedUnits.addAll( convert( selectedOrganisationUnits ) );
 
         program.setOrganisationUnits( assignedUnits );

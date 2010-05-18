@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<!-- ImportExportServiceManager                                    -->
@@ -122,7 +122,6 @@
 		<property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
 		<property name="olapURLService" ref="org.hisp.dhis.olap.OlapURLService" />
 		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 	</bean>
 
 	<bean id="internal-process-ImportPreview" class="org.hisp.dhis.importexport.ImportPreviewInternalProcess"
@@ -160,7 +159,6 @@
 			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
 		<property name="importAnalyser"
 			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 		<property name="converterInvoker"
 			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
 	</bean>
@@ -201,7 +199,6 @@
 		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
 		<property name="importAnalyser"
 			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 	</bean>
 
 	<bean
@@ -222,10 +219,6 @@
 		class="org.hisp.dhis.importexport.dhis14.file.configuration.DefaultIbatisConfigurationManager">
 		<property name="configDir" value="importexport" />
 		<property name="configFile" value="ibatisConfiguration.xml" />
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
-		<property name="configurationManager"
-			ref="org.hisp.dhis.external.configuration.ConfigurationManager" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -238,8 +231,8 @@
 		<property name="importService" ref="org.hisp.dhis.importexport.XMLImportService" />
 	</bean>
 
-	   <bean id="org.hisp.dhis.importexport.DXFConverter"
-          class="org.hisp.dhis.importexport.dxf.converter.DXFConverter" >
+	<bean id="org.hisp.dhis.importexport.DXFConverter"
+         class="org.hisp.dhis.importexport.dxf.converter.DXFConverter" >
         <property name="importObjectService"
                   ref="org.hisp.dhis.importexport.ImportObjectService" />
         <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
@@ -264,7 +257,6 @@
         <property name="batchHandlerFactory" ref="batchHandlerFactory" />
         <property name="objectMappingGenerator"
                   ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-        <property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
         <property name="converterInvoker"
                   ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
     </bean>
@@ -273,10 +265,6 @@
           class="org.hisp.dhis.importexport.xml.importer.DefaultXMLImportService">
         <property name="converter"
                   ref="org.hisp.dhis.importexport.DXFConverter" />
-        <property name="locationManager"
-                  ref="org.hisp.dhis.external.location.LocationManager" />
-		<property name="dhisResolver"
-                  ref="org.hisp.dhis.external.location.LocationManagerResolver" />
     </bean>
 
     <bean id="org.hisp.dhis.importexport.invoker.ConverterInvoker"
@@ -307,7 +295,6 @@
 		<property name="batchHandlerFactory" ref="batchHandlerFactory" />
 		<property name="objectMappingGenerator"
 			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-		<property name="cacheManager" ref="org.hisp.dhis.cache.HibernateCacheManager" />
 		<property name="converterInvoker"
 			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
 	</bean>
@@ -363,10 +350,6 @@
 		class="org.hisp.dhis.importexport.ixf.config.XMLIXFConfigurationManager">
 		<property name="configDir" value="importexport" />
 		<property name="configFile" value="ixfConfiguration.xml" />
-		<property name="locationManager"
-			ref="org.hisp.dhis.external.location.LocationManager" />
-		<property name="configurationManager"
-			ref="org.hisp.dhis.external.configuration.ConfigurationManager" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
