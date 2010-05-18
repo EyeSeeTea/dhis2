@@ -27,14 +27,18 @@ package org.hisp.dhis.system.database;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import javax.annotation.PostConstruct;
+
 import org.hibernate.cfg.Configuration;
 import org.hisp.dhis.hibernate.HibernateConfigurationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
+@Component("databaseInfoProvider")
 public class HibernateDatabaseInfoProvider
     implements DatabaseInfoProvider
 {
@@ -60,6 +64,7 @@ public class HibernateDatabaseInfoProvider
     @Autowired
     private HibernateConfigurationProvider configurationProvider;
     
+    @PostConstruct
     public void init()
     {
         Configuration config = configurationProvider.getConfiguration();

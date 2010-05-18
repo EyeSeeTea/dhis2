@@ -62,12 +62,8 @@ public class AboutAction
     @Autowired
     private LocationManager locationManager;
 
-    private DatabaseInfoProvider provider;
-
-    public void setProvider( DatabaseInfoProvider provider )
-    {
-        this.provider = provider;
-    }
+    @Autowired
+    private DatabaseInfoProvider databaseInfoProvider;
     
     private I18n i18n;
 
@@ -211,7 +207,7 @@ public class AboutAction
         // Database
         // ---------------------------------------------------------------------
 
-        info = provider.getDatabaseInfo();
+        info = databaseInfoProvider.getDatabaseInfo();
         
         try
         {
