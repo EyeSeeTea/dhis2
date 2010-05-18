@@ -60,7 +60,7 @@
 		
 		<!-- gender -->
 		<div id="genderDiv" style="display:none">
-			<select id='genderValue' name='genderValue' onclick="fillValue(this.value);" style="width: 8em">
+			<select id='genderValue' name='genderValue' onChange="fillValue(this.value);" style="width: 8em">
 				<option value="" selected="selected">[$i18n.getString( "please_select" )]</option>
 				<option value="M" >$i18n.getString( "male" )</option>
 				<option value="F">$i18n.getString( "female" )</option>
@@ -87,7 +87,8 @@
 		
 		<!-- birthDateEstimated -->
 		<div id="birthDateEstimatedDiv" style="display:none ">
-			<select id='birthDateEstimatedValue' name='birthDateEstimatedValue' onclick="fillValue(this.value);" style="width: 8em">
+			<select id='birthDateEstimatedValue' name='birthDateEstimatedValue' onChange="fillValue(this.value);" style="width: 8em">
+				<option value="">[$i18n.getString( "please_select" )]</option>
 				<option value="true">$i18n.getString( "yes" )</option>
 				<option value="false" selected="selected">$i18n.getString( "no" )</option>
 			</select>
@@ -95,7 +96,8 @@
 		
 		<!-- bloodGroup -->
 		<div id="bloodGroupDiv" style="display:none ">
-			<select id="bloodGroupValue" name="bloodGroupValue" onclick="fillValue(this.value);" style="width: 8em">
+			<select id="bloodGroupValue" name="bloodGroupValue" onChange="fillValue(this.value);" style="width: 8em">
+				<option value="" selected="selected">[$i18n.getString( "please_select" )]</option>
 				<option value="A+">A+</option>
 				<option value="A-">A-</option>
 				<option value="AB+">AB+</option>
@@ -116,23 +118,3 @@
 
 </form>    
 <span id="message"></span>
-<script language="javascript">
-	function showDivValue(){
-		var divName = byId('property').value;
-		if(divName != ''){
-			 byId('genderDiv').style.display = 'none';
-			 byId('integerValueOfAgeDiv').style.display = 'none';
-			 byId('birthDateDiv').style.display = 'none';
-			 byId('birthDateEstimatedDiv').style.display = 'none';
-			 byId('bloodGroupDiv').style.display = 'none';
-			
-			 divName += "Div";
-			 var div = byId(divName);
-			 div.style.display = 'block';
-		 }
-	}
-	
-	function fillValue( value ){
-		byId('value').value = value;
-	}
-</script>

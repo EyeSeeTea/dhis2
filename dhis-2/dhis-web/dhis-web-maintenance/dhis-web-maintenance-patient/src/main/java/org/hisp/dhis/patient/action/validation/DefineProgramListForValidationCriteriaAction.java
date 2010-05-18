@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,11 @@
 
 package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.i18n.I18nFormat;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -35,54 +39,49 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version GetValidationCriteriaAction.java Apr 29, 2010 10:45:36 AM
+ * @version DefineProgramListForValidationCriteriaAction.java May 17, 2010
  */
-public class GetValidationCriteriaAction
+public class DefineProgramListForValidationCriteriaAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
     private ValidationCriteriaService validationCriteriaService;
 
+    private ProgramService programService;
+
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+    private Integer criteriaId;
+
+    private Integer[] programIds;
+
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
+
     public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
     {
         this.validationCriteriaService = validationCriteriaService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input && Output
-    // -------------------------------------------------------------------------
-
-    private int id;
-
-    private ValidationCriteria validationCriteria;
-
-    private I18nFormat format;
-
-    // -------------------------------------------------------------------------
-    // Getter && Setter
-    // -------------------------------------------------------------------------
-
-    public void setId( int id )
+    public void setProgramIds( Integer[] programIds )
     {
-        this.id = id;
+        this.programIds = programIds;
     }
 
-    public I18nFormat getFormat()
+    public void setProgramService( ProgramService programService )
     {
-        return format;
+        this.programService = programService;
     }
 
-    public void setFormat( I18nFormat format )
+    public void setCriteriaId( Integer criteriaId )
     {
-        this.format = format;
-    }
-
-    public ValidationCriteria getValidationCriteria()
-    {
-        return validationCriteria;
+        this.criteriaId = criteriaId;
     }
 
     // -------------------------------------------------------------------------
@@ -93,7 +92,34 @@ public class GetValidationCriteriaAction
     public String execute()
         throws Exception
     {
-        validationCriteria = validationCriteriaService.getValidationCriteria( id );
+        ValidationCriteria validationCriteria = validationCriteriaService.getValidationCriteria( criteriaId );
+
+        Set<Program> selectedProgram = new HashSet<Program>();
+
+        if ( programIds != null )
+        {
+            for ( Integer id : programIds )
+            {
+                Program program = programService.getProgram( id );
+
+                program.getPatientValidationCriteria().add( validationCriteria );
+
+                selectedProgram.add( program );
+
+                programService.updateProgram( program );
+
+            }
+        }
+
+        Set<Program> removePrograms = new HashSet<Program>( programService.getAllPrograms() );
+        removePrograms.removeAll( selectedProgram );
+
+        for ( Program program : removePrograms )
+        {
+            program.getPatientValidationCriteria().remove( validationCriteria );
+
+            programService.updateProgram( program );
+        }
 
         return SUCCESS;
     }

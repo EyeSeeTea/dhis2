@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,10 @@
 
 package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.i18n.I18nFormat;
+import java.util.Collection;
+
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -35,54 +38,63 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version GetValidationCriteriaAction.java Apr 29, 2010 10:45:36 AM
+ * @version GetProgramListForValidationCriteriaAction.java May 17, 2010
  */
-public class GetValidationCriteriaAction
+public class GetProgramListForValidationCriteriaAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
     private ValidationCriteriaService validationCriteriaService;
 
+    private ProgramService programService;
+
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+    private Integer criteriaId;
+
+    private Collection<Program> selectedPrograms;
+
+    private Collection<Program> availablePrograms;
+
+    private ValidationCriteria validationCriteria;
+
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
+
     public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
     {
         this.validationCriteriaService = validationCriteriaService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input && Output
-    // -------------------------------------------------------------------------
-
-    private int id;
-
-    private ValidationCriteria validationCriteria;
-
-    private I18nFormat format;
-
-    // -------------------------------------------------------------------------
-    // Getter && Setter
-    // -------------------------------------------------------------------------
-
-    public void setId( int id )
+    public Collection<Program> getSelectedPrograms()
     {
-        this.id = id;
-    }
-
-    public I18nFormat getFormat()
-    {
-        return format;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
+        return selectedPrograms;
     }
 
     public ValidationCriteria getValidationCriteria()
     {
         return validationCriteria;
+    }
+
+    public Collection<Program> getAvailablePrograms()
+    {
+        return availablePrograms;
+    }
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
+    public void setCriteriaId( Integer criteriaId )
+    {
+        this.criteriaId = criteriaId;
     }
 
     // -------------------------------------------------------------------------
@@ -93,7 +105,12 @@ public class GetValidationCriteriaAction
     public String execute()
         throws Exception
     {
-        validationCriteria = validationCriteriaService.getValidationCriteria( id );
+        validationCriteria = validationCriteriaService.getValidationCriteria( criteriaId );
+
+        selectedPrograms = programService.getPrograms( validationCriteria );
+
+        availablePrograms = programService.getAllPrograms();
+        availablePrograms.removeAll( selectedPrograms );
 
         return SUCCESS;
     }
