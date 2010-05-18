@@ -36,7 +36,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -45,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class HibernateGenericStore<T>
     implements GenericIdentifiableObjectStore<T>
 {
-    @Autowired 
     protected SessionFactory sessionFactory;
 
     public void setSessionFactory( SessionFactory sessionFactory )
