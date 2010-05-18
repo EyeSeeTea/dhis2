@@ -51,7 +51,7 @@ public class DefaultSelectionTreeManager
 
     private static final String SESSION_KEY_ROOT_ORG_UNITS = "dhis-oust-root-org-units";
     
-    private static final double PERSENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS = 0.3;
+    private static final double PERCENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS = 0.3;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -310,7 +310,7 @@ public class DefaultSelectionTreeManager
         
         int noSelected = units.size();
 
-        if ( (double) noSelected / noTotal > PERSENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS )
+        if ( (double) noSelected / noTotal > PERCENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS )
         {
             Collection<OrganisationUnit> allOrgUnits = organisationUnitService.getAllOrganisationUnits();
             for ( OrganisationUnit each : allOrgUnits )
