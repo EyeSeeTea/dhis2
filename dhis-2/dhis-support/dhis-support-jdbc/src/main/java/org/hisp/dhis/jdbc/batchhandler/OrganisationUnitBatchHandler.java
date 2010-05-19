@@ -95,6 +95,7 @@ public class OrganisationUnitBatchHandler
         statementBuilder.setColumn( "active" );
         statementBuilder.setColumn( "comment" );
         statementBuilder.setColumn( "geocode" );
+        statementBuilder.setColumn( "polygoncoordinates" );
         statementBuilder.setColumn( "latitude" );
         statementBuilder.setColumn( "longitude" );
         statementBuilder.setColumn( "lastUpdated" );
@@ -113,6 +114,7 @@ public class OrganisationUnitBatchHandler
         statementBuilder.setValue( unit.isActive() );
         statementBuilder.setValue( unit.getComment() );
         statementBuilder.setValue( unit.getGeoCode() );
+        statementBuilder.setValue( unit.getPolygonCoordinates() );
         statementBuilder.setValue( unit.getLatitude() );
         statementBuilder.setValue( unit.getLongitude() );
         statementBuilder.setValue( unit.getLastUpdated() );

@@ -65,6 +65,9 @@ public class OrganisationUnitConverter
     private static final String FIELD_ACTIVE = "active";
     private static final String FIELD_COMMENT = "comment";
     private static final String FIELD_GEO_CODE = "geoCode";
+    private static final String FIELD_POLYGON_COORDINATES = "polygonCoordinates";
+    private static final String FIELD_LATITUDE = "latitude";
+    private static final String FIELD_LONGITUDE = "longitude";    
     private static final String FIELD_LAST_UPDATED = "lastUpdated";
     
     // -------------------------------------------------------------------------
@@ -123,6 +126,9 @@ public class OrganisationUnitConverter
                 writer.writeElement( FIELD_ACTIVE, String.valueOf( unit.isActive() ) );
                 writer.writeElement( FIELD_COMMENT, unit.getComment() );
                 writer.writeElement( FIELD_GEO_CODE, unit.getGeoCode() );
+                writer.writeElement( FIELD_POLYGON_COORDINATES, unit.getPolygonCoordinates() );
+                writer.writeElement( FIELD_LATITUDE, unit.getLatitude() );
+                writer.writeElement( FIELD_LONGITUDE, unit.getLongitude() );
                 writer.writeElement( FIELD_LAST_UPDATED, DateUtils.getMediumDateString( unit.getLastUpdated(), EMPTY ) );
                 
                 writer.closeElement();
@@ -150,6 +156,9 @@ public class OrganisationUnitConverter
             unit.setActive( Boolean.parseBoolean( values.get( FIELD_ACTIVE ) ) );
             unit.setComment( values.get( FIELD_COMMENT ) );
             unit.setGeoCode( values.get( FIELD_GEO_CODE ) );
+            unit.setPolygonCoordinates( values.get( FIELD_POLYGON_COORDINATES ) );
+            unit.setLatitude( values.get( FIELD_LATITUDE ) );
+            unit.setLongitude( values.get( FIELD_LONGITUDE ) );
             unit.setLastUpdated( DateUtils.getMediumDate( values.get( FIELD_LAST_UPDATED ) ) );            
             
             NameMappingUtil.addOrganisationUnitMapping( unit.getId(), unit.getName() );
