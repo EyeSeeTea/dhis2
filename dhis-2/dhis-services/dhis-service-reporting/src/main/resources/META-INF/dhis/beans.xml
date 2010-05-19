@@ -32,8 +32,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     
   <bean id="org.hisp.dhis.reporttable.jdbc.ReportTableManager"
     class="org.hisp.dhis.reporttable.jdbc.JDBCReportTableManager">
-    <property name="statementManager" ref="statementManager"/>
-    <property name="statementBuilder" ref="statementBuilder"/>
+	<property name="statementBuilder" ref="statementBuilder"/>
   </bean>
 
   <bean id="org.hisp.dhis.reporttable.ReportTableStore"
@@ -81,7 +80,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       value="reports"/>
     <property name="reportConfigFile" 
       value="reportConfiguration.xml"/>
-	<property name="jdbcConfiguration" value="jdbcConfiguration"/> 
   </bean>
   
   <!-- Chart -->
@@ -161,9 +159,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="org.hisp.dhis.completeness.DataSetCompletenessStore"
-    class="org.hisp.dhis.completeness.jdbc.JDBCDataSetCompletenessStore">   
-    <property name="statementManager" ref="statementManager"/>
-  </bean>
+    class="org.hisp.dhis.completeness.jdbc.JDBCDataSetCompletenessStore"/>
 
   <bean id="internal-process-DataSetCompleteness"
     class="org.hisp.dhis.completeness.DataSetCompletenessInternalProcess"

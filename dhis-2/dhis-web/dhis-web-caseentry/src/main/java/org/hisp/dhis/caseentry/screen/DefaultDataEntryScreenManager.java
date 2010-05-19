@@ -39,7 +39,6 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.customvalue.CustomValue;
-import org.hisp.dhis.customvalue.CustomValueService;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -80,13 +79,7 @@ public class DefaultDataEntryScreenManager
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    private CustomValueService customValueService;
-
-    public void setCustomValueService( CustomValueService customValueService )
-    {
-        this.customValueService = customValueService;
-    }
-
+    
     private PatientDataValueService patientDataValueService;
 
     public void setPatientDataValueService( PatientDataValueService patientDataValueService )
@@ -1101,7 +1094,7 @@ public class DefaultDataEntryScreenManager
         final String jsCodeForDate = " name=\"entryfield\" $DISABLED onchange=\"saveDateCustom( this )\" data=\"{compulsory:$COMPULSORY, dataElementId:$DATAELEMENTID, dataElementName:'$DATAELEMENTNAME', dataElementType:'$DATAELEMENTTYPE', programStageId:$PROGRAMSTAGEID, programStageName: '$PROGRAMSTAGENAME', orgUnitName:'$ORGUNITNAME'}\"";
         // final String historyCode =
         // " ondblclick='javascript:viewHistory( $DATAELEMENTID, $OPTIONCOMBOID, true )' ";
-        final String calDataElementCode = " class=\"calculated\" disabled ";
+        //final String calDataElementCode = " class=\"calculated\" disabled ";
 
         // ---------------------------------------------------------------------
         // Metadata code to add to HTML before outputting

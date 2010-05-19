@@ -47,6 +47,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.source.Source;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -60,19 +61,11 @@ public class HibernateDataValueStore
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SessionFactory sessionFactory;
 
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
+    @Autowired
     private StatementManager statementManager;
-
-    public void setStatementManager( StatementManager statementManager )
-    {
-        this.statementManager = statementManager;
-    }
 
     private PeriodStore periodStore;
 

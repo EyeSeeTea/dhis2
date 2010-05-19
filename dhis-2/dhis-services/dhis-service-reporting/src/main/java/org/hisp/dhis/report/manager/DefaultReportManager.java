@@ -78,12 +78,8 @@ public class DefaultReportManager
         this.reportConfigFile = reportConfigFile;
     }
     
+    @Autowired
     private JdbcConfiguration jdbcConfiguration;
-
-    public void setJdbcConfiguration( JdbcConfiguration jdbcConfiguration )
-    {
-        this.jdbcConfiguration = jdbcConfiguration;
-    }
     
     // -------------------------------------------------------------------------
     // Dependencies
