@@ -30,7 +30,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-dataset/dataSetList.vm</param>
       <param name="menu">/dhis-web-maintenance-dataset/menu.vm</param>
-      <param name="javascripts">javascript/dataSet.js,javascript/filterTable.js</param>
+      <param name="javascripts">javascript/dataSet.js</param>
     </action>
     
     <!-- Section -->
