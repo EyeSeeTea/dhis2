@@ -169,10 +169,8 @@ public class XMLPipe
         public void close()
             throws XMLStreamException
         {
-            throw new UnsupportedOperationException("Unused functionality.  Not implemented" );
-//            closed = true;
-//            // TODO: think about emptying eventq?
-//            return;
+            // not a real stream ... no handle to close
+	    return;
         }
 
         @Override
@@ -278,7 +276,8 @@ public class XMLPipe
         public void close()
             throws XMLStreamException
         {
-            throw new UnsupportedOperationException("Unused functionality.  Not implemented" );
+            // not a real stream ... no handle to close
+	    return;
         }
     };
 }
