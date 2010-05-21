@@ -47,7 +47,7 @@
       <param name="page">/dhis-web-maintenance-dataset/addSection.vm</param>
       <param name="menu">/dhis-web-maintenance-dataset/menu.vm</param>
       <result name="success" type="chain">section</result>
-      <param name="javascripts">javascript/dataElementsList.js,javascript/section.js
+      <param name="javascripts">javascript/section.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
       ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
     </action>
