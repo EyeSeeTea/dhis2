@@ -64,7 +64,7 @@
       <param name="page">/dhis-web-maintenance-dataset/sortOrderSection.vm</param>
       <param name="menu">/dhis-web-maintenance-dataset/menu.vm</param>
       <result name="success" type="chain">section</result>
-      <param name="javascripts">javascript/dataElementsList.js,javascript/dataSet.js</param>
+      <param name="javascripts">javascript/dataSet.js</param>
     </action>
     
     <action name="editSectionAction" 
