@@ -18,13 +18,13 @@ var PARAMETER;
 var ACTIVEPANEL;
 /* Mask */
 var MASK;
-/* Boolean  */
+/* Boolean */
 var LABELS;
-/* Legend colors for export  */
+/* Legend colors for export */
 var COLORINTERPOLATION;
-/* Export values  */
+/* Export values */
 var EXPORTVALUES;
-/* Currently selected vector feature  */
+/* Currently selected vector feature */
 var FEATURE;
 /* Global chart for show/hide */
 var CHART;
@@ -2629,6 +2629,7 @@ Ext.onReady( function() {
 					ctCls: 'aa_med',
 					icon: '../../images/add_small.png',
 					handler: function() {
+                        Ext.getCmp('maplayer_w').setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 50);
 						Ext.getCmp('maplayer_w').show();
 					}
 				}
@@ -3168,9 +3169,23 @@ var periodWindow = new Ext.Window({
                     height: getMultiSelectHeight(),
                     store: periodTimeseriesStore
                 },
+                { html: '<div class="window-field-label">Window width</div>' },
+                {
+                    xtype: 'textfield',
+                    id: 'timeserieswindowwidth_tf',
+                    value: 800,
+                    width: combo_number_width
+                },
+                { html: '<div class="window-field-label">Window height</div>' },
+                {
+                    xtype: 'textfield',
+                    id: 'timeserieswindowheight_tf',
+                    value: 400,
+                    width: combo_number_width
+                },
                 {
                     xtype: 'button',
-                    id: 'newview_b',
+                    id: 'timeseries_b',
                     isFormField: true,
                     hideLabel: true,
                     cls: 'window-button',
@@ -3184,7 +3199,7 @@ var periodWindow = new Ext.Window({
                         
                         var pnameArray = new Array();
                         for (var i = 0; i < pidArray.length; i++) {
-                            pnameArray[i] = periodTimeseriesStore.getById(pidArray[i]).data.name;
+                            pnameArray[i] = [i, periodTimeseriesStore.getById(pidArray[i]).data.name];
                         }
                         
                         setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL);
@@ -3221,7 +3236,7 @@ function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
                     for (var i = 0; i < pidArray.length; i++) {
                         for (var j = 0; j < mapValueTimeseriesStore.getCount(); j++) {
                             if (mapValueTimeseriesStore.getAt(j).data.periodId == pidArray[i]) {
-                                valueArray[i] = parseFloat(mapValueTimeseriesStore.getAt(j).data.value);
+                                valueArray[i] = [i, parseFloat(mapValueTimeseriesStore.getAt(j).data.value)];
                             }
                         }
                     }
@@ -3234,74 +3249,26 @@ function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
     });
 }
 
-function getChart(title, x, name, valueArray) {
-    var chart = new Ext.Window({
-        title: 'Indicator value timeseries',
-        resizeable: true,
-        width: 800,
-        height: 450,
-        items: [
-            new Ext.ux.HighChart({
-                titleCollapse: true,
-                layout: 'fit',
-                border: true,
-                id: 'thechart',
-                chartConfig: {
-                    chart: {
-                        id: 'thechart',
-                        defaultSeriesType: 'line',
-                        margin: [50, 50, 60, 50]
-                    },
-                    title: {
-                        text: title,
-                        style: {
-                            margin: '10px 50px 0 0', // center it
-                            font: 'bold 20px arial',
-                            color: '#555'
-                        }
-                    },
-                    xAxis: {
-                        categories: x,
-                        labels: {
-                            rotation: -25,
-                            align: 'right',
-                            style: {
-                                font: 'normal 12px arial,lucida sans unicode',
-                                color: '#555'
-                            }
-                        }
-                    },
-                    yAxis: {
-                        title: '',
-                        plotLines: [
-                            {
-                                value: 0,
-                                width: 1,
-                                color: '#808080'
-                            }
-                        ]
-                    },
-                    tooltip: {
-                        formatter: function() {
-                            return '<b>'+ this.series.name +'</b><br/>'+
-                                this.x +': '+ this.y;
-                        }
-                    },
-                    legend: {
-                        enabled: false
-                    },
-                    series: [
-                        {
-                            name: name,
-                            data: valueArray
-                        }
-                    ]
-                }
-            })
-        ]
-    });
+function getChart(title, pnameArray, name, valueArray) {
+    var width = Ext.getCmp('timeserieswindowwidth_tf').getValue() || 800;
+    var height = Ext.getCmp('timeserieswindowheight_tf').getValue() || 400;
     
-    return chart;
+    return new Ext.Window({
+        title: title,
+        defaults: { bodyStyle: 'padding:10px 32px 12px 22px; border:0px' },
+        items: [{
+            xtype: 'panel',
+            items: [{
+                xtype: 'flot',
+                width: 1000,
+                height: 300,
+                series: [valueArray],
+                xaxis: {
+                    ticks: pnameArray
+                }
+            }]
+        }]
+    });
 }
 
 var chartWindow = new Ext.Window({
@@ -3360,10 +3327,10 @@ function onClickSelectChoropleth(feature) {
 		mapping.relation = feature.attributes[MAPDATA.nameColumn];
     }
 	else {
-        featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
-        featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
-        featureWindow.show();
-        periodWindow.hide();
+        // featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
+        // featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
+        // featureWindow.show();
+        // periodWindow.hide();
 	}
 }
 

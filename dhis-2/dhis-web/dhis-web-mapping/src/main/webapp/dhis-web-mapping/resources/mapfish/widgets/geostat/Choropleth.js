@@ -214,6 +214,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 										Ext.getCmp('maplegendset_cb').hideField();
 									}
 									else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
+                                        LEGEND.type = map_legend_type_predefined;
 										Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
 										Ext.getCmp('method').hideField();
 										Ext.getCmp('bounds').hideField();
@@ -422,6 +423,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 									Ext.getCmp('maplegendset_cb').hideField();
 								}
 								else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
+                                    LEGEND.type = map_legend_type_predefined;
 									Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
 									Ext.getCmp('method').hideField();
 									Ext.getCmp('bounds').hideField();
@@ -447,7 +449,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('indicatorgroup_cb').setValue(MAPVIEW.indicatorGroupId);
                                 
                                 var igId = Ext.getCmp('indicatorgroup_cb').getValue();
-                                indicatorStore.baseParams = { indicatorGroupId: igId, format: 'json' };
+                                indicatorStore.baseParams = { indicatorGroupId: igId };
                                 indicatorStore.reload();
                             },
                             failure: function() {
@@ -481,13 +483,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue() != '') {
+                        if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').reset();
                         }
                         
                         Ext.getCmp('indicator_cb').reset();
-                        var igId = Ext.getCmp('indicatorgroup_cb').getValue();
-                        indicatorStore.baseParams = { indicatorGroupId: igId, format: 'json' };
+                        indicatorStore.baseParams = { indicatorGroupId: Ext.getCmp('indicatorgroup_cb').getValue() };
                         indicatorStore.reload();
                     },
                     scope: this
@@ -514,7 +515,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue() != '') {
+                        if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').reset();
                         }
  
