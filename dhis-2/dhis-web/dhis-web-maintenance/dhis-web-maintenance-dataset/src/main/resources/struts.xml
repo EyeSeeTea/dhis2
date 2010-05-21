@@ -244,7 +244,7 @@
       class="org.hisp.dhis.dataset.action.GetDataSetAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-dataset/dataSetAssociations.vm</param>
-      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/dataElementsList.js,javascript/associations.js</param>
+      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/associations.js</param>
       <param name="requiredAuthorities">F_DATASET_UPDATE</param>
     </action>
     
