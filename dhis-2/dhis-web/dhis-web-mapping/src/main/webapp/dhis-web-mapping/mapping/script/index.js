@@ -18,13 +18,13 @@ var PARAMETER;
 var ACTIVEPANEL;
 /* Mask */
 var MASK;
-/* Boolean  */
+/* Boolean */
 var LABELS;
-/* Legend colors for export  */
+/* Legend colors for export */
 var COLORINTERPOLATION;
-/* Export values  */
+/* Export values */
 var EXPORTVALUES;
-/* Currently selected vector feature  */
+/* Currently selected vector feature */
 var FEATURE;
 /* Global chart for show/hide */
 var CHART;
@@ -2629,6 +2629,7 @@ Ext.onReady( function() {
 					ctCls: 'aa_med',
 					icon: '../../images/add_small.png',
 					handler: function() {
+                        Ext.getCmp('maplayer_w').setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 50);
 						Ext.getCmp('maplayer_w').show();
 					}
 				}

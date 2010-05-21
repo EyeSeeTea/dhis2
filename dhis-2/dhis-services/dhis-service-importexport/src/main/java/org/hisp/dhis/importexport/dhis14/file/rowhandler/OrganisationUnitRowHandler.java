@@ -81,7 +81,11 @@ public class OrganisationUnitRowHandler
         NameMappingUtil.addOrganisationUnitMapping( unit.getId(), unit.getName() );
 
         unit.setUuid( UUIdUtils.getUUId() );
-        unit.setShortName( unit.getShortName() + EMPTY + MathUtils.getRandom() );
+        
+        if ( unit.getShortName() != null && unit.getShortName().length() > 30 )
+        {
+            unit.setShortName( unit.getShortName().substring( 30 ) + MathUtils.getRandom() );
+        }
             
         if ( unit.getCode() != null && unit.getCode().trim().length() == 0 )
         {

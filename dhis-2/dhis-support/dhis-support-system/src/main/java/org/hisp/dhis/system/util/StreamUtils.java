@@ -31,6 +31,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -40,6 +41,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -183,6 +185,48 @@ public class StreamUtils
             catch ( Exception ex )
             {   
             }
+        }
+    }
+    
+    /**
+     * Get an InputStream for the String.
+     * 
+     * @param string the String.
+     * @return the InputStream.
+     */
+    public static InputStream getInputStream( String string )
+    {
+        try
+        {
+            return new BufferedInputStream( new ByteArrayInputStream( string.getBytes( ENCODING_UTF ) ) );
+        }
+        catch ( UnsupportedEncodingException ex )
+        {
+            throw new RuntimeException( ex );
+        }
+    }
+    
+    /**
+     * Returns the content of the File as a String.
+     * 
+     * @param file the File.
+     * @return the String.
+     */
+    public static String getContent( File file )
+    {
+        try
+        {
+            BufferedInputStream in = new BufferedInputStream( new FileInputStream( file ) );
+            
+            byte[] bytes = new byte[(int)file.length()];
+            
+            in.read( bytes );
+            
+            return new String( bytes, ENCODING_UTF );
+        }
+        catch ( IOException ex )
+        {
+            throw new RuntimeException( ex );
         }
     }
     

@@ -46,6 +46,7 @@ import org.hisp.dhis.importexport.pdf.converter.OrganisationUnitConverter;
 import org.hisp.dhis.importexport.pdf.converter.OrganisationUnitHierarchyConverter;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -58,13 +59,9 @@ public class ITextPDFExportService
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SessionFactory sessionFactory;
 
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-    
     private DataElementService dataElementService;
 
     public void setDataElementService( DataElementService dataElementService )

@@ -61,6 +61,7 @@ import org.hisp.dhis.importexport.ImportService;
 import org.hisp.dhis.importexport.dxf.converter.DXFConverter;
 import org.hisp.dhis.system.process.OutputHolderState;
 import org.hisp.dhis.system.util.StreamUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author bobj
@@ -78,19 +79,11 @@ public class DefaultXMLImportService
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     protected LocationManager locationManager;
-
-    public void setLocationManager( LocationManager locationManager )
-    {
-        this.locationManager = locationManager;
-    }
-
+    
+    @Autowired
     protected URIResolver dhisResolver;
-
-    public void setDhisResolver( URIResolver dhisResolver )
-    {
-        this.dhisResolver = dhisResolver;
-    }
 
     private DXFConverter converter;
 

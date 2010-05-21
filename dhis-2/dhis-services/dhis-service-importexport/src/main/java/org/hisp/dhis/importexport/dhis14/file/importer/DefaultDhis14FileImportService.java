@@ -119,6 +119,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.util.AppendingHashMap;
 import org.hisp.dhis.system.util.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
 
@@ -240,12 +241,8 @@ public class DefaultDhis14FileImportService
         this.importAnalyser = importAnalyser;
     }    
 
+    @Autowired
     private HibernateCacheManager cacheManager;
-
-    public void setCacheManager( HibernateCacheManager cacheManager )
-    {
-        this.cacheManager = cacheManager;
-    }
 
     // -------------------------------------------------------------------------
     // Constructor

@@ -95,6 +95,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.validation.ValidationRuleService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -110,13 +111,12 @@ public class DefaultDXFExportService
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SessionFactory sessionFactory;
 
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-    
+    @Autowired
+    private StatementManager statementManager;
+
     private DataElementCategoryService categoryService;
 
     public void setCategoryService( DataElementCategoryService categoryService )
@@ -206,13 +206,6 @@ public class DefaultDXFExportService
     public void setDataMartService( DataMartService dataMartService )
     {
         this.dataMartService = dataMartService;
-    }
-
-    private StatementManager statementManager;
-
-    public void setStatementManager( StatementManager statementManager )
-    {
-        this.statementManager = statementManager;
     }
 
     // -------------------------------------------------------------------------
