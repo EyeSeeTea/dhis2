@@ -73,7 +73,12 @@ public class ImportParams
 
     public boolean minorVersionGreaterOrEqual( String version )
     {
-        if ( version == null || !MathUtils.isNumeric( version ) )
+        if ( version == null )
+        {
+            return false; // Backwards compatible with DXF files without version
+        }
+        
+        if ( !MathUtils.isNumeric( version ) )
         {
             throw new IllegalArgumentException( "Invalid version, must be numeric: " + version );            
         }

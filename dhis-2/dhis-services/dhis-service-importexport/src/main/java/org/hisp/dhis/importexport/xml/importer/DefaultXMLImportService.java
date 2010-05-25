@@ -109,22 +109,21 @@ public class DefaultXMLImportService
     {
         XMLReader dxfReader;
 
-        log.info( "Transform importData()" );
-        state.setMessage( "Transform importData()" );
+        log.info( "Parsing import file" );
+        state.setMessage( "Parsing import file" );
 
-        // the InputStream carrying the XML to be imported
-        InputStream xmlInStream;
+        InputStream xmlInStream; // The InputStream carrying the XML to be imported
 
-        // Importing of data from xml source is a three phase process
-        // Phase 1: Get the XML stream
-        // this could potentially be from a zip, a gzip or uncompressed
-        // dsource
+        // ---------------------------------------------------------------------
+        // Phase 1: Get the XML stream. This could potentially be from a ZIP, a 
+        // GZIP or uncompressed source
+        // ---------------------------------------------------------------------
+        
         BufferedInputStream bufin = new BufferedInputStream( inputStream );
 
         if ( StreamUtils.isZip( bufin ) )
         {
-            // TODO: need a smart zip archive analyzer
-            xmlInStream = new ZipInputStream( bufin );
+            xmlInStream = new ZipInputStream( bufin ); // TODO: Need a smart ZIP archive analyzer
             StreamUtils.getNextZipEntry( (ZipInputStream) xmlInStream );
         }
         else
@@ -134,22 +133,21 @@ public class DefaultXMLImportService
                 xmlInStream = new GZIPInputStream( bufin );
             }
             else
-            {
-                // assume uncompressed xml
-                xmlInStream = bufin;
+            {                
+                xmlInStream = bufin; // Assume uncompressed XML
             }
         }
 
-        // Phase 2: get a STaX eventreader for the stream
-        // On the basis of QName of root element perform additional
-        // transformation(s)
+        // ---------------------------------------------------------------------
+        // Phase 2: Get a STaX eventreader for the stream. On the basis of QName 
+        // of root element perform additional transformation(s).
+        // ---------------------------------------------------------------------
+        
         XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
         XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( xmlInStream );
         XMLEventReader2 eventReader = (XMLEventReader2) factory.createXMLEventReader( streamReader );
-
-        // look for the document root element but don't pluck it from the
-        // stream
-        while ( !eventReader.peek().isStartElement() )
+        
+        while ( !eventReader.peek().isStartElement() ) // Look for the document root element but don't pluck it from the stream
         {
             eventReader.nextEvent();
         }
@@ -160,39 +158,38 @@ public class DefaultXMLImportService
         log.info( "Importing " + rootName.getLocalPart() + " from " + root.getNamespaceURI( rootName.getPrefix() ) );
 
         if ( rootName.getLocalPart().equals( DXF_ROOT ) )
-        {
-            // native dxf stream - no transform required
-            dxfReader = XMLFactory.getXMLReader( streamReader );
+        {            
+            dxfReader = XMLFactory.getXMLReader( streamReader ); // Native DXF stream - no transform required
         }
         else
         {
             InputStream sheetStream = getStyleSheetForRoot( root );
             if ( sheetStream == null )
             {
-                throw new Exception( "no stylesheet for " + rootName );
+                throw new Exception( "No stylesheet for " + rootName );
             }
 
             Source sheet = new StreamSource( sheetStream );
-            // rewind stream to reclaim root element
-            bufin.reset();
+            
+            bufin.reset(); // Rewind stream to reclaim root element
             Source source = new StreamSource( bufin );
             TransformerTask tt = new TransformerTask( sheet, null );
-
-            // make a pipe to capture output of transform
-            XMLPipe pipe = new XMLPipe();
+            
+            XMLPipe pipe = new XMLPipe(); // Make a pipe to capture output of transform
             XMLEventWriter pipeinput = pipe.getInput();
             XMLEventReader2 pipeoutput = pipe.getOutput();
-
-            // set result of transform to input of pipe
-            StAXResult result = new StAXResult( pipeinput );
+            
+            StAXResult result = new StAXResult( pipeinput ); // Set result of transform to input of pipe
             tt.transform( source, result, dhisResolver );
-            log.info( "transform successful - importing dxf" );
-
-            // set dxfReader to output of pipe
-            dxfReader = new DefaultXMLEventReader( (XMLEventReader2) pipeoutput );
+            log.info( "Transform successful - Importing DXF" );
+            
+            dxfReader = new DefaultXMLEventReader( (XMLEventReader2) pipeoutput ); // Set dxfReader to output of pipe
         }
+
+        // ---------------------------------------------------------------------
+        // Phase 3: Pass through to DXF convertor
+        // ---------------------------------------------------------------------
         
-        // Phase 3: pass through to dxf convertor
         converter.read( dxfReader, params, state );
         dxfReader.closeReader();
         StreamUtils.closeInputStream( xmlInStream );
@@ -216,17 +213,19 @@ public class DefaultXMLImportService
         String localpart = rootName.getLocalPart();
         String namespaceURI = rootName.getNamespaceURI();
 
-        // Sdmx hd hack - this is a special case 'cos the transform will be
-        // dependent on KeyFamily ns
-        // Its fragile because the CrossSectionalData element is not obliged to
-        // declare the KeyFamily ns.
-        // But all current implementations do.
+        // ---------------------------------------------------------------------
+        // Sdmx hd hack - this is a special case because the transform will be
+        // dependent on KeyFamily ns. Its fragile because the CrossSectionalData 
+        // element is not obliged to declare the KeyFamily ns, but all current 
+        // implementations do.
         // TODO: handle this more elegantly and robustly
+        // ---------------------------------------------------------------------
+        
         if ( localpart.equals( "CrossSectionalData" ) )
         {
             log.info( "SDMX cross sectional data file" );
-            // we might have it. Depends if the DataSet namespace is declared
-            Iterator<?> otherNamespaces = root.getNamespaces();
+            
+            Iterator<?> otherNamespaces = root.getNamespaces(); // We might have it, depends if the DataSet namespace is declared
             while ( otherNamespaces.hasNext() )
             {
                 Namespace ns = (Namespace) otherNamespaces.next();
@@ -245,9 +244,8 @@ public class DefaultXMLImportService
         }
 
         try
-        {
-            // look up the stylesheet from transformers.xml
-            InputStream transformers = locationManager.getInputStream( TRANSFORMERS_CONFIG );
+        {            
+            InputStream transformers = locationManager.getInputStream( TRANSFORMERS_CONFIG ); // Look up the stylesheet from transformers.xml
             String xpath = "/transforms/transform[(@root='" + localpart + "') and (@ns='" + namespaceURI + "')]/xslt";
             String stylesheet = "transform/" + XPathFilter.findText( transformers, xpath );
             transformers.close();
