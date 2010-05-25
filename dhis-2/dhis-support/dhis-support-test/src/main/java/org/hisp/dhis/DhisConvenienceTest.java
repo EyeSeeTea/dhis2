@@ -561,8 +561,6 @@ public abstract class DhisConvenienceTest
         unit.setActive( true );
         unit.setComment( "Comment" + uniqueCharacter );
         unit.setGeoCode( "GeoCode" );
-        unit.setLatitude( "Latitude" );
-        unit.setLongitude( "Longitude" );
 
         return unit;
     }
