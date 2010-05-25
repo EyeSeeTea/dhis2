@@ -27,7 +27,13 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.mapping.MapLayer;
 import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.mapping.comparator.MapLayerNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -35,7 +41,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class AddOrUpdateMapLayerAction
+public class GetMapLayersByTypeAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -48,66 +54,28 @@ public class AddOrUpdateMapLayerAction
     {
         this.mappingService = mappingService;
     }
-
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
-    
-    private String name;
 
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-    
     private String type;
-    
+
     public void setType( String type )
     {
         this.type = type;
     }
-    
-    private String mapSource;
-    
-    public void setMapSource( String mapSource )
-    {
-        this.mapSource = mapSource;
-    }
-    
-    private String layer;
-    
-    public void setLayer( String layer )
-    {
-        this.layer = layer;
-    }
-    
-    private String fillColor;
 
-    public void setFillColor( String fillColor )
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private List<MapLayer> object;
+
+    public List<MapLayer> getObject()
     {
-        this.fillColor = fillColor;
+        return object;
     }
-
-    private double fillOpacity;
-
-    public void setFillOpacity( double fillOpacity )
-    {
-        this.fillOpacity = fillOpacity;
-    }
-    
-    private String strokeColor;
-
-    public void setStrokeColor( String strokeColor )
-    {
-        this.strokeColor = strokeColor;
-    }
-    
-    private int strokeWidth;
-
-    public void setStrokeWidth( int strokeWidth )
-    {
-        this.strokeWidth = strokeWidth;
-    }    
     
     // -------------------------------------------------------------------------
     // Action implementation
@@ -115,7 +83,9 @@ public class AddOrUpdateMapLayerAction
 
     public String execute()
     {
-        mappingService.addOrUpdateMapLayer( name, type, mapSource, layer, fillColor, fillOpacity, strokeColor, strokeWidth );
+        object = new ArrayList<MapLayer>( mappingService.getMapLayersByType( type ) );
+        
+        Collections.sort( object, new MapLayerNameComparator() );
         
         return SUCCESS;
     }

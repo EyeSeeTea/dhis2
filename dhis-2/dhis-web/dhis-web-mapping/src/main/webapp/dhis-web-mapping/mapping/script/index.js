@@ -60,9 +60,34 @@ Ext.onReady( function() {
 
     MAP = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
 	MASK = new Ext.LoadMask(Ext.getBody(),{msg:i18n_loading,msgCls:'x-mask-loading2'});
-	
+    
+    /* Base layers */
+    function addBaseLayersToMap() {
+        Ext.Ajax.request({
+            url: path + 'getMapLayersByType' + type,
+            params: { type: map_layer_type_baselayer },
+            method: 'POST',
+            success: function(r) {
+                var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+                for (var i = 0; i < mapLayers.length; i++) {
+                    MAP.addLayers([
+                        new OpenLayers.Layer.WMS(
+                            mapLayers[i].name,
+                            mapLayers[i].mapSource,
+                            {layers: mapLayers[i].layer}
+                        )
+                    ]);
+                    MAP.layers[MAP.layers.length-1].setVisibility(false);
+                }
+            }
+        });
+    }
+    
+    addBaseLayersToMap();
+    
+    /* Get map view parameter and apply to global variable */	
     if (getUrlParam('view')){PARAMETER=getUrlParam('view');}	
-	var mapViewParam = PARAMETER ? PARAMETER : 0;
+	var mapViewParam = PARAMETER || 0;
 	
 	Ext.Ajax.request({
 		url: path + 'getBaseCoordinate' + type,
@@ -123,7 +148,7 @@ Ext.onReady( function() {
 					var c = Ext.getCmp('numClasses').getValue();
 					var ca = Ext.getCmp('colorA_cf').getValue();
 					var cb = Ext.getCmp('colorB_cf').getValue();
-					var mlsid = Ext.getCmp('maplegendset_cb').getValue() ? Ext.getCmp('maplegendset_cb').getValue() : 0;
+					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || 0;
 					var lon = MAP.getCenter().lon;
 					var lat = MAP.getCenter().lat;
 					var zoom = parseInt(MAP.getZoom());
@@ -2517,12 +2542,110 @@ Ext.onReady( function() {
     });
 	
 	/* Section: layers */
-	var vmap0 = new OpenLayers.Layer.WMS(
-        'World',
-        'http://labs.metacarta.com/wms/vmap0', 
-        {layers: 'basic'}
-    );
-                                   
+
+    
+    
+    
+    
+    
+	// MAP.layers[0].setVisibility(false);
+    
+    function addBaseLayersToMap() {
+alert(1);    
+        Ext.Ajax.request({
+			url: path + 'getMapLayersByType' + type,
+            params: { type: map_layer_type_baselayer },
+			method: 'POST',
+			success: function(r) {
+                // var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+                // alert(mapLayers[0].mapSource);
+                
+                var vmap0 = new OpenLayers.Layer.WMS(
+                    'World',
+                    'http://labs.metacarta.com/wms/vmap0', 
+                    {layers: 'basic'}
+                );
+                
+                MAP.addLayers([vmap0]);
+            }
+        });
+            
+        // var wms = new OpenLayers.Layer.WMS(
+            // 'Verden',
+            // 'http://iridl.ldeo.columbia.edu/cgi-bin/wms/wms.pl?VERSION=1.1.1',
+            // {layers: 'Health Regional Africa Meningitis Meningitis Observed'}
+        // );
+        // var name = 'Verden';
+        // var ms = 'http://iridl.ldeo.columbia.edu/cgi-bin/wms/wms.pl';
+        // var ms = 'http://iridl.ldeo.columbia.edu/cgi-bin/wms/wms.pl?VERSION=1.1.1';
+        // var wms = new OpenLayers.Layer.WMS(
+            // name,
+            // ms,
+            // {layers: ['Health Regional Africa Meningitis Meningitis Observed', 'Health Regional Africa Malaria MARA Distribution Model']}
+        // );
+
+        
+    
+    
+        // Ext.Ajax.request({
+			// url: path + 'getMapLayersByType' + type,
+            // params: { type: map_layer_type_baselayer },
+			// method: 'POST',
+			// success: function(r) {
+                // var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+                // alert(mapLayers[0].mapSource);
+                
+                // var name = 'Verden';
+                // var ms = 'http://labs.metacarta.com/wms/vmap0';
+                // var wms = new OpenLayers.Layer.WMS(
+                    // name,
+                    // ms,
+                    // {layers: 'basic'}
+                // );
+
+                // MAP.addLayers([wms]);
+                
+            // }
+        // });
+        
+                // var name = 'Verden';
+                // var ms = 'http://labs.metacarta.com/wms/vmap0';
+// alert(ms);
+// alert(mapLayers[0].mapSource);
+                
+                // var wms = new OpenLayers.Layer.WMS(
+                    // name,
+                    // ms,
+                    // {layers: 'basic'}
+                // );
+
+                // MAP.addLayers([wms]);
+                    
+                    
+                    
+				// var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+                // for (var i = 0; i < mapLayers.length; i++) {
+// var mapSource = escape(mapLayers[i].mapSource);
+// alert(mapSource);
+                    // var ms = 'http://labs.metacarta.com/wms/vmap0';
+                    // var wms = new OpenLayers.Layer.WMS(
+                        // mapLayers[i].name,
+                        // ms,
+                        // {layers: 'basic'}
+                    // );
+
+                    // MAP.addLayers([wms]);
+// MAP.layers[MAP.layers.length-1].setVisibility(false);
+                // }
+            // },
+            // failure: function() {
+				// alert('Error: getMapLayersByType(base layer)');
+			// }
+		// });
+    }
+    
+    // addBaseLayersToMap();
+    
     var choroplethLayer = new OpenLayers.Layer.Vector('Thematic map', {
         'visibility': false,
         'displayInLayerSwitcher': false,
@@ -2539,14 +2662,13 @@ Ext.onReady( function() {
         })
     });
     
-    MAP.addLayers([ vmap0, choroplethLayer ]);
-    
-	MAP.layers[0].setVisibility(false);
+    MAP.addLayers([ choroplethLayer ]);
     
 	function addOverlaysToMap() {
 		Ext.Ajax.request({
-			url: path + 'getAllMapLayers' + type,
-			method: 'GET',
+			url: path + 'getMapLayersByType' + type,
+            params: { type: map_layer_type_overlay },
+			method: 'POST',
 			success: function(r) {
 				var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
 				
@@ -2593,6 +2715,8 @@ Ext.onReady( function() {
 	}
 	
 	addOverlaysToMap();
+    
+
 	
 	var layerTreeConfig = [{
         nodeType: 'gx_baselayercontainer',
@@ -3045,7 +3169,7 @@ Ext.onReady( function() {
     
 	MAP.events.on({
         changelayer: function(e) {
-            if (e.property == 'visibility' && e.layer != choroplethLayer && e.layer != vmap0) {
+            if (e.property == 'visibility' && e.layer != choroplethLayer ) {
                 if (e.layer.visibility) {
                     selectFeatureChoropleth.deactivate();
                 }
