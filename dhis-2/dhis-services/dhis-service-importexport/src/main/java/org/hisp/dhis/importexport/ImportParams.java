@@ -87,9 +87,6 @@ public class ImportParams
         double _minorVersion = Double.parseDouble( minorVersion ) * 1000;
         double _requiredVersion = Double.parseDouble( requiredVersion ) * 1000;
         
-        System.out.println( "Minorversion " + _minorVersion );
-        System.out.println( "Req version " + _requiredVersion );
-        
         return (int)_minorVersion >= (int)_requiredVersion;
     }
     
