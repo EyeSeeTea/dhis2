@@ -200,8 +200,8 @@ public class DefaultXMLImportService
             
             dxfReader = new DefaultXMLEventReader( (XMLEventReader2) pipeoutput ); // Set dxfReader to output of pipe
             
-            params.setNamespace( NAMESPACE_10 ); // Use latest namespace and version
-            params.setMinorVersion( MINOR_VERSION_11 );
+            params.setNamespace( NAMESPACE_10 ); // Use default namespace and version, should be upgraded as we go
+            params.setMinorVersion( MINOR_VERSION_10 );
         }
 
         // ---------------------------------------------------------------------

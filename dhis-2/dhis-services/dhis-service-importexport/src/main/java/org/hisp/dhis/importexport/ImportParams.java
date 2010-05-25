@@ -72,22 +72,25 @@ public class ImportParams
     // Logic
     // -------------------------------------------------------------------------
 
-    public boolean minorVersionGreaterOrEqual( String version )
+    public boolean minorVersionGreaterOrEqual( String requiredVersion )
     {
-        if ( version == null || minorVersion == null )
+        if ( requiredVersion == null || minorVersion == null )
         {
-            return false; // For legacy DXF files without version
+            return false;
         }
         
-        if ( !MathUtils.isNumeric( version ) )
+        if ( !MathUtils.isNumeric( minorVersion ) )
         {
-            throw new IllegalArgumentException( "Invalid version, must be numeric: " + version );            
+            throw new IllegalArgumentException( "Invalid version, must be numeric: " + minorVersion );            
         }
         
         double _minorVersion = Double.parseDouble( minorVersion ) * 1000;
-        double _version = Double.parseDouble( version ) * 1000;
+        double _requiredVersion = Double.parseDouble( requiredVersion ) * 1000;
         
-        return (int)_version >= (int)_minorVersion;
+        System.out.println( "Minorversion " + _minorVersion );
+        System.out.println( "Req version " + _requiredVersion );
+        
+        return (int)_minorVersion >= (int)_requiredVersion;
     }
     
     public boolean isImport()
