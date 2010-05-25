@@ -36,6 +36,7 @@ import java.util.zip.ZipInputStream;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.transform.Source;
@@ -62,6 +63,9 @@ import org.hisp.dhis.importexport.dxf.converter.DXFConverter;
 import org.hisp.dhis.system.process.OutputHolderState;
 import org.hisp.dhis.system.util.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.hisp.dhis.importexport.ImportParams.*;
+import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
 
 /**
  * @author bobj
@@ -160,6 +164,17 @@ public class DefaultXMLImportService
         if ( rootName.getLocalPart().equals( DXF_ROOT ) )
         {            
             dxfReader = XMLFactory.getXMLReader( streamReader ); // Native DXF stream - no transform required
+
+            // -----------------------------------------------------------------
+            // Retrieve namespace and version from root element and set on 
+            // import params. Use default if not found.
+            // -----------------------------------------------------------------
+            
+            params.setNamespace( defaultIfEmpty( rootName.getNamespaceURI(), NAMESPACE_10 ) );
+            Attribute versionAttribute = root.getAttributeByName( new QName( ATTRIBUTE_MINOR_VERSION ) );
+            params.setMinorVersion( versionAttribute != null ? versionAttribute.getValue() : MINOR_VERSION_10 );
+            
+            log.info( "Using DXF namespace '" + params.getNamespace() + "' version '" + params.getMinorVersion() + "'" );
         }
         else
         {
@@ -184,6 +199,9 @@ public class DefaultXMLImportService
             log.info( "Transform successful - Importing DXF" );
             
             dxfReader = new DefaultXMLEventReader( (XMLEventReader2) pipeoutput ); // Set dxfReader to output of pipe
+            
+            params.setNamespace( NAMESPACE_10 ); // Use latest namespace and version
+            params.setMinorVersion( MINOR_VERSION_11 );
         }
 
         // ---------------------------------------------------------------------
