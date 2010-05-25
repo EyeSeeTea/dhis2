@@ -9,14 +9,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   <!-- Store definitions -->
   
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormAssociationStore"
-    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormAssociationStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormAssociationStore"/>
   
    <bean id="org.hisp.dhis.dataentryform.DataEntryFormStore"
-    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormStore"/>
 
   <bean id="org.hisp.dhis.customvalue.CustomValueStore"
     class="org.hisp.dhis.customvalue.hibernate.HibernateCustomValueStore">
@@ -25,10 +21,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementStore"
-    class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-	<property name="statementManager" ref="statementManager"/>
-  </bean>
+    class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementStore"/>
   
   <bean id="org.hisp.dhis.dataelement.DataElementGroupStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
@@ -50,15 +43,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   
   <bean id="org.hisp.dhis.datavalue.DataValueStore"
     class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="statementManager" ref="statementManager"/>
     <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore"/>
   </bean>
   
   <bean id="org.hisp.dhis.indicator.IndicatorStore"
-    class="org.hisp.dhis.indicator.hibernate.HibernateIndicatorStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.indicator.hibernate.HibernateIndicatorStore"/>
 	
   <bean id="org.hisp.dhis.indicator.IndicatorTypeStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
@@ -79,27 +68,19 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
     
   <bean id="org.hisp.dhis.period.PeriodStore"
-    class="org.hisp.dhis.period.hibernate.HibernatePeriodStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.period.hibernate.HibernatePeriodStore"/>
   
   <bean id="org.hisp.dhis.source.SourceStore"
-    class="org.hisp.dhis.source.hibernate.HibernateSourceStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.source.hibernate.HibernateSourceStore"/>
   
   <bean id="org.hisp.dhis.dataset.DataSetStore"
     class="org.hisp.dhis.dataset.hibernate.HibernateDataSetStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="periodStore"
-      ref="org.hisp.dhis.period.PeriodStore"/>
+    <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore"/>
   </bean>
 
   <bean id="org.hisp.dhis.dataset.CompleteDataSetRegistrationStore"
-    class="org.hisp.dhis.dataset.hibernate.HibernateCompleteDataSetRegistrationStore"> 
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="periodService"
-      ref="org.hisp.dhis.period.PeriodService"/>
+    class="org.hisp.dhis.dataset.hibernate.HibernateCompleteDataSetRegistrationStore">
+    <property name="periodService" ref="org.hisp.dhis.period.PeriodService"/>
   </bean>
   
  <bean id="org.hisp.dhis.minmax.MinMaxDataElementStore"
@@ -151,16 +132,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="org.hisp.dhis.dataset.SectionStore"
-    class="org.hisp.dhis.dataset.hibernate.HibernateSectionStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.dataset.hibernate.HibernateSectionStore"/>
   
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitStore"
-    class="org.hisp.dhis.organisationunit.hibernate.HibernateOrganisationUnitStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-    <property name="statementManager" ref="statementManager"/>
-    <property name="jdbcTemplate" ref="jdbcTemplate"/>
-  </bean>
+    class="org.hisp.dhis.organisationunit.hibernate.HibernateOrganisationUnitStore"/>
 
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupStore"
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
@@ -175,21 +150,14 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="org.hisp.dhis.dataanalysis.jdbc.DataAnalysisStore"
-    class="org.hisp.dhis.dataanalysis.jdbc.JdbcDataAnalysisStore">
-    <property name="statementManager" ref="statementManager"/>
-    <property name="statementBuilder" ref="statementBuilder"/>
-  </bean>
+    class="org.hisp.dhis.dataanalysis.jdbc.JdbcDataAnalysisStore"/>
   
   <bean id="org.hisp.dhis.datavalue.DataValueAuditStore"
-    class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueAuditStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueAuditStore"/>
   
   <bean id="org.hisp.dhis.user.UserStore" 
     class="org.hisp.dhis.user.hibernate.HibernateUserStore">
-    <property name="sessionFactory" ref="sessionFactory"/>
-     <property name="currentUserService"
-      ref="org.hisp.dhis.user.CurrentUserService"/>
+     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
   </bean>
     
   <bean id="org.hisp.dhis.validation.ValidationCriteriaStore"
@@ -197,6 +165,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<property name="clazz" value="org.hisp.dhis.validation.ValidationCriteria" />
 	<property name="sessionFactory" ref="sessionFactory" />
   </bean>
+   
+  <bean id="org.hisp.dhis.translation.TranslationStore"
+	class="org.hisp.dhis.translation.hibernate.HibernateTranslationStore"/>
    
   <!-- Service definitions -->
 
@@ -445,6 +416,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	  ref="org.hisp.dhis.validation.ValidationCriteriaStore" />
   </bean>
   
+  <bean id="org.hisp.dhis.translation.TranslationService"
+	class="org.hisp.dhis.translation.DefaultTranslationService">
+	<property name="translationStore" ref="org.hisp.dhis.translation.TranslationStore" />
+  </bean>
+	
   <bean id="org.hisp.dhis.i18n.locale.LocaleManagerDb" class="org.hisp.dhis.i18n.locale.DatabaseLocaleManager">
 	<property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService"/>
   </bean>
@@ -481,18 +457,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</property>
   </bean>
 
-  <!-- Translation -->
-
-  <bean id="org.hisp.dhis.translation.TranslationStore"
-	class="org.hisp.dhis.translation.hibernate.HibernateTranslationStore">
-	<property name="sessionFactory" ref="sessionFactory" />
-  </bean>
-
-  <bean id="org.hisp.dhis.translation.TranslationService"
-	class="org.hisp.dhis.translation.DefaultTranslationService">
-	<property name="translationStore" ref="org.hisp.dhis.translation.TranslationStore" />
-  </bean>
-	
   <!-- I18n object definitions -->
 
   <bean id="I18nDataElement" class="org.hisp.dhis.i18n.I18nObject">
@@ -971,9 +935,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="userDetailsService"
-    class="org.hisp.dhis.security.hibernate.HibernateUserDetailsService">
-    <property name="sessionFactory" ref="sessionFactory"/>
-  </bean>
+    class="org.hisp.dhis.security.hibernate.HibernateUserDetailsService"/>
   
   <bean id="passwordEncoder"
     class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>

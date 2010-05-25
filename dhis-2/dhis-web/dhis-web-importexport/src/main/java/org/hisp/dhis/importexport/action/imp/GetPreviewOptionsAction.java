@@ -27,10 +27,12 @@ package org.hisp.dhis.importexport.action.imp;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.util.SessionUtils.*;
+import static org.hisp.dhis.util.SessionUtils.KEY_PREVIEW_STATUS;
+import static org.hisp.dhis.util.SessionUtils.KEY_PREVIEW_TYPE;
+import static org.hisp.dhis.util.SessionUtils.getSessionVar;
+import static org.hisp.dhis.util.SessionUtils.setSessionVar;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 

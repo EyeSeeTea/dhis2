@@ -801,3 +801,12 @@ function datePickerInRange ( startdate, enddate )
 	});
 }
 
+/**
+ * Create input table id become sortable table * * 
+ * @param tableId the id of table you want to sort * * 
+ */
+
+function tableSorter( tableId )
+{
+	$("#" + tableId ).tablesorter(); 
+}

@@ -75,6 +75,11 @@ public class GetValidationCriteriaAction
         return format;
     }
 
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
+
     public ValidationCriteria getValidationCriteria()
     {
         return validationCriteria;

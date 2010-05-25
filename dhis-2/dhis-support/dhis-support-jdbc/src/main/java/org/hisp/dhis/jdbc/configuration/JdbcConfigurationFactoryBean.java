@@ -61,7 +61,7 @@ public class JdbcConfigurationFactoryBean
     @Autowired
     private HibernateConfigurationProvider configurationProvider;
     
-    private JdbcConfiguration jdbcConfiguration;
+    private JdbcConfiguration jdbcConfig;
 
     // -------------------------------------------------------------------------
     // Initialisation
@@ -101,7 +101,7 @@ public class JdbcConfigurationFactoryBean
         config.setUsername( hibernateConfiguration.getProperty( KEY_USERNAME ) );
         config.setPassword( hibernateConfiguration.getProperty( KEY_PASSWORD ) );
         
-        this.jdbcConfiguration = config;
+        this.jdbcConfig = config;
     }
 
     // -------------------------------------------------------------------------
@@ -111,7 +111,7 @@ public class JdbcConfigurationFactoryBean
     public JdbcConfiguration getObject()
         throws Exception
     {
-        return jdbcConfiguration;
+        return jdbcConfig;
     }
 
     public Class<JdbcConfiguration> getObjectType()

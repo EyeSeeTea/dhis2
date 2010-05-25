@@ -24,7 +24,7 @@
 	</table>
 </form>
 
-<table width="100%" class="listTable">
+<table width="100%" class="listTable" id="listTable">
 	<thead>
 		<tr>
 			<th>$i18n.getString('name')</th>
@@ -95,6 +95,10 @@
 			});
 		#end
 	#end
+	
+	jQuery(document).ready(function(){		
+		tableSorter( 'listTable' );	
+	});
 
 </script>
 <span id="message" style="top:100px;right:5px;position:fixed;width:200px;z-index:10002" onclick="hideById(this.id);"></span>

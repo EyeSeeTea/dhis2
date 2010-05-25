@@ -692,7 +692,33 @@ div#headerMessage
   background-color: #ebf0f6;
 }
 
-div#ui-datepicker-div{
+div#ui-datepicker-div
+{
 	font-size:10pt;
 	z-index:99999999;
+}
+
+table thead tr .header 
+{
+	background-image: url('../images/bg.gif');	
+}
+
+
+table thead tr .headerSortUp
+{
+	background-image: url('../images/asc.gif');	
+}
+table thead tr .headerSortDown 
+{
+	background-image: url('../images/desc.gif');	
+}
+
+
+table thead tr .headerSortUp,
+table thead tr .headerSortDown,
+table thead tr .header
+{
+	background-repeat:no-repeat;
+	background-position: center right;
+	cursor:pointer;
 }

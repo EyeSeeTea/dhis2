@@ -4,13 +4,8 @@
 <table class="mainPageTable">
   <tr>
     <td style="vertical-align:top">
-      <table class="listTable">
-          <col>
-          <col>
-          <col width="20">
-          <col width="20">   
-          <thead>    	
-		  <tr>
+		<table width="100%">
+			<tr>
 			<td colspan="2"><label>$i18n.getString( "select_dataset" )</label><br>
 			  <select id="dataSetId" name="dataSetId" style="min-width:20em" onchange="javascript:getSectionByDataSet(this.options[this.selectedIndex].value)">
 				<option value=null selected="selected" >[ $i18n.getString( "all" ) ]</option>
@@ -25,6 +20,13 @@
                 <input type="button" value="$i18n.getString( "cancel" )" onclick="javascript:window.location.href='dataSet.action'" style="width:80px">
 	  		</td>
   		  </tr>
+		</table>
+      <table class="listTable" id="listTable">
+          <col>
+          <col>
+          <col width="100">
+          
+          <thead>
           <tr>
             <th>$i18n.getString( "name" )</th>
 			<th>$i18n.getString( "label" )</th>
@@ -61,4 +63,7 @@
 
 <script type="text/javascript">
 var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete" ) , "'" )';
+	jQuery(document).ready(function(){	
+		tableSorter( 'listTable' );	
+	});
 </script>

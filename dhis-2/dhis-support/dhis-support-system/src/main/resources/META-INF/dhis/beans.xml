@@ -14,10 +14,5 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="deletionInterceptor"
     class="org.hisp.dhis.system.deletion.DeletionInterceptor">
   </bean>
-  
-  <bean id="org.hisp.dhis.system.database.DatabaseInfoProvider"
-    class="org.hisp.dhis.system.database.HibernateDatabaseInfoProvider"
-    init-method="init">
-  </bean>
-  
+    
 </beans>

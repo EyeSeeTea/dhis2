@@ -165,9 +165,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.dataelement.DataElementService"/>    
     <property name="categoryService"
       ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
-    <property name="customValueService">
-      <ref bean="org.hisp.dhis.customvalue.CustomValueService"/>
-    </property>        
     <property name="programStageInstanceService">
       <ref bean="org.hisp.dhis.program.ProgramStageInstanceService"/>
     </property>     
