@@ -561,8 +561,6 @@ public abstract class DhisConvenienceTest
         unit.setActive( true );
         unit.setComment( "Comment" + uniqueCharacter );
         unit.setGeoCode( "GeoCode" );
-        unit.setLatitude( "Latitude" );
-        unit.setLongitude( "Longitude" );
 
         return unit;
     }
@@ -669,7 +667,7 @@ public abstract class DhisConvenienceTest
      * @param rightSide The right side expression.
      */
     public static ValidationRule createValidationRule( char uniqueCharacter, String operator, Expression leftSide,
-        Expression rightSide )
+        Expression rightSide, PeriodType periodType )
     {
         ValidationRule validationRule = new ValidationRule();
 
@@ -679,6 +677,7 @@ public abstract class DhisConvenienceTest
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
+        validationRule.setPeriodType( periodType );
 
         return validationRule;
     }

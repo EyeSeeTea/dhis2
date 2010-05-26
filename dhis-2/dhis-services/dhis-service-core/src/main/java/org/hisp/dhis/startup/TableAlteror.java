@@ -129,6 +129,9 @@ public class TableAlteror
             executeSql( "UPDATE patientattribute SET mandatory=false" );
         }
         
+        //drop table reporttable_categoryoptioncombos
+        executeSql( "DROP table reporttable_categoryoptioncombos" );
+        
         log.info( "Tables updated" );
     }
     

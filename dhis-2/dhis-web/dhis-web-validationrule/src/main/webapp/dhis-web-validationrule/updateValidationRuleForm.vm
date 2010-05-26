@@ -48,6 +48,15 @@
 		<td><textarea id="description" name="description" style="width:20em; height:6em" class="{validate:{maxlength:255}}">$!encoder.htmlEncode( $validationRule.description )</textarea></td>
 	</tr>
 	<tr>
+		<td><label for="periodType">$encoder.htmlEncode( $i18n.getString( "period_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><select type="text" id="periodTypeName" name="periodTypeName" style="min-width:20em">
+					#foreach ( $periodType in $periodTypes )
+             		 <option value="$periodType.name" #if( $validationRule.periodType.name.equals($periodType.name ) ) selected="selected" #end>$periodType.name</option>
+            		#end						
+			</select>
+		</td>
+	</tr>
+	<tr>
 		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "operator" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select id="operator" name="operator" style="width:20em">
@@ -62,8 +71,8 @@
 	</tr>
 	<tr>
 		<td></td>
-		<td><input type="button" value="$i18n.getString( 'edit_left_side' )" style="width:10em" onclick="showEditLeftSideExpressionForm()"><input 
-				type="button" value="$i18n.getString( 'edit_right_side' )" style="width:10em" onclick="showEditRightSideExpressionForm()"></td>
+		<td><input type="button" value="$i18n.getString( 'edit_left_side' )" style="width:10em" onclick="showEditLeftSideExpressionForm()">
+			<input type="button" value="$i18n.getString( 'edit_right_side' )" style="width:10em" onclick="showEditRightSideExpressionForm()"></td>
 	</tr>
 	<tr>
 		<td></td>

@@ -96,9 +96,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
   
   <bean id="org.hisp.dhis.validation.ValidationRuleStore"
-    class="org.hisp.dhis.hibernate.HibernateGenericStore">
+    class="org.hisp.dhis.validation.hibernate.HibernateValidationRuleStore">
     <property name="clazz" value="org.hisp.dhis.validation.ValidationRule"/>
     <property name="sessionFactory" ref="sessionFactory"/>
+    <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore"/>
   </bean>
   
   <bean id="org.hisp.dhis.validation.ValidationRuleGroupStore"
