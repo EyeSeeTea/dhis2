@@ -25,15 +25,15 @@
 <table width="100%" class="listTable" id="listTable">
 	<thead>
 		<tr>
-			<th><input type="checkbox" onclick="selectALL(this.checked)"/></th>
+			<th class="{sorter: false}"><input type="checkbox" onclick="selectALL(this.checked)"/></th>
 			<th>$i18n.getString('name')</th>
 			<th>$i18n.getString('item_type')</th>
 			<th>$i18n.getString('period_type')</th>
 			<th>$i18n.getString('row')</th>		
 			<th>$i18n.getString('column')</th>		
-			<th>$i18n.getString('expression')</th>		
+			<th class="{sorter: false}">$i18n.getString('expression')</th>		
 			<th>$i18n.getString('sheet_no')</th>	
-			<th width="80px">$i18n.getString('operations')</th>		
+			<th width="80px" class="{sorter: false}">$i18n.getString('operations')</th>		
 		</tr>
 	</thead>
 	<tbody id="list">	

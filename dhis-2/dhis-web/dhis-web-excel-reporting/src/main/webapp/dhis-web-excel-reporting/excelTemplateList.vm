@@ -29,7 +29,7 @@
 		<tr>
 			<th>$i18n.getString('name')</th>
 			<th>$i18n.getString('template_status')</th>
-			<th width="110px">$i18n.getString('operations')</th>
+			<th width="110px" class="{sorter: false}">$i18n.getString('operations')</th>
 		</tr>
 	</thead>
 	<tbody id="list">	

@@ -16,7 +16,7 @@
 				});
 				jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
 				jQuery("#name").focus();
-				datePicker( 'openingDate' );
+				datePickerInRange( 'openingDate', 'closedDate' );
 			}
 	);
 

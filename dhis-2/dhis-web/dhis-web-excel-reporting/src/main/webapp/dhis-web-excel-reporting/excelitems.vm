@@ -21,8 +21,8 @@
 			<th>$i18n.getString('sheetNo')</th>	
 			<th>$i18n.getString('row')</th>
 			<th>$i18n.getString('column')</th>		
-			<th>$i18n.getString('expression')</th>
-			<th width="70px">$i18n.getString('operations')</th>		
+			<th class="{sorter: false}">$i18n.getString('expression')</th>
+			<th width="70px" class="{sorter: false}">$i18n.getString('operations')</th>		
 		</tr>
 	</thead>	
 	<tbody id="list">	

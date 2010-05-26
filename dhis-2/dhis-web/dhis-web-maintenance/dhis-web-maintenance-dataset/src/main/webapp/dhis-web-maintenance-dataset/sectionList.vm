@@ -30,7 +30,7 @@
           <tr>
             <th>$i18n.getString( "name" )</th>
 			<th>$i18n.getString( "label" )</th>
-            <th colspan="2">$i18n.getString( "operations" )</th>
+            <th colspan="2" class="{sorter: false}">$i18n.getString( "operations" )</th>
           </tr>
           </thead>
           <tbody id="list">

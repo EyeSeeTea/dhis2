@@ -19,7 +19,7 @@
                 <thead>
 				<tr>
 					<th>$i18n.getString( "name" )</th>
-					<th colspan="4">$i18n.getString( "operations" )</th>
+					<th colspan="4" class="{sorter: false}">$i18n.getString( "operations" )</th>
 				</tr>
                 </thead>
 				<tbody id="list">
