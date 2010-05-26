@@ -110,8 +110,7 @@
 			</result>
 			<result name="plainTextError" type="plainTextErrorResult">
 				<param name="parse">true</param>
-				<param name="message">${exception.class.name}:
-					${exception.message}</param>
+				<param name="message">${exception.class.name}: ${exception.message}</param>
 			</result>
 		</global-results>
 	</package>
