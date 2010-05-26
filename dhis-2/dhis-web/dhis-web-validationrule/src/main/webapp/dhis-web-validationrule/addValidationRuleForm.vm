@@ -47,6 +47,15 @@
 		<td><textarea id="description" name="description" style="width:20em; height:6em" class="{validate:{maxlength:255}}"></textarea></td>
 	</tr>
 	<tr>
+		<td><label for="periodType">$encoder.htmlEncode( $i18n.getString( "period_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><select type="text" id="periodTypeName" name="periodTypeName" style="min-width:20em">
+					#foreach ( $periodType in $periodTypes )
+             		 <option value="$periodType.name">$periodType.name</option>
+            		#end						
+			</select>
+		</td>
+	</tr>
+	<tr>
 		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "operator" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select id="operator" name="operator" style="width:20em">

@@ -1,5 +1,3 @@
-package org.hisp.dhis.workbook;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,35 +25,51 @@ package org.hisp.dhis.workbook;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+package org.hisp.dhis.validationrule.action;
 
-import org.hisp.dhis.completeness.DataSetCompletenessResult;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.validation.ValidationResult;
+import java.util.Collection;
+
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version GetPeriodTypesAction.java May 19, 2010 12:10:10 PM
  */
-public interface WorkbookService
+public class GetPeriodTypesAction
+    implements Action
 {
-    String ID = WorkbookService.class.getName();
-    
-    String writeReportTableData( OutputStream outputStream, int id, I18nFormat format );
-    
-    void writeAllDataElements( OutputStream outputStream );
-    
-    void writeAllIndicators( OutputStream outputStream );
-    
-    void writeAllOrganisationUnits( OutputStream outputStream );
+    // -------------------------------------------------------------------------
+    // Dependency
+    // -------------------------------------------------------------------------
 
-    void writeDataSetCompletenessResult( Collection<DataSetCompletenessResult> results, OutputStream out, I18n i18n, OrganisationUnit unit, DataSet dataSet );
-    
-    void writeValidationResult( Map<String, List<ValidationResult>> results, OutputStream out, I18n i18n, I18nFormat format );
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private Collection<PeriodType> periodTypes;
+
+    public Collection<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
+    @Override
+    public String execute()
+        throws Exception
+    {
+        periodTypes = periodService.getAllPeriodTypes();
+
+        return SUCCESS;
+    }
+
 }

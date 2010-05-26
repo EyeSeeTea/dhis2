@@ -5,16 +5,19 @@
 
 function validateAddValidationRule()
 {
+	var params = 'name=' + getFieldValue( 'name' );
+		params += '&operator=' + getFieldValue( 'operator' );
+		params += '&leftSideExpression=' + getFieldValue( 'leftSideExpression' );
+		params += '&leftSideDescription=' + getFieldValue( 'leftSideDescription' );
+		params += '&rightSideExpression=' + getFieldValue( 'rightSideExpression' );
+		params += '&rightSideDescription=' + getFieldValue( 'rightSideDescription' );
+		params += '&periodTypeName=' + getFieldValue( 'periodTypeName');
     var request = new Request();
     request.setResponseTypeXML( 'message' );
     request.setCallbackSuccess( addValidationCompleted );
-    request.send( 'validateValidationRule.action?name=' + getFieldValue( 'name' )  +
-    '&operator=' + getFieldValue( 'operator' ) +
-    '&leftSideExpression=' + getFieldValue( 'leftSideExpression' ) +
-    '&leftSideDescription=' + getFieldValue( 'leftSideDescription' ) +
-    '&rightSideExpression=' + getFieldValue( 'rightSideExpression' ) +
-    '&rightSideDescription=' + getFieldValue( 'rightSideDescription' ) );
-
+	request.sendAsPost(params);
+    request.send( 'validateValidationRule.action');
+    
     return false;
 }
 
@@ -35,8 +38,7 @@ function addValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        setMessage( 'message' ) = message;
     }
 }
 
@@ -46,16 +48,20 @@ function addValidationCompleted( messageElement )
 
 function validateUpdateValidationRule()
 {
+	var params = 'name=' + getFieldValue( 'name' );
+		params += 'id=' + getFieldValue( 'id' );
+		params += '&operator=' + getFieldValue( 'operator' );
+		params += '&leftSideExpression=' + getFieldValue( 'leftSideExpression' );
+		params += '&leftSideDescription=' + getFieldValue( 'leftSideDescription' );
+		params += '&rightSideExpression=' + getFieldValue( 'rightSideExpression' );
+		params += '&rightSideDescription=' + getFieldValue( 'rightSideDescription' );
+		params += '&periodTypeName=' + getFieldValue( 'periodTypeName');
+
 	var request = new Request();
     request.setResponseTypeXML( 'message' );
     request.setCallbackSuccess( updateValidationCompleted );
-    request.send( 'validateValidationRule.action?id=' + getFieldValue( 'id' ) +
-    '&name=' + getFieldValue( 'name' )  +
-	'&operator=' + getFieldValue( 'operator' ) +
-    '&leftSideExpression=' + getFieldValue( 'leftSideExpression' ) +
-    '&leftSideDescription=' + getFieldValue( 'leftSideDescription' ) +
-    '&rightSideExpression=' + getFieldValue( 'rightSideExpression' ) +
-    '&rightSideDescription=' + getFieldValue( 'rightSideDescription' ) );
+	request.sendAsPost(params);
+    request.send( 'validateValidationRule.action' );
 
     return false;
 }

@@ -40,6 +40,8 @@ import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractValidationRuleConverter;
+import org.hisp.dhis.period.MonthlyPeriodType;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleService;
 
@@ -164,6 +166,8 @@ public class ValidationRuleConverter
             validationRule.getRightSide().setDescription( values.get( FIELD_RIGHTSIDE_DESCRIPTION ) );            
             validationRule.getRightSide().setDataElementsInExpression(
                 expressionService.getDataElementsInExpression( validationRule.getRightSide().getExpression() ) );
+            
+            validationRule.setPeriodType( PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME ) ); //TODO Intermediate hack!
             
             read( validationRule, GroupMemberType.NONE, params );
         }
