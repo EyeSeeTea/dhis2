@@ -285,6 +285,12 @@
 				/dhis-web-mapping/jsonMapLayers.vm</result>
 		</action>
 
+        <action name="getMapLayersByType"
+            class="org.hisp.dhis.mapping.action.GetMapLayersByTypeAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonMapLayers.vm</result>
+        </action>
+
 		<!-- Indicator -->
 
 		<action name="getAllIndicatorGroups"

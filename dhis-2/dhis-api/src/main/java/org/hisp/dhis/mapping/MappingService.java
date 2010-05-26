@@ -394,7 +394,7 @@ public interface MappingService
 
     void updateMapLayer( MapLayer mapLayer );
 
-    void addOrUpdateMapLayer( String name, String type, String mapSource, String fillColor, double fillOpacity,
+    void addOrUpdateMapLayer( String name, String type, String mapSource, String layer, String fillColor, double fillOpacity,
         String strokeColor, int strokeWidth );
 
     void deleteMapLayer( MapLayer mapLayer );
@@ -402,6 +402,8 @@ public interface MappingService
     MapLayer getMapLayer( int id );
 
     MapLayer getMapLayerByName( String name );
+    
+    Collection<MapLayer> getMapLayersByType( String type );
 
     Collection<MapLayer> getMapLayersByMapSourceType();
 

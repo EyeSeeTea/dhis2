@@ -458,6 +458,18 @@ public class HibernateMappingStore
 
         return (MapLayer) criteria.uniqueResult();
     }
+    
+    @SuppressWarnings( "unchecked" )
+    public Collection<MapLayer> getMapLayersByType( String type )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( MapLayer.class );
+
+        criteria.add( Restrictions.eq( "type", type ) );
+
+        return criteria.list();
+    }
 
     @SuppressWarnings( "unchecked" )
     public Collection<MapLayer> getMapLayersByMapSourceType( String mapSourceType )

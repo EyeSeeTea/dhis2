@@ -818,7 +818,7 @@ public class DefaultMappingService
         mappingStore.updateMapLayer( mapLayer );
     }
 
-    public void addOrUpdateMapLayer( String name, String type, String mapSource, String fillColor, double fillOpacity,
+    public void addOrUpdateMapLayer( String name, String type, String mapSource, String layer, String fillColor, double fillOpacity,
         String strokeColor, int strokeWidth )
     {
         MapLayer mapLayer = mappingStore.getMapLayerByName( name );
@@ -832,6 +832,7 @@ public class DefaultMappingService
             mapLayer.setType( type );
             mapLayer.setMapSourceType( mapSourceType );
             mapLayer.setMapSource( mapSource );
+            mapLayer.setLayer( layer );
             mapLayer.setFillColor( fillColor );
             mapLayer.setFillOpacity( fillOpacity );
             mapLayer.setStrokeColor( strokeColor );
@@ -841,7 +842,7 @@ public class DefaultMappingService
         }
         else
         {
-            addMapLayer( new MapLayer( name, type, mapSourceType, mapSource, fillColor, fillOpacity, strokeColor,
+            addMapLayer( new MapLayer( name, type, mapSourceType, mapSource, layer, fillColor, fillOpacity, strokeColor,
                 strokeWidth ) );
         }
     }
@@ -859,6 +860,11 @@ public class DefaultMappingService
     public MapLayer getMapLayerByName( String name )
     {
         return mappingStore.getMapLayerByName( name );
+    }
+    
+    public Collection<MapLayer> getMapLayersByType( String type )
+    {
+        return mappingStore.getMapLayersByType( type );
     }
 
     public Collection<MapLayer> getMapLayersByMapSourceType()
