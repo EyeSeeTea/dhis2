@@ -742,10 +742,6 @@ function removeItem( itemId, itemName, confirmation, action )
         
                     showWarning();
     	    	}
-				else if ( json.response == "nonSufficientAuthority" )
-				{
-					window.location.href = "../dhis-web-commons-about/showSufficientFeedbackForm.action";
-				}
     	    }
     	);
     }
