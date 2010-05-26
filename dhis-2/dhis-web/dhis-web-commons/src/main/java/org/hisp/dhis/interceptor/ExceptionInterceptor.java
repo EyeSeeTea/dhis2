@@ -51,7 +51,7 @@ public class ExceptionInterceptor
 
     public static final String EXCEPTION_RESULT_DEFAULT = "exceptionDefault";
 
-    public static final String EXCEPTION_RESULT_PLAIN_TEXT = "plainTextErrorResult";
+    public static final String EXCEPTION_RESULT_PLAIN_TEXT = "plainTextError";
 
     public static final String EXCEPTION_RESULT_ACCESS_DENIED = "accessDenied";
 
