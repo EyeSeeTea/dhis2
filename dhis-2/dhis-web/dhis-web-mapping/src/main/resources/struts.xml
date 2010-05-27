@@ -67,20 +67,32 @@
 			</result>
 		</action>
 
-		<action name="getMapValuesByMap"
-			class="org.hisp.dhis.mapping.action.GetMapValuesByMapAction">
+        <action name="getDataMapValuesByMap"
+            class="org.hisp.dhis.mapping.action.GetDataMapValuesByMapAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
+
+        <action name="getDataMapValuesByLevel"
+            class="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
+
+		<action name="getIndicatorMapValuesByMap"
+			class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
 		</action>
 
-		<action name="getMapValuesByLevel"
-			class="org.hisp.dhis.mapping.action.GetMapValuesByLevelAction">
+		<action name="getIndicatorMapValuesByLevel"
+			class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction">
 			<result name="success" type="velocity-json">
-				/dhis-web-mapping/jsonAggregatedMapValues.vm</result>
+				/dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
 		</action>
 		
-		<action name="getMapValuesByMapAndFeatureId"
-            class="org.hisp.dhis.mapping.action.GetMapValuesByMapAndFeatureIdAction">
+		<action name="getIndicatorMapValuesByMapAndFeatureId"
+            class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAndFeatureIdAction">
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>
