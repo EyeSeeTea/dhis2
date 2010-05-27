@@ -3264,12 +3264,27 @@ Ext.onReady( function() {
     
 	MAP.events.on({
         changelayer: function(e) {
-            if (e.property == 'visibility' && e.layer != choroplethLayer ) {
+            var isOverlay = false;
+            for (var i = 0; i < mapLayerStore.getTotalCount(); i++) {
+                if (mapLayerStore.getAt(i).data.name == e.layer.name) {
+                    isOverlay = true;
+                }
+            }
+            
+            var activeOverlays = false;
+            if (e.property == 'visibility' && isOverlay ) {
                 if (e.layer.visibility) {
                     selectFeatureChoropleth.deactivate();
                 }
                 else {
-                    selectFeatureChoropleth.activate();
+                    for (var i = 0; i < mapLayerStore.getTotalCount(); i++) {
+                        if (MAP.getLayersByName(mapLayerStore.getAt(i).data.name)[0].visibility) {
+                            activeOverlays = true;
+                        }
+                    }
+                    if (!activeOverlays) {
+                        selectFeatureChoropleth.activate();
+                    }
                 }
             }
         }
