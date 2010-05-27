@@ -35,16 +35,16 @@ import org.hisp.dhis.mapping.MappingService;
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Jan Henrik Overland
+ * @author Lars Helge Overland
  * @version $Id$
  */
-public class GetMapValuesByMapAndFeatureIdAction
+public class GetIndicatorMapValuesByLevelAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private MappingService mappingService;
 
     public void setMappingService( MappingService mappingService )
@@ -63,25 +63,18 @@ public class GetMapValuesByMapAndFeatureIdAction
         this.indicatorId = indicatorId;
     }
 
-    private Collection<Integer> periodIds;
+    private int periodId;
 
-    public void setPeriodIds( Collection<Integer> periodIds )
+    public void setPeriodId( int periodId )
     {
-        this.periodIds = periodIds;
+        this.periodId = periodId;
     }
 
-    private String mapLayerPath;
+    private int level;    
 
-    public void setMapLayerPath( String mapLayerPath )
+    public void setLevel( int level )
     {
-        this.mapLayerPath = mapLayerPath;
-    }
-    
-    private String featureId;
-
-    public void setFeatureId( String featureId )
-    {
-        this.featureId = featureId;
+        this.level = level;
     }
 
     // -------------------------------------------------------------------------
@@ -98,12 +91,12 @@ public class GetMapValuesByMapAndFeatureIdAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedMapValues( indicatorId, periodIds, mapLayerPath, featureId );
-
+        object = mappingService.getAggregatedIndicatorMapValues( indicatorId, periodId, level );
+        
         return SUCCESS;
     }
 }

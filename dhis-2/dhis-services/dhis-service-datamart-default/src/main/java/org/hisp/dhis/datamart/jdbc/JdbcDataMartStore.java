@@ -56,9 +56,10 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.system.objectmapper.AggregatedDataMapValueRowMapper;
 import org.hisp.dhis.system.objectmapper.AggregatedDataValueRowMapper;
+import org.hisp.dhis.system.objectmapper.AggregatedIndicatorMapValueRowMapper;
 import org.hisp.dhis.system.objectmapper.AggregatedIndicatorValueRowMapper;
-import org.hisp.dhis.system.objectmapper.AggregatedMapValueRowMapper;
 import org.hisp.dhis.system.objectmapper.DataValueRowMapper;
 import org.hisp.dhis.system.objectmapper.DeflatedDataValueRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,6 +178,40 @@ public class JdbcDataMartStore
     }
 
     // -------------------------------------------------------------------------
+    // AggregatedDataMapValue
+    // -------------------------------------------------------------------------
+    
+    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level )
+    {
+        final StatementHolder holder = statementManager.getHolder();
+        
+        final ObjectMapper<AggregatedMapValue> mapper = new ObjectMapper<AggregatedMapValue>();
+        
+        try
+        {
+            final String sql = 
+                "SELECT o.organisationunitid, o.name, a.value, a.periodid " +
+                "FROM aggregateddatavalue AS a, organisationunit AS o " +
+                "WHERE a.dataelementid  = " + dataElementId + " " +
+                "AND a.periodid = " + periodId + " " + 
+                "AND a.level = " + level + " " +
+                "AND a.organisationunitid = o.organisationunitid";
+            
+            final ResultSet resultSet = holder.getStatement().executeQuery( sql );
+            
+            return mapper.getCollection( resultSet, new AggregatedDataMapValueRowMapper() );
+        }
+        catch ( SQLException ex )
+        {
+            throw new RuntimeException( "Failed to get aggregated data map values", ex );
+        }
+        finally
+        {
+            holder.close();
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // AggregatedIndicatorValue
     // -------------------------------------------------------------------------
 
@@ -268,10 +303,10 @@ public class JdbcDataMartStore
     }
 
     // -------------------------------------------------------------------------
-    // AggregatedMapValue
+    // AggregatedIndicatorMapValue
     // -------------------------------------------------------------------------
 
-    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level )
+    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level )
     {
         final StatementHolder holder = statementManager.getHolder();
         
@@ -289,11 +324,11 @@ public class JdbcDataMartStore
             
             final ResultSet resultSet = holder.getStatement().executeQuery( sql );
             
-            return mapper.getCollection( resultSet, new AggregatedMapValueRowMapper() );
+            return mapper.getCollection( resultSet, new AggregatedIndicatorMapValueRowMapper() );
         }
         catch ( SQLException ex )
         {
-            throw new RuntimeException( "Failed to get aggregated map values", ex );
+            throw new RuntimeException( "Failed to get aggregated indicator map values", ex );
         }
         finally
         {
@@ -301,7 +336,7 @@ public class JdbcDataMartStore
         }
     }
     
-    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level, int organisationUnitId )
+    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level, int organisationUnitId )
     {
         final StatementHolder holder = statementManager.getHolder();
         
@@ -320,11 +355,11 @@ public class JdbcDataMartStore
             
             final ResultSet resultSet = holder.getStatement().executeQuery( sql );
             
-            return mapper.getCollection( resultSet, new AggregatedMapValueRowMapper() );
+            return mapper.getCollection( resultSet, new AggregatedIndicatorMapValueRowMapper() );
         }
         catch ( SQLException ex )
         {
-            throw new RuntimeException( "Failed to get aggregated map values", ex );
+            throw new RuntimeException( "Failed to get aggregated indicator map values", ex );
         }
         finally
         {
@@ -332,7 +367,7 @@ public class JdbcDataMartStore
         }
     }
     
-    public Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds, int level, int organisationUnitId )
+    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, Collection<Integer> periodIds, int level, int organisationUnitId )
     {
         final StatementHolder holder = statementManager.getHolder();
         
@@ -351,11 +386,11 @@ public class JdbcDataMartStore
             
             final ResultSet resultSet = holder.getStatement().executeQuery( sql );
             
-            return mapper.getCollection( resultSet, new AggregatedMapValueRowMapper() );
+            return mapper.getCollection( resultSet, new AggregatedIndicatorMapValueRowMapper() );
         }
         catch ( SQLException ex )
         {
-            throw new RuntimeException( "Failed to get aggregated map values", ex );
+            throw new RuntimeException( "Failed to get aggregated indicator map values", ex );
         }
         finally
         {

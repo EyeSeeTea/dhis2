@@ -3456,7 +3456,7 @@ function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
     }
     
     mapValueTimeseriesStore = new Ext.data.JsonStore({
-        url: path + 'getMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
+        url: path + 'getIndicatorMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
         root: 'mapvalues',
         fields:['orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
         autoLoad: false,
@@ -3638,7 +3638,7 @@ function getChoroplethData() {
     var indicatorId = Ext.getCmp('indicator_cb').getValue();
     var periodId = Ext.getCmp('period_cb').getValue();
     var mapLayerPath = MAPDATA.mapLayerPath;
-	var url = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? 'getMapValuesByMap' : 'getMapValuesByLevel';
+	var url = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? 'getIndicatorMapValuesByMap' : 'getIndicatorMapValuesByLevel';
 	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodId: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: mapLayerPath };
 
     Ext.Ajax.request({
@@ -3691,7 +3691,7 @@ function getChoroplethData() {
 			MASK.hide();		
         },
         failure: function() {
-            alert( 'Error: getMapValues' );
+            alert( 'Error: getIndicatorMapValues' );
         } 
     });
 }

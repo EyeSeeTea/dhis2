@@ -37,7 +37,7 @@ import org.hisp.dhis.aggregation.AggregatedMapValue;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class AggregatedMapValueRowMapper
+public class AggregatedIndicatorMapValueRowMapper
     implements RowMapper<AggregatedMapValue>
 {
     public AggregatedMapValue mapRow( ResultSet resultSet )

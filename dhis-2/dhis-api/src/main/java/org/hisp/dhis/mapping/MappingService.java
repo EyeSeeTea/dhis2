@@ -55,14 +55,22 @@ public interface MappingService
     final String MAP_TEMPL_DIR = "map_temp";
 
     // -------------------------------------------------------------------------
-    // MapValue
+    // DataMapValue
+    // -------------------------------------------------------------------------
+    
+    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, String mapLayerPath );
+    
+    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level );
+
+    // -------------------------------------------------------------------------
+    // IndicatorMapValue
     // -------------------------------------------------------------------------
 
-    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds, String mapLayerPath, String featureId );
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, Collection<Integer> periodIds, String mapLayerPath, String featureId );
     
-    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, String mapLayerPath );
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, String mapLayerPath );
 
-    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level );
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level );
 
     // -------------------------------------------------------------------------
     // Map
