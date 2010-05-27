@@ -117,6 +117,14 @@ public class AbstractOrganisationUnitConverter
         {
             return false;
         }
+        if ( !isSimiliar( object.getFeatureType(), existing.getFeatureType() ) || ( isNotNull( object.getFeatureType(), existing.getFeatureType() ) && !object.getFeatureType().equals( existing.getFeatureType() ) ) )
+        {
+            return false;
+        }
+        if ( !isSimiliar( object.getCoordinates(), existing.getCoordinates() ) || ( isNotNull( object.getCoordinates(), existing.getCoordinates() ) && !object.getCoordinates().equals( existing.getCoordinates() ) ) )
+        {
+            return false;
+        }
         
         return true;
     }

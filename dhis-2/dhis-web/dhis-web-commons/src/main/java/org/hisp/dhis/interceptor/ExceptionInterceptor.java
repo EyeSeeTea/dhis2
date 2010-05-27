@@ -39,6 +39,10 @@ import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.Interceptor;
 
 /**
+ * This interceptor will intercept exceptions and redirect to appropriate
+ * exception results / pages defined in the global-results section in the XWork 
+ * configuration.
+ * 
  * @author Torgeir Lorange Ostby
  * @version $Id: WebWorkExceptionInterceptor.java 6335 2008-11-20 11:11:26Z larshelg $
  */
@@ -48,15 +52,11 @@ public class ExceptionInterceptor
     private static final Log LOG = LogFactory.getLog( ExceptionInterceptor.class );
 
     public static final String EXCEPTION_RESULT_KEY = "onExceptionReturn";
-
     public static final String EXCEPTION_RESULT_DEFAULT = "exceptionDefault";
-
-    public static final String EXCEPTION_RESULT_PLAIN_TEXT = "plainTextErrorResult";
-
-    public static final String EXCEPTION_RESULT_ACCESS_DENIED = "accessDenied";
-
+    public static final String EXCEPTION_RESULT_PLAIN_TEXT = "plainTextError";
+    public static final String EXCEPTION_RESULT_ACCESS_DENIED = "accessDenied";    
+    public static final String EXCEPTION_RESULT_JSON_ACCESS_DENIED = "jsonAccessDenied";
     public static final String TEMPLATE_KEY_EXCEPTION = "exception";
-
     public static final String TEMPLATE_KEY_SHOW_STACK_TRACE = "showStackTrace";
 
     // -------------------------------------------------------------------------
@@ -109,13 +109,11 @@ public class ExceptionInterceptor
             if ( e instanceof AccessDeniedException || e instanceof InsufficientAuthenticationException )
             {
                 if ( EXCEPTION_RESULT_PLAIN_TEXT.equals( exceptionResultName ) )
-                {
-                    // Access denied as plain text
-                    return EXCEPTION_RESULT_PLAIN_TEXT;
+                {                    
+                    return EXCEPTION_RESULT_JSON_ACCESS_DENIED; // Access denied as JSON
                 }
-
-                // Access denied as nice page
-                return EXCEPTION_RESULT_ACCESS_DENIED;
+                
+                return EXCEPTION_RESULT_ACCESS_DENIED; // Access denied as nice page
             }
 
             LOG.error( "Error while executing action", e );

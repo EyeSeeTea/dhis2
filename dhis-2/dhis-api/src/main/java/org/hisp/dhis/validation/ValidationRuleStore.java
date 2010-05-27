@@ -1,5 +1,3 @@
-package org.hisp.dhis.workbook;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,35 +25,36 @@ package org.hisp.dhis.workbook;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+package org.hisp.dhis.validation;
 
-import org.hisp.dhis.completeness.DataSetCompletenessResult;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.validation.ValidationResult;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version ValidationRuleStore.java 2010-05-18 17:05:50Z
  */
-public interface WorkbookService
+public interface ValidationRuleStore
+    extends GenericIdentifiableObjectStore<ValidationRule>
 {
-    String ID = WorkbookService.class.getName();
-    
-    String writeReportTableData( OutputStream outputStream, int id, I18nFormat format );
-    
-    void writeAllDataElements( OutputStream outputStream );
-    
-    void writeAllIndicators( OutputStream outputStream );
-    
-    void writeAllOrganisationUnits( OutputStream outputStream );
+    String ID = ValidationRuleStore.class.getName();
 
-    void writeDataSetCompletenessResult( Collection<DataSetCompletenessResult> results, OutputStream out, I18n i18n, OrganisationUnit unit, DataSet dataSet );
-    
-    void writeValidationResult( Map<String, List<ValidationResult>> results, OutputStream out, I18n i18n, I18nFormat format );
+    // -------------------------------------------------------------------------
+    // ValidationRule
+    // -------------------------------------------------------------------------
+
+    /**
+     * Adds a ValidationRule to the database.
+     * 
+     * @param validationRule the ValidationRule to add.
+     * @return the generated unique identifier for the ValidationRule.
+     */
+    int addValidationRule( ValidationRule validationRule );
+
+    /**
+     * Update a validation rule with the given identifiers.
+     * 
+     * @param validationRule the ValidationRule to update.
+     */
+    void updateValidationRule( ValidationRule validationRule );
+
 }

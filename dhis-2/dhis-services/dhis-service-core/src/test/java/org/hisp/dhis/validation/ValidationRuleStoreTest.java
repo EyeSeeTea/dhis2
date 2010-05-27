@@ -42,6 +42,8 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
+import org.hisp.dhis.period.MonthlyPeriodType;
+import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
 
 /**
@@ -65,6 +67,8 @@ public class ValidationRuleStoreTest
 
     private Expression expressionA;
     private Expression expressionB;
+    
+    private PeriodType periodType = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
     
     // -------------------------------------------------------------------------
     // Fixture
@@ -117,7 +121,7 @@ public class ValidationRuleStoreTest
     @Test
     public void testAddGetValidationRule()
     {
-        ValidationRule validationRule = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
+        ValidationRule validationRule = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
         
         int id = validationRuleStore.save( validationRule );
         
@@ -134,7 +138,7 @@ public class ValidationRuleStoreTest
     @Test
     public void testUpdateValidationRule()
     {
-        ValidationRule validationRule = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
+        ValidationRule validationRule = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
         
         int id = validationRuleStore.save( validationRule );
         
@@ -163,8 +167,8 @@ public class ValidationRuleStoreTest
     @Test
     public void testDeleteValidationRule()
     {
-        ValidationRule validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
-        ValidationRule validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
+        ValidationRule validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
+        ValidationRule validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
 
         int idA = validationRuleStore.save( validationRuleA );
         int idB = validationRuleStore.save( validationRuleB );
@@ -190,8 +194,8 @@ public class ValidationRuleStoreTest
     @Test
     public void testGetAllValidationRules()
     {
-        ValidationRule validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
-        ValidationRule validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
+        ValidationRule validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
+        ValidationRule validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
 
         validationRuleStore.save( validationRuleA );
         validationRuleStore.save( validationRuleB );
@@ -206,8 +210,8 @@ public class ValidationRuleStoreTest
     @Test
     public void testGetValidationRuleByName()
     {
-        ValidationRule validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
-        ValidationRule validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
+        ValidationRule validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
+        ValidationRule validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
 
         int id = validationRuleStore.save( validationRuleA );
         validationRuleStore.save( validationRuleB );

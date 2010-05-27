@@ -32,6 +32,7 @@ import static org.hisp.dhis.system.util.PDFUtils.*;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hisp.dhis.completeness.DataSetCompletenessResult;
@@ -79,7 +80,7 @@ public class ItextPdfService
     {
         this.indicatorService = indicatorService;
     }
-    
+
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -94,56 +95,56 @@ public class ItextPdfService
     public void writeAllDataElements( OutputStream outputStream )
     {
         Document document = PDFUtils.openDocument( outputStream );
-        
-        for ( DataElement element : dataElementService.getAllDataElements() )        
+
+        for ( DataElement element : dataElementService.getAllDataElements() )
         {
             PdfPTable table = getPdfPTable( true, 0.40f, 0.60f );
-            
+
             table.addCell( getHeader3Cell( element.getName(), 2 ) );
-            
+
             table.addCell( getCell( 2, 15 ) );
-            
+
             table.addCell( getItalicCell( "Short name", 1 ) );
             table.addCell( getTextCell( element.getShortName() ) );
-            
+
             table.addCell( getItalicCell( "Alternative name", 1 ) );
             table.addCell( getTextCell( element.getAlternativeName() ) );
-            
+
             table.addCell( getItalicCell( "Code", 1 ) );
             table.addCell( getTextCell( element.getCode() ) );
-            
+
             table.addCell( getItalicCell( "Description", 1 ) );
             table.addCell( getTextCell( element.getDescription() ) );
-            
+
             table.addCell( getItalicCell( "Active", 1 ) );
             table.addCell( getTextCell( getBoolean().get( element.isActive() ) ) );
-            
+
             table.addCell( getItalicCell( "Type", 1 ) );
-            table.addCell( getTextCell( getType().get( element.getType() ) ) );            
-            
+            table.addCell( getTextCell( getType().get( element.getType() ) ) );
+
             table.addCell( getItalicCell( "Aggregaton operator", 1 ) );
             table.addCell( getTextCell( getAggregationOperator().get( element.getAggregationOperator() ) ) );
 
             table.addCell( getCell( 2, 30 ) );
-            
+
             addTableToDocument( document, table );
         }
-        
+
         PDFUtils.closeDocument( document );
     }
 
     public void writeAllIndicators( OutputStream outputStream )
     {
         Document document = PDFUtils.openDocument( outputStream );
-        
+
         for ( Indicator indicator : indicatorService.getAllIndicators() )
         {
             PdfPTable table = getPdfPTable( true, 0.40f, 0.60f );
-    
+
             table.addCell( getHeader3Cell( indicator.getName(), 2 ) );
 
             table.addCell( getCell( 2, 15 ) );
-            
+
             table.addCell( getItalicCell( "Short name", 1 ) );
             table.addCell( getTextCell( indicator.getShortName() ) );
 
@@ -158,7 +159,7 @@ public class ItextPdfService
 
             table.addCell( getItalicCell( "Annualized", 1 ) );
             table.addCell( getTextCell( getBoolean().get( indicator.getAnnualized() ) ) );
-            
+
             table.addCell( getItalicCell( "Indicator type", 1 ) );
             table.addCell( getTextCell( indicator.getIndicatorType().getName() ) );
 
@@ -169,24 +170,24 @@ public class ItextPdfService
             table.addCell( getTextCell( indicator.getDenominatorDescription() ) );
 
             table.addCell( getCell( 2, 30 ) );
-            
+
             addTableToDocument( document, table );
         }
-        
+
         PDFUtils.closeDocument( document );
     }
-    
+
     public void writeAllOrganisationUnits( OutputStream outputStream )
     {
         Document document = PDFUtils.openDocument( outputStream );
-        
+
         for ( OrganisationUnit unit : organisationUnitService.getAllOrganisationUnits() )
         {
             PdfPTable table = getPdfPTable( true, 0.40f, 0.60f );
-            
+
             table.addCell( getHeader3Cell( unit.getName(), 2 ) );
-            
-            table.addCell( getCell( 2, 15 ) );            
+
+            table.addCell( getCell( 2, 15 ) );
 
             table.addCell( getItalicCell( "Short name", 1 ) );
             table.addCell( getTextCell( unit.getShortName() ) );
@@ -207,31 +208,34 @@ public class ItextPdfService
             table.addCell( getTextCell( unit.getComment() ) );
 
             table.addCell( getCell( 2, 30 ) );
-            
-            addTableToDocument( document, table );     
+
+            addTableToDocument( document, table );
         }
-        
+
         PDFUtils.closeDocument( document );
     }
-    
-    public void writeDataSetCompletenessResult( Collection<DataSetCompletenessResult> results, OutputStream out, I18n i18n, OrganisationUnit unit, DataSet dataSet )
+
+    public void writeDataSetCompletenessResult( Collection<DataSetCompletenessResult> results, OutputStream out,
+        I18n i18n, OrganisationUnit unit, DataSet dataSet )
     {
         Document document = openDocument( out );
-        
+
         PdfPTable table = getPdfPTable( true, 0.501f, 0.10f, 0.10f, 0.10f, 0.10f, 0.10f );
-        
+
         table.setHeaderRows( 1 );
 
         String dataSetName = dataSet != null ? " - " + dataSet.getName() : "";
-        
-        table.addCell( getHeader3Cell( i18n.getString( "data_completeness_report" ) + " - " + unit.getName() + dataSetName, 6 ) );
+
+        table.addCell( getHeader3Cell( i18n.getString( "data_completeness_report" ) + " - " + unit.getName()
+            + dataSetName, 6 ) );
 
         table.addCell( getCell( 6, 8 ) );
 
-        table.addCell( getTextCell( i18n.getString( "district_health_information_software" ) + " - " + DateUtils.getMediumDateString(), 6 ) );
+        table.addCell( getTextCell( i18n.getString( "district_health_information_software" ) + " - "
+            + DateUtils.getMediumDateString(), 6 ) );
 
         table.addCell( getCell( 6, 15 ) );
-        
+
         table.addCell( getItalicCell( i18n.getString( "name" ), 1 ) );
         table.addCell( getItalicCell( i18n.getString( "actual" ), 1 ) );
         table.addCell( getItalicCell( i18n.getString( "target" ), 1 ) );
@@ -240,7 +244,7 @@ public class ItextPdfService
         table.addCell( getItalicCell( i18n.getString( "percent" ), 1 ) );
 
         table.addCell( getCell( 6, 8 ) );
-        
+
         if ( results != null )
         {
             for ( DataSetCompletenessResult result : results )
@@ -252,29 +256,31 @@ public class ItextPdfService
                 table.addCell( getTextCell( String.valueOf( result.getRegistrationsOnTime() ) ) );
                 table.addCell( getTextCell( String.valueOf( result.getPercentageOnTime() ) ) );
             }
-        }        
-        
+        }
+
         addTableToDocument( document, table );
-        
+
         closeDocument( document );
     }
-    
-    public void writeValidationResult( Collection<ValidationResult> results, OutputStream out, I18n i18n, I18nFormat format )
+
+    public void writeValidationResult( Map<String, List<ValidationResult>> results, OutputStream out, I18n i18n,
+        I18nFormat format )
     {
         Document document = openDocument( out );
-        
+
         PdfPTable table = getPdfPTable( true, 0.19f, 0.13f, 0.21f, 0.07f, 0.12f, 0.07f, 0.21f );
-        
+
         table.setHeaderRows( 0 );
-        
+
         table.addCell( getHeader3Cell( i18n.getString( "data_quality_report" ), 7 ) );
 
         table.addCell( getCell( 7, 8 ) );
-        
-        table.addCell( getTextCell( i18n.getString( "district_health_information_software" ) + " - " + DateUtils.getMediumDateString(), 7 ) );
-        
+
+        table.addCell( getTextCell( i18n.getString( "district_health_information_software" ) + " - "
+            + DateUtils.getMediumDateString(), 7 ) );
+
         table.addCell( getCell( 7, 15 ) );
-        
+
         table.addCell( getItalicCell( i18n.getString( "source" ), 1 ) );
         table.addCell( getItalicCell( i18n.getString( "period" ), 1 ) );
         table.addCell( getItalicCell( i18n.getString( "left_side_description" ), 1 ) );
@@ -282,32 +288,42 @@ public class ItextPdfService
         table.addCell( getItalicCell( i18n.getString( "operator" ), 1 ) );
         table.addCell( getItalicCell( i18n.getString( "value" ), 1 ) );
         table.addCell( getItalicCell( i18n.getString( "right_side_description" ), 1 ) );
-        
+
         table.addCell( getCell( 7, 8 ) );
-        
+
         if ( results != null )
         {
-            for ( ValidationResult validationResult : results )
+            for ( String periodTypeName : results.keySet() )
             {
-                OrganisationUnit unit = (OrganisationUnit) validationResult.getSource();
+                List<ValidationResult> validationResults = results.get( periodTypeName );
                 
-                Period period = validationResult.getPeriod();
+                table.addCell( getCell( 7, 8 ) );
                 
-                table.addCell( getTextCell( unit.getName() ) );
-                table.addCell( getTextCell( format.formatPeriod( period ) ) );
-                table.addCell( getTextCell( validationResult.getValidationRule().getLeftSide().getDescription() ) );
-                table.addCell( getTextCell( String.valueOf( validationResult.getLeftsideValue() ) ) );
-                table.addCell( getTextCell( i18n.getString( validationResult.getValidationRule().getOperator() ), 1, ALIGN_CENTER ) );
-                table.addCell( getTextCell( String.valueOf( validationResult.getRightsideValue() ) ) );
-                table.addCell( getTextCell( validationResult.getValidationRule().getRightSide().getDescription() ) );                    
+                table.addCell( getItalicCell( periodTypeName, 7 ) );
+                
+                for ( ValidationResult validationResult : validationResults )
+                {
+                    OrganisationUnit unit = (OrganisationUnit) validationResult.getSource();
+
+                    Period period = validationResult.getPeriod();
+
+                    table.addCell( getTextCell( unit.getName() ) );
+                    table.addCell( getTextCell( format.formatPeriod( period ) ) );
+                    table.addCell( getTextCell( validationResult.getValidationRule().getLeftSide().getDescription() ) );
+                    table.addCell( getTextCell( String.valueOf( validationResult.getLeftsideValue() ) ) );
+                    table.addCell( getTextCell( i18n.getString( validationResult.getValidationRule().getOperator() ),
+                        1, ALIGN_CENTER ) );
+                    table.addCell( getTextCell( String.valueOf( validationResult.getRightsideValue() ) ) );
+                    table.addCell( getTextCell( validationResult.getValidationRule().getRightSide().getDescription() ) );
+                }
             }
         }
-        
+
         addTableToDocument( document, table );
-        
+
         closeDocument( document );
     }
-    
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -319,7 +335,7 @@ public class ItextPdfService
         map.put( false, "No" );
         return map;
     }
-    
+
     private Map<String, String> getType()
     {
         Map<String, String> map = new HashMap<String, String>();
@@ -328,7 +344,7 @@ public class ItextPdfService
         map.put( DataElement.VALUE_TYPE_BOOL, "Yes/No" );
         return map;
     }
-    
+
     private Map<String, String> getAggregationOperator()
     {
         Map<String, String> map = new HashMap<String, String>();

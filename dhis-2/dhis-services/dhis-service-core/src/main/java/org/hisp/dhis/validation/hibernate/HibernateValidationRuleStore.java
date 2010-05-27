@@ -1,5 +1,3 @@
-package org.hisp.dhis.validationrule.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,82 +25,62 @@ package org.hisp.dhis.validationrule.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
+package org.hisp.dhis.validation.hibernate;
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.pdf.PdfService;
-import org.hisp.dhis.util.SessionUtils;
-import org.hisp.dhis.validation.ValidationResult;
-
-import com.opensymphony.xwork2.ActionSupport;
+import org.hibernate.Session;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.validation.ValidationRule;
+import org.hisp.dhis.validation.ValidationRuleStore;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version HibernateValidationRuleStore.java May 19, 2010 1:48:44 PM
  */
-public class GenerateValidationResultPDFAction
-    extends ActionSupport
+
+public class HibernateValidationRuleStore
+    extends HibernateGenericStore<ValidationRule>
+    implements ValidationRuleStore
 {
-    private static final String KEY_VALIDATIONRESULT = "validationResult";
-
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private PdfService pdfService;
+    private PeriodStore periodStore;
 
-    public void setPdfService( PdfService pdfService )
+    public void setPeriodStore( PeriodStore periodStore )
     {
-        this.pdfService = pdfService;
-    }
-    
-    private I18nFormat format;
+        this.periodStore = periodStore;
 
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-    
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Implementation
     // -------------------------------------------------------------------------
 
-    private InputStream inputStream;
-
-    public InputStream getInputStream()
+    @Override
+    public int addValidationRule( ValidationRule validationRule )
     {
-        return inputStream;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
+        PeriodType periodType = periodStore.getPeriodType( validationRule.getPeriodType().getClass() );
 
-    @SuppressWarnings( "unchecked" )
-    public String execute()
-        throws Exception
+        validationRule.setPeriodType( periodType );
+
+        Session session = sessionFactory.getCurrentSession();
+
+        return (Integer) session.save( validationRule );
+    }
+
+    @Override
+    public void updateValidationRule( ValidationRule validationRule )
     {
-        Map<String, List<ValidationResult>> results = (Map<String, List<ValidationResult>>) SessionUtils.
-            getSessionVar( KEY_VALIDATIONRESULT );
-        
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        
-        pdfService.writeValidationResult( results, out, i18n, format );
+        PeriodType periodType = periodStore.getPeriodType( validationRule.getPeriodType().getClass() );
 
-        inputStream = new ByteArrayInputStream( out.toByteArray() );
-                
-        return SUCCESS;
+        validationRule.setPeriodType( periodType );
+
+        Session session = sessionFactory.getCurrentSession();
+
+        session.update( validationRule );
     }
+
 }

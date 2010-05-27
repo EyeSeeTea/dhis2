@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.expression.Expression;
+import org.hisp.dhis.period.PeriodType;
 
 /**
  * @author Kristian Nordal
@@ -65,6 +66,8 @@ public class ValidationRule
     private Expression rightSide;
     
     private Set<ValidationRuleGroup> groups = new HashSet<ValidationRuleGroup>();
+    
+    private PeriodType periodType; 
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -143,6 +146,16 @@ public class ValidationRule
     public String getOperator()
     {
         return operator;
+    }
+
+    public PeriodType getPeriodType()
+    {
+        return periodType;
+    }
+
+    public void setPeriodType( PeriodType periodType )
+    {
+        this.periodType = periodType;
     }
 
     public void setOperator( String operator )

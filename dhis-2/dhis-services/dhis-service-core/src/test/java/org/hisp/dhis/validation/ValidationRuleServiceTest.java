@@ -108,6 +108,8 @@ public class ValidationRuleServiceTest
     private ValidationRule validationRuleD;
     
     private ValidationRuleGroup group;
+
+    private PeriodType periodType = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
     
     // ----------------------------------------------------------------------
     // Fixture
@@ -192,10 +194,10 @@ public class ValidationRuleServiceTest
 
         dataSetService.addDataSet( dataSet );
         
-        validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB );
-        validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_GREATER, expressionB, expressionC );
-        validationRuleC = createValidationRule( 'C', ValidationRule.OPERATOR_LESSER_EQUAL, expressionB, expressionA );
-        validationRuleD = createValidationRule( 'D', ValidationRule.OPERATOR_LESSER, expressionA, expressionC );
+        validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB, periodType );
+        validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_GREATER, expressionB, expressionC, periodType );
+        validationRuleC = createValidationRule( 'C', ValidationRule.OPERATOR_LESSER_EQUAL, expressionB, expressionA, periodType );
+        validationRuleD = createValidationRule( 'D', ValidationRule.OPERATOR_LESSER, expressionA, expressionC, periodType );
         
         group = createValidationRuleGroup( 'A' );
     }
@@ -483,8 +485,8 @@ public class ValidationRuleServiceTest
     @Test
     public void testAddValidationRuleGroup()
     {
-        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null );
-        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null );
+        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
+        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
         
         validationRuleService.addValidationRule( ruleA );
         validationRuleService.addValidationRule( ruleB );
@@ -510,8 +512,8 @@ public class ValidationRuleServiceTest
     @Test
     public void testUpdateValidationRuleGroup()
     {
-        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null );
-        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null );
+        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
+        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
         
         validationRuleService.addValidationRule( ruleA );
         validationRuleService.addValidationRule( ruleB );
@@ -546,8 +548,8 @@ public class ValidationRuleServiceTest
     @Test
     public void testDeleteValidationRuleGroup()
     {
-        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null );
-        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null );
+        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
+        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
         
         validationRuleService.addValidationRule( ruleA );
         validationRuleService.addValidationRule( ruleB );
@@ -583,8 +585,8 @@ public class ValidationRuleServiceTest
     @Test
     public void testGetAllValidationRuleGroup()
     {
-        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null );
-        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null );
+        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
+        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
         
         validationRuleService.addValidationRule( ruleA );
         validationRuleService.addValidationRule( ruleB );
@@ -613,8 +615,8 @@ public class ValidationRuleServiceTest
     @Test
     public void testGetValidationRuleGroupByName()
     {
-        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null );
-        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null );
+        ValidationRule ruleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
+        ValidationRule ruleB = createValidationRule( 'B', ValidationRule.OPERATOR_EQUAL, null, null, periodType );
         
         validationRuleService.addValidationRule( ruleA );
         validationRuleService.addValidationRule( ruleB );

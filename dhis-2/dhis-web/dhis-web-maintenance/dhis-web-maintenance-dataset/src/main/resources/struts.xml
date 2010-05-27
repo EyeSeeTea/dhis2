@@ -59,7 +59,7 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     
-     <action name="sortOrderSection" class="org.hisp.dhis.dataset.action.section.SortOrderSection">
+    <action name="sortOrderSection" class="org.hisp.dhis.dataset.action.section.SortOrderSection">
       <result name="input" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-dataset/sortOrderSection.vm</param>
       <param name="menu">/dhis-web-maintenance-dataset/menu.vm</param>

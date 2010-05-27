@@ -4,8 +4,9 @@ function showEditLeftSideExpressionForm()
 	var description = htmlEncode( document.getElementById( "leftSideDescription" ).value );
 	var expression = htmlEncode( document.getElementById( "leftSideExpression" ).value );
 	var textualExpression = htmlEncode( document.getElementById( "leftSideTextualExpression" ).value );
+	var periodTypeName = htmlEncode( document.getElementById( "periodTypeName" ).value );
 	
-	showExpressionForm( "left", description, expression, textualExpression );
+	showExpressionForm( "left", description, expression, textualExpression, periodTypeName );
 }
 
 function showEditRightSideExpressionForm()
@@ -13,16 +14,18 @@ function showEditRightSideExpressionForm()
 	var description = htmlEncode( document.getElementById( "rightSideDescription" ).value );
 	var expression = htmlEncode( document.getElementById( "rightSideExpression" ).value );
 	var textualExpression = htmlEncode( document.getElementById( "rightSideTextualExpression" ).value );
-	
-	showExpressionForm( "right", description, expression, textualExpression );
+	var periodTypeName = htmlEncode( document.getElementById( "periodTypeName" ).value );
+
+	showExpressionForm( "right", description, expression, textualExpression, periodTypeName );
 }
 
-function showExpressionForm( side, description, expression, textualExpression )
+function showExpressionForm( side, description, expression, textualExpression, periodTypeName )
 {
 	var url = "showEditExpressionForm.action?side=" + side +		
 		"&description=" + description +
 		"&expression=" + expression +
-		"&textualExpression=" + textualExpression;
+		"&textualExpression=" + textualExpression +
+		"&periodTypeName=" + periodTypeName ;
 		
     var dialog = window.open( url, "_blank", "directories=no, \
     	height=560, width=790, location=no, menubar=no, status=no, \
@@ -45,13 +48,16 @@ function insertText( inputAreaName, inputText )
 	updateTextualExpression( inputAreaName );	
 }
 
-function filterDataElements( dataElementGroupSelectName, filterName )
+function filterDataElements( dataSetName, filterName )
 {
-	var dataElementGroup = document.getElementById( dataElementGroupSelectName );
-	var dataElementGroupId = dataElementGroup.options[ dataElementGroup.selectedIndex ].value;
-	var filter = htmlEncode( document.getElementById( filterName ).value );
+	var dataSet = byId( dataSetName );
+	var dataSetId = dataSet.options[ dataSet.selectedIndex ].value;
+	var filter = htmlEncode( byId( filterName ).value );
+	var periodTypeName = getFieldValue( 'periodTypeName');
 	
-	var url = "getFilteredDataElements.action?dataElementGroupId=" + dataElementGroupId + "&filter=" + filter;
+	var url = "getFilteredDataElements.action?dataSetId=" + dataSetId;
+		url += "&filter=" + filter;
+		url += "&periodTypeName=" + periodTypeName;
 
     var request = new Request();
 	request.setResponseTypeXML( 'operand' );
