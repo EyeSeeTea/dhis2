@@ -60,6 +60,13 @@
 				<p><label>$i18n.getString( "email" ):</label><br><span id="emailField"></span></p>
                 <p><label>$i18n.getString( "phone_number" ):</label><br><span id="phoneNumberField"></span></p>
 			</div>
+			
+			<div id="warningArea" style="display:none">
+				<div style="float:right">
+					<a href="javascript:hideWarning()" title='$i18n.getString( 'hide_warning' )'><img src="../images/close.png" alt=$i18n.getString( "hide_warning" )'></a>
+				</div>
+				<p><span id="warningField"></span></p>
+			</div>
 
 		</td>
 	</tr>

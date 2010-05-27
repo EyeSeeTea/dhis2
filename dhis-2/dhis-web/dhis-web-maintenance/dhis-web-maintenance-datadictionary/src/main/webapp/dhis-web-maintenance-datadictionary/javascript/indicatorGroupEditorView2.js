@@ -378,6 +378,12 @@ function deleteIndicatorGroupReceived( xmlObject )
 		var list = byId('availableGroups');
         list.remove( list.selectedIndex );
     }
+	else if ( type == "error" )
+	{
+		setFieldValue( 'warningArea', xmlObject.firstChild.nodeValue );
+
+		showWarning();
+	}
 }
  
  

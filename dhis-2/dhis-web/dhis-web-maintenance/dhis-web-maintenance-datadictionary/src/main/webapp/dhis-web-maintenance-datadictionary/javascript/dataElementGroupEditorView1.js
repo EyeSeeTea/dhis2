@@ -249,6 +249,12 @@ function deleteDataElementGroupReceived( xmlObject )
         document.getElementById( 'groupNameView' ).innerHTML = "";
         selectedDataElements = new Object();
     }
+	else if ( type == 'error' )
+	{
+		setFieldValue( 'warningArea', xmlObject.firstChild.nodeValue );
+
+		showWarning();
+	}
 }
 
 function showRenameDataElementGroupForm()

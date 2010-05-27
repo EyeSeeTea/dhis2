@@ -47,6 +47,7 @@
     <action name="removeValidationRule" class="org.hisp.dhis.validationrule.action.RemoveValidationRuleAction">
       <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
       <param name="requiredAuthorities">F_VALIDATIONRULE_DELETE</param>
+      <param name="onExceptionReturn">plainTextError</param>
     </action>
       
     <action name="validateValidationRule" class="org.hisp.dhis.validationrule.action.ValidateValidationRuleAction">
@@ -113,6 +114,7 @@
     <action name="removeValidationRuleGroup" class="org.hisp.dhis.validationrule.action.validationrulegroup.RemoveValidationRuleGroupAction">
       <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
       <param name="requiredAuthorities">F_VALIDATIONRULEGROUP_DELETE</param>
+      <param name="onExceptionReturn">plainTextError</param>
     </action>
       
     <action name="showAddValidationRuleGroupForm" class="org.hisp.dhis.validationrule.action.validationrulegroup.GetValidationRuleGroupMembersAction">

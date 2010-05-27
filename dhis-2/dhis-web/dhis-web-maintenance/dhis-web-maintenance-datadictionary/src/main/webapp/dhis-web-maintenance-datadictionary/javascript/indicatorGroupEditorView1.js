@@ -417,6 +417,12 @@ function deleteIndicatorGroupReceived( xmlObject )
 		var indicatorGroupsSelect = document.getElementById( 'indicatorGroups' );
         indicatorGroupsSelect.remove( indicatorGroupsSelect.selectedIndex );
     }
+	else if ( type == "error" )
+	{
+		setFieldValue( 'warningArea', xmlObject.firstChild.nodeValue );
+
+		showWarning();
+	}
 }
  
  

@@ -204,11 +204,17 @@ function deleteDataElementGroupReceived( xmlObject )
 {
     var type = xmlObject.getAttribute( 'type' );
 
-    if ( type=='success' )
+    if ( type == 'success' )
     {
         var dataElementGroupsSelect = document.getElementById( 'availableGroups' );
         dataElementGroupsSelect.remove( dataElementGroupsSelect.selectedIndex );                
     }
+	else if ( type == 'error' )
+	{
+		setFieldValue( 'warningArea', xmlObject.firstChild.nodeValue );
+
+		showWarning();
+	}
 }
 
 function showRenameDataElementGroupForm()
