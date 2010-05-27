@@ -1311,6 +1311,55 @@
 			<result name="input" type="velocity-xml">
 				/dhis-web-excel-reporting/responseInput.vm</result>
 		</action>
+		
+		<!-- Ext Chart -->
+		
+		<action name="chart" class="org.hisp.dhis.reportexcel.action.NoAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-excel-reporting/chart.vm</param>
+			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
+			<param name="javascripts">
+				../dhis-web-commons/ouwt/ouwt.js,				
+				ext/adapter/ext/ext-base.js,
+				ext/ext-all.js,
+				ext/ux/MultiSelect.js,
+				ext/ux/ItemSelector.js,				
+				ext/dataElementChart.js,
+				ext/periodChart.js,
+				ext/indicatorChart.js,
+				ext/index.js
+			</param>
+			<param name="stylesheets">
+				ext/resources/css/ext-all.css,
+				ext/ux/css/MultiSelect.css,
+				ext/resources/css/chart.css
+			</param>
+			<interceptor-ref name="organisationUnitTreeStack" />
+			<param name="menuTreeHeight">220</param>			
+		</action>
+		
+		<action name="getDataElementGroups"
+			class="org.hisp.dhis.reportexcel.chart.action.GetDataElementGroupsAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonDataElementGroups.vm
+			</result>
+		</action>
+		
+		<action name="getPeriodTypes"
+			class="org.hisp.dhis.reportexcel.chart.action.GetPeriodTypesAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonPeriodTypes.vm
+			</result>
+		</action>
+		
+		<action name="getDataElementChart"
+			class="org.hisp.dhis.reportexcel.chart.action.GetDataElementChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonChartValues.vm
+			</result>
+		</action>
+		
+		
 
 	</package>
 </struts>

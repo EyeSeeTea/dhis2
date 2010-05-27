@@ -1,0 +1,84 @@
+
+<h3>$i18n.getString( "chart" )</h3>
+<br>
+<form name="chart">
+<div id="container">
+	<div id="tabs-chart-type">
+		<div id="tab-chart-type" class="tab-item">			
+			<table width="100%" >
+				<tr align="center">
+					<td><img src="images/pie_chart.png"/></td>
+					<td><img src="images/line_chart.png"/></td>		
+					<td><img src="images/column_chart.png"/></td>	
+				</tr>
+				<tr align="center">
+					<td colspan=3><div id="chart-type"/></td>
+				</tr>		
+				<tr align="center">
+					<td><div id="pie"/></td>
+					<td><div id="line"/></td>		
+					<td><div id="column"/></td>	
+				</tr>	
+				<tr align="center">
+					<td>$i18n.getString( 'pie_char' )</td>
+					<td>$i18n.getString( 'line_chart' )</td>		
+					<td>$i18n.getString( 'column_chart' )</td>	
+				</tr>						
+			</table>				
+		</div>
+	</div>	
+	<br/>
+    <div id="tabs">
+		<div id='data-element-chart' class="tab-item">				
+			<fieldset class="fieldset">
+				<legend><b>$i18n.getString( 'axis_x' )</b></legend>
+				<table width="100%">
+					<col width="150px"/>	
+					<tr>
+						<td>$i18n.getString( 'dataelement_groups' )</td>
+						<td><input id="data-element-groups"/></td>					
+					</tr>
+					<tr>
+						<td>$i18n.getString( 'dataelement' )</td>
+						<td><div id='data-elements'></div></td>
+					</tr>					
+				</table>
+			</fieldset>
+			
+			<fieldset class="fieldset">
+				<legend><b>$i18n.getString( 'axis_y' )</b></legend>
+				<table width="100%">
+					<col width="150px"/>				
+					<tr>					
+						<td>$i18n.getString( 'period_type' )</td>
+						<td><input id="period-types"/></td>					
+					</tr>
+					<tr>
+						<td>$i18n.getString( 'period' )</td>
+						<td><input id="periods"/></td>					
+					</tr>					
+				</table>
+			</fieldset>			
+			<div id="view-dataelement-chart" align="right"/>
+			
+		</div>
+		<div id="period-chart"  class="tab-item">
+			
+		</div>
+	</div>
+</div>
+
+</form>
+
+<script>
+	var i18n_chart = "$encoder.jsEscape($i18n.getString( 'chart' ) , "'")";
+	var i18n_selection = "$encoder.jsEscape($i18n.getString( 'selection' ) , "'")";
+	var i18n_dataelement_groups = "$encoder.jsEscape($i18n.getString( 'dataelement_groups' ) , "'")";	
+	var i18n_dataelements = "$encoder.jsEscape($i18n.getString( 'dataelement' ) , "'")";	
+	var i18n_dataelement_chart = "$encoder.jsEscape($i18n.getString( 'dataelement_chart' ) , "'")";	
+	var i18n_period_type = "$encoder.jsEscape($i18n.getString( 'period_type' ) , "'")";	
+	var i18n_period = "$encoder.jsEscape($i18n.getString( 'period' ) , "'")";
+	var i18n_period_chart = "$encoder.jsEscape($i18n.getString( 'period_chart' ) , "'")";	
+	var i18n_select_chart_type = "$encoder.jsEscape($i18n.getString( 'select_chart_type' ) , "'")";	
+	
+</script>

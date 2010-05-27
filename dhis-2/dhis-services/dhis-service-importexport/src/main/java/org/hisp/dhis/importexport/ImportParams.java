@@ -1,7 +1,5 @@
 package org.hisp.dhis.importexport;
 
-import java.util.Date;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -29,12 +27,23 @@ import java.util.Date;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
+
+import org.hisp.dhis.system.util.MathUtils;
+
 /**
  * @author Lars Helge Overland
  * @version $Id: ImportParams.java 6425 2008-11-22 00:08:57Z larshelg $
  */
 public class ImportParams
 {
+    public static final String ATTRIBUTE_NAMESPACE = "xmlns";
+    public static final String ATTRIBUTE_MINOR_VERSION = "minorVersion";
+    public static final String ATTRIBUTE_EXPORTED = "exported";
+    public static final String NAMESPACE_10 = "http://dhis2.org/schema/dxf/1.0";
+    public static final String MINOR_VERSION_10 = "1.0";
+    public static final String MINOR_VERSION_11 = "1.1";
+    
     private ImportType type;
     
     private boolean extendedMode;
@@ -46,6 +55,10 @@ public class ImportParams
     private boolean skipCheckMatching;
     
     private Date lastUpdated;
+    
+    private String namespace;
+    
+    private String minorVersion;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -59,6 +72,24 @@ public class ImportParams
     // Logic
     // -------------------------------------------------------------------------
 
+    public boolean minorVersionGreaterOrEqual( String requiredVersion )
+    {
+        if ( requiredVersion == null || minorVersion == null )
+        {
+            return false;
+        }
+        
+        if ( !MathUtils.isNumeric( minorVersion ) )
+        {
+            throw new IllegalArgumentException( "Invalid version, must be numeric: " + minorVersion );            
+        }
+        
+        double _minorVersion = Double.parseDouble( minorVersion ) * 1000;
+        double _requiredVersion = Double.parseDouble( requiredVersion ) * 1000;
+        
+        return (int)_minorVersion >= (int)_requiredVersion;
+    }
+    
     public boolean isImport()
     {
         return type.equals( ImportType.IMPORT );
@@ -141,5 +172,25 @@ public class ImportParams
     public void setLastUpdated( Date lastUpdated )
     {
         this.lastUpdated = lastUpdated;
+    }
+
+    public String getNamespace()
+    {
+        return namespace;
+    }
+
+    public void setNamespace( String namespace )
+    {
+        this.namespace = namespace;
+    }
+
+    public String getMinorVersion()
+    {
+        return minorVersion;
+    }
+
+    public void setMinorVersion( String minorVersion )
+    {
+        this.minorVersion = minorVersion;
     }
 }
