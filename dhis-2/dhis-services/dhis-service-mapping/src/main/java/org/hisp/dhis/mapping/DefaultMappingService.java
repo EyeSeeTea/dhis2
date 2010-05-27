@@ -167,6 +167,7 @@ public class DefaultMappingService
      * Returns a map for the given MapOrganisationUnitRelations where the key is
      * the OrganisationUnit identifier and the value is the feature identifier.
      */
+    /*
     private java.util.Map<Integer, String> getOrganisationUnitFeatureMap(
         Collection<MapOrganisationUnitRelation> relations )
     {
@@ -178,7 +179,7 @@ public class DefaultMappingService
         }
 
         return map;
-    }
+    }*/
 
     // -------------------------------------------------------------------------
     // Map
