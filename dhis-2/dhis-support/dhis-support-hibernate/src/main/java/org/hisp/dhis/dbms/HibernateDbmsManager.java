@@ -144,7 +144,7 @@ public class HibernateDbmsManager
                
         cacheManager.clearCache();
         
-        log.debug( "Cleared Hiberate cache" );
+        log.debug( "Cleared Hibernate cache" );
     }
     
     public void clearSession()
