@@ -42,7 +42,10 @@
 				<p><label>$i18n.getString( "name" ):</label><br><span id="nameField"></span></p>
 				<p><label>$i18n.getString( "number_of_categories" ):</label><br><span id="dataElementCategoryCountField"></span></p>
 			</div>
-
+			
+			<div id="warningArea" style="display:none">
+                <span id="warningField"></span>
+            </div>
 		</td>
   </tr>
 </table>
