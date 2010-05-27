@@ -60,6 +60,7 @@ public class AbstractDataElementConverter
         match.setActive( object.isActive() );
         match.setType( object.getType() );
         match.setAggregationOperator( object.getAggregationOperator() );
+        match.setLastUpdated( object.getLastUpdated() );
                             
         dataElementService.updateDataElement( match );
     }

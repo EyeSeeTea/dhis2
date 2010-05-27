@@ -67,6 +67,9 @@ public class AbstractOrganisationUnitConverter
         match.setActive( object.isActive() );
         match.setComment( object.getComment() );
         match.setGeoCode( object.getGeoCode() );
+        match.setFeatureType( object.getFeatureType() );
+        match.setCoordinates( object.getCoordinates() );
+        match.setLastUpdated( object.getLastUpdated() );
         
         organisationUnitService.updateOrganisationUnit( match );
     }

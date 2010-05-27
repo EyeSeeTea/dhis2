@@ -72,6 +72,7 @@ public class AbstractExtendedDataElementConverter
         match.setActive( object.isActive() );
         match.setType( object.getType() );
         match.setAggregationOperator( object.getAggregationOperator() );
+        match.setLastUpdated( object.getLastUpdated() );
 
         // ---------------------------------------------------------------------
         // Update matching if import object has extended dataelement
