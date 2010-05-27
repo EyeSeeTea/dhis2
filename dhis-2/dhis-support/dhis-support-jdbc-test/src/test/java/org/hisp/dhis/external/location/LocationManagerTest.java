@@ -39,7 +39,6 @@ import java.io.OutputStream;
 import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.NotTransactional;
 
 /**
  * @author Lars Helge Overland
@@ -76,7 +75,6 @@ public class LocationManagerTest
     // -------------------------------------------------------------------------
 
     @Test
-    @NotTransactional
     public void testGetInputStream()
     {
         try
@@ -103,7 +101,6 @@ public class LocationManagerTest
     }
 
     @Test
-    @NotTransactional
     public void testInputStreamWithDirs()
     {
         try
@@ -134,7 +131,6 @@ public class LocationManagerTest
     // -------------------------------------------------------------------------
 
     @Test
-    @NotTransactional
     public void testGetFileForReading()
     {
         try
@@ -163,7 +159,6 @@ public class LocationManagerTest
     }
 
     @Test
-    @NotTransactional
     public void testGetFileForReadingWithDirs()
     {
         try
@@ -210,7 +205,6 @@ public class LocationManagerTest
     // -------------------------------------------------------------------------
 
     @Test
-    @NotTransactional
     public void testGetOutputStream()
     {
         try
@@ -226,7 +220,6 @@ public class LocationManagerTest
     }
 
     @Test
-    @NotTransactional
     public void testGetOutputStreamWithDirs()
     {
         try
@@ -246,7 +239,6 @@ public class LocationManagerTest
     // -------------------------------------------------------------------------
 
     @Test
-    @NotTransactional
     public void testGetFileForWriting()
     {
         try
@@ -277,7 +269,6 @@ public class LocationManagerTest
     }
 
     @Test
-    @NotTransactional
     public void testGetFileForWritingWithDirs()
     {
         try
@@ -312,7 +303,6 @@ public class LocationManagerTest
     // -------------------------------------------------------------------------
 
     @Test
-    @NotTransactional
     public void testGetExternalDirectory()
     {
         try
@@ -330,7 +320,6 @@ public class LocationManagerTest
     }
 
     @Test
-    @NotTransactional
     public void testExternalDirectorySet()
     {        
         boolean set = locationManager.externalDirectorySet();
@@ -346,7 +335,6 @@ public class LocationManagerTest
     }
 
     @Test
-    @NotTransactional
     public void testGetEnvironmentVariable()
     {
         String env = locationManager.getEnvironmentVariable();
