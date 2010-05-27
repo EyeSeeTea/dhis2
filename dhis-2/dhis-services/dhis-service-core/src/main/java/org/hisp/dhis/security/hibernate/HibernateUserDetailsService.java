@@ -27,6 +27,7 @@ package org.hisp.dhis.security.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -76,17 +77,15 @@ public class HibernateUserDetailsService
     {
         UserCredentials credentials = loadUserCredentials( username );
 
-        GrantedAuthority[] authorities = getGrantedAuthorities( credentials );
-
         return new User( credentials.getUsername(), credentials.getPassword(), true,
-            true, true, true, authorities );
+            true, true, true, getGrantedAuthorities( credentials ) );
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private GrantedAuthority[] getGrantedAuthorities( UserCredentials credentials )
+    private Collection<GrantedAuthority> getGrantedAuthorities( UserCredentials credentials )
     {
         Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 
@@ -98,7 +97,7 @@ public class HibernateUserDetailsService
             }
         }
 
-        return authorities.toArray( new GrantedAuthority[authorities.size()] );
+        return authorities;
     }
 
     private UserCredentials loadUserCredentials( String username )

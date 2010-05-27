@@ -38,7 +38,6 @@ import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.NotTransactional;
 
 /**
  * @author Lars Helge Overland
@@ -64,7 +63,6 @@ public class ConfigurationManagerTest
     }
     
     @Test
-    @NotTransactional
     public void testSetGet()
         throws Exception
     {

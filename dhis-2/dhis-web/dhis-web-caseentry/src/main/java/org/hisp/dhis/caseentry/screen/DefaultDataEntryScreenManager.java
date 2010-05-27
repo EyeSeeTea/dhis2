@@ -38,11 +38,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.customvalue.CustomValue;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.minmax.MinMaxDataElement;
@@ -92,13 +90,6 @@ public class DefaultDataEntryScreenManager
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
-    }
-
-    private DataElementCategoryService categoryService;
-
-    public void setCategoryService( DataElementCategoryService categoryService )
-    {
-        this.categoryService = categoryService;
     }
 
     private ProgramStageInstanceService programStageInstanceService;
@@ -1321,25 +1312,6 @@ public class DefaultDataEntryScreenManager
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Tests whether the given Collection of CustomValues contains a CustomValue
-     * with the given data element identifier and category option combo id.
-     */
-    private boolean customValuesExists( Collection<CustomValue> customValues, int dataElementId,
-        int categoryOptionComboId )
-    {
-        for ( CustomValue customValue : customValues )
-        {
-            if ( dataElementId == customValue.getDataElement().getId()
-                && categoryOptionComboId == customValue.getOptionCombo().getId() )
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     /**
      * Returns the value of the PatientDataValue in the Collection of DataValues
