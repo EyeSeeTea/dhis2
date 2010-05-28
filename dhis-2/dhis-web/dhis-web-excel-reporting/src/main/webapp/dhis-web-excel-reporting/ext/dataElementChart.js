@@ -1,24 +1,14 @@
+
 Ext.onReady(function(){
 	Ext.QuickTips.init();
-	
-	pieChartRadio.render( 'pie' );
-	lineChartRadio.render( 'line' );
-	columnChartRadio.render( 'column' );
-	
-
-	
-	//chartTypeRadioGroup.render( 'chart-type' );
-	
-	
-	
-	
+		
 	var periodsCombo = new Ext.form.ComboBox({
 		store: periodsStore,
 		typeAhead: true,
 		displayField: 'name',
 		valueField: 'id',
 		typeAhead: true,
-		mode: 'local',
+		mode: 'remote',
 		triggerAction: 'all',
 		emptyText: i18n_period,
 		selectOnFocus:true,
@@ -32,7 +22,7 @@ Ext.onReady(function(){
 		displayField: 'name',
 		valueField: 'name',
 		typeAhead: true,
-		mode: 'local',
+		mode: 'remote',
 		triggerAction: 'all',
 		emptyText: i18n_period_type,
 		selectOnFocus:true,
@@ -61,7 +51,7 @@ Ext.onReady(function(){
 		listWidth:400,
 		width:400,
 		resizable: true,
-		mode: 'local',
+		mode: 'remote',
 		triggerAction: 'all',
 		emptyText: i18n_dataelement_groups,
 		selectOnFocus:true,
@@ -76,7 +66,8 @@ Ext.onReady(function(){
 					scope: this
 				}
 		}
-	});
+	});	
+	
 	
 	var dataElementsContainer = new Ext.Container({
 		autoEl: 'div',  // This is the default
@@ -97,7 +88,64 @@ Ext.onReady(function(){
             },{
                 width: 250,
                 height: 300,
-                store: emptyStore , 
+                store: new Ext.data.SimpleStore({fields: ['id', 'name'],data: []}) , 
+				displayField: 'name',
+                valueField: 'id'	
+            }]
+        }]
+	});
+	
+// ==================================================================================
+//	AXIS X  WITH  INDICATORS
+// ==================================================================================
+
+	var indicatorGroupCombo = new Ext.form.ComboBox({
+		store: indicatorGroupsStore,
+		typeAhead: true,
+		displayField: 'name',
+		valueField: 'id',
+		typeAhead: true,
+		autoWidth :true,
+		listWidth:400,
+		width:400,
+		resizable: true,
+		mode: 'remote',
+		triggerAction: 'all',
+		emptyText: i18n_indicator_groups,
+		selectOnFocus:true,
+		applyTo: 'indicator-groups',
+		listeners: {
+				'select': {
+					fn: function() {						
+						Ext.getCmp('selected-indicators').reset();
+						indicatorsStore.baseParams = { id: indicatorGroupCombo.getValue() };
+						indicatorsStore.reload();							
+					},
+					scope: this
+				}
+		}
+	});
+	
+	var indicatorsContainer = new Ext.Container({
+		autoEl: 'div',  // This is the default
+		layout: 'column',
+		renderTo: 'indicators',	
+		items:[{
+            xtype: 'itemselector',
+			id: 'selected-indicators',
+            name: 'selected-indicators',
+            fieldLabel: 'ItemSelector',
+	        imagePath: 'ext/ux/images/',
+            multiselects: [{
+                width: 250,
+                height: 300,
+                store: indicatorsStore,
+                displayField: 'name',
+                valueField: 'id'				
+            },{
+                width: 250,
+                height: 300,
+                store: new Ext.data.SimpleStore({fields: ['id', 'name'],data: []}) , 
 				displayField: 'name',
                 valueField: 'id'	
             }]
@@ -107,34 +155,74 @@ Ext.onReady(function(){
 	var dataElementChartB = new Ext.Button({
 		text: 'View Chart',
 		renderTo: 'view-dataelement-chart',
-		handler: function() {
-			var dataElements = Ext.getCmp('selected-dataelement').getValue();
+		handler: function() {			
 			
-			var period = periodsCombo.getValue();	
+			var period = periodsCombo.getValue();
+
+			if(SELECTED_ORGID==''){
+				alert("Please select organisation unit !");
+			}else if(period==''){
+				alert("Please select period !");
+			}else{	
 			
-			var store = new Ext.data.JsonStore({
-				url: path + 'getDataElementChart' + type,
-				baseParams: { format: 'json', xaxis: dataElements.split(','), yaxis: period},	
-				root: 'data',		
-				fields: ['name', 'value'],
-				sortInfo: { field: 'name', direction: 'ASC' },
-				autoLoad: true	
-			});
+				if($("#axis-x-de").css("display")=="block"){
+					xaxis = Ext.getCmp('selected-dataelement').getValue();					
+					url = path + 'generateDataElementChart' + type;					
+					xTitle = i18n_dataelements + ":" + $("#data-elements").val();
+				}else{
+					xaxis = Ext.getCmp('selected-indicators').getValue();
+					url = path + 'generateIndicatorChart' + type;		
+					xTitle = i18n_indicators + ":" + $("#indicators-pc").val();
+				}
+				
+				
+				if(xaxis==''){
+					if($("#axis-x-de").css("display")=="block"){	
+						alert("Please select data element !");	
+					}else{
+						alert("Please select indicator !");	
+					}					
+				}else{
+				
+					var chartType = columnChartRadio.getGroupValue();
+
+					if( chartType == FULL_CHART_TYPE ){
+						var store = new Ext.data.JsonStore({
+							url: url,
+							baseParams: { format: 'json', xaxis: xaxis.split(','), yaxis: period},	
+							root: 'data',		
+							fields: ['name', 'value', 'total'],				
+							autoLoad: true	
+						});
+						
+						viewFullChart( xTitle, "Full Style Chart", PARENT, ORGANISATION_UNIT, store );
+						
+					}else{	
+				
+						var store = new Ext.data.JsonStore({
+							url: url,
+							baseParams: { format: 'json', xaxis: xaxis.split(','), yaxis: period},	
+							root: 'data',		
+							fields: ['name', 'value'],				
+							autoLoad: true	
+						});
+						
+						if( chartType == PIE_CHART_TYPE ){
+							viewPieChart( xTitle, "Pie Chart", store);
+						}else if( chartType == LINE_CHART_TYPE ){
+							viewLineChart( xTitle , "Line Chart", store	);
+						}else{
+							viewColumnChart( xTitle, "Column Chart", store	);
+						}
+					}
+				}
 			
-			
-			var chartType = columnChartRadio.getGroupValue();
-			
-			if( chartType == PIE_CHART_TYPE ){
-				viewPieChart("Data Element", "Values", "Column Chart", store	);
-			}else if( chartType == LINE_CHART_TYPE ){
-				viewLineChart("Data Element", "Values", "Column Chart", store	);
-			}else{
-				viewColumnChart("Data Element", "Values", "Column Chart", store	);
 			}
-		
 		}
 	});
 
-
+$("#axis-x-in").css("display","none");
 	
 });
+
+
