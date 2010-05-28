@@ -69,16 +69,30 @@ Ext.onReady( function() {
             method: 'POST',
             success: function(r) {
                 var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
-                for (var i = 0; i < mapLayers.length; i++) {
-                    MAP.addLayers([
-                        new OpenLayers.Layer.WMS(
-                            mapLayers[i].name,
-                            mapLayers[i].mapSource,
-                            {layers: mapLayers[i].layer}
-                        )
-                    ]);
-                    MAP.layers[MAP.layers.length-1].setVisibility(false);
-                }
+				
+				if (mapLayers.length > 0) {
+					for (var i = 0; i < mapLayers.length; i++) {
+						MAP.addLayers([
+							new OpenLayers.Layer.WMS(
+								mapLayers[i].name,
+								mapLayers[i].mapSource,
+								{layers: mapLayers[i].layer}
+							)
+						]);
+						MAP.layers[MAP.layers.length-1].setVisibility(false);
+					}
+				}
+				else {
+					MAP.addLayers([
+						new OpenLayers.Layer.WMS(
+							'World',
+							'http://labs.metacarta.com/wms/vmap0',
+							{layers: 'basic'}
+						)
+					]);
+					
+					MAP.getLayersByName('World')[0].setVisibility(false);
+				}
             }
         });
     }
