@@ -28,6 +28,10 @@ package org.hisp.dhis.importexport.converter;
  */
 
 import org.amplecode.quick.BatchHandler;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.source.Source;
@@ -37,16 +41,21 @@ import org.hisp.dhis.source.Source;
  * @version $Id: AbstractOrganisationUnitConverter.java 6251 2008-11-10 14:37:05Z larshelg $
  */
 public class AbstractOrganisationUnitConverter
-    extends AbstractConverter<OrganisationUnit>
+    extends AbstractConverter<OrganisationUnit> implements Importer<OrganisationUnit>
 {
     protected OrganisationUnitService organisationUnitService;
 
     protected BatchHandler<Source> sourceBatchHandler;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( OrganisationUnit object, ImportParams params )
+    {
+        NameMappingUtil.addOrganisationUnitMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+    
+    @Override
     protected void importUnique( OrganisationUnit object )
     {
         int id = sourceBatchHandler.insertObject( object, true );
@@ -55,7 +64,8 @@ public class AbstractOrganisationUnitConverter
         
         batchHandler.addObject( object );
     }
-    
+
+    @Override
     protected void importMatching( OrganisationUnit object, OrganisationUnit match )
     {
         match.setUuid( object.getUuid() );
@@ -73,7 +83,8 @@ public class AbstractOrganisationUnitConverter
         
         organisationUnitService.updateOrganisationUnit( match );
     }
-    
+
+    @Override
     protected OrganisationUnit getMatching( OrganisationUnit object )
     {
         OrganisationUnit match = organisationUnitService.getOrganisationUnitByName( object.getName() );
@@ -85,7 +96,8 @@ public class AbstractOrganisationUnitConverter
         
         return match;
     }
-    
+
+    @Override
     protected boolean isIdentical( OrganisationUnit object, OrganisationUnit existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

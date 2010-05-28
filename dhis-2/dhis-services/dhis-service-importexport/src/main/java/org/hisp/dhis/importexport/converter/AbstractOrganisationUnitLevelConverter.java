@@ -27,6 +27,9 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
@@ -35,19 +38,23 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
  * @version $Id$
  */
 public class AbstractOrganisationUnitLevelConverter
-    extends AbstractConverter<OrganisationUnitLevel>
+    extends AbstractConverter<OrganisationUnitLevel> implements Importer<OrganisationUnitLevel>
 {
     protected OrganisationUnitService organisationUnitService;
 
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    @Override
+    public void importObject( OrganisationUnitLevel object, ImportParams params )
+    {
+        read( object, GroupMemberType.NONE, params );
+    }
 
+    @Override
     protected void importUnique( OrganisationUnitLevel object )
     {
         organisationUnitService.addOrganisationUnitLevel( object );
     }
-    
+
+    @Override
     protected void importMatching( OrganisationUnitLevel object, OrganisationUnitLevel match )
     {
         match.setLevel( object.getLevel() );
@@ -55,7 +62,8 @@ public class AbstractOrganisationUnitLevelConverter
         
         organisationUnitService.updateOrganisationUnitLevel( match );
     }
-    
+
+    @Override
     protected OrganisationUnitLevel getMatching( OrganisationUnitLevel object )
     {
         OrganisationUnitLevel match = organisationUnitService.getOrganisationUnitLevelByLevel( object.getLevel() );
@@ -67,7 +75,8 @@ public class AbstractOrganisationUnitLevelConverter
         
         return match;
     }
-    
+
+    @Override
     protected boolean isIdentical( OrganisationUnitLevel object, OrganisationUnitLevel existing )
     {
         if ( object.getLevel() != existing.getLevel() )

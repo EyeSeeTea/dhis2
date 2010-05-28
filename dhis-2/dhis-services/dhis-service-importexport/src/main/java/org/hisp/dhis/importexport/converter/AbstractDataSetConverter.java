@@ -29,25 +29,35 @@ package org.hisp.dhis.importexport.converter;
 
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: AbstractDataSetConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
 public class AbstractDataSetConverter
-    extends AbstractConverter<DataSet>
+    extends AbstractConverter<DataSet> implements Importer<DataSet>
 {
     protected DataSetService dataSetService;
 
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    @Override
+    public void importObject( DataSet object, ImportParams params )
+    {
+        NameMappingUtil.addDataSetMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );        
+    }
 
+    @Override
     protected void importUnique( DataSet object )
     {
         batchHandler.addObject( object );    
     }
 
+    @Override
     protected void importMatching( DataSet object, DataSet match )
     {
         match.setName( object.getName() );
@@ -55,12 +65,14 @@ public class AbstractDataSetConverter
         
         dataSetService.updateDataSet( match );
     }
-    
+
+    @Override
     protected DataSet getMatching( DataSet object )
     {
         return dataSetService.getDataSetByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( DataSet object, DataSet existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

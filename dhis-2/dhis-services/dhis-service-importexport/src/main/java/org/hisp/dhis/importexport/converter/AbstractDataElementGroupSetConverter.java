@@ -29,37 +29,49 @@ package org.hisp.dhis.importexport.converter;
 
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class AbstractDataElementGroupSetConverter
-    extends AbstractConverter<DataElementGroupSet>
+    extends AbstractConverter<DataElementGroupSet> implements Importer<DataElementGroupSet>
 {
     protected DataElementService dataElementService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( DataElementGroupSet object, ImportParams params )
+    {
+        NameMappingUtil.addDataElementGroupSetMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( DataElementGroupSet object )
     {
         dataElementService.addDataElementGroupSet( object );
     }
-    
+
+    @Override
     protected void importMatching( DataElementGroupSet object, DataElementGroupSet match )
     {
         match.setName( object.getName() );
         
         dataElementService.updateDataElementGroupSet( match );
     }
-    
+
+    @Override
     protected DataElementGroupSet getMatching( DataElementGroupSet object )
     {
         return dataElementService.getDataElementGroupSetByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( DataElementGroupSet object, DataElementGroupSet existing )
     {
         return object.getName().equals( existing.getName() );

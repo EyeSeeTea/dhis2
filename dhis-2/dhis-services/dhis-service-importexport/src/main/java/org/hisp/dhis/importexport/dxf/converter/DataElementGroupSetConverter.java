@@ -36,12 +36,10 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractDataElementGroupSetConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
@@ -116,9 +114,7 @@ public class DataElementGroupSetConverter
             groupSet.setUuid( values.get( FIELD_UUID ) );
             groupSet.setName( values.get( FIELD_NAME ) );
             
-            NameMappingUtil.addDataElementGroupSetMapping( groupSet.getId(), groupSet.getName() );
-            
-            read( groupSet, GroupMemberType.NONE, params );
+            importObject( groupSet, params );
         }
     }
 }

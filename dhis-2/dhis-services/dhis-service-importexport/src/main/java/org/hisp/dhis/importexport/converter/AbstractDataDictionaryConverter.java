@@ -29,20 +29,28 @@ package org.hisp.dhis.importexport.converter;
 
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class AbstractDataDictionaryConverter
-    extends AbstractConverter<DataDictionary>
+    extends AbstractConverter<DataDictionary> implements Importer<DataDictionary>
 {
     protected DataDictionaryService dataDictionaryService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( DataDictionary object, ImportParams params )
+    {        
+        NameMappingUtil.addDataDictionaryMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );        
+    }
+    
     @Override
     protected void importUnique( DataDictionary object )
     {

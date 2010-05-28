@@ -29,35 +29,42 @@ package org.hisp.dhis.importexport.converter;
 
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
+import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class AbstractCompleteDataSetRegistrationConverter
-    extends AbstractConverter<CompleteDataSetRegistration>
+    extends AbstractConverter<CompleteDataSetRegistration> implements Importer<CompleteDataSetRegistration>
 {
     protected ImportParams params;
 
     protected CompleteDataSetRegistrationService completeDataSetRegistrationService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( CompleteDataSetRegistration object, ImportParams params )
+    {
+        read( object, GroupMemberType.NONE, params );        
+    }
+
+    @Override
     protected void importUnique( CompleteDataSetRegistration object )
     {
         batchHandler.addObject( object );    
     }
 
+    @Override
     protected void importMatching( CompleteDataSetRegistration object, CompleteDataSetRegistration match )
     {
         match.setDate( object.getDate() );
         
         batchHandler.updateObject( match );
     }
-    
+
+    @Override
     protected CompleteDataSetRegistration getMatching( CompleteDataSetRegistration object )
     {
         // ---------------------------------------------------------------------
@@ -73,7 +80,8 @@ public class AbstractCompleteDataSetRegistrationConverter
         
         return batchHandler.objectExists( object ) ? object : null;
     }
-    
+
+    @Override
     protected boolean isIdentical( CompleteDataSetRegistration object, CompleteDataSetRegistration existing )
     {
         // ---------------------------------------------------------------------

@@ -30,6 +30,9 @@ package org.hisp.dhis.importexport.converter;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
@@ -41,7 +44,7 @@ import org.hisp.dhis.reporttable.ReportTableService;
  * @version $Id$
  */
 public class AbstractReportTableConverter
-    extends AbstractConverter<ReportTable>
+    extends AbstractConverter<ReportTable> implements Importer<ReportTable>
 {
     protected ReportTableService reportTableService;
     
@@ -57,15 +60,19 @@ public class AbstractReportTableConverter
     
     protected OrganisationUnitService organisationUnitService;
 
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    @Override
+    public void importObject( ReportTable object, ImportParams params )
+    {
+        read( object, GroupMemberType.NONE, params );
+    }
 
+    @Override
     protected void importUnique( ReportTable object )
     {
         reportTableService.saveReportTable( object );
     }
 
+    @Override
     protected void importMatching( ReportTable object, ReportTable match )
     {
         match.setName( object.getName() );
@@ -97,12 +104,14 @@ public class AbstractReportTableConverter
         
         reportTableService.saveReportTable( match );
     }
-    
+
+    @Override
     protected ReportTable getMatching( ReportTable object )
     {
         return reportTableService.getReportTableByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( ReportTable object, ReportTable existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

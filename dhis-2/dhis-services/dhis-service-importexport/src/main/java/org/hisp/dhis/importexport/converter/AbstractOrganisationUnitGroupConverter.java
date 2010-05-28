@@ -1,5 +1,9 @@
 package org.hisp.dhis.importexport.converter;
 
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 
@@ -31,19 +35,25 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
  */
 
 public class AbstractOrganisationUnitGroupConverter
-    extends AbstractConverter<OrganisationUnitGroup>
+    extends AbstractConverter<OrganisationUnitGroup> implements Importer<OrganisationUnitGroup>
 {
     protected OrganisationUnitGroupService organisationUnitGroupService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
-    
+
+    @Override
+    public void importObject( OrganisationUnitGroup object, ImportParams params )
+    {
+        NameMappingUtil.addOrganisationUnitGroupMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( OrganisationUnitGroup object )
     {
         batchHandler.addObject( object );
     }
-    
+
+    @Override
     protected void importMatching( OrganisationUnitGroup object, OrganisationUnitGroup match )
     {
         match.setUuid( object.getUuid() );
@@ -51,12 +61,14 @@ public class AbstractOrganisationUnitGroupConverter
         
         organisationUnitGroupService.updateOrganisationUnitGroup( match );
     }
-    
+
+    @Override
     protected OrganisationUnitGroup getMatching( OrganisationUnitGroup object )
     {
         return organisationUnitGroupService.getOrganisationUnitGroupByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( OrganisationUnitGroup object, OrganisationUnitGroup existing )
     {
         return object.getName().equals( existing.getName() );

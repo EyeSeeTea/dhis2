@@ -27,6 +27,10 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
@@ -35,19 +39,25 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
  * @version $Id: AbstractGroupSetConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
 public class AbstractGroupSetConverter
-    extends AbstractConverter<OrganisationUnitGroupSet>
+    extends AbstractConverter<OrganisationUnitGroupSet> implements Importer<OrganisationUnitGroupSet>
 {
     protected OrganisationUnitGroupService organisationUnitGroupService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( OrganisationUnitGroupSet object, ImportParams params )
+    {
+        NameMappingUtil.addGroupSetMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( OrganisationUnitGroupSet object )
     {
         batchHandler.addObject( object );
     }
-    
+
+    @Override
     protected void importMatching( OrganisationUnitGroupSet object, OrganisationUnitGroupSet match )
     {
         match.setName( object.getName() );
@@ -56,12 +66,14 @@ public class AbstractGroupSetConverter
         
         organisationUnitGroupService.updateOrganisationUnitGroupSet( match );
     }
-    
+
+    @Override
     protected OrganisationUnitGroupSet getMatching( OrganisationUnitGroupSet object )
     {
         return organisationUnitGroupService.getOrganisationUnitGroupSetByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( OrganisationUnitGroupSet object, OrganisationUnitGroupSet existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

@@ -33,7 +33,6 @@ import java.util.Map;
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
@@ -119,7 +118,7 @@ public class OlapUrlConverter
             olapUrl.setName( values.get( FIELD_NAME ) );
             olapUrl.setUrl( values.get( FIELD_URL ) );
             
-            read( olapUrl, GroupMemberType.NONE, params );
+            importObject( olapUrl, params );
         }
     }
 }

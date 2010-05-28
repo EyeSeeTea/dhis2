@@ -40,12 +40,10 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractCalculatedDataElementConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
@@ -176,9 +174,7 @@ public class CalculatedDataElementConverter
             String expression = expressionService.convertExpression( values.get( FIELD_EXPRESSION ), dataElementMapping, categoryOptionComboMapping );
             element.setExpression( new Expression( expression, null, new HashSet<DataElement>() ) );
             
-            NameMappingUtil.addDataElementMapping( element.getId(), element.getName() );
-            
-            read( element, GroupMemberType.NONE, params );
+            importObject( element, params );
         }
     }
 }

@@ -41,7 +41,6 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
@@ -202,7 +201,7 @@ public class DataValueConverter
             value.setComment( values.get( FIELD_COMMENT ) );
             value.getOptionCombo().setId( categoryOptionComboMapping.get( Integer.parseInt( values.get( FIELD_CATEGORY_OPTION_COMBO ) ) ) );
             
-            read( value, GroupMemberType.NONE, params );
+            importObject( value, params );
         }
     }
 }

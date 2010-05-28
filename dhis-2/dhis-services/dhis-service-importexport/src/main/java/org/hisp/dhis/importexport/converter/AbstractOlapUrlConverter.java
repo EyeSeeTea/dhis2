@@ -27,6 +27,9 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.olap.OlapURL;
 import org.hisp.dhis.olap.OlapURLService;
 
@@ -35,19 +38,23 @@ import org.hisp.dhis.olap.OlapURLService;
  * @version $Id$
  */
 public class AbstractOlapUrlConverter
-    extends AbstractConverter<OlapURL>
+    extends AbstractConverter<OlapURL> implements Importer<OlapURL>
 {
     protected OlapURLService olapURLService;
 
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    @Override
+    public void importObject( OlapURL object, ImportParams params )
+    {        
+        read( object, GroupMemberType.NONE, params );
+    }
 
+    @Override
     protected void importUnique( OlapURL object )
     {
         olapURLService.saveOlapURL( object );
     }
 
+    @Override
     protected void importMatching( OlapURL object, OlapURL match )
     {
         match.setName( object.getName() );
@@ -56,11 +63,13 @@ public class AbstractOlapUrlConverter
         olapURLService.updateOlapURL( match );
     }
 
+    @Override
     protected OlapURL getMatching( OlapURL object )
     {
         return olapURLService.getOlapURLByName( object.getName() );
     }
 
+    @Override
     protected boolean isIdentical( OlapURL object, OlapURL existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

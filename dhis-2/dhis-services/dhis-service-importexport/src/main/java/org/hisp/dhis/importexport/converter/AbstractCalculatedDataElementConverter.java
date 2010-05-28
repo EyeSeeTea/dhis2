@@ -30,16 +30,31 @@ package org.hisp.dhis.importexport.converter;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class AbstractCalculatedDataElementConverter
-    extends AbstractConverter<CalculatedDataElement>
+    extends AbstractConverter<CalculatedDataElement> implements Importer<CalculatedDataElement>
 {
     protected DataElementService dataElementService;
 
+    // -------------------------------------------------------------------------
+    // Importer implementation
+    // -------------------------------------------------------------------------
+
+    public void importObject( CalculatedDataElement object, ImportParams params )
+    {
+        NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+    
     // -------------------------------------------------------------------------
     // Overridden methods
     // -------------------------------------------------------------------------

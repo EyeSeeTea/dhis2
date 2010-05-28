@@ -29,35 +29,47 @@ package org.hisp.dhis.importexport.converter;
 
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class AbstractDataElementCategoryConverter
-    extends AbstractConverter<DataElementCategory>
+    extends AbstractConverter<DataElementCategory> implements Importer<DataElementCategory>
 {
     protected DataElementCategoryService categoryService;
 
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    @Override
+    public void importObject( DataElementCategory object, ImportParams params )
+    {
+        NameMappingUtil.addCategoryMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
 
+    @Override
     protected void importUnique( DataElementCategory object )
     {
         batchHandler.addObject( object );        
     }
-    
+
+    @Override
     protected void importMatching( DataElementCategory object, DataElementCategory match )
     {
         throw new UnsupportedOperationException( "DataElementCategory can only be unique or duplicate" );
     }
 
+    @Override
     protected DataElementCategory getMatching( DataElementCategory object )
     {
         return categoryService.getDataElementCategoryByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( DataElementCategory object, DataElementCategory existing )
     {
         return object.getName().equals( existing.getName() );

@@ -29,35 +29,47 @@ package org.hisp.dhis.importexport.converter;
 
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class AbstractDataElementCategoryOptionComboConverter
-    extends AbstractConverter<DataElementCategoryOptionCombo>
+    extends AbstractConverter<DataElementCategoryOptionCombo> implements Importer<DataElementCategoryOptionCombo>
 {
     protected DataElementCategoryService categoryService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( DataElementCategoryOptionCombo object, ImportParams params )
+    {
+        NameMappingUtil.addCategoryOptionComboMapping( object.getId(), object );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( DataElementCategoryOptionCombo object )
     {
         categoryService.addDataElementCategoryOptionCombo( object );     
     }
-    
+
+    @Override
     protected void importMatching( DataElementCategoryOptionCombo object, DataElementCategoryOptionCombo match )
     {
         throw new UnsupportedOperationException( "DataElementCategoryOptionCombo can only be unique or duplicate" );
     }
 
+    @Override
     protected DataElementCategoryOptionCombo getMatching( DataElementCategoryOptionCombo object )
     {
         return categoryService.getDataElementCategoryOptionCombo( object );
     }
-    
+
+    @Override
     protected boolean isIdentical( DataElementCategoryOptionCombo object, DataElementCategoryOptionCombo existing )
     {
         return object.equalsOnName( existing );

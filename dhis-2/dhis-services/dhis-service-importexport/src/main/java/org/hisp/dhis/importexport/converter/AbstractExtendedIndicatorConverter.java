@@ -29,6 +29,10 @@ package org.hisp.dhis.importexport.converter;
 
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 
@@ -37,16 +41,21 @@ import org.hisp.dhis.indicator.IndicatorService;
  * @version $Id: AbstractExtendedIndicatorConverter.java 5946 2008-10-16 15:46:43Z larshelg $
  */
 public class AbstractExtendedIndicatorConverter
-    extends AbstractConverter<Indicator>
+    extends AbstractConverter<Indicator> implements Importer<Indicator>
 {
     protected BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler;
     
     protected IndicatorService indicatorService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
-    
+
+    @Override
+    public void importObject( Indicator object, ImportParams params )
+    {
+        NameMappingUtil.addIndicatorMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( Indicator object )
     {
         ExtendedDataElement extendedIndicator = object.getExtended();
@@ -61,7 +70,8 @@ public class AbstractExtendedIndicatorConverter
         
         batchHandler.addObject( object );      
     }
-    
+
+    @Override
     protected void importMatching( Indicator object, Indicator match )
     {
         match.setName( object.getName() );
@@ -126,7 +136,8 @@ public class AbstractExtendedIndicatorConverter
         
         indicatorService.updateIndicator( match );                
     }
-    
+
+    @Override
     protected Indicator getMatching( Indicator object )
     {
         Indicator match = indicatorService.getIndicatorByName( object.getName() );
@@ -147,7 +158,8 @@ public class AbstractExtendedIndicatorConverter
         
         return match;
     }
-    
+
+    @Override
     protected boolean isIdentical( Indicator object, Indicator existing )
     {
         // ---------------------------------------------------------------------

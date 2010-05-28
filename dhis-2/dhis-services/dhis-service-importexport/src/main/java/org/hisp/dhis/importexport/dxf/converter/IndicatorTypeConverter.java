@@ -34,12 +34,10 @@ import org.amplecode.quick.BatchHandler;
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractIndicatorTypeConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 
@@ -124,9 +122,7 @@ public class IndicatorTypeConverter
             type.setName( values.get( FIELD_NAME ) );
             type.setFactor( Integer.parseInt( values.get( FIELD_FACTOR ) ) );
             
-            NameMappingUtil.addIndicatorTypeMapping( type.getId(), type.getName() );
-            
-            read( type, GroupMemberType.NONE, params );
+            importObject( type, params );
         }
     }
 }

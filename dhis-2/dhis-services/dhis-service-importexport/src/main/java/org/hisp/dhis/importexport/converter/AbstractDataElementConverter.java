@@ -30,25 +30,35 @@ package org.hisp.dhis.importexport.converter;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: AbstractDataElementConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
 public class AbstractDataElementConverter
-    extends AbstractConverter<DataElement>
+    extends AbstractConverter<DataElement> implements Importer<DataElement>
 {
     protected DataElementService dataElementService;
-        
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( DataElement object, ImportParams params )
+    {
+        NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( DataElement object )
     {
         batchHandler.addObject( object );        
     }
 
+    @Override
     protected void importMatching( DataElement object, DataElement match )
     {
         match.setUuid( object.getUuid() );
@@ -64,7 +74,8 @@ public class AbstractDataElementConverter
                             
         dataElementService.updateDataElement( match );
     }
-    
+
+    @Override
     protected DataElement getMatching( DataElement object )
     {
         DataElement match = dataElementService.getDataElementByName( object.getName() );
@@ -80,7 +91,8 @@ public class AbstractDataElementConverter
         
         return match;
     }
-    
+
+    @Override
     protected boolean isIdentical( DataElement object, DataElement existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

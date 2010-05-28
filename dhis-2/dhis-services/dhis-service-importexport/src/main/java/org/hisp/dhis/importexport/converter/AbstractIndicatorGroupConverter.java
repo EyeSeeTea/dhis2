@@ -27,6 +27,10 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
 
@@ -35,19 +39,25 @@ import org.hisp.dhis.indicator.IndicatorService;
  * @version $Id: AbstractIndicatorGroupConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
 public class AbstractIndicatorGroupConverter
-    extends AbstractConverter<IndicatorGroup>
+    extends AbstractConverter<IndicatorGroup> implements Importer<IndicatorGroup>
 {
     protected IndicatorService indicatorService;
 
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    @Override
+    public void importObject( IndicatorGroup object, ImportParams params )
+    {
+        NameMappingUtil.addIndicatorGroupMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
 
+    @Override
     protected void importUnique( IndicatorGroup object )
     {
         batchHandler.addObject( object );
     }
 
+    @Override
     protected void importMatching( IndicatorGroup object, IndicatorGroup match )
     {
         match.setUuid( object.getUuid() );
@@ -55,12 +65,14 @@ public class AbstractIndicatorGroupConverter
         
         indicatorService.updateIndicatorGroup( object );
     }
-    
+
+    @Override
     protected IndicatorGroup getMatching( IndicatorGroup object )
     {
         return indicatorService.getIndicatorGroupByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( IndicatorGroup object, IndicatorGroup existing )
     {
         return object.getName().equals( existing.getName() );

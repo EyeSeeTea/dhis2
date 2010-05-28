@@ -31,22 +31,31 @@ import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: AbstractExtendedDataElementConverter.java 5946 2008-10-16 15:46:43Z larshelg $
  */
 public class AbstractExtendedDataElementConverter
-    extends AbstractConverter<DataElement>
+    extends AbstractConverter<DataElement> implements Importer<DataElement>
 {
     protected BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler;
     
     protected DataElementService dataElementService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( DataElement object, ImportParams params )
+    {
+        NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( DataElement object )
     {
         ExtendedDataElement extendedDataElement = object.getExtended();
@@ -62,6 +71,7 @@ public class AbstractExtendedDataElementConverter
         batchHandler.addObject( object );        
     }
 
+    @Override
     protected void importMatching( DataElement object, DataElement match )
     {
         match.setName( object.getName() );
@@ -122,7 +132,8 @@ public class AbstractExtendedDataElementConverter
         
         dataElementService.updateDataElement( match );
     }
-    
+
+    @Override
     protected DataElement getMatching( DataElement object )
     {
         DataElement match = dataElementService.getDataElementByName( object.getName() );
@@ -143,7 +154,8 @@ public class AbstractExtendedDataElementConverter
         
         return match;
     }
-    
+
+    @Override
     protected boolean isIdentical( DataElement object, DataElement existing )
     {
         // ---------------------------------------------------------------------

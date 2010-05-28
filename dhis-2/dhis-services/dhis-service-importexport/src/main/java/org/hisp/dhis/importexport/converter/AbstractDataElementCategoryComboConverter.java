@@ -29,35 +29,47 @@ package org.hisp.dhis.importexport.converter;
 
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class AbstractDataElementCategoryComboConverter
-    extends AbstractConverter<DataElementCategoryCombo>
+    extends AbstractConverter<DataElementCategoryCombo> implements Importer<DataElementCategoryCombo>
 {
     protected DataElementCategoryService categoryService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( DataElementCategoryCombo object, ImportParams params )
+    {
+        NameMappingUtil.addCategoryComboMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( DataElementCategoryCombo object )
     {
         batchHandler.addObject( object );        
     }
-    
+
+    @Override
     protected void importMatching( DataElementCategoryCombo object, DataElementCategoryCombo match )
     {
         throw new UnsupportedOperationException( "DataElementCategoryCombo can only be unique or duplicate" );
     }
 
+    @Override
     protected DataElementCategoryCombo getMatching( DataElementCategoryCombo object )
     {
         return categoryService.getDataElementCategoryComboByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( DataElementCategoryCombo object, DataElementCategoryCombo existing )
     {
         return object.getName().equals( existing.getName() );

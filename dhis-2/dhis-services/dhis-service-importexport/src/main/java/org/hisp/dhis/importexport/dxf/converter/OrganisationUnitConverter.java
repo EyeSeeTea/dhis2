@@ -36,12 +36,10 @@ import org.amplecode.quick.BatchHandler;
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractOrganisationUnitConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.source.Source;
@@ -198,9 +196,7 @@ public class OrganisationUnitConverter
                 unit.setLastUpdated( DateUtils.getMediumDate( reader.getElementValue() ) );
             }
             
-            NameMappingUtil.addOrganisationUnitMapping( unit.getId(), unit.getName() );
-            
-            read( unit, GroupMemberType.NONE, params );
+            importObject( unit, params );
         }
     }
 }

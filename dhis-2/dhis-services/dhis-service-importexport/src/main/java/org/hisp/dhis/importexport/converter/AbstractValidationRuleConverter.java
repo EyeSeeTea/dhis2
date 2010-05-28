@@ -28,6 +28,9 @@ package org.hisp.dhis.importexport.converter;
  */
 
 import org.hisp.dhis.expression.ExpressionService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleService;
 
@@ -36,16 +39,19 @@ import org.hisp.dhis.validation.ValidationRuleService;
  * @version $Id: AbstractValidationRuleConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
 public class AbstractValidationRuleConverter
-    extends AbstractConverter<ValidationRule>
+    extends AbstractConverter<ValidationRule> implements Importer<ValidationRule>
 {
     protected ValidationRuleService validationRuleService;
 
     protected ExpressionService expressionService;
-        
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( ValidationRule object, ImportParams params )
+    {
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( ValidationRule object )
     {
         expressionService.addExpression( object.getLeftSide() );
@@ -53,7 +59,8 @@ public class AbstractValidationRuleConverter
         
         validationRuleService.saveValidationRule( object );        
     }
-    
+
+    @Override
     protected void importMatching( ValidationRule object, ValidationRule match )
     {
         match.setName( object.getName() );
@@ -72,12 +79,14 @@ public class AbstractValidationRuleConverter
         
         validationRuleService.updateValidationRule( match );
     }
-    
+
+    @Override
     protected ValidationRule getMatching( ValidationRule object )
     {
         return validationRuleService.getValidationRuleByName( object.getName() );
     }    
 
+    @Override
     protected boolean isIdentical( ValidationRule object, ValidationRule existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

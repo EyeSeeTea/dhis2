@@ -30,30 +30,36 @@ package org.hisp.dhis.importexport.converter;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: AbstractDataValueConverter.java 5152 2008-05-15 12:30:29Z larshelg $
  */
 public class AbstractDataValueConverter
-    extends AbstractConverter<DataValue>
+    extends AbstractConverter<DataValue> implements Importer<DataValue>
 {
     protected DataValueService dataValueService;
     
     protected DataMartService dataMartService;
     
     protected ImportParams params;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( DataValue object, ImportParams params )
+    {        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( DataValue object )
     {
         batchHandler.addObject( object );    
     }
 
+    @Override
     protected void importMatching( DataValue object, DataValue match )
     {
         match.setValue( object.getValue() );
@@ -63,7 +69,8 @@ public class AbstractDataValueConverter
         
         batchHandler.updateObject( match );
     }
-    
+
+    @Override
     protected DataValue getMatching( DataValue object )
     {
         // ---------------------------------------------------------------------
@@ -79,7 +86,8 @@ public class AbstractDataValueConverter
         return dataMartService.getDataValue( object.getDataElement().getId(), object.getOptionCombo().getId(), 
             object.getPeriod().getId(), object.getSource().getId() );
     }
-    
+
+    @Override
     protected boolean isIdentical( DataValue object, DataValue existing )
     {
         if ( !isSimiliar( object.getValue(), existing.getValue() ) || ( isNotNull( object.getValue(), existing.getValue() ) && !object.getValue().equals( existing.getValue() ) ) )

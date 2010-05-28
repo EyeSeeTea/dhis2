@@ -35,7 +35,6 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
@@ -169,7 +168,7 @@ public class ValidationRuleConverter
             
             validationRule.setPeriodType( PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME ) ); //TODO Intermediate hack!
             
-            read( validationRule, GroupMemberType.NONE, params );
+            importObject( validationRule, params );
         }
     }
 }

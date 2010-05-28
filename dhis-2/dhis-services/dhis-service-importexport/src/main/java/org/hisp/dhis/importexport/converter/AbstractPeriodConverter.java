@@ -27,6 +27,10 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -36,31 +40,39 @@ import org.hisp.dhis.period.PeriodType;
  * @version $Id: AbstractPeriodConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
 public class AbstractPeriodConverter
-    extends AbstractConverter<Period>
+    extends AbstractConverter<Period> implements Importer<Period>
 {
     protected PeriodService periodService;
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
+    public void importObject( Period object, ImportParams params )
+    {
+        NameMappingUtil.addPeriodMapping( object.getId(), object );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
+
+    @Override
     protected void importUnique( Period object )
     {
         batchHandler.addObject( object );
     }
-    
+
+    @Override
     protected void importMatching( Period object, Period match )
     {
         // Do nothing
     }
-    
+
+    @Override
     protected Period getMatching( Period object )
     {
         PeriodType periodType = periodService.getPeriodType( object.getPeriodType().getId() );
         
         return periodService.getPeriod( object.getStartDate(), object.getEndDate(), periodType );
     }
-    
+
+    @Override
     protected boolean isIdentical( Period object, Period existing )
     {
         if ( !object.getStartDate().equals( existing.getStartDate() ) )

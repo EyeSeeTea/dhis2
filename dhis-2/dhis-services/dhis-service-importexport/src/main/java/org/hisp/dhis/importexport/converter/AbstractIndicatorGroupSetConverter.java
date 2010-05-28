@@ -27,6 +27,10 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorService;
 
@@ -35,31 +39,39 @@ import org.hisp.dhis.indicator.IndicatorService;
  * @version $Id$
  */
 public class AbstractIndicatorGroupSetConverter
-    extends AbstractConverter<IndicatorGroupSet>
+    extends AbstractConverter<IndicatorGroupSet> implements Importer<IndicatorGroupSet>
 {
     protected IndicatorService indicatorService;
 
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    @Override
+    public void importObject( IndicatorGroupSet object, ImportParams params )
+    {
+        NameMappingUtil.addIndicatorGroupSetMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
+    }
 
+    @Override
     protected void importUnique( IndicatorGroupSet object )
     {
         indicatorService.addIndicatorGroupSet( object );
     }
-    
+
+    @Override
     protected void importMatching( IndicatorGroupSet object, IndicatorGroupSet match )
     {
         match.setName( object.getName() );
         
         indicatorService.updateIndicatorGroupSet( match );
     }
-    
+
+    @Override
     protected IndicatorGroupSet getMatching( IndicatorGroupSet object )
     {
         return indicatorService.getIndicatorGroupSetByName( object.getName() );
     }
-    
+
+    @Override
     protected boolean isIdentical( IndicatorGroupSet object, IndicatorGroupSet existing )
     {
         return object.getName().equals( existing.getName() );

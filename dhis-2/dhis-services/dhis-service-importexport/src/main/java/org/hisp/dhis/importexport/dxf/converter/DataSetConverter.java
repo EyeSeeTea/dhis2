@@ -36,12 +36,10 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractDataSetConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodType;
 
@@ -96,6 +94,19 @@ public class DataSetConverter
         this.dataSetService = dataSetService;
         this.periodTypeMapping = periodTypeMapping;
     }
+
+    /**
+     * Constructor for import operations.
+     * 
+     * @param batchHandler the batchHandler to use.
+     * @param dataSetStore the dataSetStore to use.
+     */
+    public DataSetConverter( BatchHandler<DataSet> batchHandler, 
+        DataSetService dataSetService )
+    {
+        this.batchHandler = batchHandler;
+        this.dataSetService = dataSetService;
+    }
     
     // -------------------------------------------------------------------------
     // XMLConverter implementation
@@ -143,9 +154,7 @@ public class DataSetConverter
             dataSet.setCode( values.get( FIELD_CODE ) );
             dataSet.getPeriodType().setId( periodTypeMapping.get( values.get( FIELD_PERIOD_TYPE ) ) );
             
-            NameMappingUtil.addDataSetMapping( dataSet.getId(), dataSet.getName() );
-            
-            read( dataSet, GroupMemberType.NONE, params );
+            importObject( dataSet, params );
         }
     }
 }

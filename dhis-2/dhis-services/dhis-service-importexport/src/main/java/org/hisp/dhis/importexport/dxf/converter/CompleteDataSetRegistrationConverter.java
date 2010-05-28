@@ -38,7 +38,6 @@ import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
@@ -184,7 +183,7 @@ public class CompleteDataSetRegistrationConverter
                         
             registration.setDate( DateUtils.getMediumDate( values.get( FIELD_DATE ) ) );
             
-            read( registration, GroupMemberType.NONE, params );
+            importObject( registration, params );
         }
     }
 }

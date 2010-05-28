@@ -36,12 +36,10 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractExtendedIndicatorConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
@@ -328,9 +326,7 @@ public class ExtendedIndicatorConverter
 
             indicator.setExtended( extended.isNull() ? null : extended );
             
-            NameMappingUtil.addIndicatorMapping( indicator.getId(), indicator.getName() );
-            
-            read( indicator, GroupMemberType.NONE, params );
+            importObject( indicator, params );
         }
     }
 }

@@ -37,12 +37,10 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractDataElementConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.system.util.DateUtils;
 
 /**
@@ -165,9 +163,7 @@ public class DataElementConverter
             element.getCategoryCombo().setId( categoryComboMapping.get( Integer.parseInt( values.get( FIELD_CATEGORY_COMBO ) ) ) );
             element.setLastUpdated( DateUtils.getMediumDate( values.get( FIELD_LAST_UPDATED ) ) );            
             
-            NameMappingUtil.addDataElementMapping( element.getId(), element.getName() );
-            
-            read( element, GroupMemberType.NONE, params );
+            importObject( element, params );
         }
     }
 }

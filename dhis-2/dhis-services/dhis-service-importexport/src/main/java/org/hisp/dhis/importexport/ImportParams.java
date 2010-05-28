@@ -66,6 +66,13 @@ public class ImportParams
     {
     }
 
+    public ImportParams( ImportType type, ImportStrategy importStrategy, boolean dataValues )
+    {
+        this.type = type;
+        this.importStrategy = importStrategy;
+        this.dataValues = dataValues;
+    }
+    
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
