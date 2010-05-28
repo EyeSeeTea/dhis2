@@ -46,6 +46,7 @@ import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.datalock.DataSetLock;
 import org.hisp.dhis.datalock.DataSetLockService;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.de.comments.StandardCommentsManager;
@@ -147,19 +148,26 @@ public class FormAction
     {
         this.i18n = i18n;
     }
-    
+
     private DataSetLockService dataSetLockService;
-    
-    public void setDataSetLockService( DataSetLockService dataSetLockService)
+
+    public void setDataSetLockService( DataSetLockService dataSetLockService )
     {
         this.dataSetLockService = dataSetLockService;
     }
 
     private DataElementCategoryService categoryService;
-    
+
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private DataSetService dataSetService;
+
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
     }
 
     // -------------------------------------------------------------------------
@@ -311,13 +319,13 @@ public class FormAction
         Period period = selectedStateManager.getSelectedPeriod();
 
         DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
-        
+
         if ( dataSetLock != null && dataSetLock.getSources().contains( organisationUnit ) )
         {
             disabled = "disabled";
         }
 
-        Collection<DataElement> dataElements = dataSet.getDataElements();
+        Collection<DataElement> dataElements = new ArrayList<DataElement>( dataSetService.getDataElements( dataSet ) );
 
         if ( dataElements.size() == 0 )
         {
@@ -325,14 +333,15 @@ public class FormAction
         }
 
         DataElementCategoryOptionCombo defaultOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        
+
         optionComboId = defaultOptionCombo.getId();
 
         // ---------------------------------------------------------------------
         // Get the min/max values
         // ---------------------------------------------------------------------
 
-        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataElements );
+        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
+            organisationUnit, dataElements );
 
         minMaxMap = new HashMap<Integer, MinMaxDataElement>( minMaxDataElements.size() );
 
@@ -358,7 +367,8 @@ public class FormAction
         // Prepare values for unsaved CalculatedDataElements
         // ---------------------------------------------------------------------
 
-        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet, period );
+        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet,
+            period );
 
         // ---------------------------------------------------------------------
         // Make the standard comments available

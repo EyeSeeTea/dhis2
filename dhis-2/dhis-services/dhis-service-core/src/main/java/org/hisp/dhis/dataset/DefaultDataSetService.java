@@ -58,6 +58,7 @@ public class DefaultDataSetService
     implements DataSetService
 {
     private Logger logger = Logger.getLogger( getClass() );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -82,14 +83,13 @@ public class DefaultDataSetService
     {
         i18nService = service;
     }
-    
+
     private CurrentUserService currentUserService;
-    
+
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
     }
-
 
     // -------------------------------------------------------------------------
     // DataSet
@@ -100,26 +100,20 @@ public class DefaultDataSetService
         int id = dataSetStore.addDataSet( dataSet );
 
         i18nService.addObject( dataSet );
-        
-        logger.log( AuditLogLevel.AUDIT_TRAIL, 
-            AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-            AuditLogUtil.ACTION_ADD , 
-            DataSet.class.getSimpleName(), 
-            dataSet.getName()) );
-        
+
+        logger.log( AuditLogLevel.AUDIT_TRAIL, AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
+            AuditLogUtil.ACTION_ADD, DataSet.class.getSimpleName(), dataSet.getName() ) );
+
         return id;
     }
 
     public void updateDataSet( DataSet dataSet )
     {
         dataSetStore.updateDataSet( dataSet );
-        
-        logger.log( AuditLogLevel.AUDIT_TRAIL, 
-            AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-            AuditLogUtil.ACTION_EDIT, 
-            DataSet.class.getSimpleName(), 
-            dataSet.getName()) );
-        
+
+        logger.log( AuditLogLevel.AUDIT_TRAIL, AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
+            AuditLogUtil.ACTION_EDIT, DataSet.class.getSimpleName(), dataSet.getName() ) );
+
         i18nService.verify( dataSet );
     }
 
@@ -128,12 +122,9 @@ public class DefaultDataSetService
         i18nService.removeObject( dataSet );
 
         dataSetStore.deleteDataSet( dataSet );
-        
-        logger.log( AuditLogLevel.AUDIT_TRAIL, 
-            AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-            AuditLogUtil.ACTION_DELETE, 
-            DataSet.class.getSimpleName(), 
-            dataSet.getName()) );
+
+        logger.log( AuditLogLevel.AUDIT_TRAIL, AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
+            AuditLogUtil.ACTION_DELETE, DataSet.class.getSimpleName(), dataSet.getName() ) );
     }
 
     public DataSet getDataSet( int id )
@@ -287,7 +278,8 @@ public class DefaultDataSetService
 
         for ( DataSet dataSet : dataSetListByPeriodType )
         {
-            // DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryFormByDataSet( dataSet );
+            // DataEntryForm dataEntryForm =
+            // dataEntryFormService.getDataEntryFormByDataSet( dataSet );
 
             if ( dataSet.getSources() != null )
             {
@@ -297,7 +289,7 @@ public class DefaultDataSetService
 
         return assignedDataSetListByPeriodType;
     }
-   
+
     public Collection<DataElement> getDistinctDataElements( Collection<Integer> dataSetIdentifiers )
     {
         Collection<DataSet> dataSets = getDataSets( dataSetIdentifiers );
@@ -310,6 +302,11 @@ public class DefaultDataSetService
         }
 
         return dataElements;
+    }
+
+    public Collection<DataElement> getDataElements( DataSet dataSet )
+    {
+        return i18n( i18nService, dataSet.getDataElements() );
     }
 
     // -------------------------------------------------------------------------
@@ -344,5 +341,6 @@ public class DefaultDataSetService
     public Collection<FrequencyOverrideAssociation> getFrequencyOverrideAssociationsBySource( Source source )
     {
         return dataSetStore.getFrequencyOverrideAssociationsBySource( source );
-    }   
+    }
+
 }
