@@ -181,10 +181,10 @@
 
 		<action name="deleteDataElemenGroupEditor"
 			class="org.hisp.dhis.dd.action.dataelementgroup.RemoveDataElementGroupAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseError.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 			<param name="requiredAuthorities">F_DATAELEMENTGROUP_DELETE</param>
 		</action>
@@ -412,10 +412,10 @@
 
 		<action name="deleteIndicatorGroupEditor"
 			class="org.hisp.dhis.dd.action.indicatorgroup.RemoveIndicatorGroupAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseError.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 			<param name="requiredAuthorities">F_INDICATORGROUP_DELETE</param>
 		</action>

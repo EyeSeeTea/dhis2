@@ -350,7 +350,7 @@ function assignGroupsForIndicatorReceived( xmlObject )
 /*==============================================================================
  * Delete Indicator Group
  *==============================================================================*/
- 
+/*
 function deleteIndicatorGroup()
 {
 	if( window.confirm( i18n_confirm_delete ) )
@@ -385,5 +385,41 @@ function deleteIndicatorGroupReceived( xmlObject )
 		showWarning();
 	}
 }
- 
- 
+*/
+
+function deleteIndicatorGroup()
+{
+	if ( window.confirm( i18n_confirm_delete ) )
+	{
+		var list = byId('availableGroups');
+	
+		if ( list.value == '' )
+		{
+			setHeaderDelayMessage(i18n_select_indicator_group);
+		}
+		else
+		{
+			$.getJSON
+			(
+				'deleteIndicatorGroupEditor.action',
+				{
+					"id": list.value
+				},
+				function( json )
+				{
+					if ( json.response == "success" )
+					{
+						var list = byId('availableGroups');
+						list.remove( list.selectedIndex );
+					}
+					else if ( json.response == "error" )
+					{
+						setFieldValue( 'warningArea', json.message );
+			
+						showWarning();
+					}
+				}
+			);
+		}
+	}
+}

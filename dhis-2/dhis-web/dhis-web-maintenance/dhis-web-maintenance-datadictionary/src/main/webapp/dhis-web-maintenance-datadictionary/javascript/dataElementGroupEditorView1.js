@@ -216,6 +216,7 @@ function updateDataElementGroupMembersReceived( xmlObject )
     setHeaderDelayMessage( i18n_update_success + " : " + dataElementGroupsSelect.options[ dataElementGroupsSelect.selectedIndex ].text );
 }
 
+/*
 function deleteDataElementGroup()
 {
     var dataElementGroupsSelect = document.getElementById( 'dataElementGroups' );
@@ -242,7 +243,7 @@ function deleteDataElementGroupReceived( xmlObject )
 {
     var type = xmlObject.getAttribute( 'type' );
 
-    if ( type=='success' )
+    if ( type == 'success' )
     {
         var dataElementGroupsSelect = document.getElementById( 'dataElementGroups' );
         dataElementGroupsSelect.remove( dataElementGroupsSelect.selectedIndex );
@@ -255,6 +256,49 @@ function deleteDataElementGroupReceived( xmlObject )
 
 		showWarning();
 	}
+}
+*/
+
+function deleteDataElementGroup()
+{
+    var dataElementGroupsSelect = document.getElementById( 'dataElementGroups' );
+
+    try
+    {
+        var id = dataElementGroupsSelect.options[ dataElementGroupsSelect.selectedIndex ].value;
+        var name =  dataElementGroupsSelect.options[ dataElementGroupsSelect.selectedIndex ].text;
+		
+        if ( window.confirm( i18n_confirm_delete + '\n\n' + name ) )
+        {
+		    $.getJSON
+			(
+				'deleteDataElemenGroupEditor.action',
+				{
+					"id": id
+				},
+				function( json )
+				{
+					if ( json.response == "success" )
+					{
+						var dataElementGroupsSelect = document.getElementById( 'dataElementGroups' );
+						dataElementGroupsSelect.remove( dataElementGroupsSelect.selectedIndex );
+						document.getElementById( 'groupNameView' ).innerHTML = "";
+						selectedDataElements = new Object();
+					}
+					else if ( json.response == "error" )
+					{
+						setFieldValue( 'warningArea', json.message );
+			
+						showWarning();
+					}
+				}
+			);
+        }
+    }
+    catch(e)
+    {
+        alert( i18n_select_dataelement_group );
+    }
 }
 
 function showRenameDataElementGroupForm()
