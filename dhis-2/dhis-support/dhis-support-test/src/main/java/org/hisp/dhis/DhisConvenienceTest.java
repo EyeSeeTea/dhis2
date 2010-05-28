@@ -86,6 +86,8 @@ import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.source.SourceStore;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.validation.ValidationCriteria;
+import org.hisp.dhis.validation.ValidationCriteriaService;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
@@ -127,6 +129,8 @@ public abstract class DhisConvenienceTest
     protected PeriodService periodService;
 
     protected ValidationRuleService validationRuleService;
+
+    protected ValidationCriteriaService validationCriteriaService;
 
     protected ExpressionService expressionService;
 
@@ -237,15 +241,15 @@ public abstract class DhisConvenienceTest
 
         return true;
     }
-    
+
     public static String message( Object expected )
     {
-        return "Expected was: " + ( ( expected != null ) ? "[" + expected.toString() + "]" : "[null]" );
+        return "Expected was: " + ((expected != null) ? "[" + expected.toString() + "]" : "[null]");
     }
 
     public static String message( Object expected, Object actual )
     {
-        return message( expected ) + " Actual was: " + ( ( actual != null ) ? "[" + actual.toString() + "]" : "[null]" );
+        return message( expected ) + " Actual was: " + ((actual != null) ? "[" + actual.toString() + "]" : "[null]");
     }
 
     // -------------------------------------------------------------------------
@@ -339,7 +343,7 @@ public abstract class DhisConvenienceTest
         DataElement dataElement = createDataElement( uniqueCharacter );
 
         dataElement.setCategoryCombo( categoryCombo );
-        dataElement.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );        
+        dataElement.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
 
         return dataElement;
     }
@@ -351,7 +355,7 @@ public abstract class DhisConvenienceTest
      */
     public static DataElement createDataElement( char uniqueCharacter, String type, String aggregationOperator )
     {
-        DataElement dataElement = createDataElement( uniqueCharacter );        
+        DataElement dataElement = createDataElement( uniqueCharacter );
         dataElement.setType( type );
         dataElement.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
         dataElement.setAggregationOperator( aggregationOperator );
@@ -365,9 +369,10 @@ public abstract class DhisConvenienceTest
      * @param aggregationOperator The aggregation operator.
      * @param categoryCombo The category combo.
      */
-    public static DataElement createDataElement( char uniqueCharacter, String type, String aggregationOperator, DataElementCategoryCombo categoryCombo )
+    public static DataElement createDataElement( char uniqueCharacter, String type, String aggregationOperator,
+        DataElementCategoryCombo categoryCombo )
     {
-        DataElement dataElement = createDataElement( uniqueCharacter );        
+        DataElement dataElement = createDataElement( uniqueCharacter );
         dataElement.setType( type );
         dataElement.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
         dataElement.setAggregationOperator( aggregationOperator );
@@ -380,7 +385,8 @@ public abstract class DhisConvenienceTest
      * @param uniqueCharacter A unique character to identify the object.
      * @param expression The Expression.
      */
-    public static CalculatedDataElement createCalculatedDataElement( char uniqueCharacter, String type, String aggregationOperator, DataElementCategoryCombo categoryCombo, Expression expression )
+    public static CalculatedDataElement createCalculatedDataElement( char uniqueCharacter, String type,
+        String aggregationOperator, DataElementCategoryCombo categoryCombo, Expression expression )
     {
         CalculatedDataElement dataElement = new CalculatedDataElement();
 
@@ -418,7 +424,8 @@ public abstract class DhisConvenienceTest
 
         for ( char identifier : categoryOptionUniqueIdentifiers )
         {
-            categoryOptionCombo.getCategoryOptions().add( new DataElementCategoryOption( "CategoryOption" + identifier ) );
+            categoryOptionCombo.getCategoryOptions()
+                .add( new DataElementCategoryOption( "CategoryOption" + identifier ) );
         }
 
         return categoryOptionCombo;
@@ -443,12 +450,12 @@ public abstract class DhisConvenienceTest
     public static DataElementGroupSet createDataElementGroupSet( char uniqueCharacter )
     {
         DataElementGroupSet groupSet = new DataElementGroupSet();
-        
+
         groupSet.setUuid( BASE_UUID + uniqueCharacter );
         groupSet.setName( "DataElementGroupSet" + uniqueCharacter );
-        
+
         return groupSet;
-    }    
+    }
 
     /**
      * @param uniqueCharacter A unique character to identify the object.
@@ -522,13 +529,13 @@ public abstract class DhisConvenienceTest
     public static IndicatorGroupSet createIndicatorGroupSet( char uniqueCharacter )
     {
         IndicatorGroupSet groupSet = new IndicatorGroupSet();
-        
+
         groupSet.setUuid( BASE_UUID + uniqueCharacter );
         groupSet.setName( "IndicatorGroupSet" + uniqueCharacter );
-        
+
         return groupSet;
     }
-    
+
     /**
      * @param uniqueCharacter A unique character to identify the object.
      * @param periodType The period type.
@@ -665,6 +672,7 @@ public abstract class DhisConvenienceTest
      * @param operator The operator.
      * @param leftSide The left side expression.
      * @param rightSide The right side expression.
+     * @param periodType The period-type.
      */
     public static ValidationRule createValidationRule( char uniqueCharacter, String operator, Expression leftSide,
         Expression rightSide, PeriodType periodType )
@@ -838,19 +846,20 @@ public abstract class DhisConvenienceTest
         return user;
     }
 
-    protected static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages, OrganisationUnit organisationUnit )
+    protected static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
+        OrganisationUnit organisationUnit )
     {
         Program program = new Program();
-        
+
         program.setName( "Program" + uniqueCharacter );
         program.setDescription( "Description" + uniqueCharacter );
         program.setDateOfEnrollmentDescription( "DateOfEnrollmentDescription" );
         program.setDateOfIncidentDescription( "DateOfIncidentDescription" );
         program.setProgramStages( programStages );
-        
+
         return program;
     }
-    
+
     public static ProgramStage createProgramStage( char uniqueCharacter, int stage, int minDays )
     {
         ProgramStage programStage = new ProgramStage();
@@ -858,7 +867,7 @@ public abstract class DhisConvenienceTest
         programStage.setName( "name" + uniqueCharacter );
         programStage.setDescription( "description" + uniqueCharacter );
         programStage.setStageInProgram( stage );
-        programStage.setMinDaysFromStart( minDays );        
+        programStage.setMinDaysFromStart( minDays );
 
         return programStage;
     }
@@ -866,7 +875,7 @@ public abstract class DhisConvenienceTest
     public static Patient createPatient( char uniqueChar )
     {
         Patient patient = new Patient();
-        
+
         patient.setFirstName( "FirstName" + uniqueChar );
         patient.setMiddleName( "MiddleName" + uniqueChar );
         patient.setLastName( "LastName" + uniqueChar );
@@ -874,10 +883,27 @@ public abstract class DhisConvenienceTest
         patient.setBirthDate( getDate( 1970, 1, 1 ) );
         patient.setBloodGroup( "A" );
         patient.setRegistrationDate( new Date() );
-        
+
         return patient;
     }
-    
+
+    /**
+     * @param uniqueCharacter A unique character to identify the object.
+     * @return
+     */
+    public static ValidationCriteria createValidationCriteria( char uniqueCharacter, String property, int operator, Object value )
+    {
+        ValidationCriteria validationCriteria = new ValidationCriteria();
+
+        validationCriteria.setName( "ValidationCriteria" + uniqueCharacter );
+        validationCriteria.setDescription( "Description" + uniqueCharacter );
+        validationCriteria.setProperty(property);
+        validationCriteria.setOperator( operator );
+        validationCriteria.setValue( value );
+
+        return validationCriteria;
+    }
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -964,4 +990,9 @@ public abstract class DhisConvenienceTest
 
         return dir.delete();
     }
+
+    // -------------------------------------------------------------------------
+    // Validation Criteria
+    // -------------------------------------------------------------------------
+
 }

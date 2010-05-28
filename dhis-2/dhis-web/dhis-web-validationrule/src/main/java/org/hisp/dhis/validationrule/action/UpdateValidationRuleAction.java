@@ -155,6 +155,7 @@ public class UpdateValidationRuleAction
 
         validationRule.getRightSide().setExpression( rightSideExpression );
         validationRule.getRightSide().setDescription( rightSideDescription );
+
         validationRule.getRightSide().setDataElementsInExpression(
             expressionService.getDataElementsInExpression( rightSideExpression ) );
 

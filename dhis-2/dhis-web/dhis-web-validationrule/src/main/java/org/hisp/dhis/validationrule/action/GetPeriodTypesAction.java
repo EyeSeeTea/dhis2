@@ -29,6 +29,7 @@ package org.hisp.dhis.validationrule.action;
 
 import java.util.Collection;
 
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 
@@ -62,12 +63,25 @@ public class GetPeriodTypesAction
     {
         return periodTypes;
     }
+    
+    private String monthlyPeriodTypeName;
+    
+
+    public String getMonthlyPeriodTypeName()
+    {
+        return monthlyPeriodTypeName;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
         periodTypes = periodService.getAllPeriodTypes();
+        monthlyPeriodTypeName =  MonthlyPeriodType.NAME ;
 
         return SUCCESS;
     }

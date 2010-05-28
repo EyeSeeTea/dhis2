@@ -157,11 +157,11 @@ public class AddValidationRuleAction
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
-        
+
         PeriodType periodType = periodService.getPeriodTypeByName(periodTypeName);
         validationRule.setPeriodType(periodType);
         
-        validationRuleService.addValidationRule( validationRule );
+        validationRuleService.saveValidationRule( validationRule );
         
         return SUCCESS;
     }

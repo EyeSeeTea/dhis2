@@ -25,7 +25,7 @@
 				#foreach( $validationRule in $validationRulesList )
 				<tr id="tr${validationRule.id}">
 					<td onclick="showValidationRuleDetails( $validationRule.id )">$!encoder.htmlEncode( $validationRule.name )</td>
-					<td onclick="showValidationRuleDetails( $validationRule.id )">$!validationRule.periodType.name </td>
+					<td onclick="showValidationRuleDetails( $validationRule.id )">$i18n.getString($!validationRule.periodType.name) </td>
 					<td style="text-align:center"><a href="showUpdateValidationRuleForm.action?id=$validationRule.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( 'edit' )"></a></td>
 					<td style="text-align:center"><a href="javascript:removeValidationRule( $validationRule.id, '$encoder.jsEncode( $validationRule.name )' )" title="$i18n.getString( 'remove' )"><img src="../images/delete.png" alt="$i18n.getString( 'remove' )"></a></td>
 					<td style="text-align:center"><a href="javascript:showValidationRuleDetails( $validationRule.id )" title="$i18n.getString( "show_details" )"><img src="../images/information.png" alt="$i18n.getString( 'show_details' )"></a></td>

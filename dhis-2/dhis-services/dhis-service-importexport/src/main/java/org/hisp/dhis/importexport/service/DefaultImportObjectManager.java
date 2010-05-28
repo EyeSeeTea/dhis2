@@ -1115,7 +1115,7 @@ public class DefaultImportObjectManager
                 expressionService.addExpression( object.getLeftSide() );
                 expressionService.addExpression( object.getRightSide() );
                                 
-                validationRuleService.addValidationRule( object );
+                validationRuleService.saveValidationRule( object );
             }
         }
         

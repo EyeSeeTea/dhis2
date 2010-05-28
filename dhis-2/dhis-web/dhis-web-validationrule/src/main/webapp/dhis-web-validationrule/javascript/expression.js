@@ -103,8 +103,8 @@ function updateTextualExpressionReceived( messageElement )
 
 function validateExpression()
 {
-	var description = htmlEncode( document.getElementById( "description" ).value );
-	var expression = htmlEncode( document.getElementById( "expression" ).value );
+	var description = htmlEncode( byId( "description" ).value );
+	var expression = htmlEncode( byId( "expression" ).value );
     
     var url = "validateExpression.action?description=" + description + "&expression=" + expression;
 
@@ -121,22 +121,21 @@ function validateExpressionReceived( xmlObject )
     
     if ( type == "success" )
     {
-        saveExpression();
+		var description = byId( "description" ).value;
+		var expression = byId( "expression" ).value;
+		var textualDescription = byId( "textualExpression" ).innerHTML;
+		var side = htmlEncode( byId( "side" ).value );
+        saveExpression(side, description, expression, textualDescription);
+		window.opener.document.getElementById('periodTypeName').disabled = true;
     }
     else if ( type == "error" )
     {
-        document.getElementById( "textualExpression" ).innerHTML = message;
+        byId( "textualExpression" ).innerHTML = message;
     }   
 }
 
-function saveExpression()
+function saveExpression(side, description, expression, textualDescription)
 {
-    var description = document.getElementById( "description" ).value;
-    var expression = document.getElementById( "expression" ).value;
-    var textualDescription = document.getElementById( "textualExpression" ).innerHTML;
-    
-    var side = htmlEncode( document.getElementById( "side" ).value );
-    
     if ( window.opener && !window.opener.closed )
     {
 	    if ( side == "left" )
@@ -152,6 +151,27 @@ function saveExpression()
 			window.opener.document.getElementById( "rightSideTextualExpression" ).value = textualDescription;
 		}
     }
-
+	
     window.close();
+}
+
+// -----------------------------------------------------------------------------
+// Set Null Expression
+// -----------------------------------------------------------------------------
+
+function setNullExpression(){
+	// set left-expression
+	var description = htmlEncode( byId( "leftSideDescription" ).value );
+	byId( "leftSideExpression" ).value  = '';
+	byId( "leftSideTextualExpression" ).value = '';
+	saveExpression('left', description, '', '');
+
+	// set right-expression
+	description = htmlEncode( byId( "rightSideDescription" ).value );
+	byId( "rightSideExpression" ).value = '';
+	byId( "rightSideTextualExpression" ).value = '';
+	saveExpression('right', description, '', '');
+	
+	// Show periodType combo
+	byId('periodTypeName').disabled = false;
 }

@@ -42,7 +42,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
-import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
 
@@ -70,7 +69,7 @@ public class ValidationRuleGroupStoreTest
     private Expression expressionA;
     private Expression expressionB;
 
-    private PeriodType periodType = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
+    private PeriodType periodType;
     
     // -------------------------------------------------------------------------
     // Fixture
@@ -110,6 +109,8 @@ public class ValidationRuleGroupStoreTest
         
         expressionService.addExpression( expressionB );
         expressionService.addExpression( expressionA );
+        
+        periodType = PeriodType.getAvailablePeriodTypes().iterator().next();
     }
 
     // -------------------------------------------------------------------------

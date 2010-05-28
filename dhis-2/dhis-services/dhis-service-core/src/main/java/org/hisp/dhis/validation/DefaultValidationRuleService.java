@@ -277,11 +277,16 @@ public class DefaultValidationRuleService
     // ValidationRule CRUD operations
     // -------------------------------------------------------------------------
 
-    public int addValidationRule( ValidationRule validationRule )
+    public int saveValidationRule( ValidationRule validationRule )
     {
-        return validationRuleStore.addValidationRule( validationRule );
+        return validationRuleStore.saveValidationRule( validationRule );
     }
-
+    
+    public void updateValidationRule( ValidationRule validationRule )
+    {
+        validationRuleStore.updateValidationRule( validationRule );
+    }
+    
     public void deleteValidationRule( ValidationRule validationRule )
     {
         validationRuleStore.delete( validationRule );
@@ -313,11 +318,6 @@ public class DefaultValidationRuleService
     public ValidationRule getValidationRuleByName( String name )
     {
         return validationRuleStore.getByName( name );
-    }
-
-    public void updateValidationRule( ValidationRule validationRule )
-    {
-        validationRuleStore.updateValidationRule( validationRule );
     }
 
     // -------------------------------------------------------------------------
@@ -353,4 +353,5 @@ public class DefaultValidationRuleService
     {
         return validationRuleGroupStore.getByName( name );
     }
+    
 }

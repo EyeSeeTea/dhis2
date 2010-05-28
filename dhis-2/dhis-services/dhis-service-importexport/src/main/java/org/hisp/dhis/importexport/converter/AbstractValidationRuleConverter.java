@@ -51,7 +51,7 @@ public class AbstractValidationRuleConverter
         expressionService.addExpression( object.getLeftSide() );
         expressionService.addExpression( object.getRightSide() );
         
-        validationRuleService.addValidationRule( object );        
+        validationRuleService.saveValidationRule( object );        
     }
     
     protected void importMatching( ValidationRule object, ValidationRule match )
