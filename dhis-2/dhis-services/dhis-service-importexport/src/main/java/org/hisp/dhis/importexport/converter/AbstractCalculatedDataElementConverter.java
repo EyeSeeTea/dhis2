@@ -60,6 +60,7 @@ public class AbstractCalculatedDataElementConverter
         match.setActive( object.isActive() );
         match.setType( object.getType() );
         match.setAggregationOperator( object.getAggregationOperator() );
+        match.setLastUpdated( object.getLastUpdated() );
         match.setSaved( object.isSaved() );
         match.setExpression( object.getExpression() );
         

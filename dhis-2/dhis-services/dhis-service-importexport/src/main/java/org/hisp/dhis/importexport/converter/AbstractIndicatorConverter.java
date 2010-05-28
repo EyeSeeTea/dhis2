@@ -63,6 +63,7 @@ public class AbstractIndicatorConverter
         match.setDenominator( object.getDenominator() );
         match.setDenominatorDescription( object.getDenominatorDescription() );
         match.setDenominatorAggregationOperator( object.getDenominatorAggregationOperator() );
+        match.setLastUpdated( object.getLastUpdated() );
         
         indicatorService.updateIndicator( match );                
     }
