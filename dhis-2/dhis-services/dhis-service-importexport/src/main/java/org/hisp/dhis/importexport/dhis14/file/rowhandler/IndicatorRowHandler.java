@@ -35,7 +35,6 @@ import java.util.Map;
 
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
@@ -96,8 +95,6 @@ public class IndicatorRowHandler
     {
         final Indicator indicator = (Indicator) object;
         
-        NameMappingUtil.addIndicatorMapping( indicator.getId(), indicator.getName() );
-        
         indicator.setUuid( UUIdUtils.getUUId() );
 
         if ( indicator.getAlternativeName() != null && indicator.getAlternativeName().trim().length() == 0 )
@@ -121,6 +118,6 @@ public class IndicatorRowHandler
         indicator.setNumerator( convertExpressionFromDhis14( indicator.getNumerator(), dataElementMap, categoryOptionCombo.getId(), indicator.getName() ) );
         indicator.setDenominator( convertExpressionFromDhis14( indicator.getDenominator(), dataElementMap, categoryOptionCombo.getId(), indicator.getName() ) );
         
-        read( indicator, GroupMemberType.NONE, params );
+        importObject( indicator, params );
     }
 }

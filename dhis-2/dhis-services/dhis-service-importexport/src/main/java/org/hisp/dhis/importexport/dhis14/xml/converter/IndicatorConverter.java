@@ -40,7 +40,6 @@ import java.util.Map;
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
@@ -203,6 +202,6 @@ public class IndicatorConverter
         indicator.setSortOrder( parseInt( values.get( FIELD_SORT_ORDER ) ) );
         indicator.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
         
-        read( indicator, GroupMemberType.NONE, params );
+        importObject( indicator, params );
     }
 }

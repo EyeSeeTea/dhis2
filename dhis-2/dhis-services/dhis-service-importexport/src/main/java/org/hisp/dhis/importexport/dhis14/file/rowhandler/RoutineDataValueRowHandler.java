@@ -35,7 +35,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.converter.AbstractDataValueConverter;
@@ -120,7 +119,7 @@ public class RoutineDataValueRowHandler
         
         if ( value.getDataElement() != null && value.getPeriod() != null && value.getSource() != null && value.getValue() != null )
         {
-            read( value, GroupMemberType.NONE, params );
+            importObject( value, params );
         }
     }
 }

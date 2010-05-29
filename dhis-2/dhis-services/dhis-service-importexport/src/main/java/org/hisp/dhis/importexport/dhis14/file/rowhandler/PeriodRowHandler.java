@@ -31,12 +31,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.amplecode.quick.BatchHandler;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.converter.AbstractPeriodConverter;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14PeriodUtil;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 
@@ -88,9 +86,7 @@ public class PeriodRowHandler
             
             Dhis14PeriodUtil.addPeriod( period ); // For uniqueness
             
-            NameMappingUtil.addPeriodMapping( period.getId(), period ); // For later reference by routine datavalues
-            
-            read( period, GroupMemberType.NONE, params );
+            importObject( period, params );
         }
     }
 }

@@ -51,6 +51,7 @@ public class AbstractCalculatedDataElementConverter
     public void importObject( CalculatedDataElement object, ImportParams params )
     {
         NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
+        NameMappingUtil.addDataElementAggregationOperatorMapping( object.getId(), object.getAggregationOperator() );
         
         read( object, GroupMemberType.NONE, params );
     }

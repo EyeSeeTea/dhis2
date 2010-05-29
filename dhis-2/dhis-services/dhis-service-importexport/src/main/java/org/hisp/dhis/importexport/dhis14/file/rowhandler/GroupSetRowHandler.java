@@ -28,11 +28,9 @@ package org.hisp.dhis.importexport.dhis14.file.rowhandler;
  */
 
 import org.amplecode.quick.BatchHandler;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.converter.AbstractGroupSetConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
@@ -70,8 +68,6 @@ public class GroupSetRowHandler
     {
         final OrganisationUnitGroupSet groupSet = (OrganisationUnitGroupSet) object;
         
-        NameMappingUtil.addGroupSetMapping( groupSet.getId(), groupSet.getName() );
-        
-        read( groupSet, GroupMemberType.NONE, params );
+        importObject( groupSet, params );
     }
 }

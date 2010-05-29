@@ -48,6 +48,7 @@ public class AbstractDataElementConverter
     public void importObject( DataElement object, ImportParams params )
     {
         NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
+        NameMappingUtil.addDataElementAggregationOperatorMapping( object.getId(), object.getAggregationOperator() );
         
         read( object, GroupMemberType.NONE, params );
     }

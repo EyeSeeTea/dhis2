@@ -31,12 +31,10 @@ import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.converter.AbstractDataElementConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.system.util.UUIdUtils;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
@@ -79,9 +77,6 @@ public class DataElementRowHandler
     {
         final DataElement dataElement = (DataElement) object;
         
-        NameMappingUtil.addDataElementMapping( dataElement.getId(), dataElement.getName() );
-        NameMappingUtil.addDataElementAggregationOperatorMapping( dataElement.getId(), dataElement.getAggregationOperator() );
-        
         dataElement.setUuid( UUIdUtils.getUUId() );
         dataElement.setActive( true );
                     
@@ -91,7 +86,7 @@ public class DataElementRowHandler
         }
         
         dataElement.setCategoryCombo( categoryCombo );
-            
-        read( dataElement, GroupMemberType.NONE, params );
+
+        importObject( dataElement, params );
     }
 }

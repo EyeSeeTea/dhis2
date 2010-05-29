@@ -33,14 +33,12 @@ import java.util.Map;
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.converter.AbstractPeriodConverter;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14DateUtil;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14ObjectMappingUtil;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -128,8 +126,6 @@ public class PeriodConverter
         period.setStartDate( Dhis14DateUtil.getDate( Integer.parseInt( values.get( FIELD_START_DATE ) ) ) );
         period.setEndDate( Dhis14DateUtil.getDate( Integer.parseInt( values.get( FIELD_END_DATE ) ) ) );
         
-        NameMappingUtil.addPeriodMapping( period.getId(), period );
-        
-        read( period, GroupMemberType.NONE, params );
+        importObject( period, params );
     }
 }

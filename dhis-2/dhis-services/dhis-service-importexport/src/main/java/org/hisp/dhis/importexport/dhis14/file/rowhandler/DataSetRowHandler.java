@@ -32,12 +32,10 @@ import java.util.Map;
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.converter.AbstractDataSetConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
 
@@ -81,8 +79,6 @@ public class DataSetRowHandler
         
         dataSet.getPeriodType().setId( periodTypeMapping.get( dataSet.getPeriodType().getName() ) );
         
-        NameMappingUtil.addDataSetMapping( dataSet.getId(), dataSet.getName() );
-        
-        read( dataSet, GroupMemberType.NONE, params );
+        importObject( dataSet, params );
     }
 }

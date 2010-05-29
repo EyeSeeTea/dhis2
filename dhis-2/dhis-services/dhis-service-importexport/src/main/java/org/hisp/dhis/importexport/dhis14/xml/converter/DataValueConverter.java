@@ -30,8 +30,8 @@ package org.hisp.dhis.importexport.dhis14.xml.converter;
 import static org.hisp.dhis.importexport.csv.util.CsvUtil.NEWLINE;
 import static org.hisp.dhis.importexport.csv.util.CsvUtil.SEPARATOR_B;
 import static org.hisp.dhis.importexport.csv.util.CsvUtil.csvEncode;
-import static org.hisp.dhis.importexport.csv.util.CsvUtil.getCsvValue;
 import static org.hisp.dhis.importexport.csv.util.CsvUtil.getCsvEndValue;
+import static org.hisp.dhis.importexport.csv.util.CsvUtil.getCsvValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,7 +51,6 @@ import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.importexport.CSVConverter;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
@@ -228,7 +227,7 @@ public class DataValueConverter
                 value.setComment( values[13] );
                 value.setOptionCombo( proxyCategoryOptionCombo );
                 
-                read( value, GroupMemberType.NONE, params );
+                importObject( value, params );
             }
         }
         catch ( IOException ex )

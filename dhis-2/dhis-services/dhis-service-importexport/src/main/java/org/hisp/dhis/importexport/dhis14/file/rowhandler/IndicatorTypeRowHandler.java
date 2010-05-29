@@ -28,11 +28,9 @@ package org.hisp.dhis.importexport.dhis14.file.rowhandler;
  */
 
 import org.amplecode.quick.BatchHandler;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.converter.AbstractIndicatorTypeConverter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 
@@ -70,8 +68,6 @@ public class IndicatorTypeRowHandler
     {
         final IndicatorType indicatorType = (IndicatorType) object;
         
-        NameMappingUtil.addIndicatorTypeMapping( indicatorType.getId(), indicatorType.getName() );
-        
-        read( indicatorType, GroupMemberType.NONE, params );
+        importObject( indicatorType, params );
     }
 }
