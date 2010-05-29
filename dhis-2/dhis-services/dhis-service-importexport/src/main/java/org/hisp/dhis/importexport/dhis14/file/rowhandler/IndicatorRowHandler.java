@@ -38,7 +38,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
-import org.hisp.dhis.importexport.converter.AbstractIndicatorConverter;
+import org.hisp.dhis.importexport.importer.IndicatorImporter;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
@@ -51,7 +51,7 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  * @version $Id: IndicatorRowHandler.java 6461 2008-11-24 11:32:37Z larshelg $
  */
 public class IndicatorRowHandler
-    extends AbstractIndicatorConverter implements RowHandler
+    extends IndicatorImporter implements RowHandler
 {
     private Map<Object, Integer> indicatorTypeMap;
     

@@ -33,8 +33,8 @@ import java.util.Set;
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
-import org.hisp.dhis.importexport.converter.AbstractPeriodConverter;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14PeriodUtil;
+import org.hisp.dhis.importexport.importer.PeriodImporter;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 
@@ -45,7 +45,7 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  * @version $Id: PeriodRowHandler.java 6028 2008-10-24 13:44:34Z larshelg $
  */
 public class PeriodRowHandler
-    extends AbstractPeriodConverter implements RowHandler
+    extends PeriodImporter implements RowHandler
 {
     private ImportParams params;
     

@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -38,8 +38,8 @@ import org.hisp.dhis.importexport.Importer;
  * @author Lars Helge Overland
  * @version $Id: AbstractDataValueConverter.java 5152 2008-05-15 12:30:29Z larshelg $
  */
-public class AbstractDataValueConverter
-    extends AbstractConverter<DataValue> implements Importer<DataValue>
+public class DataValueImporter
+    extends AbstractImporter<DataValue> implements Importer<DataValue>
 {
     protected DataValueService dataValueService;
     

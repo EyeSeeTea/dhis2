@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,67 +27,54 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataset.CompleteDataSetRegistration;
-import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorService;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
+ * @version $Id: AbstractIndicatorGroupConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractCompleteDataSetRegistrationConverter
-    extends AbstractConverter<CompleteDataSetRegistration> implements Importer<CompleteDataSetRegistration>
+public class IndicatorGroupImporter
+    extends AbstractImporter<IndicatorGroup> implements Importer<IndicatorGroup>
 {
-    protected ImportParams params;
-
-    protected CompleteDataSetRegistrationService completeDataSetRegistrationService;
+    protected IndicatorService indicatorService;
 
     @Override
-    public void importObject( CompleteDataSetRegistration object, ImportParams params )
+    public void importObject( IndicatorGroup object, ImportParams params )
     {
-        read( object, GroupMemberType.NONE, params );        
-    }
-
-    @Override
-    protected void importUnique( CompleteDataSetRegistration object )
-    {
-        batchHandler.addObject( object );    
-    }
-
-    @Override
-    protected void importMatching( CompleteDataSetRegistration object, CompleteDataSetRegistration match )
-    {
-        match.setDate( object.getDate() );
+        NameMappingUtil.addIndicatorGroupMapping( object.getId(), object.getName() );
         
-        batchHandler.updateObject( match );
+        read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected CompleteDataSetRegistration getMatching( CompleteDataSetRegistration object )
+    protected void importUnique( IndicatorGroup object )
     {
-        // ---------------------------------------------------------------------
-        // CompleteDataSetRegistration cannot be compared against existing 
-        // registrations during preview since the elements in its composite id 
-        // have not been mapped
-        // ---------------------------------------------------------------------
+        batchHandler.addObject( object );
+    }
 
-        if ( params.isPreview() )
-        {
-            return null;
-        }
+    @Override
+    protected void importMatching( IndicatorGroup object, IndicatorGroup match )
+    {
+        match.setUuid( object.getUuid() );
+        match.setName( object.getName() );
         
-        return batchHandler.objectExists( object ) ? object : null;
+        indicatorService.updateIndicatorGroup( object );
     }
 
     @Override
-    protected boolean isIdentical( CompleteDataSetRegistration object, CompleteDataSetRegistration existing )
+    protected IndicatorGroup getMatching( IndicatorGroup object )
     {
-        // ---------------------------------------------------------------------
-        // Matching registrations will not be overwritten
-        // ---------------------------------------------------------------------
+        return indicatorService.getIndicatorGroupByName( object.getName() );
+    }
 
-        return true;
+    @Override
+    protected boolean isIdentical( IndicatorGroup object, IndicatorGroup existing )
+    {
+        return object.getName().equals( existing.getName() );
     }
 }

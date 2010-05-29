@@ -39,8 +39,8 @@ import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
-import org.hisp.dhis.importexport.converter.AbstractOrganisationUnitConverter;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14DateUtil;
+import org.hisp.dhis.importexport.importer.OrganisationUnitImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
@@ -49,7 +49,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
  * @version $Id: OrganisationUnitConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class OrganisationUnitConverter
-    extends AbstractOrganisationUnitConverter implements XMLConverter
+    extends OrganisationUnitImporter implements XMLConverter
 {
     public static final String ELEMENT_NAME = "OrgUnit";
     

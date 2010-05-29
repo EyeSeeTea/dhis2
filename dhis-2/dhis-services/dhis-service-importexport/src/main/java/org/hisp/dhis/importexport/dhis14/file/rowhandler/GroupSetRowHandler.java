@@ -30,7 +30,7 @@ package org.hisp.dhis.importexport.dhis14.file.rowhandler;
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
-import org.hisp.dhis.importexport.converter.AbstractGroupSetConverter;
+import org.hisp.dhis.importexport.importer.GroupSetImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
@@ -41,7 +41,7 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  * @version $Id: GroupSetRowHandler.java 5946 2008-10-16 15:46:43Z larshelg $
  */
 public class GroupSetRowHandler
-    extends AbstractGroupSetConverter implements RowHandler
+    extends GroupSetImporter implements RowHandler
 {
     private ImportParams params;
     

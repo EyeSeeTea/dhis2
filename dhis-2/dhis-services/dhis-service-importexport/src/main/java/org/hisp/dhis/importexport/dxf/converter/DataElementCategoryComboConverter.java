@@ -39,14 +39,14 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractDataElementCategoryComboConverter;
+import org.hisp.dhis.importexport.importer.DataElementCategoryComboImporter;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class DataElementCategoryComboConverter
-    extends AbstractDataElementCategoryComboConverter implements XMLConverter
+    extends DataElementCategoryComboImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "categoryCombos";
     public static final String ELEMENT_NAME = "categoryCombo";

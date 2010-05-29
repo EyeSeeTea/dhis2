@@ -39,7 +39,7 @@ import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractPeriodConverter;
+import org.hisp.dhis.importexport.importer.PeriodImporter;
 import org.hisp.dhis.importexport.ixf.util.IXFMappingUtil;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.period.Period;
@@ -51,7 +51,7 @@ import org.hisp.dhis.system.util.DateUtils;
  * @version $Id: TimePeriodConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class TimePeriodConverter
-    extends AbstractPeriodConverter implements XMLConverter
+    extends PeriodImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "timePeriods";
     public static final String ELEMENT_NAME = "timePeriod";

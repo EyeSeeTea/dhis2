@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -38,8 +38,8 @@ import org.hisp.dhis.importexport.mapping.NameMappingUtil;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class AbstractDataElementCategoryOptionConverter
-    extends AbstractConverter<DataElementCategoryOption> implements Importer<DataElementCategoryOption>
+public class DataElementCategoryOptionImporter
+    extends AbstractImporter<DataElementCategoryOption> implements Importer<DataElementCategoryOption>
 {
     protected DataElementCategoryService categoryService;
 

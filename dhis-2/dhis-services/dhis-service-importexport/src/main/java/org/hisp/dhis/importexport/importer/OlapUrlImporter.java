@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,51 +27,60 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+import org.hisp.dhis.olap.OlapURL;
+import org.hisp.dhis.olap.OlapURLService;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class AbstractDataElementCategoryComboConverter
-    extends AbstractConverter<DataElementCategoryCombo> implements Importer<DataElementCategoryCombo>
+public class OlapUrlImporter
+    extends AbstractImporter<OlapURL> implements Importer<OlapURL>
 {
-    protected DataElementCategoryService categoryService;
+    protected OlapURLService olapURLService;
 
     @Override
-    public void importObject( DataElementCategoryCombo object, ImportParams params )
-    {
-        NameMappingUtil.addCategoryComboMapping( object.getId(), object.getName() );
-        
+    public void importObject( OlapURL object, ImportParams params )
+    {        
         read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( DataElementCategoryCombo object )
+    protected void importUnique( OlapURL object )
     {
-        batchHandler.addObject( object );        
+        olapURLService.saveOlapURL( object );
     }
 
     @Override
-    protected void importMatching( DataElementCategoryCombo object, DataElementCategoryCombo match )
+    protected void importMatching( OlapURL object, OlapURL match )
     {
-        throw new UnsupportedOperationException( "DataElementCategoryCombo can only be unique or duplicate" );
+        match.setName( object.getName() );
+        match.setUrl( object.getUrl() );
+        
+        olapURLService.updateOlapURL( match );
     }
 
     @Override
-    protected DataElementCategoryCombo getMatching( DataElementCategoryCombo object )
+    protected OlapURL getMatching( OlapURL object )
     {
-        return categoryService.getDataElementCategoryComboByName( object.getName() );
+        return olapURLService.getOlapURLByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( DataElementCategoryCombo object, DataElementCategoryCombo existing )
+    protected boolean isIdentical( OlapURL object, OlapURL existing )
     {
-        return object.getName().equals( existing.getName() );
-    }
+        if ( !object.getName().equals( existing.getName() ) )
+        {
+            return false;
+        }
+        if ( !isSimiliar( object.getUrl(), existing.getUrl() ) || ( isNotNull( object.getUrl(), existing.getUrl() ) && !object.getUrl().equals( existing.getUrl() ) ) )
+        {
+            return false;
+        }
+        
+        return true;
+    }    
 }

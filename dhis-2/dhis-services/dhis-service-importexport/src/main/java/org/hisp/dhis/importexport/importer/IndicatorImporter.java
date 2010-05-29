@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,91 +27,81 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.CalculatedDataElement;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorService;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
+ * @version $Id: AbstractIndicatorConverter.java 4753 2008-03-14 12:48:50Z larshelg $
  */
-public class AbstractCalculatedDataElementConverter
-    extends AbstractConverter<CalculatedDataElement> implements Importer<CalculatedDataElement>
+public class IndicatorImporter
+    extends AbstractImporter<Indicator> implements Importer<Indicator>
 {
-    protected DataElementService dataElementService;
+    protected IndicatorService indicatorService;
 
-    // -------------------------------------------------------------------------
-    // Importer implementation
-    // -------------------------------------------------------------------------
-
-    public void importObject( CalculatedDataElement object, ImportParams params )
+    @Override
+    public void importObject( Indicator object, ImportParams params )
     {
-        NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
-        NameMappingUtil.addDataElementAggregationOperatorMapping( object.getId(), object.getAggregationOperator() );
+        NameMappingUtil.addIndicatorMapping( object.getId(), object.getName() );
         
         read( object, GroupMemberType.NONE, params );
     }
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
-    protected void importUnique( CalculatedDataElement object )
+    @Override
+    protected void importUnique( Indicator object )
     {
-        dataElementService.addDataElement( object );
+        batchHandler.addObject( object );      
     }
-    
-    protected void importMatching( CalculatedDataElement object, CalculatedDataElement match )
+
+    @Override
+    protected void importMatching( Indicator object, Indicator match )
     {
         match.setUuid( object.getUuid() );
         match.setName( object.getName() );
-        match.setShortName( object.getShortName() );
         match.setAlternativeName( object.getAlternativeName() );
+        match.setShortName( object.getShortName() );
         match.setCode( object.getCode() );
         match.setDescription( object.getDescription() );
-        match.setActive( object.isActive() );
-        match.setType( object.getType() );
-        match.setAggregationOperator( object.getAggregationOperator() );
+        match.setIndicatorType( object.getIndicatorType() );
+        match.setNumerator( object.getNumerator() );
+        match.setNumeratorDescription( object.getNumeratorDescription() );
+        match.setNumeratorAggregationOperator( object.getNumeratorAggregationOperator() );
+        match.setDenominator( object.getDenominator() );
+        match.setDenominatorDescription( object.getDenominatorDescription() );
+        match.setDenominatorAggregationOperator( object.getDenominatorAggregationOperator() );
         match.setLastUpdated( object.getLastUpdated() );
-        match.setSaved( object.isSaved() );
-        match.setExpression( object.getExpression() );
         
-        dataElementService.updateDataElement( match );
+        indicatorService.updateIndicator( match );                
     }
-    
-    protected CalculatedDataElement getMatching( CalculatedDataElement object )
+
+    @Override
+    protected Indicator getMatching( Indicator object )
     {
-        DataElement match = dataElementService.getDataElementByName( object.getName() );
-
+        Indicator match = indicatorService.getIndicatorByName( object.getName() );
+        
         if ( match == null )
         {
-            match = dataElementService.getDataElementByAlternativeName( object.getAlternativeName() );
+            match = indicatorService.getIndicatorByAlternativeName( object.getAlternativeName() );
         }
         if ( match == null )
         {
-            match = dataElementService.getDataElementByShortName( object.getShortName() );
+            match = indicatorService.getIndicatorByShortName( object.getShortName() );
         }
         
-        CalculatedDataElement calculated = (CalculatedDataElement) match;
-        
-        if ( calculated != null )
-        {
-            calculated.getExpression().getExpression(); // Load Expression in session
-        }
-        
-        return calculated; 
+        return match;
     }
 
-    protected boolean isIdentical( CalculatedDataElement object, CalculatedDataElement existing )
+    @Override
+    protected boolean isIdentical( Indicator object, Indicator existing )
     {
         if ( !object.getName().equals( existing.getName() ) )
         {
             return false;
-        }        
+        }
         if ( !isSimiliar( object.getAlternativeName(), existing.getAlternativeName() ) || ( isNotNull( object.getAlternativeName(), existing.getAlternativeName() ) && !object.getAlternativeName().equals( existing.getAlternativeName() ) ) )
         {
             return false;
@@ -128,36 +118,23 @@ public class AbstractCalculatedDataElementConverter
         {
             return false;
         }
-        if ( object.isActive() != existing.isActive() )
+        if ( !isSimiliar( object.getNumeratorDescription(), existing.getNumeratorDescription() ) || ( isNotNull( object.getNumeratorDescription(), existing.getNumeratorDescription() ) && !object.getNumeratorDescription().equals( existing.getNumeratorDescription() ) ) )
         {
             return false;
         }
-        if ( !object.getType().equals( existing.getType() ) )
+        if ( !isSimiliar( object.getNumeratorAggregationOperator(), existing.getNumeratorAggregationOperator() ) || ( isNotNull( object.getNumeratorAggregationOperator(), existing.getNumeratorAggregationOperator() ) && !object.getNumeratorAggregationOperator().equals( existing.getNumeratorAggregationOperator() ) ) )
         {
             return false;
         }
-        if ( !object.getAggregationOperator().equals( existing.getAggregationOperator() ) )
+        if ( !isSimiliar( object.getDenominatorDescription(), existing.getDenominatorDescription() ) || ( isNotNull( object.getDenominatorDescription(), existing.getDenominatorDescription() ) && !object.getDenominatorDescription().equals( existing.getDenominatorDescription() ) ) )
         {
             return false;
         }
-        if ( object.isSaved() != existing.isSaved() )
+        if ( !isSimiliar( object.getDenominatorAggregationOperator(), existing.getDenominatorAggregationOperator() ) || ( isNotNull( object.getDenominatorAggregationOperator(), existing.getDenominatorAggregationOperator() ) && !object.getDenominatorAggregationOperator().equals( existing.getDenominatorAggregationOperator() ) ) )
         {
             return false;
         }
         
         return true;
-    }   
-    
-    @Override
-    protected boolean ignore( CalculatedDataElement object, CalculatedDataElement match )
-    {
-        boolean ignore = !(object instanceof CalculatedDataElement) && match instanceof CalculatedDataElement;
-        
-        if ( ignore )
-        {
-            log.warn( "Data element ignored because it matches with a calculated data element: " + object );
-        }
-        
-        return ignore;
-    } 
+    }
 }

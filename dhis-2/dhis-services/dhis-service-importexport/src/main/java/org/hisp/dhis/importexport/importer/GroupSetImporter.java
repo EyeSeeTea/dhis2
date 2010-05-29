@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,51 +27,68 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
+ * @version $Id: AbstractGroupSetConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractDataElementCategoryConverter
-    extends AbstractConverter<DataElementCategory> implements Importer<DataElementCategory>
+public class GroupSetImporter
+    extends AbstractImporter<OrganisationUnitGroupSet> implements Importer<OrganisationUnitGroupSet>
 {
-    protected DataElementCategoryService categoryService;
+    protected OrganisationUnitGroupService organisationUnitGroupService;
 
     @Override
-    public void importObject( DataElementCategory object, ImportParams params )
+    public void importObject( OrganisationUnitGroupSet object, ImportParams params )
     {
-        NameMappingUtil.addCategoryMapping( object.getId(), object.getName() );
+        NameMappingUtil.addGroupSetMapping( object.getId(), object.getName() );
         
         read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( DataElementCategory object )
+    protected void importUnique( OrganisationUnitGroupSet object )
     {
-        batchHandler.addObject( object );        
+        batchHandler.addObject( object );
     }
 
     @Override
-    protected void importMatching( DataElementCategory object, DataElementCategory match )
+    protected void importMatching( OrganisationUnitGroupSet object, OrganisationUnitGroupSet match )
     {
-        throw new UnsupportedOperationException( "DataElementCategory can only be unique or duplicate" );
+        match.setName( object.getName() );
+        match.setDescription( object.getDescription() );
+        match.setCompulsory( object.isCompulsory() );
+        
+        organisationUnitGroupService.updateOrganisationUnitGroupSet( match );
     }
 
     @Override
-    protected DataElementCategory getMatching( DataElementCategory object )
+    protected OrganisationUnitGroupSet getMatching( OrganisationUnitGroupSet object )
     {
-        return categoryService.getDataElementCategoryByName( object.getName() );
+        return organisationUnitGroupService.getOrganisationUnitGroupSetByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( DataElementCategory object, DataElementCategory existing )
+    protected boolean isIdentical( OrganisationUnitGroupSet object, OrganisationUnitGroupSet existing )
     {
-        return object.getName().equals( existing.getName() );
+        if ( !object.getName().equals( existing.getName() ) )
+        {
+            return false;
+        }
+        if ( !object.getDescription().equals( existing.getDescription() ) )
+        {
+            return false;
+        }
+        if ( object.isCompulsory() != existing.isCompulsory() )
+        {
+            return false;
+        }
+        
+        return true;
     }
 }

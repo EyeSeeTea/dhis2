@@ -40,7 +40,7 @@ import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractOrganisationUnitConverter;
+import org.hisp.dhis.importexport.importer.OrganisationUnitImporter;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -51,7 +51,7 @@ import org.hisp.dhis.source.Source;
  * @version $Id: SourceConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class SourceConverter
-    extends AbstractOrganisationUnitConverter implements XMLConverter
+    extends OrganisationUnitImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "sources";
     public static final String ELEMENT_NAME = "source";

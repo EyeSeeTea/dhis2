@@ -43,14 +43,14 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractCalculatedDataElementConverter;
+import org.hisp.dhis.importexport.importer.CalculatedDataElementImporter;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class CalculatedDataElementConverter
-    extends AbstractCalculatedDataElementConverter implements XMLConverter
+    extends CalculatedDataElementImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "calculatedDataElements";
     public static final String ELEMENT_NAME = "calculatedDataElement";

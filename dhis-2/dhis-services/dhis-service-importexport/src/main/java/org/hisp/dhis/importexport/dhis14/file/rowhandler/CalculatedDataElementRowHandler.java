@@ -39,7 +39,7 @@ import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
-import org.hisp.dhis.importexport.converter.AbstractCalculatedDataElementConverter;
+import org.hisp.dhis.importexport.importer.CalculatedDataElementImporter;
 import org.hisp.dhis.system.util.UUIdUtils;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
@@ -49,7 +49,7 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  * @version $Id$
  */
 public class CalculatedDataElementRowHandler
-    extends AbstractCalculatedDataElementConverter implements RowHandler
+    extends CalculatedDataElementImporter implements RowHandler
 {
     private ImportParams params;
     

@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -48,9 +48,9 @@ import org.hisp.dhis.importexport.analysis.ImportAnalyser;
  * @author Lars Helge Overland
  * @version $Id: AbstractConverter.java 6298 2008-11-17 17:31:14Z larshelg $
  */
-public abstract class AbstractConverter<T extends ImportableObject>
+public abstract class AbstractImporter<T extends ImportableObject>
 {
-    protected static final Log log = LogFactory.getLog( AbstractConverter.class );
+    protected static final Log log = LogFactory.getLog( AbstractImporter.class );
     
     protected static final String EMPTY = "";
     

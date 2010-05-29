@@ -41,7 +41,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractCompleteDataSetRegistrationConverter;
+import org.hisp.dhis.importexport.importer.CompleteDataSetRegistrationImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
@@ -56,7 +56,7 @@ import org.hisp.dhis.system.util.DateUtils;
  * @version $Id$
  */
 public class CompleteDataSetRegistrationConverter
-    extends AbstractCompleteDataSetRegistrationConverter implements XMLConverter
+    extends CompleteDataSetRegistrationImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "completeDataSetRegistrations";
     public static final String ELEMENT_NAME = "registration";

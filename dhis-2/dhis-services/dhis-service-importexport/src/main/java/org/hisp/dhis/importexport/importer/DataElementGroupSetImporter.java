@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,7 +27,7 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
@@ -36,44 +36,43 @@ import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractDataElementGroupConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ * @version $Id$
  */
-public class AbstractDataElementGroupConverter
-    extends AbstractConverter<DataElementGroup> implements Importer<DataElementGroup>
+public class DataElementGroupSetImporter
+    extends AbstractImporter<DataElementGroupSet> implements Importer<DataElementGroupSet>
 {
     protected DataElementService dataElementService;
 
     @Override
-    public void importObject( DataElementGroup object, ImportParams params )
+    public void importObject( DataElementGroupSet object, ImportParams params )
     {
-        NameMappingUtil.addDataElementGroupMapping( object.getId(), object.getName() );
+        NameMappingUtil.addDataElementGroupSetMapping( object.getId(), object.getName() );
         
         read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( DataElementGroup object )
+    protected void importUnique( DataElementGroupSet object )
     {
-        batchHandler.addObject( object );      
+        dataElementService.addDataElementGroupSet( object );
     }
 
     @Override
-    protected void importMatching( DataElementGroup object, DataElementGroup match )
+    protected void importMatching( DataElementGroupSet object, DataElementGroupSet match )
     {
-        match.setUuid( object.getUuid() );
         match.setName( object.getName() );
         
-        dataElementService.updateDataElementGroup( match );
+        dataElementService.updateDataElementGroupSet( match );
     }
 
     @Override
-    protected DataElementGroup getMatching( DataElementGroup object )
+    protected DataElementGroupSet getMatching( DataElementGroupSet object )
     {
-        return dataElementService.getDataElementGroupByName( object.getName() );
+        return dataElementService.getDataElementGroupSetByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( DataElementGroup object, DataElementGroup existing )
+    protected boolean isIdentical( DataElementGroupSet object, DataElementGroupSet existing )
     {
         return object.getName().equals( existing.getName() );
     }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,54 +27,70 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.datadictionary.DataDictionary;
+import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorService;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractIndicatorGroupConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ * @version $Id$
  */
-public class AbstractIndicatorGroupConverter
-    extends AbstractConverter<IndicatorGroup> implements Importer<IndicatorGroup>
+public class DataDictionaryImporter
+    extends AbstractImporter<DataDictionary> implements Importer<DataDictionary>
 {
-    protected IndicatorService indicatorService;
+    protected DataDictionaryService dataDictionaryService;
 
     @Override
-    public void importObject( IndicatorGroup object, ImportParams params )
-    {
-        NameMappingUtil.addIndicatorGroupMapping( object.getId(), object.getName() );
+    public void importObject( DataDictionary object, ImportParams params )
+    {        
+        NameMappingUtil.addDataDictionaryMapping( object.getId(), object.getName() );
         
-        read( object, GroupMemberType.NONE, params );
+        read( object, GroupMemberType.NONE, params );        
+    }
+    
+    @Override
+    protected void importUnique( DataDictionary object )
+    {
+        batchHandler.addObject( object );        
     }
 
     @Override
-    protected void importUnique( IndicatorGroup object )
+    protected void importMatching( DataDictionary object, DataDictionary match )
     {
-        batchHandler.addObject( object );
-    }
-
-    @Override
-    protected void importMatching( IndicatorGroup object, IndicatorGroup match )
-    {
-        match.setUuid( object.getUuid() );
         match.setName( object.getName() );
+        match.setDescription( object.getDescription() );
+        match.setRegion( object.getRegion() );
         
-        indicatorService.updateIndicatorGroup( object );
+        dataDictionaryService.saveDataDictionary( match );
     }
 
     @Override
-    protected IndicatorGroup getMatching( IndicatorGroup object )
+    protected DataDictionary getMatching( DataDictionary object )
     {
-        return indicatorService.getIndicatorGroupByName( object.getName() );
+        DataDictionary match = dataDictionaryService.getDataDictionaryByName( object.getName() );
+        
+        return match;
     }
 
     @Override
-    protected boolean isIdentical( IndicatorGroup object, IndicatorGroup existing )
+    protected boolean isIdentical( DataDictionary object, DataDictionary existing )
     {
-        return object.getName().equals( existing.getName() );
+        if ( !object.getName().equals( existing.getName() ) )
+        {
+            return false;
+        }
+        if ( !isSimiliar( object.getDescription(), existing.getDescription() ) || ( isNotNull( object.getDescription(), existing.getDescription() ) && !object.getDescription().equals( existing.getDescription() ) ) )
+        {
+            return false;
+        }
+        if ( !isSimiliar( object.getRegion(), existing.getRegion() ) || ( isNotNull( object.getRegion(), existing.getRegion() ) && !object.getRegion().equals( existing.getRegion() ) ) )
+        {
+            return false;
+        }
+        
+        return true;
     }
 }

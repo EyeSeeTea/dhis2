@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,63 +27,36 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.importexport.GroupMemberType;
-import org.hisp.dhis.importexport.ImportParams;
-import org.hisp.dhis.importexport.Importer;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.importexport.GroupMemberAssociation;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractPeriodConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ * @version $Id: AbstractGroupMemberConverter.java 4674 2008-03-04 16:09:50Z larshelg $
  */
-public class AbstractPeriodConverter
-    extends AbstractConverter<Period> implements Importer<Period>
+public class GroupMemberImporter
+    extends AbstractImporter<GroupMemberAssociation>
 {
-    protected PeriodService periodService;
+    // -------------------------------------------------------------------------
+    // Overridden methods
+    // -------------------------------------------------------------------------
 
-    @Override
-    public void importObject( Period object, ImportParams params )
+    protected void importUnique( GroupMemberAssociation object )
     {
-        NameMappingUtil.addPeriodMapping( object.getId(), object );
-        
-        read( object, GroupMemberType.NONE, params );
+        batchHandler.addObject( object );      
     }
 
-    @Override
-    protected void importUnique( Period object )
+    protected void importMatching( GroupMemberAssociation object, GroupMemberAssociation match )
     {
-        batchHandler.addObject( object );
+        throw new UnsupportedOperationException( "GroupMemberAssociations can only be unique or duplicate" );
     }
-
-    @Override
-    protected void importMatching( Period object, Period match )
+    
+    protected GroupMemberAssociation getMatching( GroupMemberAssociation object )
     {
-        // Do nothing
+        return !batchHandler.objectExists( object ) ? null : object;
     }
-
-    @Override
-    protected Period getMatching( Period object )
+    
+    protected boolean isIdentical( GroupMemberAssociation object, GroupMemberAssociation existing )
     {
-        PeriodType periodType = periodService.getPeriodType( object.getPeriodType().getId() );
-        
-        return periodService.getPeriod( object.getStartDate(), object.getEndDate(), periodType );
-    }
-
-    @Override
-    protected boolean isIdentical( Period object, Period existing )
-    {
-        if ( !object.getStartDate().equals( existing.getStartDate() ) )
-        {
-            return false;
-        }
-        if ( !object.getEndDate().equals( existing.getEndDate() ) )
-        {
-            return false;
-        }
-        
         return true;
     }
 }

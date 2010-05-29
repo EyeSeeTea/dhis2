@@ -9,7 +9,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractOrganisationUnitLevelConverter;
+import org.hisp.dhis.importexport.importer.OrganisationUnitLevelImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
@@ -45,7 +45,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
  * @version $Id$
  */
 public class OrganisationUnitLevelConverter
-    extends AbstractOrganisationUnitLevelConverter implements XMLConverter
+    extends OrganisationUnitLevelImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "organisationUnitLevels";
     public static final String ELEMENT_NAME = "organisationUnitLevel";

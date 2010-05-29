@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -39,8 +39,8 @@ import org.hisp.dhis.importexport.mapping.NameMappingUtil;
  * @author Lars Helge Overland
  * @version $Id: AbstractDataElementConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractDataElementConverter
-    extends AbstractConverter<DataElement> implements Importer<DataElement>
+public class DataElementImporter
+    extends AbstractImporter<DataElement> implements Importer<DataElement>
 {
     protected DataElementService dataElementService;
 

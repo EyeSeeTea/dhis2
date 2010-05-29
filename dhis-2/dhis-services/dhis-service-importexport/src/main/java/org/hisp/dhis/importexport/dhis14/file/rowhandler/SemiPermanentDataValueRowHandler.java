@@ -37,8 +37,8 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportParams;
-import org.hisp.dhis.importexport.converter.AbstractDataValueConverter;
 import org.hisp.dhis.importexport.dhis14.object.Dhis14SemiPermanentDataValue;
+import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.source.Source;
@@ -50,7 +50,7 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  * @version $Id: SemiPermanentDataValueRowHandler.java 5946 2008-10-16 15:46:43Z larshelg $
  */
 public class SemiPermanentDataValueRowHandler
-    extends AbstractDataValueConverter implements RowHandler
+    extends DataValueImporter implements RowHandler
 {
     private Map<Object, Integer> dataElementMapping;
     

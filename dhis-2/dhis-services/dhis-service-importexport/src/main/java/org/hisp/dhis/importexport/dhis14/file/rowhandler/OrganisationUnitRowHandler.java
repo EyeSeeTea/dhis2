@@ -31,7 +31,7 @@ import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
-import org.hisp.dhis.importexport.converter.AbstractOrganisationUnitConverter;
+import org.hisp.dhis.importexport.importer.OrganisationUnitImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.source.Source;
@@ -45,7 +45,7 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  * @version $Id: OrganisationUnitRowHandler.java 6298 2008-11-17 17:31:14Z larshelg $
  */
 public class OrganisationUnitRowHandler
-    extends AbstractOrganisationUnitConverter implements RowHandler
+    extends OrganisationUnitImporter implements RowHandler
 {    
     private ImportParams params;
     

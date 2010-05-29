@@ -41,7 +41,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractExtendedDataElementConverter;
+import org.hisp.dhis.importexport.importer.ExtendedDataElementImporter;
 import org.hisp.dhis.system.util.DateUtils;
 
 /**
@@ -49,7 +49,7 @@ import org.hisp.dhis.system.util.DateUtils;
  * @version $Id: ExtendedDataElementConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class ExtendedDataElementConverter
-    extends AbstractExtendedDataElementConverter implements XMLConverter
+    extends ExtendedDataElementImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "extendedDataElements";
     public static final String ELEMENT_NAME = "dataElement";

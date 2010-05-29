@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -43,8 +43,8 @@ import org.hisp.dhis.reporttable.ReportTableService;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class AbstractReportTableConverter
-    extends AbstractConverter<ReportTable> implements Importer<ReportTable>
+public class ReportTableImporter
+    extends AbstractImporter<ReportTable> implements Importer<ReportTable>
 {
     protected ReportTableService reportTableService;
     

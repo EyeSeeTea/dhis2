@@ -39,14 +39,14 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractDataDictionaryConverter;
+import org.hisp.dhis.importexport.importer.DataDictionaryImporter;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class DataDictionaryConverter
-    extends AbstractDataDictionaryConverter implements XMLConverter
+    extends DataDictionaryImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "dataDictionaries";
     public static final String ELEMENT_NAME = "dataDictionary";

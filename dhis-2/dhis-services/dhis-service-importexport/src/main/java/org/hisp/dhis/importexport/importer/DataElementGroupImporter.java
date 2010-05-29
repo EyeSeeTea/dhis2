@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,52 +27,53 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorService;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
+ * @version $Id: AbstractDataElementGroupConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractIndicatorGroupSetConverter
-    extends AbstractConverter<IndicatorGroupSet> implements Importer<IndicatorGroupSet>
+public class DataElementGroupImporter
+    extends AbstractImporter<DataElementGroup> implements Importer<DataElementGroup>
 {
-    protected IndicatorService indicatorService;
+    protected DataElementService dataElementService;
 
     @Override
-    public void importObject( IndicatorGroupSet object, ImportParams params )
+    public void importObject( DataElementGroup object, ImportParams params )
     {
-        NameMappingUtil.addIndicatorGroupSetMapping( object.getId(), object.getName() );
+        NameMappingUtil.addDataElementGroupMapping( object.getId(), object.getName() );
         
         read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( IndicatorGroupSet object )
+    protected void importUnique( DataElementGroup object )
     {
-        indicatorService.addIndicatorGroupSet( object );
+        batchHandler.addObject( object );      
     }
 
     @Override
-    protected void importMatching( IndicatorGroupSet object, IndicatorGroupSet match )
+    protected void importMatching( DataElementGroup object, DataElementGroup match )
     {
+        match.setUuid( object.getUuid() );
         match.setName( object.getName() );
         
-        indicatorService.updateIndicatorGroupSet( match );
+        dataElementService.updateDataElementGroup( match );
     }
 
     @Override
-    protected IndicatorGroupSet getMatching( IndicatorGroupSet object )
+    protected DataElementGroup getMatching( DataElementGroup object )
     {
-        return indicatorService.getIndicatorGroupSetByName( object.getName() );
+        return dataElementService.getDataElementGroupByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( IndicatorGroupSet object, IndicatorGroupSet existing )
+    protected boolean isIdentical( DataElementGroup object, DataElementGroup existing )
     {
         return object.getName().equals( existing.getName() );
     }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -36,8 +36,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
  * @author Lars Helge Overland
  * @version $Id: AbstractOrganisationUnitRelationshipConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractOrganisationUnitRelationshipConverter
-    extends AbstractConverter<GroupMemberAssociation>
+public class OrganisationUnitRelationshipImporter
+    extends AbstractImporter<GroupMemberAssociation>
 {
     protected OrganisationUnitService organisationUnitService;
     

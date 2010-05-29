@@ -1,11 +1,4 @@
-package org.hisp.dhis.importexport.converter;
-
-import org.hisp.dhis.importexport.GroupMemberType;
-import org.hisp.dhis.importexport.ImportParams;
-import org.hisp.dhis.importexport.Importer;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -34,43 +27,63 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class AbstractOrganisationUnitGroupConverter
-    extends AbstractConverter<OrganisationUnitGroup> implements Importer<OrganisationUnitGroup>
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+
+/**
+ * @author Lars Helge Overland
+ * @version $Id: AbstractDataSetConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ */
+public class DataSetImporter
+    extends AbstractImporter<DataSet> implements Importer<DataSet>
 {
-    protected OrganisationUnitGroupService organisationUnitGroupService;
+    protected DataSetService dataSetService;
 
     @Override
-    public void importObject( OrganisationUnitGroup object, ImportParams params )
+    public void importObject( DataSet object, ImportParams params )
     {
-        NameMappingUtil.addOrganisationUnitGroupMapping( object.getId(), object.getName() );
+        NameMappingUtil.addDataSetMapping( object.getId(), object.getName() );
         
-        read( object, GroupMemberType.NONE, params );
+        read( object, GroupMemberType.NONE, params );        
     }
 
     @Override
-    protected void importUnique( OrganisationUnitGroup object )
+    protected void importUnique( DataSet object )
     {
-        batchHandler.addObject( object );
+        batchHandler.addObject( object );    
     }
 
     @Override
-    protected void importMatching( OrganisationUnitGroup object, OrganisationUnitGroup match )
+    protected void importMatching( DataSet object, DataSet match )
     {
-        match.setUuid( object.getUuid() );
         match.setName( object.getName() );
+        match.setPeriodType( object.getPeriodType() );
         
-        organisationUnitGroupService.updateOrganisationUnitGroup( match );
+        dataSetService.updateDataSet( match );
     }
 
     @Override
-    protected OrganisationUnitGroup getMatching( OrganisationUnitGroup object )
+    protected DataSet getMatching( DataSet object )
     {
-        return organisationUnitGroupService.getOrganisationUnitGroupByName( object.getName() );
+        return dataSetService.getDataSetByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( OrganisationUnitGroup object, OrganisationUnitGroup existing )
+    protected boolean isIdentical( DataSet object, DataSet existing )
     {
-        return object.getName().equals( existing.getName() );
+        if ( !object.getName().equals( existing.getName() ) )
+        {
+            return false;
+        }
+        if ( object.getPeriodType().getId() != existing.getPeriodType().getId() )
+        {
+            return false;
+        }
+        
+        return true;
     }
 }

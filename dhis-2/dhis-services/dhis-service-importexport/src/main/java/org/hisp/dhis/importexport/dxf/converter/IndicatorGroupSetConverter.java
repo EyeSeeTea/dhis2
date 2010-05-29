@@ -37,7 +37,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractIndicatorGroupSetConverter;
+import org.hisp.dhis.importexport.importer.IndicatorGroupSetImporter;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorService;
 
@@ -46,7 +46,7 @@ import org.hisp.dhis.indicator.IndicatorService;
  * @version $Id$
  */
 public class IndicatorGroupSetConverter
-    extends AbstractIndicatorGroupSetConverter implements XMLConverter
+    extends IndicatorGroupSetImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "indicatorGroupSets";
     public static final String ELEMENT_NAME = "indicatorGroupSet";

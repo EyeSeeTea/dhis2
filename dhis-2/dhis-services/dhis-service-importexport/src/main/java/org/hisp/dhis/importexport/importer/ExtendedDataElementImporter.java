@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -29,63 +29,59 @@ package org.hisp.dhis.importexport.converter;
 
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.datadictionary.ExtendedDataElement;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorService;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractExtendedIndicatorConverter.java 5946 2008-10-16 15:46:43Z larshelg $
+ * @version $Id: AbstractExtendedDataElementConverter.java 5946 2008-10-16 15:46:43Z larshelg $
  */
-public class AbstractExtendedIndicatorConverter
-    extends AbstractConverter<Indicator> implements Importer<Indicator>
+public class ExtendedDataElementImporter
+    extends AbstractImporter<DataElement> implements Importer<DataElement>
 {
     protected BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler;
     
-    protected IndicatorService indicatorService;
+    protected DataElementService dataElementService;
 
     @Override
-    public void importObject( Indicator object, ImportParams params )
+    public void importObject( DataElement object, ImportParams params )
     {
-        NameMappingUtil.addIndicatorMapping( object.getId(), object.getName() );
+        NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
         
         read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( Indicator object )
+    protected void importUnique( DataElement object )
     {
-        ExtendedDataElement extendedIndicator = object.getExtended();
-
-        if ( extendedIndicator != null )
+        ExtendedDataElement extendedDataElement = object.getExtended();
+        
+        if ( extendedDataElement != null )
         {
-            int id = extendedDataElementBatchHandler.insertObject( extendedIndicator, true );
+            int id = extendedDataElementBatchHandler.insertObject( extendedDataElement, true );
             
-            extendedIndicator.setId( id );
-            object.setExtended( extendedIndicator );
+            extendedDataElement.setId( id );
+            object.setExtended( extendedDataElement );
         }
         
-        batchHandler.addObject( object );      
+        batchHandler.addObject( object );        
     }
 
     @Override
-    protected void importMatching( Indicator object, Indicator match )
+    protected void importMatching( DataElement object, DataElement match )
     {
         match.setName( object.getName() );
-        match.setAlternativeName( object.getAlternativeName() );
         match.setShortName( object.getShortName() );
+        match.setAlternativeName( object.getAlternativeName() );
         match.setCode( object.getCode() );
         match.setDescription( object.getDescription() );
-        match.setIndicatorType( object.getIndicatorType() );
-        match.setNumerator( object.getNumerator() );
-        match.setNumeratorDescription( object.getNumeratorDescription() );
-        match.setNumeratorAggregationOperator( object.getNumeratorAggregationOperator() );
-        match.setDenominator( object.getDenominator() );
-        match.setDenominatorDescription( object.getDenominatorDescription() );
-        match.setDenominatorAggregationOperator( object.getDenominatorAggregationOperator() );
+        match.setActive( object.isActive() );
+        match.setType( object.getType() );
+        match.setAggregationOperator( object.getAggregationOperator() );
         match.setLastUpdated( object.getLastUpdated() );
 
         // ---------------------------------------------------------------------
@@ -95,7 +91,7 @@ public class AbstractExtendedIndicatorConverter
         if ( object.getExtended() != null )
         {
             ExtendedDataElement extended = new ExtendedDataElement();
-
+            
             extended.setMnemonic( object.getExtended().getMnemonic() );
             extended.setVersion( object.getExtended().getVersion() );
             extended.setContext( object.getExtended().getContext() );
@@ -134,23 +130,23 @@ public class AbstractExtendedIndicatorConverter
             match.setExtended( extended );
         }
         
-        indicatorService.updateIndicator( match );                
+        dataElementService.updateDataElement( match );
     }
 
     @Override
-    protected Indicator getMatching( Indicator object )
+    protected DataElement getMatching( DataElement object )
     {
-        Indicator match = indicatorService.getIndicatorByName( object.getName() );
-        
-        if ( match == null )
-        {
-            match = indicatorService.getIndicatorByAlternativeName( object.getAlternativeName() );
-        }
-        if ( match == null )
-        {
-            match = indicatorService.getIndicatorByShortName( object.getShortName() );
-        }
+        DataElement match = dataElementService.getDataElementByName( object.getName() );
 
+        if ( match == null )
+        {
+            match = dataElementService.getDataElementByAlternativeName( object.getAlternativeName() );
+        }
+        if ( match == null )
+        {
+            match = dataElementService.getDataElementByShortName( object.getShortName() );
+        }
+        
         if ( match != null && match.getExtended() != null )
         {
             match.getExtended().getMnemonic(); // Dirty loading of extended data element
@@ -160,7 +156,7 @@ public class AbstractExtendedIndicatorConverter
     }
 
     @Override
-    protected boolean isIdentical( Indicator object, Indicator existing )
+    protected boolean isIdentical( DataElement object, DataElement existing )
     {
         // ---------------------------------------------------------------------
         // Regular attributes
@@ -169,7 +165,7 @@ public class AbstractExtendedIndicatorConverter
         if ( !object.getName().equals( existing.getName() ) )
         {
             return false;
-        }
+        }        
         if ( !isSimiliar( object.getAlternativeName(), existing.getAlternativeName() ) || ( isNotNull( object.getAlternativeName(), existing.getAlternativeName() ) && !object.getAlternativeName().equals( existing.getAlternativeName() ) ) )
         {
             return false;
@@ -186,27 +182,15 @@ public class AbstractExtendedIndicatorConverter
         {
             return false;
         }
-        if ( !isSimiliar( object.getNumerator(), existing.getNumerator() ) || ( isNotNull( object.getNumerator(), existing.getNumerator() ) && !object.getNumerator().equals( existing.getNumerator() ) ) )
+        if ( object.isActive() != existing.isActive() )
         {
             return false;
         }
-        if ( !isSimiliar( object.getNumeratorDescription(), existing.getNumeratorDescription() ) || ( isNotNull( object.getNumeratorDescription(), existing.getNumeratorDescription() ) && !object.getNumeratorDescription().equals( existing.getNumeratorDescription() ) ) )
+        if ( !object.getType().equals( existing.getType() ) )
         {
             return false;
         }
-        if ( !isSimiliar( object.getNumeratorAggregationOperator(), existing.getNumeratorAggregationOperator() ) || ( isNotNull( object.getNumeratorAggregationOperator(), existing.getNumeratorAggregationOperator() ) && !object.getNumeratorAggregationOperator().equals( existing.getNumeratorAggregationOperator() ) ) )
-        {
-            return false;
-        }
-        if ( !isSimiliar( object.getDenominator(), existing.getDenominator() ) || ( isNotNull( object.getDenominator(), existing.getDenominator() ) && !object.getDenominator().equals( existing.getDenominator() ) ) )
-        {
-            return false;
-        }
-        if ( !isSimiliar( object.getDenominatorDescription(), existing.getDenominatorDescription() ) || ( isNotNull( object.getDenominatorDescription(), existing.getDenominatorDescription() ) && !object.getDenominatorDescription().equals( existing.getDenominatorDescription() ) ) )
-        {
-            return false;
-        }
-        if ( !isSimiliar( object.getDenominatorAggregationOperator(), existing.getDenominatorAggregationOperator() ) || ( isNotNull( object.getDenominatorAggregationOperator(), existing.getDenominatorAggregationOperator() ) && !object.getDenominatorAggregationOperator().equals( existing.getDenominatorAggregationOperator() ) ) )
+        if ( !object.getAggregationOperator().equals( existing.getAggregationOperator() ) )
         {
             return false;
         }
@@ -347,5 +331,4 @@ public class AbstractExtendedIndicatorConverter
         
         return true;
     }
-
 }

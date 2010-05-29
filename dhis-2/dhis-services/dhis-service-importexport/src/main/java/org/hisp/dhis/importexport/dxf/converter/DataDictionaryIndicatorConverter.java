@@ -43,7 +43,7 @@ import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractGroupMemberConverter;
+import org.hisp.dhis.importexport.importer.GroupMemberImporter;
 import org.hisp.dhis.indicator.Indicator;
 
 /**
@@ -51,7 +51,7 @@ import org.hisp.dhis.indicator.Indicator;
  * @version $Id$
  */
 public class DataDictionaryIndicatorConverter
-    extends AbstractGroupMemberConverter implements XMLConverter, Importer<GroupMemberAssociation>
+    extends GroupMemberImporter implements XMLConverter, Importer<GroupMemberAssociation>
 {
     public static final String COLLECTION_NAME = "dataDictionaryIndicators";
     public static final String ELEMENT_NAME = "dataDictionaryIndicator";

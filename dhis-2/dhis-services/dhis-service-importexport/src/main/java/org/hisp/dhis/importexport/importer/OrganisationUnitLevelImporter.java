@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -37,8 +37,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class AbstractOrganisationUnitLevelConverter
-    extends AbstractConverter<OrganisationUnitLevel> implements Importer<OrganisationUnitLevel>
+public class OrganisationUnitLevelImporter
+    extends AbstractImporter<OrganisationUnitLevel> implements Importer<OrganisationUnitLevel>
 {
     protected OrganisationUnitService organisationUnitService;
 

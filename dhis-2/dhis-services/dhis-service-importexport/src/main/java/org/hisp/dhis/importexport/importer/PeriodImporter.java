@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,59 +27,59 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractDataSetConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ * @version $Id: AbstractPeriodConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractDataSetConverter
-    extends AbstractConverter<DataSet> implements Importer<DataSet>
+public class PeriodImporter
+    extends AbstractImporter<Period> implements Importer<Period>
 {
-    protected DataSetService dataSetService;
+    protected PeriodService periodService;
 
     @Override
-    public void importObject( DataSet object, ImportParams params )
+    public void importObject( Period object, ImportParams params )
     {
-        NameMappingUtil.addDataSetMapping( object.getId(), object.getName() );
+        NameMappingUtil.addPeriodMapping( object.getId(), object );
         
-        read( object, GroupMemberType.NONE, params );        
+        read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( DataSet object )
+    protected void importUnique( Period object )
     {
-        batchHandler.addObject( object );    
+        batchHandler.addObject( object );
     }
 
     @Override
-    protected void importMatching( DataSet object, DataSet match )
+    protected void importMatching( Period object, Period match )
     {
-        match.setName( object.getName() );
-        match.setPeriodType( object.getPeriodType() );
+        // Do nothing
+    }
+
+    @Override
+    protected Period getMatching( Period object )
+    {
+        PeriodType periodType = periodService.getPeriodType( object.getPeriodType().getId() );
         
-        dataSetService.updateDataSet( match );
+        return periodService.getPeriod( object.getStartDate(), object.getEndDate(), periodType );
     }
 
     @Override
-    protected DataSet getMatching( DataSet object )
+    protected boolean isIdentical( Period object, Period existing )
     {
-        return dataSetService.getDataSetByName( object.getName() );
-    }
-
-    @Override
-    protected boolean isIdentical( DataSet object, DataSet existing )
-    {
-        if ( !object.getName().equals( existing.getName() ) )
+        if ( !object.getStartDate().equals( existing.getStartDate() ) )
         {
             return false;
         }
-        if ( object.getPeriodType().getId() != existing.getPeriodType().getId() )
+        if ( !object.getEndDate().equals( existing.getEndDate() ) )
         {
             return false;
         }

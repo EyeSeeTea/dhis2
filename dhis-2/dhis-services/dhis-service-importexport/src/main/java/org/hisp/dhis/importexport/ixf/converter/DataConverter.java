@@ -42,7 +42,7 @@ import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractDataValueConverter;
+import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.source.Source;
@@ -52,7 +52,7 @@ import org.hisp.dhis.source.Source;
  * @version $Id$
  */
 public class DataConverter
-    extends AbstractDataValueConverter implements XMLConverter
+    extends DataValueImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "indicator";
     public static final String ELEMENT_NAME = "data";

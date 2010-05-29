@@ -44,7 +44,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractReportTableConverter;
+import org.hisp.dhis.importexport.importer.ReportTableImporter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -61,7 +61,7 @@ import org.hisp.dhis.reporttable.ReportTableService;
  * @version $Id$
  */
 public class ReportTableConverter
-    extends AbstractReportTableConverter implements XMLConverter
+    extends ReportTableImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "reportTables";
     public static final String ELEMENT_NAME = "reportTable";

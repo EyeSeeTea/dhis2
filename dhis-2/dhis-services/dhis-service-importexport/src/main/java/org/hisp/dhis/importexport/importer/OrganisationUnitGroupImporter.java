@@ -1,4 +1,11 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
+
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,36 +34,43 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.importexport.GroupMemberAssociation;
-
-/**
- * @author Lars Helge Overland
- * @version $Id: AbstractGroupMemberConverter.java 4674 2008-03-04 16:09:50Z larshelg $
- */
-public class AbstractGroupMemberConverter
-    extends AbstractConverter<GroupMemberAssociation>
+public class OrganisationUnitGroupImporter
+    extends AbstractImporter<OrganisationUnitGroup> implements Importer<OrganisationUnitGroup>
 {
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
+    protected OrganisationUnitGroupService organisationUnitGroupService;
 
-    protected void importUnique( GroupMemberAssociation object )
+    @Override
+    public void importObject( OrganisationUnitGroup object, ImportParams params )
     {
-        batchHandler.addObject( object );      
+        NameMappingUtil.addOrganisationUnitGroupMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
     }
 
-    protected void importMatching( GroupMemberAssociation object, GroupMemberAssociation match )
+    @Override
+    protected void importUnique( OrganisationUnitGroup object )
     {
-        throw new UnsupportedOperationException( "GroupMemberAssociations can only be unique or duplicate" );
+        batchHandler.addObject( object );
     }
-    
-    protected GroupMemberAssociation getMatching( GroupMemberAssociation object )
+
+    @Override
+    protected void importMatching( OrganisationUnitGroup object, OrganisationUnitGroup match )
     {
-        return !batchHandler.objectExists( object ) ? null : object;
+        match.setUuid( object.getUuid() );
+        match.setName( object.getName() );
+        
+        organisationUnitGroupService.updateOrganisationUnitGroup( match );
     }
-    
-    protected boolean isIdentical( GroupMemberAssociation object, GroupMemberAssociation existing )
+
+    @Override
+    protected OrganisationUnitGroup getMatching( OrganisationUnitGroup object )
     {
-        return true;
+        return organisationUnitGroupService.getOrganisationUnitGroupByName( object.getName() );
+    }
+
+    @Override
+    protected boolean isIdentical( OrganisationUnitGroup object, OrganisationUnitGroup existing )
+    {
+        return object.getName().equals( existing.getName() );
     }
 }

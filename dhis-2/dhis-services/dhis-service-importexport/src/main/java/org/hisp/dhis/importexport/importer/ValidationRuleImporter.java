@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -38,8 +38,8 @@ import org.hisp.dhis.validation.ValidationRuleService;
  * @author Lars Helge Overland
  * @version $Id: AbstractValidationRuleConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractValidationRuleConverter
-    extends AbstractConverter<ValidationRule> implements Importer<ValidationRule>
+public class ValidationRuleImporter
+    extends AbstractImporter<ValidationRule> implements Importer<ValidationRule>
 {
     protected ValidationRuleService validationRuleService;
 

@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,8 +27,8 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
@@ -38,59 +38,40 @@ import org.hisp.dhis.importexport.mapping.NameMappingUtil;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class AbstractDataDictionaryConverter
-    extends AbstractConverter<DataDictionary> implements Importer<DataDictionary>
+public class DataElementCategoryImporter
+    extends AbstractImporter<DataElementCategory> implements Importer<DataElementCategory>
 {
-    protected DataDictionaryService dataDictionaryService;
+    protected DataElementCategoryService categoryService;
 
     @Override
-    public void importObject( DataDictionary object, ImportParams params )
-    {        
-        NameMappingUtil.addDataDictionaryMapping( object.getId(), object.getName() );
+    public void importObject( DataElementCategory object, ImportParams params )
+    {
+        NameMappingUtil.addCategoryMapping( object.getId(), object.getName() );
         
-        read( object, GroupMemberType.NONE, params );        
+        read( object, GroupMemberType.NONE, params );
     }
-    
+
     @Override
-    protected void importUnique( DataDictionary object )
+    protected void importUnique( DataElementCategory object )
     {
         batchHandler.addObject( object );        
     }
 
     @Override
-    protected void importMatching( DataDictionary object, DataDictionary match )
+    protected void importMatching( DataElementCategory object, DataElementCategory match )
     {
-        match.setName( object.getName() );
-        match.setDescription( object.getDescription() );
-        match.setRegion( object.getRegion() );
-        
-        dataDictionaryService.saveDataDictionary( match );
+        throw new UnsupportedOperationException( "DataElementCategory can only be unique or duplicate" );
     }
 
     @Override
-    protected DataDictionary getMatching( DataDictionary object )
+    protected DataElementCategory getMatching( DataElementCategory object )
     {
-        DataDictionary match = dataDictionaryService.getDataDictionaryByName( object.getName() );
-        
-        return match;
+        return categoryService.getDataElementCategoryByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( DataDictionary object, DataDictionary existing )
+    protected boolean isIdentical( DataElementCategory object, DataElementCategory existing )
     {
-        if ( !object.getName().equals( existing.getName() ) )
-        {
-            return false;
-        }
-        if ( !isSimiliar( object.getDescription(), existing.getDescription() ) || ( isNotNull( object.getDescription(), existing.getDescription() ) && !object.getDescription().equals( existing.getDescription() ) ) )
-        {
-            return false;
-        }
-        if ( !isSimiliar( object.getRegion(), existing.getRegion() ) || ( isNotNull( object.getRegion(), existing.getRegion() ) && !object.getRegion().equals( existing.getRegion() ) ) )
-        {
-            return false;
-        }
-        
-        return true;
+        return object.getName().equals( existing.getName() );
     }
 }

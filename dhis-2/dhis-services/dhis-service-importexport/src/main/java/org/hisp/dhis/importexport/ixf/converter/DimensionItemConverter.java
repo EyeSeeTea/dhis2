@@ -39,7 +39,7 @@ import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractDataElementCategoryOptionConverter;
+import org.hisp.dhis.importexport.importer.DataElementCategoryOptionImporter;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.system.util.UUIdUtils;
 
@@ -48,7 +48,7 @@ import org.hisp.dhis.system.util.UUIdUtils;
  * @version $Id$
  */
 public class DimensionItemConverter
-    extends AbstractDataElementCategoryOptionConverter implements XMLConverter
+    extends DataElementCategoryOptionImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "simpleDim";
     public static final String ELEMENT_NAME = "item";

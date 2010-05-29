@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -30,57 +30,60 @@ package org.hisp.dhis.importexport.converter;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
-import org.hisp.dhis.olap.OlapURL;
-import org.hisp.dhis.olap.OlapURLService;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.indicator.IndicatorType;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
+ * @version $Id: AbstractIndicatorTypeConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
-public class AbstractOlapUrlConverter
-    extends AbstractConverter<OlapURL> implements Importer<OlapURL>
+public class IndicatorTypeImporter
+    extends AbstractImporter<IndicatorType> implements Importer<IndicatorType>
 {
-    protected OlapURLService olapURLService;
+    protected IndicatorService indicatorService;
 
     @Override
-    public void importObject( OlapURL object, ImportParams params )
-    {        
+    public void importObject( IndicatorType object, ImportParams params )
+    {
+        NameMappingUtil.addIndicatorTypeMapping( object.getId(), object.getName() );
+        
         read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( OlapURL object )
+    protected void importUnique( IndicatorType object )
     {
-        olapURLService.saveOlapURL( object );
+        batchHandler.addObject( object );
     }
 
     @Override
-    protected void importMatching( OlapURL object, OlapURL match )
+    protected void importMatching( IndicatorType object, IndicatorType match )
     {
         match.setName( object.getName() );
-        match.setUrl( object.getUrl() );
+        match.setFactor( object.getFactor() );
         
-        olapURLService.updateOlapURL( match );
+        indicatorService.updateIndicatorType( match );                
     }
 
     @Override
-    protected OlapURL getMatching( OlapURL object )
+    protected IndicatorType getMatching( IndicatorType object )
     {
-        return olapURLService.getOlapURLByName( object.getName() );
+        return indicatorService.getIndicatorTypeByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( OlapURL object, OlapURL existing )
+    protected boolean isIdentical( IndicatorType object, IndicatorType existing )
     {
         if ( !object.getName().equals( existing.getName() ) )
         {
             return false;
         }
-        if ( !isSimiliar( object.getUrl(), existing.getUrl() ) || ( isNotNull( object.getUrl(), existing.getUrl() ) && !object.getUrl().equals( existing.getUrl() ) ) )
+        if ( object.getFactor() != existing.getFactor() )
         {
             return false;
         }
         
         return true;
-    }    
+    }
 }

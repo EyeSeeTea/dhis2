@@ -54,7 +54,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
-import org.hisp.dhis.importexport.converter.AbstractDataValueConverter;
+import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -67,7 +67,7 @@ import org.hisp.dhis.system.util.StreamUtils;
  * @version $Id$
  */
 public class DataValueConverter
-    extends AbstractDataValueConverter implements CSVConverter 
+    extends DataValueImporter implements CSVConverter 
 {
     private static final String SEPARATOR = ",";
     private static final String FILENAME = "RoutineData.txt";

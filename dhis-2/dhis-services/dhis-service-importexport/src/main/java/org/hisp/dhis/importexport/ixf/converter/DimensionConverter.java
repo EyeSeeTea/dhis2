@@ -42,14 +42,14 @@ import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractDataElementCategoryConverter;
+import org.hisp.dhis.importexport.importer.DataElementCategoryImporter;
 
 /**
  * @author Lars Helge Overland
  * @version $Id: DimensionConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class DimensionConverter
-    extends AbstractDataElementCategoryConverter implements XMLConverter
+    extends DataElementCategoryImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "dimensions";
     public static final String ELEMENT_NAME = "simpleDim";

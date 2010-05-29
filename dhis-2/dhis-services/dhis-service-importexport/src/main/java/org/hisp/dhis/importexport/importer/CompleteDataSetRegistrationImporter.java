@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,68 +27,67 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataset.CompleteDataSetRegistration;
+import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractGroupSetConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ * @version $Id$
  */
-public class AbstractGroupSetConverter
-    extends AbstractConverter<OrganisationUnitGroupSet> implements Importer<OrganisationUnitGroupSet>
+public class CompleteDataSetRegistrationImporter
+    extends AbstractImporter<CompleteDataSetRegistration> implements Importer<CompleteDataSetRegistration>
 {
-    protected OrganisationUnitGroupService organisationUnitGroupService;
+    protected ImportParams params;
+
+    protected CompleteDataSetRegistrationService completeDataSetRegistrationService;
 
     @Override
-    public void importObject( OrganisationUnitGroupSet object, ImportParams params )
+    public void importObject( CompleteDataSetRegistration object, ImportParams params )
     {
-        NameMappingUtil.addGroupSetMapping( object.getId(), object.getName() );
+        read( object, GroupMemberType.NONE, params );        
+    }
+
+    @Override
+    protected void importUnique( CompleteDataSetRegistration object )
+    {
+        batchHandler.addObject( object );    
+    }
+
+    @Override
+    protected void importMatching( CompleteDataSetRegistration object, CompleteDataSetRegistration match )
+    {
+        match.setDate( object.getDate() );
         
-        read( object, GroupMemberType.NONE, params );
+        batchHandler.updateObject( match );
     }
 
     @Override
-    protected void importUnique( OrganisationUnitGroupSet object )
+    protected CompleteDataSetRegistration getMatching( CompleteDataSetRegistration object )
     {
-        batchHandler.addObject( object );
-    }
+        // ---------------------------------------------------------------------
+        // CompleteDataSetRegistration cannot be compared against existing 
+        // registrations during preview since the elements in its composite id 
+        // have not been mapped
+        // ---------------------------------------------------------------------
 
-    @Override
-    protected void importMatching( OrganisationUnitGroupSet object, OrganisationUnitGroupSet match )
-    {
-        match.setName( object.getName() );
-        match.setDescription( object.getDescription() );
-        match.setCompulsory( object.isCompulsory() );
-        
-        organisationUnitGroupService.updateOrganisationUnitGroupSet( match );
-    }
-
-    @Override
-    protected OrganisationUnitGroupSet getMatching( OrganisationUnitGroupSet object )
-    {
-        return organisationUnitGroupService.getOrganisationUnitGroupSetByName( object.getName() );
-    }
-
-    @Override
-    protected boolean isIdentical( OrganisationUnitGroupSet object, OrganisationUnitGroupSet existing )
-    {
-        if ( !object.getName().equals( existing.getName() ) )
+        if ( params.isPreview() )
         {
-            return false;
-        }
-        if ( !object.getDescription().equals( existing.getDescription() ) )
-        {
-            return false;
-        }
-        if ( object.isCompulsory() != existing.isCompulsory() )
-        {
-            return false;
+            return null;
         }
         
+        return batchHandler.objectExists( object ) ? object : null;
+    }
+
+    @Override
+    protected boolean isIdentical( CompleteDataSetRegistration object, CompleteDataSetRegistration existing )
+    {
+        // ---------------------------------------------------------------------
+        // Matching registrations will not be overwritten
+        // ---------------------------------------------------------------------
+
         return true;
     }
 }

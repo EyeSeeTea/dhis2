@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.converter;
+package org.hisp.dhis.importexport.importer;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,63 +27,51 @@ package org.hisp.dhis.importexport.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.indicator.IndicatorType;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractIndicatorTypeConverter.java 4646 2008-02-26 14:54:29Z larshelg $
+ * @version $Id$
  */
-public class AbstractIndicatorTypeConverter
-    extends AbstractConverter<IndicatorType> implements Importer<IndicatorType>
+public class DataElementCategoryComboImporter
+    extends AbstractImporter<DataElementCategoryCombo> implements Importer<DataElementCategoryCombo>
 {
-    protected IndicatorService indicatorService;
+    protected DataElementCategoryService categoryService;
 
     @Override
-    public void importObject( IndicatorType object, ImportParams params )
+    public void importObject( DataElementCategoryCombo object, ImportParams params )
     {
-        NameMappingUtil.addIndicatorTypeMapping( object.getId(), object.getName() );
+        NameMappingUtil.addCategoryComboMapping( object.getId(), object.getName() );
         
         read( object, GroupMemberType.NONE, params );
     }
 
     @Override
-    protected void importUnique( IndicatorType object )
+    protected void importUnique( DataElementCategoryCombo object )
     {
-        batchHandler.addObject( object );
+        batchHandler.addObject( object );        
     }
 
     @Override
-    protected void importMatching( IndicatorType object, IndicatorType match )
+    protected void importMatching( DataElementCategoryCombo object, DataElementCategoryCombo match )
     {
-        match.setName( object.getName() );
-        match.setFactor( object.getFactor() );
-        
-        indicatorService.updateIndicatorType( match );                
+        throw new UnsupportedOperationException( "DataElementCategoryCombo can only be unique or duplicate" );
     }
 
     @Override
-    protected IndicatorType getMatching( IndicatorType object )
+    protected DataElementCategoryCombo getMatching( DataElementCategoryCombo object )
     {
-        return indicatorService.getIndicatorTypeByName( object.getName() );
+        return categoryService.getDataElementCategoryComboByName( object.getName() );
     }
 
     @Override
-    protected boolean isIdentical( IndicatorType object, IndicatorType existing )
+    protected boolean isIdentical( DataElementCategoryCombo object, DataElementCategoryCombo existing )
     {
-        if ( !object.getName().equals( existing.getName() ) )
-        {
-            return false;
-        }
-        if ( object.getFactor() != existing.getFactor() )
-        {
-            return false;
-        }
-        
-        return true;
+        return object.getName().equals( existing.getName() );
     }
 }
