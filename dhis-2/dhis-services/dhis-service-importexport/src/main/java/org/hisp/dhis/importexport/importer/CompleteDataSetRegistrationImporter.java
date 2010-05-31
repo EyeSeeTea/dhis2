@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.importexport.GroupMemberType;
@@ -42,8 +43,19 @@ public class CompleteDataSetRegistrationImporter
 {
     protected ImportParams params;
 
-    protected CompleteDataSetRegistrationService completeDataSetRegistrationService;
+    protected CompleteDataSetRegistrationService registrationService;
 
+    public CompleteDataSetRegistrationImporter()
+    {
+    }
+
+    public CompleteDataSetRegistrationImporter( BatchHandler<CompleteDataSetRegistration> batchHandler, CompleteDataSetRegistrationService registrationService, ImportParams params )
+    {
+        this.batchHandler = batchHandler;
+        this.registrationService = registrationService;
+        this.params = params;
+    }
+    
     @Override
     public void importObject( CompleteDataSetRegistration object, ImportParams params )
     {

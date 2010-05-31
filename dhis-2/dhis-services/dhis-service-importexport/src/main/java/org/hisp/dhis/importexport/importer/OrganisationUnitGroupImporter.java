@@ -1,5 +1,6 @@
 package org.hisp.dhis.importexport.importer;
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
@@ -39,6 +40,16 @@ public class OrganisationUnitGroupImporter
 {
     protected OrganisationUnitGroupService organisationUnitGroupService;
 
+    public OrganisationUnitGroupImporter()
+    {
+    }
+    
+    public OrganisationUnitGroupImporter( BatchHandler<OrganisationUnitGroup> batchHandler, OrganisationUnitGroupService organisationUnitGroupService )
+    {
+        this.batchHandler = batchHandler;
+        this.organisationUnitGroupService = organisationUnitGroupService;
+    }
+    
     @Override
     public void importObject( OrganisationUnitGroup object, ImportParams params )
     {

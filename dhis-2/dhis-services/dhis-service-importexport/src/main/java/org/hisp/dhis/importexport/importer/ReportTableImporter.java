@@ -60,6 +60,15 @@ public class ReportTableImporter
     
     protected OrganisationUnitService organisationUnitService;
 
+    public ReportTableImporter()
+    {
+    }
+    
+    public ReportTableImporter( ReportTableService reportTableService )
+    {
+        this.reportTableService = reportTableService;
+    }
+    
     @Override
     public void importObject( ReportTable object, ImportParams params )
     {

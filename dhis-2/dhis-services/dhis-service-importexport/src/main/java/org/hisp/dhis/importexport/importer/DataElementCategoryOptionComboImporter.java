@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.importexport.GroupMemberType;
@@ -43,6 +44,16 @@ public class DataElementCategoryOptionComboImporter
 {
     protected DataElementCategoryService categoryService;
 
+    public DataElementCategoryOptionComboImporter()
+    {
+    }
+    
+    public DataElementCategoryOptionComboImporter( BatchHandler<DataElementCategoryOptionCombo> batchHandler, DataElementCategoryService categoryService )
+    {
+        this.batchHandler = batchHandler;
+        this.categoryService = categoryService;
+    }
+    
     @Override
     public void importObject( DataElementCategoryOptionCombo object, ImportParams params )
     {

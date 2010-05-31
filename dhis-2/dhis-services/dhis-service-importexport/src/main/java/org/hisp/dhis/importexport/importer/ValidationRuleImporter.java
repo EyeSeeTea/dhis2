@@ -45,6 +45,16 @@ public class ValidationRuleImporter
 
     protected ExpressionService expressionService;
 
+    public ValidationRuleImporter()
+    {
+    }
+    
+    public ValidationRuleImporter( ValidationRuleService validationRuleService, ExpressionService expressionService )
+    {
+        this.validationRuleService = validationRuleService;
+        this.expressionService = expressionService;
+    }
+    
     @Override
     public void importObject( ValidationRule object, ImportParams params )
     {

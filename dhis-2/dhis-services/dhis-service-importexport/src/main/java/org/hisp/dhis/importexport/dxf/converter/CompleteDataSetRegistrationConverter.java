@@ -94,7 +94,7 @@ public class CompleteDataSetRegistrationConverter
         OrganisationUnitService organisationUnitService,
         PeriodService periodService )
     {   
-        this.completeDataSetRegistrationService = completeDataSetRegistrationService;
+        this.registrationService = completeDataSetRegistrationService;
         this.dataSetService = dataSetService;
         this.organisationUnitService = organisationUnitService;
         this.periodService = periodService;
@@ -144,7 +144,7 @@ public class CompleteDataSetRegistrationConverter
             {
                 writer.openElement( COLLECTION_NAME );
                 
-                registrations = completeDataSetRegistrationService.getCompleteDataSetRegistrations( dataSets, units, periods );
+                registrations = registrationService.getCompleteDataSetRegistrations( dataSets, units, periods );
                 
                 for ( final CompleteDataSetRegistration registration : registrations )
                 {

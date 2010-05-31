@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.importexport.GroupMemberType;
@@ -43,6 +44,16 @@ public class DataSetImporter
 {
     protected DataSetService dataSetService;
 
+    public DataSetImporter()
+    {
+    }
+
+    public DataSetImporter( BatchHandler<DataSet> batchHandler, DataSetService dataSetService )
+    {
+        this.batchHandler = batchHandler;
+        this.dataSetService = dataSetService;
+    }
+    
     @Override
     public void importObject( DataSet object, ImportParams params )
     {

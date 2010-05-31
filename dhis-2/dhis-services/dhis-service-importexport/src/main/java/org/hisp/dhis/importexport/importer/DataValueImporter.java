@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
@@ -47,6 +48,18 @@ public class DataValueImporter
     
     protected ImportParams params;
 
+    public DataValueImporter()
+    {
+    }
+    
+    public DataValueImporter( BatchHandler<DataValue> batchHandler, DataValueService dataValueService, DataMartService dataMartService, ImportParams params )
+    {
+        this.batchHandler = batchHandler;
+        this.dataValueService = dataValueService;
+        this.dataMartService = dataMartService;
+        this.params = params;
+    }
+    
     @Override
     public void importObject( DataValue object, ImportParams params )
     {        

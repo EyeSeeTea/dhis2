@@ -47,6 +47,17 @@ public class ExtendedDataElementImporter
     
     protected DataElementService dataElementService;
 
+    public ExtendedDataElementImporter()
+    {
+    }
+    
+    public ExtendedDataElementImporter( BatchHandler<DataElement> batchHandler, BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler, DataElementService dataElementService )
+    {
+        this.batchHandler = batchHandler;
+        this.extendedDataElementBatchHandler = extendedDataElementBatchHandler;
+        this.dataElementService = dataElementService;
+    }
+    
     @Override
     public void importObject( DataElement object, ImportParams params )
     {

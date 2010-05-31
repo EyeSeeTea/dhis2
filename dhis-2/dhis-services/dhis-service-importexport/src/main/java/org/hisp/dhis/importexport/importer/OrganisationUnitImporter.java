@@ -47,6 +47,16 @@ public class OrganisationUnitImporter
 
     protected BatchHandler<Source> sourceBatchHandler;
 
+    public OrganisationUnitImporter()
+    {
+    }
+    
+    public OrganisationUnitImporter( BatchHandler<OrganisationUnit> batchHandler, OrganisationUnitService organisationUnitService )
+    {
+        this.batchHandler = batchHandler;
+        this.organisationUnitService = organisationUnitService;
+    }
+    
     @Override
     public void importObject( OrganisationUnit object, ImportParams params )
     {

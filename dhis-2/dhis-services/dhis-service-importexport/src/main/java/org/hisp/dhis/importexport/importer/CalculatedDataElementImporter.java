@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -44,10 +45,17 @@ public class CalculatedDataElementImporter
 {
     protected DataElementService dataElementService;
 
-    // -------------------------------------------------------------------------
-    // Importer implementation
-    // -------------------------------------------------------------------------
-
+    public CalculatedDataElementImporter()
+    {
+    }
+    
+    public CalculatedDataElementImporter( BatchHandler<CalculatedDataElement> batchHandler, DataElementService dataElementService )
+    {
+        this.batchHandler = batchHandler;
+        this.dataElementService = dataElementService;
+    }
+    
+    @Override
     public void importObject( CalculatedDataElement object, ImportParams params )
     {
         NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
@@ -55,16 +63,14 @@ public class CalculatedDataElementImporter
         
         read( object, GroupMemberType.NONE, params );
     }
-    
-    // -------------------------------------------------------------------------
-    // Overridden methods
-    // -------------------------------------------------------------------------
 
+    @Override
     protected void importUnique( CalculatedDataElement object )
     {
         dataElementService.addDataElement( object );
     }
-    
+
+    @Override
     protected void importMatching( CalculatedDataElement object, CalculatedDataElement match )
     {
         match.setUuid( object.getUuid() );
@@ -82,7 +88,8 @@ public class CalculatedDataElementImporter
         
         dataElementService.updateDataElement( match );
     }
-    
+
+    @Override
     protected CalculatedDataElement getMatching( CalculatedDataElement object )
     {
         DataElement match = dataElementService.getDataElementByName( object.getName() );
@@ -106,6 +113,7 @@ public class CalculatedDataElementImporter
         return calculated; 
     }
 
+    @Override
     protected boolean isIdentical( CalculatedDataElement object, CalculatedDataElement existing )
     {
         if ( !object.getName().equals( existing.getName() ) )

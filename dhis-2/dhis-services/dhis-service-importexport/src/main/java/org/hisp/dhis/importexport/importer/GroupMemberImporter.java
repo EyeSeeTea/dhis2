@@ -33,7 +33,7 @@ import org.hisp.dhis.importexport.GroupMemberAssociation;
  * @author Lars Helge Overland
  * @version $Id: AbstractGroupMemberConverter.java 4674 2008-03-04 16:09:50Z larshelg $
  */
-public class GroupMemberImporter
+public abstract class GroupMemberImporter
     extends AbstractImporter<GroupMemberAssociation>
 {
     // -------------------------------------------------------------------------

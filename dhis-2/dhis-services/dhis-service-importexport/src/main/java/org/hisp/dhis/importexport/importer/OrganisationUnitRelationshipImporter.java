@@ -43,6 +43,16 @@ public class OrganisationUnitRelationshipImporter
     
     protected BatchHandler<OrganisationUnit> organisationUnitBatchHandler;
 
+    public OrganisationUnitRelationshipImporter()
+    {
+    }
+    
+    public OrganisationUnitRelationshipImporter( BatchHandler<OrganisationUnit> batchHandler, OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitBatchHandler = batchHandler;
+        this.organisationUnitService = organisationUnitService;
+    }
+    
     // -------------------------------------------------------------------------
     // Overridden methods
     // -------------------------------------------------------------------------

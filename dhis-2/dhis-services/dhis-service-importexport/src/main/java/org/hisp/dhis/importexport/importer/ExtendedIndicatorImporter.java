@@ -47,6 +47,16 @@ public class ExtendedIndicatorImporter
     
     protected IndicatorService indicatorService;
 
+    public ExtendedIndicatorImporter()
+    {
+    }
+    
+    public ExtendedIndicatorImporter( BatchHandler<Indicator> batchHandler, IndicatorService indicatorService )
+    {
+        this.batchHandler = batchHandler;
+        this.indicatorService = indicatorService;
+    }
+    
     @Override
     public void importObject( Indicator object, ImportParams params )
     {

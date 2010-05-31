@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.importexport.GroupMemberType;
@@ -43,6 +44,16 @@ public class DataDictionaryImporter
 {
     protected DataDictionaryService dataDictionaryService;
 
+    public DataDictionaryImporter()
+    {
+    }
+    
+    public DataDictionaryImporter( BatchHandler<DataDictionary> batchHandler, DataDictionaryService dataDictionaryService )
+    {
+        this.batchHandler = batchHandler;
+        this.dataDictionaryService = dataDictionaryService;
+    }
+    
     @Override
     public void importObject( DataDictionary object, ImportParams params )
     {        

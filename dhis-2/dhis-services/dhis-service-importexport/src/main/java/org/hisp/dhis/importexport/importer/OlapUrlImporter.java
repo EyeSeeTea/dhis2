@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
@@ -42,6 +43,16 @@ public class OlapUrlImporter
 {
     protected OlapURLService olapURLService;
 
+    public OlapUrlImporter()
+    {
+    }
+    
+    public OlapUrlImporter( BatchHandler<OlapURL> batchHandler, OlapURLService olapURLService )
+    {
+        this.batchHandler = batchHandler;
+        this.olapURLService = olapURLService;
+    }
+    
     @Override
     public void importObject( OlapURL object, ImportParams params )
     {        
