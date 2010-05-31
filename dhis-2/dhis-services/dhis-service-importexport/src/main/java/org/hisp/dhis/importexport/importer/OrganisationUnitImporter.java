@@ -27,6 +27,8 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
+
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
@@ -51,9 +53,10 @@ public class OrganisationUnitImporter
     {
     }
     
-    public OrganisationUnitImporter( BatchHandler<OrganisationUnit> batchHandler, OrganisationUnitService organisationUnitService )
+    public OrganisationUnitImporter( BatchHandler<OrganisationUnit> batchHandler, BatchHandler<Source> sourceBatchHandler, OrganisationUnitService organisationUnitService )
     {
         this.batchHandler = batchHandler;
+        this.sourceBatchHandler = sourceBatchHandler;
         this.organisationUnitService = organisationUnitService;
     }
     
@@ -86,9 +89,9 @@ public class OrganisationUnitImporter
         match.setClosedDate( object.getClosedDate() );
         match.setActive( object.isActive() );
         match.setComment( object.getComment() );
-        match.setGeoCode( object.getGeoCode() );
-        match.setFeatureType( object.getFeatureType() );
-        match.setCoordinates( object.getCoordinates() );
+        match.setGeoCode( defaultIfEmpty( object.getGeoCode(), match.getGeoCode() ) );
+        match.setFeatureType( defaultIfEmpty( object.getFeatureType(), match.getFeatureType() ) );
+        match.setCoordinates( defaultIfEmpty( object.getCoordinates(), match.getCoordinates() ) );
         match.setLastUpdated( object.getLastUpdated() );
         
         organisationUnitService.updateOrganisationUnit( match );

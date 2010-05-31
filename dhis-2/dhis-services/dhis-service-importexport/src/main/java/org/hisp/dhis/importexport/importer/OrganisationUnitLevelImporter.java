@@ -27,7 +27,6 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
@@ -47,9 +46,8 @@ public class OrganisationUnitLevelImporter
     {
     }
     
-    public OrganisationUnitLevelImporter( BatchHandler<OrganisationUnitLevel> batchHandler, OrganisationUnitService organisationUnitService )
+    public OrganisationUnitLevelImporter( OrganisationUnitService organisationUnitService )
     {
-        this.batchHandler = batchHandler;
         this.organisationUnitService = organisationUnitService;
     }
     
