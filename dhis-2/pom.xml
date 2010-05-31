@@ -294,7 +294,6 @@
         <artifactId>spring-tx</artifactId>
         <version>${spring.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.aspectj</groupId>
         <artifactId>aspectjrt</artifactId>
@@ -408,7 +407,7 @@
       <dependency>
         <groupId>com.h2database</groupId>
         <artifactId>h2</artifactId>
-        <version>1.2.129</version>
+        <version>1.2.136</version>
       </dependency>
       <dependency>
         <groupId>com.ibatis</groupId>
