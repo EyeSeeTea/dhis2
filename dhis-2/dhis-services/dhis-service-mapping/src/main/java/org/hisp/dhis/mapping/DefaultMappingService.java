@@ -39,6 +39,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
@@ -91,6 +94,13 @@ public class DefaultMappingService
         this.indicatorService = indicatorService;
     }
 
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+
     private PeriodService periodService;
 
     public void setPeriodService( PeriodService periodService )
@@ -119,14 +129,15 @@ public class DefaultMappingService
     // -------------------------------------------------------------------------
     // DataMapValues
     // -------------------------------------------------------------------------
-    
-    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, String mapLayerPath )
+
+    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId,
+        String mapLayerPath )
     {
         int level = getMapByMapLayerPath( mapLayerPath ).getOrganisationUnitLevel().getLevel();
 
         return getAggregatedDataMapValues( dataElementId, periodId, level );
     }
-    
+
     public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level )
     {
         return dataMartStore.getAggregatedDataMapValues( dataElementId, periodId, level );
@@ -136,12 +147,13 @@ public class DefaultMappingService
     // IndicatorMapValues
     // -------------------------------------------------------------------------
 
-    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, Collection<Integer> periodIds,
-        String mapLayerPath, String featureId )
+    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId,
+        Collection<Integer> periodIds, String mapLayerPath, String featureId )
     {
         int level = getMapByMapLayerPath( mapLayerPath ).getOrganisationUnitLevel().getLevel();
 
-        int organisationUnitId = getMapOrganisationUnitRelationByFeatureId( featureId, mapLayerPath ).getOrganisationUnit().getId();
+        int organisationUnitId = getMapOrganisationUnitRelationByFeatureId( featureId, mapLayerPath )
+            .getOrganisationUnit().getId();
 
         Collection<AggregatedMapValue> mapValues;
 
@@ -152,7 +164,8 @@ public class DefaultMappingService
         }
         else
         {
-            mapValues = dataMartStore.getAggregatedIndicatorMapValues( indicatorId, periodIds, level, organisationUnitId );
+            mapValues = dataMartStore.getAggregatedIndicatorMapValues( indicatorId, periodIds, level,
+                organisationUnitId );
         }
 
         // java.util.Map<Integer, String> relations =
@@ -167,7 +180,8 @@ public class DefaultMappingService
         return mapValues;
     }
 
-    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, String mapLayerPath )
+    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId,
+        String mapLayerPath )
     {
         int level = getMapByMapLayerPath( mapLayerPath ).getOrganisationUnitLevel().getLevel();
 
@@ -184,18 +198,15 @@ public class DefaultMappingService
      * the OrganisationUnit identifier and the value is the feature identifier.
      */
     /*
-    private java.util.Map<Integer, String> getOrganisationUnitFeatureMap(
-        Collection<MapOrganisationUnitRelation> relations )
-    {
-        java.util.Map<Integer, String> map = new HashMap<Integer, String>();
-
-        for ( MapOrganisationUnitRelation relation : relations )
-        {
-            map.put( relation.getOrganisationUnit().getId(), relation.getFeatureId() );
-        }
-
-        return map;
-    }*/
+     * private java.util.Map<Integer, String> getOrganisationUnitFeatureMap(
+     * Collection<MapOrganisationUnitRelation> relations ) {
+     * java.util.Map<Integer, String> map = new HashMap<Integer, String>();
+     * 
+     * for ( MapOrganisationUnitRelation relation : relations ) { map.put(
+     * relation.getOrganisationUnit().getId(), relation.getFeatureId() ); }
+     * 
+     * return map; }
+     */
 
     // -------------------------------------------------------------------------
     // Map
@@ -685,15 +696,12 @@ public class DefaultMappingService
         return mappingStore.addMapView( mapView );
     }
 
-    public int addMapView( String name, int indicatorGroupId, int indicatorId, String periodTypeName, int periodId,
-        String mapSourceType, String mapSource, String mapLegendType, int method, int classes, String colorLow,
-        String colorHigh, int mapLegendSetId, String longitude, String latitude, int zoom )
+    public int addMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
+        int dataElementGroupId, int dataElementId, String periodTypeName, int periodId, String mapSourceType,
+        String mapSource, String mapLegendType, int method, int classes, String colorLow, String colorHigh,
+        int mapLegendSetId, String longitude, String latitude, int zoom )
     {
         MapView mapView = new MapView();
-
-        IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( indicatorGroupId );
-
-        Indicator indicator = indicatorService.getIndicator( indicatorId );
 
         PeriodType periodType = periodService.getPeriodTypeByClass( PeriodType.getPeriodTypeByName( periodTypeName )
             .getClass() );
@@ -701,10 +709,25 @@ public class DefaultMappingService
         Period period = periodService.getPeriod( periodId );
 
         MapLegendSet mapLegendSet = getMapLegendSet( mapLegendSetId );
+        
+        if ( mapValueType == MapView.MAP_VALUE_TYPE_INDICATOR )
+        {
+            mapView.setIndicatorGroup( indicatorService.getIndicatorGroup( indicatorGroupId ) );
+            mapView.setIndicator( indicatorService.getIndicator( indicatorId ) );
+            mapView.setDataElementGroup( new DataElementGroup() );
+            mapView.setDataElement( new DataElement() );
+        }
+
+        else if ( mapValueType == MapView.MAP_VALUE_TYPE_INDICATOR )
+        {
+            mapView.setIndicatorGroup( new IndicatorGroup() );
+            mapView.setIndicator( new Indicator() );
+            mapView.setDataElementGroup( dataElementService.getDataElementGroup( dataElementGroupId ) );
+            mapView.setDataElement( dataElementService.getDataElement( dataElementId ) );
+        }
 
         mapView.setName( name );
-        mapView.setIndicatorGroup( indicatorGroup );
-        mapView.setIndicator( indicator );
+        mapView.setMapValueType( mapValueType );
         mapView.setPeriodType( periodType );
         mapView.setPeriod( period );
         mapView.setMapSourceType( mapSourceType );
@@ -727,13 +750,18 @@ public class DefaultMappingService
         mappingStore.updateMapView( mapView );
     }
 
-    public void addOrUpdateMapView( String name, int indicatorGroupId, int indicatorId, String periodTypeName,
-        int periodId, String mapSource, String mapLegendType, int method, int classes, String colorLow,
-        String colorHigh, int mapLegendSetId, String longitude, String latitude, int zoom )
+    public void addOrUpdateMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
+        int dataElementGroupId, int dataElementId, String periodTypeName, int periodId, String mapSource,
+        String mapLegendType, int method, int classes, String colorLow, String colorHigh, int mapLegendSetId,
+        String longitude, String latitude, int zoom )
     {
-        IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( indicatorGroupId );
+        IndicatorGroup indicatorGroup;
 
-        Indicator indicator = indicatorService.getIndicator( indicatorId );
+        Indicator indicator;
+        
+        DataElementGroup dataElementGroup;
+        
+        DataElement dataElement;
 
         PeriodType periodType = periodService.getPeriodTypeByClass( PeriodType.getPeriodTypeByName( periodTypeName )
             .getClass() );
@@ -746,12 +774,31 @@ public class DefaultMappingService
             .getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
 
         MapView mapView = mappingStore.getMapViewByName( name );
+        
+        if ( mapValueType == MapView.MAP_VALUE_TYPE_INDICATOR )
+        {
+            indicatorGroup = indicatorService.getIndicatorGroup( indicatorGroupId );
+            indicator = indicatorService.getIndicator( indicatorId );
+            dataElementGroup = new DataElementGroup();
+            dataElement = new DataElement();
+        }
+        
+        else
+        {
+            indicatorGroup = new IndicatorGroup();
+            indicator = new Indicator();
+            dataElementGroup = dataElementService.getDataElementGroup( dataElementGroupId );
+            dataElement = dataElementService.getDataElement( dataElementId );
+        }
 
         if ( mapView != null )
         {
             mapView.setName( name );
+            mapView.setMapValueType( mapValueType );
             mapView.setIndicatorGroup( indicatorGroup );
             mapView.setIndicator( indicator );
+            mapView.setDataElementGroup( dataElementGroup );
+            mapView.setDataElement( dataElement );
             mapView.setPeriodType( periodType );
             mapView.setPeriod( period );
             mapView.setMapSourceType( mapSourceType );
@@ -770,7 +817,7 @@ public class DefaultMappingService
         }
         else
         {
-            mapView = new MapView( name, indicatorGroup, indicator, periodType, period, mapSourceType, mapSource,
+            mapView = new MapView( name, mapValueType, indicatorGroup, indicator, dataElementGroup, dataElement, periodType, period, mapSourceType, mapSource,
                 mapLegendType, method, classes, colorLow, colorHigh, mapLegendSet, longitude, latitude, zoom );
 
             addMapView( mapView );
@@ -835,8 +882,8 @@ public class DefaultMappingService
         mappingStore.updateMapLayer( mapLayer );
     }
 
-    public void addOrUpdateMapLayer( String name, String type, String mapSource, String layer, String fillColor, double fillOpacity,
-        String strokeColor, int strokeWidth )
+    public void addOrUpdateMapLayer( String name, String type, String mapSource, String layer, String fillColor,
+        double fillOpacity, String strokeColor, int strokeWidth )
     {
         MapLayer mapLayer = mappingStore.getMapLayerByName( name );
 
@@ -859,8 +906,8 @@ public class DefaultMappingService
         }
         else
         {
-            addMapLayer( new MapLayer( name, type, mapSourceType, mapSource, layer, fillColor, fillOpacity, strokeColor,
-                strokeWidth ) );
+            addMapLayer( new MapLayer( name, type, mapSourceType, mapSource, layer, fillColor, fillOpacity,
+                strokeColor, strokeWidth ) );
         }
     }
 
@@ -878,7 +925,7 @@ public class DefaultMappingService
     {
         return mappingStore.getMapLayerByName( name );
     }
-    
+
     public Collection<MapLayer> getMapLayersByType( String type )
     {
         return mappingStore.getMapLayersByType( type );

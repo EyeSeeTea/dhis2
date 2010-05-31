@@ -288,7 +288,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
         indicatorGroupStore = new Ext.data.JsonStore({
             url: path + 'getAllIndicatorGroups' + type,
-            baseParams: { format: 'json' },
             root: 'indicatorGroups',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -297,7 +296,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         indicatorStore = new Ext.data.JsonStore({
             url: path + 'getIndicatorsByIndicatorGroup' + type,
-            baseParams: { indicatorGroupId: 0 },
+			baseParams: {indicatorGroupId:0},
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -312,7 +311,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             },  this
                         );
                         
-                        Ext.getCmp('indicator_cb').reset();
+                        Ext.getCmp('indicator_cb').clearValue();
 
                         if (MAPVIEW) {
                             Ext.getCmp('indicator_cb').setValue(MAPVIEW.indicatorId);
@@ -320,11 +319,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             var name = MAPVIEW.periodTypeId;
                             Ext.getCmp('periodtype_cb').setValue(name);
                             
-                            periodStore.baseParams = { name: name, format: 'json' };
+                            periodStore.baseParams = { name: name };
                             periodStore.reload();
                         }
-                    },
-                    scope: this
+                    }
                 }
             }
         });
@@ -507,9 +505,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
+			id: 'valuetype_cb',
             fieldLabel: i18n_mapvaluetype,
 			labelSeparator: labelseparator,
-            id: 'valuetype_cb',
             editable: false,
             valueField: 'id',
             displayField: 'name',
@@ -520,7 +518,27 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             store: new Ext.data.SimpleStore({
                 fields: ['id', 'name'],
                 data: [[map_value_type_indicator, 'Indicators'], [map_value_type_dataelement, 'Data elements']]
-            })
+            }),
+			listeners: {
+				'select': {
+					fn: function() {
+						if (Ext.getCmp('valuetype_cb').getValue() == map_value_type_indicator) {
+							Ext.getCmp('indicatorgroup_cb').showField();
+							Ext.getCmp('indicator_cb').showField();
+							Ext.getCmp('dataelementgroup_cb').hideField();
+							Ext.getCmp('dataelement_cb').hideField();
+							VALUETYPE.polygon = map_value_type_indicator;
+						}
+						else if (Ext.getCmp('valuetype_cb').getValue() == map_value_type_dataelement) {
+							Ext.getCmp('indicatorgroup_cb').hideField();
+							Ext.getCmp('indicator_cb').hideField();
+							Ext.getCmp('dataelementgroup_cb').showField();
+							Ext.getCmp('dataelement_cb').showField();
+							VALUETYPE.polygon = map_value_type_dataelement;
+						}
+					}
+				}
+			}
 		},
         
         {
@@ -543,14 +561,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb').getValue()) {
-                            Ext.getCmp('mapview_cb').reset();
+                            Ext.getCmp('mapview_cb').clearValue();
                         }
-                        
-                        Ext.getCmp('indicator_cb').reset();
-                        indicatorStore.baseParams = { indicatorGroupId: Ext.getCmp('indicatorgroup_cb').getValue() };
+						
+						Ext.getCmp('indicator_cb').clearValue();
+						indicatorStore.setBaseParam('indicatorGroupId', this.getValue());
                         indicatorStore.reload();
-                    },
-                    scope: this
+                    }
                 }
             }
         },
@@ -631,12 +648,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').reset();
                         }
-                        
                         Ext.getCmp('dataelement_cb').reset();
-                        dataElementGroupStore.baseParams = { dataElementGroupId: Ext.getCmp('dataelementgroup_cb').getValue() };
-                        dataElementGroupStore.reload();
-                    },
-                    scope: this
+						dataElementStore.setBaseParam('dataElementGroupId', this.getValue());
+                        dataElementStore.reload();
+                    }
                 }
             }
         },
@@ -663,6 +678,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').reset();
                         }
+						
+						choropleth.classify(false);
  
                         // var iId = Ext.getCmp('dataelement_cb').getValue();
                         
@@ -1001,7 +1018,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         }
 
         ];
-		
+	
 		mapfish.widgets.geostat.Choropleth.superclass.initComponent.apply(this);
     },
     
@@ -1067,11 +1084,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		}
 		else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_predefined) {
 			Ext.getCmp('maplegendset_cb').showField();
-		}
-// alert(		Ext.getCmp('valuetype_cb').getValue());
-		if (Ext.getCmp('valuetype_cb').getValue() == map_value_type_indicator) {
-			Ext.getCmp('dataelementgroup_cb').hideField();
-			Ext.getCmp('dataelement_cb').hideField();
 		}
         
         if (this.newUrl) {
