@@ -41,7 +41,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.importer.ExtendedDataElementImporter;
+import org.hisp.dhis.importexport.importer.DataElementImporter;
 import org.hisp.dhis.system.util.DateUtils;
 
 /**
@@ -49,7 +49,7 @@ import org.hisp.dhis.system.util.DateUtils;
  * @version $Id: ExtendedDataElementConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class ExtendedDataElementConverter
-    extends ExtendedDataElementImporter implements XMLConverter
+    extends DataElementImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "extendedDataElements";
     public static final String ELEMENT_NAME = "dataElement";
@@ -129,13 +129,11 @@ public class ExtendedDataElementConverter
      * @param dataElementService the dataElementService to use.
      */
     public ExtendedDataElementConverter( BatchHandler<DataElement> batchHandler,
-        BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler, 
         ImportObjectService importObjectService,
         Map<Object, Integer> categoryComboMapping, 
         DataElementService dataElementService )
     {
         this.batchHandler = batchHandler;
-        this.extendedDataElementBatchHandler = extendedDataElementBatchHandler;
         this.importObjectService = importObjectService;
         this.categoryComboMapping = categoryComboMapping;
         this.dataElementService = dataElementService;

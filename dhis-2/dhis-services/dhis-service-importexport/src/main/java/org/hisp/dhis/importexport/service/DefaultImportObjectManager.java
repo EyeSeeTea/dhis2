@@ -38,7 +38,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
-import org.hisp.dhis.datadictionary.ExtendedDataElement;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
@@ -72,10 +71,12 @@ import org.hisp.dhis.importexport.importer.DataElementCategoryImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryOptionImporter;
 import org.hisp.dhis.importexport.importer.DataElementGroupImporter;
 import org.hisp.dhis.importexport.importer.DataElementGroupSetImporter;
+import org.hisp.dhis.importexport.importer.DataElementImporter;
 import org.hisp.dhis.importexport.importer.DataSetImporter;
 import org.hisp.dhis.importexport.importer.GroupSetImporter;
 import org.hisp.dhis.importexport.importer.IndicatorGroupImporter;
 import org.hisp.dhis.importexport.importer.IndicatorGroupSetImporter;
+import org.hisp.dhis.importexport.importer.IndicatorImporter;
 import org.hisp.dhis.importexport.importer.IndicatorTypeImporter;
 import org.hisp.dhis.importexport.importer.OlapUrlImporter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitGroupImporter;
@@ -109,7 +110,6 @@ import org.hisp.dhis.jdbc.batchhandler.DataSetBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataSetMemberBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataSetSourceAssociationBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataValueBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.ExtendedDataElementBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.GroupSetBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.GroupSetMemberBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.IndicatorBatchHandler;
@@ -411,64 +411,23 @@ public class DefaultImportObjectManager
     public void importDataElements()
     {
         BatchHandler<DataElement> batchHandler = batchHandlerFactory.createBatchHandler( DataElementBatchHandler.class );
-        BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler = 
-            batchHandlerFactory.createBatchHandler( ExtendedDataElementBatchHandler.class );
         
         Map<Object, Integer> categoryComboMapping = objectMappingGenerator.getCategoryComboMapping( false );
         
         batchHandler.init();
-        extendedDataElementBatchHandler.init();
         
         Collection<ImportObject> importObjects = importObjectStore.getImportObjects( DataElement.class );
+        
+        Importer<DataElement> importer = new DataElementImporter( batchHandler, dataElementService );
         
         for ( ImportObject importObject : importObjects )
         {
             DataElement object = (DataElement) importObject.getObject();
-
-            NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
-            
-            if ( importObject.getStatus() == ImportObjectStatus.NEW )
-            {
-                ExtendedDataElement extendedObject = object.getExtended();
-                
-                if ( extendedObject != null )
-                {
-                    int id = extendedDataElementBatchHandler.insertObject( extendedObject, true );
-                    
-                    extendedObject.setId( id );
-                    
-                    object.setExtended( extendedObject );
-                }
-            }
-            else if ( importObject.getStatus() == ImportObjectStatus.UPDATE )//TODO
-            {
-                ExtendedDataElement extendedObject = object.getExtended();
-                
-                if ( extendedObject != null )
-                {
-                    ExtendedDataElement extendedCompareObject = ((DataElement)importObject.getCompareObject()).getExtended();
-                    
-                    extendedObject.setId( extendedCompareObject.getId() );
-                    
-                    extendedDataElementBatchHandler.updateObject( extendedObject );
-                    
-                    object.setExtended( extendedObject );
-                }
-                
-                DataElement compareObject = (DataElement) importObject.getCompareObject();
-                
-                object.setId( compareObject.getId() );
-            }
-            
             object.getCategoryCombo().setId( categoryComboMapping.get( object.getCategoryCombo().getId() ) );
-            
-            importObject.setObject( object );
-            
-            addOrUpdateObject( batchHandler, importObject );
+            importer.importObject( object, params );
         }
         
         batchHandler.flush();
-        extendedDataElementBatchHandler.flush();
         
         importObjectStore.deleteImportObjects( DataElement.class );
         
@@ -615,68 +574,27 @@ public class DefaultImportObjectManager
     public void importIndicators()
     {
         BatchHandler<Indicator> batchHandler = batchHandlerFactory.createBatchHandler( IndicatorBatchHandler.class );
-        BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler = 
-            batchHandlerFactory.createBatchHandler( ExtendedDataElementBatchHandler.class );
         
         Map<Object, Integer> indicatorTypeMapping = objectMappingGenerator.getIndicatorTypeMapping( false );
         Map<Object, Integer> dataElementMapping = objectMappingGenerator.getDataElementMapping( false );
         Map<Object, Integer> categoryOptionComboMapping = objectMappingGenerator.getCategoryOptionComboMapping( false );
         
         batchHandler.init();
-        extendedDataElementBatchHandler.init();
                 
         Collection<ImportObject> importObjects = importObjectStore.getImportObjects( Indicator.class );
 
+        Importer<Indicator> importer = new IndicatorImporter( batchHandler, indicatorService );
+        
         for ( ImportObject importObject : importObjects )
         {
             Indicator object = (Indicator) importObject.getObject();
-
-            NameMappingUtil.addIndicatorMapping( object.getId(), object.getName() );
-            
-            if ( importObject.getStatus() == ImportObjectStatus.NEW )
-            {
-                ExtendedDataElement extendedIndicator = object.getExtended();
-                
-                if ( extendedIndicator != null )
-                {
-                    int id = extendedDataElementBatchHandler.insertObject( extendedIndicator, true );
-                    
-                    extendedIndicator.setId( id );
-                    
-                    object.setExtended( extendedIndicator );
-                }
-            }
-            else if ( importObject.getStatus() == ImportObjectStatus.UPDATE )
-            {
-                ExtendedDataElement extendedObject = object.getExtended();
-                
-                if ( extendedObject != null )
-                {
-                    ExtendedDataElement extendedCompareObject = ((Indicator)importObject.getCompareObject()).getExtended();
-                    
-                    extendedObject.setId( extendedCompareObject.getId() );
-                    
-                    extendedDataElementBatchHandler.updateObject( extendedObject );
-                    
-                    object.setExtended( extendedObject );
-                }
-                
-                Indicator compareObject = (Indicator) importObject.getCompareObject();
-                
-                object.setId( compareObject.getId() );
-            }
-            
             object.getIndicatorType().setId( indicatorTypeMapping.get( object.getIndicatorType().getId() ) );
             object.setNumerator( expressionService.convertExpression( object.getNumerator(), dataElementMapping, categoryOptionComboMapping ) );
-            object.setDenominator( expressionService.convertExpression( object.getDenominator(), dataElementMapping, categoryOptionComboMapping ) );
-            
-            importObject.setObject( object );
-            
-            addOrUpdateObject( batchHandler, importObject );
+            object.setDenominator( expressionService.convertExpression( object.getDenominator(), dataElementMapping, categoryOptionComboMapping ) );            
+            importer.importObject( object, params );
         }
         
         batchHandler.flush();
-        extendedDataElementBatchHandler.flush();
         
         importObjectStore.deleteImportObjects( Indicator.class );
         

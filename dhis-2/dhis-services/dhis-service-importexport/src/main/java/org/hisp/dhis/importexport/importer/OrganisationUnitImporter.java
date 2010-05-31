@@ -81,14 +81,14 @@ public class OrganisationUnitImporter
     @Override
     protected void importMatching( OrganisationUnit object, OrganisationUnit match )
     {
-        match.setUuid( object.getUuid() );
+        match.setUuid( defaultIfEmpty( object.getUuid(), match.getUuid() ) );
         match.setName( object.getName() );
-        match.setShortName( object.getShortName() );
-        match.setCode( object.getCode() );
-        match.setOpeningDate( object.getClosedDate() );
+        match.setShortName( defaultIfEmpty( object.getShortName(), match.getShortName() ) );
+        match.setCode( defaultIfEmpty( object.getCode(), match.getCode() ) );
+        match.setOpeningDate( object.getOpeningDate() );
         match.setClosedDate( object.getClosedDate() );
         match.setActive( object.isActive() );
-        match.setComment( object.getComment() );
+        match.setComment( defaultIfEmpty( object.getComment(), match.getComment() ) );
         match.setGeoCode( defaultIfEmpty( object.getGeoCode(), match.getGeoCode() ) );
         match.setFeatureType( defaultIfEmpty( object.getFeatureType(), match.getFeatureType() ) );
         match.setCoordinates( defaultIfEmpty( object.getCoordinates(), match.getCoordinates() ) );
