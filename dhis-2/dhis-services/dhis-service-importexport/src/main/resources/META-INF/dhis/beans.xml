@@ -13,12 +13,6 @@
 			<map>
 				<entry>
 					<key>
-						<value>IXF</value>
-					</key>
-					<ref bean="org.hisp.dhis.importexport.IXFExportService" />
-				</entry>
-				<entry>
-					<key>
 						<value>DXF</value>
 					</key>
 					<ref bean="org.hisp.dhis.importexport.DXFExportService" />
@@ -266,35 +260,6 @@
           class="org.hisp.dhis.importexport.invoker.DefaultConverterInvoker" />
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- IXF Import                                                    -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<bean id="internal-process-IXFImportService" class="org.hisp.dhis.importexport.ImportInternalProcess"
-		scope="prototype">
-		<property name="statementManager" ref="statementManager" />
-		<property name="importService" ref="org.hisp.dhis.importexport.IXFImportService" />
-	</bean>
-
-	<bean id="org.hisp.dhis.importexport.IXFImportService"
-		class="org.hisp.dhis.importexport.ixf.importer.DefaultIXFImportService"
-		scope="prototype">
-		<property name="importObjectService"
-			ref="org.hisp.dhis.importexport.ImportObjectService" />
-		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="categoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
-		<property name="batchHandlerFactory" ref="batchHandlerFactory" />
-		<property name="objectMappingGenerator"
-			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-		<property name="converterInvoker"
-			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
-	</bean>
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<!-- DXF Export                                                    -->
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
@@ -319,29 +284,6 @@
 		<property name="completeDataSetRegistrationService"
 			ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
 		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
-	</bean>
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- IXF Export                                                    -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<bean id="org.hisp.dhis.importexport.IXFExportService"
-		class="org.hisp.dhis.importexport.ixf.exporter.DefaultIXFExportService">
-		<property name="categoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-		<property name="configurationManager"
-			ref="org.hisp.dhis.importexport.ixf.config.IXFConfigurationManager" />
-	</bean>
-
-	<bean id="org.hisp.dhis.importexport.ixf.config.IXFConfigurationManager"
-		class="org.hisp.dhis.importexport.ixf.config.XMLIXFConfigurationManager">
-		<property name="configDir" value="importexport" />
-		<property name="configFile" value="ixfConfiguration.xml" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
