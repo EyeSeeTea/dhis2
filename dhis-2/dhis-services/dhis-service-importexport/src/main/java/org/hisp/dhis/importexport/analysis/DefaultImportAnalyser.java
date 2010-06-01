@@ -94,7 +94,7 @@ public class DefaultImportAnalyser
                 value.getDataElement().getId() + SEPARARATOR +
                 value.getOptionCombo().getId() + SEPARARATOR +
                 value.getPeriod().getId() + SEPARARATOR +
-                value.getSource().getId() + SEPARARATOR ) );
+                value.getSource().getId() ) );
         }
         else if ( object instanceof DataElement )
         {
