@@ -88,11 +88,8 @@ public class GetDataElementAction
 
     public String execute()
     {
-        System.out.println("\n\n\n ==== \n id = " + id);
-        System.out.println("\n dataElementService = " + dataElementService);
         dataElement = dataElementService.getDataElement( id );
-        System.out.println("\n dataElement = " + dataElement);
-        
+
         dataElementGroups = new ArrayList<DataElementGroup>( dataElementService
             .getGroupsContainingDataElement( dataElement ) );
         
