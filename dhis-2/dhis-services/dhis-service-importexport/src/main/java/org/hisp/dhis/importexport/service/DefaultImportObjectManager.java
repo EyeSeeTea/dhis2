@@ -65,6 +65,7 @@ import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.importexport.ImportType;
 import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.importer.CalculatedDataElementImporter;
 import org.hisp.dhis.importexport.importer.DataDictionaryImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryComboImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryImporter;
@@ -411,10 +412,10 @@ public class DefaultImportObjectManager
     public void importDataElements()
     {
         BatchHandler<DataElement> batchHandler = batchHandlerFactory.createBatchHandler( DataElementBatchHandler.class );
+
+        batchHandler.init();
         
         Map<Object, Integer> categoryComboMapping = objectMappingGenerator.getCategoryComboMapping( false );
-        
-        batchHandler.init();
         
         Collection<ImportObject> importObjects = importObjectStore.getImportObjects( DataElement.class );
         
@@ -443,33 +444,15 @@ public class DefaultImportObjectManager
 
         Collection<ImportObject> importObjects = importObjectStore.getImportObjects( CalculatedDataElement.class );
 
+        Importer<CalculatedDataElement> importer = new CalculatedDataElementImporter( dataElementService );
+        
         for ( ImportObject importObject : importObjects )
         {
             CalculatedDataElement object = (CalculatedDataElement) importObject.getObject();
-
-            NameMappingUtil.addDataElementMapping( object.getId(), object.getName() );
-
-            if ( importObject.getStatus() == ImportObjectStatus.UPDATE )
-            {
-                DataElement compareObject = (DataElement) importObject.getCompareObject();
-                
-                object.setId( compareObject.getId() );
-            }
-
             object.getCategoryCombo().setId( categoryComboMapping.get( object.getCategoryCombo().getId() ) );
             object.getExpression().setExpression( expressionService.convertExpression( 
                 object.getExpression().getExpression(), dataElementMapping, categoryOptionComboMapping ) );
-            
-            importObject.setObject( object );
-            
-            if ( importObject.getStatus() == ImportObjectStatus.NEW )
-            {
-                dataElementService.addDataElement( object );
-            }
-            else if ( importObject.getStatus() == ImportObjectStatus.UPDATE )
-            {
-                dataElementService.updateDataElement( object );
-            }
+            importer.importObject( object, params );            
         }
         
         importObjectStore.deleteImportObjects( CalculatedDataElement.class );
@@ -794,10 +777,8 @@ public class DefaultImportObjectManager
         {
             GroupMemberAssociation object = (GroupMemberAssociation) importObject.getObject();
             
-            OrganisationUnit child = organisationUnitService.getOrganisationUnit( organisationUnitMapping.get( object.getMemberId() ) );
-            
-            OrganisationUnit parent = organisationUnitService.getOrganisationUnit( organisationUnitMapping.get( object.getGroupId() ) );
-            
+            OrganisationUnit child = organisationUnitService.getOrganisationUnit( organisationUnitMapping.get( object.getMemberId() ) );            
+            OrganisationUnit parent = organisationUnitService.getOrganisationUnit( organisationUnitMapping.get( object.getGroupId() ) );            
             child.setParent( parent );
             
             batchHandler.updateObject( child );

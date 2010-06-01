@@ -27,7 +27,6 @@ package org.hisp.dhis.importexport.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -49,9 +48,8 @@ public class CalculatedDataElementImporter
     {
     }
     
-    public CalculatedDataElementImporter( BatchHandler<CalculatedDataElement> batchHandler, DataElementService dataElementService )
+    public CalculatedDataElementImporter( DataElementService dataElementService )
     {
-        this.batchHandler = batchHandler;
         this.dataElementService = dataElementService;
     }
     
