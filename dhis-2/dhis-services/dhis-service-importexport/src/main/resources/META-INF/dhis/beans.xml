@@ -148,10 +148,9 @@
 		<property name="batchHandlerFactory" ref="batchHandlerFactory" />
 		<property name="objectMappingGenerator"
 			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-		<property name="importAnalyser"
-			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
 		<property name="converterInvoker"
 			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
+		<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService"/>
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -187,8 +186,6 @@
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
-		<property name="importAnalyser"
-			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
 	</bean>
 
 	<bean
@@ -329,16 +326,6 @@
 		<property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
 		<property name="categoryService"
 			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-	</bean>
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- Analyser                                                      -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<bean id="org.hisp.dhis.importexport.analysis.ImportAnalyser"
-		class="org.hisp.dhis.importexport.analysis.DefaultImportAnalyser"
-		scope="prototype">
-		<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

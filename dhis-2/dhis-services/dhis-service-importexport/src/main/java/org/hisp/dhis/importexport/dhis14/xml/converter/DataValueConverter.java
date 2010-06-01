@@ -53,6 +53,7 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -101,11 +102,13 @@ public class DataValueConverter
     public DataValueConverter( BatchHandler<ImportDataValue> importDataValueBatchHandler,
         DataElementCategoryService categoryService,
         ImportObjectService importObjectService,
+        ImportAnalyser importAnalyser,
         ImportParams params )
     {
         this.importDataValueBatchHandler = importDataValueBatchHandler;
         this.categoryService = categoryService;
         this.importObjectService = importObjectService;
+        this.importAnalyser = importAnalyser;
         this.params = params;
         this.dataElementMapping = new MimicingHashMap<Object, Integer>();
         this.periodMapping = new MimicingHashMap<Object, Integer>();

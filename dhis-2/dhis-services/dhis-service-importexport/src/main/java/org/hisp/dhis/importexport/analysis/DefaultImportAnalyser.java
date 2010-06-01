@@ -63,13 +63,9 @@ public class DefaultImportAnalyser
     
     private static final String SEPARARATOR = "-";
 
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
     private ExpressionService expressionService;
 
-    public void setExpressionService( ExpressionService expressionService )
+    public DefaultImportAnalyser( ExpressionService expressionService )
     {
         this.expressionService = expressionService;
     }

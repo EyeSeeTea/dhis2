@@ -58,6 +58,7 @@ import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.ImportService;
+import org.hisp.dhis.importexport.analysis.DefaultImportAnalyser;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.dhis14.file.query.QueryManager;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.CalculatedDataElementRowHandler;
@@ -226,16 +227,11 @@ public class DefaultDhis14FileImportService
         this.dataMartService = dataMartService;
     }
 
-    private ImportAnalyser importAnalyser;
-
-    public void setImportAnalyser( ImportAnalyser importAnalyser )
-    {
-        this.importAnalyser = importAnalyser;
-    }    
-
     @Autowired
     private HibernateCacheManager cacheManager;
 
+    private ImportAnalyser importAnalyser;
+    
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -256,6 +252,8 @@ public class DefaultDhis14FileImportService
     public void importData( ImportParams params, InputStream inputStream, ProcessState state )
     {
         NameMappingUtil.clearMapping();
+        
+        importAnalyser = new DefaultImportAnalyser( expressionService );
         
         if ( !verifyImportFile( params, state ) )
         {
