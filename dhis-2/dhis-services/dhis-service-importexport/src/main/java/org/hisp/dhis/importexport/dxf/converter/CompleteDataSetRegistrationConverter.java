@@ -70,6 +70,8 @@ public class CompleteDataSetRegistrationConverter
     // Properties
     // -------------------------------------------------------------------------
 
+    private CompleteDataSetRegistrationService registrationService;
+    
     private DataSetService dataSetService;
     
     private OrganisationUnitService organisationUnitService;

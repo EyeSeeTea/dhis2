@@ -44,7 +44,6 @@ import org.hisp.dhis.cache.HibernateCacheManager;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.CSVConverter;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
@@ -127,13 +126,6 @@ public class DefaultDhis14XMLImportService
         this.organisationUnitService = organisationUnitService;
     }
     
-    private DataValueService dataValueService;
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
     private ImportObjectService importObjectService;
 
     public void setImportObjectService( ImportObjectService importObjectService )
@@ -296,7 +288,6 @@ public class DefaultDhis14XMLImportService
                 importDataValueBatchHandler.init();
                 
                 CSVConverter dataValueConverter = new DataValueConverter( importDataValueBatchHandler,
-                    dataValueService,
                     categoryService,
                     importObjectService,
                     params );

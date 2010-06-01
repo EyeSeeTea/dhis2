@@ -30,7 +30,6 @@ package org.hisp.dhis.importexport.importer;
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
@@ -42,8 +41,6 @@ import org.hisp.dhis.importexport.Importer;
 public class DataValueImporter
     extends AbstractImporter<DataValue> implements Importer<DataValue>
 {
-    protected DataValueService dataValueService;
-    
     protected DataMartService dataMartService;
     
     protected ImportParams params;
@@ -52,10 +49,9 @@ public class DataValueImporter
     {
     }
     
-    public DataValueImporter( BatchHandler<DataValue> batchHandler, DataValueService dataValueService, DataMartService dataMartService, ImportParams params )
+    public DataValueImporter( BatchHandler<DataValue> batchHandler, DataMartService dataMartService, ImportParams params )
     {
         this.batchHandler = batchHandler;
-        this.dataValueService = dataValueService;
         this.dataMartService = dataMartService;
         this.params = params;
     }

@@ -29,7 +29,6 @@ package org.hisp.dhis.importexport.importer;
 
 import org.amplecode.quick.BatchHandler;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
-import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.Importer;
@@ -43,16 +42,13 @@ public class CompleteDataSetRegistrationImporter
 {
     protected ImportParams params;
 
-    protected CompleteDataSetRegistrationService registrationService;
-
     public CompleteDataSetRegistrationImporter()
     {
     }
 
-    public CompleteDataSetRegistrationImporter( BatchHandler<CompleteDataSetRegistration> batchHandler, CompleteDataSetRegistrationService registrationService, ImportParams params )
+    public CompleteDataSetRegistrationImporter( BatchHandler<CompleteDataSetRegistration> batchHandler, ImportParams params )
     {
         this.batchHandler = batchHandler;
-        this.registrationService = registrationService;
         this.params = params;
     }
     

@@ -48,6 +48,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -66,6 +67,7 @@ import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.importexport.ImportType;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.importer.CalculatedDataElementImporter;
+import org.hisp.dhis.importexport.importer.CompleteDataSetRegistrationImporter;
 import org.hisp.dhis.importexport.importer.DataDictionaryImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryComboImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryImporter;
@@ -74,6 +76,7 @@ import org.hisp.dhis.importexport.importer.DataElementGroupImporter;
 import org.hisp.dhis.importexport.importer.DataElementGroupSetImporter;
 import org.hisp.dhis.importexport.importer.DataElementImporter;
 import org.hisp.dhis.importexport.importer.DataSetImporter;
+import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.importexport.importer.GroupSetImporter;
 import org.hisp.dhis.importexport.importer.IndicatorGroupImporter;
 import org.hisp.dhis.importexport.importer.IndicatorGroupSetImporter;
@@ -83,6 +86,7 @@ import org.hisp.dhis.importexport.importer.OlapUrlImporter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitGroupImporter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitImporter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitLevelImporter;
+import org.hisp.dhis.importexport.importer.PeriodImporter;
 import org.hisp.dhis.importexport.importer.ReportTableImporter;
 import org.hisp.dhis.importexport.importer.ValidationRuleImporter;
 import org.hisp.dhis.importexport.mapping.GroupMemberAssociationVerifier;
@@ -134,6 +138,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.source.Source;
@@ -256,6 +261,20 @@ public class DefaultImportObjectManager
     public void setReportTableService( ReportTableService reportTableService )
     {
         this.reportTableService = reportTableService;
+    }
+    
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
+    
+    private DataMartService dataMartService;
+
+    public void setDataMartService( DataMartService dataMartService )
+    {
+        this.dataMartService = dataMartService;
     }
 
     // -------------------------------------------------------------------------
@@ -916,13 +935,11 @@ public class DefaultImportObjectManager
         
         Collection<ImportObject> importObjects = importObjectStore.getImportObjects( Period.class );
         
+        Importer<Period> importer = new PeriodImporter( batchHandler, periodService );
+        
         for ( ImportObject importObject : importObjects )
         {
-            Period period = (Period) importObject.getObject();
-            
-            NameMappingUtil.addPeriodMapping( period.getId(), period );
-            
-            addOrUpdateObject( batchHandler, importObject );
+            importer.importObject( (Period) importObject.getObject(), params );
         }
         
         batchHandler.flush();
@@ -985,6 +1002,8 @@ public class DefaultImportObjectManager
         Map<Object, Integer> periodMapping = objectMappingGenerator.getPeriodMapping( false );
         Map<Object, Integer> sourceMapping = objectMappingGenerator.getOrganisationUnitMapping( false );
         
+        Importer<CompleteDataSetRegistration> importer = new CompleteDataSetRegistrationImporter( batchHandler, params );
+        
         for ( ImportObject importObject : importObjects )
         {
             CompleteDataSetRegistration registration = (CompleteDataSetRegistration) importObject.getObject();
@@ -993,15 +1012,7 @@ public class DefaultImportObjectManager
             registration.getPeriod().setId( periodMapping.get( registration.getPeriod().getId() ) );
             registration.getSource().setId( sourceMapping.get( registration.getSource().getId() ) );
             
-            // -----------------------------------------------------------------
-            // Must check for existing registrations since this cannot be done
-            // during preview
-            // -----------------------------------------------------------------
-            
-            if ( !batchHandler.objectExists( registration ) )
-            {
-                batchHandler.addObject( registration );
-            }
+            importer.importObject( registration, params );
         }
         
         batchHandler.flush();
@@ -1025,6 +1036,8 @@ public class DefaultImportObjectManager
         
         Collection<ImportDataValue> importValues = importDataValueService.getImportDataValues( ImportObjectStatus.NEW );
         
+        Importer<DataValue> importer = new DataValueImporter( batchHandler, dataMartService, params );
+        
         for ( ImportDataValue importValue : importValues )
         {
             DataValue value = importValue.getDataValue();
@@ -1034,15 +1047,7 @@ public class DefaultImportObjectManager
             value.getSource().setId( sourceMapping.get( value.getSource().getId() ) );
             value.getOptionCombo().setId( categoryOptionComboMapping.get( value.getOptionCombo().getId() ) );
             
-            // -------------------------------------------------------------
-            // Must check for existing datavalues since this cannot be done
-            // during preview
-            // -------------------------------------------------------------
-            
-            if ( !batchHandler.objectExists( value ) )
-            {
-                batchHandler.addObject( value );
-            }
+            importer.importObject( value, params );
         }
         
         batchHandler.flush();
@@ -1055,23 +1060,6 @@ public class DefaultImportObjectManager
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    @SuppressWarnings( "unchecked" )
-    private void addOrUpdateObject( BatchHandler batchHandler, ImportObject importObject )
-    {
-        if ( importObject.getStatus() == ImportObjectStatus.NEW )
-        {
-            batchHandler.addObject( importObject.getObject() );
-        }
-        else if ( importObject.getStatus() == ImportObjectStatus.UPDATE )
-        {
-            batchHandler.updateObject( importObject.getObject() );
-        }
-
-        // ---------------------------------------------------------------------
-        // Ignoring ImportObjects of type MATCH
-        // ---------------------------------------------------------------------
-    }
 
     @SuppressWarnings( "unchecked" )
     private void importGroupMemberAssociation( BatchHandler batchHandler, GroupMemberType type,

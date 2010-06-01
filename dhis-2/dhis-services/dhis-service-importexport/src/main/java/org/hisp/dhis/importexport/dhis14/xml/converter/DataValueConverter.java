@@ -47,7 +47,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.importexport.CSVConverter;
 import org.hisp.dhis.importexport.ExportParams;
@@ -100,13 +99,11 @@ public class DataValueConverter
      * Constructor for read operations.
      */
     public DataValueConverter( BatchHandler<ImportDataValue> importDataValueBatchHandler,
-        DataValueService dataValueService,
         DataElementCategoryService categoryService,
         ImportObjectService importObjectService,
         ImportParams params )
     {
         this.importDataValueBatchHandler = importDataValueBatchHandler;
-        this.dataValueService = dataValueService;
         this.categoryService = categoryService;
         this.importObjectService = importObjectService;
         this.params = params;

@@ -50,7 +50,6 @@ import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.GroupMemberAssociation;
@@ -218,13 +217,6 @@ public class DXFConverter
     public void setOlapURLService( OlapURLService olapURLService )
     {
         this.olapURLService = olapURLService;
-    }
-
-    private DataValueService dataValueService;
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
     }
 
     private DataMartService dataMartService;
@@ -970,7 +962,7 @@ public class DXFConverter
                 importDataValueBatchHandler.init();
 
                 XMLConverter converter = new DataValueConverter( batchHandler, importDataValueBatchHandler,
-                    dataValueService, dataMartService, importObjectService, params, objectMappingGenerator
+                    dataMartService, importObjectService, params, objectMappingGenerator
                         .getDataElementMapping( params.skipMapping() ), objectMappingGenerator
                         .getPeriodMapping( params.skipMapping() ), objectMappingGenerator
                         .getOrganisationUnitMapping( params.skipMapping() ), objectMappingGenerator

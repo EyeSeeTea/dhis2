@@ -91,6 +91,8 @@
 		<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
 		<property name="importDataValueService"	ref="org.hisp.dhis.importexport.ImportDataValueService" />
 		<property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -147,7 +149,6 @@
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 		<property name="organisationUnitService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 		<property name="importObjectService"
 			ref="org.hisp.dhis.importexport.ImportObjectService" />
 		<property name="batchHandlerFactory" ref="batchHandlerFactory" />
@@ -191,7 +192,6 @@
 		<property name="organisationUnitGroupService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
 		<property name="importAnalyser"
 			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
@@ -248,7 +248,6 @@
         <property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
         <property name="olapURLService" ref="org.hisp.dhis.olap.OlapURLService" />
         <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-        <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
         <property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
         <property name="batchHandlerFactory" ref="batchHandlerFactory" />
         <property name="objectMappingGenerator"

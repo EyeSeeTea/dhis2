@@ -34,7 +34,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.dhis14.object.Dhis14RoutineDataValue;
@@ -74,7 +73,6 @@ public class RoutineDataValueRowHandler
 
     public RoutineDataValueRowHandler( BatchHandler<DataValue> batchHandler,
         BatchHandler<ImportDataValue> importDataValueBatchHandler,
-        DataValueService dataValueService,
         DataMartService dataMartService,
         Map<Object, Integer> dataElementMapping,
         Map<Object, Integer> periodMapping, 
@@ -84,7 +82,6 @@ public class RoutineDataValueRowHandler
     {
         this.batchHandler = batchHandler;
         this.importDataValueBatchHandler = importDataValueBatchHandler;
-        this.dataValueService = dataValueService;
         this.dataMartService = dataMartService;
         this.dataElementMapping = dataElementMapping;
         this.periodMapping = periodMapping;
