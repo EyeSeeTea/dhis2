@@ -21,7 +21,7 @@
 <input type="hidden" id="curLocaleCode" value="$locale.getLanguage()_$locale.getCountry()"/>
 <h3>$i18n.getString( "create_new_data_element" )</h3>
 
-<form id="addExtendedDataElementForm" action="addExtendedDataElement.action" method="post">
+<form id="addExtendedDataElementForm" action="addExtendedDataElement.action" method="post" onsubmit="return validateAddExtendedDataElement()">
 
 <table>	
 	<tr>

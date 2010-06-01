@@ -21,7 +21,7 @@
 <input type="hidden" id="curLocaleCode" value="$locale.getLanguage()_$locale.getCountry()"/>
 <h3>$i18n.getString( "edit_data_element" )</h3>
 
-<form id="updateExtendedDataElementForm" action="updateExtendedDataElement.action" method="post">
+<form id="updateExtendedDataElementForm" action="updateExtendedDataElement.action" method="post" onsubmit="return validateUpdateExtendedDataElement();">
 
 <div>
 	<input type="hidden" id="id" name="id" value="$dataElement.id">

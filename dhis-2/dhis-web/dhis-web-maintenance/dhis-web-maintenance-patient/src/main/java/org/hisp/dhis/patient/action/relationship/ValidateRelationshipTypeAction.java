@@ -99,7 +99,10 @@ public class ValidateRelationshipTypeAction
     public String execute()
         throws Exception
     {
-
+System.out.println("\n\n\n +++++ \n");
+System.out.println("\n aIsToB = " + aIsToB);
+System.out.println("\n bIsToA = " + bIsToA);
+System.out.println("\n description = " + description);
         if ( aIsToB == null )
         {
             message = i18n.getString( "please_specify_the_a_side_of_the_relationship_type" );
