@@ -251,7 +251,7 @@
 
 	var previousName = '';
 	
-	var startField = document.getElementById( 'dataDictionary' );
+	var startField = document.getElementById( 'name' );
 	startField.select();
 	startField.focus();
 	
