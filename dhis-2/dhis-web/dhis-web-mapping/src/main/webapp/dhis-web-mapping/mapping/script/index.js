@@ -157,8 +157,11 @@ Ext.onReady( function() {
 				text: i18n_save ,
 				handler: function() {
 					var vn = Ext.getCmp('viewname_tf').getValue();
-					var ig = Ext.getCmp('indicatorgroup_cb').getValue();
-					var ii = Ext.getCmp('indicator_cb').getValue();
+                    var mvt = Ext.getCmp('mapvaluetype_cb').getValue();
+					var ig = mvt == map_value_type_indicator ? Ext.getCmp('indicatorgroup_cb').getValue() : 0;
+					var ii = mvt == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : 0;
+                    var deg = mvt == map_value_type_dataelement ? Ext.getCmp('dataelementgroup_cb').getValue() : 0;
+					var de = mvt == map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : 0;
 					var pt = Ext.getCmp('periodtype_cb').getValue();
 					var p = Ext.getCmp('period_cb').getValue();
 					var ms = Ext.getCmp('map_cb').getValue();
@@ -202,8 +205,7 @@ Ext.onReady( function() {
 							Ext.Ajax.request({
 								url: path + 'addOrUpdateMapView' + type,
 								method: 'POST',
-								params: { name: vn, indicatorGroupId: ig, indicatorId: ii, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: 2, classes: c, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
-
+								params: { name: vn, mapValueType: mvt, indicatorGroupId: ig, indicatorId: ii, dataElementGroupId: deg, dataElementId: de, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: 2, classes: c, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
 								success: function(r) {
 									Ext.messageBlack.msg( i18n_new_map_view, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().reload();

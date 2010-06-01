@@ -505,7 +505,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-			id: 'valuetype_cb',
+			id: 'mapvaluetype_cb',
             fieldLabel: i18n_mapvaluetype,
 			labelSeparator: labelseparator,
             editable: false,
@@ -522,14 +522,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			listeners: {
 				'select': {
 					fn: function() {
-						if (Ext.getCmp('valuetype_cb').getValue() == map_value_type_indicator) {
+						if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator) {
 							Ext.getCmp('indicatorgroup_cb').showField();
 							Ext.getCmp('indicator_cb').showField();
 							Ext.getCmp('dataelementgroup_cb').hideField();
 							Ext.getCmp('dataelement_cb').hideField();
 							VALUETYPE.polygon = map_value_type_indicator;
 						}
-						else if (Ext.getCmp('valuetype_cb').getValue() == map_value_type_dataelement) {
+						else if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_dataelement) {
 							Ext.getCmp('indicatorgroup_cb').hideField();
 							Ext.getCmp('indicator_cb').hideField();
 							Ext.getCmp('dataelementgroup_cb').showField();

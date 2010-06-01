@@ -709,19 +709,19 @@ public class DefaultMappingService
         Period period = periodService.getPeriod( periodId );
 
         MapLegendSet mapLegendSet = getMapLegendSet( mapLegendSetId );
-        
+
         if ( mapValueType == MapView.MAP_VALUE_TYPE_INDICATOR )
         {
             mapView.setIndicatorGroup( indicatorService.getIndicatorGroup( indicatorGroupId ) );
             mapView.setIndicator( indicatorService.getIndicator( indicatorId ) );
-            mapView.setDataElementGroup( new DataElementGroup() );
-            mapView.setDataElement( new DataElement() );
+            mapView.setDataElementGroup( null );
+            mapView.setDataElement( null );
         }
 
         else if ( mapValueType == MapView.MAP_VALUE_TYPE_INDICATOR )
         {
-            mapView.setIndicatorGroup( new IndicatorGroup() );
-            mapView.setIndicator( new Indicator() );
+            mapView.setIndicatorGroup( null );
+            mapView.setIndicator( null );
             mapView.setDataElementGroup( dataElementService.getDataElementGroup( dataElementGroupId ) );
             mapView.setDataElement( dataElementService.getDataElement( dataElementId ) );
         }
@@ -755,13 +755,13 @@ public class DefaultMappingService
         String mapLegendType, int method, int classes, String colorLow, String colorHigh, int mapLegendSetId,
         String longitude, String latitude, int zoom )
     {
-        IndicatorGroup indicatorGroup;
+        IndicatorGroup indicatorGroup = null;
 
-        Indicator indicator;
-        
-        DataElementGroup dataElementGroup;
-        
-        DataElement dataElement;
+        Indicator indicator = null;
+
+        DataElementGroup dataElementGroup = null;
+
+        DataElement dataElement = null;
 
         PeriodType periodType = periodService.getPeriodTypeByClass( PeriodType.getPeriodTypeByName( periodTypeName )
             .getClass() );
@@ -774,19 +774,14 @@ public class DefaultMappingService
             .getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
 
         MapView mapView = mappingStore.getMapViewByName( name );
-        
-        if ( mapValueType == MapView.MAP_VALUE_TYPE_INDICATOR )
+
+        if ( mapValueType.equals( MapView.MAP_VALUE_TYPE_INDICATOR ) )
         {
             indicatorGroup = indicatorService.getIndicatorGroup( indicatorGroupId );
             indicator = indicatorService.getIndicator( indicatorId );
-            dataElementGroup = new DataElementGroup();
-            dataElement = new DataElement();
         }
-        
         else
         {
-            indicatorGroup = new IndicatorGroup();
-            indicator = new Indicator();
             dataElementGroup = dataElementService.getDataElementGroup( dataElementGroupId );
             dataElement = dataElementService.getDataElement( dataElementId );
         }
@@ -817,8 +812,9 @@ public class DefaultMappingService
         }
         else
         {
-            mapView = new MapView( name, mapValueType, indicatorGroup, indicator, dataElementGroup, dataElement, periodType, period, mapSourceType, mapSource,
-                mapLegendType, method, classes, colorLow, colorHigh, mapLegendSet, longitude, latitude, zoom );
+            mapView = new MapView( name, mapValueType, indicatorGroup, indicator, dataElementGroup, dataElement,
+                periodType, period, mapSourceType, mapSource, mapLegendType, method, classes, colorLow, colorHigh,
+                mapLegendSet, longitude, latitude, zoom );
 
             addMapView( mapView );
         }
