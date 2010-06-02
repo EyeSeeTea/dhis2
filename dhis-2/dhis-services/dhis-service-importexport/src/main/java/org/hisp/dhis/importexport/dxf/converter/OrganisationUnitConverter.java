@@ -65,10 +65,10 @@ public class OrganisationUnitConverter
     private static final String FIELD_ACTIVE = "active";
     private static final String FIELD_COMMENT = "comment";
     private static final String FIELD_GEO_CODE = "geoCode";
-    private static final String FIELD_COORDINATES = "coordinates";
     private static final String FIELD_COORDINATE = "coordinate";
-    private static final String FIELD_FEATURE_TYPE = "featureType";
+    private static final String FIELD_FEATURE = "feature";
     private static final String FIELD_LAST_UPDATED = "lastUpdated";
+    private static final String ATTRIBUTE_TYPE = "type";
     
     // -------------------------------------------------------------------------
     // Constructor
@@ -126,9 +126,8 @@ public class OrganisationUnitConverter
                 writer.writeElement( FIELD_ACTIVE, String.valueOf( unit.isActive() ) );
                 writer.writeElement( FIELD_COMMENT, unit.getComment() );
                 writer.writeElement( FIELD_GEO_CODE, unit.getGeoCode() );
-                writer.writeElement( FIELD_FEATURE_TYPE, unit.getFeatureType() );
                 
-                writer.openElement( FIELD_COORDINATES );
+                writer.openElement( FIELD_FEATURE, ATTRIBUTE_TYPE, unit.getFeatureType() );                
                 for ( String coordinate : unit.getCoordinatesAsCollection() )
                 {
                     writer.writeElement( FIELD_COORDINATE, coordinate );
@@ -182,11 +181,11 @@ public class OrganisationUnitConverter
                 reader.moveToStartElement( FIELD_GEO_CODE );
                 unit.setGeoCode( reader.getElementValue() );
                 
-                reader.moveToStartElement( FIELD_FEATURE_TYPE );
-                unit.setFeatureType( reader.getElementValue() );
+                reader.moveToStartElement( FIELD_FEATURE );
+                unit.setFeatureType( reader.getAttributeValue( ATTRIBUTE_TYPE ) );
                 
                 Collection<String> coordinates = new ArrayList<String>();
-                while ( reader.moveToStartElement( FIELD_COORDINATE, FIELD_COORDINATES ) )
+                while ( reader.moveToStartElement( FIELD_COORDINATE, FIELD_FEATURE ) )
                 {
                     coordinates.add( reader.getElementValue() );
                 }
