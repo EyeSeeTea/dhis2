@@ -65,7 +65,7 @@ public class OrganisationUnitConverter
     private static final String FIELD_ACTIVE = "active";
     private static final String FIELD_COMMENT = "comment";
     private static final String FIELD_GEO_CODE = "geoCode";
-    private static final String FIELD_COORDINATE = "coordinate";
+    private static final String FIELD_COORDINATES = "coordinates";
     private static final String FIELD_FEATURE = "feature";
     private static final String FIELD_LAST_UPDATED = "lastUpdated";
     private static final String ATTRIBUTE_TYPE = "type";
@@ -130,7 +130,7 @@ public class OrganisationUnitConverter
                 writer.openElement( FIELD_FEATURE, ATTRIBUTE_TYPE, unit.getFeatureType() );                
                 for ( String coordinate : unit.getCoordinatesAsCollection() )
                 {
-                    writer.writeElement( FIELD_COORDINATE, coordinate );
+                    writer.writeElement( FIELD_COORDINATES, coordinate );
                 }
                 writer.closeElement();
                 
@@ -185,7 +185,7 @@ public class OrganisationUnitConverter
                 unit.setFeatureType( reader.getAttributeValue( ATTRIBUTE_TYPE ) );
                 
                 Collection<String> coordinates = new ArrayList<String>();
-                while ( reader.moveToStartElement( FIELD_COORDINATE, FIELD_FEATURE ) )
+                while ( reader.moveToStartElement( FIELD_COORDINATES, FIELD_FEATURE ) )
                 {
                     coordinates.add( reader.getElementValue() );
                 }
