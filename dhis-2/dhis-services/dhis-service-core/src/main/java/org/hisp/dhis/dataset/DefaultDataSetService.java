@@ -156,19 +156,11 @@ public class DefaultDataSetService
     {
         Set<DataSet> dataSets = new HashSet<DataSet>();
 
-        dataSets: for ( DataSet dataSet : getAllDataSets() )
+        for ( Source source : sources )
         {
-            for ( Source source : sources )
-            {
-                if ( dataSet.getSources().contains( source ) )
-                {
-                    dataSets.add( dataSet );
-
-                    continue dataSets;
-                }
-            }
+            dataSets.addAll( getDataSetsBySource( source ) );
         }
-
+        
         return dataSets;
     }
 
@@ -268,9 +260,6 @@ public class DefaultDataSetService
 
         for ( DataSet dataSet : dataSetListByPeriodType )
         {
-            // DataEntryForm dataEntryForm =
-            // dataEntryFormService.getDataEntryFormByDataSet( dataSet );
-
             if ( dataSet.getSources() != null )
             {
                 assignedDataSetListByPeriodType.add( dataSet );
