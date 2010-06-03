@@ -290,6 +290,26 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 	</bean>
 
+    <!-- DataElement -->
+
+    <bean id="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction"
+        class="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction"
+        scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
+
+    <bean
+        id="org.hisp.dhis.mapping.action.GetDataElementsByDataElementGroupAction"
+        class="org.hisp.dhis.mapping.action.GetDataElementsByDataElementGroupAction"
+        scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.mapping.action.GetAllDataElementsAction"
+        class="org.hisp.dhis.mapping.action.GetAllDataElementsAction" scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
+
 	<!-- Period -->
 
 	<bean id="org.hisp.dhis.mapping.action.GetAllPeriodTypesAction"
