@@ -16,14 +16,13 @@
       <active/>
       <comment/>
       <geoCode/>
-      <featureType>MultiPolygon</featureType>
-      <coordinates>
+      <feature type="MultiPolygon">
         <xsl:for-each select=".//gml:Polygon">
-          <coordinate>
+          <coordinates>
             <xsl:value-of select=".//gml:coordinates"/>
-          </coordinate>
+          </coordinates>
         </xsl:for-each>
-      </coordinates>
+      </feature>
       <lastUpdated/>
     </organisationUnit>
   </xsl:for-each>
