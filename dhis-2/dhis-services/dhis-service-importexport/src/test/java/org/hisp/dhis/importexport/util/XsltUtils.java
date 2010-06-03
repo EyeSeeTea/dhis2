@@ -56,7 +56,7 @@ public class XsltUtils
     private LocationManager locationManager;
     
     @Test
-    @Ignore
+    //@Ignore
     public void transform() 
         throws Exception
     {
