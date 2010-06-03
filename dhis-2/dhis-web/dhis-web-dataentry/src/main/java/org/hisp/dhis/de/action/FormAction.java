@@ -46,7 +46,6 @@ import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.datalock.DataSetLock;
 import org.hisp.dhis.datalock.DataSetLockService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.de.comments.StandardCommentsManager;
@@ -60,7 +59,6 @@ import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 import org.hisp.dhis.order.manager.DataElementOrderManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.system.util.TimeUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -162,13 +160,6 @@ public class FormAction
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
-    }
-
-    private DataSetService dataSetService;
-
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
     }
 
     // -------------------------------------------------------------------------
@@ -309,7 +300,6 @@ public class FormAction
     public String execute()
         throws Exception
     {
-        TimeUtils.markHMS( "1" );
         zeroValueSaveMode = (Boolean) systemSettingManager.getSystemSetting( KEY_ZERO_VALUE_SAVE_MODE, false );
 
         OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
@@ -318,20 +308,17 @@ public class FormAction
 
         customValues = (List<CustomValue>) customValueService.getCustomValuesByDataSet( dataSet );
 
-        TimeUtils.markHMS( "2" );
         Period period = selectedStateManager.getSelectedPeriod();
 
         DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
 
-        TimeUtils.markHMS( "3" );
         if ( dataSetLock != null && dataSetLock.getSources().contains( organisationUnit ) )
         {
             disabled = "disabled";
         }
 
-        Collection<DataElement> dataElements = new ArrayList<DataElement>( dataSetService.getDataElements( dataSet ) );
+        Collection<DataElement> dataElements = dataSet.getDataElements();
 
-        TimeUtils.markHMS( "4" );
         if ( dataElements.size() == 0 )
         {
             return SUCCESS;
@@ -341,7 +328,6 @@ public class FormAction
 
         optionComboId = defaultOptionCombo.getId();
 
-        TimeUtils.markHMS( "5" );
         // ---------------------------------------------------------------------
         // Get the min/max values
         // ---------------------------------------------------------------------
@@ -349,7 +335,6 @@ public class FormAction
         Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
             organisationUnit, dataElements );
 
-        TimeUtils.markHMS( "6" );
         minMaxMap = new HashMap<Integer, MinMaxDataElement>( minMaxDataElements.size() );
 
         for ( MinMaxDataElement minMaxDataElement : minMaxDataElements )
@@ -361,10 +346,8 @@ public class FormAction
         // Get the DataValues and create a map
         // ---------------------------------------------------------------------
 
-        TimeUtils.markHMS( "7" );
         Collection<DataValue> dataValues = dataValueService.getDataValues( organisationUnit, period, dataElements );
 
-        TimeUtils.markHMS( "8" );
         dataValueMap = new HashMap<Integer, DataValue>( dataValues.size() );
 
         for ( DataValue dataValue : dataValues )
@@ -376,18 +359,15 @@ public class FormAction
         // Prepare values for unsaved CalculatedDataElements
         // ---------------------------------------------------------------------
 
-        TimeUtils.markHMS( "9" );
         calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet,
             period );
 
-        TimeUtils.markHMS( "10" );
         // ---------------------------------------------------------------------
         // Make the standard comments available
         // ---------------------------------------------------------------------
 
         standardComments = standardCommentsManager.getStandardComments();
 
-        TimeUtils.markHMS( "11" );
         // ---------------------------------------------------------------------
         // Make the DataElement types available
         // ---------------------------------------------------------------------
@@ -405,7 +385,6 @@ public class FormAction
         dataEntryForm = dataEntryFormService.getDataEntryFormByDataSet( dataSet );
         cdeFormExists = (dataEntryForm != null);
 
-        TimeUtils.markHMS( "12" );
         if ( cdeFormExists )
         {
             customDataEntryFormCode = dataEntryScreenManager.populateCustomDataEntryScreen(
@@ -413,7 +392,6 @@ public class FormAction
                 i18n, dataSet );
         }
 
-        TimeUtils.markHMS( "13" );
         // ---------------------------------------------------------------------
         // Working on the display of dataelements
         // ---------------------------------------------------------------------
@@ -422,7 +400,6 @@ public class FormAction
 
         displayPropertyHandler.handle( orderedDataElements );
 
-        TimeUtils.markHMS( "14" );
         return SUCCESS;
     }
 }
