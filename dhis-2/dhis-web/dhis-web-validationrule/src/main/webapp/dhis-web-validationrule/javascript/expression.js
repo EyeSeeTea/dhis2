@@ -34,20 +34,9 @@ function showExpressionForm( side, description, expression, textualExpression, p
 
 function insertText( inputAreaName, inputText )
 {
-	var inputArea = document.getElementById( inputAreaName );
-	
-	var startPos = inputArea.selectionStart;
-	var endPos = inputArea.selectionEnd;
-	
-	var existingText = inputArea.value;
-	var textBefore = existingText.substring( 0, startPos );
-	var textAfter = existingText.substring( endPos, existingText.length );
-	
-	inputArea.value = textBefore + inputText + textAfter;
+	insertTextCommon( inputAreaName, inputText );	
 	
 	updateTextualExpression( inputAreaName );
-	
-	setCaretToPos( inputArea, inputArea.value.length);
 }
 
 function filterDataElements( dataSetName, filterName )

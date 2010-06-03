@@ -788,3 +788,38 @@ function getFilteredDataElementsReceived( xmlObject )
 		operandList.add( option, null );	
 	}
 }
+
+function insertTextCommon( inputAreaName, inputText )
+{
+	var inputArea = document.getElementById( inputAreaName );
+	
+	// IE support
+	if ( document.selection ) 
+	{
+		inputArea.focus();
+        sel = document.selection.createRange();
+        sel.text = inputText;
+        inputArea.focus();
+	}
+	// MOZILLA/NETSCAPE support
+	else if ( inputArea.selectionStart || inputArea.selectionStart == '0' ) 
+	{
+	
+		var startPos = inputArea.selectionStart;
+		var endPos = inputArea.selectionEnd;
+		
+		var existingText = inputArea.value;
+		var textBefore = existingText.substring( 0, startPos );
+		var textAfter = existingText.substring( endPos, existingText.length );
+
+		inputArea.value = textBefore + inputText + textAfter;
+	}
+	else 
+	{
+		inputArea.value += inputText;
+		inputArea.focus();
+	}
+
+	setCaretToPos( inputArea, inputArea.value.length );
+}
+
