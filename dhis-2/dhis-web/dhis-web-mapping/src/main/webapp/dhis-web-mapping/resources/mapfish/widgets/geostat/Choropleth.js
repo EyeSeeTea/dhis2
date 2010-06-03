@@ -244,47 +244,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 }
             }
         });
-		
-		dataElementGroupStore = new Ext.data.JsonStore({
-			url: path + 'getAllDataElementGroups' + type,
-            root: 'dataElementGroups',
-            fields: ['id', 'name'],
-            sortInfo: { field: 'name', direction: 'ASC' },
-            autoLoad: true
-        });
-		
-		dataElementStore = new Ext.data.JsonStore({
-            url: path + 'getDataElementsByDataElementGroup' + type,
-            root: 'dataElements',
-            fields: ['id', 'name', 'shortName'],
-            sortInfo: { field: 'name', direction: 'ASC' },
-            autoLoad: false,
-            listeners: {
-                'load': {
-                    fn: function() {
-                        dataElementStore.each( function fn(record) {
-                                var name = record.get('name');
-                                name = name.replace('&lt;', '<').replace('&gt;', '>');
-                                record.set('name', name);
-                            },  this
-                        );
-                        
-                        Ext.getCmp('dataelement_cb').reset();
-
-                        if (MAPVIEW) {
-                            Ext.getCmp('dataelement_cb').setValue(MAPVIEW.indicatorId);
-                            
-                            var name = MAPVIEW.periodTypeId;
-                            Ext.getCmp('dataelement_cb').setValue(name);
-                            
-                            periodStore.baseParams = { name: name };
-                            periodStore.reload();
-                        }
-                    },
-                    scope: this
-                }
-            }
-        });
     
         indicatorGroupStore = new Ext.data.JsonStore({
             url: path + 'getAllIndicatorGroups' + type,
@@ -315,14 +274,51 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                         if (MAPVIEW) {
                             Ext.getCmp('indicator_cb').setValue(MAPVIEW.indicatorId);
+                            Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
                             
-                            var name = MAPVIEW.periodTypeId;
-                            Ext.getCmp('periodtype_cb').setValue(name);
-                            
-                            periodStore.baseParams = { name: name };
+                            periodStore.baseParams = { name: MAPVIEW.periodTypeId };
                             periodStore.reload();
                         }
                     }
+                }
+            }
+        });
+		
+		dataElementGroupStore = new Ext.data.JsonStore({
+			url: path + 'getAllDataElementGroups' + type,
+            root: 'dataElementGroups',
+            fields: ['id', 'name'],
+            sortInfo: { field: 'name', direction: 'ASC' },
+            autoLoad: true
+        });
+		
+		dataElementStore = new Ext.data.JsonStore({
+            url: path + 'getDataElementsByDataElementGroup' + type,
+            root: 'dataElements',
+            fields: ['id', 'name', 'shortName'],
+            sortInfo: { field: 'name', direction: 'ASC' },
+            autoLoad: false,
+            listeners: {
+                'load': {
+                    fn: function() {
+                        dataElementStore.each(
+                        function fn(record) {
+                                var name = record.get('name');
+                                name = name.replace('&lt;', '<').replace('&gt;', '>');
+                                record.set('name', name);
+                            },  this
+                        );
+                        
+                        Ext.getCmp('dataelement_cb').clearValue();
+
+                        if (MAPVIEW) {
+                            Ext.getCmp('dataelement_cb').setValue(MAPVIEW.dataElementId);
+                            // Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
+                            periodStore.baseParams = {name: MAPVIEW.periodTypeId};
+                            periodStore.reload();
+                        }
+                    },
+                    scope: this
                 }
             }
         });
@@ -422,7 +418,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'mapview_cb',
-            fieldLabel: i18n_favorite ,
+            fieldLabel: i18n_favorite,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -447,6 +443,29 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             success: function(r) {
                                 MAPVIEW = Ext.util.JSON.decode(r.responseText).mapView[0];
 								MAPSOURCE = MAPVIEW.mapSourceType;
+                                
+                                Ext.getCmp('mapvaluetype_cb').setValue(MAPVIEW.mapValueType);
+                                
+                                if (MAPVIEW.mapValueType == map_value_type_indicator) {
+                                    Ext.getCmp('indicatorgroup_cb').showField();
+                                    Ext.getCmp('indicator_cb').showField();
+                                    Ext.getCmp('dataelementgroup_cb').hideField();
+                                    Ext.getCmp('dataelement_cb').hideField();
+                                    
+                                    Ext.getCmp('indicatorgroup_cb').setValue(MAPVIEW.indicatorGroupId);
+                                    indicatorStore.baseParams = { indicatorGroupId: MAPVIEW.indicatorGroupId };
+                                    indicatorStore.reload();
+                                }
+                                else if (MAPVIEW.mapValueType == map_value_type_dataelement) {
+                                    Ext.getCmp('indicatorgroup_cb').hideField();
+                                    Ext.getCmp('indicator_cb').hideField();
+                                    Ext.getCmp('dataelementgroup_cb').showField();
+                                    Ext.getCmp('dataelement_cb').showField();
+                                    
+                                    Ext.getCmp('dataelementgroup_cb').setValue(MAPVIEW.dataElementGroupId);
+                                    dataElementStore.baseParams = { dataElementGroupId: MAPVIEW.dataElementGroupId };
+                                    dataElementStore.reload();
+                                }                                        
 								
 								if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
 									Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
@@ -470,26 +489,24 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 									Ext.getCmp('colorA_cf').hideField();
 									Ext.getCmp('colorB_cf').hideField();
 									Ext.getCmp('maplegendset_cb').showField();
-									Ext.Ajax.request({
-										url: path + 'getMapLegendSet' + type,
-										method: 'POST',
-										params: { id: MAPVIEW.mapLegendSetId },
-										success: function(r) {
-											var mls = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-											Ext.getCmp('maplegendset_cb').setValue(mls.id);
-											choropleth.applyPredefinedLegend();
-										},
-										failure: function() {
-											alert('Error: getMapLegendSet');
-										}
-									});
-								}									
-								
-                                Ext.getCmp('indicatorgroup_cb').setValue(MAPVIEW.indicatorGroupId);
-                                
-                                var igId = Ext.getCmp('indicatorgroup_cb').getValue();
-                                indicatorStore.baseParams = { indicatorGroupId: igId };
-                                indicatorStore.reload();
+									
+                                    Ext.getCmp('maplegendset_cb').setValue(MAPVIEW.mapLegendSetId);
+                                    choropleth.applyPredefinedLegend();
+                                    
+                                    // Ext.Ajax.request({
+										// url: path + 'getMapLegendSet' + type,
+										// method: 'POST',
+										// params: { id: MAPVIEW.mapLegendSetId },
+										// success: function(r) {
+											// var mls = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
+											// Ext.getCmp('maplegendset_cb').setValue(mls.id);
+											// choropleth.applyPredefinedLegend();
+										// },
+										// failure: function() {
+											// alert('Error: getMapLegendSet');
+										// }
+									// });
+								}
                             },
                             failure: function() {
                               alert( i18n_status , i18n_error_while_retrieving_data );
@@ -1105,14 +1122,20 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			}
         }
                 
-        if (!Ext.getCmp('indicator_cb').getValue() ||
+        if ((!Ext.getCmp('indicator_cb').getValue() && !Ext.getCmp('dataelement_cb').getValue()) ||
             !Ext.getCmp('period_cb').getValue() ||
-            !Ext.getCmp('map_cb').getValue()) {
-                if (exception) {
-                    Ext.messageRed.msg( i18n_thematic_map , i18n_form_is_not_complete );
-                }
+            !Ext.getCmp('map_cb').getValue() ) {
+            if (exception) {
+                Ext.messageRed.msg( i18n_thematic_map , i18n_form_is_not_complete );
                 return;
+            }
+            return;
         }
+        
+        // if (!Ext.getCmp('period_cb').getValue() || !Ext.getCmp('map_cb').getValue()) {
+            // Ext.messageRed.msg( i18n_thematic_map , i18n_form_is_not_complete );
+            // return;
+        // }
 
 		MASK.msg = i18n_loading;
         MASK.show();

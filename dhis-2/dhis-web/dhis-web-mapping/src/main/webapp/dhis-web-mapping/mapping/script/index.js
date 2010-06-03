@@ -178,8 +178,13 @@ Ext.onReady( function() {
 						Ext.messageRed.msg( i18n_new_map_view , i18n_map_view_form_is_not_complete );
 						return;
 					}
+                    
+                    if (!ii && !de) {
+                        Ext.messageRed.msg( i18n_new_map_view, i18n_thematic_map_form_is_not_complete );
+						return;
+					}
 					
-					if (!ig || !ii || !pt || !p || !ms || !c ) {
+					if (!pt || !p || !ms || !c) {
 						Ext.messageRed.msg( i18n_new_map_view, i18n_thematic_map_form_is_not_complete );
 						return;
 					}
@@ -252,13 +257,15 @@ Ext.onReady( function() {
 					Ext.Ajax.request({
 						url: path + 'deleteMapView' + type,
 						method: 'POST',
-						params: { id: v },
-
+						params: {id: v},
 						success: function(r) {
 							Ext.messageBlack.msg( i18n_delete_map_view , 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted );
 							Ext.getCmp('view_cb').getStore().reload();
-							Ext.getCmp('view_cb').reset();
+							Ext.getCmp('view_cb').clearValue();
 							Ext.getCmp('mapview_cb').getStore().reload();
+                            if (v == Ext.getCmp('mapview_cb').getValue()) {
+                                Ext.getCmp('mapview_cb').clearValue();
+                            }
 						},
 						failure: function() {
 							alert( i18n_status , i18n_error_while_saving_data );

@@ -7,7 +7,7 @@
     "indicatorId": "$!{object.indicator.id}",
     "dataElementGroupId": "$!{object.dataElementGroup.id}",
     "dataElementId": "$!{object.dataElement.id}",
-    "periodTypeId": "$!{object.periodType.id}",
+    "periodTypeId": "$!encoder.jsEncode( ${object.periodType.name} )",
     "periodId": "$!{object.period.id}",
     "mapSourceType": "$!encoder.jsEncode( ${object.mapSourceType} )",
     "mapSource": "$!encoder.jsEncode( ${object.mapSource} )",
