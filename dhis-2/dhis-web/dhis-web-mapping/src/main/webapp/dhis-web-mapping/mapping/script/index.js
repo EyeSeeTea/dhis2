@@ -454,25 +454,27 @@ Ext.onReady( function() {
 				cls: 'window-button',
 				text: i18n_export_image,
 				handler: function() {
-					if (ACTIVEPANEL == thematicMap
-						&& Ext.getCmp('period_cb').getValue()!='' 
-						&& Ext.getCmp('indicator_cb').getValue()!=''
-						&& Ext.getCmp('map_cb').getValue()!='') {
-						
+                    var cb = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+
+                    if (ACTIVEPANEL == thematicMap
+                        && cb
+						&& Ext.getCmp('period_cb').getValue() 
+						&& Ext.getCmp('map_cb').getValue()) {
+
 						var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
 						var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
 						var viewBox = objectSVGDocument.getAttribute('viewBox');
 						var title = Ext.getCmp('exportimagetitle_tf').getValue();
 						
-						if(title==''){
+						if (!title) {
 							Ext.messageRed.msg( i18n_export_map_as_image , i18n_please_enter_map_title );
-						}else{						
+						}
+                        else {						
 							var q = Ext.getCmp('exportimagequality_cb').getValue();
 							var w = objectSVGDocument.getAttribute('width') * q;
 							var h = objectSVGDocument.getAttribute('height') * q;
 							var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
 							var period = Ext.getCmp('period_cb').getValue();
-							var indicator = Ext.getCmp('indicator_cb').getValue();
 							var imageFormat = Ext.getCmp('exportimageformat_cb').getValue();
 							
 							Ext.getCmp('exportimagetitle_tf').reset();
@@ -488,7 +490,7 @@ Ext.onReady( function() {
 							document.getElementById('heightField').value = h;  
 							document.getElementById('includeLegendsField').value = includeLegend;  
 							document.getElementById('periodField').value = period;  
-							document.getElementById('indicatorField').value = indicator;   
+							document.getElementById('indicatorField').value = cb;   
 							document.getElementById('legendsField').value = getLegendsJSON();
 							document.getElementById('imageFormat').value = imageFormat;
 
