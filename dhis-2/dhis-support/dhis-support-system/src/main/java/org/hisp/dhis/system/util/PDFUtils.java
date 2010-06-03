@@ -490,9 +490,7 @@ public class PDFUtils
     {
         try
         {
-            BaseFont baseFont = BaseFont.createFont( "arial.ttf", "Identity-H", true );
-
-            return baseFont;
+            return BaseFont.createFont( PDF_ARIAL_FONT, dimension, BaseFont.EMBEDDED );
         }
         catch ( Exception e )
         {
