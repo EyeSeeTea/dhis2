@@ -43,18 +43,18 @@ public interface ValidationRuleStore
     // -------------------------------------------------------------------------
 
     /**
-     * Adds a ValidationRule to the database.
+     * Saves a ValidationRule to the database.
      * 
      * @param validationRule the ValidationRule to add.
      * @return the generated unique identifier for the ValidationRule.
      */
-    int addValidationRule( ValidationRule validationRule );
-
+    
+    int saveValidationRule( ValidationRule validationRule );
     /**
-     * Update a validation rule with the given identifiers.
+     * Update a ValidationRule to the database.
      * 
      * @param validationRule the ValidationRule to update.
+     * @return the generated unique identifier for the ValidationRule.
      */
     void updateValidationRule( ValidationRule validationRule );
-
 }

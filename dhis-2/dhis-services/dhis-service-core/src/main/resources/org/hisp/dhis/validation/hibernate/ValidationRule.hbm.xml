@@ -33,7 +33,7 @@
     </set>
     
 	<many-to-one name="periodType" class="org.hisp.dhis.period.PeriodType"
-			lazy="false" column="periodtypeid"
+			column="periodtypeid"
 			foreign-key="fk_validationrule_periodtypeid" />
 			
   </class>

@@ -58,16 +58,16 @@ public class DefaultValidationCriteriaService
     public int saveValidationCriteria( ValidationCriteria validationCriteria )
     {
         return validationCriteriaStore.save( validationCriteria );
-    }
-
-    public void deleteValidationCriteria( ValidationCriteria validationCriteria )
-    {
-        validationCriteriaStore.delete( validationCriteria );
-    }
+    } 
 
     public void updateValidationCriteria( ValidationCriteria validationCriteria )
     {
         validationCriteriaStore.update( validationCriteria );
+    }
+    
+    public void deleteValidationCriteria( ValidationCriteria validationCriteria )
+    {
+        validationCriteriaStore.delete( validationCriteria );
     }
 
     public ValidationCriteria getValidationCriteria( int id )
@@ -79,8 +79,7 @@ public class DefaultValidationCriteriaService
     {
         return validationCriteriaStore.getAll();
     }
-
-    @Override
+    
     public ValidationCriteria getValidationCriteria( String name )
     {
         return validationCriteriaStore.getByName( name );

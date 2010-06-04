@@ -42,10 +42,10 @@ public interface ValidationCriteriaService
     // -------------------------------------------------------------------------
     
     int saveValidationCriteria( ValidationCriteria validationCriteria );
+    
+    void updateValidationCriteria( ValidationCriteria validationCriteria );
 
     void deleteValidationCriteria( ValidationCriteria validationCriteria );
-
-    void updateValidationCriteria( ValidationCriteria validationCriteria );
 
     ValidationCriteria getValidationCriteria( int id );
     

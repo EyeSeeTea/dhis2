@@ -248,7 +248,7 @@ public class DXFImportServiceTest
         ImportParams importParams = ImportExportUtils.getImportParams( ImportStrategy.NEW_AND_UPDATES, false, false, false );
 
         importService.importData( importParams, inputStreamH );
-
+        
         assertObjects( dataASize );
     }
 

@@ -35,11 +35,10 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
-import org.hisp.dhis.importexport.converter.AbstractValidationRuleConverter;
+import org.hisp.dhis.importexport.importer.ValidationRuleImporter;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.validation.ValidationRule;
@@ -50,7 +49,7 @@ import org.hisp.dhis.validation.ValidationRuleService;
  * @version $Id: ValidationRuleConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class ValidationRuleConverter
-    extends AbstractValidationRuleConverter implements XMLConverter
+    extends ValidationRuleImporter implements XMLConverter
 {
     public static final String COLLECTION_NAME = "validationRules";
     public static final String ELEMENT_NAME = "validationRule";
@@ -169,7 +168,7 @@ public class ValidationRuleConverter
             
             validationRule.setPeriodType( PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME ) ); //TODO Intermediate hack!
             
-            read( validationRule, GroupMemberType.NONE, params );
+            importObject( validationRule, params );
         }
     }
 }

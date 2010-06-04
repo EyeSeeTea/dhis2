@@ -225,24 +225,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- IXF Configuration                                             -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<bean id="org.hisp.dhis.importexport.action.ixf.GetIXFConfigurationAction"
-		class="org.hisp.dhis.importexport.action.ixf.GetIXFConfigurationAction"
-		scope="prototype">
-		<property name="configurationManager"
-			ref="org.hisp.dhis.importexport.ixf.config.IXFConfigurationManager" />
-	</bean>
-
-	<bean id="org.hisp.dhis.importexport.action.ixf.SetIXFConfigurationAction"
-		class="org.hisp.dhis.importexport.action.ixf.SetIXFConfigurationAction"
-		scope="prototype">
-		<property name="configurationManager"
-			ref="org.hisp.dhis.importexport.ixf.config.IXFConfigurationManager" />
-	</bean>
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<!-- Dhis 1.4 Configuration                                        -->
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 

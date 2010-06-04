@@ -52,7 +52,6 @@ public class HibernateValidationRuleStore
     public void setPeriodStore( PeriodStore periodStore )
     {
         this.periodStore = periodStore;
-
     }
 
     // -------------------------------------------------------------------------
@@ -60,7 +59,7 @@ public class HibernateValidationRuleStore
     // -------------------------------------------------------------------------
 
     @Override
-    public int addValidationRule( ValidationRule validationRule )
+    public int saveValidationRule( ValidationRule validationRule )
     {
         PeriodType periodType = periodStore.getPeriodType( validationRule.getPeriodType().getClass() );
 
@@ -70,7 +69,7 @@ public class HibernateValidationRuleStore
 
         return (Integer) session.save( validationRule );
     }
-
+    
     @Override
     public void updateValidationRule( ValidationRule validationRule )
     {
@@ -82,5 +81,4 @@ public class HibernateValidationRuleStore
 
         session.update( validationRule );
     }
-
 }

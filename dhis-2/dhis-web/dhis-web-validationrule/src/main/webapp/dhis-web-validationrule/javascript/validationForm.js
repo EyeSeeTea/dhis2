@@ -27,9 +27,10 @@ function addValidationCompleted( messageElement )
     var message = messageElement.firstChild.nodeValue;
     
     if ( type == 'success' )
-    {        
+    {    
+		byId('periodTypeName').disabled = false;
+		
         var form = document.getElementById( 'addValidationRuleForm' );
-        
         form.submit();
     }
     else if ( type == 'error' )
@@ -38,7 +39,7 @@ function addValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        setMessage( 'message' ) = message;
+        setMessage( message );
     }
 }
 
@@ -73,8 +74,9 @@ function updateValidationCompleted( messageElement )
     
     if ( type == 'success' )
     {   
-        var form = document.getElementById( 'updateValidationRuleForm' );
+		byId('periodTypeName').disabled = false;
         
+		var form = document.getElementById( 'updateValidationRuleForm' );
         form.submit();
     }
     else if ( type == 'error' )
@@ -83,7 +85,19 @@ function updateValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        setMessage( message );
     }
+}
+
+// ---------------------------------------------------------------------
+// disabled PeriodType field
+// ---------------------------------------------------------------------
+function disabledPeriodTypeField(){
+	if(getFieldValue( 'leftSideExpression' ) == '' &&
+	   getFieldValue( 'rightSideExpression' ) == '') {
+		byId('periodTypeName').disabled = false;
+	}
+	else{
+		byId('periodTypeName').disabled = true;
+	}
 }

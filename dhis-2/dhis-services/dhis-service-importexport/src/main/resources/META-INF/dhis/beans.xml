@@ -13,12 +13,6 @@
 			<map>
 				<entry>
 					<key>
-						<value>IXF</value>
-					</key>
-					<ref bean="org.hisp.dhis.importexport.IXFExportService" />
-				</entry>
-				<entry>
-					<key>
 						<value>DXF</value>
 					</key>
 					<ref bean="org.hisp.dhis.importexport.DXFExportService" />
@@ -81,14 +75,18 @@
 		<property name="categoryService"
 			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="validationRuleService"
-			ref="org.hisp.dhis.validation.ValidationRuleService" />
+		<property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
+		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
+		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+		<property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
+		<property name="validationRuleService" ref="org.hisp.dhis.validation.ValidationRuleService" />
 		<property name="olapURLService" ref="org.hisp.dhis.olap.OlapURLService" />
 		<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
-		<property name="importDataValueService"
-			ref="org.hisp.dhis.importexport.ImportDataValueService" />
+		<property name="importDataValueService"	ref="org.hisp.dhis.importexport.ImportDataValueService" />
+		<property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -145,16 +143,14 @@
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 		<property name="organisationUnitService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 		<property name="importObjectService"
 			ref="org.hisp.dhis.importexport.ImportObjectService" />
 		<property name="batchHandlerFactory" ref="batchHandlerFactory" />
 		<property name="objectMappingGenerator"
 			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-		<property name="importAnalyser"
-			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
 		<property name="converterInvoker"
 			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
+		<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService"/>
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -189,10 +185,7 @@
 		<property name="organisationUnitGroupService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
-		<property name="importAnalyser"
-			ref="org.hisp.dhis.importexport.analysis.ImportAnalyser" />
 	</bean>
 
 	<bean
@@ -246,7 +239,6 @@
         <property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
         <property name="olapURLService" ref="org.hisp.dhis.olap.OlapURLService" />
         <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-        <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
         <property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
         <property name="batchHandlerFactory" ref="batchHandlerFactory" />
         <property name="objectMappingGenerator"
@@ -263,35 +255,6 @@
 
     <bean id="org.hisp.dhis.importexport.invoker.ConverterInvoker"
           class="org.hisp.dhis.importexport.invoker.DefaultConverterInvoker" />
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- IXF Import                                                    -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<bean id="internal-process-IXFImportService" class="org.hisp.dhis.importexport.ImportInternalProcess"
-		scope="prototype">
-		<property name="statementManager" ref="statementManager" />
-		<property name="importService" ref="org.hisp.dhis.importexport.IXFImportService" />
-	</bean>
-
-	<bean id="org.hisp.dhis.importexport.IXFImportService"
-		class="org.hisp.dhis.importexport.ixf.importer.DefaultIXFImportService"
-		scope="prototype">
-		<property name="importObjectService"
-			ref="org.hisp.dhis.importexport.ImportObjectService" />
-		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="categoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
-		<property name="batchHandlerFactory" ref="batchHandlerFactory" />
-		<property name="objectMappingGenerator"
-			ref="org.hisp.dhis.importexport.mapping.ObjectMappingGenerator" />
-		<property name="converterInvoker"
-			ref="org.hisp.dhis.importexport.invoker.ConverterInvoker" />
-	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<!-- DXF Export                                                    -->
@@ -318,29 +281,6 @@
 		<property name="completeDataSetRegistrationService"
 			ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
 		<property name="dataMartService" ref="org.hisp.dhis.datamart.DataMartService" />
-	</bean>
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- IXF Export                                                    -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<bean id="org.hisp.dhis.importexport.IXFExportService"
-		class="org.hisp.dhis.importexport.ixf.exporter.DefaultIXFExportService">
-		<property name="categoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-		<property name="configurationManager"
-			ref="org.hisp.dhis.importexport.ixf.config.IXFConfigurationManager" />
-	</bean>
-
-	<bean id="org.hisp.dhis.importexport.ixf.config.IXFConfigurationManager"
-		class="org.hisp.dhis.importexport.ixf.config.XMLIXFConfigurationManager">
-		<property name="configDir" value="importexport" />
-		<property name="configFile" value="ixfConfiguration.xml" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -386,16 +326,6 @@
 		<property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
 		<property name="categoryService"
 			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-	</bean>
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- Analyser                                                      -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<bean id="org.hisp.dhis.importexport.analysis.ImportAnalyser"
-		class="org.hisp.dhis.importexport.analysis.DefaultImportAnalyser"
-		scope="prototype">
-		<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
 	</bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

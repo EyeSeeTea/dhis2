@@ -192,9 +192,15 @@ public class DefaultDataElementService
     public Collection<DataElement> getDataElementsByZeroIsSignificantAndGroup( boolean zeroIsSignificant,
         DataElementGroup dataElementGroup )
     {
-        Collection<DataElement> dataElements = getDataElementsByZeroIsSignificant( zeroIsSignificant );
+        Collection<DataElement> dataElements = new HashSet<DataElement>();
 
-        dataElements.retainAll( dataElementGroup.getMembers() );
+        for ( DataElement element : dataElementGroup.getMembers() )
+        {
+            if ( element.isZeroIsSignificant() )
+            {
+                dataElements.add( element );
+            }
+        }
 
         return dataElements;
     }
@@ -628,5 +634,4 @@ public class DefaultDataElementService
     {
         return dataElementStore.getAllGeneratedOperands( dataElements );
     }
-
 }

@@ -60,11 +60,11 @@ public class TableAlteror
     {
         this.statementManager = statementManager;
     }
-    
+
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
-    
+
     @Transactional
     public void execute()
     {
@@ -72,10 +72,15 @@ public class TableAlteror
         executeSql( "drop table columnorder" );
         executeSql( "drop table roworder" );
         executeSql( "alter table dataelementcategoryoption drop column categoryid" );
-        executeSql( "alter table reporttable drop column dimensiontype" ); // New is dimension_type
-        
-        //categories_categoryoptions
-        int c1 = executeSql( "UPDATE categories_categoryoptions SET sort_order=0 WHERE sort_order is NULL OR sort_order=0" ); // set to 0 temporarily
+        executeSql( "alter table reporttable drop column dimensiontype" ); // New
+        // is
+        // dimension_type
+
+        // categories_categoryoptions
+        int c1 = executeSql( "UPDATE categories_categoryoptions SET sort_order=0 WHERE sort_order is NULL OR sort_order=0" ); // set
+        // to
+        // 0
+        // temporarily
         if ( c1 > 0 )
         {
             updateSortOrder( "categories_categoryoptions", "categoryid", "categoryoptionid" );
@@ -83,70 +88,81 @@ public class TableAlteror
         executeSql( "ALTER TABLE categories_categoryoptions DROP CONSTRAINT categories_categoryoptions_pkey" );
         executeSql( "ALTER TABLE categories_categoryoptions ADD CONSTRAINT categories_categoryoptions_pkey PRIMARY KEY (categoryid, sort_order)" );
 
-        //categorycombos_categories
-        int c2 = executeSql( "update categorycombos_categories SET sort_order=0 where sort_order is NULL OR sort_order=0" ); // set to 0 temporarily
+        // categorycombos_categories
+        int c2 = executeSql( "update categorycombos_categories SET sort_order=0 where sort_order is NULL OR sort_order=0" ); // set
+        // to
+        // 0
+        // temporarily
         if ( c2 > 0 )
         {
             updateSortOrder( "categorycombos_categories", "categorycomboid", "categoryid" );
         }
         executeSql( "ALTER TABLE categorycombos_categories DROP CONSTRAINT categorycombos_categories_pkey" );
         executeSql( "ALTER TABLE categorycombos_categories ADD CONSTRAINT categorycombos_categories_pkey PRIMARY KEY (categorycomboid, sort_order)" );
-        
-        //categorycombos_optioncombos
+
+        // categorycombos_optioncombos
         executeSql( "ALTER TABLE categorycombos_optioncombos DROP CONSTRAINT categorycombos_optioncombos_pkey" );
         executeSql( "ALTER TABLE categorycombos_optioncombos ADD CONSTRAINT categorycombos_optioncombos_pkey PRIMARY KEY (categoryoptioncomboid)" );
         executeSql( "ALTER TABLE categorycombos_optioncombos DROP CONSTRAINT fk4bae70f697e49675" );
-        
-        //categoryoptioncombo
+
+        // categoryoptioncombo
         executeSql( "ALTER TABLE categoryoptioncombo DROP COLUMN displayorder" );
-        
-        //categoryoptioncombos_categoryoptions
-        int c3 = executeSql( "update categoryoptioncombos_categoryoptions SET sort_order=0 where sort_order is NULL OR sort_order=0" ); // set to 0 temporarily
+
+        // categoryoptioncombos_categoryoptions
+        int c3 = executeSql( "update categoryoptioncombos_categoryoptions SET sort_order=0 where sort_order is NULL OR sort_order=0" ); // set
+        // to
+        // 0
+        // temporarily
         if ( c3 > 0 )
         {
             updateSortOrder( "categoryoptioncombos_categoryoptions", "categoryoptioncomboid", "categoryoptionid" );
         }
         executeSql( "ALTER TABLE categoryoptioncombos_categoryoptions DROP CONSTRAINT categoryoptioncombos_categoryoptions_pkey" );
         executeSql( "ALTER TABLE categoryoptioncombos_categoryoptions ADD CONSTRAINT categoryoptioncombos_categoryoptions_pkey PRIMARY KEY (categoryoptioncomboid, sort_order)" );
-        
-        //dataelementcategoryoption
+
+        // dataelementcategoryoption
         executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN shortname" );
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT fk_dataelement_categoryid" );
-        //executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_name_key" ); will be maintained in transition period
+        // executeSql(
+        // "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_name_key"
+        // ); will be maintained in transition period
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_shortname_key" );
-        
-        //minmaxdataelement query index
+
+        // minmaxdataelement query index
         executeSql( "CREATE INDEX index_minmaxdataelement ON minmaxdataelement( sourceid, dataelementid, categoryoptioncomboid )" );
-        
-        //drop code unique constraints
+
+        // drop code unique constraints
         executeSql( "ALTER TABLE dataelement DROP CONSTRAINT dataelement_code_key" );
         executeSql( "ALTER TABLE indicator DROP CONSTRAINT indicator_code_key" );
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_code_key" );
-        
-        //add mandatory boolean field to patientattribute
+
+        // add mandatory boolean field to patientattribute
         if ( executeSql( "ALTER TABLE patientattribute ADD mandatory bool" ) >= 0 )
         {
             executeSql( "UPDATE patientattribute SET mandatory=false" );
         }
         
+        // update periodType field to ValidationRule
+        executeSql( "UPDATE validationrule SET periodtypeid = ( SELECT periodtypeid FROM periodtype WHERE name='Monthly')" );
+
         //drop table reporttable_categoryoptioncombos
         executeSql( "DROP table reporttable_categoryoptioncombos" );
         
         log.info( "Tables updated" );
     }
-    
+
     private List<Integer> getDistinctIdList( String table, String col1 )
-    {       
+    {
         StatementHolder holder = statementManager.getHolder();
 
         List<Integer> distinctIds = new ArrayList<Integer>();
-        
+
         try
         {
             Statement statement = holder.getStatement();
-            
+
             ResultSet resultSet = statement.executeQuery( "SELECT DISTINCT " + col1 + " FROM " + table );
-            
+
             while ( resultSet.next() )
             {
                 distinctIds.add( resultSet.getInt( 1 ) );
@@ -160,31 +176,32 @@ public class TableAlteror
         {
             holder.close();
         }
-        
+
         return distinctIds;
     }
-    
+
     private Map<Integer, List<Integer>> getIdMap( String table, String col1, String col2, List<Integer> distinctIds )
     {
         StatementHolder holder = statementManager.getHolder();
-        
+
         Map<Integer, List<Integer>> idMap = new HashMap<Integer, List<Integer>>();
-        
+
         try
         {
             Statement statement = holder.getStatement();
-            
+
             for ( Integer distinctId : distinctIds )
             {
                 List<Integer> foreignIds = new ArrayList<Integer>();
-                
-                ResultSet resultSet = statement.executeQuery( "SELECT " + col2 + " FROM " + table + " WHERE " + col1 + "=" + distinctId );
-                
+
+                ResultSet resultSet = statement.executeQuery( "SELECT " + col2 + " FROM " + table + " WHERE " + col1
+                    + "=" + distinctId );
+
                 while ( resultSet.next() )
                 {
                     foreignIds.add( resultSet.getInt( 1 ) );
                 }
-                
+
                 idMap.put( distinctId, foreignIds );
             }
         }
@@ -196,35 +213,36 @@ public class TableAlteror
         {
             holder.close();
         }
-        
+
         return idMap;
     }
 
     private void updateSortOrder( String table, String col1, String col2 )
     {
         List<Integer> distinctIds = getDistinctIdList( table, col1 );
-        
+
         log.info( "Got distinct ids: " + distinctIds.size() );
-        
+
         Map<Integer, List<Integer>> idMap = getIdMap( table, col1, col2, distinctIds );
 
         log.info( "Got id map: " + idMap.size() );
-        
+
         for ( Integer distinctId : idMap.keySet() )
         {
             int sortOrder = 1;
-            
+
             for ( Integer foreignId : idMap.get( distinctId ) )
             {
-                String sql = "UPDATE " + table + " SET sort_order=" + sortOrder++ + " WHERE " + col1 + "=" + distinctId + " AND " + col2 + "=" + foreignId;
-            
+                String sql = "UPDATE " + table + " SET sort_order=" + sortOrder++ + " WHERE " + col1 + "=" + distinctId
+                    + " AND " + col2 + "=" + foreignId;
+
                 int count = executeSql( sql );
-                
+
                 log.info( "Executed: " + count + " - " + sql );
             }
         }
     }
-    
+
     private int executeSql( String sql )
     {
         try
@@ -234,7 +252,7 @@ public class TableAlteror
         catch ( Exception ex )
         {
             log.debug( ex );
-            
+
             return -1;
         }
     }

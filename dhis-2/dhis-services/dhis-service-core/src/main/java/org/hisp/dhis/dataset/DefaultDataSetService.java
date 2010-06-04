@@ -149,36 +149,18 @@ public class DefaultDataSetService
 
     public Collection<DataSet> getDataSetsBySource( Source source )
     {
-        Set<DataSet> dataSets = new HashSet<DataSet>();
-
-        for ( DataSet dataSet : getAllDataSets() )
-        {
-            if ( dataSet.getSources().contains( source ) )
-            {
-                dataSets.add( dataSet );
-            }
-        }
-
-        return dataSets;
+        return i18n( i18nService, dataSetStore.getDataSetsBySource( source ) );
     }
 
     public Collection<DataSet> getDataSetsBySources( Collection<? extends Source> sources )
     {
         Set<DataSet> dataSets = new HashSet<DataSet>();
 
-        dataSets: for ( DataSet dataSet : getAllDataSets() )
+        for ( Source source : sources )
         {
-            for ( Source source : sources )
-            {
-                if ( dataSet.getSources().contains( source ) )
-                {
-                    dataSets.add( dataSet );
-
-                    continue dataSets;
-                }
-            }
+            dataSets.addAll( getDataSetsBySource( source ) );
         }
-
+        
         return dataSets;
     }
 
@@ -278,9 +260,6 @@ public class DefaultDataSetService
 
         for ( DataSet dataSet : dataSetListByPeriodType )
         {
-            // DataEntryForm dataEntryForm =
-            // dataEntryFormService.getDataEntryFormByDataSet( dataSet );
-
             if ( dataSet.getSources() != null )
             {
                 assignedDataSetListByPeriodType.add( dataSet );
