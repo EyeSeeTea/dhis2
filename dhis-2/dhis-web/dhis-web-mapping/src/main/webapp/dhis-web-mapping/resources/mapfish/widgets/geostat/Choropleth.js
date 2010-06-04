@@ -445,6 +445,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 								MAPSOURCE = MAPVIEW.mapSourceType;
                                 
                                 Ext.getCmp('mapvaluetype_cb').setValue(MAPVIEW.mapValueType);
+								VALUETYPE.polygon = MAPVIEW.mapValueType;
                                 
                                 if (MAPVIEW.mapValueType == map_value_type_indicator) {
                                     Ext.getCmp('indicatorgroup_cb').showField();
