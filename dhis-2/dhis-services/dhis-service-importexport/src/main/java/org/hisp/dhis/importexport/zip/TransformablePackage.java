@@ -4,7 +4,10 @@ package org.hisp.dhis.importexport.zip;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.zip.ZipFile;
+import javax.xml.stream.XMLInputFactory;
 import org.amplecode.staxwax.reader.XMLReader;
+import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.stax2.XMLStreamReader2;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.dxf.converter.DXFConverter;
@@ -69,8 +72,10 @@ public abstract class TransformablePackage implements ZipImporter
         String xsltIdTag = getTransformerTag(zipFile);
 
         InputStream xmlDataStream = getXMLDataStream(zipFile);
-        
-        XMLReader dxfReader = preConverter.transform( xmlDataStream, params, state, xsltParams, xsltIdTag );
+        XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
+        XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( xmlDataStream );
+
+        XMLReader dxfReader = preConverter.transform( streamReader, params, state, xsltParams, xsltIdTag );
         converter.read( dxfReader, params, state );
     }
 

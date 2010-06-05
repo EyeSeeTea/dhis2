@@ -122,6 +122,7 @@ import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
+import org.hisp.dhis.importexport.ImportException;
 
 /**
  * @author Lars Helge Overland
@@ -245,13 +246,18 @@ public class DefaultDhis14FileImportService
     // ImportService implementation
     // -------------------------------------------------------------------------
 
-    public void importData( ImportParams params, InputStream inputStream )
+    @Override
+    public void importData( ImportParams params, InputStream inputStream ) throws ImportException
     {
         
     }
+    @Override
     public void importData( ImportParams params, InputStream inputStream, ProcessState state )
+        throws ImportException
     {
-        NameMappingUtil.clearMapping();
+        try {
+            NameMappingUtil.clearMapping();
+
         
         importAnalyser = new DefaultImportAnalyser( expressionService );
         
@@ -306,6 +312,10 @@ public class DefaultDhis14FileImportService
         NameMappingUtil.clearMapping();
         
         cacheManager.clearCache();
+        } catch (Exception ex) {
+            log.info( ex);
+            throw new ImportException("DHIS14 import failed");
+        }
     }
     
     // -------------------------------------------------------------------------

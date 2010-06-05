@@ -31,8 +31,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipFile;
 import org.amplecode.staxwax.reader.XMLReader;
@@ -74,17 +77,18 @@ public class DefaultImportService
     // -------------------------------------------------------------------------
     @Override
     public void importData( ImportParams params, InputStream inputStream )
-        throws Exception
+        throws ImportException
     {
         importData( params, inputStream, new OutputHolderState() );
     }
 
     @Override
     public void importData( ImportParams params, InputStream inputStream, ProcessState state )
-        throws Exception
+        throws ImportException
     {
 
         log.info( "Importing stream" );
+
         state.setMessage( "Importing stream" );
 
         // ---------------------------------------------------------------------
@@ -136,8 +140,15 @@ public class DefaultImportService
 
             if ( StreamUtils.isGZip( bufin ) )
             {
-                // pass through the uncompressed stream
-                xmlDataStream = new BufferedInputStream( new GZIPInputStream( bufin ) );
+                try
+                {
+                    // pass through the uncompressed stream
+                    xmlDataStream = new BufferedInputStream( new GZIPInputStream( bufin ) );
+                } catch ( IOException ex )
+                {
+                    log.info( ex );
+                    throw new ImportException("Corrupt gzip stream");
+                }
             } else
             {
                 // assume uncompressed xml and keep moving

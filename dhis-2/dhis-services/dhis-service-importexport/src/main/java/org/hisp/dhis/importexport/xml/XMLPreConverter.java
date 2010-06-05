@@ -90,9 +90,12 @@ public class XMLPreConverter
 
     /**
      * This method is called for an anonymous xml stream ie. we don't yet know if or how to transform it
+     * @param xmlDataStream
      * @param reader
      * @param params
      * @param state
+     * @return
+     * @throws ImportException
      */
     public XMLReader transform( InputStream xmlDataStream, ImportParams params, ProcessState state ) throws ImportException
     {
@@ -111,7 +114,8 @@ public class XMLPreConverter
 
         try
         {
-            XMLStreamReader2 streamReader = getXMLStreamReader( bufin );
+             XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
+             XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( xmlDataStream );
 
             // buffer enough space to read root element
             bufin.mark( BUFFER_SIZE );
@@ -166,34 +170,6 @@ public class XMLPreConverter
     }
 
     /**
-     * This method can be called when we have prior knowledge of the transform to use
-     *
-     * @param xmlDataStream
-     * @param params
-     * @param state
-     * @param xsltParams
-     * @param xsltTag
-     * @return
-     * @throws ImportException
-     */
-    public DefaultXMLEventReader transform( InputStream xmlDataStream, ImportParams params, ProcessState state,
-        Map<String, String> xsltParams, String xsltTag ) throws ImportException
-    {
-        DefaultXMLEventReader dxfReader = null;
-        try
-        {
-            dxfReader = this.transform( this.getXMLStreamReader( xmlDataStream ), params, state, xsltParams, xsltTag );
-        } catch ( Exception ex )
-        {
-            log.info( ex );
-            throw new ImportException( "Failed to transform xml stream" );
-        }
-
-        return dxfReader;
-
-    }
-
-    /**
      *
      * @param streamReader
      * @param params
@@ -229,14 +205,5 @@ public class XMLPreConverter
         streamReader.close();
 
         return dxfReader;
-    }
-
-    private XMLStreamReader2 getXMLStreamReader( InputStream xmlDataStream ) throws XMLStreamException
-    {
-        XMLEventReader2 eventReader;
-
-        XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
-        XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( xmlDataStream );
-        return streamReader;
     }
 }
