@@ -496,7 +496,8 @@
 
 	<!-- i18n -->
 
-	<bean id="org.hisp.dhis.i18n.action.I18nAction" class="org.hisp.dhis.i18n.action.I18nAction">
+	<bean id="org.hisp.dhis.i18n.action.I18nAction" class="org.hisp.dhis.i18n.action.I18nAction"
+		scope="prototype">
 		<property name="i18nService">
 			<ref bean="org.hisp.dhis.i18n.I18nService" />
 		</property>
@@ -516,11 +517,9 @@
 		<property name="i18nService">
 			<ref bean="org.hisp.dhis.i18n.I18nService" />
 		</property>
-		<!--
 		<property name="translationService">
 			<ref bean="org.hisp.dhis.translation.TranslationService" />
 		</property>
-		-->
 	</bean>
 	
 	<bean id="org.hisp.dhis.i18n.action.ValidateAddDuplicatedTranslationAction" 

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Translated default messages for the jQuery validation plugin.
  * 
  */
@@ -41,5 +41,12 @@ en_GB = {
         ,datelessthanequaltoday: "This date can not be after today."
         ,required_group : "Please fill out at least one of these fields."
         ,password: "Password must contain at least one capital letter and one digit"
+		,custome_regex: $.validator.format("{1}")
 };
 
+vi_VN = {
+		required: "Vùng nhập liệu này không để thể trống."
+		,minlength: $.validator.format("Xin vui lòng nhập ít nhất {0} ký tự")
+		,maxlength: $.validator.format("Vui lòng không nhập quá {0} ký tự")
+		,custome_regex: $.validator.format("{1}")
+};
