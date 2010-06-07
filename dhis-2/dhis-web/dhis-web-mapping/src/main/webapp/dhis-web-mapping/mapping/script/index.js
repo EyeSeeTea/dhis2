@@ -62,18 +62,18 @@ Ext.onReady( function() {
 	/* Activate tooltip */
 	Ext.QuickTips.init();
 
-    MAP = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
+	MAP = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
 	MASK = new Ext.LoadMask(Ext.getBody(),{msg:i18n_loading,msgCls:'x-mask-loading2'});
     
-    /* Base layers */
-    function addBaseLayersToMap() {
-        Ext.Ajax.request({
-            url: path + 'getMapLayersByType' + type,
-            params: { type: map_layer_type_baselayer },
-            method: 'POST',
-            success: function(r) {
-                var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
-				
+	/* Base layers */
+	function addBaseLayersToMap() {
+		Ext.Ajax.request({
+			url: path + 'getMapLayersByType' + type,
+			params: { type: map_layer_type_baselayer },
+			method: 'POST',
+			success: function(r) {
+				var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+					
 				if (mapLayers.length > 0) {
 					for (var i = 0; i < mapLayers.length; i++) {
 						MAP.addLayers([
@@ -87,17 +87,69 @@ Ext.onReady( function() {
 					}
 				}
 				else {
-					MAP.addLayers([
-						new OpenLayers.Layer.WMS(
-							'World',
-							'http://labs.metacarta.com/wms/vmap0',
-							{layers: 'basic'}
-						)
-					]);
+					// MAP.addLayers([
+						// new OpenLayers.Layer.WMS(
+							// 'World',
+							// 'http://labs.metacarta.com/wms/vmap0',
+							// {layers: 'basic'}
+						// )
+					// ]);
 					
-					MAP.getLayersByName('World')[0].setVisibility(false);
+					var baseLayer = new OpenLayers.Layer.WMS(
+						'Whatever',
+						'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
+						{layers: 'Health Regional Africa Meningitis Meningitis Observed'}
+					);
+					
+					var store = new GeoExt.data.LayerStore({
+						map: MAP,
+						layers: baseLayer
+					});
+					
+					var lp = new GeoExt.LegendPanel({
+						layerStore: store
+					});
+					
+					// var frs =  baseLayer.getFullRequestString({
+						   // REQUEST: "GetLegendGraphic",
+						   // WIDTH: null,
+						   // HEIGHT: null,
+						   // EXCEPTIONS: "application/vnd.ogc.se_xml",
+						   // LAYER: 'Health Regional Africa Meningitis Meningitis Observed',
+						   // LAYERS: null,
+						   // SRS: null,
+						   // FORMAT: 'image/jpeg'
+					   // });
+						
+					// alert(frs);
+					
+					// var layerRecord = new GeoExt.data.LayerRecord({
+						// layer: baseLayer,
+						// title: 'tittel'
+					// });
+					
+					// var wmsLegend = new GeoExt.WMSLegend({
+						// layerRecord: layerRecord
+					// });
+				
+					MAP.addLayers([baseLayer]);
+					MAP.getLayersByName(baseLayer.name)[0].setVisibility(false);
+					
+					var frs = baseLayer.getFullRequestString({
+						REQUEST: "GetLegendGraphic",
+						WIDTH: null,
+						HEIGHT: null,
+						EXCEPTIONS: "application/vnd.ogc.se_xml",
+						LAYER: 'Health Regional Africa Meningitis Meningitis Observed',
+						LAYERS: null,
+						SRS: null,
+						FORMAT: 'image/png'
+					});
+					
+					alert(frs);
+
 				}
-            }
+			}
         });
     }
     
