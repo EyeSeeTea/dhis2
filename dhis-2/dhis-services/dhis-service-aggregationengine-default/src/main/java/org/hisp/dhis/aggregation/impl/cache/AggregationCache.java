@@ -42,9 +42,7 @@ import org.hisp.dhis.period.Period;
  */
 public interface AggregationCache
 {
-    Collection<Integer> getChildren( OrganisationUnitHierarchy hierarchy, int parentId );
-
-    Collection<OrganisationUnitHierarchy> getOrganisationUnitHierarchies( Date startDate, Date endDate );
+    OrganisationUnitHierarchy getOrganisationUnitHierarchy();
     
     Period getPeriod( int periodId );
     

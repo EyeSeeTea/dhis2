@@ -185,8 +185,6 @@ public class DataMartServiceTest
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitH ) );
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitI ) );
         
-        organisationUnitService.addOrganisationUnitHierarchy( new Date() ); //TODO
-
         // ---------------------------------------------------------------------
         // Setup DataValues
         // ---------------------------------------------------------------------

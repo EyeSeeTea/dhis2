@@ -55,6 +55,7 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.GroupMemberAssociation;
 import org.hisp.dhis.importexport.ImportDataValue;
+import org.hisp.dhis.importexport.ImportException;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.ImportService;
@@ -118,11 +119,9 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.util.AppendingHashMap;
-import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
-import org.hisp.dhis.importexport.ImportException;
 
 /**
  * @author Lars Helge Overland
@@ -289,7 +288,6 @@ public class DefaultDhis14FileImportService
         importGroupSets( params, state );
         importGroupSetMembers( params, state );
         importOrganisationUnitRelationships( params, state );
-        importOrganisationUnitHierarchy( state );
 
         importDataSetOrganisationUnitAssociations( params, state );
         
@@ -680,15 +678,6 @@ public class DefaultDhis14FileImportService
         log.info( "Imported OrganisationUnitRelationships" );
     }
     
-    private void importOrganisationUnitHierarchy( ProcessState state )
-    {
-        state.setMessage( "importing_organisation_unit_hierarchy" );
-        
-        organisationUnitService.addOrganisationUnitHierarchy( DateUtils.getEpoch() );
-        
-        log.info( "Imported OrganisationUnitHierarchy" );
-    }
-
     // -------------------------------------------------------------------------
     // DataSet - OrganisationUnit Associations
     // -------------------------------------------------------------------------

@@ -52,7 +52,7 @@ import org.hisp.dhis.datamart.indicator.IndicatorDataMart;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.system.util.ConversionUtils;
@@ -176,6 +176,13 @@ public class DefaultDataMartEngine
         this.expressionService = expressionService;
     }
     
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
     // -------------------------------------------------------------------------
     // DataMartEngine implementation
     // -------------------------------------------------------------------------
@@ -240,8 +247,9 @@ public class DefaultDataMartEngine
         
         state.setMessage( "crosstabulating_data" );
 
-        final Collection<DataElementOperand> emptyOperands = crossTabService.populateCrossTabTable( allDataElementOperands, getIntersectingIds( periodIds ), 
-            getIdsWithChildren( organisationUnitIds ) );
+        Collection<Integer> childrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnitIds );
+        
+        final Collection<DataElementOperand> emptyOperands = crossTabService.populateCrossTabTable( allDataElementOperands, getIntersectingIds( periodIds ), childrenIds );
 
         log.info( "Populated crosstab table: " + TimeUtils.getHMS() );
                 
@@ -390,23 +398,6 @@ public class DefaultDataMartEngine
         }
         
         return identifiers;
-    }
-        
-    /**
-     * Returns the idenfifiers in given collection including all of its children.
-     */
-    private Collection<Integer> getIdsWithChildren( final Collection<Integer> organisationUnitIds )
-    {
-        final OrganisationUnitHierarchy hierarchy = aggregationCache.getLatestOrganisationUnitHierarchy();
-        
-        final Set<Integer> identifers = new HashSet<Integer>( organisationUnitIds.size() );
-        
-        for ( final Integer id : organisationUnitIds )
-        {
-            identifers.addAll( aggregationCache.getChildren( hierarchy, id ) );
-        }
-        
-        return identifers;
     }
     
     /**

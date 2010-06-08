@@ -166,8 +166,6 @@ public class DataMartServiceAggregationLevelsTest
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitK ) );
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitL ) );
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitM ) );
-        
-        organisationUnitService.addOrganisationUnitHierarchy( new Date() ); //TODO
 
         // ---------------------------------------------------------------------
         // Setup DataValues
