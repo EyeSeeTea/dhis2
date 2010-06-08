@@ -469,6 +469,41 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	    <value>description</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="shortName">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="25" />
+			  <entry key="regex" value="/^[\w]?[\w\d]*$/" />
+			  <entry key="message" value="translation_shortname_wellformed" />
+		    </map>
+		  </entry>
+		  <entry key="description">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="200" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nDataElementGroup" class="org.hisp.dhis.i18n.I18nObject">
@@ -478,6 +513,22 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <value>name</value>
       </list>
     </property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
+
   </bean>
 
   <bean id="I18nDataElementGroupSet" class="org.hisp.dhis.i18n.I18nObject">
@@ -486,6 +537,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	  <list>
 	    <value>name</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -500,6 +566,61 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<value>denominatorDescription</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="shortName">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="25" />
+			  <entry key="regex" value="/^[\w]?[\w\d]*$/" />
+			  <entry key="message" value="translation_shortname_wellformed" />
+		    </map>
+		  </entry>
+		  <entry key="description">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="200" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="numeratorDescription">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="100" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="denominatorDescription">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="100" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nIndicatorType" class="org.hisp.dhis.i18n.I18nObject">
@@ -508,6 +629,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	  <list>
 		<value>name</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -518,6 +654,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	    <value>name</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nIndicatorGroupSet" class="org.hisp.dhis.i18n.I18nObject">
@@ -527,6 +678,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	    <value>name</value>
 	  </list>
     </property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nDataDictionary" class="org.hisp.dhis.i18n.I18nObject">
@@ -537,6 +703,41 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<value>description</value>
 		<value>region</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="description">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="200" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="region">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="255" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -549,6 +750,41 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<value>comment</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="shortName">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="25" />
+			  <entry key="regex" value="/^[\w]?[\w\d]*$/" />
+			  <entry key="message" value="translation_shortname_wellformed" />
+		    </map>
+		  </entry>
+		  <entry key="comment">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="360" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nOrganisationUnitGroup" class="org.hisp.dhis.i18n.I18nObject">
@@ -557,6 +793,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       <list>
 	    <value>name</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -568,6 +819,31 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<value>description</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="description">
+		    <map>
+			  <entry key="unique" value="false" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="200" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nDataSet" class="org.hisp.dhis.i18n.I18nObject">
@@ -575,7 +851,33 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="propertyNames">
 	  <list>
 	    <value>name</value>
+	    <value>shortName</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		  <entry key="shortName">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="false" />
+			  <entry key="minlength" value="0" />
+			  <entry key="maxlength" value="25" />
+			  <entry key="regex" value="/^[\w]?[\w\d]*$/" />
+			  <entry key="message" value="translation_shortname_wellformed" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -586,6 +888,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	    <value>name</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nReportExcelNormal" class="org.hisp.dhis.i18n.I18nObject">
@@ -594,6 +911,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       <list>
 	    <value>name</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -604,6 +936,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	    <value>name</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nReportExcelOganiztionGroupListing" class="org.hisp.dhis.i18n.I18nObject">
@@ -612,6 +959,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	  <list>
 	    <value>name</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -622,6 +984,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	    <value>name</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nReportExcelItem" class="org.hisp.dhis.i18n.I18nObject">
@@ -630,6 +1007,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	  <list>
 	    <value>name</value>
 	  </list>
+	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
 	</property>
   </bean>
 
@@ -640,6 +1032,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	    <value>name</value>
 	  </list>
 	</property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
 
   <bean id="I18nExcelItem" class="org.hisp.dhis.i18n.I18nObject">
@@ -649,6 +1056,21 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<value>name</value>
 	  </list>
     </property>
+	
+	<property name="rulePropertyNames">
+		<map>
+		  <entry key="name">
+		    <map>
+			  <entry key="unique" value="true" />
+			  <entry key="required" value="true" />
+			  <entry key="minlength" value="2" />
+			  <entry key="maxlength" value="160" />
+			  <entry key="regex" value="''" />
+			  <entry key="message" value="" />
+		    </map>
+		  </entry>
+		</map>
+	</property>
   </bean>
   
   <!-- Startup routine definitions -->

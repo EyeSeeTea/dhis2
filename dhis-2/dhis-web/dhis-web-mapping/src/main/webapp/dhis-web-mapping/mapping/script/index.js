@@ -96,32 +96,19 @@ Ext.onReady( function() {
 					// ]);
 					
 					var baseLayer = new OpenLayers.Layer.WMS(
-						'Whatever',
-						'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
-						{layers: 'Health Regional Africa Meningitis Meningitis Observed'}
+						'World',
+						'http://labs.metacarta.com/wms/vmap0',
+						{layers: 'basic'}
 					);
 					
-					var store = new GeoExt.data.LayerStore({
-						map: MAP,
-						layers: baseLayer
-					});
+					// var store = new GeoExt.data.LayerStore({
+						// map: MAP,
+						// layers: baseLayer
+					// });
 					
-					var lp = new GeoExt.LegendPanel({
-						layerStore: store
-					});
-					
-					// var frs =  baseLayer.getFullRequestString({
-						   // REQUEST: "GetLegendGraphic",
-						   // WIDTH: null,
-						   // HEIGHT: null,
-						   // EXCEPTIONS: "application/vnd.ogc.se_xml",
-						   // LAYER: 'Health Regional Africa Meningitis Meningitis Observed',
-						   // LAYERS: null,
-						   // SRS: null,
-						   // FORMAT: 'image/jpeg'
-					   // });
-						
-					// alert(frs);
+					// var lp = new GeoExt.LegendPanel({
+						// layerStore: store
+					// });
 					
 					// var layerRecord = new GeoExt.data.LayerRecord({
 						// layer: baseLayer,
@@ -140,14 +127,13 @@ Ext.onReady( function() {
 						WIDTH: null,
 						HEIGHT: null,
 						EXCEPTIONS: "application/vnd.ogc.se_xml",
-						LAYER: 'Health Regional Africa Meningitis Meningitis Observed',
-						LAYERS: null,
+						LAYERS: 'basic',
+						LAYER: null,
 						SRS: null,
 						FORMAT: 'image/png'
 					});
 					
 					alert(frs);
-
 				}
 			}
         });
@@ -2821,7 +2807,23 @@ Ext.onReady( function() {
         })
     });
     
-    MAP.addLayers([ choroplethLayer ]);
+    var proportionalSymbolLayer = new OpenLayers.Layer.Vector('Tematisk kart', {
+        'visibility': false,
+        'displayInLayerSwitcher': false,
+        'styleMap': new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style(
+                OpenLayers.Util.applyDefaults(
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1 },
+                    OpenLayers.Feature.Vector.style['default']
+                )
+            ),
+            'select': new OpenLayers.Style(
+                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+            )
+        })
+    });
+    
+    MAP.addLayers([ choroplethLayer, proportionalSymbolLayer ]);
     
 	function addOverlaysToMap() {
 		Ext.Ajax.request({
@@ -2887,6 +2889,9 @@ Ext.onReady( function() {
     }, {
         nodeType: 'gx_layer',
         layer: 'Thematic map'
+    }, {
+        nodeType: 'gx_layer',
+        layer: 'Tematisk kart'
     }];       
     
     var layerTree = new Ext.tree.TreePanel({
@@ -2946,6 +2951,24 @@ Ext.onReady( function() {
                     choroplethLayer.setVisibility(false);
                     choropleth.classify(false, true);
                     ACTIVEPANEL = thematicMap;
+                }
+            }
+        }
+    });
+    
+    proportionalSymbol = new mapfish.widgets.geostat.Symbol({
+        id: 'proportionalsymbol',
+        map: MAP,
+        layer: proportionalSymbolLayer,
+		title: '<span class="panel-title">PS</span>',
+        url: 'sl_facilities',
+        featureSelection: false,
+        legendDiv: 'choroplethLegend',
+        defaults: {width: 130},
+        listeners: {
+            expand: {
+                fn: function() {
+                    proportionalSymbolLayer.setVisibility(false);
                 }
             }
         }
@@ -3252,6 +3275,7 @@ Ext.onReady( function() {
                 },
                 items: [
                     choropleth,
+                    proportionalSymbol,
                     shapefilePanel,
                     mapping,
 					adminPanel,
@@ -3307,7 +3331,7 @@ Ext.onReady( function() {
 	ACTIVEPANEL = thematicMap;
     
 	/* Section: map controls */
-	var selectFeatureChoropleth = new OpenLayers.Control.newSelectFeature(
+	var selectFeaturePolygon = new OpenLayers.Control.newSelectFeature(
         choroplethLayer, {
             onClickSelect: onClickSelectChoropleth,
             onClickUnselect: onClickUnselectChoropleth,
@@ -3316,8 +3340,19 @@ Ext.onReady( function() {
         }
     );
     
-    MAP.addControl(selectFeatureChoropleth);
-    selectFeatureChoropleth.activate();
+    var selectFeaturePoint = new OpenLayers.Control.newSelectFeature(
+        proportionalSymbolLayer, {
+            onClickSelect: onClickSelectChoropleth,
+            onClickUnselect: onClickUnselectChoropleth,
+            onHoverSelect: onHoverSelectChoropleth,
+            onHoverUnselect: onHoverUnselectChoropleth
+        }
+    );
+    
+    MAP.addControl(selectFeaturePolygon);
+    MAP.addControl(selectFeaturePoint);
+    selectFeaturePolygon.activate();
+    selectFeaturePoint.activate();
 
 	MAP.addControl(new OpenLayers.Control.MousePosition({
         displayClass: 'void', 
@@ -3355,7 +3390,8 @@ Ext.onReady( function() {
             var activeOverlays = false;
             if (e.property == 'visibility' && isOverlay ) {
                 if (e.layer.visibility) {
-                    selectFeatureChoropleth.deactivate();
+                    selectFeaturePolygon.deactivate();
+                    selectFeaturePoint.deactivate();
                 }
                 else {
                     for (var i = 0; i < mapLayerStore.getTotalCount(); i++) {
@@ -3364,7 +3400,8 @@ Ext.onReady( function() {
                         }
                     }
                     if (!activeOverlays) {
-                        selectFeatureChoropleth.activate();
+                        selectFeaturePolygon.activate();
+                        selectFeaturePoint.activate();
                     }
                 }
             }
@@ -3598,7 +3635,7 @@ var chartWindow = new Ext.Window({
 
 function onHoverSelectChoropleth(feature) {
     if (MAPDATA != null) {
-        if (ACTIVEPANEL == thematicMap) {
+        if (ACTIVEPANEL == thematicMap || ACTIVEPANEL == thematicMap2) {
 			Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[MAPDATA.nameColumn] + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
         }
         else if (ACTIVEPANEL == organisationUnitAssignment) {
