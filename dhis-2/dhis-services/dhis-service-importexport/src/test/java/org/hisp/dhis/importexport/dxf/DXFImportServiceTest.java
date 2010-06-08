@@ -127,9 +127,15 @@ public class DXFImportServiceTest
 
     private InputStream inputStreamSimpleXsl;
 
+    private InputStream inputStreamExcelx;
+
+    private InputStream inputStreamXL2DXF;
+
     private final static String TRANSFORMS = "transforms.xml";
 
     private final static String SIMPLEXSL = "changeroot.xsl";
+
+    private final static String XL2DXF = "xl2dxf.xsl";
 
     private ImportObjectService importObjectService;
 
@@ -158,11 +164,13 @@ public class DXFImportServiceTest
         inputStreamG = classLoader.getResourceAsStream( "dxfG.zip" );
         inputStreamH = classLoader.getResourceAsStream( "changeroot.xml" );
         inputStreamSDMX = classLoader.getResourceAsStream( "formattedCSDS2.xml" );
+        inputStreamExcelx = classLoader.getResourceAsStream( "orgunits.xlsx" );
 
         inputStreamTransforms = classLoader.getResourceAsStream( TRANSFORMS );
         inputStreamSimpleXsl = classLoader.getResourceAsStream( SIMPLEXSL );
+        inputStreamXL2DXF = classLoader.getResourceAsStream( XL2DXF );
 
-        importService = (ImportService) getBean( "org.hisp.dhis.importexport.XMLImportService" );
+        importService = (ImportService) getBean( "org.hisp.dhis.importexport.ImportService" );
 
         categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
 
@@ -197,13 +205,16 @@ public class DXFImportServiceTest
         {
             OutputStream transforms = null;
             OutputStream simplexsl = null;
+            OutputStream xl2dxf = null;
             String transformPath = extDir.getPath() + "/transform";
             File transformDir = new File( transformPath );
             transformDir.mkdir();
             transforms = new FileOutputStream( transformPath + "/" + TRANSFORMS );
             simplexsl = new FileOutputStream( transformPath + "/" + SIMPLEXSL );
+            xl2dxf = new FileOutputStream( transformPath + "/" + XL2DXF );
             copy( inputStreamTransforms, transforms );
             copy( inputStreamSimpleXsl, simplexsl );
+            copy( inputStreamXL2DXF, xl2dxf );
             transforms.close();
             simplexsl.close();
         }
@@ -250,6 +261,17 @@ public class DXFImportServiceTest
         importService.importData( importParams, inputStreamH );
         
         assertObjects( dataASize );
+    }
+
+    @Test
+    public void testExcelXImportWithTransform() throws Exception
+    {
+        ImportParams importParams = ImportExportUtils.getImportParams( ImportStrategy.NEW_AND_UPDATES, false, false, false );
+
+        importService.importData( importParams, inputStreamExcelx );
+
+        assertEquals( organisationUnitService.getAllOrganisationUnits().size(), 49 );
+
     }
 
     @Ignore

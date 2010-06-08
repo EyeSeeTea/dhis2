@@ -174,6 +174,12 @@ public class ImportParams
         this.lastUpdated = lastUpdated;
     }
 
+    //----------------------------------------------------------------
+    //
+    // DXF parameters
+    //
+    //----------------------------------------------------------------
+
     public String getNamespace()
     {
         return namespace;
