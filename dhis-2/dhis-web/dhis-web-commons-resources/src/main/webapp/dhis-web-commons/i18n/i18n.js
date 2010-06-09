@@ -139,12 +139,3 @@ function addLocale()
 
     setMessage( locale_added + " " + toAdd );
 }
-
-function setMessage( message )
-{
-	if ( message != "" )
-	{
-		document.getElementById('message').innerHTML = message;
-		document.getElementById('message').style.display = 'block';
-	}
-}

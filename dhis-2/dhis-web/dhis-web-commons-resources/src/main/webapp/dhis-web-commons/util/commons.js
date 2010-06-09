@@ -385,8 +385,11 @@ function getFieldValue( fieldId )
  */
 function setMessage( message )
 {
-    $( '#message' ).html( message );
-    $( '#message' ).slideDown( 'fast' );
+	if ( (message != "") && (message != null) )
+	{
+		$( '#message' ).html( message );
+		$( '#message' ).slideDown( 'fast' );
+	}
 }
 
 /**
