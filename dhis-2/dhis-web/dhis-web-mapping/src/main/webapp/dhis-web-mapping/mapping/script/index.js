@@ -87,37 +87,11 @@ Ext.onReady( function() {
 					}
 				}
 				else {
-					// MAP.addLayers([
-						// new OpenLayers.Layer.WMS(
-							// 'World',
-							// 'http://labs.metacarta.com/wms/vmap0',
-							// {layers: 'basic'}
-						// )
-					// ]);
-					
 					var baseLayer = new OpenLayers.Layer.WMS(
 						'World',
-						'http://labs.metacarta.com/wms/vmap0',
-						{layers: 'basic'}
+						'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
+						{layers: 'Health Regional Africa Malaria MARA Distribution Model'}
 					);
-					
-					// var store = new GeoExt.data.LayerStore({
-						// map: MAP,
-						// layers: baseLayer
-					// });
-					
-					// var lp = new GeoExt.LegendPanel({
-						// layerStore: store
-					// });
-					
-					// var layerRecord = new GeoExt.data.LayerRecord({
-						// layer: baseLayer,
-						// title: 'tittel'
-					// });
-					
-					// var wmsLegend = new GeoExt.WMSLegend({
-						// layerRecord: layerRecord
-					// });
 				
 					MAP.addLayers([baseLayer]);
 					MAP.getLayersByName(baseLayer.name)[0].setVisibility(false);
@@ -133,7 +107,7 @@ Ext.onReady( function() {
 						FORMAT: 'image/png'
 					});
 					
-					alert(frs);
+					// alert(frs);
 				}
 			}
         });
@@ -2807,7 +2781,7 @@ Ext.onReady( function() {
         })
     });
     
-    var proportionalSymbolLayer = new OpenLayers.Layer.Vector('Tematisk kart', {
+    var proportionalSymbolLayer = new OpenLayers.Layer.Vector('Point layer', {
         'visibility': false,
         'displayInLayerSwitcher': false,
         'styleMap': new OpenLayers.StyleMap({
@@ -2891,7 +2865,7 @@ Ext.onReady( function() {
         layer: 'Thematic map'
     }, {
         nodeType: 'gx_layer',
-        layer: 'Tematisk kart'
+        layer: 'Point layer'
     }];       
     
     var layerTree = new Ext.tree.TreePanel({
