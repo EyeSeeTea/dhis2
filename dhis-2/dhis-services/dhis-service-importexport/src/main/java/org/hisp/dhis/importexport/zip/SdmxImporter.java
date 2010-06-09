@@ -2,6 +2,9 @@ package org.hisp.dhis.importexport.zip;
 
 
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -49,13 +52,18 @@ public class SdmxImporter extends TransformablePackage {
     @Autowired
     protected XMLPreConverter preConverter;
 
-
     @Autowired
     protected DXFConverter converter;
 
-    public static String CROSS_SECTIONAL_DATA = "Data_CROSS.xml";
+    public static final String CROSS_SECTIONAL_DATA = "Data_CROSS.xml";
 
-    public static String SDMX_CSD_XSLT_TAG = "SDMX_CSD";
+    public static final String SDMX_CSD_XSLT_TAG = "SDMX_CSD";
+
+    public static final String TIMESTAMP = "timestamp";
+
+    public static final String METADATA_PARAM = "dxf_url";
+
+    public static final String METADATA = "metadata/Export.xml";
 
     @Override
     protected String getTransformerTag(ZipFile zipFile) throws Exception
@@ -66,7 +74,13 @@ public class SdmxImporter extends TransformablePackage {
     @Override
     protected Map<String, String> getXsltParams() throws Exception
     {
-         return new HashMap<String,String>();
+         HashMap<String,String> xsltParams = new HashMap<String,String>();
+         Date now = new Date();
+         DateFormat dfm = new SimpleDateFormat("yyyy-MM-dd");
+         xsltParams.put( TIMESTAMP, dfm.format( now ));
+         xsltParams.put( METADATA_PARAM, METADATA );
+
+         return xsltParams;
     }
 
     @Override
@@ -77,7 +91,6 @@ public class SdmxImporter extends TransformablePackage {
         InputStream stream = zipFile.getInputStream( entry );
 
         return stream;
-
     }
 
     @Override
