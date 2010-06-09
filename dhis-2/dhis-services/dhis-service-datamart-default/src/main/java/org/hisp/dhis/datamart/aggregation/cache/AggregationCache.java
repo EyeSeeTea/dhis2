@@ -39,12 +39,6 @@ import org.hisp.dhis.period.Period;
  */
 public interface AggregationCache
 {
-    OrganisationUnitHierarchy getLatestOrganisationUnitHierarchy();
-    
-    Collection<OrganisationUnitHierarchy> getOrganisationUnitHierarchies( Date startDate, Date endDate );
-    
-    Collection<Integer> getChildren( OrganisationUnitHierarchy hierarchy, int parentId );
-    
     Collection<Period> getIntersectingPeriods( Date startDate, Date endDate );
     
     Period getPeriod( int id );

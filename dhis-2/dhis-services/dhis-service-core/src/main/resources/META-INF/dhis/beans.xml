@@ -1127,13 +1127,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="skipInTests" value="true"/>
   </bean>
   
-  <bean id="org.hisp.dhis.organisationunit.OrganisationUnitHierarchyVerifier"
-    class="org.hisp.dhis.organisationunit.OrganisationUnitHierarchyVerifier">
-    <property name="organisationUnitService"
-      ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/> 
-    <property name="skipInTests" value="true"/>
-  </bean>
-  
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator"
     class="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator">
     <property name="organisationUnitGroupService"
@@ -1169,7 +1162,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
           <ref local="org.hisp.dhis.expression.MultiDimensionExpressionUpgrader"/>
           <ref local="org.hisp.dhis.dataset.DataSetShortNamePopulator"/>
           <ref local="org.hisp.dhis.dataelement.UuidPopulator"/>
-		  <ref local="org.hisp.dhis.organisationunit.OrganisationUnitHierarchyVerifier"/>
           <ref local="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator"/>
           <ref local="org.hisp.dhis.dataentryform.DataEntryFormPopulator"/>
         </list>
