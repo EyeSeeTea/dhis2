@@ -417,6 +417,7 @@
 
 #if ( $dimension )
 <script type="text/javascript">
+	document.getElementById( "doIndicators" ).checked = true;
 	document.getElementById( "doIndicators" ).disabled = true;
     document.getElementById( "doOrganisationUnits" ).disabled = true;
     document.getElementById( "doPeriods" ).disabled = true;
