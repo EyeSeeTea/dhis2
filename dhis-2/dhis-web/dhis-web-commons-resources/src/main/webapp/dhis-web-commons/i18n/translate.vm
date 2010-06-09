@@ -10,8 +10,8 @@
 					,errorElement:"td"
 				});
 				jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
+				setMessage( '$!message' );
 			}
-  
 	);
 
 </script>
@@ -109,12 +109,5 @@
     var country_must_be_two_chars = '$i18n.getString( "translation_country_must_be_two_chars" )';
     var variant_must_be_specified = '$i18n.getString( "translation_variant_must_be_specified" )';
     var locale_already_exists = '$i18n.getString( "translation_locale_already_exists" )';
-	
-	$(document).ready( function()
-	{
-		#if ( $message )
-			setMessage( '$!message' );
-		#end
-	});
 	
 </script>

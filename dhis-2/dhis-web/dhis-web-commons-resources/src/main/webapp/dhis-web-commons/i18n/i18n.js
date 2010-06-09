@@ -142,6 +142,9 @@ function addLocale()
 
 function setMessage( message )
 {
-	document.getElementById('message').innerHTML = message;
-	document.getElementById('message').style.display = 'block';
+	if ( message != "" )
+	{
+		document.getElementById('message').innerHTML = message;
+		document.getElementById('message').style.display = 'block';
+	}
 }
