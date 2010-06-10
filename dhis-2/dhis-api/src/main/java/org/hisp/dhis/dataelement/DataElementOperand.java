@@ -41,10 +41,11 @@ import java.util.List;
 public class DataElementOperand
     implements Serializable, Comparable<DataElementOperand>
 {
-    public static final String SEPARATOR = ".";
-    
+    public static final String SEPARATOR = ".";    
     private static final String SPACE = "";
-
+    private static final String COLUMN_PREFIX = "de";
+    private static final String COLUMN_SEPARATOR = "_";
+    
     private int id;
     
     private DataElement dataElement;
@@ -180,6 +181,11 @@ public class DataElementOperand
     public String getPersistedId()
     {
         return dataElement.getId() + SEPARATOR + categoryOptionCombo.getId();
+    }
+    
+    public String getSimpleName()
+    {
+        return COLUMN_PREFIX + dataElementId + COLUMN_SEPARATOR + optionComboId;
     }
 
     // -------------------------------------------------------------------------
