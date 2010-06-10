@@ -35,9 +35,11 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueAudit;
 import org.hisp.dhis.datavalue.DataValueAuditStore;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.source.Source;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -125,6 +127,28 @@ public class HibernateDataValueAuditStore
                 deleteDataValueAudit( each );
             }
         }
+    }
+    
+    public int deleteByPeriod( Period period )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Query query = session.createQuery( "delete DataValueAudit where period = :period" );
+        query.setEntity( "period", period );
+
+        return query.executeUpdate();
+        
+        
+    }
+    
+    public int deleteByDataElementCategoryOptionCombo( DataElementCategoryOptionCombo optionCombo )
+    {
+    	   Session session = sessionFactory.getCurrentSession();
+
+           Query query = session.createQuery( "delete DataValueAudit where optionCombo = :optionCombo" );
+           query.setEntity( "optionCombo", optionCombo );
+
+           return query.executeUpdate();
     }
 
 }

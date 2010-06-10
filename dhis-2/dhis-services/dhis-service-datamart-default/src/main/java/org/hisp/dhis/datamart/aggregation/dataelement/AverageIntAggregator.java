@@ -78,11 +78,9 @@ public class AverageIntAggregator
     // -------------------------------------------------------------------------
 
     public Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Period period, final OrganisationUnit unit, int unitLevel )
+        final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy )
     {
-        final OrganisationUnitHierarchy hierarchy = aggregationCache.getLatestOrganisationUnitHierarchy();
-        
-        final Collection<Integer> unitIds = aggregationCache.getChildren( hierarchy, unit.getId() );
+        final Collection<Integer> unitIds = hierarchy.getChildren( unit.getId() );
         
         final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>(); // <Operand, total value>
         
@@ -92,7 +90,7 @@ public class AverageIntAggregator
         for ( final Integer unitId : unitIds )
         {
             final Collection<CrossTabDataValue> crossTabValues = 
-                getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unitId, hierarchy );
+                getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unitId, null );
             
             final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
                 period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>

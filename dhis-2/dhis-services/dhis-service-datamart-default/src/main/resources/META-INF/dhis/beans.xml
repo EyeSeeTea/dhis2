@@ -65,6 +65,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
     <property name="expressionService"
       ref="org.hisp.dhis.expression.ExpressionService"/>
+    <property name="organisationUnitService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/>
   </bean>
   
   <bean id="internal-process-DataMart"

@@ -189,7 +189,7 @@ public class DefaultCrossTabService
         
         for ( DataElementOperand operand : operands )
         {
-            final String key = CrossTabStore.COLUMN_PREFIX + operand.getDataElementId() + CrossTabStore.SEPARATOR + operand.getOptionComboId();
+            final String key = operand.getSimpleName();
             
             if ( columnNameIndexMap.containsKey( key ) )
             {

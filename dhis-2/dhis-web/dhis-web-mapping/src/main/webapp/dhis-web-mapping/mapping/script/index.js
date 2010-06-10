@@ -52,7 +52,11 @@ function validateInput(name){return (name.length<=25);}
 /* Decide multiselect height based on screen resolution */
 function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else if(h<=1050){return 310;}else if(h<=1200){return 470;}else{return 900;}}
 /* Toggle feature labels */
-function toggleFeatureLabels(classify){var layer=MAP.getLayersByName('Thematic map')[0];function activateLabels(){layer.styleMap=new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${'+MAPDATA.nameColumn+'}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=true;}function deactivateLabels(){layer.styleMap=new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=false;}if(classify){if(LABELS){deactivateLabels();}else{activateLabels();}if(ACTIVEPANEL==thematicMap){choropleth.classify(false,true);}else if(ACTIVEPANEL==organisationUnitAssignment){mapping.classify(false,true);}}else{if(LABELS){activateLabels();}}}
+function toggleFeatureLabels(classify) {
+    var layer=MAP.getLayersByName('Thematic map')[0];
+    function activateLabels(){
+        layer.styleMap=new OpenLayers.StyleMap(
+            {'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${'+MAPDATA.nameColumn+'}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=true;}function deactivateLabels(){layer.styleMap=new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=false;}if(classify){if(LABELS){deactivateLabels();}else{activateLabels();}if(ACTIVEPANEL==thematicMap){choropleth.classify(false,true);}else if(ACTIVEPANEL==organisationUnitAssignment){mapping.classify(false,true);}}else{if(LABELS){activateLabels();}}}
 /* Sort method */
 function sortByValue(a,b){return b.value-a.value;}
 /* Create JSON for map export */
@@ -2772,7 +2776,7 @@ Ext.onReady( function() {
     });
 	
 	/* Section: layers */
-    var choroplethLayer = new OpenLayers.Layer.Vector('Thematic map', {
+    var choroplethLayer = new OpenLayers.Layer.Vector('Polygon layer', {
         'visibility': false,
         'displayInLayerSwitcher': false,
         'styleMap': new OpenLayers.StyleMap({
@@ -2869,7 +2873,7 @@ Ext.onReady( function() {
         singleClickExpand: true
     }, {
         nodeType: 'gx_layer',
-        layer: 'Thematic map'
+        layer: 'Polygon layer'
     }, {
         nodeType: 'gx_layer',
         layer: 'Point layer'
@@ -2921,7 +2925,7 @@ Ext.onReady( function() {
         id: 'choropleth',
         map: MAP,
         layer: choroplethLayer,
-		title: '<span class="panel-title">' + i18n_thematic_map + '</span>',
+		title: '<span class="panel-title">' + i18n_polygon_layer + '</span>',
         url: 'init',
         featureSelection: false,
         legendDiv: 'polygonlegend',
@@ -2941,7 +2945,7 @@ Ext.onReady( function() {
         id: 'proportionalsymbol',
         map: MAP,
         layer: proportionalSymbolLayer,
-		title: '<span class="panel-title">PS</span>',
+		title: '<span class="panel-title">' + i18n_point_layer + '</span>',
         url: 'init',
         featureSelection: false,
         legendDiv: 'pointlegend',
@@ -3014,7 +3018,7 @@ Ext.onReady( function() {
 		iconCls: 'icon-labels',
 		tooltip: i18n_show_hide_labels,
 		handler: function() {
-			toggleFeatureLabels(true);				
+			toggleFeatureLabels(true);
 		}
 	});
 	
@@ -3159,7 +3163,7 @@ Ext.onReady( function() {
 			zoomInButton,
 			zoomOutButton,
 			zoomMaxExtentButton,
-			labelsButton,
+			// labelsButton,
 			'-',
 			exportImageButton,
 			exportExcelButton,

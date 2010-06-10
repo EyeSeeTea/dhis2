@@ -52,6 +52,7 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedIndicatorValueBatchHandler;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -161,6 +162,8 @@ public class DefaultIndicatorDataMart
         final BatchHandler<AggregatedIndicatorValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedIndicatorValueBatchHandler.class );
 
         batchHandler.init();
+
+        OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
         
         int count = 0;
         int level = 0;
@@ -193,8 +196,8 @@ public class DefaultIndicatorDataMart
             
             for ( final Period period : periods )
             {
-                sumIntValueMap = sumIntAggregator.getAggregatedValues( sumOperandIndexMap, period, unit, level );                
-                averageIntValueMap = averageIntAggregator.getAggregatedValues( averageOperandIndexMap, period, unit, level );
+                sumIntValueMap = sumIntAggregator.getAggregatedValues( sumOperandIndexMap, period, unit, level, hierarchy );                
+                averageIntValueMap = averageIntAggregator.getAggregatedValues( averageOperandIndexMap, period, unit, level, hierarchy);
                 
                 valueMapMap = new HashMap<String, Map<DataElementOperand, Double>>( 2 );
                 

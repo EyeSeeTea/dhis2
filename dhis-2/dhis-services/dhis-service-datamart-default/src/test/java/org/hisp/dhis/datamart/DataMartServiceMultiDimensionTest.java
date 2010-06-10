@@ -198,8 +198,6 @@ public class DataMartServiceMultiDimensionTest
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitA ) );
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitB ) );
         organisationUnitIds.add( organisationUnitService.addOrganisationUnit( unitC ) );
-
-        organisationUnitService.addOrganisationUnitHierarchy( new Date() ); //TODO
     }
 
     @Override

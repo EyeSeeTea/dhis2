@@ -51,9 +51,9 @@ public class ExcelXImporter extends TransformablePackage {
 
     private final static Log log = LogFactory.getLog( ExcelXImporter.class );
 
-    private static String WORKBOOK = "xl/workbook.xml";
-    private static String WORKSHEET2 = "xl/worksheets/sheet2.xml";
-    private static String TITLESHEET = "xl/worksheets/sheet1.xml";
+    public static final String WORKBOOK = "xl/workbook.xml";
+    public static final String WORKSHEET2 = "xl/worksheets/sheet2.xml";
+    public static final String TITLESHEET = "xl/worksheets/sheet1.xml";
 
     private static String SHARED_STRINGS = "xl/sharedStrings.xml";
 

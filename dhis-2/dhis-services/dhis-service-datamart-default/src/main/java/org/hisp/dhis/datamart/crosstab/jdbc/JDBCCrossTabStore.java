@@ -74,8 +74,7 @@ public class JDBCCrossTabStore
             
             for ( DataElementOperand operand : operands )
             {
-                sql.append( COLUMN_PREFIX ).append( operand.getDataElementId() ).append(
-                    SEPARATOR ).append( operand.getOptionComboId() ).append( " VARCHAR(30), " );
+                sql.append( operand.getSimpleName() ).append( " VARCHAR(30), " );
             }
             
             sql.append( "PRIMARY KEY ( periodid, sourceid ) );" );
@@ -195,7 +194,7 @@ public class JDBCCrossTabStore
             
             for ( final DataElementOperand operand : operands )
             {
-                buffer.append( COLUMN_PREFIX ).append( operand.getDataElementId() ).append( SEPARATOR ).append( operand.getOptionComboId() ).append( ", " );
+                buffer.append( operand.getSimpleName() ).append( ", " );
             }
             
             if ( buffer.length() > 1 )

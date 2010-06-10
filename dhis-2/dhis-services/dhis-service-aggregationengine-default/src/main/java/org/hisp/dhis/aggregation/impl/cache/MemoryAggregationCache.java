@@ -49,9 +49,7 @@ import org.hisp.dhis.period.PeriodService;
 public class MemoryAggregationCache
     implements AggregationCache
 {
-    private Map<String, Collection<Integer>> childrenCache = new HashMap<String, Collection<Integer>>();
-
-    private Map<String, Collection<OrganisationUnitHierarchy>> hierarchyCache = new HashMap<String, Collection<OrganisationUnitHierarchy>>();
+    private OrganisationUnitHierarchy hierarchyCache = null;
     
     private Map<String, Period> periodCache = new HashMap<String, Period>();
     
@@ -88,40 +86,16 @@ public class MemoryAggregationCache
     // AggregationCache implementation
     // -------------------------------------------------------------------------
 
-    public Collection<Integer> getChildren( OrganisationUnitHierarchy hierarchy, int parentId )
+    public OrganisationUnitHierarchy getOrganisationUnitHierarchy()
     {
-        String key = hierarchy.getId() + SEPARATOR + parentId;
-
-        Collection<Integer> children = childrenCache.get( key );
-
-        if ( children != null )
+        if ( hierarchyCache != null )
         {
-            return children;
+            return hierarchyCache;
         }
-
-        children = organisationUnitService.getChildren( hierarchy.getId(), parentId );
         
-        childrenCache.put( key, children );
+        hierarchyCache = organisationUnitService.getOrganisationUnitHierarchy();
         
-        return children;
-    }
-
-    public Collection<OrganisationUnitHierarchy> getOrganisationUnitHierarchies( Date startDate, Date endDate )
-    {
-        String key = startDate.toString() + SEPARATOR + endDate.toString();
-
-        Collection<OrganisationUnitHierarchy> hierarchies = hierarchyCache.get( key );
-
-        if ( hierarchies != null )
-        {
-            return hierarchies;
-        }
-
-        hierarchies = organisationUnitService.getOrganisationUnitHierarchies( startDate, endDate );
-        
-        hierarchyCache.put( key, hierarchies );
-        
-        return hierarchies;
+        return hierarchyCache;
     }
     
     public Period getPeriod( int periodId )
