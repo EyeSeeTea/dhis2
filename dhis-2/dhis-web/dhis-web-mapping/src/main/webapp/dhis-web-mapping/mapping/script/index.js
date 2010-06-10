@@ -53,7 +53,7 @@ function validateInput(name){return (name.length<=25);}
 function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else if(h<=1050){return 310;}else if(h<=1200){return 470;}else{return 900;}}
 /* Toggle feature labels */
 function toggleFeatureLabels(classify) {
-    var layer=MAP.getLayersByName('Thematic map')[0];
+    var layer=MAP.getLayersByName('Polygon layer')[0];
     function activateLabels(){
         layer.styleMap=new OpenLayers.StyleMap(
             {'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${'+MAPDATA.nameColumn+'}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=true;}function deactivateLabels(){layer.styleMap=new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=false;}if(classify){if(LABELS){deactivateLabels();}else{activateLabels();}if(ACTIVEPANEL==thematicMap){choropleth.classify(false,true);}else if(ACTIVEPANEL==organisationUnitAssignment){mapping.classify(false,true);}}else{if(LABELS){activateLabels();}}}
@@ -3798,7 +3798,7 @@ function getChoroplethData() {
         method: 'POST',
         params: params,
         success: function(r) {
-			FEATURE[thematicMap] = MAP.getLayersByName('Thematic map')[0].features;
+			FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
 			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
 			EXPORTVALUES = getExportDataValueJSON(mapvalues);
 			var mv = new Array();
@@ -3986,7 +3986,7 @@ function getAssignOrganisationUnitData() {
 	
     var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 	var relations =	 Ext.getCmp('grid_gp').getStore();
-	var features = MAP.getLayersByName('Thematic map')[0].features;
+	var features = MAP.getLayersByName('Polygon layer')[0].features;
 	var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
 	var noCls = 1;
 	var noAssigned = 0;
@@ -4037,7 +4037,7 @@ function getAutoAssignOrganisationUnitData(position) {
         method: 'POST',
         params: { level: level },
         success: function(r) {
-		    var layers = MAP.getLayersByName('Thematic map');
+		    var layers = MAP.getLayersByName('Polygon layer');
 			var features = layers[0]['features'];
 			var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
 			var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
