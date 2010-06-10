@@ -7,7 +7,10 @@ var BASECOORDINATE;
 /* Geojson, shapefile or database */
 var MAPSOURCE;
 /* A map object */
-var MAPDATA;
+var MAPDATA = new Object();
+MAPDATA[thematicMap] = new Object();
+MAPDATA[thematicMap2] = new Object();
+MAPDATA[organisationUnitAssignment] = new Object();
 /* Filename or level */
 var URL;
 /* Active mapview object  */
@@ -25,14 +28,18 @@ var COLORINTERPOLATION;
 /* Export values */
 var EXPORTVALUES;
 /* Currently selected vector feature */
-var FEATURE;
+var FEATURE = new Object();
+FEATURE[thematicMap] = new Object();
+FEATURE[thematicMap2] = new Object();
 /* Global chart for show/hide */
 var CHART;
 /* Current legend type and method */
 var LEGEND = new Object();
-LEGEND.type = map_legend_type_automatic;
-LEGEND.method = 1;
-LEGEND.classes = 5;
+LEGEND[thematicMap] = new Object();
+LEGEND[thematicMap2] = new Object();
+LEGEND[thematicMap].type = LEGEND[thematicMap2].type = map_legend_type_automatic;
+LEGEND[thematicMap].method = LEGEND[thematicMap2].method = 1;
+LEGEND[thematicMap].classes = LEGEND[thematicMap2].classes = 5;
 /* Current map value types */
 VALUETYPE = new Object();
 VALUETYPE.polygon = map_value_type_indicator;
@@ -90,7 +97,7 @@ Ext.onReady( function() {
 					var baseLayer = new OpenLayers.Layer.WMS(
 						'World',
 						'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
-						{layers: 'Health Regional Africa Malaria MARA Distribution Model'}
+						{layers: 'Health Regional Africa Meningitis Meningitis Observed'}
 					);
 				
 					MAP.addLayers([baseLayer]);
@@ -2787,7 +2794,7 @@ Ext.onReady( function() {
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1 },
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 6 },
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
@@ -2917,7 +2924,7 @@ Ext.onReady( function() {
 		title: '<span class="panel-title">' + i18n_thematic_map + '</span>',
         url: 'init',
         featureSelection: false,
-        legendDiv: 'choroplethLegend',
+        legendDiv: 'polygonlegend',
         defaults: {width: 130},
         listeners: {
             expand: {
@@ -2935,14 +2942,16 @@ Ext.onReady( function() {
         map: MAP,
         layer: proportionalSymbolLayer,
 		title: '<span class="panel-title">PS</span>',
-        url: 'sl_facilities',
+        url: 'init',
         featureSelection: false,
-        legendDiv: 'choroplethLegend',
+        legendDiv: 'pointlegend',
         defaults: {width: 130},
         listeners: {
             expand: {
                 fn: function() {
                     proportionalSymbolLayer.setVisibility(false);
+                    proportionalSymbol.classify(false, true);
+                    ACTIVEPANEL = thematicMap2;
                 }
             }
         }
@@ -3222,10 +3231,18 @@ Ext.onReady( function() {
 						]
 					},
                     {
-                        title: '<span class="panel-title">'+ i18n_map_legend +'</span>',
+                        title: '<span class="panel-title">'+ i18n_map_legend_polygon +'</span>',
                         minHeight: 65,
                         autoHeight: true,
-                        contentEl: 'legend',
+                        contentEl: 'polygonlegendpanel',
+                        anchor: '100%',
+						bodyStyle: 'padding-left: 4px;'
+                    },
+                    {
+                        title: '<span class="panel-title">'+ i18n_map_legend_point +'</span>',
+                        minHeight: 65,
+                        autoHeight: true,
+                        contentEl: 'pointlegendpanel',
                         anchor: '100%',
 						bodyStyle: 'padding-left: 4px;'
                     }
@@ -3307,19 +3324,19 @@ Ext.onReady( function() {
 	/* Section: map controls */
 	var selectFeaturePolygon = new OpenLayers.Control.newSelectFeature(
         choroplethLayer, {
-            onClickSelect: onClickSelectChoropleth,
-            onClickUnselect: onClickUnselectChoropleth,
-            onHoverSelect: onHoverSelectChoropleth,
-            onHoverUnselect: onHoverUnselectChoropleth
+            onClickSelect: onClickSelectPolygon,
+            onClickUnselect: onClickUnselectPolygon,
+            onHoverSelect: onHoverSelectPolygon,
+            onHoverUnselect: onHoverUnselectPolygon
         }
     );
     
     var selectFeaturePoint = new OpenLayers.Control.newSelectFeature(
         proportionalSymbolLayer, {
-            onClickSelect: onClickSelectChoropleth,
-            onClickUnselect: onClickUnselectChoropleth,
-            onHoverSelect: onHoverSelectChoropleth,
-            onHoverUnselect: onHoverUnselectChoropleth
+            onClickSelect: onClickSelectPoint,
+            onClickUnselect: onClickUnselectPoint,
+            onHoverSelect: onHoverSelectPoint,
+            onHoverUnselect: onHoverUnselectPoint
         }
     );
     
@@ -3384,9 +3401,13 @@ Ext.onReady( function() {
 	
 	Ext.getCmp('maplegendset_cb').hideField();
 	Ext.getCmp('bounds').hideField();
-	
 	Ext.getCmp('dataelementgroup_cb').hideField();
 	Ext.getCmp('dataelement_cb').hideField();
+    
+    Ext.getCmp('maplegendset_cb2').hideField();
+	Ext.getCmp('bounds_tf2').hideField();
+	Ext.getCmp('dataelementgroup_cb2').hideField();
+	Ext.getCmp('dataelement_cb2').hideField();
 	
 	
     Ext.get('loading').fadeOut({remove: true});
@@ -3607,23 +3628,24 @@ var chartWindow = new Ext.Window({
     items: CHART
 });
 
-function onHoverSelectChoropleth(feature) {
-    if (MAPDATA != null) {
-        if (ACTIVEPANEL == thematicMap || ACTIVEPANEL == thematicMap2) {
-			Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[MAPDATA.nameColumn] + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
-        }
-        else if (ACTIVEPANEL == organisationUnitAssignment) {
-			Ext.getCmp('featureinfo_l').setText('<span style="color:black">' + feature.attributes[MAPDATA.nameColumn] + '</span>', false);
-        }
+/* Section: select features */
+function onHoverSelectPolygon(feature) {
+    FEATURE[thematicMap] = feature;
+
+    if (ACTIVEPANEL == organisationUnitAssignment) {
+        Ext.getCmp('featureinfo_l').setText('<span style="color:black">' + FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn] + '</span>', false);
+    }
+    else {
+        Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap].attributes[MAPDATA[thematicMap].nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap].attributes.value + '</div>', false);
     }
 }
 
-function onHoverUnselectChoropleth(feature) {
+function onHoverUnselectPolygon(feature) {
     Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
 }
 
-function onClickSelectChoropleth(feature) {
-	FEATURE = feature;
+function onClickSelectPolygon(feature) {
+	FEATURE[thematicMap] = feature;
 
 	var east_panel = Ext.getCmp('east');
 	var x = east_panel.x - 210;
@@ -3640,7 +3662,7 @@ function onClickSelectChoropleth(feature) {
 			height: 65,
 			layout: 'fit',
 			plain: true,
-			html: '<div class="window-orgunit-text">' + feature.attributes[MAPDATA.nameColumn] + '</div>',
+			html: '<div class="window-orgunit-text">' + FEATURE[thematicMap].attributes[MAPDATA[thematicMap].nameColumn] + '</div>',
 			x: x,
 			y: y,
 			listeners: {
@@ -3654,7 +3676,7 @@ function onClickSelectChoropleth(feature) {
 		
 		popup = feature_popup;		
 		feature_popup.show();
-		mapping.relation = feature.attributes[MAPDATA.nameColumn];
+		mapping.relation = FEATURE[thematicMap].attributes[MAPDATA[thematicMap].nameColumn];
     }
 	else {
         // featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
@@ -3664,8 +3686,15 @@ function onClickSelectChoropleth(feature) {
 	}
 }
 
-function onClickUnselectChoropleth(feature) {}
+function onClickUnselectPolygon(feature) {}
 
+function onClickSelectPoint(feature) {}
+function onClickUnselectPoint(feature) {}
+function onHoverSelectPoint(feature) {
+    FEATURE[thematicMap2] = feature;
+    Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap2].attributes[MAPDATA[thematicMap2].nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap2].attributes.value + '</div>', false);
+}
+function onHoverUnselectPoint(feature) {}
 
 
 /* Section: map data */
@@ -3675,29 +3704,29 @@ function loadMapData(redirect, position) {
         method: 'POST',
         params: { mapLayerPath: URL },
         success: function(r) {
-			MAPDATA = Ext.util.JSON.decode(r.responseText).map[0];
+			MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
             
             if (MAPSOURCE == map_source_type_database) {
-                MAPDATA.name = Ext.getCmp('map_cb').getRawValue();
-                MAPDATA.organisationUnit = 'Country';
-                MAPDATA.organisationUnitLevel = Ext.getCmp('map_cb').getValue();
-                MAPDATA.nameColumn = 'name';
-                MAPDATA.longitude = BASECOORDINATE.longitude;
-                MAPDATA.latitude = BASECOORDINATE.latitude;
-                MAPDATA.zoom = 7;
+                MAPDATA[ACTIVEPANEL].name = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getRawValue() : Ext.getCmp('map_cb2').getRawValue();
+                MAPDATA[ACTIVEPANEL].organisationUnit = 'Country';
+                MAPDATA[ACTIVEPANEL].organisationUnitLevel = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getValue() : Ext.getCmp('map_cb2').getValue();
+                MAPDATA[ACTIVEPANEL].nameColumn = 'name';
+                MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
+                MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
+                MAPDATA[ACTIVEPANEL].zoom = 7;
             }
             else if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-                MAPDATA.organisationUnitLevel = parseFloat(MAPDATA.organisationUnitLevel);
-                MAPDATA.longitude = parseFloat(MAPDATA.longitude);
-                MAPDATA.latitude = parseFloat(MAPDATA.latitude);
-                MAPDATA.zoom = parseFloat(MAPDATA.zoom);
+                MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
+                MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
+                MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
+                MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
             }
 			
 			if (!position) {
-				if (MAPDATA.zoom != MAP.getZoom()) {
-					MAP.zoomTo(MAPDATA.zoom);
+				if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
+					MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
 				}
-				MAP.setCenter(new OpenLayers.LonLat(MAPDATA.longitude, MAPDATA.latitude));
+				MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
 			}
 			
 			if (MAPVIEW) {
@@ -3705,19 +3734,17 @@ function loadMapData(redirect, position) {
 					MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
 				}
 				else {
-					MAP.setCenter(new OpenLayers.LonLat(MAPDATA.longitude, MAPDATA.latitude), MAPDATA.zoom);
+					MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
 				}
 				MAPVIEW = false;
 			}
 			
 			toggleFeatureLabels(false);
 
-            if (redirect == thematicMap) {
-                getChoroplethData(); }
-            else if (redirect == organisationUnitAssignment) {
-                getAssignOrganisationUnitData(); }
-            else if (redirect == 'auto-assignment') {
-                getAutoAssignOrganisationUnitData(position); }
+            if (redirect == thematicMap) { getChoroplethData(); }
+            else if (redirect == thematicMap2) { getSymbolData(); }
+            else if (redirect == organisationUnitAssignment) { getAssignOrganisationUnitData(); }
+            else if (redirect == 'auto-assignment') { getAutoAssignOrganisationUnitData(position); }
         },
         failure: function() {
             alert( i18n_error_while_retrieving_data + ': loadMapData' );
@@ -3734,7 +3761,7 @@ function getChoroplethData() {
     var indicatorId = Ext.getCmp('indicator_cb').getValue();
 	var dataElementId = Ext.getCmp('dataelement_cb').getValue();
     var periodId = Ext.getCmp('period_cb').getValue();
-    var mapLayerPath = MAPDATA.mapLayerPath;
+    var mapLayerPath = MAPDATA[thematicMap].mapLayerPath;
 	var url;
 	var params = new Object();
 	params.periodId = periodId;
@@ -3767,12 +3794,12 @@ function getChoroplethData() {
         method: 'POST',
         params: params,
         success: function(r) {
-			var features = MAP.getLayersByName('Thematic map')[0].features;
+			FEATURE[thematicMap] = MAP.getLayersByName('Thematic map')[0].features;
 			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
 			EXPORTVALUES = getExportDataValueJSON(mapvalues);
 			var mv = new Array();
             var mour = new Array();
-			var nameColumn = MAPDATA.nameColumn;
+			var nameColumn = MAPDATA[thematicMap].nameColumn;
 			var options = {};
 			
 			if (mapvalues.length == 0) {
@@ -3797,8 +3824,8 @@ function getChoroplethData() {
                             mour[relations[i].featureId] = relations[i].organisationUnit;
                         }
 
-                        for (var j = 0; j < features.length; j++) {
-                            features[j].attributes.value = mv[mour[features[j].attributes[nameColumn]]] || 0;
+                        for (var j = 0; j < FEATURE[thematicMap].length; j++) {
+                            FEATURE[thematicMap][j].attributes.value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]] || 0;
                         }
                         
                         applyValues();
@@ -3807,9 +3834,9 @@ function getChoroplethData() {
 			}
 			else if (MAPSOURCE == map_source_type_database) {
 				for (var i = 0; i < mapvalues.length; i++) {
-					for (var j = 0; j < features.length; j++) {
-						if (mapvalues[i].orgUnitName == features[j].attributes.name) {
-							features[j].attributes.value = parseFloat(mapvalues[i].value);
+					for (var j = 0; j < FEATURE[thematicMap].length; j++) {
+						if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
+							FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
 							break;
 						}
 					}
@@ -3837,15 +3864,126 @@ function getChoroplethData() {
     });
 }
 
+/* Section: symbol */
+function getSymbolData() {
+	MASK.msg = i18n_creating_choropleth;
+	MASK.show();
+	
+    var indicatorId = Ext.getCmp('indicator_cb2').getValue();
+	var dataElementId = Ext.getCmp('dataelement_cb2').getValue();
+    var periodId = Ext.getCmp('period_cb2').getValue();
+    var mapLayerPath = MAPDATA[thematicMap2].mapLayerPath;
+	var url;
+	var params = new Object();
+	params.periodId = periodId;
+	
+	if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
+		params.mapLayerPath = mapLayerPath;
+		if (VALUETYPE.point == map_value_type_indicator) {
+			url = 'getIndicatorMapValuesByMap';
+			params.indicatorId = indicatorId;
+		}
+		else if (VALUETYPE.point == map_value_type_dataelement) {
+			url = 'getDataMapValuesByMap';
+			params.dataElementId = dataElementId;
+		}
+	}
+	else {
+		params.level = mapLayerPath;
+		if (VALUETYPE.point == map_value_type_indicator) {
+			url = 'getIndicatorMapValuesByLevel';
+			params.indicatorId = indicatorId;
+		}
+		else if (VALUETYPE.point == map_value_type_dataelement) {
+			url = 'getDataMapValuesByLevel';
+			params.dataElementId = dataElementId;
+		}
+	}
+
+    Ext.Ajax.request({
+        url: path + url + type,
+        method: 'POST',
+        params: params,
+        success: function(r) {
+			FEATURE[thematicMap2] = MAP.getLayersByName('Point layer')[0].features;
+			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
+			EXPORTVALUES = getExportDataValueJSON(mapvalues);
+			var mv = new Array();
+            var mour = new Array();
+			var nameColumn = MAPDATA[thematicMap2].nameColumn;
+			var options = {};
+			
+			if (mapvalues.length == 0) {
+				Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
+				MASK.hide();
+				return;
+			}
+            
+            for (var i = 0; i < mapvalues.length; i++) {
+				mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
+			}
+
+			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
+                Ext.Ajax.request({
+                    url: path + 'getAvailableMapOrganisationUnitRelations' + type,
+                    method: 'POST',
+                    params: { mapLayerPath: mapLayerPath },
+                    success: function(r) {
+                        var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
+                       
+                        for (var i = 0; i < relations.length; i++) {
+                            mour[relations[i].featureId] = relations[i].organisationUnit;
+                        }
+
+                        for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
+                            FEATURE[thematicMap2][j].attributes.value = mv[mour[FEATURE[thematicMap2][j].attributes[nameColumn]]] || 0;
+                        }
+                        
+                        applyValues();
+                    }
+                });           
+			}
+			else if (MAPSOURCE == map_source_type_database) {
+				for (var i = 0; i < mapvalues.length; i++) {
+					for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
+						if (mapvalues[i].orgUnitName == FEATURE[thematicMap2][j].attributes.name) {
+							FEATURE[thematicMap2][j].attributes.value = parseFloat(mapvalues[i].value);
+							break;
+						}
+					}
+				}
+                
+                applyValues();
+			}
+            
+            function applyValues() {
+                proportionalSymbol.indicator = options.indicator = 'value';
+                options.method = Ext.getCmp('method_cb2').getValue();
+                options.numClasses = Ext.getCmp('numClasses_cb2').getValue();
+                options.colors = proportionalSymbol.getColors();
+                
+                proportionalSymbol.coreComp.updateOptions(options);
+                proportionalSymbol.coreComp.applyClassification();
+                proportionalSymbol.classificationApplied = true;
+			
+                MASK.hide();
+            }
+        },
+        failure: function() {
+            alert( 'Error: getIndicatorMapValues' );
+        } 
+    });
+}
+
 /* Section: mapping */
 function getAssignOrganisationUnitData() {
 	MASK.msg = i18n_creating_map;
 	MASK.show();
 	
-    var mlp = MAPDATA.mapLayerPath;
+    var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 	var relations =	 Ext.getCmp('grid_gp').getStore();
 	var features = MAP.getLayersByName('Thematic map')[0].features;
-	var nameColumn = MAPDATA.nameColumn;
+	var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
 	var noCls = 1;
 	var noAssigned = 0;
 	var options = {};
@@ -3888,7 +4026,7 @@ function getAutoAssignOrganisationUnitData(position) {
 	MASK.msg = i18n_loading ;
 	MASK.show();
 
-    var level = MAPDATA.organisationUnitLevel;
+    var level = MAPDATA[organisationUnitAssignment].organisationUnitLevel;
 
     Ext.Ajax.request({
         url: path + 'getOrganisationUnitsAtLevel' + type,
@@ -3898,8 +4036,8 @@ function getAutoAssignOrganisationUnitData(position) {
 		    var layers = MAP.getLayersByName('Thematic map');
 			var features = layers[0]['features'];
 			var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
-			var nameColumn = MAPDATA.nameColumn;
-			var mlp = MAPDATA.mapLayerPath;
+			var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
+			var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 			var count_match = 0;
 			var relations = '';
 			

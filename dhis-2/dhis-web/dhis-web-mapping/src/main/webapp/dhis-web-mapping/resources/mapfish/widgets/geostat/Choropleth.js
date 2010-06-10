@@ -167,9 +167,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 					colors[colors.length-1].setFromHex(mapLegends[i].color);
 					bounds.push(mapLegends[i].endValue);
 				}
+
 				choropleth.colorInterpolation = colors;
 				choropleth.bounds = bounds;
-				choropleth.classify(false);								
+				choropleth.classify(false);
 			},
 			failure: function() {
 				alert('Error: getMapLegendsByMapLegendSet');
@@ -214,7 +215,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 										Ext.getCmp('maplegendset_cb').hideField();
 									}
 									else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
-                                        LEGEND.type = map_legend_type_predefined;
+                                        LEGEND[thematicMap].type = map_legend_type_predefined;
 										Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
 										Ext.getCmp('method').hideField();
 										Ext.getCmp('bounds').hideField();
@@ -482,7 +483,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 									Ext.getCmp('maplegendset_cb').hideField();
 								}
 								else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
-                                    LEGEND.type = map_legend_type_predefined;
+                                    LEGEND[thematicMap].type = map_legend_type_predefined;
 									Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
 									Ext.getCmp('method').hideField();
 									Ext.getCmp('bounds').hideField();
@@ -824,7 +825,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             emptyText: emptytext,
 			labelSeparator: labelseparator,
-            value: LEGEND.type,
+            value: LEGEND[thematicMap].type,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -837,8 +838,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_predefined && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND.type ) {
-							LEGEND.type = map_legend_type_predefined;
+                        if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_predefined && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND[thematicMap].type ) {
+							LEGEND[thematicMap].type = map_legend_type_predefined;
 							Ext.getCmp('method').hideField();
 							Ext.getCmp('bounds').hideField();
                             Ext.getCmp('numClasses').hideField();
@@ -850,8 +851,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 								this.classify(false);
 							}
                         }
-                        else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND.type) {
-							LEGEND.type = map_legend_type_automatic;
+                        else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND[thematicMap].type) {
+							LEGEND[thematicMap].type = map_legend_type_automatic;
 							Ext.getCmp('method').showField();
 							if (Ext.getCmp('method').getValue() == 0) {
 								Ext.getCmp('bounds').showField();
@@ -907,7 +908,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             emptyText: emptytext,
 			labelSeparator: labelseparator,
-            value: LEGEND.method,
+            value: LEGEND[thematicMap].method,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -921,13 +922,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('method').getValue() == 0 && Ext.getCmp('method').getValue() != LEGEND.method) {
-							LEGEND.method = 0;
+                        if (Ext.getCmp('method').getValue() == 0 && Ext.getCmp('method').getValue() != LEGEND[thematicMap].method) {
+							LEGEND[thematicMap].method = 0;
                             Ext.getCmp('bounds').showField();
                             Ext.getCmp('numClasses').hideField();
                         }
-                        else if (Ext.getCmp('method').getValue() != LEGEND.method) {
-							LEGEND.method = Ext.getCmp('method').getValue();
+                        else if (Ext.getCmp('method').getValue() != LEGEND[thematicMap].method) {
+							LEGEND[thematicMap].method = Ext.getCmp('method').getValue();
                             Ext.getCmp('bounds').hideField();
                             Ext.getCmp('numClasses').showField();
                             
@@ -959,7 +960,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             valueField: 'value',
             displayField: 'value',
             mode: 'local',
-            value: LEGEND.classes,
+            value: LEGEND[thematicMap].classes,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -973,8 +974,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('mapview_cb').reset();
                         }
 						
-						if (Ext.getCmp('numClasses').getValue() != LEGEND.classes) {
-							LEGEND.classes = Ext.getCmp('numClasses').getValue();
+						if (Ext.getCmp('numClasses').getValue() != LEGEND[thematicMap].classes) {
+							LEGEND[thematicMap].classes = Ext.getCmp('numClasses').getValue();
 							this.classify(false);
 						}
                     },

@@ -55,9 +55,9 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
      */
     numClasses: 5,
 	
-	minSize: 2,
+	minSize: 3,
 	
-	maxSize: 20,
+	maxSize: 15,
 	
 	minVal: null,
 	
@@ -83,7 +83,7 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
     colorInterpolation: null,
 
     /**
-     * Constructor: mapfish.GeoStat.Choropleth
+     * Constructor: mapfish.GeoStat.Symbol
      *
      * Parameters:
      * map - {<OpenLayers.Map>} OpenLayers map object
@@ -117,10 +117,20 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
     createColorInterpolation: function() {
         var initialColors = this.colors;
         var numColors = this.classification.bins.length;
-        this.colorInterpolation =
-            mapfish.ColorRgb.getColorsArrayByRgbInterpolation(
-                initialColors[0], initialColors[1], numColors
-            );
+		var mapLegendType = ACTIVEPANEL == organisationUnitAssignment ? map_legend_type_automatic : Ext.getCmp('maplegendtype_cb2').getValue();
+		
+		if (mapLegendType == map_legend_type_automatic) {
+			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(initialColors[0], initialColors[1], numColors);
+			for (var i = 0; i < proportionalSymbol.imageLegend.length; i++) {
+				proportionalSymbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();
+			}
+		}
+		else if (mapLegendType == map_legend_type_predefined) {
+			this.colorInterpolation = proportionalSymbol.colorInterpolation;
+			for (var i = 0; i < proportionalSymbol.colorInterpolation.length; i++) {
+				proportionalSymbol.imageLegend[i].color = proportionalSymbol.colorInterpolation[i].toHexString();
+			}
+		}
     },
 
     /**
@@ -129,18 +139,20 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
      */
     setClassification: function() {
         var values = [];
-        var features = this.layer.features;
-        for (var i = 0; i < features.length; i++) {
-            values.push(features[i].attributes[this.colorIndicator]);
-        }
+        // var features = this.layer.features;
 
+        for (var i = 0; i < FEATURE[thematicMap2].length; i++) {
+           // values.push(features[i].attributes[this.colorIndicator]);
+           values.push(FEATURE[thematicMap2][i].attributes.value);
+        }
+        
         var distOptions = {
             'labelGenerator' : this.options.labelGenerator
         };
         var dist = new mapfish.GeoStat.Distribution(values, distOptions);
 
-		this.minVal = dist.minVal;
-        this.maxVal = dist.maxVal;
+		// this.minVal = dist.minVal;
+        // this.maxVal = dist.maxVal;
 
         this.classification = dist.classify(
             this.method,
@@ -159,28 +171,28 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
      */
     applyClassification: function(options) {
         this.updateOptions(options);
-		
-		var calculateRadius = OpenLayers.Function.bind(
-            function(feature) {
-                var value = feature.attributes[this.sizeIndicator];
-                var size = (value - this.minVal) / (this.maxVal - this.minVal) *
-                           (this.maxSize - this.minSize) + this.minSize;
-                return size;
-            }, this
-        );
-        this.extendStyle(null,
-            {'pointRadius': '${calculateRadius}'},
-            {'calculateRadius': calculateRadius}
-        );
+
+		// var calculateRadius = OpenLayers.Function.bind(
+            // function(feature) {
+                // var value = feature.attributes[this.sizeIndicator];
+                // var size = (value - this.minVal) / (this.maxVal - this.minVal) *
+                           // (this.maxSize - this.minSize) + this.minSize;
+                // return size;
+            // }, this
+        // );
+        // this.extendStyle(null,
+            // {'pointRadius': '${calculateRadius}'},
+            // {'calculateRadius': calculateRadius}
+        // );
 		
         var boundsArray = this.classification.getBoundsArray();
-        var rules = new Array(boundsArray.length - 1);
-        for (var i = 0; i < boundsArray.length -1; i++) {
+        var rules = new Array(boundsArray.length-1);
+        for (var i = 0; i < boundsArray.length-1; i++) {
             var rule = new OpenLayers.Rule({
                 symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
                 filter: new OpenLayers.Filter.Comparison({
                     type: OpenLayers.Filter.Comparison.BETWEEN,
-                    property: this.colorIndicator,
+                    property: this.indicator,
                     lowerBoundary: boundsArray[i],
                     upperBoundary: boundsArray[i + 1]
                 })
@@ -188,7 +200,6 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
             rules[i] = rule;
         }
         this.extendStyle(rules);
-
         mapfish.GeoStat.prototype.applyClassification.apply(this, arguments);
     },
 
