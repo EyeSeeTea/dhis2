@@ -72,7 +72,13 @@ public class DailyPeriodType
 
         return new Period( this, fixedDate, fixedDate );
     }
-
+    
+    @Override
+    public int getFrequencyOrder()
+    {
+        return 1;
+    }
+    
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------
