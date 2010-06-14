@@ -532,14 +532,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('indicator_cb2').showField();
 							Ext.getCmp('dataelementgroup_cb2').hideField();
 							Ext.getCmp('dataelement_cb2').hideField();
-							VALUETYPE.polygon = map_value_type_indicator;
+							VALUETYPE.point = map_value_type_indicator;
 						}
 						else if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_dataelement) {
 							Ext.getCmp('indicatorgroup_cb2').hideField();
 							Ext.getCmp('indicator_cb2').hideField();
 							Ext.getCmp('dataelementgroup_cb2').showField();
 							Ext.getCmp('dataelement_cb2').showField();
-							VALUETYPE.polygon = map_value_type_dataelement;
+							VALUETYPE.point = map_value_type_dataelement;
 						}
 					}
 				}

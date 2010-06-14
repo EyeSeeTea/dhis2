@@ -367,12 +367,12 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
      */
     defaultLabelGenerator: function(bin, binIndex, nbBins) {
 		if (ACTIVEPANEL == organisationUnitAssignment) {
-			if (bin.upperBound < 1) {
-				return 'Available' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
-			}
-			else {
-				return 'Assigned' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
-			}
+            if (bin.upperBound < 1) {
+                return 'Available' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
+            }
+            else {
+                return 'Assigned' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
+            }
 		}
 		else {
             var upper = parseFloat(bin.upperBound);
@@ -382,7 +382,6 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                     upper -= parseFloat("0.1");
                 }
             }
-			
 			return parseFloat(bin.lowerBound).toFixed(1) + ' - ' + upper.toFixed(1) + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
 		}
     },
@@ -435,9 +434,8 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
     classifyByEqIntervals: function(nbBins) {
         var bounds = [];
 
-        for(var i = 0; i <= nbBins; i++) {
-            bounds[i] = this.minVal +
-                i*(this.maxVal - this.minVal) / nbBins;
+        for (var i = 0; i <= nbBins; i++) {
+            bounds[i] = this.minVal + i*(this.maxVal - this.minVal) / nbBins;
         }
 
         return this.classifyWithBounds(bounds);
@@ -489,7 +487,17 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
      * {<mapfish.GeoStat.Classification>} Classification
      */
     classify: function(method, nbBins, bounds) {
-		var mlt = ACTIVEPANEL == thematicMap ? Ext.getCmp('maplegendtype_cb').getValue() : Ext.getCmp('maplegendtype_cb2').getValue();
+		var mlt;
+        if (ACTIVEPANEL == thematicMap) {
+            mlt = Ext.getCmp('maplegendtype_cb').getValue();
+        }
+        else if (ACTIVEPANEL == thematicMap2) {
+            Ext.getCmp('maplegendtype_cb2').getValue();
+        }
+        else if (ACTIVEPANEL == organisationUnitAssignment) {
+            mlt = map_legend_type_automatic;
+        }
+
 		if (mlt == map_legend_type_automatic) {
 			if (method == mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
 				var str = ACTIVEPANEL == thematicMap ? Ext.getCmp('bounds').getValue() : Ext.getCmp('bounds_cb2').getValue();

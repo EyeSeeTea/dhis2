@@ -328,7 +328,7 @@ Ext.onReady( function() {
 						params: { id: v2 },
 
 						success: function(r) {
-							Ext.messageBlack.msg( i18n_dashboard_map_view, the_view + ' <span class="x-msg-hl">' + nv + '</span> ' + i18n_was_added_to_dashboard );
+							Ext.messageBlack.msg( i18n_dashboard_map_view, i18n_the_view + ' <span class="x-msg-hl">' + nv + '</span> ' + i18n_was_added_to_dashboard );
 							
 							Ext.getCmp('view_cb').getStore().reload();
 							Ext.getCmp('view_cb').reset();
@@ -3666,7 +3666,7 @@ function onClickSelectPolygon(feature) {
 			height: 65,
 			layout: 'fit',
 			plain: true,
-			html: '<div class="window-orgunit-text">' + FEATURE[thematicMap].attributes[MAPDATA[thematicMap].nameColumn] + '</div>',
+			html: '<div class="window-orgunit-text">' + FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn] + '</div>',
 			x: x,
 			y: y,
 			listeners: {
@@ -3680,7 +3680,7 @@ function onClickSelectPolygon(feature) {
 		
 		popup = feature_popup;		
 		feature_popup.show();
-		mapping.relation = FEATURE[thematicMap].attributes[MAPDATA[thematicMap].nameColumn];
+		mapping.relation = FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn];
     }
 	else {
         // featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
@@ -3986,18 +3986,18 @@ function getAssignOrganisationUnitData() {
 	
     var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 	var relations =	 Ext.getCmp('grid_gp').getStore();
-	var features = MAP.getLayersByName('Polygon layer')[0].features;
+	FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
 	var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
 	var noCls = 1;
 	var noAssigned = 0;
 	var options = {};
 	
-	for (var i = 0; i < features.length; i++) {
-		features[i].attributes['value'] = 0;
+	for (var i = 0; i < FEATURE[thematicMap].length; i++) {
+		FEATURE[thematicMap][i].attributes['value'] = 0;
 	
 		for (var j = 0; j < relations.getTotalCount(); j++) {
-			if (relations.getAt(j).data.featureId == features[i].attributes[nameColumn]) {
-				features[i].attributes['value'] = 1;
+			if (relations.getAt(j).data.featureId == FEATURE[thematicMap][i].attributes[nameColumn]) {
+				FEATURE[thematicMap][i].attributes['value'] = 1;
 				noAssigned++;
 				noCls = noCls < 2 ? 2 : noCls;
 				break;
@@ -4005,8 +4005,8 @@ function getAssignOrganisationUnitData() {
 		}
 	}
 
-	var color = noCls > 1 && noAssigned == features.length ? assigned_row_color : unassigned_row_color;
-	noCls = noCls > 1 && noAssigned == features.length ? 1 : noCls;
+	var color = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? assigned_row_color : unassigned_row_color;
+	noCls = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? 1 : noCls;
 	
 	mapping.indicator = options.indicator = 'value';
 	options.method = 1;
@@ -4037,16 +4037,15 @@ function getAutoAssignOrganisationUnitData(position) {
         method: 'POST',
         params: { level: level },
         success: function(r) {
-		    var layers = MAP.getLayersByName('Polygon layer');
-			var features = layers[0]['features'];
+			FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
 			var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
 			var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
 			var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 			var count_match = 0;
 			var relations = '';
 			
-			for ( var i = 0; i < features.length; i++ ) {
-				features[i].attributes.compareName = features[i].attributes[nameColumn].split(' ').join('').toLowerCase();
+			for ( var i = 0; i < FEATURE[thematicMap].length; i++ ) {
+				FEATURE[thematicMap][i].attributes.compareName = FEATURE[thematicMap][i].attributes[nameColumn].split(' ').join('').toLowerCase();
 			}
 	
 			for ( var i = 0; i < organisationUnits.length; i++ ) {
@@ -4054,10 +4053,10 @@ function getAutoAssignOrganisationUnitData(position) {
 			}
 			
 			for ( var i = 0; i < organisationUnits.length; i++ ) {
-				for ( var j = 0; j < features.length; j++ ) {
-					if (features[j].attributes.compareName == organisationUnits[i].compareName) {
+				for ( var j = 0; j < FEATURE[thematicMap].length; j++ ) {
+					if (FEATURE[thematicMap][j].attributes.compareName == organisationUnits[i].compareName) {
 						count_match++;
-						relations += organisationUnits[i].id + '::' + features[j].attributes[nameColumn] + ';;';
+						relations += organisationUnits[i].id + '::' + FEATURE[thematicMap][j].attributes[nameColumn] + ';;';
 						break;
 					}
 				}
@@ -4075,7 +4074,7 @@ function getAutoAssignOrganisationUnitData(position) {
 					MASK.msg = i18n_applying_organisation_units_relations ;
 					MASK.show();
 					
-					Ext.messageBlack.msg( i18n_assign + ' ' + i18n_organisation_units, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + features.length + '</span>');
+					Ext.messageBlack.msg( i18n_assign + ' ' + i18n_organisation_units, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');
 					
 					Ext.getCmp('grid_gp').getStore().reload();
 					loadMapData(organisationUnitAssignment, position);
