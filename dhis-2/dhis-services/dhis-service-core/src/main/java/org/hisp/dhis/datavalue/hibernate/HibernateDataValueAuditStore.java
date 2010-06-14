@@ -128,27 +128,30 @@ public class HibernateDataValueAuditStore
             }
         }
     }
-    
+
     public int deleteByPeriod( Period period )
     {
+        /*
         Session session = sessionFactory.getCurrentSession();
 
         Query query = session.createQuery( "delete DataValueAudit where period = :period" );
         query.setEntity( "period", period );
 
         return query.executeUpdate();
-        
-        
+        */
+        return 0;
     }
-    
+
     public int deleteByDataElementCategoryOptionCombo( DataElementCategoryOptionCombo optionCombo )
     {
-    	   Session session = sessionFactory.getCurrentSession();
+        /*
+        Session session = sessionFactory.getCurrentSession();
 
-           Query query = session.createQuery( "delete DataValueAudit where optionCombo = :optionCombo" );
-           query.setEntity( "optionCombo", optionCombo );
+        Query query = session.createQuery( "delete DataValueAudit where optionCombo = :optionCombo" );
+        query.setEntity( "optionCombo", optionCombo );
 
-           return query.executeUpdate();
+        return query.executeUpdate();
+        */
+        return 0;
     }
-
 }

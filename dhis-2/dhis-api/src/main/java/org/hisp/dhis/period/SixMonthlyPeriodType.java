@@ -83,6 +83,12 @@ public class SixMonthlyPeriodType
         return new Period( this, startDate, cal.getTime() );
     }
 
+    @Override
+    public int getFrequencyOrder()
+    {
+        return 5;
+    }
+
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------

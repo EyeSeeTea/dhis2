@@ -395,12 +395,14 @@ public class DefaultDataElementCategoryService
             Set<DataElementCategoryOptionCombo> categoryOptionCombos = dataElement.getCategoryCombo()
                 .getOptionCombos();
 
+            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder() : 0;
+            
             if ( categoryOptionCombos.size() > 1 && !(dataElement instanceof CalculatedDataElement) )
             {
                 for ( DataElementCategoryOptionCombo optionCombo : categoryOptionCombos )
                 {
                     DataElementOperand operand = new DataElementOperand( dataElement.getId(), optionCombo.getId(), dataElement.getName()
-                        + optionCombo.getName(), new ArrayList<Integer>( dataElement.getAggregationLevels() ) );
+                        + optionCombo.getName(), dataElement.getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ), frequencyOrder );
 
                     operands.add( operand );
                 }
@@ -408,7 +410,7 @@ public class DefaultDataElementCategoryService
             else
             {
                 DataElementOperand operand = new DataElementOperand( dataElement.getId(), categoryOptionCombos.iterator().next().getId(),
-                    dataElement.getName(), new ArrayList<Integer>( dataElement.getAggregationLevels() ) );
+                    dataElement.getName(), dataElement.getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ), frequencyOrder );
 
                 operands.add( operand );
             }
