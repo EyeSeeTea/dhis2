@@ -27,11 +27,12 @@ package org.hisp.dhis.datamart.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
-import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
+import static org.hisp.dhis.datamart.util.FilterUtils.getAnnualizationFactor;
+import static org.hisp.dhis.datamart.util.FilterUtils.getAnnualizationString;
+import static org.hisp.dhis.datamart.util.FilterUtils.getAvgOperands;
+import static org.hisp.dhis.datamart.util.FilterUtils.getSumOperands;
 import static org.hisp.dhis.datamart.util.ParserUtil.generateExpression;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
-import static org.hisp.dhis.system.util.DateUtils.DAYS_IN_YEAR;
 import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
 
@@ -57,7 +58,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -68,9 +68,6 @@ public class DefaultIndicatorDataMart
     implements IndicatorDataMart
 {
     private static final int DECIMALS = 1;
-    
-    private static final String TRUE = "true";
-    private static final String FALSE = "false";
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -246,60 +243,5 @@ public class DefaultIndicatorDataMart
         batchHandler.flush();
         
         return count;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Map<DataElementOperand, Integer> getSumOperands( Collection<DataElementOperand> operands, PeriodType periodType, Map<DataElementOperand, Integer> operandIndexMap )
-    {
-        Map<DataElementOperand, Integer> sumOperandIndexMap = new HashMap<DataElementOperand, Integer>();
-        
-        for ( final DataElementOperand operand : operands )
-        {
-            if ( operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_SUM ) || 
-                ( operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) && operand.getFrequencyOrder() >= periodType.getFrequencyOrder() ) )
-            {
-                sumOperandIndexMap.put( operand, operandIndexMap.get( operand ) );
-            }
-        }
-        
-        return sumOperandIndexMap;
-    }
-
-    private Map<DataElementOperand, Integer> getAvgOperands( Collection<DataElementOperand> operands, PeriodType periodType, Map<DataElementOperand, Integer> operandIndexMap )
-    {
-        Map<DataElementOperand, Integer> avgOperandIndexMap = new HashMap<DataElementOperand, Integer>();
-        
-        for ( final DataElementOperand operand : operands )
-        {
-            if ( operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) &&
-                operand.getFrequencyOrder() < periodType.getFrequencyOrder() )
-            {
-                avgOperandIndexMap.put( operand, operandIndexMap.get( operand ) );
-            }
-        }
-        
-        return avgOperandIndexMap;
-    }
-        
-    private double getAnnualizationFactor( final Indicator indicator, final Period period )
-    {
-        double factor = 1.0;
-        
-        if ( indicator.getAnnualized() != null && indicator.getAnnualized() )
-        {
-            final int daysInPeriod = DateUtils.daysBetween( period.getStartDate(), period.getEndDate() ) + 1;
-            
-            factor = DAYS_IN_YEAR / daysInPeriod;
-        }
-        
-        return factor;
-    }
-    
-    private String getAnnualizationString( final Boolean annualized )
-    {
-        return ( annualized == null || !annualized ) ? FALSE : TRUE;
     }
 }
