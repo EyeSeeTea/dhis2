@@ -126,13 +126,15 @@ public class DefaultDataElementDataMart
         
         final AggregatedDataValue value = new AggregatedDataValue();
         
-        for ( final OrganisationUnit unit : organisationUnits )
+        for ( final Period period : periods )
         {
-            level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
+            final Map<DataElementOperand, Integer> currentOperandIndexMap = dataElementAggregator.getOperandIndexMap( operands, period.getPeriodType(), operandIndexMap );
             
-            for ( final Period period : periods )
+            for ( final OrganisationUnit unit : organisationUnits )
             {
-                valueMap = dataElementAggregator.getAggregatedValues( operandIndexMap, period, unit, level, hierarchy );
+                level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
+                
+                valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy );
                 
                 periodType = period.getPeriodType();
                 

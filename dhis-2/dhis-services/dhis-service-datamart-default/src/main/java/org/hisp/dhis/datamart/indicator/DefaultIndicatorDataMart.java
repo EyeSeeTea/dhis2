@@ -27,12 +27,9 @@ package org.hisp.dhis.datamart.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.datamart.util.FilterUtils.getAnnualizationFactor;
-import static org.hisp.dhis.datamart.util.FilterUtils.getAnnualizationString;
-import static org.hisp.dhis.datamart.util.FilterUtils.getAvgOperands;
-import static org.hisp.dhis.datamart.util.FilterUtils.getSumOperands;
 import static org.hisp.dhis.datamart.util.ParserUtil.generateExpression;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
+import static org.hisp.dhis.system.util.DateUtils.DAYS_IN_YEAR;
 import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
 
@@ -43,7 +40,6 @@ import java.util.Map;
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
 import org.hisp.dhis.datamart.aggregation.dataelement.DataElementAggregator;
@@ -58,6 +54,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -68,6 +65,9 @@ public class DefaultIndicatorDataMart
     implements IndicatorDataMart
 {
     private static final int DECIMALS = 1;
+
+    private static final String TRUE = "true";
+    private static final String FALSE = "false";
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -153,12 +153,6 @@ public class DefaultIndicatorDataMart
         
         int count = 0;
         
-        Map<DataElementOperand, Double> numeratorValueMap = null;
-        Map<DataElementOperand, Double> denominatorValueMap = null;
-        
-        double numeratorValue = 0.0;
-        double denominatorValue = 0.0;
-        
         double annualizationFactor = 0.0;
         double factor = 0.0;
         double aggregatedValue = 0.0;
@@ -172,8 +166,8 @@ public class DefaultIndicatorDataMart
         {
             final PeriodType periodType = period.getPeriodType();
             
-            final Map<DataElementOperand, Integer> sumOperandIndexMap = getSumOperands( operands, periodType, operandIndexMap );
-            final Map<DataElementOperand, Integer> averageOperandIndexMap = getAvgOperands( operands, periodType, operandIndexMap );
+            final Map<DataElementOperand, Integer> sumOperandIndexMap = sumIntAggregator.getOperandIndexMap( operands, periodType, operandIndexMap );
+            final Map<DataElementOperand, Integer> averageOperandIndexMap = averageIntAggregator.getOperandIndexMap( operands, periodType, operandIndexMap );
 
             for ( final OrganisationUnit unit : organisationUnits )
             {
@@ -182,28 +176,13 @@ public class DefaultIndicatorDataMart
                 final Map<DataElementOperand, Double> sumIntValueMap = sumIntAggregator.getAggregatedValues( sumOperandIndexMap, period, unit, level, hierarchy );                
                 final Map<DataElementOperand, Double> averageIntValueMap = averageIntAggregator.getAggregatedValues( averageOperandIndexMap, period, unit, level, hierarchy);
                 
-                final Map<String, Map<DataElementOperand, Double>> valueMapMap = new HashMap<String, Map<DataElementOperand, Double>>( 2 );
+                final Map<DataElementOperand, Double> valueMap = new HashMap<DataElementOperand, Double>( sumIntValueMap );
+                valueMap.putAll( averageIntValueMap );
                 
-                valueMapMap.put( DataElement.AGGREGATION_OPERATOR_SUM, sumIntValueMap );
-                valueMapMap.put( DataElement.AGGREGATION_OPERATOR_AVERAGE, averageIntValueMap );
-
                 for ( final Indicator indicator : indicators )
                 {
-                    // ---------------------------------------------------------
-                    // Numerator
-                    // ---------------------------------------------------------
-
-                    numeratorValueMap = valueMapMap.get( indicator.getNumeratorAggregationOperator() );
-                    
-                    numeratorValue = calculateExpression( generateExpression( indicator.getNumerator(), numeratorValueMap ) );
-                    
-                    // ---------------------------------------------------------
-                    // Denominator
-                    // ---------------------------------------------------------
-
-                    denominatorValueMap = valueMapMap.get( indicator.getDenominatorAggregationOperator() );
-                    
-                    denominatorValue = calculateExpression( generateExpression( indicator.getDenominator(), denominatorValueMap ) );
+                    final double numeratorValue = calculateExpression( generateExpression( indicator.getNumerator(), valueMap ) );                    
+                    final double denominatorValue = calculateExpression( generateExpression( indicator.getDenominator(), valueMap ) );
 
                     // ---------------------------------------------------------
                     // AggregatedIndicatorValue
@@ -243,5 +222,28 @@ public class DefaultIndicatorDataMart
         batchHandler.flush();
         
         return count;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+    
+    public static double getAnnualizationFactor( final Indicator indicator, final Period period )
+    {
+        double factor = 1.0;
+        
+        if ( indicator.getAnnualized() != null && indicator.getAnnualized() )
+        {
+            final int daysInPeriod = DateUtils.daysBetween( period.getStartDate(), period.getEndDate() ) + 1;
+            
+            factor = DAYS_IN_YEAR / daysInPeriod;
+        }
+        
+        return factor;
+    }
+    
+    public static String getAnnualizationString( final Boolean annualized )
+    {
+        return ( annualized == null || !annualized ) ? FALSE : TRUE;
     }
 }

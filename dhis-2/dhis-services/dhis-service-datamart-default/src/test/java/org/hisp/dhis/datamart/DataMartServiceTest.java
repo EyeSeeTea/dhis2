@@ -48,9 +48,11 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.junit.Test;
 
 /**
@@ -141,9 +143,10 @@ public class DataMartServiceTest
         // ---------------------------------------------------------------------
         // Setup Periods
         // ---------------------------------------------------------------------
-
-        PeriodType periodType = periodService.getAllPeriodTypes().iterator().next();
-
+        
+        PeriodType monthly = new MonthlyPeriodType();
+        PeriodType quarterly = new QuarterlyPeriodType();
+        
         Date mar01 = getDate( 2005, 3, 1 );
         Date mar31 = getDate( 2005, 3, 31 );
         Date apr01 = getDate( 2005, 4, 1 );
@@ -151,10 +154,10 @@ public class DataMartServiceTest
         Date may01 = getDate( 2005, 5, 1 );
         Date may31 = getDate( 2005, 5, 31 );
         
-        periodA = createPeriod( periodType, mar01, mar31 );
-        periodB = createPeriod( periodType, apr01, apr30 );
-        periodC = createPeriod( periodType, may01, may31 );
-        periodD = createPeriod( periodType, mar01, may31 );
+        periodA = createPeriod( monthly, mar01, mar31 );
+        periodB = createPeriod( monthly, apr01, apr30 );
+        periodC = createPeriod( monthly, may01, may31 );
+        periodD = createPeriod( quarterly, mar01, may31 );
         
         periodIds.add( periodService.addPeriod( periodA ) );
         periodIds.add( periodService.addPeriod( periodB ) );
