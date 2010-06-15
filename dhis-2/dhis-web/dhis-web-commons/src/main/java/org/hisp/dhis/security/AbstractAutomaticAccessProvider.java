@@ -28,6 +28,8 @@ package org.hisp.dhis.security;
  */
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.security.authority.SystemAuthoritiesProvider;
 import org.hisp.dhis.user.UserStore;
@@ -90,17 +92,15 @@ public abstract class AbstractAutomaticAccessProvider
         return systemAuthoritiesProvider.getSystemAuthorities();
     }
 
-    protected GrantedAuthority[] getGrantedAuthorities()
+    protected Collection<GrantedAuthority> getGrantedAuthorities()
     {
         Collection<String> systemAuthorities = getAuthorities();
 
-        GrantedAuthority[] grantedAuthorities = new GrantedAuthority[systemAuthorities.size()];
-
-        int i = 0;
+        Set<GrantedAuthority> grantedAuthorities = new HashSet<GrantedAuthority>( systemAuthorities.size() );
 
         for ( String authority : systemAuthorities )
         {
-            grantedAuthorities[i++] = new GrantedAuthorityImpl( authority );
+            grantedAuthorities.add( new GrantedAuthorityImpl( authority ) );
         }
 
         return grantedAuthorities;

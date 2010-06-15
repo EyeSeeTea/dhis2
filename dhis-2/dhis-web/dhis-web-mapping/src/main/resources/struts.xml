@@ -67,20 +67,32 @@
 			</result>
 		</action>
 
-		<action name="getMapValuesByMap"
-			class="org.hisp.dhis.mapping.action.GetMapValuesByMapAction">
+        <action name="getDataMapValuesByMap"
+            class="org.hisp.dhis.mapping.action.GetDataMapValuesByMapAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
+
+        <action name="getDataMapValuesByLevel"
+            class="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
+
+		<action name="getIndicatorMapValuesByMap"
+			class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
 		</action>
 
-		<action name="getMapValuesByLevel"
-			class="org.hisp.dhis.mapping.action.GetMapValuesByLevelAction">
+		<action name="getIndicatorMapValuesByLevel"
+			class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction">
 			<result name="success" type="velocity-json">
-				/dhis-web-mapping/jsonAggregatedMapValues.vm</result>
+				/dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
 		</action>
 		
-		<action name="getMapValuesByMapAndFeatureId"
-            class="org.hisp.dhis.mapping.action.GetMapValuesByMapAndFeatureIdAction">
+		<action name="getIndicatorMapValuesByMapAndFeatureId"
+            class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAndFeatureIdAction">
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>
@@ -285,6 +297,12 @@
 				/dhis-web-mapping/jsonMapLayers.vm</result>
 		</action>
 
+        <action name="getMapLayersByType"
+            class="org.hisp.dhis.mapping.action.GetMapLayersByTypeAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonMapLayers.vm</result>
+        </action>
+
 		<!-- Indicator -->
 
 		<action name="getAllIndicatorGroups"
@@ -304,6 +322,26 @@
 			<result name="success" type="velocity-json">
 				/dhis-web-mapping/jsonminIndicators.vm</result>
 		</action>
+
+        <!-- DataElement -->
+
+        <action name="getAllDataElementGroups"
+            class="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonDataElementGroups.vm</result>
+        </action>
+
+        <action name="getDataElementsByDataElementGroup"
+            class="org.hisp.dhis.mapping.action.GetDataElementsByDataElementGroupAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminDataElements.vm</result>
+        </action>
+
+        <action name="getAllDataElements"
+            class="org.hisp.dhis.mapping.action.GetAllDataElementsAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminDataElements.vm</result>
+        </action>
 
 		<!-- Period -->
 

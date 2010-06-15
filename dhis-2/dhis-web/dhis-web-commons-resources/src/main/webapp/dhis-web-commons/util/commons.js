@@ -385,8 +385,11 @@ function getFieldValue( fieldId )
  */
 function setMessage( message )
 {
-    $( '#message' ).html( message );
-    $( '#message' ).slideDown( 'fast' );
+	if ( (message != "") && (message != null) )
+	{
+		$( '#message' ).html( message );
+		$( '#message' ).slideDown( 'fast' );
+	}
 }
 
 /**
@@ -742,10 +745,6 @@ function removeItem( itemId, itemName, confirmation, action )
         
                     showWarning();
     	    	}
-				else if ( json.response == "nonSufficientAuthority" )
-				{
-					window.location.href = "../dhis-web-commons-about/showSufficientFeedbackForm.action";
-				}
     	    }
     	);
     }
@@ -810,3 +809,133 @@ function tableSorter( tableId )
 {
 	$("#" + tableId ).tablesorter(); 
 }
+
+function setSelectionRange( input, selectionStart, selectionEnd ) 
+{
+	if ( input.setSelectionRange ) 
+	{
+		input.focus();
+	    input.setSelectionRange( selectionStart, selectionEnd );
+	}
+	else if ( input.createTextRange ) 
+	{
+	    var range = input.createTextRange();
+	    range.collapse( true );
+	    range.moveEnd( 'character', selectionEnd );
+	    range.moveStart( 'character', selectionStart );
+	    range.select();
+	}
+}
+
+function setCaretToPos ( input, pos ) 
+{
+	setSelectionRange( input, pos, pos );
+}
+
+function getFilteredDataElementsReceived( xmlObject )
+{
+	var operandList = document.getElementById( "dataElementId" );
+			
+	operandList.options.length = 0;
+	
+	var operands = xmlObject.getElementsByTagName( "operand" );
+	
+	for ( var i = 0; i < operands.length; i++)
+	{
+		var id = operands[ i ].getElementsByTagName( "operandId" )[0].firstChild.nodeValue;
+		var elementName = operands[ i ].getElementsByTagName( "operandName" )[0].firstChild.nodeValue;
+		
+		var option = document.createElement( "option" );
+		option.value = "[" + id + "]";
+		option.text = elementName;
+		operandList.add( option, null );	
+	}
+}
+
+function insertTextCommon( inputAreaName, inputText )
+{
+	var inputArea = document.getElementById( inputAreaName );
+	
+	// IE support
+	if ( document.selection ) 
+	{
+		inputArea.focus();
+        sel = document.selection.createRange();
+        sel.text = inputText;
+        inputArea.focus();
+	}
+	// MOZILLA/NETSCAPE support
+	else if ( inputArea.selectionStart || inputArea.selectionStart == '0' ) 
+	{
+	
+		var startPos = inputArea.selectionStart;
+		var endPos = inputArea.selectionEnd;
+		
+		var existingText = inputArea.value;
+		var textBefore = existingText.substring( 0, startPos );
+		var textAfter = existingText.substring( endPos, existingText.length );
+
+		inputArea.value = textBefore + inputText + textAfter;
+	}
+	else 
+	{
+		inputArea.value += inputText;
+		inputArea.focus();
+	}
+
+	setCaretToPos( inputArea, inputArea.value.length );
+}
+
+/**
+ * Create Mask with proccessing * 
+ */
+function MaskAjaxProccess()
+{	
+	this.processWidth = 100;
+	this.processHeight = 100;
+	
+	this.width = document.documentElement.clientWidth;
+	this.height = document.documentElement.clientHeight;	
+	this.mask = document.createElement( 'div' );
+	
+	this.mask.id = "mask";
+	this.mask.style.position = "fixed";
+	this.mask.style.display = "none";
+	this.mask.style.top = 0;
+	this.mask.style.width = this.width + "px";
+	this.mask.style.height = this.height + "px";
+	this.mask.style.background = "#000000";
+	this.mask.style.opacity = 0.5;
+	this.mask.style.zIndex = 10;
+	
+	this.process = document.createElement( 'div' );
+	this.process.id = "process";
+	this.process.style.display = "none";
+	this.process.style.position = "fixed";	
+	this.process.style.background = "#000000";
+	this.process.style.backgroundRepeat = "no-repeat";
+	this.process.style.width = this.processWidth + "px";
+	this.process.style.height = this.processHeight + "px";
+	this.process.style.backgroundImage = "url(../images/ajax-loader-preview.gif)";
+	this.process.style.top = ((this.height / 2) - (this.processHeight/2)) + "px";
+	this.process.style.left = ((this.width / 2) - (this.processWidth/2)) + "px";	
+	this.process.style.zIndex = 11;
+	this.process.style.border = "#CCCCCC 3px solid";
+		
+	this.show = function()
+	{		
+		document.body.appendChild(this.process);
+		document.body.appendChild( this.mask );
+			
+		$('#mask' ).fadeIn(1000);
+		$('#process' ).fadeIn(1000);		
+	}	
+	
+	this.hide = function()
+	{			
+		$('#mask'  ).fadeOut(1000);		
+		$('#process'  ).fadeOut(1000);		
+	}	
+	
+}
+var MaskAjaxProccess = new MaskAjaxProccess();	

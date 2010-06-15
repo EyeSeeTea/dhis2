@@ -33,6 +33,10 @@ var LEGEND = new Object();
 LEGEND.type = map_legend_type_automatic;
 LEGEND.method = 1;
 LEGEND.classes = 5;
+/* Current map value types */
+VALUETYPE = new Object();
+VALUETYPE.polygon = map_value_type_indicator;
+VALUETYPE.point = map_value_type_indicator;
 
 /* Detect mapview parameter in URL */
 function getUrlParam(strParamName){var output='';var strHref=window.location.href;if(strHref.indexOf('?')>-1){var strQueryString=strHref.substr(strHref.indexOf('?')).toLowerCase();var aQueryString=strQueryString.split('&');for(var iParam=0;iParam<aQueryString.length;iParam++){if(aQueryString[iParam].indexOf(strParamName.toLowerCase()+'=')>-1){var aParam=aQueryString[iParam].split('=');output=aParam[1];break;}}}return unescape(output);}
@@ -60,9 +64,48 @@ Ext.onReady( function() {
 
     MAP = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
 	MASK = new Ext.LoadMask(Ext.getBody(),{msg:i18n_loading,msgCls:'x-mask-loading2'});
-	
-    if (getUrlParam('view')){PARAMETER=getUrlParam('view');}	
-	var mapViewParam = PARAMETER ? PARAMETER : 0;
+    
+    /* Base layers */
+    function addBaseLayersToMap() {
+        Ext.Ajax.request({
+            url: path + 'getMapLayersByType' + type,
+            params: { type: map_layer_type_baselayer },
+            method: 'POST',
+            success: function(r) {
+                var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+				
+				if (mapLayers.length > 0) {
+					for (var i = 0; i < mapLayers.length; i++) {
+						MAP.addLayers([
+							new OpenLayers.Layer.WMS(
+								mapLayers[i].name,
+								mapLayers[i].mapSource,
+								{layers: mapLayers[i].layer}
+							)
+						]);
+						MAP.layers[MAP.layers.length-1].setVisibility(false);
+					}
+				}
+				else {
+					MAP.addLayers([
+						new OpenLayers.Layer.WMS(
+							'World',
+							'http://labs.metacarta.com/wms/vmap0',
+							{layers: 'basic'}
+						)
+					]);
+					
+					MAP.getLayersByName('World')[0].setVisibility(false);
+				}
+            }
+        });
+    }
+    
+    addBaseLayersToMap();
+    
+    /* Get map view parameter and apply to global variable */
+    if (getUrlParam('view')){PARAMETER=getUrlParam('view');}
+	var mapViewParam = PARAMETER || 0;
 	
 	Ext.Ajax.request({
 		url: path + 'getBaseCoordinate' + type,
@@ -114,8 +157,11 @@ Ext.onReady( function() {
 				text: i18n_save ,
 				handler: function() {
 					var vn = Ext.getCmp('viewname_tf').getValue();
-					var ig = Ext.getCmp('indicatorgroup_cb').getValue();
-					var ii = Ext.getCmp('indicator_cb').getValue();
+                    var mvt = Ext.getCmp('mapvaluetype_cb').getValue();
+					var ig = mvt == map_value_type_indicator ? Ext.getCmp('indicatorgroup_cb').getValue() : 0;
+					var ii = mvt == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : 0;
+                    var deg = mvt == map_value_type_dataelement ? Ext.getCmp('dataelementgroup_cb').getValue() : 0;
+					var de = mvt == map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : 0;
 					var pt = Ext.getCmp('periodtype_cb').getValue();
 					var p = Ext.getCmp('period_cb').getValue();
 					var ms = Ext.getCmp('map_cb').getValue();
@@ -123,7 +169,7 @@ Ext.onReady( function() {
 					var c = Ext.getCmp('numClasses').getValue();
 					var ca = Ext.getCmp('colorA_cf').getValue();
 					var cb = Ext.getCmp('colorB_cf').getValue();
-					var mlsid = Ext.getCmp('maplegendset_cb').getValue() ? Ext.getCmp('maplegendset_cb').getValue() : 0;
+					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || 0;
 					var lon = MAP.getCenter().lon;
 					var lat = MAP.getCenter().lat;
 					var zoom = parseInt(MAP.getZoom());
@@ -132,8 +178,13 @@ Ext.onReady( function() {
 						Ext.messageRed.msg( i18n_new_map_view , i18n_map_view_form_is_not_complete );
 						return;
 					}
+                    
+                    if (!ii && !de) {
+                        Ext.messageRed.msg( i18n_new_map_view, i18n_thematic_map_form_is_not_complete );
+						return;
+					}
 					
-					if (!ig || !ii || !pt || !p || !ms || !c ) {
+					if (!pt || !p || !ms || !c) {
 						Ext.messageRed.msg( i18n_new_map_view, i18n_thematic_map_form_is_not_complete );
 						return;
 					}
@@ -159,8 +210,7 @@ Ext.onReady( function() {
 							Ext.Ajax.request({
 								url: path + 'addOrUpdateMapView' + type,
 								method: 'POST',
-								params: { name: vn, indicatorGroupId: ig, indicatorId: ii, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: 2, classes: c, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
-
+								params: { name: vn, mapValueType: mvt, indicatorGroupId: ig, indicatorId: ii, dataElementGroupId: deg, dataElementId: de, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: 2, classes: c, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
 								success: function(r) {
 									Ext.messageBlack.msg( i18n_new_map_view, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().reload();
@@ -207,13 +257,15 @@ Ext.onReady( function() {
 					Ext.Ajax.request({
 						url: path + 'deleteMapView' + type,
 						method: 'POST',
-						params: { id: v },
-
+						params: {id: v},
 						success: function(r) {
 							Ext.messageBlack.msg( i18n_delete_map_view , 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted );
 							Ext.getCmp('view_cb').getStore().reload();
-							Ext.getCmp('view_cb').reset();
+							Ext.getCmp('view_cb').clearValue();
 							Ext.getCmp('mapview_cb').getStore().reload();
+                            if (v == Ext.getCmp('mapview_cb').getValue()) {
+                                Ext.getCmp('mapview_cb').clearValue();
+                            }
 						},
 						failure: function() {
 							alert( i18n_status , i18n_error_while_saving_data );
@@ -402,25 +454,27 @@ Ext.onReady( function() {
 				cls: 'window-button',
 				text: i18n_export_image,
 				handler: function() {
-					if (ACTIVEPANEL == thematicMap
-						&& Ext.getCmp('period_cb').getValue()!='' 
-						&& Ext.getCmp('indicator_cb').getValue()!=''
-						&& Ext.getCmp('map_cb').getValue()!='') {
-						
+                    var cb = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+
+                    if (ACTIVEPANEL == thematicMap
+                        && cb
+						&& Ext.getCmp('period_cb').getValue() 
+						&& Ext.getCmp('map_cb').getValue()) {
+
 						var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
 						var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
 						var viewBox = objectSVGDocument.getAttribute('viewBox');
 						var title = Ext.getCmp('exportimagetitle_tf').getValue();
 						
-						if(title==''){
+						if (!title) {
 							Ext.messageRed.msg( i18n_export_map_as_image , i18n_please_enter_map_title );
-						}else{						
+						}
+                        else {						
 							var q = Ext.getCmp('exportimagequality_cb').getValue();
 							var w = objectSVGDocument.getAttribute('width') * q;
 							var h = objectSVGDocument.getAttribute('height') * q;
 							var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
 							var period = Ext.getCmp('period_cb').getValue();
-							var indicator = Ext.getCmp('indicator_cb').getValue();
 							var imageFormat = Ext.getCmp('exportimageformat_cb').getValue();
 							
 							Ext.getCmp('exportimagetitle_tf').reset();
@@ -436,7 +490,7 @@ Ext.onReady( function() {
 							document.getElementById('heightField').value = h;  
 							document.getElementById('includeLegendsField').value = includeLegend;  
 							document.getElementById('periodField').value = period;  
-							document.getElementById('indicatorField').value = indicator;   
+							document.getElementById('indicatorField').value = cb;   
 							document.getElementById('legendsField').value = getLegendsJSON();
 							document.getElementById('imageFormat').value = imageFormat;
 
@@ -1976,7 +2030,7 @@ Ext.onReady( function() {
 		}
     });
     
-    /* Section: overlays */
+    /* Section: map layers */
 	var wmsOverlayStore=new GeoExt.data.WMSCapabilitiesStore({url:path_geoserver+ows});
 	var mapLayerNameTextField=new Ext.form.TextField({id:'maplayername_tf',emptyText:emptytext,hideLabel:true,width:combo_width});
 	var mapLayerMapSourceFileComboBox=new Ext.form.ComboBox({id:'maplayermapsourcefile_cb',editable:false,displayField:'name',valueField:'name',emptyText:emptytext,hideLabel:true,width:combo_width,minListWidth:combo_width,triggerAction:'all',mode:'remote',store:geojsonStore});
@@ -2079,7 +2133,7 @@ Ext.onReady( function() {
 	var mapLayerFillOpacityComboBox=new Ext.form.ComboBox({id:'maplayerfillopacity_cb',hideLabel:true,editable:true,valueField:'value',displayField:'value',mode:'local',triggerAction:'all',width:combo_number_width,minListWidth:combo_number_width,value:0.5,store:new Ext.data.SimpleStore({fields:['value'],data:[[0.0],[0.1],[0.2],[0.3],[0.4],[0.5],[0.6],[0.7],[0.8],[0.9],[1.0]]})});
 	var mapLayerStrokeColorColorField=new Ext.ux.ColorField({id:'maplayerstrokecolor_cf',hideLabel:true,allowBlank:false,width:combo_width,value:'#222222'});
 	var mapLayerStrokeWidthComboBox=new Ext.form.ComboBox({id:'maplayerstrokewidth_cb',hideLabel:true,editable:true,valueField:'value',displayField:'value',mode:'local',triggerAction:'all',width:combo_number_width,minListWidth:combo_number_width,value:2,store:new Ext.data.SimpleStore({fields:['value'],data:[[0],[1],[2],[3],[4]]})});
-	var mapLayerStore=new Ext.data.JsonStore({url:path+'getAllMapLayers'+type,root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var mapLayerStore=new Ext.data.JsonStore({url:path+'getMapLayersByType'+type,baseParams:{type:map_layer_type_overlay},root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
 	var mapLayerComboBox=new Ext.form.ComboBox({id:'maplayer_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:emptytext,hideLabel:true,selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:mapLayerStore});
     
     var deleteMapLayerButton = new Ext.Button({
@@ -2219,8 +2273,8 @@ Ext.onReady( function() {
         ]
     });
 
-	var mapLayerWindow = new Ext.Window({
-        id: 'maplayer_w',
+	var overlaysWindow = new Ext.Window({
+        id: 'overlays_w',
         title: '<span id="window-maplayer-title">'+i18n_overlays+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
@@ -2236,11 +2290,11 @@ Ext.onReady( function() {
                 listeners: {
                     tabchange: function(panel, tab)
                     {
-                        if (tab.id == 'maplayer0') {
-							Ext.getCmp('maplayer_w').setHeight(390);                        
+                        if (tab.id == 'overlay0') {
+							Ext.getCmp('overlays_w').setHeight(395);                        
                         }
-                        else if (tab.id == 'maplayer1') {
-							Ext.getCmp('maplayer_w').setHeight(155);
+                        else if (tab.id == 'overlay1') {
+							Ext.getCmp('overlays_w').setHeight(151);
                         }
                     }
                 },
@@ -2248,7 +2302,7 @@ Ext.onReady( function() {
                 [
                     {
                         title: '<span class="panel-tab-title">'+i18n_new+'</span>',
-                        id: 'maplayer0',
+                        id: 'overlay0',
                         items:
                         [
                             newMapLayerPanel
@@ -2256,7 +2310,7 @@ Ext.onReady( function() {
                     },
                     {
                         title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
-                        id: 'maplayer1',
+                        id: 'overlay1',
                         items:
                         [
                             deleteMapLayerPanel
@@ -2279,6 +2333,188 @@ Ext.onReady( function() {
 				}
 			}
 		}
+    });
+    
+    var mapLayerBaseLayersNameTextField=new Ext.form.TextField({id:'maplayerbaselayersname_tf',emptyText:emptytext,hideLabel:true,width:combo_width});
+    var mapLayerBaseLayersUrlTextField=new Ext.form.TextField({id:'maplayerbaselayersurl_tf',emptyText:emptytext,hideLabel:true,width:combo_width});
+    var mapLayerBaseLayersLayerTextField=new Ext.form.TextField({id:'maplayerbaselayerslayer_tf',emptyText:emptytext,hideLabel:true,width:combo_width});
+    
+    var mapLayerBaseLayerStore=new Ext.data.JsonStore({url:path+'getMapLayersByType'+type,baseParams:{ type:map_layer_type_baselayer },root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var mapLayerBaseLayerComboBox=new Ext.form.ComboBox({id:'maplayerbaselayers_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:emptytext,hideLabel:true,selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:mapLayerBaseLayerStore});
+    
+    var deleteMapLayerBaseLayersButton = new Ext.Button({
+        id: 'deletemaplayerbaselayers_b',
+        text: i18n_delete_baselayer,
+ 		cls: 'window-button',
+        handler: function() {
+            var ml = Ext.getCmp('maplayerbaselayers_cb').getValue();
+            var mln = Ext.getCmp('maplayerbaselayers_cb').getRawValue();
+            
+            if (!ml) {
+                Ext.messageRed.msg( i18n_delete_baselayer, i18n_please_select_a_baselayer );
+                return;
+            }
+            
+            Ext.Ajax.request({
+                url: path + 'deleteMapLayer' + type,
+                method: 'POST',
+                params: { id: ml },
+                success: function(r) {
+                    Ext.messageBlack.msg( i18n_delete_baselayer , i18n_baselayer + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
+                    Ext.getCmp('maplayerbaselayers_cb').getStore().reload();
+                    Ext.getCmp('maplayerbaselayers_cb').reset();
+                    
+                    if (MAP.baseLayer && mln == MAP.baseLayer.name) {                    
+                        Ext.Ajax.request({
+                            url: path + 'getMapLayersByType' + type,
+                            params: { type: map_layer_type_baselayer },
+                            method: 'POST',
+                            success: function(r) {
+                                var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+                                for (var i = 0; i < mapLayers.length; i++) {
+                                    MAP.getLayersByName(mapLayers[i].name)[0].setVisibility(false);
+                                }
+                            },
+                            failure: function() {
+                                alert( 'Error: getMapLayersByType' );
+                            }
+                        });
+                    }
+                },
+                failure: function() {
+                    alert( 'Error: deleteMapLayer' );
+                }
+            });
+            
+            MAP.getLayersByName(mln)[0].destroy(false);
+        }
+    });
+    
+    var newMapLayerBaseLayersPanel = new Ext.form.FormPanel({
+        id: 'newmaplayerbaselayers_p',
+        items:
+        [
+            { html: '<div class="panel-fieldlabel-first">'+i18n_display_name+'</div>' }, mapLayerBaseLayersNameTextField,
+            { html: '<div class="panel-fieldlabel">'+i18n_url+'</div>' }, mapLayerBaseLayersUrlTextField,
+            { html: '<div class="panel-fieldlabel">'+i18n_layer+'</div>' }, mapLayerBaseLayersLayerTextField,
+            {
+				xtype: 'button',
+				id: 'newmaplayerbaselayers_b',
+				text: 'Register new base layer',
+				cls: 'window-button',
+				handler: function() {
+					var mlbn = Ext.getCmp('maplayerbaselayersname_tf').getValue();
+					var mlbu = Ext.getCmp('maplayerbaselayersurl_tf').getValue();
+					var mlbl = Ext.getCmp('maplayerbaselayerslayer_tf').getValue();
+					
+					if (!mlbn || !mlbu || !mlbl) {
+						Ext.messageRed.msg( i18n_new_baselayer, i18n_baselayer_form_is_not_complete );
+						return;
+					}
+					
+					if (validateInput(mlbn) == false) {
+						Ext.messageRed.msg( i18n_new_baselayer , i18n_baselayer_name_cannot_be_longer_than_25_characters );
+						return;
+					}
+					
+					Ext.Ajax.request({
+						url: path + 'getMapLayersByType' + type,
+                        params: { type: map_layer_type_baselayer },
+						method: 'POST',
+						success: function(r) {
+							var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
+							
+							for (i in mapLayers) {
+								if (mapLayers[i].name == mlbn) {
+									Ext.messageRed.msg( i18n_new_baselayer , i18n_name + ' <span class="x-msg-hl">' + mlbn + '</span> '+i18n_is_already_in_use+'.');
+									return;
+								}
+							}
+					
+							Ext.Ajax.request({
+								url: path + 'addOrUpdateMapLayer' + type,
+								method: 'POST',
+								params: { name: mlbn, type: map_layer_type_baselayer, mapSource: mlbu, layer: mlbl, fillColor: '', fillOpacity: 0, strokeColor: '', strokeWidth: 0 },
+								success: function(r) {
+									Ext.messageBlack.msg( i18n_new_baselayer , 'The base layer <span class="x-msg-hl">' + mlbn + '</span> '+i18n_was_registered+'.');
+									Ext.getCmp('maplayerbaselayers_cb').getStore().reload();
+									MAP.addLayers([
+                                        new OpenLayers.Layer.WMS(
+                                            mlbn,
+                                            mlbu,
+                                            {layers: mlbl}
+                                        )
+                                    ]);
+									
+									Ext.getCmp('maplayerbaselayersname_tf').reset();
+									Ext.getCmp('maplayerbaselayersurl_tf').reset();
+									Ext.getCmp('maplayerbaselayerslayer_tf').reset();
+								},
+								failure: function() {}
+							});
+						},
+						failure: function() {}
+					});
+				}
+			}
+        ]
+    });
+
+    var deleteMapLayerBaseLayerPanel = new Ext.form.FormPanel({
+        id: 'deletemaplayerbaselayer_p',
+        items:
+        [
+            { html: '<div class="panel-fieldlabel-first">'+i18n_baselayers+'</div>' }, mapLayerBaseLayerComboBox,
+            deleteMapLayerBaseLayersButton
+        ]
+    });
+    
+    var baselayersWindow = new Ext.Window({
+        id: 'baselayers_w',
+        title: '<span id="window-maplayer-title">'+i18n_baselayers+'</span>',
+		layout: 'fit',
+        closeAction: 'hide',
+		width: 234,
+        items:
+        [
+			{
+                xtype: 'tabpanel',
+                activeTab: 0,
+                deferredRender: false,
+                plain: true,
+                defaults: {layout: 'fit', bodyStyle: 'padding:8px'},
+                listeners: {
+                    tabchange: function(panel, tab)
+                    {
+                        if (tab.id == 'baselayer0') {
+							Ext.getCmp('baselayers_w').setHeight(247);
+                        }
+                        else if (tab.id == 'baselayer1') {
+							Ext.getCmp('baselayers_w').setHeight(151);
+                        }
+                    }
+                },
+                items:
+                [
+                    {
+                        title: '<span class="panel-tab-title">'+i18n_new+'</span>',
+                        id: 'baselayer0',
+                        items:
+                        [
+                            newMapLayerBaseLayersPanel
+                        ]
+                    },
+                    {
+                        title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
+                        id: 'baselayer1',
+                        items:
+                        [
+                            deleteMapLayerBaseLayerPanel
+                        ]
+                    }
+                ]
+            }
+        ]
     });
 	
     /* Section: administrator */
@@ -2517,12 +2753,6 @@ Ext.onReady( function() {
     });
 	
 	/* Section: layers */
-	var vmap0 = new OpenLayers.Layer.WMS(
-        'World',
-        'http://labs.metacarta.com/wms/vmap0', 
-        {layers: 'basic'}
-    );
-                                   
     var choroplethLayer = new OpenLayers.Layer.Vector('Thematic map', {
         'visibility': false,
         'displayInLayerSwitcher': false,
@@ -2539,14 +2769,13 @@ Ext.onReady( function() {
         })
     });
     
-    MAP.addLayers([ vmap0, choroplethLayer ]);
-    
-	MAP.layers[0].setVisibility(false);
+    MAP.addLayers([ choroplethLayer ]);
     
 	function addOverlaysToMap() {
 		Ext.Ajax.request({
-			url: path + 'getAllMapLayers' + type,
-			method: 'GET',
+			url: path + 'getMapLayersByType' + type,
+            params: { type: map_layer_type_overlay },
+			method: 'POST',
 			success: function(r) {
 				var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
 				
@@ -2598,7 +2827,7 @@ Ext.onReady( function() {
         nodeType: 'gx_baselayercontainer',
         singleClickExpand: true,
         expanded: true,
-        text: 'Backgrounds',
+        text: 'Base layers',
 		iconCls: 'icon-background'
     }, {
         nodeType: 'gx_overlaylayercontainer',
@@ -2623,14 +2852,26 @@ Ext.onReady( function() {
 			[
 				{
 					xtype: 'button',
+					id: 'baselayers_b',
+					text: 'Base layers',
+					cls: 'x-btn-text-icon',
+					ctCls: 'aa_med',
+					icon: '../../images/add_small.png',
+					handler: function() {
+                        Ext.getCmp('baselayers_w').setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 50);
+						Ext.getCmp('baselayers_w').show();
+					}
+				},
+                {
+					xtype: 'button',
 					id: 'overlays_b',
 					text: 'Overlays',
 					cls: 'x-btn-text-icon',
 					ctCls: 'aa_med',
 					icon: '../../images/add_small.png',
 					handler: function() {
-                        Ext.getCmp('maplayer_w').setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 50);
-						Ext.getCmp('maplayer_w').show();
+                        Ext.getCmp('overlays_w').setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 50);
+						Ext.getCmp('overlays_w').show();
 					}
 				}
 			]
@@ -3032,11 +3273,18 @@ Ext.onReady( function() {
         prefix: '<span style="color:#666;">x: &nbsp;</span>',
         separator: '<br/><span style="color:#666;">y: &nbsp;</span>'
     }));
-
+    
+    var vmap0 = new OpenLayers.Layer.WMS(
+        "World",
+        "http://labs.metacarta.com/wms/vmap0", 
+        {layers: "basic"}
+    );
+    
     MAP.addControl(new OpenLayers.Control.OverviewMap({
         div: $('overviewmap'),
         size: new OpenLayers.Size(188, 97),
-        minRectSize: 0
+        minRectSize: 0,
+        layers: [vmap0]
     }));
     
     MAP.addControl(new OpenLayers.Control.ZoomBox());
@@ -3045,12 +3293,27 @@ Ext.onReady( function() {
     
 	MAP.events.on({
         changelayer: function(e) {
-            if (e.property == 'visibility' && e.layer != choroplethLayer && e.layer != vmap0) {
+            var isOverlay = false;
+            for (var i = 0; i < mapLayerStore.getTotalCount(); i++) {
+                if (mapLayerStore.getAt(i).data.name == e.layer.name) {
+                    isOverlay = true;
+                }
+            }
+            
+            var activeOverlays = false;
+            if (e.property == 'visibility' && isOverlay ) {
                 if (e.layer.visibility) {
                     selectFeatureChoropleth.deactivate();
                 }
                 else {
-                    selectFeatureChoropleth.activate();
+                    for (var i = 0; i < mapLayerStore.getTotalCount(); i++) {
+                        if (MAP.getLayersByName(mapLayerStore.getAt(i).data.name)[0].visibility) {
+                            activeOverlays = true;
+                        }
+                    }
+                    if (!activeOverlays) {
+                        selectFeatureChoropleth.activate();
+                    }
                 }
             }
         }
@@ -3058,6 +3321,10 @@ Ext.onReady( function() {
 	
 	Ext.getCmp('maplegendset_cb').hideField();
 	Ext.getCmp('bounds').hideField();
+	
+	Ext.getCmp('dataelementgroup_cb').hideField();
+	Ext.getCmp('dataelement_cb').hideField();
+	
 	
     Ext.get('loading').fadeOut({remove: true});
 	
@@ -3222,7 +3489,7 @@ function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
     }
     
     mapValueTimeseriesStore = new Ext.data.JsonStore({
-        url: path + 'getMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
+        url: path + 'getIndicatorMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
         root: 'mapvalues',
         fields:['orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
         autoLoad: false,
@@ -3398,14 +3665,39 @@ function loadMapData(redirect, position) {
 
 /* Section: choropleth */
 function getChoroplethData() {
-	MASK.msg = i18n_creating_choropleth ;
+	MASK.msg = i18n_creating_choropleth;
 	MASK.show();
 	
     var indicatorId = Ext.getCmp('indicator_cb').getValue();
+	var dataElementId = Ext.getCmp('dataelement_cb').getValue();
     var periodId = Ext.getCmp('period_cb').getValue();
     var mapLayerPath = MAPDATA.mapLayerPath;
-	var url = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? 'getMapValuesByMap' : 'getMapValuesByLevel';
-	var params = MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile ? { indicatorId: indicatorId, periodId: periodId, mapLayerPath: mapLayerPath } : { indicatorId: indicatorId, periodId: periodId, level: mapLayerPath };
+	var url;
+	var params = new Object();
+	params.periodId = periodId;
+	
+	if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
+		params.mapLayerPath = mapLayerPath;
+		if (VALUETYPE.polygon == map_value_type_indicator) {
+			url = 'getIndicatorMapValuesByMap';
+			params.indicatorId = indicatorId;
+		}
+		else if (VALUETYPE.polygon == map_value_type_dataelement) {
+			url = 'getDataMapValuesByMap';
+			params.dataElementId = dataElementId;
+		}
+	}
+	else {
+		params.level = mapLayerPath;
+		if (VALUETYPE.polygon == map_value_type_indicator) {
+			url = 'getIndicatorMapValuesByLevel';
+			params.indicatorId = indicatorId;
+		}
+		else if (VALUETYPE.polygon == map_value_type_dataelement) {
+			url = 'getDataMapValuesByLevel';
+			params.dataElementId = dataElementId;
+		}
+	}
 
     Ext.Ajax.request({
         url: path + url + type,
@@ -3414,25 +3706,41 @@ function getChoroplethData() {
         success: function(r) {
 			var features = MAP.getLayersByName('Thematic map')[0].features;
 			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-			EXPORTVALUES = getExportDataValueJSON( mapvalues );
+			EXPORTVALUES = getExportDataValueJSON(mapvalues);
 			var mv = new Array();
+            var mour = new Array();
 			var nameColumn = MAPDATA.nameColumn;
 			var options = {};
 			
 			if (mapvalues.length == 0) {
-				Ext.messageRed.msg( i18n_thematic_map ,  i18n_selected_period_level_no_data );
+				Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
 				MASK.hide();
 				return;
 			}
-
-			for (var i = 0; i < mapvalues.length; i++) {
+            
+            for (var i = 0; i < mapvalues.length; i++) {
 				mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
 			}
 
 			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-				for (var j = 0; j < features.length; j++) {
-					features[j].attributes.value = mv[features[j].attributes[nameColumn]] ? mv[features[j].attributes[nameColumn]] : 0;
-				}
+                Ext.Ajax.request({
+                    url: path + 'getAvailableMapOrganisationUnitRelations' + type,
+                    method: 'POST',
+                    params: { mapLayerPath: mapLayerPath },
+                    success: function(r) {
+                        var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
+                       
+                        for (var i = 0; i < relations.length; i++) {
+                            mour[relations[i].featureId] = relations[i].organisationUnit;
+                        }
+
+                        for (var j = 0; j < features.length; j++) {
+                            features[j].attributes.value = mv[mour[features[j].attributes[nameColumn]]] || 0;
+                        }
+                        
+                        applyValues();
+                    }
+                });           
 			}
 			else if (MAPSOURCE == map_source_type_database) {
 				for (var i = 0; i < mapvalues.length; i++) {
@@ -3443,21 +3751,25 @@ function getChoroplethData() {
 						}
 					}
 				}
+                
+                applyValues();
 			}
-
-			choropleth.indicator = options.indicator = 'value';
-			options.method = Ext.getCmp('method').getValue();
-			options.numClasses = Ext.getCmp('numClasses').getValue();
-			options.colors = choropleth.getColors();
+            
+            function applyValues() {
+                choropleth.indicator = options.indicator = 'value';
+                options.method = Ext.getCmp('method').getValue();
+                options.numClasses = Ext.getCmp('numClasses').getValue();
+                options.colors = choropleth.getColors();
+                
+                choropleth.coreComp.updateOptions(options);
+                choropleth.coreComp.applyClassification();
+                choropleth.classificationApplied = true;
 			
-			choropleth.coreComp.updateOptions(options);
-			choropleth.coreComp.applyClassification();
-			choropleth.classificationApplied = true;
-			
-			MASK.hide();		
+                MASK.hide();
+            }
         },
         failure: function() {
-            alert( 'Error: getMapValues' );
+            alert( 'Error: getIndicatorMapValues' );
         } 
     });
 }

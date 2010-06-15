@@ -84,6 +84,10 @@ public class GeneratePeriodsInChartAction
             String name = format.formatPeriod( period );
 
             keys.add( name );
+            
+            System.out.println("Indicator:" + indicator);
+            System.out.println("Period:" + period);
+            System.out.println("Organisation Unit:" + organisationUnit.getName());
 
             double value = aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period
                 .getEndDate(), organisationUnit );

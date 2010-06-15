@@ -29,8 +29,6 @@ package org.hisp.dhis.importexport;
 
 import java.util.Date;
 
-import org.hisp.dhis.system.util.MathUtils;
-
 /**
  * @author Lars Helge Overland
  * @version $Id: ImportParams.java 6425 2008-11-22 00:08:57Z larshelg $
@@ -68,6 +66,13 @@ public class ImportParams
     {
     }
 
+    public ImportParams( ImportType type, ImportStrategy importStrategy, boolean dataValues )
+    {
+        this.type = type;
+        this.importStrategy = importStrategy;
+        this.dataValues = dataValues;
+    }
+    
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
@@ -78,12 +83,7 @@ public class ImportParams
         {
             return false;
         }
-        
-        if ( !MathUtils.isNumeric( minorVersion ) )
-        {
-            throw new IllegalArgumentException( "Invalid version, must be numeric: " + minorVersion );            
-        }
-        
+                
         double _minorVersion = Double.parseDouble( minorVersion ) * 1000;
         double _requiredVersion = Double.parseDouble( requiredVersion ) * 1000;
         
@@ -173,6 +173,12 @@ public class ImportParams
     {
         this.lastUpdated = lastUpdated;
     }
+
+    //----------------------------------------------------------------
+    //
+    // DXF parameters
+    //
+    //----------------------------------------------------------------
 
     public String getNamespace()
     {

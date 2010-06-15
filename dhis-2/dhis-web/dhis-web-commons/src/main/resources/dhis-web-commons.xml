@@ -104,14 +104,12 @@
 		<default-interceptor-ref name="exceptionStack" />
 
 		<global-results>
-			<result name="exceptionDefault" type="velocity">/exception.vm
-			</result>
-			<result name="accessDenied" type="velocity">/accessDenied.vm
-			</result>
+			<result name="exceptionDefault" type="velocity">/exception.vm</result>
+			<result name="accessDenied" type="velocity">/accessDenied.vm</result>
+			<result name="jsonAccessDenied" type="velocity">/dhis-web-commons/ajax/jsonAccessDenied.vm</result>
 			<result name="plainTextError" type="plainTextErrorResult">
 				<param name="parse">true</param>
-				<param name="message">${exception.class.name}:
-					${exception.message}</param>
+				<param name="message">${exception.class.name}: ${exception.message}</param>
 			</result>
 		</global-results>
 	</package>
@@ -253,11 +251,15 @@
 		<action name="i18n" class="org.hisp.dhis.i18n.action.I18nAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-commons/i18n/translate.vm</param>
-			<param name="javascripts">../dhis-web-commons/i18n/i18n.js,../dhis-web-commons/lists/lists.js</param>
+			<param name="javascripts">../dhis-web-commons/i18n/i18n.js,../dhis-web-commons/lists/lists.js
+				,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
+				,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js
+			</param>
 		</action>
 
 		<action name="translate" class="org.hisp.dhis.i18n.action.TranslateAction">
 			<result name="success" type="velocity">/dhis-web-commons/i18n/goback.vm</result>
+			<result name="input" type="chain">i18n</result>
 		</action>
 		
 		<action name="validateAddDuplicatedTranslation" class="org.hisp.dhis.i18n.action.ValidateAddDuplicatedTranslationAction">

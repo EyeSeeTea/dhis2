@@ -1,17 +1,5 @@
 package org.hisp.dhis.reportexcel.chart.action;
 
-import java.util.List;
-import java.util.Map;
-
-import org.amplecode.quick.StatementManager;
-import org.apache.commons.collections.Bag;
-import org.apache.commons.collections.map.MultiValueMap;
-import org.hisp.dhis.aggregation.AggregationService;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.period.PeriodService;
-
-import com.opensymphony.xwork2.Action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -38,6 +26,16 @@ import com.opensymphony.xwork2.Action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import java.util.List;
+import java.util.Map;
+
+import org.amplecode.quick.StatementManager;
+import org.hisp.dhis.aggregation.AggregationService;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.period.PeriodService;
+
+import com.opensymphony.xwork2.Action;
 
 public abstract class GenerateChartSupportAction
     implements Action

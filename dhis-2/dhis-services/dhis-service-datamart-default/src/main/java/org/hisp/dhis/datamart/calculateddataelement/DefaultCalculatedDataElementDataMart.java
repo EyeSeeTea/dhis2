@@ -50,6 +50,7 @@ import org.hisp.dhis.datamart.aggregation.dataelement.DataElementAggregator;
 import org.hisp.dhis.datamart.crosstab.CrossTabService;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedDataValueBatchHandler;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -151,6 +152,8 @@ public class DefaultCalculatedDataElementDataMart
         
         batchHandler.init();
 
+        OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
+        
         int count = 0;
         int level = 0;
 
@@ -175,8 +178,8 @@ public class DefaultCalculatedDataElementDataMart
             
             for ( final Period period : periods )
             {
-                sumIntValueMap = sumIntAggregator.getAggregatedValues( sumOperandIndexMap, period, unit, level );                
-                averageIntValueMap = averageIntAggregator.getAggregatedValues( averageOperandIndexMap, period, unit, level );
+                sumIntValueMap = sumIntAggregator.getAggregatedValues( sumOperandIndexMap, period, unit, level, hierarchy );                
+                averageIntValueMap = averageIntAggregator.getAggregatedValues( averageOperandIndexMap, period, unit, level, hierarchy );
                                 
                 valueMapMap = new HashMap<String, Map<DataElementOperand, Double>>( 2 );
                 

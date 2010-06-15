@@ -43,7 +43,6 @@ import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
-import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -108,12 +107,6 @@ public class DefaultPatientService
         this.relationshipTypeService = relationshipTypeService;
     }
 
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
     // -------------------------------------------------------------------------
     // PatientDataValue
     // -------------------------------------------------------------------------

@@ -616,9 +616,7 @@ public class DefaultDataEntryScreenManager
                 int dataElementId = Integer.parseInt( identifierMatcher.group( 1 ) );
                 int optionComboId = Integer.parseInt( identifierMatcher.group( 2 ) );
 
-                DataElement dataElement = dataElementMap.get( dataElementId ); // dataElementService.getDataElement(
-                                                                               // dataElementId
-                                                                               // );
+                DataElement dataElement = dataElementMap.get( dataElementId ); 
 
                 if ( dataElement == null )
                 {

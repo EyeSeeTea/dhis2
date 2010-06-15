@@ -55,14 +55,23 @@ public interface MappingService
     final String MAP_TEMPL_DIR = "map_temp";
 
     // -------------------------------------------------------------------------
-    // MapValue
+    // DataMapValue
     // -------------------------------------------------------------------------
 
-    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, Collection<Integer> periodIds, String mapLayerPath, String featureId );
-    
-    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, String mapLayerPath );
+    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, String mapLayerPath );
 
-    Collection<AggregatedMapValue> getAggregatedMapValues( int indicatorId, int periodId, int level );
+    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level );
+
+    // -------------------------------------------------------------------------
+    // IndicatorMapValue
+    // -------------------------------------------------------------------------
+
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, Collection<Integer> periodIds,
+        String mapLayerPath, String featureId );
+
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, String mapLayerPath );
+
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level );
 
     // -------------------------------------------------------------------------
     // Map
@@ -366,15 +375,17 @@ public interface MappingService
 
     int addMapView( MapView mapView );
 
-    int addMapView( String name, int indicatorGroupId, int indicatorId, String periodTypeName, int periodId,
-        String mapSourceType, String mapSource, String mapLegendType, int method, int classes, String colorLow,
-        String colorHigh, int mapLegendSetId, String longitude, String latitude, int zoom );
+    int addMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId, int dataElementGroupId,
+        int dataElementId, String periodTypeName, int periodId, String mapSourceType, String mapSource,
+        String mapLegendType, int method, int classes, String colorLow, String colorHigh, int mapLegendSetId,
+        String longitude, String latitude, int zoom );
 
     void updateMapView( MapView mapView );
 
-    void addOrUpdateMapView( String name, int indicatorGroupId, int indicatorId, String periodTypeName, int periodId,
-        String mapSource, String mapLegendType, int method, int classes, String colorLow, String colorHigh,
-        int mapLegendSetId, String longitude, String latitude, int zoom );
+    void addOrUpdateMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
+        int dataElementGroupId, int dataElementId, String periodTypeName, int periodId, String mapSource,
+        String mapLegendType, int method, int classes, String colorLow, String colorHigh, int mapLegendSetId,
+        String longitude, String latitude, int zoom );
 
     void deleteMapView( MapView view );
 
@@ -394,14 +405,16 @@ public interface MappingService
 
     void updateMapLayer( MapLayer mapLayer );
 
-    void addOrUpdateMapLayer( String name, String type, String mapSource, String fillColor, double fillOpacity,
-        String strokeColor, int strokeWidth );
+    void addOrUpdateMapLayer( String name, String type, String mapSource, String layer, String fillColor,
+        double fillOpacity, String strokeColor, int strokeWidth );
 
     void deleteMapLayer( MapLayer mapLayer );
 
     MapLayer getMapLayer( int id );
 
     MapLayer getMapLayerByName( String name );
+
+    Collection<MapLayer> getMapLayersByType( String type );
 
     Collection<MapLayer> getMapLayersByMapSourceType();
 

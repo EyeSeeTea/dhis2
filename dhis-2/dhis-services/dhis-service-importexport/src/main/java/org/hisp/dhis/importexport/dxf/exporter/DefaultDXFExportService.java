@@ -109,8 +109,7 @@ public class DefaultDXFExportService
 {
     private static final String ZIP_ENTRY_NAME = "Export.xml";
     private static final String ROOT_NAME = "dxf";
-    
-    
+        
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------

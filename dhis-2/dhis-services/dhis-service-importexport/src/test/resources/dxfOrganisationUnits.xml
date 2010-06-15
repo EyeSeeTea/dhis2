@@ -11,12 +11,11 @@
 <active>true</active>
 <comment>Comment</comment>
 <geoCode>GeoCode</geoCode>
-<featureType>MultiPolygon</featureType>
-<coordinates>
-<coordinate>11.11,22.22 33.33,44.44 55.55,66.66</coordinate>
-<coordinate>77.77,88.88 99.99,11.11 22.22,33.33</coordinate>
-<coordinate>44.44,55.55 66.66,77.77 88.88,99.99</coordinate>
-</coordinates>
+<feature type="MultiPolygon">
+<coordinates>11.11,22.22 33.33,44.44 55.55,66.66</coordinates>
+<coordinates>77.77,88.88 99.99,11.11 22.22,33.33</coordinates>
+<coordinates>44.44,55.55 66.66,77.77 88.88,99.99</coordinates>
+</feature>
 <lastUpdated>2010-01-01</lastUpdated>
 </organisationUnit>
 <organisationUnit>
@@ -30,12 +29,11 @@
 <active>true</active>
 <comment>Comment</comment>
 <geoCode>GeoCode</geoCode>
-<featureType>MultiPolygon</featureType>
-<coordinates>
-<coordinate>11.11,22.22 33.33,44.44 55.55,66.66</coordinate>
-<coordinate>77.77,88.88 99.99,11.11 22.22,33.33</coordinate>
-<coordinate>44.44,55.55 66.66,77.77 88.88,99.99</coordinate>
-</coordinates>
+<feature type="MultiPolygon">
+<coordinates>11.11,22.22 33.33,44.44 55.55,66.66</coordinates>
+<coordinates>77.77,88.88 99.99,11.11 22.22,33.33</coordinates>
+<coordinates>44.44,55.55 66.66,77.77 88.88,99.99</coordinates>
+</feature>
 <lastUpdated>2010-01-01</lastUpdated>
 </organisationUnit>
 <organisationUnit>
@@ -49,12 +47,11 @@
 <active>true</active>
 <comment>Comment</comment>
 <geoCode>GeoCode</geoCode>
-<featureType>MultiPolygon</featureType>
-<coordinates>
-<coordinate>11.11,22.22 33.33,44.44 55.55,66.66</coordinate>
-<coordinate>77.77,88.88 99.99,11.11 22.22,33.33</coordinate>
-<coordinate>44.44,55.55 66.66,77.77 88.88,99.99</coordinate>
-</coordinates>
+<feature type="MultiPolygon">
+<coordinates>11.11,22.22 33.33,44.44 55.55,66.66</coordinates>
+<coordinates>77.77,88.88 99.99,11.11 22.22,33.33</coordinates>
+<coordinates>44.44,55.55 66.66,77.77 88.88,99.99</coordinates>
+</feature>
 <lastUpdated>2010-01-01</lastUpdated>
 </organisationUnit>
 </organisationUnits>

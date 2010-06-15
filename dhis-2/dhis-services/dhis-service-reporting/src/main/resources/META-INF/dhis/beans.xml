@@ -237,14 +237,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     class="org.hisp.dhis.startup.OpenHealthDataSourceWriter">
     <property name="environmentVariable" value="OPENHEALTH_HOME"/>
     <property name="dataSourceFile" value="datasources.xml"/>
+    <property name="skipInTests" value="true"/>
   </bean>
-  
-  <bean id="org.hisp.dhis.startup.ReportTableUpgrader"
-    class="org.hisp.dhis.startup.ReportTableUpgrader">
-    <property name="reportTableService"
-      ref="org.hisp.dhis.reporttable.ReportTableService"/>
-  </bean>
-  
+    
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject"
       ref="org.hisp.dhis.system.startup.StartupRoutineExecutor"/>
@@ -252,7 +247,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="arguments">
       <list>
         <ref local="org.hisp.dhis.startup.OpenHealthDataSourceWriter"/>
-        <ref local="org.hisp.dhis.startup.ReportTableUpgrader"/>
       </list>
     </property>
   </bean>

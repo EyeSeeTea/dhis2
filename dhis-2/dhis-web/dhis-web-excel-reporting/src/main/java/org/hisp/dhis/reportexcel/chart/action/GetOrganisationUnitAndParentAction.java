@@ -68,13 +68,26 @@ public class GetOrganisationUnitAndParentAction
         return parent;
     }
 
+    private boolean root;
+
+    public boolean isRoot()
+    {
+        return root;
+    }
+
     @Override
     public String execute()
         throws Exception
     {
+
         organisationUnit = organisationUnitSelectionManager.getSelectedOrganisationUnit();
 
-        parent = organisationUnit.getParent();
+        if ( organisationUnit != null )
+        {
+            root = organisationUnitSelectionManager.getRootOrganisationUnits().contains( organisationUnit );
+
+            parent = organisationUnit.getParent();
+        }
 
         return SUCCESS;
     }

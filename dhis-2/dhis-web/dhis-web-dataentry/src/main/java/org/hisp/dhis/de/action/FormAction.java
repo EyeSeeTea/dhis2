@@ -147,16 +147,16 @@ public class FormAction
     {
         this.i18n = i18n;
     }
-    
+
     private DataSetLockService dataSetLockService;
-    
-    public void setDataSetLockService( DataSetLockService dataSetLockService)
+
+    public void setDataSetLockService( DataSetLockService dataSetLockService )
     {
         this.dataSetLockService = dataSetLockService;
     }
 
     private DataElementCategoryService categoryService;
-    
+
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
@@ -311,7 +311,7 @@ public class FormAction
         Period period = selectedStateManager.getSelectedPeriod();
 
         DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
-        
+
         if ( dataSetLock != null && dataSetLock.getSources().contains( organisationUnit ) )
         {
             disabled = "disabled";
@@ -325,14 +325,15 @@ public class FormAction
         }
 
         DataElementCategoryOptionCombo defaultOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        
+
         optionComboId = defaultOptionCombo.getId();
 
         // ---------------------------------------------------------------------
         // Get the min/max values
         // ---------------------------------------------------------------------
 
-        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataElements );
+        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
+            organisationUnit, dataElements );
 
         minMaxMap = new HashMap<Integer, MinMaxDataElement>( minMaxDataElements.size() );
 
@@ -358,7 +359,8 @@ public class FormAction
         // Prepare values for unsaved CalculatedDataElements
         // ---------------------------------------------------------------------
 
-        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet, period );
+        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet,
+            period );
 
         // ---------------------------------------------------------------------
         // Make the standard comments available

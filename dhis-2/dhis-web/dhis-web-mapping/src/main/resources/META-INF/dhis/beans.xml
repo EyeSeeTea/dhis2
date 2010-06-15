@@ -52,18 +52,28 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
 	</bean>
 
-	<bean id="org.hisp.dhis.mapping.action.GetMapValuesByMapAction"
-		class="org.hisp.dhis.mapping.action.GetMapValuesByMapAction" scope="prototype">
+    <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByMapAction"
+        class="org.hisp.dhis.mapping.action.GetDataMapValuesByMapAction" scope="prototype">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction"
+        class="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction" scope="prototype">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
+	<bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction"
+		class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction" scope="prototype">
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
 	</bean>
 
-	<bean id="org.hisp.dhis.mapping.action.GetMapValuesByLevelAction"
-		class="org.hisp.dhis.mapping.action.GetMapValuesByLevelAction" scope="prototype">
+	<bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction"
+		class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction" scope="prototype">
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.mapping.action.GetMapValuesByMapAndFeatureIdAction"
-        class="org.hisp.dhis.mapping.action.GetMapValuesByMapAndFeatureIdAction" scope="prototype">
+	<bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAndFeatureIdAction"
+        class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAndFeatureIdAction" scope="prototype">
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
@@ -255,6 +265,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
 	</bean>
 
+    <bean id="org.hisp.dhis.mapping.action.GetMapLayersByTypeAction"
+        class="org.hisp.dhis.mapping.action.GetMapLayersByTypeAction" scope="prototype">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
 	<!-- Indicator -->
 
 	<bean id="org.hisp.dhis.mapping.action.GetAllIndicatorGroupsAction"
@@ -274,6 +289,26 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.mapping.action.GetAllIndicatorsAction" scope="prototype">
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 	</bean>
+
+    <!-- DataElement -->
+
+    <bean id="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction"
+        class="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction"
+        scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
+
+    <bean
+        id="org.hisp.dhis.mapping.action.GetDataElementsByDataElementGroupAction"
+        class="org.hisp.dhis.mapping.action.GetDataElementsByDataElementGroupAction"
+        scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.mapping.action.GetAllDataElementsAction"
+        class="org.hisp.dhis.mapping.action.GetAllDataElementsAction" scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
 
 	<!-- Period -->
 

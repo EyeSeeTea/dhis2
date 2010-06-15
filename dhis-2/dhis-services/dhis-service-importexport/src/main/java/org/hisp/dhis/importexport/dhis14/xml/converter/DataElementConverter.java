@@ -27,13 +27,13 @@ package org.hisp.dhis.importexport.dhis14.xml.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.dataelement.DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME;
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertAggregationOperatorFromDhis14;
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertAggregationOperatorToDhis14;
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertBooleanFromDhis14;
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertBooleanToDhis14;
 import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertTypeToDhis14;
 import static org.hisp.dhis.system.util.ConversionUtils.parseInt;
-import static org.hisp.dhis.dataelement.DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -48,15 +48,14 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberType;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
-import org.hisp.dhis.importexport.converter.AbstractDataElementConverter;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14DateUtil;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14ObjectMappingUtil;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14ParsingUtils;
+import org.hisp.dhis.importexport.importer.DataElementImporter;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 
 /**
@@ -64,7 +63,7 @@ import org.hisp.dhis.importexport.mapping.NameMappingUtil;
  * @version $Id: DataElementConverter.java 6455 2008-11-24 08:59:37Z larshelg $
  */
 public class DataElementConverter
-    extends AbstractDataElementConverter implements XMLConverter
+    extends DataElementImporter implements XMLConverter
 {
     public static final String ELEMENT_NAME = "DataElement";
     
@@ -231,8 +230,6 @@ public class DataElementConverter
         element.setSortOrder( parseInt( values.get( FIELD_SORT_ORDER ) ) );
         element.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
         
-        NameMappingUtil.addDataElementAggregationOperatorMapping( element.getId(), element.getAggregationOperator() );
-        
-        read( element, GroupMemberType.NONE, params );   
+        importObject( element, params );   
     }    
 }

@@ -78,10 +78,8 @@ public class SumIntAggregator
     // -------------------------------------------------------------------------
 
     public Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Period period, final OrganisationUnit unit, int unitLevel )
+        final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy )
     {
-        final OrganisationUnitHierarchy hierarchy = aggregationCache.getLatestOrganisationUnitHierarchy();
-        
         final Collection<CrossTabDataValue> crossTabValues = 
             getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unit.getId(), hierarchy );
         
@@ -102,10 +100,8 @@ public class SumIntAggregator
     }
 
     public Collection<CrossTabDataValue> getCrossTabDataValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Date startDate, final Date endDate, final int parentId, final OrganisationUnitHierarchy hierarchy )
+        final Date startDate, final Date endDate, final int parentId, final OrganisationUnitHierarchy hierarchy ) //TODO replace inline
     {
-        final Collection<Integer> sourceIds = aggregationCache.getChildren( hierarchy, parentId );
-        
         final Collection<Period> periods = aggregationCache.getIntersectingPeriods( startDate, endDate );
         
         final Collection<Integer> periodIds = new ArrayList<Integer>( periods.size() );
@@ -115,7 +111,7 @@ public class SumIntAggregator
             periodIds.add( period.getId() );
         }
         
-        return dataMartStore.getCrossTabDataValues( operandIndexMap, periodIds, sourceIds );
+        return dataMartStore.getCrossTabDataValues( operandIndexMap, periodIds, hierarchy.getChildren( parentId ) );
     }
     
     public Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 

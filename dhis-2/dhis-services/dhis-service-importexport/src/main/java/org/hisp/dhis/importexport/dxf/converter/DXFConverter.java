@@ -37,7 +37,6 @@ import org.hisp.dhis.cache.HibernateCacheManager;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
-import org.hisp.dhis.datadictionary.ExtendedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -51,7 +50,6 @@ import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.GroupMemberAssociation;
@@ -59,6 +57,8 @@ import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
+import org.hisp.dhis.importexport.analysis.DefaultImportAnalyser;
+import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.invoker.ConverterInvoker;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.importexport.mapping.ObjectMappingGenerator;
@@ -85,7 +85,6 @@ import org.hisp.dhis.jdbc.batchhandler.DataSetBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataSetMemberBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataSetSourceAssociationBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataValueBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.ExtendedDataElementBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.GroupSetBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.GroupSetMemberBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.ImportDataValueBatchHandler;
@@ -222,13 +221,6 @@ public class DXFConverter
         this.olapURLService = olapURLService;
     }
 
-    private DataValueService dataValueService;
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
     private DataMartService dataMartService;
 
     public void setDataMartService( DataMartService dataMartService )
@@ -267,6 +259,8 @@ public class DXFConverter
 
     public void read( XMLReader reader, ImportParams params, ProcessState state )
     {
+        ImportAnalyser importAnalyser = new DefaultImportAnalyser( expressionService );
+        
         NameMappingUtil.clearMapping();
 
         if ( params.isPreview() )
@@ -391,7 +385,7 @@ public class DXFConverter
                 batchHandler.init();
 
                 XMLConverter converter = new DataElementConverter( batchHandler, importObjectService,
-                    objectMappingGenerator.getCategoryComboMapping( params.skipMapping() ), dataElementService );
+                    objectMappingGenerator.getCategoryComboMapping( params.skipMapping() ), dataElementService, importAnalyser );
 
                 converterInvoker.invokeRead( converter, reader, params );
 
@@ -406,20 +400,13 @@ public class DXFConverter
                 BatchHandler<DataElement> batchHandler = batchHandlerFactory
                     .createBatchHandler( DataElementBatchHandler.class );
 
-                BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler = batchHandlerFactory
-                    .createBatchHandler( ExtendedDataElementBatchHandler.class );
-
-                extendedDataElementBatchHandler.init();
-
                 batchHandler.init();
 
                 XMLConverter converter = new ExtendedDataElementConverter( batchHandler,
-                    extendedDataElementBatchHandler, importObjectService, objectMappingGenerator
+                    importObjectService, objectMappingGenerator
                         .getCategoryComboMapping( params.skipMapping() ), dataElementService );
 
                 converterInvoker.invokeRead( converter, reader, params );
-
-                extendedDataElementBatchHandler.flush();
 
                 batchHandler.flush();
 
@@ -541,7 +528,7 @@ public class DXFConverter
                 XMLConverter converter = new IndicatorConverter( batchHandler, importObjectService, indicatorService,
                     expressionService, objectMappingGenerator.getIndicatorTypeMapping( params.skipMapping() ),
                     objectMappingGenerator.getDataElementMapping( params.skipMapping() ), objectMappingGenerator
-                        .getCategoryOptionComboMapping( params.skipMapping() ) );
+                        .getCategoryOptionComboMapping( params.skipMapping() ), importAnalyser );
 
                 converterInvoker.invokeRead( converter, reader, params );
 
@@ -556,22 +543,15 @@ public class DXFConverter
                 BatchHandler<Indicator> batchHandler = batchHandlerFactory
                     .createBatchHandler( IndicatorBatchHandler.class );
 
-                BatchHandler<ExtendedDataElement> extendedDataElementBatchHandler = batchHandlerFactory
-                    .createBatchHandler( ExtendedDataElementBatchHandler.class );
-
-                extendedDataElementBatchHandler.init();
-
                 batchHandler.init();
 
-                XMLConverter converter = new ExtendedIndicatorConverter( batchHandler, extendedDataElementBatchHandler,
+                XMLConverter converter = new ExtendedIndicatorConverter( batchHandler,
                     importObjectService, indicatorService, expressionService, objectMappingGenerator
                         .getIndicatorTypeMapping( params.skipMapping() ), objectMappingGenerator
                         .getDataElementMapping( params.skipMapping() ), objectMappingGenerator
                         .getCategoryOptionComboMapping( params.skipMapping() ) );
 
                 converterInvoker.invokeRead( converter, reader, params );
-
-                extendedDataElementBatchHandler.flush();
 
                 batchHandler.flush();
 
@@ -755,7 +735,7 @@ public class DXFConverter
                 batchHandler.init();
 
                 XMLConverter converter = new OrganisationUnitConverter( batchHandler, sourceBatchHandler,
-                    importObjectService, organisationUnitService );
+                    importObjectService, organisationUnitService, importAnalyser );
 
                 converterInvoker.invokeRead( converter, reader, params );
 
@@ -986,7 +966,7 @@ public class DXFConverter
                 importDataValueBatchHandler.init();
 
                 XMLConverter converter = new DataValueConverter( batchHandler, importDataValueBatchHandler,
-                    dataValueService, dataMartService, importObjectService, params, objectMappingGenerator
+                    dataMartService, importObjectService, params, objectMappingGenerator
                         .getDataElementMapping( params.skipMapping() ), objectMappingGenerator
                         .getPeriodMapping( params.skipMapping() ), objectMappingGenerator
                         .getOrganisationUnitMapping( params.skipMapping() ), objectMappingGenerator
@@ -1000,6 +980,11 @@ public class DXFConverter
 
                 log.info( "Imported DataValues" );
             }
+        }
+
+        if ( params.isAnalysis() )
+        {
+            state.setOutput( importAnalyser.getImportAnalysis() );
         }
 
         NameMappingUtil.clearMapping();

@@ -442,7 +442,7 @@ public class FormAction
                 if ( !cat.getCategoryOptions().isEmpty() )
                 {
                     catColSpan = catColSpan / cat.getCategoryOptions().size();
-                    int total = optionCombos.size() / ( catColSpan * cat.getCategoryOptions().size() );
+                    int total = optionCombos.size() / (catColSpan * cat.getCategoryOptions().size());
                     Collection<Integer> cols = new ArrayList<Integer>( total );
 
                     for ( int i = 0; i < total; i++ )
@@ -451,9 +451,9 @@ public class FormAction
                     }
 
                     /*
-                     * TODO Cols are made to be a collection simply to facilitate a
-                     * for loop in the velocity template - there should be a better
-                     * way of "for" doing a loop.
+                     * TODO Cols are made to be a collection simply to
+                     * facilitate a for loop in the velocity template - there
+                     * should be a better way of "for" doing a loop.
                      */
 
                     colRepeat.put( cat.getId(), cols );
@@ -501,8 +501,7 @@ public class FormAction
         // Prepare values for unsaved CalculatedDataElements
         // ---------------------------------------------------------------------
 
-        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet,
-            period );
+        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet, period );
 
         // ---------------------------------------------------------------------
         // Make the standard comments available
@@ -526,7 +525,7 @@ public class FormAction
 
         dataEntryForm = dataEntryFormService.getDataEntryFormByDataSet( dataSet );
 
-        cdeFormExists = ( dataEntryForm != null );
+        cdeFormExists = (dataEntryForm != null);
 
         if ( cdeFormExists )
         {
