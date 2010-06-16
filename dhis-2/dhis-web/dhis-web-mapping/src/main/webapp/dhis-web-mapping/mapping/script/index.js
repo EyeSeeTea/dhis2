@@ -2886,8 +2886,20 @@ Ext.onReady( function() {
         rootVisible: false,
         root: {
             nodeType: 'async',
-            children: layerTreeConfig            
-        }, 
+            children: layerTreeConfig
+        },
+		listeners: {
+			'click': {
+				fn: function(n) {
+					if (n.isAncestor(this.getNodeById('xnode-253')) || n.isAncestor(this.getNodeById('xnode-254'))) {
+						alert(n.attributes.layer.name);
+					}
+					else {
+						alert(n.attributes.layer);
+					}
+				}
+			}
+		},					
         bbar: new Ext.StatusBar({
 			id: 'maplayers_sb',
 			items:
