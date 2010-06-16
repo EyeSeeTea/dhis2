@@ -198,8 +198,15 @@ public class AddPatientAction
         {
             for ( PatientIdentifierType identifierType : identifierTypes )
             {
-                value = request.getParameter( PREFIX_IDENTIFIER + identifierType.getId() );
-
+                if(identifierType.getFormat().equals("State Format"))
+                {
+                    value = organisationUnit.getCode()+request.getParameter( "progcode" )+request.getParameter( "yearcode" )+request.getParameter( "benicode" );
+                    System.out.println( "value = "+value );
+                }
+                else
+                {
+                    value = request.getParameter( PREFIX_IDENTIFIER + identifierType.getId() );
+                }
                 if ( StringUtils.isNotBlank( value ) )
                 {
                     pIdentifier = new PatientIdentifier();

@@ -262,7 +262,14 @@ function searchValidationCompleted( messageElement )
 	}
 }
 
+// -----------------------------------------------------------------------------
+// Disable form
+// -----------------------------------------------------------------------------
 
+function disableForm()
+{
+    $('#firstName').attr("disabled", true);
+}
 // -----------------------------------------------------------------------------
 // Add Patient
 // -----------------------------------------------------------------------------
@@ -271,7 +278,7 @@ function validateAddPatient()
 {
 	
 	var age = document.getElementById( 'age' );
-		
+	var orgunitcode = document.getElementById('orgunitcode');
 	if( age.value != '' )
 	{
 		if( !isInt( age.value ) )
@@ -282,7 +289,7 @@ function validateAddPatient()
 			
 			return false;
 		}
-	}	
+	}
 	
 	var params = '&checkedDuplicate='+checkedDuplicate 
 				+'&firstName=' + getFieldValue( 'firstName' ) 
@@ -418,7 +425,7 @@ function move( listId ) {
 	
 	var fromList = document.getElementById(listId);
 	
-	if ( fromList.selectedIndex == -1 ) { return; }
+	if ( fromList.selectedIndex == -1 ) {return;}
 	
 	if ( ! availableList ) 
 	{
@@ -570,7 +577,7 @@ function showListPatientDuplicate(rootElement, validate)
 		}
 		jQuery("#thickboxContainer","#hiddenModalContent").html("").append(sPatient);
 		if( !validate ) jQuery("#btnCreateNew","#hiddenModalContent").click(function(){window.parent.tb_remove();});
-		else jQuery("#btnCreateNew","#hiddenModalContent").click(function(){window.parent.tb_remove();window.parent.checkedDuplicate = true; window.parent.validatePatient();});
+		else jQuery("#btnCreateNew","#hiddenModalContent").click(function(){window.parent.tb_remove();window.parent.checkedDuplicate = true;window.parent.validatePatient();});
 		tb_show( message, "#TB_inline?height=500&width=500&inlineId=hiddenModalContent", null);
 	}
 }
