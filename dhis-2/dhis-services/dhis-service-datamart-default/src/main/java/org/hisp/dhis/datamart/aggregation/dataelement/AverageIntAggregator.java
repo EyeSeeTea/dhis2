@@ -31,7 +31,6 @@ import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 import static org.hisp.dhis.system.util.DateUtils.getDaysInclusive;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -98,7 +97,7 @@ public class AverageIntAggregator
         for ( final Integer unitId : unitIds )
         {
             final Collection<CrossTabDataValue> crossTabValues = 
-                getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unitId, null );
+                dataMartStore.getCrossTabDataValues( operandIndexMap, aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), unitId );
             
             final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
                 period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
@@ -117,21 +116,6 @@ public class AverageIntAggregator
         }  
         
         return values;
-    }
-    
-    public Collection<CrossTabDataValue> getCrossTabDataValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Date startDate, final Date endDate, final int parentId, final OrganisationUnitHierarchy hierarchy )
-    {
-        final Collection<Period> periods = aggregationCache.getIntersectingPeriods( startDate, endDate );
-        
-        final Collection<Integer> periodIds = new ArrayList<Integer>( periods.size() );
-        
-        for ( final Period period : periods )
-        {
-            periodIds.add( period.getId() );
-        }
-        
-        return dataMartStore.getCrossTabDataValues( operandIndexMap, periodIds, parentId );
     }
     
     public Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 

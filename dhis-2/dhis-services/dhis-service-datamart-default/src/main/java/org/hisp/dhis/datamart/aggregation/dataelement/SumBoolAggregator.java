@@ -32,7 +32,6 @@ import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
 import static org.hisp.dhis.system.util.DateUtils.getDaysInclusive;
 import static org.hisp.dhis.system.util.MathUtils.getFloor;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -85,8 +84,8 @@ public class SumBoolAggregator
             return new HashMap<DataElementOperand, Double>();
         }
         
-        final Collection<CrossTabDataValue> crossTabValues = 
-            getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unit.getId(), hierarchy );
+        final Collection<CrossTabDataValue> crossTabValues = dataMartStore.getCrossTabDataValues( operandIndexMap, 
+            aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), hierarchy.getChildren( unit.getId() ) );
         
         final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
             period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <data element id, [total value, total relevant days]>
@@ -102,21 +101,6 @@ public class SumBoolAggregator
         }
         
         return values;
-    }
-
-    public Collection<CrossTabDataValue> getCrossTabDataValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Date startDate, final Date endDate, final int parentId, final OrganisationUnitHierarchy hierarchy )
-    {
-        final Collection<Period> periods = aggregationCache.getIntersectingPeriods( startDate, endDate );
-        
-        final Collection<Integer> periodIds = new ArrayList<Integer>( periods.size() );
-        
-        for ( final Period period : periods )
-        {
-            periodIds.add( period.getId() );
-        }
-        
-        return dataMartStore.getCrossTabDataValues( operandIndexMap, periodIds, hierarchy.getChildren( parentId ) );
     }
     
     public Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 

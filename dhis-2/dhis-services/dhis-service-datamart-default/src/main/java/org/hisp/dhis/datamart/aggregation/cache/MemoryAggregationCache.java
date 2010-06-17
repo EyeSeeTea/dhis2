@@ -36,6 +36,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.system.util.ConversionUtils;
 
 /**
  * @author Lars Helge Overland
@@ -56,7 +57,7 @@ public class MemoryAggregationCache
     
     private final ThreadLocal<Map<String, Collection<Integer>>> childrenCache = new ThreadLocal<Map<String,Collection<Integer>>>();
     
-    private final ThreadLocal<Map<String, Collection<Period>>> intersectingPeriodCache = new ThreadLocal<Map<String,Collection<Period>>>();
+    private final ThreadLocal<Map<String, Collection<Integer>>> intersectingPeriodCache = new ThreadLocal<Map<String,Collection<Integer>>>();
 
     private final ThreadLocal<Map<String, Period>> periodCache = new ThreadLocal<Map<String,Period>>();
 
@@ -84,22 +85,22 @@ public class MemoryAggregationCache
     // AggregationCache implementation
     // -------------------------------------------------------------------------
 
-    public Collection<Period> getIntersectingPeriods( final Date startDate, final Date endDate )
+    public Collection<Integer> getIntersectingPeriods( final Date startDate, final Date endDate )
     {
         final String key = startDate.toString() + SEPARATOR + endDate.toString();
         
-        Map<String, Collection<Period>> cache = intersectingPeriodCache.get();
+        Map<String, Collection<Integer>> cache = intersectingPeriodCache.get();
         
-        Collection<Period> periods = null;
+        Collection<Integer> periods = null;
         
         if ( cache != null && ( periods = cache.get( key ) ) != null )
         {
             return periods;
         }
         
-        periods = periodService.getIntersectingPeriods( startDate, endDate );
+        periods = ConversionUtils.getIdentifiers( Period.class, periodService.getIntersectingPeriods( startDate, endDate ) );
         
-        cache = ( cache == null ) ? new HashMap<String, Collection<Period>>() : cache;
+        cache = ( cache == null ) ? new HashMap<String, Collection<Integer>>() : cache;
         
         cache.put( key, periods );
         

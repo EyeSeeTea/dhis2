@@ -49,9 +49,6 @@ public interface DataElementAggregator
     Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
         final Period period, final OrganisationUnit unit, int unitLevel, final OrganisationUnitHierarchy hierarchy );
     
-    Collection<CrossTabDataValue> getCrossTabDataValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Date startDate, final Date endDate, final int parentId, final OrganisationUnitHierarchy hierarchy );
-    
     Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 
         final Date startDate, final Date endDate, final Date aggregationStartDate, final Date aggregationEndDate, int unitLevel );
     
