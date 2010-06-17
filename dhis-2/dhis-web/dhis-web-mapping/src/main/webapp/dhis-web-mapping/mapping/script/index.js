@@ -83,6 +83,15 @@ Ext.onReady( function() {
 			params: { type: map_layer_type_baselayer },
 			method: 'POST',
 			success: function(r) {
+                var baseLayer = new OpenLayers.Layer.WMS(
+                    'World',
+                    'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
+                    {layers: 'Health Regional Africa Meningitis Meningitis Observed'}
+                );
+            
+                MAP.addLayers([baseLayer]);
+                MAP.layers[0].setVisibility(false);
+                
 				var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
 					
 				if (mapLayers.length > 0) {
@@ -96,29 +105,6 @@ Ext.onReady( function() {
 						]);
 						MAP.layers[MAP.layers.length-1].setVisibility(false);
 					}
-				}
-				else {
-					var baseLayer = new OpenLayers.Layer.WMS(
-						'World',
-						'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
-						{layers: 'Health Regional Africa Meningitis Meningitis Observed'}
-					);
-				
-					MAP.addLayers([baseLayer]);
-					MAP.getLayersByName(baseLayer.name)[0].setVisibility(false);
-					
-					var frs = baseLayer.getFullRequestString({
-						REQUEST: "GetLegendGraphic",
-						WIDTH: null,
-						HEIGHT: null,
-						EXCEPTIONS: "application/vnd.ogc.se_xml",
-						LAYERS: 'basic',
-						LAYER: null,
-						SRS: null,
-						FORMAT: 'image/png'
-					});
-					
-					// alert(frs);
 				}
 			}
         });
@@ -2861,6 +2847,57 @@ Ext.onReady( function() {
 	}
 	
 	addOverlaysToMap();
+    
+    function showWMSLegend(layer) {
+        var baseLayerOptionsWindow = new Ext.Window({
+            title: 'Layer options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            items: [
+                {
+                    xtype: 'menu',
+                    id: 'baselayeroptions_m',
+                    floating: false,
+                    items: [
+                        {
+                            html: 'Show WMS legend',
+                            iconCls: 'no-icon',
+                            listeners: {
+                                'click': {
+                                    fn: function() {
+                                        baseLayerOptionsWindow.destroy();
+                                        
+                                        var frs = layer.getFullRequestString({
+                                            REQUEST: "GetLegendGraphic",
+                                            WIDTH: null,
+                                            HEIGHT: null,
+                                            EXCEPTIONS: "application/vnd.ogc.se_xml",
+                                            LAYERS: layer.params.LAYERS,
+                                            LAYER: layer.params.LAYERS,
+                                            SRS: null,
+                                            FORMAT: 'image/png'
+                                        });
+
+                                        var wmsLayerLegendWindow = new Ext.Window({
+                                            title: 'WMS Legend: <span style="font-weight:normal;">' + layer.name + '</span>',
+                                            items: [
+                                                {
+                                                    xtype: 'panel',
+                                                    html: '<img src="' + frs + '">'
+                                                }
+                                            ]
+                                        });
+                                        wmsLayerLegendWindow.setPagePosition(Ext.getCmp('east').x - 500, Ext.getCmp('center').y + 50);
+                                        wmsLayerLegendWindow.show();
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+        baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 190, Ext.getCmp('center').y + 50);
+        baseLayerOptionsWindow.show();
+    }
 	
 	var layerTreeConfig = [{
         nodeType: 'gx_baselayercontainer',
@@ -2891,11 +2928,14 @@ Ext.onReady( function() {
 		listeners: {
 			'click': {
 				fn: function(n) {
-					if (n.isAncestor(this.getNodeById('xnode-253')) || n.isAncestor(this.getNodeById('xnode-254'))) {
-						alert(n.attributes.layer.name);
+					if (n.isAncestor(this.getNodeById('xnode-253'))) {
+						showWMSLegend(MAP.getLayersByName(n.attributes.layer.name)[0]);
 					}
+                    else if (n.isAncestor(this.getNodeById('xnode-254'))) {
+                        //alert(n.attributes.layer.name);
+                    }
 					else {
-						alert(n.attributes.layer);
+						//alert(n.attributes.layer);
 					}
 				}
 			}
