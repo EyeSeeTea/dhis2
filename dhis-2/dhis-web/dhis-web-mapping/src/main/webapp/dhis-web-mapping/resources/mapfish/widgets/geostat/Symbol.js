@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2007-2008  Camptocamp
  *
  * This file is part of MapFish Client
@@ -18,14 +18,14 @@
  */
 
 /**
- * @requires core/GeoStat/Choropleth.js
+ * @requires core/GeoStat/Symbol.js
  * @requires core/Color.js
  */
 
 Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
 
 /**
- * Class: mapfish.widgets.geostat.Choropleth
+ * Class: mapfish.widgets.geostat.Symbol
  * Use this class to create a widget allowing to display choropleths
  * on the map.
  *
@@ -33,7 +33,7 @@ Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
  * - {Ext.FormPanel}
  */
 
-mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
+mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 
     /**
      * APIProperty: layer
@@ -126,7 +126,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     labelGenerator: null,
 
     /**
-     * Constructor: mapfish.widgets.geostat.Choropleth
+     * Constructor: mapfish.widgets.geostat.Symbol
      *
      * Parameters:
      * config - {Object} Config object.
@@ -146,7 +146,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     newUrl: false,
 	
 	applyPredefinedLegend: function() {
-		var mls = Ext.getCmp('maplegendset_cb').getValue();
+		var mls = Ext.getCmp('maplegendset_cb2').getValue();
 		var bounds = [];
 		Ext.Ajax.request({
 			url: path + 'getMapLegendsByMapLegendSet' + type,
@@ -168,9 +168,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 					bounds.push(mapLegends[i].endValue);
 				}
 
-				choropleth.colorInterpolation = colors;
-				choropleth.bounds = bounds;
-				choropleth.classify(false);
+				proportionalSymbol.colorInterpolation = colors;
+				proportionalSymbol.bounds = bounds;
+				proportionalSymbol.classify(false);								
 			},
 			failure: function() {
 				alert('Error: getMapLegendsByMapLegendSet');
@@ -180,7 +180,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 	
     initComponent : function() {
     
-        mapViewStore = new Ext.data.JsonStore({
+        mapViewStore2 = new Ext.data.JsonStore({
             url: path + 'getAllMapViews' + type,
             root: 'mapViews',
             fields: ['id', 'name'],
@@ -199,41 +199,41 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     MAPVIEW = Ext.util.JSON.decode(r.responseText).mapView[0];
                                     MAPSOURCE = MAPVIEW.mapSourceType;
 									Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
-                                    Ext.getCmp('mapview_cb').setValue(MAPVIEW.id);
+                                    Ext.getCmp('mapview_cb2').setValue(MAPVIEW.id);
 									
 									if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
-										Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
-										Ext.getCmp('numClasses').setValue(MAPVIEW.classes);
-										Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
-										Ext.getCmp('colorB_cf').setValue(MAPVIEW.colorHigh);
+										Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_automatic);
+										Ext.getCmp('numClasses_cb2').setValue(MAPVIEW.classes);
+										Ext.getCmp('colorA_cf2').setValue(MAPVIEW.colorLow);
+										Ext.getCmp('colorB_cf2').setValue(MAPVIEW.colorHigh);
 										
-										Ext.getCmp('method').showField();
-										Ext.getCmp('bounds').hideField();
-										Ext.getCmp('numClasses').showField();
-										Ext.getCmp('colorA_cf').showField();
-										Ext.getCmp('colorB_cf').showField();
-										Ext.getCmp('maplegendset_cb').hideField();
+										Ext.getCmp('method_cb2').showField();
+										Ext.getCmp('bounds_tf2').hideField();
+										Ext.getCmp('numClasses_cb2').showField();
+										Ext.getCmp('colorA_cf2').showField();
+										Ext.getCmp('colorB_cf2').showField();
+										Ext.getCmp('maplegendset_cb2').hideField();
 									}
 									else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
-                                        LEGEND[thematicMap].type = map_legend_type_predefined;
-										Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
-										Ext.getCmp('method').hideField();
-										Ext.getCmp('bounds').hideField();
-										Ext.getCmp('numClasses').hideField();
-										Ext.getCmp('colorA_cf').hideField();
-										Ext.getCmp('colorB_cf').hideField();
-										Ext.getCmp('maplegendset_cb').showField();
+                                        LEGEND[thematicMap2].type = map_legend_type_predefined;
+										Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
+										Ext.getCmp('method_cb2').hideField();
+										Ext.getCmp('bounds_tf2').hideField();
+										Ext.getCmp('numClasses_cb2').hideField();
+										Ext.getCmp('colorA_cf2').hideField();
+										Ext.getCmp('colorB_cf2').hideField();
+										Ext.getCmp('maplegendset_cb2').showField();
 										
-										predefinedMapLegendSetStore.load();
+										predefinedMapLegendSetStore2.load();
 									}										
 										
 									MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
 
-                                    Ext.getCmp('indicatorgroup_cb').setValue(MAPVIEW.indicatorGroupId);
+                                    Ext.getCmp('indicatorgroup_cb2').setValue(MAPVIEW.indicatorGroupId);
                                     
                                     var igId = MAPVIEW.indicatorGroupId;
-                                    indicatorStore.baseParams = { indicatorGroupId: igId, format: 'json' };
-                                    indicatorStore.reload();
+                                    indicatorStore2.baseParams = { indicatorGroupId: igId, format: 'json' };
+                                    indicatorStore2.reload();
                                 },
                                 failure: function() {
                                   alert( i18n_status , i18n_error_while_retrieving_data );
@@ -246,7 +246,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         });
     
-        indicatorGroupStore = new Ext.data.JsonStore({
+        indicatorGroupStore2 = new Ext.data.JsonStore({
             url: path + 'getAllIndicatorGroups' + type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
@@ -254,7 +254,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             autoLoad: true
         });
         
-        indicatorStore = new Ext.data.JsonStore({
+        indicatorStore2 = new Ext.data.JsonStore({
             url: path + 'getIndicatorsByIndicatorGroup' + type,
 			baseParams: {indicatorGroupId:0},
             root: 'indicators',
@@ -264,7 +264,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'load': {
                     fn: function() {
-                        indicatorStore.each(
+                        indicatorStore2.each(
                             function fn(record) {
                                 var name = record.get('name');
                                 name = name.replace('&lt;', '<').replace('&gt;', '>');
@@ -272,20 +272,20 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             },  this
                         );
                         
-                        Ext.getCmp('indicator_cb').clearValue();
+                        Ext.getCmp('indicator_cb2').clearValue();
 
                         if (MAPVIEW) {
-                            Ext.getCmp('indicator_cb').setValue(MAPVIEW.indicatorId);
-                            Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
-                            periodStore.baseParams = {name: MAPVIEW.periodTypeId};
-                            periodStore.reload();
+                            Ext.getCmp('indicator_cb2').setValue(MAPVIEW.indicatorId);
+                            Ext.getCmp('periodtype_cb2').setValue(MAPVIEW.periodTypeId);
+                            periodStore2.baseParams = {name: MAPVIEW.periodTypeId};
+                            periodStore2.reload();
                         }
                     }
                 }
             }
         });
 		
-		dataElementGroupStore = new Ext.data.JsonStore({
+		dataElementGroupStore2 = new Ext.data.JsonStore({
 			url: path + 'getAllDataElementGroups' + type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
@@ -293,7 +293,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             autoLoad: true
         });
 		
-		dataElementStore = new Ext.data.JsonStore({
+		dataElementStore2 = new Ext.data.JsonStore({
             url: path + 'getDataElementsByDataElementGroup' + type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
@@ -302,7 +302,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'load': {
                     fn: function() {
-                        dataElementStore.each(
+                        dataElementStore2.each(
                         function fn(record) {
                                 var name = record.get('name');
                                 name = name.replace('&lt;', '<').replace('&gt;', '>');
@@ -310,13 +310,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             },  this
                         );
                         
-                        Ext.getCmp('dataelement_cb').clearValue();
+                        Ext.getCmp('dataelement_cb2').clearValue();
 
                         if (MAPVIEW) {
-                            Ext.getCmp('dataelement_cb').setValue(MAPVIEW.dataElementId);
-                            Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
-                            periodStore.baseParams = {name: MAPVIEW.periodTypeId};
-                            periodStore.reload();
+                            Ext.getCmp('dataelement_cb2').setValue(MAPVIEW.dataElementId);
+                            Ext.getCmp('periodtype_cb2').setValue(MAPVIEW.periodTypeId);
+                            periodStore2.baseParams = {name: MAPVIEW.periodTypeId};
+                            periodStore2.reload();
                         }
                     },
                     scope: this
@@ -324,14 +324,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         });
         
-        periodTypeStore = new Ext.data.JsonStore({
+        periodTypeStore2 = new Ext.data.JsonStore({
             url: path + 'getAllPeriodTypes' + type,
             root: 'periodTypes',
             fields: ['name'],
             autoLoad: true
         });
             
-        periodStore = new Ext.data.JsonStore({
+        periodStore2 = new Ext.data.JsonStore({
             url: path + 'getPeriodsByPeriodType' + type,
             baseParams: { name: 0 },
             root: 'periods',
@@ -341,7 +341,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'load': {
                     fn: function() {
                         if (MAPVIEW) {
-                            Ext.getCmp('period_cb').setValue(MAPVIEW.periodId);
+                            Ext.getCmp('period_cb2').setValue(MAPVIEW.periodId);
                             var mst = MAPVIEW.mapSourceType;
 
                             Ext.Ajax.request({
@@ -349,7 +349,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 method: 'POST',
                                 params: { mapSourceType: mst },
 								success: function(r) {
-                                    Ext.getCmp('map_cb').getStore().reload();
+                                    Ext.getCmp('map_cb2').getStore().reload();
                                     Ext.getCmp('maps_cb').getStore().reload();
                                     
                                     Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
@@ -367,7 +367,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         });
             
-        mapStore = new Ext.data.JsonStore({
+        mapStore2 = new Ext.data.JsonStore({
             url: path + 'getAllMaps' + type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
@@ -377,15 +377,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'load': {
                     fn: function() {
                         if (MAPVIEW) {
-                            Ext.getCmp('map_cb').setValue(MAPVIEW.mapSource);
-                            choropleth.classify(false, true);
+                            Ext.getCmp('map_cb2').setValue(MAPVIEW.mapSource);
+                            proportionalSymbol.classify(false, true);
                         }
                     }
                 }
             }
         });
 		
-		predefinedMapLegendSetStore = new Ext.data.JsonStore({
+		predefinedMapLegendSetStore2 = new Ext.data.JsonStore({
             url: path + 'getMapLegendSetsByType' + type,
             baseParams: { type: map_legend_type_predefined },
             root: 'mapLegendSets',
@@ -401,8 +401,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 								params: { id: MAPVIEW.mapLegendSetId },
 								success: function(r) {
 									var mls = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-									Ext.getCmp('maplegendset_cb').setValue(mls.id);
-									choropleth.applyPredefinedLegend();
+									Ext.getCmp('maplegendset_cb2').setValue(mls.id);
+									proportionalSymbol.applyPredefinedLegend();
 								},
 								failure: function() {
 									alert('Error: getMapLegendSet');
@@ -418,7 +418,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
          
         {
             xtype: 'combo',
-            id: 'mapview_cb',
+            id: 'mapview_cb2',
             fieldLabel: i18n_favorite,
             typeAhead: true,
             editable: false,
@@ -431,11 +431,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
 			labelSeparator: labelseparator,
             width: combo_width,
-            store: mapViewStore,
+            store: mapViewStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        var mId = Ext.getCmp('mapview_cb').getValue();
+                        var mId = Ext.getCmp('mapview_cb2').getValue();
                         
                         Ext.Ajax.request({
                             url: path + 'getMapView' + type,
@@ -445,55 +445,55 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 MAPVIEW = Ext.util.JSON.decode(r.responseText).mapView[0];
 								MAPSOURCE = MAPVIEW.mapSourceType;
                                 
-                                Ext.getCmp('mapvaluetype_cb').setValue(MAPVIEW.mapValueType);
+                                Ext.getCmp('mapvaluetype_cb2').setValue(MAPVIEW.mapValueType);
 								VALUETYPE.polygon = MAPVIEW.mapValueType;
                                 
                                 if (MAPVIEW.mapValueType == map_value_type_indicator) {
-                                    Ext.getCmp('indicatorgroup_cb').showField();
-                                    Ext.getCmp('indicator_cb').showField();
-                                    Ext.getCmp('dataelementgroup_cb').hideField();
-                                    Ext.getCmp('dataelement_cb').hideField();
+                                    Ext.getCmp('indicatorgroup_cb2').showField();
+                                    Ext.getCmp('indicator_cb2').showField();
+                                    Ext.getCmp('dataelementgroup_cb2').hideField();
+                                    Ext.getCmp('dataelement_cb2').hideField();
                                     
-                                    Ext.getCmp('indicatorgroup_cb').setValue(MAPVIEW.indicatorGroupId);
-                                    indicatorStore.baseParams = { indicatorGroupId: MAPVIEW.indicatorGroupId };
-                                    indicatorStore.reload();
+                                    Ext.getCmp('indicatorgroup_cb2').setValue(MAPVIEW.indicatorGroupId);
+                                    indicatorStore2.baseParams = { indicatorGroupId: MAPVIEW.indicatorGroupId };
+                                    indicatorStore2.reload();
                                 }
                                 else if (MAPVIEW.mapValueType == map_value_type_dataelement) {
-                                    Ext.getCmp('indicatorgroup_cb').hideField();
-                                    Ext.getCmp('indicator_cb').hideField();
-                                    Ext.getCmp('dataelementgroup_cb').showField();
-                                    Ext.getCmp('dataelement_cb').showField();
+                                    Ext.getCmp('indicatorgroup_cb2').hideField();
+                                    Ext.getCmp('indicator_cb2').hideField();
+                                    Ext.getCmp('dataelementgroup_cb2').showField();
+                                    Ext.getCmp('dataelement_cb2').showField();
                                     
-                                    Ext.getCmp('dataelementgroup_cb').setValue(MAPVIEW.dataElementGroupId);
-                                    dataElementStore.baseParams = { dataElementGroupId: MAPVIEW.dataElementGroupId };
-                                    dataElementStore.reload();
+                                    Ext.getCmp('dataelementgroup_cb2').setValue(MAPVIEW.dataElementGroupId);
+                                    dataElementStore2.baseParams = { dataElementGroupId: MAPVIEW.dataElementGroupId };
+                                    dataElementStore2.reload();
                                 }                                        
 								
 								if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
-									Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
-									Ext.getCmp('numClasses').setValue(MAPVIEW.classes);
-									Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
-									Ext.getCmp('colorB_cf').setValue(MAPVIEW.colorHigh);
+									Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_automatic);
+									Ext.getCmp('numClasses_cb2').setValue(MAPVIEW.classes);
+									Ext.getCmp('colorA_cf2').setValue(MAPVIEW.colorLow);
+									Ext.getCmp('colorB_cf2').setValue(MAPVIEW.colorHigh);
 									
-									Ext.getCmp('method').showField();
-									Ext.getCmp('bounds').hideField();
-									Ext.getCmp('numClasses').showField();
-									Ext.getCmp('colorA_cf').showField();
-									Ext.getCmp('colorB_cf').showField();
-									Ext.getCmp('maplegendset_cb').hideField();
+									Ext.getCmp('method_cb2').showField();
+									Ext.getCmp('bounds_tf2').hideField();
+									Ext.getCmp('numClasses_cb2').showField();
+									Ext.getCmp('colorA_cf2').showField();
+									Ext.getCmp('colorB_cf2').showField();
+									Ext.getCmp('maplegendset_cb2').hideField();
 								}
 								else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
-                                    LEGEND[thematicMap].type = map_legend_type_predefined;
-									Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
-									Ext.getCmp('method').hideField();
-									Ext.getCmp('bounds').hideField();
-									Ext.getCmp('numClasses').hideField();
-									Ext.getCmp('colorA_cf').hideField();
-									Ext.getCmp('colorB_cf').hideField();
-									Ext.getCmp('maplegendset_cb').showField();
+                                    LEGEND[thematicMap2].type = map_legend_type_predefined;
+									Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
+									Ext.getCmp('method_cb2').hideField();
+									Ext.getCmp('bounds_tf2').hideField();
+									Ext.getCmp('numClasses_cb2').hideField();
+									Ext.getCmp('colorA_cf2').hideField();
+									Ext.getCmp('colorB_cf2').hideField();
+									Ext.getCmp('maplegendset_cb2').showField();
 									
-                                    Ext.getCmp('maplegendset_cb').setValue(MAPVIEW.mapLegendSetId);
-                                    choropleth.applyPredefinedLegend();
+                                    Ext.getCmp('maplegendset_cb2').setValue(MAPVIEW.mapLegendSetId);
+                                    proportionalSymbol.applyPredefinedLegend();
 								}
                             },
                             failure: function() {
@@ -510,7 +510,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-			id: 'mapvaluetype_cb',
+			id: 'mapvaluetype_cb2',
             fieldLabel: i18n_mapvaluetype,
 			labelSeparator: labelseparator,
             editable: false,
@@ -527,19 +527,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			listeners: {
 				'select': {
 					fn: function() {
-						if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator) {
-							Ext.getCmp('indicatorgroup_cb').showField();
-							Ext.getCmp('indicator_cb').showField();
-							Ext.getCmp('dataelementgroup_cb').hideField();
-							Ext.getCmp('dataelement_cb').hideField();
-							VALUETYPE.polygon = map_value_type_indicator;
+						if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator) {
+							Ext.getCmp('indicatorgroup_cb2').showField();
+							Ext.getCmp('indicator_cb2').showField();
+							Ext.getCmp('dataelementgroup_cb2').hideField();
+							Ext.getCmp('dataelement_cb2').hideField();
+							VALUETYPE.point = map_value_type_indicator;
 						}
-						else if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_dataelement) {
-							Ext.getCmp('indicatorgroup_cb').hideField();
-							Ext.getCmp('indicator_cb').hideField();
-							Ext.getCmp('dataelementgroup_cb').showField();
-							Ext.getCmp('dataelement_cb').showField();
-							VALUETYPE.polygon = map_value_type_dataelement;
+						else if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_dataelement) {
+							Ext.getCmp('indicatorgroup_cb2').hideField();
+							Ext.getCmp('indicator_cb2').hideField();
+							Ext.getCmp('dataelementgroup_cb2').showField();
+							Ext.getCmp('dataelement_cb2').showField();
+							VALUETYPE.point = map_value_type_dataelement;
 						}
 					}
 				}
@@ -548,7 +548,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'indicatorgroup_cb',
+            id: 'indicatorgroup_cb2',
             fieldLabel: i18n_indicator_group,
             typeAhead: true,
             editable: false,
@@ -561,17 +561,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: indicatorGroupStore,
+            store: indicatorGroupStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue()) {
-                            Ext.getCmp('mapview_cb').clearValue();
+                        if (Ext.getCmp('mapview_cb2').getValue()) {
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
 						
-						Ext.getCmp('indicator_cb').clearValue();
-						indicatorStore.setBaseParam('indicatorGroupId', this.getValue());
-                        indicatorStore.reload();
+						Ext.getCmp('indicator_cb2').clearValue();
+						indicatorStore2.setBaseParam('indicatorGroupId', this.getValue());
+                        indicatorStore2.reload();
                     }
                 }
             }
@@ -579,7 +579,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'indicator_cb',
+            id: 'indicator_cb2',
             fieldLabel: i18n_indicator ,
             typeAhead: true,
             editable: false,
@@ -592,15 +592,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: indicatorStore,
+            store: indicatorStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue()) {
-                            Ext.getCmp('mapview_cb').reset();
+                        if (Ext.getCmp('mapview_cb2').getValue()) {
+                            Ext.getCmp('mapview_cb2').reset();
                         }
  
-                        var iId = Ext.getCmp('indicator_cb').getValue();
+                        var iId = Ext.getCmp('indicator_cb2').getValue();
                         
                         Ext.Ajax.request({
                             url: path + 'getMapLegendSetByIndicator' + type,
@@ -611,14 +611,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 var data = Ext.util.JSON.decode(responseObject.responseText);
                                 
                                 if (data.mapLegendSet[0].id != '') {
-//                                    Ext.getCmp('method').setValue(data.mapLegendSet[0].method);
-                                    Ext.getCmp('numClasses').setValue(data.mapLegendSet[0].classes);
+//                                    Ext.getCmp('method_cb2').setValue(data.mapLegendSet[0].method);
+                                    Ext.getCmp('numClasses_cb2').setValue(data.mapLegendSet[0].classes);
 
-                                    Ext.getCmp('colorA_cf').setValue(data.mapLegendSet[0].colorLow);
-                                    Ext.getCmp('colorB_cf').setValue(data.mapLegendSet[0].colorHigh);
+                                    Ext.getCmp('colorA_cf2').setValue(data.mapLegendSet[0].colorLow);
+                                    Ext.getCmp('colorB_cf2').setValue(data.mapLegendSet[0].colorHigh);
                                 }
                                 
-                                choropleth.classify(false);
+                                proportionalSymbol.classify(false);
                             },
                             failure: function()
                             {
@@ -633,7 +633,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            id: 'dataelementgroup_cb',
+            id: 'dataelementgroup_cb2',
             fieldLabel: i18n_dataelement_group,
             typeAhead: true,
             editable: false,
@@ -646,16 +646,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: dataElementGroupStore,
+            store: dataElementGroupStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue()) {
-                            Ext.getCmp('mapview_cb').reset();
+                        if (Ext.getCmp('mapview_cb2').getValue()) {
+                            Ext.getCmp('mapview_cb2').reset();
                         }
-                        Ext.getCmp('dataelement_cb').reset();
-						dataElementStore.setBaseParam('dataElementGroupId', this.getValue());
-                        dataElementStore.reload();
+                        Ext.getCmp('dataelement_cb2').reset();
+						dataElementStore2.setBaseParam('dataElementGroupId', this.getValue());
+                        dataElementStore2.reload();
                     }
                 }
             }
@@ -663,7 +663,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'dataelement_cb',
+            id: 'dataelement_cb2',
             fieldLabel: i18n_dataelement ,
             typeAhead: true,
             editable: false,
@@ -676,17 +676,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: dataElementStore,
+            store: dataElementStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue()) {
-                            Ext.getCmp('mapview_cb').reset();
+                        if (Ext.getCmp('mapview_cb2').getValue()) {
+                            Ext.getCmp('mapview_cb2').reset();
                         }
 						
-						choropleth.classify(false);
+						proportionalSymbol.classify(false);
  
-                        // var iId = Ext.getCmp('dataelement_cb').getValue();
+                        // var iId = Ext.getCmp('dataelement_cb2').getValue();
                         
 						/* TODO legend set
 						
@@ -699,14 +699,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 var data = Ext.util.JSON.decode(responseObject.responseText);
                                 
                                 if (data.mapLegendSet[0].id != '') {
-                                   // Ext.getCmp('method').setValue(data.mapLegendSet[0].method);
-                                    Ext.getCmp('numClasses').setValue(data.mapLegendSet[0].classes);
+                                   // Ext.getCmp('method_cb2').setValue(data.mapLegendSet[0].method);
+                                    Ext.getCmp('numClasses_cb2').setValue(data.mapLegendSet[0].classes);
 
-                                    Ext.getCmp('colorA_cf').setValue(data.mapLegendSet[0].colorLow);
-                                    Ext.getCmp('colorB_cf').setValue(data.mapLegendSet[0].colorHigh);
+                                    Ext.getCmp('colorA_cf2').setValue(data.mapLegendSet[0].colorLow);
+                                    Ext.getCmp('colorB_cf2').setValue(data.mapLegendSet[0].colorHigh);
                                 }
                                 
-                                choropleth.classify(false);
+                                proportionalSymbol.classify(false);
                             },
                             failure: function()
                             {
@@ -722,7 +722,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'periodtype_cb',
+            id: 'periodtype_cb2',
             fieldLabel: i18n_period_type,
             typeAhead: true,
             editable: false,
@@ -735,17 +735,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: periodTypeStore,
+            store: periodTypeStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue() != '') {
-                            Ext.getCmp('mapview_cb').reset();
+                        if (Ext.getCmp('mapview_cb2').getValue() != '') {
+                            Ext.getCmp('mapview_cb2').reset();
                         }
                         
-                        var pt = Ext.getCmp('periodtype_cb').getValue();
-                        Ext.getCmp('period_cb').getStore().baseParams = { name: pt, format: 'json' };
-                        Ext.getCmp('period_cb').getStore().reload();
+                        var pt = Ext.getCmp('periodtype_cb2').getValue();
+                        Ext.getCmp('period_cb2').getStore().baseParams = { name: pt, format: 'json' };
+                        Ext.getCmp('period_cb2').getStore().reload();
                     },
                     scope: this
                 }
@@ -754,7 +754,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'combo',
-            id: 'period_cb',
+            id: 'period_cb2',
             fieldLabel: i18n_period ,
             typeAhead: true,
             editable: false,
@@ -767,12 +767,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: periodStore,
+            store: periodStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue() != '') {
-                            Ext.getCmp('mapview_cb').reset();
+                        if (Ext.getCmp('mapview_cb2').getValue() != '') {
+                            Ext.getCmp('mapview_cb2').reset();
                         }
                         
                         this.classify(false);
@@ -784,7 +784,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'map_cb',
+            id: 'map_cb2',
             fieldLabel: i18n_map ,
             typeAhead: true,
             editable: false,
@@ -797,15 +797,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: mapStore,
+            store: mapStore2,
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue() != '') {
-                            Ext.getCmp('mapview_cb').reset();
+                        if (Ext.getCmp('mapview_cb2').getValue() != '') {
+                            Ext.getCmp('mapview_cb2').reset();
                         }
                         
-                        this.newUrl = Ext.getCmp('map_cb').getValue();
+                        this.newUrl = Ext.getCmp('map_cb2').getValue();
                         this.classify(false);
                     },
                     scope: this
@@ -818,14 +818,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		{
             xtype: 'combo',
             fieldLabel: i18n_legend_type ,
-            id: 'maplegendtype_cb',
+            id: 'maplegendtype_cb2',
             editable: false,
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
             emptyText: emptytext,
 			labelSeparator: labelseparator,
-            value: LEGEND[thematicMap].type,
+            value: LEGEND[thematicMap2].type,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -838,33 +838,33 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_predefined && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND[thematicMap].type ) {
-							LEGEND[thematicMap].type = map_legend_type_predefined;
-							Ext.getCmp('method').hideField();
-							Ext.getCmp('bounds').hideField();
-                            Ext.getCmp('numClasses').hideField();
-							Ext.getCmp('colorA_cf').hideField();
-							Ext.getCmp('colorB_cf').hideField();
-							Ext.getCmp('maplegendset_cb').showField();
+                        if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_predefined && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap2].type ) {
+							LEGEND[thematicMap2].type = map_legend_type_predefined;
+							Ext.getCmp('method_cb2').hideField();
+							Ext.getCmp('bounds_tf2').hideField();
+                            Ext.getCmp('numClasses_cb2').hideField();
+							Ext.getCmp('colorA_cf2').hideField();
+							Ext.getCmp('colorB_cf2').hideField();
+							Ext.getCmp('maplegendset_cb2').showField();
 							
-							if (Ext.getCmp('maplegendset_cb').getValue()) {
+							if (Ext.getCmp('maplegendset_cb2').getValue()) {
 								this.classify(false);
 							}
                         }
-                        else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND[thematicMap].type) {
-							LEGEND[thematicMap].type = map_legend_type_automatic;
-							Ext.getCmp('method').showField();
-							if (Ext.getCmp('method').getValue() == 0) {
-								Ext.getCmp('bounds').showField();
-								Ext.getCmp('numClasses').hideField();
+                        else if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap2].type) {
+							LEGEND[thematicMap2].type = map_legend_type_automatic;
+							Ext.getCmp('method_cb2').showField();
+							if (Ext.getCmp('method_cb2').getValue() == 0) {
+								Ext.getCmp('bounds_tf2').showField();
+								Ext.getCmp('numClasses_cb2').hideField();
 							}
 							else {
-								Ext.getCmp('bounds').hideField();
-								Ext.getCmp('numClasses').showField();
+								Ext.getCmp('bounds_tf2').hideField();
+								Ext.getCmp('numClasses_cb2').showField();
 							}
-							Ext.getCmp('colorA_cf').showField();
-							Ext.getCmp('colorB_cf').showField();
-							Ext.getCmp('maplegendset_cb').hideField();
+							Ext.getCmp('colorA_cf2').showField();
+							Ext.getCmp('colorB_cf2').showField();
+							Ext.getCmp('maplegendset_cb2').hideField();
                             
                             this.classify(false);
                         }
@@ -876,8 +876,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            fieldLabel: i18n_legend_set ,
-            id: 'maplegendset_cb',
+            fieldLabel: i18n_legend_set,
+            id: 'maplegendset_cb2',
             editable: false,
             valueField: 'id',
             displayField: 'name',
@@ -887,11 +887,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             width: combo_width,
 			hidden: true,
-            store: predefinedMapLegendSetStore,
+            store: predefinedMapLegendSetStore2,
             listeners: {
                 'select': {
                     fn: function() {
-						choropleth.applyPredefinedLegend();
+						proportionalSymbol.applyPredefinedLegend();
                     },
                     scope: this
                 }
@@ -900,15 +900,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'combo',
-            fieldLabel: i18n_method ,
-            id: 'method',
+            fieldLabel: i18n_method,
+            id: 'method_cb2',
             editable: false,
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
             emptyText: emptytext,
 			labelSeparator: labelseparator,
-            value: LEGEND[thematicMap].method,
+            value: LEGEND[thematicMap2].method,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -922,15 +922,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('method').getValue() == 0 && Ext.getCmp('method').getValue() != LEGEND[thematicMap].method) {
-							LEGEND[thematicMap].method = 0;
-                            Ext.getCmp('bounds').showField();
-                            Ext.getCmp('numClasses').hideField();
+                        if (Ext.getCmp('method_cb2').getValue() == 0 && Ext.getCmp('method_cb2').getValue() != LEGEND[thematicMap2].method) {
+							LEGEND[thematicMap2].method = 0;
+                            Ext.getCmp('bounds_tf2').showField();
+                            Ext.getCmp('numClasses_cb2').hideField();
                         }
-                        else if (Ext.getCmp('method').getValue() != LEGEND[thematicMap].method) {
-							LEGEND[thematicMap].method = Ext.getCmp('method').getValue();
-                            Ext.getCmp('bounds').hideField();
-                            Ext.getCmp('numClasses').showField();
+                        else if (Ext.getCmp('method_cb2').getValue() != LEGEND[thematicMap2].method) {
+							LEGEND[thematicMap2].method = Ext.getCmp('method_cb2').getValue();
+                            Ext.getCmp('bounds_tf2').hideField();
+                            Ext.getCmp('numClasses_cb2').showField();
                             
                             this.classify(false);
                         }
@@ -942,7 +942,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'textfield',
-            id: 'bounds',
+            id: 'bounds_tf2',
             fieldLabel: i18n_bounds,
 			labelSeparator: labelseparator,
             emptyText: i18n_comma_separated_values,
@@ -955,12 +955,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'combo',
             fieldLabel: i18n_classes ,
 			labelSeparator: labelseparator,
-            id: 'numClasses',
+            id: 'numClasses_cb2',
             editable: false,
             valueField: 'value',
             displayField: 'value',
             mode: 'local',
-            value: LEGEND[thematicMap].classes,
+            value: LEGEND[thematicMap2].classes,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -970,12 +970,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue() != '') {
-                            Ext.getCmp('mapview_cb').reset();
+                        if (Ext.getCmp('mapview_cb2').getValue() != '') {
+                            Ext.getCmp('mapview_cb2').reset();
                         }
 						
-						if (Ext.getCmp('numClasses').getValue() != LEGEND[thematicMap].classes) {
-							LEGEND[thematicMap].classes = Ext.getCmp('numClasses').getValue();
+						if (Ext.getCmp('numClasses_cb2').getValue() != LEGEND[thematicMap2].classes) {
+							LEGEND[thematicMap2].classes = Ext.getCmp('numClasses_cb2').getValue();
 							this.classify(false);
 						}
                     },
@@ -988,7 +988,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'colorfield',
             fieldLabel: i18n_low_color,
 			labelSeparator: labelseparator,
-            id: 'colorA_cf',
+            id: 'colorA_cf2',
             allowBlank: false,
             isFormField: true,
             width: combo_width,
@@ -999,7 +999,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'colorfield',
             fieldLabel: i18n_high_color,
 			labelSeparator: labelseparator,
-            id: 'colorB_cf',
+            id: 'colorB_cf2',
             allowBlank: false,
             isFormField: true,
             width: combo_width,
@@ -1013,7 +1013,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			cls: 'aa_med',
             isFormField: true,
             fieldLabel: '',
-            labelSeparator: '',
+            labelSeparator: labelseparator,
             text: i18n_refresh,
             handler: function() {
                 this.layer.setVisibility(true);
@@ -1024,7 +1024,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         ];
 	
-		mapfish.widgets.geostat.Choropleth.superclass.initComponent.apply(this);
+		mapfish.widgets.geostat.Symbol.superclass.initComponent.apply(this);
     },
     
     setUrl: function(url) {
@@ -1064,9 +1064,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
      */
     getColors: function() {
         var colorA = new mapfish.ColorRgb();
-        colorA.setFromHex(Ext.getCmp('colorA_cf').getValue());
+        colorA.setFromHex(Ext.getCmp('colorA_cf2').getValue());
         var colorB = new mapfish.ColorRgb();
-        colorB.setFromHex(Ext.getCmp('colorB_cf').getValue());
+        colorB.setFromHex(Ext.getCmp('colorB_cf2').getValue());
         return [colorA, colorB];
     },
 
@@ -1084,11 +1084,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             return;
         }
 		
-		if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic) {
-			Ext.getCmp('maplegendset_cb').hideField();
+		if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic) {
+			Ext.getCmp('maplegendset_cb2').hideField();
 		}
-		else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_predefined) {
-			Ext.getCmp('maplegendset_cb').showField();
+		else if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_predefined) {
+			Ext.getCmp('maplegendset_cb2').showField();
 		}
         
         if (this.newUrl) {
@@ -1110,11 +1110,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			}
         }
         
-        var cb = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue : Ext.getCmp('dataelement_cb').getValue;
+        var cb = Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb2').getValue : Ext.getCmp('dataelement_cb2').getValue;
                 
         if (!cb ||
-            !Ext.getCmp('period_cb').getValue() ||
-            !Ext.getCmp('map_cb').getValue() ) {
+            !Ext.getCmp('period_cb2').getValue() ||
+            !Ext.getCmp('map_cb2').getValue() ) {
             if (exception) {
                 Ext.messageRed.msg( i18n_thematic_map , i18n_form_is_not_complete );
             }
@@ -1125,7 +1125,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         MASK.show();
 
 		if (!this.newUrl) {
-			loadMapData(thematicMap, position);
+			loadMapData(thematicMap2, position);
 		}
     },
 
@@ -1134,7 +1134,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
      * Called by EXT when the component is rendered.
      */
     onRender: function(ct, position) {
-        mapfish.widgets.geostat.Choropleth.superclass.onRender.apply(this, arguments);
+        mapfish.widgets.geostat.Symbol.superclass.onRender.apply(this, arguments);
         if(this.loadMask){
             this.loadMask = new Ext.LoadMask(this.bwrap,
                     this.loadMask);
@@ -1153,8 +1153,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             'labelGenerator': this.labelGenerator
         };
 
-        this.coreComp = new mapfish.GeoStat.Choropleth(this.map, coreOptions);
+        this.coreComp = new mapfish.GeoStat.Symbol(this.map, coreOptions);
     }   
 });
 
-Ext.reg('choropleth', mapfish.widgets.geostat.Choropleth);
+Ext.reg('proportionalSymbol', mapfish.widgets.geostat.Symbol);

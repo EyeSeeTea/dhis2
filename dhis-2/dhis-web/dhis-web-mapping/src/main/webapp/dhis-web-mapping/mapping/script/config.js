@@ -20,6 +20,7 @@
 //	Help strings
 
 	thematicMap = 'gisThematicMap';
+    thematicMap2 = 'gisThematicMap2';
 	mapRegistration = 'gisMap';
 	organisationUnitAssignment = 'gisMapOrganisationUnitRelation';
 	administration = 'gisAdministration';
