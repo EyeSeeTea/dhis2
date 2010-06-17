@@ -125,29 +125,32 @@ public class DefaultDataElementDataMart
         {
             final Map<DataElementOperand, Integer> currentOperandIndexMap = dataElementAggregator.getOperandIndexMap( operands, period.getPeriodType(), operandIndexMap );
             
-            for ( final OrganisationUnit unit : organisationUnits )
+            if ( currentOperandIndexMap != null && currentOperandIndexMap.size() > 0 )
             {
-                final int level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
-                
-                final Map<DataElementOperand, Double> valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy );
-                
-                final PeriodType periodType = period.getPeriodType();
-                
-                for ( Entry<DataElementOperand, Double> entry : valueMap.entrySet() )
+                for ( final OrganisationUnit unit : organisationUnits )
                 {
-                    value.clear();
+                    final int level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
                     
-                    value.setDataElementId( entry.getKey().getDataElementId() );
-                    value.setCategoryOptionComboId( entry.getKey().getOptionComboId() );
-                    value.setPeriodId( period.getId() );
-                    value.setPeriodTypeId( periodType.getId() );
-                    value.setOrganisationUnitId( unit.getId() );
-                    value.setLevel( level );
-                    value.setValue( getRounded( entry.getValue(), DECIMALS ) );
+                    final Map<DataElementOperand, Double> valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy );
                     
-                    batchHandler.addObject( value );
+                    final PeriodType periodType = period.getPeriodType();
                     
-                    count++;
+                    for ( Entry<DataElementOperand, Double> entry : valueMap.entrySet() )
+                    {
+                        value.clear();
+                        
+                        value.setDataElementId( entry.getKey().getDataElementId() );
+                        value.setCategoryOptionComboId( entry.getKey().getOptionComboId() );
+                        value.setPeriodId( period.getId() );
+                        value.setPeriodTypeId( periodType.getId() );
+                        value.setOrganisationUnitId( unit.getId() );
+                        value.setLevel( level );
+                        value.setValue( getRounded( entry.getValue(), DECIMALS ) );
+                        
+                        batchHandler.addObject( value );
+                        
+                        count++;
+                    }
                 }
             }
         }
