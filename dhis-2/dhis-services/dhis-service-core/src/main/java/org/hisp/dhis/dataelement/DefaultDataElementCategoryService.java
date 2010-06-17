@@ -39,7 +39,7 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.period.DailyPeriodType;
+import org.hisp.dhis.period.TwoYearlyPeriodType;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
@@ -396,7 +396,7 @@ public class DefaultDataElementCategoryService
             Set<DataElementCategoryOptionCombo> categoryOptionCombos = dataElement.getCategoryCombo()
                 .getOptionCombos();
 
-            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder() : new DailyPeriodType().getFrequencyOrder(); //TODO improve
+            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder() : new TwoYearlyPeriodType().getFrequencyOrder(); // Assume lowest frequency if no PeriodType
             
             if ( categoryOptionCombos.size() > 1 && !(dataElement instanceof CalculatedDataElement) )
             {

@@ -115,14 +115,9 @@ public class DefaultDataElementDataMart
 
         batchHandler.init();
 
-        OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
+        final OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
         
         int count = 0;
-        int level = 0;
-        
-        Map<DataElementOperand, Double> valueMap = null;
-        
-        PeriodType periodType = null;
         
         final AggregatedDataValue value = new AggregatedDataValue();
         
@@ -132,11 +127,11 @@ public class DefaultDataElementDataMart
             
             for ( final OrganisationUnit unit : organisationUnits )
             {
-                level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
+                final int level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
                 
-                valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy );
+                final Map<DataElementOperand, Double> valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy );
                 
-                periodType = period.getPeriodType();
+                final PeriodType periodType = period.getPeriodType();
                 
                 for ( Entry<DataElementOperand, Double> entry : valueMap.entrySet() )
                 {

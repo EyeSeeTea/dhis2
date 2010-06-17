@@ -51,6 +51,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.datamart.aggregation.dataelement.SumIntAggregator"/>
     <property name="averageIntAggregator"
       ref="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntAggregator"/>
+	<property name="averageIntSingleValueAggregator"
+      ref="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntSingleValueAggregator"/>
     <property name="sumBoolAggregator"
       ref="org.hisp.dhis.datamart.aggregation.dataelement.SumBoolAggregator"/>
     <property name="averageBoolAggregator"
@@ -126,6 +128,14 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.datamart.aggregation.cache.AggregationCache"/>
   </bean>
 
+  <bean id="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntSingleValueAggregator"
+    class="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntSingleValueAggregator">
+    <property name="dataMartStore"
+      ref="org.hisp.dhis.datamart.DataMartStore"/>
+    <property name="aggregationCache"
+      ref="org.hisp.dhis.datamart.aggregation.cache.AggregationCache"/>
+  </bean>
+
   <bean id="org.hisp.dhis.datamart.aggregation.dataelement.AverageBoolAggregator"
     class="org.hisp.dhis.datamart.aggregation.dataelement.AverageBoolAggregator">
     <property name="dataMartStore"
@@ -163,6 +173,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.datamart.aggregation.dataelement.SumIntAggregator"/>
     <property name="averageIntAggregator"
       ref="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntAggregator"/>
+	<property name="averageIntSingleValueAggregator"
+      ref="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntSingleValueAggregator"/>
     <property name="crossTabService"
       ref="org.hisp.dhis.datamart.crosstab.CrossTabService"/>
     <property name="aggregationCache"
@@ -183,6 +195,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.datamart.aggregation.dataelement.SumIntAggregator"/>
     <property name="averageIntAggregator"
       ref="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntAggregator"/>
+	<property name="averageIntSingleValueAggregator"
+      ref="org.hisp.dhis.datamart.aggregation.dataelement.AverageIntSingleValueAggregator"/>
     <property name="crossTabService"
       ref="org.hisp.dhis.datamart.crosstab.CrossTabService"/>
     <property name="dataElementService"

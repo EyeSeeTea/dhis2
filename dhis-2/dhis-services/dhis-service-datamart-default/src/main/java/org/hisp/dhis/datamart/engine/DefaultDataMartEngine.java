@@ -129,6 +129,13 @@ public class DefaultDataMartEngine
         this.averageIntAggregator = averageIntDataElementAggregator;
     }
 
+    private DataElementAggregator averageIntSingleValueAggregator;
+    
+    public void setAverageIntSingleValueAggregator( DataElementAggregator averageIntSingleValueAggregator )
+    {
+        this.averageIntSingleValueAggregator = averageIntSingleValueAggregator;
+    }
+
     private DataElementAggregator sumBoolAggregator;
 
     public void setSumBoolAggregator( DataElementAggregator sumBooleanDataElementAggregator )
@@ -281,6 +288,13 @@ public class DefaultDataMartEngine
             count += dataElementDataMart.exportDataValues( intNonCalculatedDataElementOperands, periodIds, organisationUnitIds, averageIntAggregator );
         
             log.info( "Exported values for data elements with average aggregation operator of type number: " + TimeUtils.getHMS() );
+        }
+
+        if ( intNonCalculatedDataElementOperands.size() > 0 )
+        {            
+            count += dataElementDataMart.exportDataValues( intNonCalculatedDataElementOperands, periodIds, organisationUnitIds, averageIntSingleValueAggregator );
+        
+            log.info( "Exported values for data elements with average aggregation operator with single value of type number: " + TimeUtils.getHMS() );
         }
 
         if ( boolNonCalculatedDataElementOperands.size() > 0 )

@@ -88,7 +88,7 @@ public class AverageBoolAggregator
             getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unit.getId(), hierarchy );
         
         final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
-            period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <data element id, [total value, total relevant days]>
+            period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
 
         final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>( entries.size() ); // <Operand, total value>
 
@@ -204,8 +204,7 @@ public class AverageBoolAggregator
         
         for ( final DataElementOperand operand : operands )
         {
-            if ( operand.getValueType().equals( VALUE_TYPE_BOOL ) && ( operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) &&
-                operand.getFrequencyOrder() < periodType.getFrequencyOrder() ) )
+            if ( operand.getValueType().equals( VALUE_TYPE_BOOL ) && operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) )
             {
                 avgOperandIndexMap.put( operand, operandIndexMap.get( operand ) );
             }
