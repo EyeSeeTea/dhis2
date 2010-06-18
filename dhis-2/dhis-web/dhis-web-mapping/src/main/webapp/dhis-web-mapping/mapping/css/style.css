@@ -11,6 +11,9 @@
 .x-panel-body {
 	border:0px;
 }
+.x-panel-tl {
+    padding-left: 8px;
+}
 .x-form-field {
 	font:10px lucida sans unicode,arial,tahoma,helvetica,sans-serif;
 }
@@ -55,6 +58,12 @@
 	font-size:10px;
 	color:#666;
 	padding-left:21px;
+}
+
+/* OpenLayers overrides */
+
+div.olMapViewport {
+    border-top:1px solid #DDDDDD;
 }
 
 /* OpenLayers (include in lib)
