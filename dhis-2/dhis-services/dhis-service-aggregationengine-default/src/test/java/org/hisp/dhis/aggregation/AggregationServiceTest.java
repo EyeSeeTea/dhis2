@@ -33,15 +33,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 
-import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.datamart.DataMartService;
-import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValueService;
@@ -73,7 +70,6 @@ public class AggregationServiceTest
     private DataElementCategoryOptionCombo categoryOptionCombo;
 
     private Collection<Integer> dataElementIds;
-    private Collection<Integer> indicatorIds;
     private Collection<Integer> periodIds;
     private Collection<Integer> organisationUnitIds;
     
@@ -134,7 +130,6 @@ public class AggregationServiceTest
         // ---------------------------------------------------------------------
 
         dataElementIds = new HashSet<Integer>();
-        indicatorIds = new HashSet<Integer>();
         periodIds = new HashSet<Integer>();
         organisationUnitIds = new HashSet<Integer>();
         

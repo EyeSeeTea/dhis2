@@ -276,9 +276,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_category_options" );
 
                 BatchHandler<DataElementCategoryOption> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataElementCategoryOptionBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataElementCategoryOptionBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementCategoryOptionConverter( batchHandler, importObjectService,
                     categoryService );
@@ -294,9 +292,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_categories" );
 
                 BatchHandler<DataElementCategory> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataElementCategoryBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataElementCategoryBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementCategoryConverter( batchHandler, importObjectService,
                     categoryService );
@@ -312,9 +308,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_category_combos" );
 
                 BatchHandler<DataElementCategoryCombo> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataElementCategoryComboBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataElementCategoryComboBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementCategoryComboConverter( batchHandler, importObjectService,
                     categoryService );
@@ -342,9 +336,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_category_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( CategoryCategoryOptionAssociationBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( CategoryCategoryOptionAssociationBatchHandler.class ).init();
 
                 XMLConverter converter = new CategoryCategoryOptionAssociationConverter( batchHandler,
                     importObjectService, objectMappingGenerator.getCategoryMapping( params.skipMapping() ),
@@ -361,9 +353,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_category_combo_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( CategoryComboCategoryAssociationBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( CategoryComboCategoryAssociationBatchHandler.class ).init();
 
                 XMLConverter converter = new CategoryComboCategoryAssociationConverter( batchHandler,
                     importObjectService, objectMappingGenerator.getCategoryComboMapping( params.skipMapping() ),
@@ -380,9 +370,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_elements" );
 
                 BatchHandler<DataElement> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataElementBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataElementBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getCategoryComboMapping( params.skipMapping() ), dataElementService, importAnalyser );
@@ -398,9 +386,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_elements" );
 
                 BatchHandler<DataElement> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataElementBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataElementBatchHandler.class ).init();
 
                 XMLConverter converter = new ExtendedDataElementConverter( batchHandler,
                     importObjectService, objectMappingGenerator
@@ -430,9 +416,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_groups" );
 
                 BatchHandler<DataElementGroup> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataElementGroupBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataElementGroupBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementGroupConverter( batchHandler, importObjectService,
                     dataElementService );
@@ -448,9 +432,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_group_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataElementGroupMemberBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataElementGroupMemberBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementGroupMemberConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getDataElementMapping( params.skipMapping() ), objectMappingGenerator
@@ -467,9 +449,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_group_sets" );
 
                 BatchHandler<DataElementGroupSet> batchHandler = batchHandlerFactory.
-                    createBatchHandler( DataElementGroupSetBatchHandler.class );
-
-                batchHandler.init();
+                    createBatchHandler( DataElementGroupSetBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementGroupSetConverter( batchHandler, importObjectService, dataElementService );
 
@@ -484,9 +464,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_element_group_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.
-                    createBatchHandler( DataElementGroupSetMemberBatchHandler.class );
-
-                batchHandler.init();
+                    createBatchHandler( DataElementGroupSetMemberBatchHandler.class ).init();
 
                 XMLConverter converter = new DataElementGroupSetMemberConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getDataElementGroupMapping( params.skipMapping() ),
@@ -503,9 +481,7 @@ public class DXFConverter
                 state.setMessage( "importing_indicator_types" );
 
                 BatchHandler<IndicatorType> batchHandler = batchHandlerFactory
-                    .createBatchHandler( IndicatorTypeBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( IndicatorTypeBatchHandler.class ).init();
 
                 XMLConverter converter = new IndicatorTypeConverter( batchHandler, importObjectService,
                     indicatorService );
@@ -521,9 +497,7 @@ public class DXFConverter
                 state.setMessage( "importing_indicators" );
 
                 BatchHandler<Indicator> batchHandler = batchHandlerFactory
-                    .createBatchHandler( IndicatorBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( IndicatorBatchHandler.class ).init();
 
                 XMLConverter converter = new IndicatorConverter( batchHandler, importObjectService, indicatorService,
                     expressionService, objectMappingGenerator.getIndicatorTypeMapping( params.skipMapping() ),
@@ -541,9 +515,7 @@ public class DXFConverter
                 state.setMessage( "importing_indicators" );
 
                 BatchHandler<Indicator> batchHandler = batchHandlerFactory
-                    .createBatchHandler( IndicatorBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( IndicatorBatchHandler.class ).init();
 
                 XMLConverter converter = new ExtendedIndicatorConverter( batchHandler,
                     importObjectService, indicatorService, expressionService, objectMappingGenerator
@@ -562,9 +534,7 @@ public class DXFConverter
                 state.setMessage( "importing_indicator_groups" );
 
                 BatchHandler<IndicatorGroup> batchHandler = batchHandlerFactory
-                    .createBatchHandler( IndicatorGroupBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( IndicatorGroupBatchHandler.class ).init();
 
                 XMLConverter converter = new IndicatorGroupConverter( batchHandler, importObjectService,
                     indicatorService );
@@ -580,9 +550,7 @@ public class DXFConverter
                 state.setMessage( "importing_indicator_group_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( IndicatorGroupMemberBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( IndicatorGroupMemberBatchHandler.class ).init();
 
                 XMLConverter converter = new IndicatorGroupMemberConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getIndicatorMapping( params.skipMapping() ), objectMappingGenerator
@@ -599,9 +567,7 @@ public class DXFConverter
                 state.setMessage( "importing_indicator_group_sets" );
 
                 BatchHandler<IndicatorGroupSet> batchHandler = batchHandlerFactory.
-                    createBatchHandler( IndicatorGroupSetBatchHandler.class );
-
-                batchHandler.init();
+                    createBatchHandler( IndicatorGroupSetBatchHandler.class ).init();
 
                 XMLConverter converter = new IndicatorGroupSetConverter( batchHandler, importObjectService, indicatorService );
 
@@ -616,9 +582,7 @@ public class DXFConverter
                 state.setMessage( "importing_indicator_group_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.
-                    createBatchHandler( IndicatorGroupSetMemberBatchHandler.class );
-
-                batchHandler.init();
+                    createBatchHandler( IndicatorGroupSetMemberBatchHandler.class ).init();
 
                 XMLConverter converter = new IndicatorGroupSetMemberConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getIndicatorGroupMapping( params.skipMapping() ),
@@ -635,9 +599,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_dictionaries" );
 
                 BatchHandler<DataDictionary> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataDictionaryBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataDictionaryBatchHandler.class ).init();
 
                 XMLConverter converter = new DataDictionaryConverter( batchHandler, importObjectService,
                     dataDictionaryService );
@@ -653,9 +615,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_dictionary_data_elements" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataDictionaryDataElementBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataDictionaryDataElementBatchHandler.class ).init();
 
                 XMLConverter converter = new DataDictionaryDataElementConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getDataDictionaryMapping( params.skipMapping() ), objectMappingGenerator
@@ -672,9 +632,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_dictionary_indicators" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataDictionaryIndicatorBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataDictionaryIndicatorBatchHandler.class ).init();
 
                 XMLConverter converter = new DataDictionaryIndicatorConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getDataDictionaryMapping( params.skipMapping() ), objectMappingGenerator
@@ -690,9 +648,7 @@ public class DXFConverter
             {
                 state.setMessage( "importing_data_sets" );
 
-                BatchHandler<DataSet> batchHandler = batchHandlerFactory.createBatchHandler( DataSetBatchHandler.class );
-
-                batchHandler.init();
+                BatchHandler<DataSet> batchHandler = batchHandlerFactory.createBatchHandler( DataSetBatchHandler.class ).init();
 
                 XMLConverter converter = new DataSetConverter( batchHandler, importObjectService, dataSetService,
                     objectMappingGenerator.getPeriodTypeMapping() );
@@ -708,9 +664,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataSetMemberBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataSetMemberBatchHandler.class ).init();
 
                 XMLConverter converter = new DataSetMemberConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getDataElementMapping( params.skipMapping() ), objectMappingGenerator
@@ -727,12 +681,9 @@ public class DXFConverter
                 state.setMessage( "importing_organisation_units" );
 
                 BatchHandler<Source> sourceBatchHandler = batchHandlerFactory
-                    .createBatchHandler( SourceBatchHandler.class );
+                    .createBatchHandler( SourceBatchHandler.class ).init();
                 BatchHandler<OrganisationUnit> batchHandler = batchHandlerFactory
-                    .createBatchHandler( OrganisationUnitBatchHandler.class );
-
-                sourceBatchHandler.init();
-                batchHandler.init();
+                    .createBatchHandler( OrganisationUnitBatchHandler.class ).init();
 
                 XMLConverter converter = new OrganisationUnitConverter( batchHandler, sourceBatchHandler,
                     importObjectService, organisationUnitService, importAnalyser );
@@ -749,9 +700,7 @@ public class DXFConverter
                 state.setMessage( "importing_organisation_unit_relationships" );
 
                 BatchHandler<OrganisationUnit> batchHandler = batchHandlerFactory
-                    .createBatchHandler( OrganisationUnitBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( OrganisationUnitBatchHandler.class ).init();
 
                 XMLConverter converter = new OrganisationUnitRelationshipConverter( batchHandler, importObjectService,
                     organisationUnitService, objectMappingGenerator.getOrganisationUnitMapping( params.skipMapping() ) );
@@ -767,9 +716,7 @@ public class DXFConverter
                 state.setMessage( "importing_organisation_unit_groups" );
 
                 BatchHandler<OrganisationUnitGroup> batchHandler = batchHandlerFactory
-                    .createBatchHandler( OrganisationUnitGroupBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( OrganisationUnitGroupBatchHandler.class ).init();
 
                 XMLConverter converter = new OrganisationUnitGroupConverter( batchHandler, importObjectService,
                     organisationUnitGroupService );
@@ -785,9 +732,7 @@ public class DXFConverter
                 state.setMessage( "importing_organisation_unit_group_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( OrganisationUnitGroupMemberBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( OrganisationUnitGroupMemberBatchHandler.class ).init();
 
                 XMLConverter converter = new OrganisationUnitGroupMemberConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getOrganisationUnitMapping( params.skipMapping() ), objectMappingGenerator
@@ -804,9 +749,7 @@ public class DXFConverter
                 state.setMessage( "importing_organisation_unit_group_sets" );
 
                 BatchHandler<OrganisationUnitGroupSet> batchHandler = batchHandlerFactory
-                    .createBatchHandler( GroupSetBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( GroupSetBatchHandler.class ).init();
 
                 XMLConverter converter = new GroupSetConverter( batchHandler, importObjectService,
                     organisationUnitGroupService );
@@ -822,9 +765,7 @@ public class DXFConverter
                 state.setMessage( "importing_organisation_unit_group_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( GroupSetMemberBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( GroupSetMemberBatchHandler.class ).init();
 
                 XMLConverter converter = new GroupSetMemberConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getOrganisationUnitGroupMapping( params.skipMapping() ),
@@ -852,9 +793,7 @@ public class DXFConverter
                 state.setMessage( "importing_data_set_source_associations" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataSetSourceAssociationBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( DataSetSourceAssociationBatchHandler.class ).init();
 
                 XMLConverter converter = new DataSetSourceAssociationConverter( batchHandler, importObjectService,
                     objectMappingGenerator.getDataSetMapping( params.skipMapping() ), objectMappingGenerator
@@ -882,9 +821,7 @@ public class DXFConverter
             {
                 state.setMessage( "importing_periods" );
 
-                BatchHandler<Period> batchHandler = batchHandlerFactory.createBatchHandler( PeriodBatchHandler.class );
-
-                batchHandler.init();
+                BatchHandler<Period> batchHandler = batchHandlerFactory.createBatchHandler( PeriodBatchHandler.class ).init();
 
                 XMLConverter converter = new PeriodConverter( batchHandler, importObjectService, periodService,
                     objectMappingGenerator.getPeriodTypeMapping() );
@@ -900,9 +837,7 @@ public class DXFConverter
                 state.setMessage( "importing_report_tables" );
 
                 BatchHandler<ReportTable> batchHandler = batchHandlerFactory
-                    .createBatchHandler( ReportTableBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( ReportTableBatchHandler.class ).init();
 
                 XMLConverter converter = new ReportTableConverter( reportTableService, importObjectService,
                     dataElementService, categoryService, indicatorService, dataSetService, periodService, organisationUnitService,
@@ -936,9 +871,7 @@ public class DXFConverter
                 state.setMessage( "importing_complete_data_set_registrations" );
 
                 BatchHandler<CompleteDataSetRegistration> batchHandler = batchHandlerFactory
-                    .createBatchHandler( CompleteDataSetRegistrationBatchHandler.class );
-
-                batchHandler.init();
+                    .createBatchHandler( CompleteDataSetRegistrationBatchHandler.class ).init();
 
                 XMLConverter converter = new CompleteDataSetRegistrationConverter( batchHandler, importObjectService,
                     params, objectMappingGenerator.getDataSetMapping( params.skipMapping() ), objectMappingGenerator
@@ -956,14 +889,9 @@ public class DXFConverter
                 state.setMessage( "importing_data_values" );
 
                 BatchHandler<DataValue> batchHandler = batchHandlerFactory
-                    .createBatchHandler( DataValueBatchHandler.class );
-
+                    .createBatchHandler( DataValueBatchHandler.class ).init();
                 BatchHandler<ImportDataValue> importDataValueBatchHandler = batchHandlerFactory
-                    .createBatchHandler( ImportDataValueBatchHandler.class );
-
-                batchHandler.init();
-
-                importDataValueBatchHandler.init();
+                    .createBatchHandler( ImportDataValueBatchHandler.class ).init();
 
                 XMLConverter converter = new DataValueConverter( batchHandler, importDataValueBatchHandler,
                     dataMartService, importObjectService, params, objectMappingGenerator
