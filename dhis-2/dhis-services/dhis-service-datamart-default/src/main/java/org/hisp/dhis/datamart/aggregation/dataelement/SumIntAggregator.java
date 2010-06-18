@@ -27,12 +27,10 @@ package org.hisp.dhis.datamart.aggregation.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 import static org.hisp.dhis.system.util.DateUtils.getDaysInclusive;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -89,8 +87,8 @@ public class SumIntAggregator
             return new HashMap<DataElementOperand, Double>();
         }
         
-        final Collection<CrossTabDataValue> crossTabValues = 
-            getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unit.getId(), hierarchy );
+        final Collection<CrossTabDataValue> crossTabValues = dataMartStore.getCrossTabDataValues( operandIndexMap, 
+            aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), hierarchy.getChildren( unit.getId() ) );
         
         final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
             period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
@@ -106,21 +104,6 @@ public class SumIntAggregator
         }
         
         return values;
-    }
-
-    public Collection<CrossTabDataValue> getCrossTabDataValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Date startDate, final Date endDate, final int parentId, final OrganisationUnitHierarchy hierarchy ) //TODO replace inline
-    {
-        final Collection<Period> periods = aggregationCache.getIntersectingPeriods( startDate, endDate );
-        
-        final Collection<Integer> periodIds = new ArrayList<Integer>( periods.size() );
-        
-        for ( final Period period : periods )
-        {
-            periodIds.add( period.getId() );
-        }
-        
-        return dataMartStore.getCrossTabDataValues( operandIndexMap, periodIds, hierarchy.getChildren( parentId ) );
     }
     
     public Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 
@@ -218,8 +201,7 @@ public class SumIntAggregator
         
         for ( final DataElementOperand operand : operands )
         {
-            if ( operand.getValueType().equals( VALUE_TYPE_INT ) && ( operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_SUM ) || 
-                ( operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) && operand.getFrequencyOrder() >= periodType.getFrequencyOrder() ) ) )
+            if ( operand.getValueType().equals( VALUE_TYPE_INT ) && operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_SUM ) )
             {
                 sumOperandIndexMap.put( operand, operandIndexMap.get( operand ) );
             }
