@@ -27,6 +27,8 @@ package org.hisp.dhis.datamart.aggregation.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 import static org.hisp.dhis.system.util.DateUtils.getDaysInclusive;
 
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 
 /**
  * @author Lars Helge Overland
@@ -80,6 +83,11 @@ public class AverageIntAggregator
     public Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
         final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy )
     {
+        if ( operandIndexMap == null || operandIndexMap.size() == 0 )
+        {
+            return new HashMap<DataElementOperand, Double>();
+        }
+        
         final Collection<Integer> unitIds = hierarchy.getChildren( unit.getId() );
         
         final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>(); // <Operand, total value>
@@ -204,4 +212,20 @@ public class AverageIntAggregator
         
         return totalSums;
     }
+
+    public Map<DataElementOperand, Integer> getOperandIndexMap( Collection<DataElementOperand> operands, PeriodType periodType, Map<DataElementOperand, Integer> operandIndexMap )
+    {
+        Map<DataElementOperand, Integer> avgOperandIndexMap = new HashMap<DataElementOperand, Integer>();
+        
+        for ( final DataElementOperand operand : operands )
+        {
+            if ( operand.getValueType().equals( VALUE_TYPE_INT ) && operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_AVERAGE ) &&
+                operand.getFrequencyOrder() < periodType.getFrequencyOrder() )
+            {
+                avgOperandIndexMap.put( operand, operandIndexMap.get( operand ) );
+            }
+        }
+        
+        return avgOperandIndexMap;
+    }    
 }

@@ -68,6 +68,8 @@ public class DataElementOperand
 
     private String operandName;
 
+    private String valueType;
+    
     private String aggregationOperator;
     
     private List<Integer> aggregationLevels = new ArrayList<Integer>();
@@ -103,12 +105,13 @@ public class DataElementOperand
         this.operandName = operandName;
     }
 
-    public DataElementOperand( int dataElementId, int optionComboId, String operandName, String aggregationOperator, List<Integer> aggregationLevels, int frequencyOrder )
+    public DataElementOperand( int dataElementId, int optionComboId, String operandName, String valueType, String aggregationOperator, List<Integer> aggregationLevels, int frequencyOrder )
     {
         this.dataElementId = dataElementId;
         this.optionComboId = optionComboId;
         this.operandId = dataElementId + SEPARATOR + optionComboId;
         this.operandName = operandName;
+        this.valueType = valueType;
         this.aggregationOperator = aggregationOperator;
         this.aggregationLevels = aggregationLevels;
         this.frequencyOrder = frequencyOrder;
@@ -274,6 +277,16 @@ public class DataElementOperand
     public void setOperandName( String operandName )
     {
         this.operandName = operandName;
+    }
+
+    public String getValueType()
+    {
+        return valueType;
+    }
+
+    public void setValueType( String valueType )
+    {
+        this.valueType = valueType;
     }
 
     public String getAggregationOperator()

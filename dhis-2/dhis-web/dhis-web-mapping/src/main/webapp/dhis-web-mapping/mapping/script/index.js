@@ -2848,9 +2848,9 @@ Ext.onReady( function() {
 	
 	addOverlaysToMap();
     
-    function showWMSLegend(layer) {
+    function showWMSLayerOptions(layer) {
         var baseLayerOptionsWindow = new Ext.Window({
-            title: 'Layer options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
             items: [
                 {
                     xtype: 'menu',
@@ -2890,6 +2890,53 @@ Ext.onReady( function() {
                                     }
                                 }
                             }
+                        },
+                        {
+                            html: 'Opacity',
+                            menu: {
+                                items: [
+                                    {
+                                        html: '0.1',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.1); } } }
+                                    },
+                                    {
+                                        html: '0.2',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.2); } } }
+                                    },
+                                    {
+                                        html: '0.3',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.3); } } }
+                                    },
+                                    {
+                                        html: '0.4',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.4); } } }
+                                    },
+                                    {
+                                        html: '0.5',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.5); } } }
+                                    },
+                                    {
+                                        html: '0.6',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.6); } } }
+                                    },
+                                    {
+                                        html: '0.7',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.7); } } }
+                                    },
+                                    {
+                                        html: '0.8',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.8); } } }
+                                    },
+                                    {
+                                        html: '0.9',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.9); } } }
+                                    },
+                                    {
+                                        html: '1.0',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(1.0); } } }
+                                    }
+                                ]
+                            }
                         }
                     ]
                 }
@@ -2897,6 +2944,70 @@ Ext.onReady( function() {
         });
         baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 190, Ext.getCmp('center').y + 50);
         baseLayerOptionsWindow.show();
+    }
+    
+    function showVectorLayerOptions(layer) {
+        var vectorLayerOptionsWindow = new Ext.Window({
+            title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            items: [
+                {
+                    xtype: 'menu',
+                    id: 'vectorlayeroptions_m',
+                    floating: false,
+                    items: [
+                        {
+                            html: 'Opacity',
+                            menu: {
+                                items: [
+                                    {
+                                        html: '0.1',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.1); } } }
+                                    },
+                                    {
+                                        html: '0.2',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.2); } } }
+                                    },
+                                    {
+                                        html: '0.3',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.3); } } }
+                                    },
+                                    {
+                                        html: '0.4',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.4); } } }
+                                    },
+                                    {
+                                        html: '0.5',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.5); } } }
+                                    },
+                                    {
+                                        html: '0.6',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.6); } } }
+                                    },
+                                    {
+                                        html: '0.7',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.7); } } }
+                                    },
+                                    {
+                                        html: '0.8',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.8); } } }
+                                    },
+                                    {
+                                        html: '0.9',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.9); } } }
+                                    },
+                                    {
+                                        html: '1.0',
+                                        listeners: { 'click': { fn: function() { layer.setOpacity(1.0); } } }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+        vectorLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 173, Ext.getCmp('center').y + 50);
+        vectorLayerOptionsWindow.show();
     }
 	
 	var layerTreeConfig = [{
@@ -2929,13 +3040,13 @@ Ext.onReady( function() {
 			'click': {
 				fn: function(n) {
 					if (n.isAncestor(this.getNodeById('xnode-253'))) {
-						showWMSLegend(MAP.getLayersByName(n.attributes.layer.name)[0]);
+						showWMSLayerOptions(MAP.getLayersByName(n.attributes.layer.name)[0]);
 					}
                     else if (n.isAncestor(this.getNodeById('xnode-254'))) {
-                        //alert(n.attributes.layer.name);
+                        showVectorLayerOptions(MAP.getLayersByName(n.attributes.layer.name)[0]);
                     }
 					else {
-						//alert(n.attributes.layer);
+                        showVectorLayerOptions(MAP.getLayersByName(n.attributes.layer)[0]);
 					}
 				}
 			}
