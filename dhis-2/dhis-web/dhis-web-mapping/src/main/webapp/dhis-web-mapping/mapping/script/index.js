@@ -2849,7 +2849,12 @@ Ext.onReady( function() {
 	addOverlaysToMap();
     
     function showWMSLayerOptions(layer) {
+        if (Ext.getCmp('baselayeroptions_w')) {
+            Ext.getCmp('baselayeroptions_w').destroy();
+        }
+        
         var baseLayerOptionsWindow = new Ext.Window({
+            id: 'baselayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
             items: [
                 {
@@ -2947,7 +2952,12 @@ Ext.onReady( function() {
     }
     
     function showVectorLayerOptions(layer) {
+        if (Ext.getCmp('vectorlayeroptions_w')) {
+            Ext.getCmp('vectorlayeroptions_w').destroy();
+        }
+        
         var vectorLayerOptionsWindow = new Ext.Window({
+            id: 'vectorlayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
             items: [
                 {
