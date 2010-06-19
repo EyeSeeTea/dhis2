@@ -1,6 +1,5 @@
 package org.hisp.dhis.importexport.zip;
 
-
 import java.io.InputStream;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -38,7 +37,6 @@ import org.springframework.stereotype.Component;
 /**
  *
  * @author bobj
- * @version created 02-Jun-2010
  */
 @Component("odfImporter")
 public class OdfImporter extends TransformablePackage {
@@ -72,5 +70,4 @@ public class OdfImporter extends TransformablePackage {
     {
         throw new UnsupportedOperationException( "Not supported yet." );
     }
-
 }
