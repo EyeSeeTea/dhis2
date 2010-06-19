@@ -22,7 +22,10 @@ var ACTIVEPANEL;
 /* Mask */
 var MASK;
 /* Boolean */
-var LABELS;
+var LABELS = new Object();
+LABELS[thematicMap] = false;
+LABELS[thematicMap2] = false;
+LABELS[organisationUnitAssignment] = false;
 /* Legend colors for export */
 var COLORINTERPOLATION;
 /* Export values */
@@ -52,11 +55,94 @@ function validateInput(name){return (name.length<=25);}
 /* Decide multiselect height based on screen resolution */
 function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else if(h<=1050){return 310;}else if(h<=1200){return 470;}else{return 900;}}
 /* Toggle feature labels */
-function toggleFeatureLabels(classify) {
-    var layer=MAP.getLayersByName('Polygon layer')[0];
-    function activateLabels(){
-        layer.styleMap=new OpenLayers.StyleMap(
-            {'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${'+MAPDATA.nameColumn+'}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=true;}function deactivateLabels(){layer.styleMap=new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});layer.refresh();LABELS=false;}if(classify){if(LABELS){deactivateLabels();}else{activateLabels();}if(ACTIVEPANEL==thematicMap){choropleth.classify(false,true);}else if(ACTIVEPANEL==organisationUnitAssignment){mapping.classify(false,true);}}else{if(LABELS){activateLabels();}}}
+function getActivatedOpenLayersStyleMap(nameColumn) {
+    return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${' + nameColumn + '}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])), 'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
+}
+function getDeactivatedOpenLayersStyleMap() {
+    return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
+}
+function toggleFeatureLabelsPolygons(classify, layer) {
+    function activateLabels() {
+        layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[thematicMap].nameColumn);
+        layer.refresh();
+        LABELS[thematicMap] = true;
+    }
+    function deactivateLabels() {
+        layer.styleMap = getDeactivatedOpenLayersStyleMap();
+        layer.refresh();
+        LABELS[thematicMap] = false;
+    }
+    
+    if (classify) {
+        if (LABELS[thematicMap]) {
+            deactivateLabels();
+        }
+        else {
+            activateLabels();
+        }
+        choropleth.classify(false,true);
+    }
+    else {
+        if (LABELS[thematicMap]) {
+            activateLabels();
+        }
+    }
+}
+function toggleFeatureLabelsPoints(classify, layer) {
+    function activateLabels() {
+        layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[thematicMap2].nameColumn);
+        layer.refresh();
+        LABELS[thematicMap2] = true;
+    }
+    function deactivateLabels() {
+        layer.styleMap = getDeactivatedOpenLayersStyleMap();
+        layer.refresh();
+        LABELS[thematicMap2] = false;
+    }
+    
+    if (classify) {
+        if (LABELS[thematicMap2]) {
+            deactivateLabels();
+        }
+        else {
+            activateLabels();
+        }
+        proportionalSymbol.classify(false,true);
+    }
+    else {
+        if (LABELS[thematicMap2]) {
+            activateLabels();
+        }
+    }
+}
+function toggleFeatureLabelsAssignment(classify, layer) {
+    function activateLabels() {
+        layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[organisationUnitAssignment].nameColumn);
+        layer.refresh();
+        LABELS[organisationUnitAssignment] = true;
+    }
+    function deactivateLabels() {
+        layer.styleMap = getDeactivatedOpenLayersStyleMap();
+        layer.refresh();
+        LABELS[organisationUnitAssignment] = false;
+    }
+    
+    if (classify) {
+        if (LABELS[organisationUnitAssignment]) {
+            deactivateLabels();
+        }
+        else {
+            activateLabels();
+        }
+        mapping.classify(false,true);
+    }
+    else {
+        if (LABELS[organisationUnitAssignment]) {
+            activateLabels();
+        }
+    }
+}    
+    
 /* Sort method */
 function sortByValue(a,b){return b.value-a.value;}
 /* Create JSON for map export */
@@ -3011,6 +3097,26 @@ Ext.onReady( function() {
                                     }
                                 ]
                             }
+                        },
+                        {
+                            html: 'Show/hide labels',
+                            listeners: {
+                                'click': {
+                                    fn: function() {
+                                        if (layer.name == 'Polygon layer') {
+                                            if (ACTIVEPANEL == thematicMap) {
+                                                toggleFeatureLabelsPolygons(true, layer);
+                                            }
+                                            else {
+                                                toggleFeatureLabelsAssignment(true, layer);
+                                            }
+                                        }
+                                        else if (layer.name == 'Point layer') {
+                                            toggleFeatureLabelsPoints(true, layer);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     ]
                 }
@@ -3186,14 +3292,6 @@ Ext.onReady( function() {
 		},
 		scope: this
 	});
-		
-	var labelsButton = new Ext.Button({
-		iconCls: 'icon-labels',
-		tooltip: i18n_show_hide_labels,
-		handler: function() {
-			toggleFeatureLabels(true);
-		}
-	});
 	
 	var favoritesButton = new Ext.Button({
 		iconCls: 'icon-favorite',
@@ -3336,7 +3434,6 @@ Ext.onReady( function() {
 			zoomInButton,
 			zoomOutButton,
 			zoomMaxExtentButton,
-			// labelsButton,
 			'-',
 			exportImageButton,
 			exportExcelButton,
@@ -3871,8 +3968,9 @@ function onHoverSelectPoint(feature) {
     FEATURE[thematicMap2] = feature;
     Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap2].attributes[MAPDATA[thematicMap2].nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap2].attributes.value + '</div>', false);
 }
-function onHoverUnselectPoint(feature) {}
-
+function onHoverUnselectPoint(feature) {
+    Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
+}
 
 /* Section: map data */
 function loadMapData(redirect, position) {
@@ -3916,8 +4014,6 @@ function loadMapData(redirect, position) {
 				MAPVIEW = false;
 			}
 			
-			toggleFeatureLabels(false);
-
             if (redirect == thematicMap) { getChoroplethData(); }
             else if (redirect == thematicMap2) { getSymbolData(); }
             else if (redirect == organisationUnitAssignment) { getAssignOrganisationUnitData(); }
@@ -3934,6 +4030,12 @@ function loadMapData(redirect, position) {
 function getChoroplethData() {
 	MASK.msg = i18n_creating_choropleth;
 	MASK.show();
+    
+    var l = MAP.getLayersByName('Polygon layer')[0];
+    if (LABELS[thematicMap]) {
+        toggleFeatureLabelsPolygons(false, l);
+    }
+    FEATURE[thematicMap] = l.features;    
 	
     var indicatorId = Ext.getCmp('indicator_cb').getValue();
 	var dataElementId = Ext.getCmp('dataelement_cb').getValue();
@@ -3971,7 +4073,6 @@ function getChoroplethData() {
         method: 'POST',
         params: params,
         success: function(r) {
-			FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
 			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
 			EXPORTVALUES = getExportDataValueJSON(mapvalues);
 			var mv = new Array();
@@ -4045,6 +4146,12 @@ function getChoroplethData() {
 function getSymbolData() {
 	MASK.msg = i18n_creating_choropleth;
 	MASK.show();
+    
+    var l = MAP.getLayersByName('Point layer')[0];
+    if (LABELS[thematicMap2]) {
+        toggleFeatureLabelsPoints(false, l);
+    }
+    FEATURE[thematicMap2] = l.features;
 	
     var indicatorId = Ext.getCmp('indicator_cb2').getValue();
 	var dataElementId = Ext.getCmp('dataelement_cb2').getValue();
@@ -4082,7 +4189,6 @@ function getSymbolData() {
         method: 'POST',
         params: params,
         success: function(r) {
-			FEATURE[thematicMap2] = MAP.getLayersByName('Point layer')[0].features;
 			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
 			EXPORTVALUES = getExportDataValueJSON(mapvalues);
 			var mv = new Array();
@@ -4156,10 +4262,15 @@ function getSymbolData() {
 function getAssignOrganisationUnitData() {
 	MASK.msg = i18n_creating_map;
 	MASK.show();
+    
+    var l = MAP.getLayersByName('Polygon layer')[0];
+    if (LABELS[organisationUnitAssignment]) {
+        toggleFeatureLabelsAssignment(false, l);
+    }
+    FEATURE[organisationUnitAssignment] = l.features;
 	
     var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 	var relations =	 Ext.getCmp('grid_gp').getStore();
-	FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
 	var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
 	var noCls = 1;
 	var noAssigned = 0;

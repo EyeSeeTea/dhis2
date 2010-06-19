@@ -2,9 +2,6 @@
 .ext-gecko .x-window-body .x-form-item {
 	overflow:hidden;
 }
-#ext-gen60 {
-	border-top:1px solid #d0d0d0;
-}
 .x-panel-body-noheader, .x-panel-mc .x-panel-body {
 	border-top:0px none;
 }
