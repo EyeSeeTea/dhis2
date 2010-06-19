@@ -32,7 +32,7 @@ td.error {padding-left:1em}
 			jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
 			jQuery("#firstName").focus();
 			var dateFormat = '$encoder.jsEscape( $i18n.getString( "format.date.label" ) , "'")'; 
-			jQuery("#birthDate").rules("add",{required:true,date:dateFormat,datelessthanequaltoday:true});
+			jQuery("#birthDate").rules("add",{required:true,dateISO:true,datelessthanequaltoday:true});
 		});
 </script>
 <h3>$i18n.getString( "add_new_patient" )</h3>
