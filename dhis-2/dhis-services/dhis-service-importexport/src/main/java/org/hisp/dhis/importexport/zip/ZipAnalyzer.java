@@ -30,6 +30,7 @@ package org.hisp.dhis.importexport.zip;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.importexport.ImportException;
@@ -44,20 +45,20 @@ import org.springframework.stereotype.Component;
 @Component("zipAnalyzer")
 public class ZipAnalyzer
 {
-
     private final static Log log = LogFactory.getLog( ZipAnalyzer.class );
 
     @Autowired
-    SingleStreamImporter singleStreamImporter;
+    private SingleStreamImporter singleStreamImporter;
 
     @Autowired
-    ExcelXImporter excelXImporter;
+    private ExcelXImporter excelXImporter;
 
     @Autowired
-    OdfImporter odfImporter;
+    private OdfImporter odfImporter;
 
     @Autowired
-    SdmxImporter sdmxImporter;
+    private SdmxImporter sdmxImporter;
+    
     /**
      * Zip package types we know and/or care about
      */
@@ -131,7 +132,7 @@ public class ZipAnalyzer
             return PkgType.SINGLE_ZIPPED_STREAM;
         }
 
-        Enumeration entries = zipFile.entries();
+        Enumeration<?> entries = zipFile.entries();
 
         // loop through the zip entries looking for clues
         while ( entries.hasMoreElements() )

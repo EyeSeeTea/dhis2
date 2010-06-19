@@ -33,6 +33,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		ref="org.hisp.dhis.period.PeriodService"/>
 	<property name="aggregationService"
 		ref="org.hisp.dhis.aggregation.AggregationService"/>
+	<property name="organisationUnitService"
+		ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/>
   </bean>
 	
   <bean id="org.hisp.dhis.aggregation.impl.dataelement.SumIntDataElementAggregation"
@@ -53,12 +55,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.aggregation.impl.dataelement.AverageIntDataElementAggregation"
     class="org.hisp.dhis.aggregation.impl.dataelement.AverageIntDataElementAggregation">
-    <property name="aggregationStore">
-      <ref bean="org.hisp.dhis.aggregation.AggregationStore"/>
-    </property>
-    <property name="aggregationCache">
-      <ref bean="org.hisp.dhis.aggregation.impl.cache.AggregationCache"/>
-    </property>
+    <property name="aggregationStore"
+      ref="org.hisp.dhis.aggregation.AggregationStore"/>
+    <property name="aggregationCache"
+      ref="org.hisp.dhis.aggregation.impl.cache.AggregationCache"/>
   </bean>
   
   <bean id="org.hisp.dhis.aggregation.impl.dataelement.AverageBoolDataElementAggregation"
@@ -76,7 +76,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<property name="categoryService"
 		ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
 	<property name="aggregationCache"
-     ref="org.hisp.dhis.aggregation.impl.cache.AggregationCache"/>    
+        ref="org.hisp.dhis.aggregation.impl.cache.AggregationCache"/>    
   </bean>
   
 </beans>

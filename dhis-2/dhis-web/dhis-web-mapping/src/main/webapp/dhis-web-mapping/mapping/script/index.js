@@ -3292,14 +3292,6 @@ Ext.onReady( function() {
 		},
 		scope: this
 	});
-		
-	var labelsButton = new Ext.Button({
-		iconCls: 'icon-labels',
-		tooltip: i18n_show_hide_labels,
-		handler: function() {
-			toggleFeatureLabels(true);
-		}
-	});
 	
 	var favoritesButton = new Ext.Button({
 		iconCls: 'icon-favorite',
@@ -3442,7 +3434,6 @@ Ext.onReady( function() {
 			zoomInButton,
 			zoomOutButton,
 			zoomMaxExtentButton,
-			// labelsButton,
 			'-',
 			exportImageButton,
 			exportExcelButton,
@@ -3977,8 +3968,9 @@ function onHoverSelectPoint(feature) {
     FEATURE[thematicMap2] = feature;
     Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap2].attributes[MAPDATA[thematicMap2].nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap2].attributes.value + '</div>', false);
 }
-function onHoverUnselectPoint(feature) {}
-
+function onHoverUnselectPoint(feature) {
+    Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
+}
 
 /* Section: map data */
 function loadMapData(redirect, position) {
@@ -4154,6 +4146,12 @@ function getChoroplethData() {
 function getSymbolData() {
 	MASK.msg = i18n_creating_choropleth;
 	MASK.show();
+    
+    var l = MAP.getLayersByName('Point layer')[0];
+    if (LABELS[thematicMap2]) {
+        toggleFeatureLabelsPoints(false, l);
+    }
+    FEATURE[thematicMap2] = l.features;
 	
     var indicatorId = Ext.getCmp('indicator_cb2').getValue();
 	var dataElementId = Ext.getCmp('dataelement_cb2').getValue();
@@ -4191,7 +4189,6 @@ function getSymbolData() {
         method: 'POST',
         params: params,
         success: function(r) {
-			FEATURE[thematicMap2] = MAP.getLayersByName('Point layer')[0].features;
 			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
 			EXPORTVALUES = getExportDataValueJSON(mapvalues);
 			var mv = new Array();
@@ -4265,10 +4262,15 @@ function getSymbolData() {
 function getAssignOrganisationUnitData() {
 	MASK.msg = i18n_creating_map;
 	MASK.show();
+    
+    var l = MAP.getLayersByName('Polygon layer')[0];
+    if (LABELS[organisationUnitAssignment]) {
+        toggleFeatureLabelsAssignment(false, l);
+    }
+    FEATURE[organisationUnitAssignment] = l.features;
 	
     var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 	var relations =	 Ext.getCmp('grid_gp').getStore();
-	FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
 	var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
 	var noCls = 1;
 	var noAssigned = 0;
