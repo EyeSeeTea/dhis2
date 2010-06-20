@@ -2656,13 +2656,13 @@ Ext.onReady( function() {
 										Ext.messageRed.msg( i18n_map_source , '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_already_selected+'.');
 									}
 									else {
+                                        MAPSOURCE = msv;
+                                        
 										Ext.Ajax.request({
 											url: path + 'setMapSourceTypeUserSetting' + type,
 											method: 'POST',
 											params: { mapSourceType: msv },
 											success: function(r) {
-												MAPSOURCE = msv;
-												
 												Ext.getCmp('map_cb').getStore().reload();
 												Ext.getCmp('maps_cb').getStore().reload();
 												Ext.getCmp('mapview_cb').getStore().reload();
@@ -2711,12 +2711,12 @@ Ext.onReady( function() {
 										});
 										
 										if (MAPSOURCE == map_source_type_geojson) {
-											mapLayerMapSourceFileComboBox.showField();
-											mapLayerPathWMSOverlayTextField.hideField();
+											mapLayerMapSourceFileComboBox.show();
+											mapLayerPathWMSOverlayTextField.hide();
 										}
 										else if (MAPSOURCE == map_source_type_shapefile) {
-											mapLayerMapSourceFileComboBox.hideField();
-											mapLayerPathWMSOverlayTextField.showField();
+											mapLayerMapSourceFileComboBox.hide();
+											mapLayerPathWMSOverlayTextField.show();
 										}
 									}
 								}
@@ -4267,7 +4267,7 @@ function getAssignOrganisationUnitData() {
     if (LABELS[organisationUnitAssignment]) {
         toggleFeatureLabelsAssignment(false, l);
     }
-    FEATURE[organisationUnitAssignment] = l.features;
+    FEATURE[thematicMap] = l.features;
 	
     var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
 	var relations =	 Ext.getCmp('grid_gp').getStore();
