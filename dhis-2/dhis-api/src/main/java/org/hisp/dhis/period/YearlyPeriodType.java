@@ -80,6 +80,12 @@ public class YearlyPeriodType
         return new Period( this, startDate, cal.getTime() );
     }
 
+    @Override
+    public int getFrequencyOrder()
+    {
+        return 6;
+    }
+
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------

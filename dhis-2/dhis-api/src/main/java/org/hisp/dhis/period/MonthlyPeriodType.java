@@ -81,6 +81,12 @@ public class MonthlyPeriodType
         return new Period( this, startDate, cal.getTime() );
     }
 
+    @Override
+    public int getFrequencyOrder()
+    {
+        return 3;
+    }
+
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------

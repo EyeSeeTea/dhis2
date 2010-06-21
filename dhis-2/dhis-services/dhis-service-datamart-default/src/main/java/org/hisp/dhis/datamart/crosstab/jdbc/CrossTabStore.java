@@ -40,8 +40,6 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 public interface CrossTabStore
 {
     String ID = CrossTabStore.class.getName();
-    String COLUMN_PREFIX = "de";
-    String SEPARATOR = "_";
     
     void createCrossTabTable( List<DataElementOperand> operands );
 

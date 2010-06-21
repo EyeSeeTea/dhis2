@@ -832,26 +832,6 @@ function setCaretToPos ( input, pos )
 	setSelectionRange( input, pos, pos );
 }
 
-function getFilteredDataElementsReceived( xmlObject )
-{
-	var operandList = document.getElementById( "dataElementId" );
-			
-	operandList.options.length = 0;
-	
-	var operands = xmlObject.getElementsByTagName( "operand" );
-	
-	for ( var i = 0; i < operands.length; i++)
-	{
-		var id = operands[ i ].getElementsByTagName( "operandId" )[0].firstChild.nodeValue;
-		var elementName = operands[ i ].getElementsByTagName( "operandName" )[0].firstChild.nodeValue;
-		
-		var option = document.createElement( "option" );
-		option.value = "[" + id + "]";
-		option.text = elementName;
-		operandList.add( option, null );	
-	}
-}
-
 function insertTextCommon( inputAreaName, inputText )
 {
 	var inputArea = document.getElementById( inputAreaName );

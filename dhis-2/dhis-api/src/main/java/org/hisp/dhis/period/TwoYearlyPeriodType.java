@@ -83,6 +83,12 @@ public class TwoYearlyPeriodType
         return new Period( this, startDate, cal.getTime() );
     }
 
+    @Override
+    public int getFrequencyOrder()
+    {
+        return 7;
+    }
+
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------

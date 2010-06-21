@@ -1,4 +1,3 @@
-
 function filterDataElements( aggregationOperatorRadioGroupName, dataElementGroupSelectName, filterName )
 {
 	var aggregationOperator = getSelectedRadioValue( aggregationOperatorRadioGroupName );
@@ -6,13 +5,29 @@ function filterDataElements( aggregationOperatorRadioGroupName, dataElementGroup
 	var dataElementGroupId = dataElementGroup.options[ dataElementGroup.selectedIndex ].value;
 	var filter = htmlEncode( document.getElementById( filterName ).value );
 	
-	var url = "getFilteredDataElements.action?aggregationOperator=" + aggregationOperator +
-		"&dataElementGroupId=" + dataElementGroupId + "&filter=" + filter;
-	
-	var request = new Request();
-	request.setResponseTypeXML( 'operand' );
-    request.setCallbackSuccess( getFilteredDataElementsReceived );
-    request.send( url );
+    var url = "getFilteredDataElements.action";
+    
+    $.getJSON(
+        url,
+        {
+            "aggregationOperator": aggregationOperator,
+            "dataElementGroupId": dataElementGroupId,
+            "filter": filter
+        },
+        function( json )
+        {
+        	var operandList = document.getElementById( "dataElementId" );
+        	clearList( operandList );
+        	
+        	var objects = json.operands;
+        	
+        	for ( var i=0; i<objects.length; i++ )
+	        {
+        		addOptionToList( operandList, "[" + objects[i].operandId  + "]", objects[i].operandName );
+	        }
+
+        }
+    );
 }
 
 function getSelectedRadioValue( radioGroupName )

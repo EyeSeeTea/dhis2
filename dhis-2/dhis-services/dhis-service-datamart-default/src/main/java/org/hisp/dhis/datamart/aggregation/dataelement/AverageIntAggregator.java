@@ -80,6 +80,11 @@ public class AverageIntAggregator
     public Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
         final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy )
     {
+        if ( operandIndexMap == null || operandIndexMap.size() == 0 )
+        {
+            return new HashMap<DataElementOperand, Double>();
+        }
+        
         final Collection<Integer> unitIds = hierarchy.getChildren( unit.getId() );
         
         final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>(); // <Operand, total value>

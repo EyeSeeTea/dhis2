@@ -9,22 +9,10 @@ var AXIS_X_DE = "AXIS_X_DE";
 var AXIS_X_IN = "AXIS_X_IN";
 Ext.chart.Chart.CHART_URL = 'ext/resources/charts.swf';
 
-
 Ext.onReady(function()
 {
-
-    
 	
-	new Ext.TabPanel({
-        renderTo: 'tabs-chart-type',
-        width:'100%',
-        activeTab: 0,
-        frame:true,
-        defaults:{autoHeight: true, autoScroll: true},
-        items:[
-            {contentEl:'tab-chart-type', title: i18n_select_chart_type}
-        ]
-    });
+	
 	
 	pieChartRadio.render( 'pie' );
 	lineChartRadio.render( 'line' );
@@ -32,26 +20,11 @@ Ext.onReady(function()
 	fullChartRadio.render( 'full' );
 	
 	
-	var tabs = new Ext.TabPanel({
-        renderTo: 'tabs',
-        width:'100%',
-        activeTab: 1,
-        frame:true,		
-		autoTabs : true,
-        defaults:{autoHeight: true, autoScroll: true},
-        items:[
-            {contentEl:'data-element-chart', title: i18n_de_in_chart},
-            {contentEl:'period-chart', title: i18n_period_chart}
-        ]
-    });
-	
-	tabs.activate(0);
-	
-	
 	
 	
 
 });
+
 
 function viewFullChart( xTitle, title, colTitle, lineTitle, store )
 {

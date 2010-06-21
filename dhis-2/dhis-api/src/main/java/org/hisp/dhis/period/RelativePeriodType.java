@@ -79,4 +79,10 @@ public class RelativePeriodType
         
         return new Period( this, startDate, endDate );
     }
+
+    @Override
+    public int getFrequencyOrder()
+    {
+        return 0;
+    }
 }

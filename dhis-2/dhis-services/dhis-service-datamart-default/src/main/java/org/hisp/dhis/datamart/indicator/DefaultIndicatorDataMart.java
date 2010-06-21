@@ -27,13 +27,15 @@ package org.hisp.dhis.datamart.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.datamart.util.FilterUtils.getAnnualizationFactor;
+import static org.hisp.dhis.datamart.util.FilterUtils.getAnnualizationString;
+import static org.hisp.dhis.datamart.util.FilterUtils.getAvgOperands;
+import static org.hisp.dhis.datamart.util.FilterUtils.getSumOperands;
 import static org.hisp.dhis.datamart.util.ParserUtil.generateExpression;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
-import static org.hisp.dhis.system.util.DateUtils.DAYS_IN_YEAR;
 import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +45,6 @@ import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
 import org.hisp.dhis.datamart.aggregation.dataelement.DataElementAggregator;
 import org.hisp.dhis.datamart.crosstab.CrossTabService;
@@ -57,7 +58,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -68,9 +68,6 @@ public class DefaultIndicatorDataMart
     implements IndicatorDataMart
 {
     private static final int DECIMALS = 1;
-    
-    private static final String TRUE = "true";
-    private static final String FALSE = "false";
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -117,13 +114,6 @@ public class DefaultIndicatorDataMart
     {
         this.crossTabService = crossTabService;
     }    
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
     
     private AggregationCache aggregationCache;
 
@@ -149,11 +139,7 @@ public class DefaultIndicatorDataMart
     public int exportIndicatorValues( final Collection<Integer> indicatorIds, final Collection<Integer> periodIds, 
         final Collection<Integer> organisationUnitIds, final Collection<DataElementOperand> operands )
     {
-        final Collection<DataElementOperand> sumOperands = filterOperands( operands, DataElement.AGGREGATION_OPERATOR_SUM );
-        final Collection<DataElementOperand> averageOperands = filterOperands( operands, DataElement.AGGREGATION_OPERATOR_AVERAGE );
-        
-        final Map<DataElementOperand, Integer> sumOperandIndexMap = crossTabService.getOperandIndexMap( sumOperands );
-        final Map<DataElementOperand, Integer> averageOperandIndexMap = crossTabService.getOperandIndexMap( averageOperands );
+        final Map<DataElementOperand, Integer> operandIndexMap = crossTabService.getOperandIndexMap( operands );
         
         final Collection<Indicator> indicators = indicatorService.getIndicators( indicatorIds );        
         final Collection<Period> periods = periodService.getPeriods( periodIds );
@@ -166,17 +152,9 @@ public class DefaultIndicatorDataMart
         OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
         
         int count = 0;
-        int level = 0;
-        
-        Map<DataElementOperand, Double> sumIntValueMap = null;
-        Map<DataElementOperand, Double> averageIntValueMap = null;
-        
-        Map<String, Map<DataElementOperand, Double>> valueMapMap = null;
         
         Map<DataElementOperand, Double> numeratorValueMap = null;
         Map<DataElementOperand, Double> denominatorValueMap = null;
-        
-        PeriodType periodType = null;
         
         double numeratorValue = 0.0;
         double denominatorValue = 0.0;
@@ -190,22 +168,25 @@ public class DefaultIndicatorDataMart
         
         final AggregatedIndicatorValue indicatorValue = new AggregatedIndicatorValue();
         
-        for ( final OrganisationUnit unit : organisationUnits )
+        for ( final Period period : periods )
         {
-            level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
+            final PeriodType periodType = period.getPeriodType();
             
-            for ( final Period period : periods )
+            final Map<DataElementOperand, Integer> sumOperandIndexMap = getSumOperands( operands, periodType, operandIndexMap );
+            final Map<DataElementOperand, Integer> averageOperandIndexMap = getAvgOperands( operands, periodType, operandIndexMap );
+
+            for ( final OrganisationUnit unit : organisationUnits )
             {
-                sumIntValueMap = sumIntAggregator.getAggregatedValues( sumOperandIndexMap, period, unit, level, hierarchy );                
-                averageIntValueMap = averageIntAggregator.getAggregatedValues( averageOperandIndexMap, period, unit, level, hierarchy);
+                final int level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
                 
-                valueMapMap = new HashMap<String, Map<DataElementOperand, Double>>( 2 );
+                final Map<DataElementOperand, Double> sumIntValueMap = sumIntAggregator.getAggregatedValues( sumOperandIndexMap, period, unit, level, hierarchy );                
+                final Map<DataElementOperand, Double> averageIntValueMap = averageIntAggregator.getAggregatedValues( averageOperandIndexMap, period, unit, level, hierarchy);
+                
+                final Map<String, Map<DataElementOperand, Double>> valueMapMap = new HashMap<String, Map<DataElementOperand, Double>>( 2 );
                 
                 valueMapMap.put( DataElement.AGGREGATION_OPERATOR_SUM, sumIntValueMap );
                 valueMapMap.put( DataElement.AGGREGATION_OPERATOR_AVERAGE, averageIntValueMap );
 
-                periodType = period.getPeriodType();
-                
                 for ( final Indicator indicator : indicators )
                 {
                     // ---------------------------------------------------------
@@ -262,45 +243,5 @@ public class DefaultIndicatorDataMart
         batchHandler.flush();
         
         return count;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Collection<DataElementOperand> filterOperands( final Collection<DataElementOperand> operands, final String aggregationOperator )
-    {
-        final Collection<DataElementOperand> filteredOperands = new ArrayList<DataElementOperand>();
-        
-        for ( final DataElementOperand operand : operands )
-        {
-            final DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
-            
-            if ( aggregationOperator.equals( dataElement.getAggregationOperator() ) )
-            {
-                filteredOperands.add( operand );
-            }
-        }
-        
-        return filteredOperands;
-    }
-    
-    private double getAnnualizationFactor( final Indicator indicator, final Period period )
-    {
-        double factor = 1.0;
-        
-        if ( indicator.getAnnualized() != null && indicator.getAnnualized() )
-        {
-            final int daysInPeriod = DateUtils.daysBetween( period.getStartDate(), period.getEndDate() ) + 1;
-            
-            factor = DAYS_IN_YEAR / daysInPeriod;
-        }
-        
-        return factor;
-    }
-    
-    private String getAnnualizationString( final Boolean annualized )
-    {
-        return ( annualized == null || !annualized ) ? FALSE : TRUE;
     }
 }

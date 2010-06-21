@@ -80,6 +80,11 @@ public class SumIntAggregator
     public Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
         final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy )
     {
+        if ( operandIndexMap == null || operandIndexMap.size() == 0 )
+        {
+            return new HashMap<DataElementOperand, Double>();
+        }
+        
         final Collection<CrossTabDataValue> crossTabValues = 
             getCrossTabDataValues( operandIndexMap, period.getStartDate(), period.getEndDate(), unit.getId(), hierarchy );
         

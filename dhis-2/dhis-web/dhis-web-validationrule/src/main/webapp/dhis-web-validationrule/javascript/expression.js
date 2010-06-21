@@ -46,14 +46,29 @@ function filterDataElements( dataSetName, filterName )
 	var filter = htmlEncode( byId( filterName ).value );
 	var periodTypeName = getFieldValue( 'periodTypeName');
 	
-	var url = "getFilteredDataElements.action?dataSetId=" + dataSetId;
-		url += "&filter=" + filter;
-		url += "&periodTypeName=" + periodTypeName;
+    var url = "getFilteredDataElements.action";
+    
+    $.getJSON(
+        url,
+        {
+            "dataSetId": dataSetId,
+            "periodTypeName": periodTypeName,
+            "filter": filter
+        },
+        function( json )
+        {
+        	var operandList = document.getElementById( "dataElementId" );
+        	clearList( operandList );
+        	
+        	var objects = json.operands;
+        	
+        	for ( var i=0; i<objects.length; i++ )
+	        {
+        		addOptionToList( operandList, "[" + objects[i].operandId  + "]", objects[i].operandName );
+	        }
 
-    var request = new Request();
-	request.setResponseTypeXML( 'operand' );
-    request.setCallbackSuccess( getFilteredDataElementsReceived );
-    request.send( url );
+        }
+    );
 }
 
 function updateTextualExpression( expressionFieldName )

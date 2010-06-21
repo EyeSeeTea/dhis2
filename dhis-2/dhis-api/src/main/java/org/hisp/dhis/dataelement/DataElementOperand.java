@@ -41,16 +41,25 @@ import java.util.List;
 public class DataElementOperand
     implements Serializable, Comparable<DataElementOperand>
 {
-    public static final String SEPARATOR = ".";
-    
+    public static final String SEPARATOR = ".";    
     private static final String SPACE = "";
+    private static final String COLUMN_PREFIX = "de";
+    private static final String COLUMN_SEPARATOR = "_";
+
+    // -------------------------------------------------------------------------
+    // Persisted properties
+    // -------------------------------------------------------------------------
 
     private int id;
     
     private DataElement dataElement;
     
     private DataElementCategoryOptionCombo categoryOptionCombo;
-    
+
+    // -------------------------------------------------------------------------
+    // Populated properties
+    // -------------------------------------------------------------------------
+
     private int dataElementId;
 
     private int optionComboId;
@@ -58,9 +67,13 @@ public class DataElementOperand
     private String operandId;
 
     private String operandName;
+
+    private String aggregationOperator;
     
     private List<Integer> aggregationLevels = new ArrayList<Integer>();
-
+    
+    private int frequencyOrder;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -90,13 +103,15 @@ public class DataElementOperand
         this.operandName = operandName;
     }
 
-    public DataElementOperand( int dataElementId, int optionComboId, String operandName, List<Integer> aggregationLevels )
+    public DataElementOperand( int dataElementId, int optionComboId, String operandName, String aggregationOperator, List<Integer> aggregationLevels, int frequencyOrder )
     {
         this.dataElementId = dataElementId;
         this.optionComboId = optionComboId;
         this.operandId = dataElementId + SEPARATOR + optionComboId;
         this.operandName = operandName;
+        this.aggregationOperator = aggregationOperator;
         this.aggregationLevels = aggregationLevels;
+        this.frequencyOrder = frequencyOrder;
     }
     
     // -------------------------------------------------------------------------
@@ -181,7 +196,12 @@ public class DataElementOperand
     {
         return dataElement.getId() + SEPARATOR + categoryOptionCombo.getId();
     }
-
+    
+    public String getSimpleName()
+    {
+        return COLUMN_PREFIX + dataElementId + COLUMN_SEPARATOR + optionComboId;
+    }
+    
     // -------------------------------------------------------------------------
     // Getters & setters
     // -------------------------------------------------------------------------
@@ -256,6 +276,16 @@ public class DataElementOperand
         this.operandName = operandName;
     }
 
+    public String getAggregationOperator()
+    {
+        return aggregationOperator;
+    }
+
+    public void setAggregationOperator( String aggregationOperator )
+    {
+        this.aggregationOperator = aggregationOperator;
+    }
+
     public List<Integer> getAggregationLevels()
     {
         return aggregationLevels;
@@ -264,6 +294,16 @@ public class DataElementOperand
     public void setAggregationLevels( List<Integer> aggregationLevels )
     {
         this.aggregationLevels = aggregationLevels;
+    }
+
+    public int getFrequencyOrder()
+    {
+        return frequencyOrder;
+    }
+
+    public void setFrequencyOrder( int frequencyOrder )
+    {
+        this.frequencyOrder = frequencyOrder;
     }
 
     // -------------------------------------------------------------------------
