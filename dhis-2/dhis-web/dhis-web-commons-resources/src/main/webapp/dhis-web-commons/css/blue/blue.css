@@ -330,7 +330,7 @@ div#menuDropDown3
   font-size: 9pt;
 }
 
-.page th 
+.page th, thead tr
 {
   background-image: url('head.png');
   background-repeat: repeat-x;
@@ -342,6 +342,7 @@ div#menuDropDown3
   padding-left: 7px;
   height: 19px;
 }
+
 
 #mainPage 
 {
