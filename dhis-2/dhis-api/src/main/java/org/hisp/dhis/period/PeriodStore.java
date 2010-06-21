@@ -165,6 +165,25 @@ public interface PeriodStore
      */
     Collection<Period> getPeriods( Period period, Collection<DataElement> dataElements, Collection<? extends Source> sources );
     
+    /**
+     * Checks if the given period is associated with the current session and loads
+     * it if not. Null is returned if the period does not exist.
+     * 
+     * @param period the Period.
+     * @return the Period.
+     */
+    Period reloadPeriod( Period period );
+
+    /**
+     * Checks if the given period is associated with the current session and loads
+     * it if not. The period is persisted if it does not exist. The persisted Period
+     * is returned.
+     * 
+     * @param period the Period.
+     * @return the persisted Period.
+     */
+    Period reloadForceAddPeriod( Period period );
+    
     // -------------------------------------------------------------------------
     // PeriodType
     // -------------------------------------------------------------------------

@@ -196,6 +196,32 @@ public class HibernatePeriodStore
         return periods;
     }
 
+    public Period reloadPeriod( Period period )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        if ( session.contains( period ) )
+        {
+            return period; // Already in session, no reload needed
+        }
+
+        return getPeriod( period.getStartDate(), period.getEndDate(), period.getPeriodType() );
+    }
+
+    public Period reloadForceAddPeriod( Period period )
+    {
+        Period storedPeriod = reloadPeriod( period );
+
+        if ( storedPeriod == null )
+        {
+            addPeriod( period );
+
+            return period;
+        }
+
+        return storedPeriod;
+    }
+
     // -------------------------------------------------------------------------
     // PeriodType
     // -------------------------------------------------------------------------
