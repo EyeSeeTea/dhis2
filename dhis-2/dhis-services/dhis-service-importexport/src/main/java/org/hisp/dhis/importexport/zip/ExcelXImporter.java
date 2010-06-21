@@ -1,6 +1,5 @@
 package org.hisp.dhis.importexport.zip;
 
-
 /*
  * Copyright (c) 2004-2005, University of Oslo
  * All rights reserved.
@@ -44,11 +43,10 @@ import org.springframework.stereotype.Component;
 /**
  *
  * @author bobj
- * @version created 22-Apr-2010
  */
 @Component("excelXImporter")
-public class ExcelXImporter extends TransformablePackage {
-
+public class ExcelXImporter extends TransformablePackage 
+{
     private final static Log log = LogFactory.getLog( ExcelXImporter.class );
 
     public static final String WORKBOOK = "xl/workbook.xml";
@@ -59,11 +57,9 @@ public class ExcelXImporter extends TransformablePackage {
 
     @Autowired
     protected XMLPreConverter preConverter;
-
-
+    
     @Autowired
     protected DXFConverter converter;
-
 
     /**
      * Identify the spreadsheet and lookup the associated stylesheet identifier
@@ -83,16 +79,17 @@ public class ExcelXImporter extends TransformablePackage {
         // look up the excel shared string code in cell B3
         String codedIdentifier = XPathFilter.findText( titleSheet, "//c[@r='B3']/v" );
 
-        if (codedIdentifier==null)
+        if ( codedIdentifier == null )
         {
             log.info( "Couldn't identify spreadsheet version info");
-            throw (new Exception("Couldn't identify spreadsheet version info"));
+            throw new RuntimeException( "Couldn't identify spreadsheet version info" );
         }
 
         Integer id = Integer.parseInt( codedIdentifier) + 1;
 
         log.info("Shared string: "+id);
-        // look up it's string value
+        
+        // look up its string value
         String identifier = XPathFilter.findText( sharedStrings, "/sst/si["+id+"]/t");
 
         log.info("Excel spreadsheet identified: " + identifier);
@@ -127,5 +124,4 @@ public class ExcelXImporter extends TransformablePackage {
     {
         return converter;
     }
-
 }

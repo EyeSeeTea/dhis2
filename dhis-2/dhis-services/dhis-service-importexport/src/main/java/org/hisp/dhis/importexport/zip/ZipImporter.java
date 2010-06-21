@@ -1,6 +1,5 @@
 package org.hisp.dhis.importexport.zip;
 
-
 import java.util.zip.ZipFile;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.importexport.ImportParams;
@@ -31,6 +30,7 @@ import org.hisp.dhis.importexport.ImportParams;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**
  * A ZipImporter can import zip packages such as
  * dxf, excel (xlsx), sdmx-hd, odf
@@ -41,7 +41,6 @@ import org.hisp.dhis.importexport.ImportParams;
 public interface ZipImporter
 {
     public void importData(ImportParams params, ProcessState state, ZipFile zipFile) throws Exception;
-
 }
 
 

@@ -37,8 +37,8 @@ div#header
   height: 83px;
   position: absolute;
   top: 0px;
-  left: 10px;
-  right: 10px;
+  left: 0px;
+  right: 0px;
 }
 
 img#header1
@@ -50,7 +50,7 @@ img#header2
 {
   position: absolute;
   top: 9px;
-  left: 25px;
+  left: 35px;
 }
 
 img#header3
@@ -62,35 +62,35 @@ img#menuSeparator1
 {
   position: absolute;
   top: 0px;
-  left: 570px;
+  left: 580px;
 }
 
 img#menuSeparator2
 {
   position: absolute;
   top: 0px;
-  left: 670px;
+  left: 680px;
 }
 
 img#menuSeparator3
 {
   position: absolute;
   top: 0px;
-  left: 770px;
+  left: 780px;
 }
 
 img#menuSeparator4
 {
   position: absolute;
   top: 0px;
-  left: 870px;
+  left: 880px;
 }
 
 img#menuSeparator5
 {
   position: absolute;
   top: 0px;
-  left: 970px;
+  left: 980px;
 }
 
 .menuLink
@@ -109,35 +109,35 @@ div#menuLink1
 {
   position: absolute;
   top: 7px;
-  left: 572px;
+  left: 582px;
 }
 
 div#menuLink2
 {
   position: absolute;
   top: 7px;
-  left: 672px;
+  left: 682px;
 }
 
 div#menuLink3
 {
   position: absolute;
   top: 7px;
-  left: 772px;
+  left: 782px;
 }
 
 div#menuLink4
 {
   position: absolute;
   top: 7px;
-  left: 872px;
+  left: 882px;
 }
 
 span#headerText
 {
   position: absolute;
   top: 26px;
-  left: 218px;
+  left: 228px;
   color: white;
   font-size: 17px;
 }
@@ -167,21 +167,21 @@ div#menuDropDown1
 {
   position: absolute;
   top: 76px;
-  left: 570px;
+  left: 580px;
 }
 
 div#menuDropDown2
 {
   position: absolute;
   top: 76px;
-  left: 670px;
+  left: 680px;
 }
 
 div#menuDropDown3
 {
   position: absolute;
   top: 76px;
-  left: 770px;
+  left: 780px;
 }
 
 .menuDropDownArea

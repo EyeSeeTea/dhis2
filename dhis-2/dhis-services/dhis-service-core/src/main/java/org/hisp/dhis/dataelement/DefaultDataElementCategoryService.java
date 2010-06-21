@@ -39,6 +39,7 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.period.TwoYearlyPeriodType;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
@@ -395,14 +396,14 @@ public class DefaultDataElementCategoryService
             Set<DataElementCategoryOptionCombo> categoryOptionCombos = dataElement.getCategoryCombo()
                 .getOptionCombos();
 
-            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder() : 0;
+            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder() : new TwoYearlyPeriodType().getFrequencyOrder(); // Assume lowest frequency if no PeriodType
             
             if ( categoryOptionCombos.size() > 1 && !(dataElement instanceof CalculatedDataElement) )
             {
                 for ( DataElementCategoryOptionCombo optionCombo : categoryOptionCombos )
                 {
                     DataElementOperand operand = new DataElementOperand( dataElement.getId(), optionCombo.getId(), dataElement.getName()
-                        + optionCombo.getName(), dataElement.getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ), frequencyOrder );
+                        + optionCombo.getName(), dataElement.getType(), dataElement.getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ), frequencyOrder );
 
                     operands.add( operand );
                 }
@@ -410,7 +411,7 @@ public class DefaultDataElementCategoryService
             else
             {
                 DataElementOperand operand = new DataElementOperand( dataElement.getId(), categoryOptionCombos.iterator().next().getId(),
-                    dataElement.getName(), dataElement.getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ), frequencyOrder );
+                    dataElement.getName(), dataElement.getType(), dataElement.getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ), frequencyOrder );
 
                 operands.add( operand );
             }
