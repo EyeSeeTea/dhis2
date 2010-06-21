@@ -1,6 +1,5 @@
 package org.hisp.dhis.importexport.zip;
 
-
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -30,14 +29,13 @@ import java.util.GregorianCalendar;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**
- *
+ * 
  * @author bobj
- * @version created 04-May-2010
  */
 public class ExcelExtension
 {
-
     public static String date( String xltimestr )
     {
         try
@@ -48,10 +46,11 @@ public class ExcelExtension
             // the beginning of excel time is 1/1/1900
             Calendar cal = new GregorianCalendar();
             cal.set( 1900, 0, 1 );
-            //cal.add( Calendar.DAY_OF_MONTH, 20 );
+            // cal.add( Calendar.DAY_OF_MONTH, 20 );
             cal.add( Calendar.DAY_OF_MONTH, xldays.intValue() - 2 );
             return cal.getTime().toString();
-        } catch ( Exception ex )
+        }
+        catch ( Exception ex )
         {
             return "";
         }

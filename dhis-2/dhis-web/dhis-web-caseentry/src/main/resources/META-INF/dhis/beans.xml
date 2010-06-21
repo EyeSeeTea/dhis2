@@ -281,7 +281,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="programInstanceService"
       ref="org.hisp.dhis.program.ProgramInstanceService"/>   
     <property name="programStageInstanceService"
-      ref="org.hisp.dhis.program.ProgramStageInstanceService"/>              
+      ref="org.hisp.dhis.program.ProgramStageInstanceService"/>      
+    <property name="patientService"
+      ref="org.hisp.dhis.patient.PatientService"/>      
   </bean>
   
   <bean id="org.hisp.dhis.caseentry.action.report.ViewRecordsAction"

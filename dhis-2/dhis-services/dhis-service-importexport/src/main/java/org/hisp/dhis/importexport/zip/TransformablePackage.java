@@ -1,6 +1,5 @@
 package org.hisp.dhis.importexport.zip;
 
-
 import java.io.InputStream;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -50,7 +49,6 @@ import org.hisp.dhis.importexport.xml.XMLPreConverter;
  */
 public abstract class TransformablePackage implements ZipImporter
 {
-
     private static final String URL_PARAM = "zip_url";
 
     /**
@@ -89,5 +87,4 @@ public abstract class TransformablePackage implements ZipImporter
     protected abstract XMLPreConverter getXMLPreConverter();
 
     protected abstract DXFConverter getDXFConverter();
-
 }

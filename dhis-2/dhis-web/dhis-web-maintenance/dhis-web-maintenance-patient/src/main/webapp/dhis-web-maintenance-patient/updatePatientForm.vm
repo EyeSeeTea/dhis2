@@ -120,8 +120,14 @@ jQuery(document).ready(function(){
 	#set( $identifier = "" )
 	#set( $identifier = $identiferMap.get( $identifierType.id ) )
 	<tr>
-			<td><label for="bloodGroup">$identifierType.name #if($identifierType.mandatory)<em title="$i18n.getString( "required" )" class="required">*</em> #end</label></td>
-			<td><input type="text" id="iden$identifierType.id" name="iden$identifierType.id" value="$identifier" data="{related:$identifierType.related}" #if($identifierType.related && $patient.underAge) disabled="disabled" #end class='#validate( "default"  $identifierType.mandatory )' style="width:30em" /></td>	
+            <td><label for="bloodGroup">$identifierType.name #if($identifierType.mandatory)<em title="$i18n.getString( "required" )" class="required">*</em> #end</label></td>
+            #if($identifierType.format == "State Format")
+                <td><input type="hidden" id="iden$identifierType.id" name="iden$identifierType.id" value="$identifier"/>
+                <input type="text" id="orgunitcode" name="orgunitcode" disabled="disabled" value="$orgunitcode" maxlength="9" size="10"/>-<input type="text" id="progcode" name="progcode" value="$progcode" maxlength="1" size="1"/>-<input type="text" id="yearcode" value="$yearcode" name="yearcode" maxlength="2" size="2"/>-<input type="text" id="benicode" name="benicode" value="$benicode" maxlength="4" size="4"/></td>
+            #else
+                <td><input type="text" id="iden$identifierType.id" name="iden$identifierType.id" value="$identifier" data="{related:$identifierType.related}" #if($identifierType.related && $patient.underAge) disabled="disabled" #end class='#validate( "default"  $identifierType.mandatory )' style="width:30em" /></td>	
+            #end
+
 	</tr>
 	#end
 	<tr><td>&nbsp;</td></tr>

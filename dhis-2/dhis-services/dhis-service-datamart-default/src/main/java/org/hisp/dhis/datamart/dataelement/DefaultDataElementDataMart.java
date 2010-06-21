@@ -111,46 +111,44 @@ public class DefaultDataElementDataMart
 
         final Collection<OrganisationUnit> organisationUnits = getOrganisationUnits( organisationUnitIds );
 
-        final BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class );
-
-        batchHandler.init();
-
-        OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
+        final BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
+        
+        final OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
         
         int count = 0;
-        int level = 0;
-        
-        Map<DataElementOperand, Double> valueMap = null;
-        
-        PeriodType periodType = null;
         
         final AggregatedDataValue value = new AggregatedDataValue();
         
-        for ( final OrganisationUnit unit : organisationUnits )
+        for ( final Period period : periods )
         {
-            level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
+            final Map<DataElementOperand, Integer> currentOperandIndexMap = dataElementAggregator.getOperandIndexMap( operands, period.getPeriodType(), operandIndexMap );
             
-            for ( final Period period : periods )
+            if ( currentOperandIndexMap != null && currentOperandIndexMap.size() > 0 )
             {
-                valueMap = dataElementAggregator.getAggregatedValues( operandIndexMap, period, unit, level, hierarchy );
-                
-                periodType = period.getPeriodType();
-                
-                for ( Entry<DataElementOperand, Double> entry : valueMap.entrySet() )
+                for ( final OrganisationUnit unit : organisationUnits )
                 {
-                    value.clear();
+                    final int level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
                     
-                    value.setDataElementId( entry.getKey().getDataElementId() );
-                    value.setCategoryOptionComboId( entry.getKey().getOptionComboId() );
-                    value.setPeriodId( period.getId() );
-                    value.setPeriodTypeId( periodType.getId() );
-                    value.setOrganisationUnitId( unit.getId() );
-                    value.setLevel( level );
-                    value.setValue( getRounded( entry.getValue(), DECIMALS ) );
+                    final Map<DataElementOperand, Double> valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy );
                     
-                    batchHandler.addObject( value );
+                    final PeriodType periodType = period.getPeriodType();
                     
-                    count++;
+                    for ( Entry<DataElementOperand, Double> entry : valueMap.entrySet() )
+                    {
+                        value.clear();
+                        
+                        value.setDataElementId( entry.getKey().getDataElementId() );
+                        value.setCategoryOptionComboId( entry.getKey().getOptionComboId() );
+                        value.setPeriodId( period.getId() );
+                        value.setPeriodTypeId( periodType.getId() );
+                        value.setOrganisationUnitId( unit.getId() );
+                        value.setLevel( level );
+                        value.setValue( getRounded( entry.getValue(), DECIMALS ) );
+                        
+                        batchHandler.addObject( value );
+                        
+                        count++;
+                    }
                 }
             }
         }

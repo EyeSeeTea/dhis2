@@ -754,8 +754,8 @@
 
 		<action name="getFilteredDataElements"
 			class="org.hisp.dhis.dd.action.indicatordenum.GetFilteredDataElementsAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-commons/ajax/xmlOperands.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonOperands.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 

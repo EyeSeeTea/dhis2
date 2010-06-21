@@ -1,6 +1,5 @@
 package org.hisp.dhis.importexport.zip;
 
-
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -42,13 +41,11 @@ import org.springframework.stereotype.Component;
  */
 
 /**
- *
  * @author bobj
- * @version created 22-Apr-2010
  */
 @Component("sdmxImporter")
-public class SdmxImporter extends TransformablePackage {
-
+public class SdmxImporter extends TransformablePackage 
+{
     @Autowired
     protected XMLPreConverter preConverter;
 
@@ -104,6 +101,4 @@ public class SdmxImporter extends TransformablePackage {
     {
         return converter;
     }
-
-
 }
