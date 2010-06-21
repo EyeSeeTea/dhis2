@@ -28,6 +28,13 @@ package org.hisp.dhis.period;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * @author Lars Helge Overland
@@ -139,6 +146,104 @@ public class RelativePeriods
     // Logic
     // -------------------------------------------------------------------------
 
+    /**
+     * Gets a list of Periods based on the given input and the state of this RelativePeriods.
+     * 
+     * @param months the number of months back in time representing the current month.
+     * @param format the i18n format.
+     * @return a list of relative Periods.
+     */
+    public List<Period> getRelativePeriods( int months )
+    {
+        return getRelativePeriods( months, null );
+    }
+    
+    /**
+     * Gets a list of Periods based on the given input and the state of this RelativePeriods.
+     * 
+     * @param months the number of months back in time representing the current month.
+     * @param format the i18n format.
+     * @param date the date representing now (for testing purposes).
+     * @return a list of relative Periods.
+     */
+    protected List<Period> getRelativePeriods( int months, Date date )
+    {
+        List<Period> periods = new ArrayList<Period>();
+        
+        Date current = getDate( months, date );
+        
+        if ( isReportingMonth() )
+        {
+            periods.add( new MonthlyPeriodType().createPeriod( getDate( months, date ) ) );
+        }
+        if ( isLast3Months() )
+        {
+            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 2, date ) ) );
+        }
+        if ( isLast6Months() )
+        {
+            periods.add( new SixMonthlyPeriodType().createPeriod( getDate( months + 5, date ) ) );
+        }
+        if ( isLast12Months() )
+        {
+            periods.add( new YearlyPeriodType().createPeriod( getDate( months + 11, date ) ) );
+        }
+        if ( isLast3To6Months() )
+        {
+            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 5, date ) ) );
+        }
+        if ( isLast6To9Months() )
+        {
+            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 8, date ) ) );
+        }
+        if ( isLast9To12Months() )
+        {
+            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 11, date ) ) );
+        }
+        if ( isLast12IndividualMonths() )
+        {
+            for ( int i = 11; i >= 0; i-- )
+            {
+                periods.add( new MonthlyPeriodType().createPeriod( getDate( months + i, date ) ) );
+            }
+        }
+        if ( isIndividualMonthsThisYear() )
+        {
+            Collection<Period> individualMonths = new MonthlyPeriodType().generatePeriods( new MonthlyPeriodType().createPeriod( current ) );            
+            CollectionUtils.filter( individualMonths, new PastPeriodPredicate( current ) );            
+            periods.addAll( individualMonths );
+        }
+        if ( isIndividualQuartersThisYear() )
+        {
+            Collection<Period> individualQuarters = new QuarterlyPeriodType().generatePeriods( new QuarterlyPeriodType().createPeriod( current ) );
+            CollectionUtils.filter( individualQuarters, new PastPeriodPredicate( current ) );
+            periods.addAll( individualQuarters );
+        }
+            
+        return periods;
+    }
+
+    /**
+     * Returns a date.
+     * 
+     * @param months the number of months to subtract from the current date.
+     * @param now the date representing now, ignored if null.
+     * @return a date.
+     */
+    private Date getDate( int months, Date now )
+    {
+        Calendar cal = PeriodType.createCalendarInstance();
+        
+        if ( now != null ) // For testing purposes
+        {
+            cal.setTime( now );
+        }
+        
+        cal.add( Calendar.MONTH, ( months * -1 ) );        
+        
+        return cal.getTime();
+    }
+    
     public boolean isReportingMonth()
     {
         return reportingMonth != null && reportingMonth;
