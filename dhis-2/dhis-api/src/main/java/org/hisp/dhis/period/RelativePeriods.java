@@ -30,11 +30,11 @@ package org.hisp.dhis.period;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.i18n.I18nFormat;
 
 /**
  * @author Lars Helge Overland
@@ -55,18 +55,18 @@ public class RelativePeriods
     public static final String LAST_9_TO_12_MONTHS = "last9_12_months";
     
     public static final String[] PREVIOUS_MONTH_NAMES = { 
-        "previous_month_1",
-        "previous_month_2",
-        "previous_month_3",
-        "previous_month_4",
-        "previous_month_5",
-        "previous_month_6",
-        "previous_month_7",
-        "previous_month_8",
-        "previous_month_9",
-        "previous_month_10",
+        "previous_month_12",
         "previous_month_11",
-        "previous_month_12" };
+        "previous_month_10",
+        "previous_month_9",
+        "previous_month_8",
+        "previous_month_7",
+        "previous_month_6",
+        "previous_month_5",
+        "previous_month_4",
+        "previous_month_3",
+        "previous_month_3",
+        "previous_month_1" };
     
     public static final String[] MONTHS_THIS_YEAR = {
         "january",
@@ -153,9 +153,9 @@ public class RelativePeriods
      * @param format the i18n format.
      * @return a list of relative Periods.
      */
-    public List<Period> getRelativePeriods( int months )
+    public List<Period> getRelativePeriods( int months, I18nFormat format, boolean dynamicNames )
     {
-        return getRelativePeriods( months, null );
+        return getRelativePeriods( months, null, format, dynamicNames );
     }
     
     /**
@@ -166,7 +166,7 @@ public class RelativePeriods
      * @param date the date representing now (for testing purposes).
      * @return a list of relative Periods.
      */
-    protected List<Period> getRelativePeriods( int months, Date date )
+    protected List<Period> getRelativePeriods( int months, Date date, I18nFormat format, boolean dynamicNames )
     {
         List<Period> periods = new ArrayList<Period>();
         
@@ -174,50 +174,78 @@ public class RelativePeriods
         
         if ( isReportingMonth() )
         {
-            periods.add( new MonthlyPeriodType().createPeriod( getDate( months, date ) ) );
+            Period period = new MonthlyPeriodType().createPeriod( getDate( months, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : REPORTING_MONTH );
+            periods.add( period );
         }
         if ( isLast3Months() )
         {
-            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 2, date ) ) );
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 2, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_3_MONTHS );
+            periods.add( period );
         }
         if ( isLast6Months() )
         {
-            periods.add( new SixMonthlyPeriodType().createPeriod( getDate( months + 5, date ) ) );
+            Period period = new SixMonthlyPeriodType().createPeriod( getDate( months + 5, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_6_MONTHS );
+            periods.add( period );
         }
         if ( isLast12Months() )
         {
-            periods.add( new YearlyPeriodType().createPeriod( getDate( months + 11, date ) ) );
+            Period period = new YearlyPeriodType().createPeriod( getDate( months + 11, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_12_MONTHS );
+            periods.add( period );
         }
         if ( isLast3To6Months() )
         {
-            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 5, date ) ) );
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 5, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_3_TO_6_MONTHS );
+            periods.add( period );
         }
         if ( isLast6To9Months() )
         {
-            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 8, date ) ) );
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 8, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_6_TO_9_MONTHS );
+            periods.add( period );
         }
         if ( isLast9To12Months() )
         {
-            periods.add( new QuarterlyPeriodType().createPeriod( getDate( months + 11, date ) ) );
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 11, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_9_TO_12_MONTHS );
+            periods.add( period );
         }
         if ( isLast12IndividualMonths() )
         {
             for ( int i = 11; i >= 0; i-- )
             {
-                periods.add( new MonthlyPeriodType().createPeriod( getDate( months + i, date ) ) );
+                Period period = new MonthlyPeriodType().createPeriod( getDate( months + i, date ) );
+                period.setName( dynamicNames ? format.formatPeriod( period ) : PREVIOUS_MONTH_NAMES[i] );
+                periods.add( period );
             }
         }
         if ( isIndividualMonthsThisYear() )
         {
-            Collection<Period> individualMonths = new MonthlyPeriodType().generatePeriods( new MonthlyPeriodType().createPeriod( current ) );            
-            CollectionUtils.filter( individualMonths, new PastPeriodPredicate( current ) );            
-            periods.addAll( individualMonths );
+            List<Period> individualMonths = new MonthlyPeriodType().generatePeriods( new MonthlyPeriodType().createPeriod( current ) );            
+            CollectionUtils.filter( individualMonths, new PastPeriodPredicate( current ) );
+            
+            int c = 0;
+            for ( Period period : individualMonths )
+            {
+                period.setName( dynamicNames ? format.formatPeriod( period ) : MONTHS_THIS_YEAR[c++] );
+                periods.add( period );
+            }
         }
         if ( isIndividualQuartersThisYear() )
         {
-            Collection<Period> individualQuarters = new QuarterlyPeriodType().generatePeriods( new QuarterlyPeriodType().createPeriod( current ) );
+            List<Period> individualQuarters = new QuarterlyPeriodType().generatePeriods( new QuarterlyPeriodType().createPeriod( current ) );
             CollectionUtils.filter( individualQuarters, new PastPeriodPredicate( current ) );
-            periods.addAll( individualQuarters );
+            
+            int c = 0;
+            for ( Period period : individualQuarters )
+            {
+                period.setName( dynamicNames ? format.formatPeriod( period ) : QUARTERS_THIS_YEAR[c++] );
+                periods.add( period );
+            }
         }
             
         return periods;

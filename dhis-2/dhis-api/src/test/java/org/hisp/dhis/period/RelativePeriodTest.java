@@ -56,7 +56,7 @@ public class RelativePeriodTest
     {        
         RelativePeriods periods = new RelativePeriods( true, true, true, true, true, true, true, true, true, true, true, true, true );
         
-        Collection<Period> relatives = periods.getRelativePeriods( 1, getDate( 2001, 1, 1 ) );
+        Collection<Period> relatives = periods.getRelativePeriods( 1, getDate( 2001, 1, 1 ), null, false );
         
         assertTrue( relatives.contains( new Period( new MonthlyPeriodType(), getDate( 2000, 12, 1 ), getDate( 2000, 12, 31 ) ) ) );
         assertTrue( relatives.contains( new Period( new QuarterlyPeriodType(), getDate( 2000, 10, 1 ), getDate( 2000, 12, 31 ) ) ) );
@@ -93,7 +93,7 @@ public class RelativePeriodTest
     {        
         RelativePeriods periods = new RelativePeriods( true, true, true, true, true, true, true, true, true, true, true, true, true );
         
-        Collection<Period> relatives = periods.getRelativePeriods( 2, getDate( 2001, 1, 1 ) );
+        Collection<Period> relatives = periods.getRelativePeriods( 2, getDate( 2001, 1, 1 ), null, false );
 
         assertTrue( relatives.contains( new Period( new MonthlyPeriodType(), getDate( 2000, 11, 1 ), getDate( 2000, 11, 30 ) ) ) );
         assertTrue( relatives.contains( new Period( new QuarterlyPeriodType(), getDate( 2000, 7, 1 ), getDate( 2000, 9, 30 ) ) ) );
@@ -129,7 +129,7 @@ public class RelativePeriodTest
     {        
         RelativePeriods periods = new RelativePeriods( true, true, true, true, true, true, true, true, true, true, true, true, true );
         
-        Collection<Period> relatives = periods.getRelativePeriods( 5, getDate( 2001, 1, 1 ) );
+        Collection<Period> relatives = periods.getRelativePeriods( 5, getDate( 2001, 1, 1 ), null, false );
 
         assertTrue( relatives.contains( new Period( new MonthlyPeriodType(), getDate( 2000, 8, 1 ), getDate( 2000, 8, 31 ) ) ) );
         assertTrue( relatives.contains( new Period( new QuarterlyPeriodType(), getDate( 2000, 4, 1 ), getDate( 2000, 6, 30 ) ) ) );
