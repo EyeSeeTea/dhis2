@@ -11,17 +11,11 @@ Ext.chart.Chart.CHART_URL = 'ext/resources/charts.swf';
 
 Ext.onReady(function()
 {
-	
-	
-	
+
 	pieChartRadio.render( 'pie' );
 	lineChartRadio.render( 'line' );
 	columnChartRadio.render( 'column' );
 	fullChartRadio.render( 'full' );
-	
-	
-	
-	
 
 });
 
@@ -187,7 +181,7 @@ function viewColumnChart( xTitle, title, store )
 		height:500,
 		collapsible: true,
         maximizable: true,
-		items: new Ext.chart.ColumnChart({				
+		items:[ new Ext.chart.ColumnChart({				
 				id:'columnchart' + random,	
 				store: store,
 				yField: 'value',
@@ -201,7 +195,9 @@ function viewColumnChart( xTitle, title, store )
 						labelRotation: -60
 					}
 				}
-			})
+			}),
+			
+			]
 	}).show();
 		
 }
@@ -344,6 +340,72 @@ var periodsStorePc = new Ext.data.JsonStore({
 	fields: ['id', 'name'],	
 	autoLoad: false	
 });
+
+//	===================================================================================
+//	Organisation Unit  Chart
+//	===================================================================================
+
+
+var dataElementGroupsStoreOc = new Ext.data.JsonStore({
+	url: path + 'getDataElementGroups' + type,
+	baseParams: { format: 'json', id: "ALL" },
+	root: 'dataElementGroups',
+	fields: ['id', 'name'],
+	sortInfo: { field: 'name', direction: 'ASC' },
+	autoLoad: false
+});
+
+var dataElementsStoreOc = new Ext.data.JsonStore({
+	url: '../dhis-web-commons-ajax-json/getDataElements' + type,            
+	root: 'dataElements',
+	fields: ['id', 'name'],
+	sortInfo: { field: 'name', direction: 'ASC' },
+	autoLoad: false	
+});
+
+var indicatorGroupsStoreOc = new Ext.data.JsonStore({
+	url: path + 'getIndicatorGroups' + type,
+	baseParams: { format: 'json', id: "ALL" },
+	root: 'indicatorGroups',
+	fields: ['id', 'name'],
+	sortInfo: { field: 'name', direction: 'ASC' },
+	autoLoad: false
+});
+
+var indicatorsStoreOc = new Ext.data.JsonStore({
+	url: '../dhis-web-commons-ajax-json/getIndicators' + type,            
+	root: 'indicators',
+	fields: ['id', 'name'],
+	sortInfo: { field: 'name', direction: 'ASC' },
+	autoLoad: false	
+});
+	
+var periodTypesStoreOc = new Ext.data.JsonStore({
+	url: path + 'getPeriodTypes' + type,
+	baseParams: { format: 'json'},
+	root: 'periodTypes',
+	fields: ['id', 'name'],
+	sortInfo: { field: 'name', direction: 'ASC' },
+	autoLoad: false
+});
+
+var periodsStoreOc = new Ext.data.JsonStore({
+	url: '../dhis-web-commons-ajax-json/getPeriods' + type,  
+	baseParams: { format: 'json',name:'ALL'},	
+	root: 'periods',
+	fields: ['id', 'name'],	
+	autoLoad: false	
+});
+
+var organisationUnitStoreOc = new Ext.data.JsonStore({
+	url: path + 'getChildrenOrganisationUnit' + type,  
+	baseParams: { format: 'json'},	
+	root: 'organisationUnits',
+	fields: ['id', 'name'],	
+	autoLoad: true	
+});
+
+
 
 function switchAxisxDeIn( a, b)
 {
