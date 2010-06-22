@@ -173,6 +173,14 @@ public class DefaultPeriodService
     {
         return periodStore.getPeriods( period, dataElements, sources );
     }
+    
+    public void reloadPeriods( Collection<Period> periods )
+    {
+        for ( Period period : periods )
+        {
+            periodStore.reloadForceAddPeriod( period );
+        }
+    }
 
     public Period getRelativePeriod( Date date, int startMonths, int endMonths )
     {

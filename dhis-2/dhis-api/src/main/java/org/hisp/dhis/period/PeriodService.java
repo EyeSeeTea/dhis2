@@ -195,6 +195,14 @@ public interface PeriodService
     Collection<Period> getPeriods( Period period, Collection<DataElement> dataElements, Collection<? extends Source> sources );
     
     /**
+     * Enforces that each Period in the given collection is loaded in the current
+     * session. Persists the Period if it does not exist.
+     * 
+     * @param periods the collection of Periods.
+     */
+    void reloadPeriods( Collection<Period> periods );
+    
+    /**
      * Returns a Period of type Relative. The Period will be persisted if it does
      * not exist.
      * 
