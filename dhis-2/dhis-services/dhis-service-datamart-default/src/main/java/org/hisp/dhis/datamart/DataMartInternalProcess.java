@@ -27,16 +27,7 @@ package org.hisp.dhis.datamart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
-
-import java.util.Collection;
-
 import org.amplecode.cave.process.SerialToGroup;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.datamart.engine.DataMartEngine;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.process.AbstractStatementInternalProcess;
 
 /**
@@ -56,51 +47,18 @@ public class DataMartInternalProcess
     // Dependencies
     // -------------------------------------------------------------------------
     
-    private DataMartEngine dataMartEngine;
+    private DataMartService dataMartService;
 
-    public void setDataMartEngine( DataMartEngine dataMartEngine )
+    public void setDataMartService( DataMartService dataMartService )
     {
-        this.dataMartEngine = dataMartEngine;
+        this.dataMartService = dataMartService;
     }
 
-    // -------------------------------------------------------------------------
-    // Properties
-    // -------------------------------------------------------------------------
+    private Integer id;
 
-    private Collection<Integer> dataElementIds;
-
-    public void setDataElementIds( Collection<Integer> dataElementIds )
+    public void setId( Integer id )
     {
-        this.dataElementIds = dataElementIds;
-    }
-
-    private Collection<Integer> indicatorIds;
-
-    public void setIndicatorIds( Collection<Integer> indicatorIds )
-    {
-        this.indicatorIds = indicatorIds;
-    }
-
-    private Collection<Integer> periodIds;
-
-    public void setPeriodIds( Collection<Integer> periodIds )
-    {
-        this.periodIds = periodIds;
-    }
-    
-    private Collection<Integer> organisationUnitIds;
-
-    public void setOrganisationUnitIds( Collection<Integer> organisationUnitIds )
-    {
-        this.organisationUnitIds = organisationUnitIds;
-    }
-
-    public void setProperties( DataMartExport export )
-    {
-        this.dataElementIds = getIdentifiers( DataElement.class, export.getDataElements() );
-        this.indicatorIds = getIdentifiers( Indicator.class, export.getIndicators() );
-        this.periodIds = getIdentifiers( Period.class, export.getPeriods() );
-        this.organisationUnitIds = getIdentifiers( OrganisationUnit.class, export.getOrganisationUnits() );
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
@@ -120,6 +78,6 @@ public class DataMartInternalProcess
     protected void executeStatements()
         throws Exception
     {
-        dataMartEngine.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, getState() );
+        dataMartService.export( id );
     }
 }

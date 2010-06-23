@@ -35,6 +35,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.RelativePeriods;
 
 /**
  * @author Lars Helge Overland
@@ -55,6 +56,8 @@ public class DataMartExport
     
     private Set<Period> periods = new HashSet<Period>();
 
+    private RelativePeriods relatives;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -64,13 +67,14 @@ public class DataMartExport
     }
 
     public DataMartExport( String name, Set<DataElement> dataElements, Set<Indicator> indicators,
-        Set<OrganisationUnit> organisationUnits, Set<Period> periods )
+        Set<OrganisationUnit> organisationUnits, Set<Period> periods, RelativePeriods relatives )
     {
         this.name = name;
         this.dataElements = dataElements;
         this.indicators = indicators;
         this.organisationUnits = organisationUnits;
         this.periods = periods;
+        this.relatives = relatives;
     }
 
     // -------------------------------------------------------------------------
@@ -135,6 +139,16 @@ public class DataMartExport
     public void setPeriods( Set<Period> periods )
     {
         this.periods = periods;
+    }
+
+    public RelativePeriods getRelatives()
+    {
+        return relatives;
+    }
+
+    public void setRelatives( RelativePeriods relatives )
+    {
+        this.relatives = relatives;
     }
 
     // -------------------------------------------------------------------------

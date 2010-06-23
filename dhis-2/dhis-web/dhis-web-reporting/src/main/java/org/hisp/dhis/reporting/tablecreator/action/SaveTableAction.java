@@ -234,13 +234,6 @@ public class SaveTableAction
         this.last12Months = last12Months;
     }
     
-    private boolean soFarThisYear;
-
-    public void setSoFarThisYear( boolean soFarThisYear )
-    {
-        this.soFarThisYear = soFarThisYear;
-    }
-
     private boolean last3To6Months;
 
     public void setLast3To6Months( boolean last3To6Months )
@@ -268,7 +261,14 @@ public class SaveTableAction
     {
         this.last12IndividualMonths = last12IndividualMonths;
     }
-    
+
+    private boolean soFarThisYear;
+
+    public void setSoFarThisYear( boolean soFarThisYear )
+    {
+        this.soFarThisYear = soFarThisYear;
+    }
+
     private boolean individualMonthsThisYear;
 
     public void setIndividualMonthsThisYear( boolean individualMonthsThisYear )

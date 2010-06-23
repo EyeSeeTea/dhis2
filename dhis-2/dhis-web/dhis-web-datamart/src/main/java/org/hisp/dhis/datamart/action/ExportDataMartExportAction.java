@@ -33,7 +33,6 @@ import static org.hisp.dhis.util.InternalProcessUtil.setCurrentRunningProcess;
 
 import org.amplecode.cave.process.ProcessCoordinator;
 import org.amplecode.cave.process.ProcessExecutor;
-import org.hisp.dhis.datamart.DataMartExport;
 import org.hisp.dhis.datamart.DataMartInternalProcess;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -95,9 +94,7 @@ public class ExportDataMartExportAction
 
         DataMartInternalProcess process = (DataMartInternalProcess) executor.getProcess();
                 
-        DataMartExport export = dataMartService.getDataMartExport( id );
-        
-        process.setProperties( export );
+        process.setId( id );
 
         processCoordinator.requestProcessExecution( executor );        
 

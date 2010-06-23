@@ -29,6 +29,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	  ref="org.hisp.dhis.datamart.DataMartStore"/>
     <property name="dataMartExportStore"
       ref="org.hisp.dhis.datamart.DataMartExportStore"/>
+	<property name="periodService"
+	  ref="org.hisp.dhis.period.PeriodService"/>
   </bean>
   
   <!-- DataMartEngine -->
@@ -75,8 +77,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     class="org.hisp.dhis.datamart.DataMartInternalProcess"
     scope="prototype">
     <property name="statementManager" ref="statementManager"/>
-    <property name="dataMartEngine"
-      ref="org.hisp.dhis.datamart.engine.DataMartEngine"/>
+    <property name="dataMartService"
+      ref="org.hisp.dhis.datamart.DataMartService"/>
   </bean>
   
   <!-- Crosstab -->

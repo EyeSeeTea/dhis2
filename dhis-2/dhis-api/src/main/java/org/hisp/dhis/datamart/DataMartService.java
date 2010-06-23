@@ -52,13 +52,20 @@ public interface DataMartService
     // ----------------------------------------------------------------------
     
     /**
+     * Export to data mart for the given DataMartExport.
+     * 
+     * @id the DataMartExport identifier.
+     * @return the number of exported values.
+     */
+    int export( int id );
+    
+    /**
      * Exports to data mart for the given arguments.
      * 
      * @param dataElementIds the data element identifiers.
      * @param indicatorIds the indicator identifiers.
      * @param periodIds the period identifiers.
      * @param organisationUnitIds the organisation unit identifiers.
-     * 
      * @return the number of exported values.
      */
     int export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
@@ -194,7 +201,7 @@ public interface DataMartService
      * @param export the DataMartExport to save.
      */
     void saveDataMartExport( DataMartExport export );
-    
+
     /**
      * Retrieves the DataMartExport with the given identifier.
      * 
