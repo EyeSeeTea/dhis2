@@ -53,7 +53,6 @@ import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.dimension.DimensionOption;
 import org.hisp.dhis.dimension.DimensionType;
 import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.objectmapper.AggregatedDataMapValueRowMapper;
@@ -78,9 +77,6 @@ public class JdbcDataMartStore
     @Autowired
     private StatementManager statementManager;
 
-    @Autowired
-    private StatementBuilder statementBuilder;
-    
     // -------------------------------------------------------------------------
     // AggregatedDataValue
     // -------------------------------------------------------------------------
@@ -549,15 +545,6 @@ public class JdbcDataMartStore
         {
             holder.close();
         }
-    }
-    
-    // -------------------------------------------------------------------------
-    // Period
-    // -------------------------------------------------------------------------
-
-    public int deleteRelativePeriods()
-    {
-        return statementManager.getHolder().executeUpdate( statementBuilder.getDeleteRelativePeriods() );
     }
     
     // -------------------------------------------------------------------------

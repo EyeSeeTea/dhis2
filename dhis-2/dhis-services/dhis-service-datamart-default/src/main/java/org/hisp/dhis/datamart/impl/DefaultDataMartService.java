@@ -156,15 +156,6 @@ public class DefaultDataMartService
         return dataMartStore.getDataValue( dataElementId, categoryOptionComboId, periodId, sourceId );
     }
     
-    // ----------------------------------------------------------------------
-    // Period
-    // ----------------------------------------------------------------------
-    
-    public int deleteRelativePeriods()
-    {
-        return dataMartStore.deleteRelativePeriods();
-    }
-    
     // -------------------------------------------------------------------------
     // DataMartExport
     // -------------------------------------------------------------------------

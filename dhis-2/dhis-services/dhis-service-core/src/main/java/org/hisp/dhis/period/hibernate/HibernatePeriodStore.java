@@ -205,7 +205,9 @@ public class HibernatePeriodStore
             return period; // Already in session, no reload needed
         }
 
-        return getPeriod( period.getStartDate(), period.getEndDate(), period.getPeriodType() );
+        Period storedPeriod = getPeriod( period.getStartDate(), period.getEndDate(), period.getPeriodType() );
+        
+        return storedPeriod != null ? storedPeriod.copyTransientProperties( period ) : null;
     }
 
     public Period reloadForceAddPeriod( Period period )

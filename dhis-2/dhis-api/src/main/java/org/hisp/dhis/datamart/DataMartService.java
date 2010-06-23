@@ -185,17 +185,6 @@ public interface DataMartService
     DataValue getDataValue( int dataElementId, int categoryOptionComboId, int periodId, int sourceId );
 
     // ----------------------------------------------------------------------
-    // Period
-    // ----------------------------------------------------------------------
-    
-    /**
-     * Delets periods of type relative.
-     * 
-     * @return the number of affected rows.
-     */
-    int deleteRelativePeriods();
-    
-    // ----------------------------------------------------------------------
     // DataMartExport
     // ----------------------------------------------------------------------
     

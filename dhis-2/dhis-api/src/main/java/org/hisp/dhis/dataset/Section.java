@@ -26,8 +26,8 @@ package org.hisp.dhis.dataset;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
 
 public class Section
     implements Serializable

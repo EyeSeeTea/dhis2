@@ -87,9 +87,7 @@ public class ReportTableStoreTest
     private DataSet dataSetB;
     
     private Period periodA;
-    private Period periodB;    
-    private Period periodC;
-    private Period periodD;
+    private Period periodB;
     
     private OrganisationUnit unitA;
     private OrganisationUnit unitB;
@@ -106,7 +104,6 @@ public class ReportTableStoreTest
         indicators = new ArrayList<Indicator>();
         dataSets = new ArrayList<DataSet>();
         periods = new ArrayList<Period>();
-        relativePeriods = new ArrayList<Period>();
         units = new ArrayList<OrganisationUnit>();
         
         reportTableStore = (GenericIdentifiableObjectStore<ReportTable>) getBean( "org.hisp.dhis.reporttable.ReportTableStore" );
@@ -163,15 +160,6 @@ public class ReportTableStoreTest
         periods.add( periodA );
         periods.add( periodB );        
 
-        periodC = periodService.getRelativePeriod( getDate( 2000, 3, 1 ), -1 );
-        periodD = periodService.getRelativePeriod( getDate( 2000, 3, 1 ), -3 );
-        
-        periodC.setName( RelativePeriods.REPORTING_MONTH );
-        periodD.setName( RelativePeriods.LAST_3_MONTHS );
-        
-        relativePeriods.add( periodC );
-        relativePeriods.add( periodD );
-        
         unitA = createOrganisationUnit( 'A' );
         unitB = createOrganisationUnit( 'B' );        
         

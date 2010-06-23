@@ -30,8 +30,6 @@ package org.hisp.dhis.user;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.hisp.dhis.user.UserSetting;
-
 /**
  * The main interface for working with user settings. Implementation need to get
  * the current user from {@link CurrentUserService}.

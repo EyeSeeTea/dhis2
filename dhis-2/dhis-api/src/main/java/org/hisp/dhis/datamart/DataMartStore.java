@@ -270,15 +270,4 @@ public interface DataMartStore
      * @return collection of CrossTabDataValues.
      */
     Collection<CrossTabDataValue> getCrossTabDataValues( Map<DataElementOperand, Integer> operandIndexMap, Collection<Integer> periodIds, int sourceId );
-
-    // ----------------------------------------------------------------------
-    // Period
-    // ----------------------------------------------------------------------
-    
-    /**
-     * Delets periods of type relative.
-     * 
-     * @return the number of affected rows.
-     */
-    int deleteRelativePeriods();
 }

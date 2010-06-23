@@ -227,13 +227,6 @@ public class SaveTableAction
         this.last6Months = last6Months;
     }
     
-    private boolean last9Months;
-
-    public void setLast9Months( boolean last9Months )
-    {
-        this.last9Months = last9Months;
-    }
-    
     private boolean last12Months;
 
     public void setLast12Months( boolean last12Months )
@@ -248,13 +241,6 @@ public class SaveTableAction
         this.soFarThisYear = soFarThisYear;
     }
 
-    private boolean soFarThisFinancialYear;
-
-    public void setSoFarThisFinancialYear( boolean soFarThisFinancialYear )
-    {
-        this.soFarThisFinancialYear = soFarThisFinancialYear;
-    }
-    
     private boolean last3To6Months;
 
     public void setLast3To6Months( boolean last3To6Months )
@@ -352,10 +338,8 @@ public class SaveTableAction
         relatives.setReportingMonth( reportingMonth );
         relatives.setLast3Months( last3Months );
         relatives.setLast6Months( last6Months );
-        relatives.setLast9Months( last9Months );
         relatives.setLast12Months( last12Months );
         relatives.setSoFarThisYear( soFarThisYear );
-        relatives.setSoFarThisFinancialYear( soFarThisFinancialYear );
         relatives.setLast3To6Months( last3To6Months );
         relatives.setLast6To9Months( last6To9Months );
         relatives.setLast9To12Months( last9To12Months );

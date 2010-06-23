@@ -1075,19 +1075,20 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   
   <!-- Startup routine definitions -->
 	
-  <bean id="org.hisp.dhis.dataentryform.DataEntryFormPopulator"
-    class="org.hisp.dhis.dataentryform.DataEntryFormPopulator">
-  	<property name="jdbcTemplate" ref="jdbcTemplate"/>
-  	<property name="statementBuilder" ref="statementBuilder"/>
-    <property name="runlevel" value="1"/> 
-    <property name="skipInTests" value="true"/>
+  <bean id="org.hisp.dhis.startup.TableAlteror"
+    class="org.hisp.dhis.startup.TableAlteror">
+    <property name="statementManager" ref="statementManager"/>
+	<property name="name" value="TableAlteror"/>
+    <property name="runlevel" value="1"/>
+	<property name="skipInTests" value="true"/>
   </bean>
 	
   <bean id="org.hisp.dhis.period.PeriodTypePopulator"
     class="org.hisp.dhis.period.PeriodTypePopulator">
     <property name="periodStore"
       ref="org.hisp.dhis.period.PeriodStore"/>
-    <property name="runlevel" value="1"/>
+	<property name="name" value="PeriodTypePopulator"/>
+    <property name="runlevel" value="2"/>
   </bean>
   
   <bean id="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator"
@@ -1096,7 +1097,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.dataelement.DataElementService"/>
     <property name="categoryService"
       ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
-    <property name="runlevel" value="2"/>
+	<property name="name" value="DataElementDefaultDimensionPopulator"/>
+    <property name="runlevel" value="3"/>
   </bean>
 	  
   <bean id="org.hisp.dhis.expression.MultiDimensionExpressionUpgrader"
@@ -1107,45 +1109,55 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       ref="org.hisp.dhis.indicator.IndicatorService"/>
     <property name="categoryService"
       ref="org.hisp.dhis.dataelement.DataElementCategoryService"/> 
-    <property name="runlevel" value="2"/>
+	<property name="name" value="MultiDimensionExpressionUpgrader"/>
+    <property name="runlevel" value="3"/>
     <property name="skipInTests" value="true"/>
   </bean>
   
-  <bean id="org.hisp.dhis.dataset.DataSetShortNamePopulator"
-    class="org.hisp.dhis.dataset.DataSetShortNamePopulator">
-    <property name="dataSetService"
-      ref="org.hisp.dhis.dataset.DataSetService"/>    
+  <bean id="org.hisp.dhis.startup.TableCreator"
+    class="org.hisp.dhis.startup.TableCreator">
+    <property name="jdbcTemplate" ref="jdbcTemplate"/>
+    <property name="statementBuilder" ref="statementBuilder"/>
+	<property name="name" value="TableCreator"/>
+    <property name="runlevel" value="3"/>
+  </bean>
+    
+  <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator"
+    class="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator">
+    <property name="organisationUnitGroupService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
+    <property name="runlevel" value="5"/>
+	<property name="name" value="OrganisationUnitGroupSetPopulator"/>
     <property name="skipInTests" value="true"/>
   </bean>
-  
+    
   <bean id="org.hisp.dhis.dataelement.UuidPopulator"
     class="org.hisp.dhis.dataelement.UuidPopulator">
     <property name="categoryService"
       ref="org.hisp.dhis.dataelement.DataElementCategoryService"/>
     <property name="dataElementService"
       ref="org.hisp.dhis.dataelement.DataElementService"/>
+	<property name="name" value="UuidPopulator"/>
+    <property name="runlevel" value="5"/>
     <property name="skipInTests" value="true"/>
   </bean>
   
-  <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator"
-    class="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator">
-    <property name="organisationUnitGroupService"
-      ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"/>
+  <bean id="org.hisp.dhis.dataset.DataSetShortNamePopulator"
+    class="org.hisp.dhis.dataset.DataSetShortNamePopulator">
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>
+	<property name="name" value="DataSetShortNamePopulator"/>
+    <property name="runlevel" value="5"/>
     <property name="skipInTests" value="true"/>
   </bean>
-    
-  <bean id="org.hisp.dhis.startup.TableCreator"
-    class="org.hisp.dhis.startup.TableCreator">
-    <property name="runlevel" value="3"/>
-    <property name="jdbcTemplate" ref="jdbcTemplate"/>
-    <property name="statementBuilder" ref="statementBuilder"/>
-  </bean>
-    
-  <bean id="org.hisp.dhis.startup.TableAlteror"
-    class="org.hisp.dhis.startup.TableAlteror">
-    <property name="statementManager" ref="statementManager"/>
-    <property name="runlevel" value="1"/>
-	<property name="skipInTests" value="true"/>
+  
+  <bean id="org.hisp.dhis.dataentryform.DataEntryFormPopulator"
+    class="org.hisp.dhis.dataentryform.DataEntryFormPopulator">
+  	<property name="jdbcTemplate" ref="jdbcTemplate"/>
+  	<property name="statementBuilder" ref="statementBuilder"/>
+	<property name="name" value="DataEntryFormPopulator"/>
+    <property name="runlevel" value="5"/> 
+    <property name="skipInTests" value="true"/>
   </bean>
 	
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -1155,9 +1167,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="arguments">
       <list>
         <list>
+          <ref local="org.hisp.dhis.startup.TableAlteror"/>
           <ref local="org.hisp.dhis.period.PeriodTypePopulator"/>
           <ref local="org.hisp.dhis.startup.TableCreator"/>
-          <ref local="org.hisp.dhis.startup.TableAlteror"/>
           <ref local="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator"/>
           <ref local="org.hisp.dhis.expression.MultiDimensionExpressionUpgrader"/>
           <ref local="org.hisp.dhis.dataset.DataSetShortNamePopulator"/>
