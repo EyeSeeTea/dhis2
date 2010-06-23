@@ -1,4 +1,4 @@
-package org.hisp.dhis.reporttable;
+package org.hisp.dhis.period;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -28,6 +28,13 @@ package org.hisp.dhis.reporttable;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.i18n.I18nFormat;
 
 /**
  * @author Lars Helge Overland
@@ -48,18 +55,18 @@ public class RelativePeriods
     public static final String LAST_9_TO_12_MONTHS = "last9_12_months";
     
     public static final String[] PREVIOUS_MONTH_NAMES = { 
-        "previous_month_1",
-        "previous_month_2",
-        "previous_month_3",
-        "previous_month_4",
-        "previous_month_5",
-        "previous_month_6",
-        "previous_month_7",
-        "previous_month_8",
-        "previous_month_9",
-        "previous_month_10",
+        "previous_month_12",
         "previous_month_11",
-        "previous_month_12" };
+        "previous_month_10",
+        "previous_month_9",
+        "previous_month_8",
+        "previous_month_7",
+        "previous_month_6",
+        "previous_month_5",
+        "previous_month_4",
+        "previous_month_3",
+        "previous_month_3",
+        "previous_month_1" };
     
     public static final String[] MONTHS_THIS_YEAR = {
         "january",
@@ -139,6 +146,132 @@ public class RelativePeriods
     // Logic
     // -------------------------------------------------------------------------
 
+    /**
+     * Gets a list of Periods based on the given input and the state of this RelativePeriods.
+     * 
+     * @param months the number of months back in time representing the current month.
+     * @param format the i18n format.
+     * @return a list of relative Periods.
+     */
+    public List<Period> getRelativePeriods( int months, I18nFormat format, boolean dynamicNames )
+    {
+        return getRelativePeriods( months, null, format, dynamicNames );
+    }
+    
+    /**
+     * Gets a list of Periods based on the given input and the state of this RelativePeriods.
+     * 
+     * @param months the number of months back in time representing the current month.
+     * @param format the i18n format.
+     * @param date the date representing now (for testing purposes).
+     * @return a list of relative Periods.
+     */
+    protected List<Period> getRelativePeriods( int months, Date date, I18nFormat format, boolean dynamicNames )
+    {
+        List<Period> periods = new ArrayList<Period>();
+        
+        Date current = getDate( months, date );
+        
+        if ( isReportingMonth() )
+        {
+            Period period = new MonthlyPeriodType().createPeriod( getDate( months, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : REPORTING_MONTH );
+            periods.add( period );
+        }
+        if ( isLast3Months() )
+        {
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 2, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_3_MONTHS );
+            periods.add( period );
+        }
+        if ( isLast6Months() )
+        {
+            Period period = new SixMonthlyPeriodType().createPeriod( getDate( months + 5, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_6_MONTHS );
+            periods.add( period );
+        }
+        if ( isLast12Months() )
+        {
+            Period period = new YearlyPeriodType().createPeriod( getDate( months + 11, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_12_MONTHS );
+            periods.add( period );
+        }
+        if ( isLast3To6Months() )
+        {
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 5, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_3_TO_6_MONTHS );
+            periods.add( period );
+        }
+        if ( isLast6To9Months() )
+        {
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 8, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_6_TO_9_MONTHS );
+            periods.add( period );
+        }
+        if ( isLast9To12Months() )
+        {
+            Period period = new QuarterlyPeriodType().createPeriod( getDate( months + 11, date ) );
+            period.setName( dynamicNames ? format.formatPeriod( period ) : LAST_9_TO_12_MONTHS );
+            periods.add( period );
+        }
+        if ( isLast12IndividualMonths() )
+        {
+            for ( int i = 11; i >= 0; i-- )
+            {
+                Period period = new MonthlyPeriodType().createPeriod( getDate( months + i, date ) );
+                period.setName( dynamicNames ? format.formatPeriod( period ) : PREVIOUS_MONTH_NAMES[i] );
+                periods.add( period );
+            }
+        }
+        if ( isIndividualMonthsThisYear() )
+        {
+            List<Period> individualMonths = new MonthlyPeriodType().generatePeriods( new MonthlyPeriodType().createPeriod( current ) );            
+            CollectionUtils.filter( individualMonths, new PastPeriodPredicate( current ) );
+            
+            int c = 0;
+            for ( Period period : individualMonths )
+            {
+                period.setName( dynamicNames ? format.formatPeriod( period ) : MONTHS_THIS_YEAR[c++] );
+                periods.add( period );
+            }
+        }
+        if ( isIndividualQuartersThisYear() )
+        {
+            List<Period> individualQuarters = new QuarterlyPeriodType().generatePeriods( new QuarterlyPeriodType().createPeriod( current ) );
+            CollectionUtils.filter( individualQuarters, new PastPeriodPredicate( current ) );
+            
+            int c = 0;
+            for ( Period period : individualQuarters )
+            {
+                period.setName( dynamicNames ? format.formatPeriod( period ) : QUARTERS_THIS_YEAR[c++] );
+                periods.add( period );
+            }
+        }
+            
+        return periods;
+    }
+
+    /**
+     * Returns a date.
+     * 
+     * @param months the number of months to subtract from the current date.
+     * @param now the date representing now, ignored if null.
+     * @return a date.
+     */
+    private Date getDate( int months, Date now )
+    {
+        Calendar cal = PeriodType.createCalendarInstance();
+        
+        if ( now != null ) // For testing purposes
+        {
+            cal.setTime( now );
+        }
+        
+        cal.add( Calendar.MONTH, ( months * -1 ) );        
+        
+        return cal.getTime();
+    }
+    
     public boolean isReportingMonth()
     {
         return reportingMonth != null && reportingMonth;

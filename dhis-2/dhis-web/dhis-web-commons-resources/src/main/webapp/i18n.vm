@@ -1,0 +1,16 @@
+var dateFormat = '$encoder.jsEscape($i18n.getString( 'format.date.label.jquery' ) , "'")';
+
+month_short_january		= Tháng 1
+month_short_february	= Tháng 2
+month_short_march		= Tháng 3
+month_short_april		= Tháng 4
+month_short_may			= Tháng 5
+month_short_june		= Tháng 6
+month_short_july		= Tháng 7
+month_short_august		= Tháng 8
+month_short_september	= Tháng 9
+month_short_october		= Tháng 10
+month_short_november	= Tháng 11
+month_short_december	= Tháng 12
+
+var monthNamesShort = 
