@@ -1,4 +1,4 @@
-package org.hisp.dhis.reporttable;
+package org.hisp.dhis.period;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo

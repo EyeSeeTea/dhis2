@@ -144,6 +144,11 @@ public class OrganisationUnit
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
+    
+    public boolean hasChild()
+    {
+    	return !this.children.isEmpty();
+    }
 
     public boolean hasCoordinates()
     {

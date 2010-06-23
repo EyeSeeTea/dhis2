@@ -38,9 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
  * @author bobj
- * @version created 21-Apr-2010
  */
 @Component("zipAnalyzer")
 public class ZipAnalyzer

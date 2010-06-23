@@ -14,6 +14,9 @@
 .x-form-field {
 	font:10px lucida sans unicode,arial,tahoma,helvetica,sans-serif;
 }
+.x-form-item label.x-form-item-label {
+    padding:3px 3px 3px 4px;
+}
 .x-combo-list {
 	font:10px lucida sans unicode,arial,tahoma,helvetica,sans-serif;
 }

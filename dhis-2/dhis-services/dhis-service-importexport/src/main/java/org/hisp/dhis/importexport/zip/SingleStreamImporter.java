@@ -40,22 +40,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * SingleStreamImporter is the simplest Importer
+ * SingleStreamImporter is the simplest Importer.
  *
  * @author bobj
- * @version created 21-Apr-2010
  */
 @Component("singleStreamImporter")
-public class SingleStreamImporter implements ZipImporter {
-
+public class SingleStreamImporter implements ZipImporter 
+{
     @Autowired
     protected XMLPreConverter preConverter;
 
-
     @Autowired
     protected DXFConverter converter;
-
-    // -------------------------------------------------------------------------
 
     public InputStream getXMLStream(ZipFile zipFile) throws IOException
     {
@@ -70,6 +66,4 @@ public class SingleStreamImporter implements ZipImporter {
         XMLReader dxfReader = preConverter.transform( getXMLStream(zipFile), params, state);
         converter.read( dxfReader, params, state );
     }
-
-
 }

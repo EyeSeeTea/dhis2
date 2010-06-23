@@ -750,6 +750,66 @@ function removeItem( itemId, itemName, confirmation, action )
     }
 }
 
+/**
+ * Create jQuery datepicker for input text with id * * 
+ * @param id the id of input filed which you want enter date *
+ */
+function datePicker( id )
+{
+	$("#" + id).datepicker(
+	{
+		dateFormat:dateFormat,
+		changeMonth: true,
+		changeYear: true,			
+		monthNamesShort: monthNames,
+		dayNamesMin: dayNamesMin,
+		showOn: 'both',
+		buttonImage: '../images/calendar.png',
+		buttonImageOnly: true
+	});
+}
+
+/**
+ * Create jQuery datepicker for start date and end ate text with id * * 
+ * @param startdate the id of input filed which you want enter start date *
+ * @param enddate the id of input filed which you want enter end date *
+ */
+
+function datePickerInRange ( startdate, enddate )
+{
+	var dates = $('#'+startdate+', #' + enddate).datepicker(
+	{
+		dateFormat:dateFormat,
+		defaultDate: "+1w",
+		changeMonth: true,
+		changeYear: true,
+		numberOfMonths: 1,
+		monthNamesShort: monthNames,
+		dayNamesMin: dayNamesMin,
+		showAnim:'',
+		showOn: 'both',
+		buttonImage: '../images/calendar.png',
+		buttonImageOnly: true,
+		onSelect: function(selectedDate)
+		{
+			var option = this.id == startdate ? "minDate" : "maxDate";
+			var instance = $(this).data("datepicker");
+			var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+			dates.not(this).datepicker("option", option, date);
+		}
+	});
+}
+
+/**
+ * Create input table id become sortable table * * 
+ * @param tableId the id of table you want to sort * * 
+ */
+
+function tableSorter( tableId )
+{
+	$("#" + tableId ).tablesorter(); 
+}
+
 function setSelectionRange( input, selectionStart, selectionEnd ) 
 {
 	if ( input.setSelectionRange ) 
@@ -806,3 +866,56 @@ function insertTextCommon( inputAreaName, inputText )
 	setCaretToPos( inputArea, inputArea.value.length );
 }
 
+/**
+ * Create Mask with proccessing * 
+ */
+function MaskAjaxProccess()
+{	
+	this.processWidth = 100;
+	this.processHeight = 100;
+	
+	this.width = document.documentElement.clientWidth;
+	this.height = document.documentElement.clientHeight;	
+	this.mask = document.createElement( 'div' );
+	
+	this.mask.id = "mask";
+	this.mask.style.position = "fixed";
+	this.mask.style.display = "none";
+	this.mask.style.top = 0;
+	this.mask.style.width = this.width + "px";
+	this.mask.style.height = this.height + "px";
+	this.mask.style.background = "#000000";
+	this.mask.style.opacity = 0.5;
+	this.mask.style.zIndex = 10;
+	
+	this.process = document.createElement( 'div' );
+	this.process.id = "process";
+	this.process.style.display = "none";
+	this.process.style.position = "fixed";	
+	this.process.style.background = "#000000";
+	this.process.style.backgroundRepeat = "no-repeat";
+	this.process.style.width = this.processWidth + "px";
+	this.process.style.height = this.processHeight + "px";
+	this.process.style.backgroundImage = "url(../images/ajax-loader-preview.gif)";
+	this.process.style.top = ((this.height / 2) - (this.processHeight/2)) + "px";
+	this.process.style.left = ((this.width / 2) - (this.processWidth/2)) + "px";	
+	this.process.style.zIndex = 11;
+	this.process.style.border = "#CCCCCC 3px solid";
+		
+	this.show = function()
+	{		
+		document.body.appendChild(this.process);
+		document.body.appendChild( this.mask );
+			
+		$('#mask' ).fadeIn(1000);
+		$('#process' ).fadeIn(1000);		
+	}	
+	
+	this.hide = function()
+	{			
+		$('#mask'  ).fadeOut(1000);		
+		$('#process'  ).fadeOut(1000);		
+	}	
+	
+}
+var MaskAjaxProccess = new MaskAjaxProccess();	

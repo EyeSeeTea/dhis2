@@ -27,12 +27,10 @@
 	</tr>
 	<tr>
 		<td>
-			<input type="text" id="fromDate" name="fromDate" title="Earliest date will be used if no date is selected">
-			<img src="../images/calendar_icon.gif" alt="" width="16" height="16" id="getDateFieldFrom" style="cursor: pointer;" title="$i18n.getString( "date_selector" )" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''">
+			<input type="text" id="fromDate" name="fromDate" title="Earliest date will be used if no date is selected">			
 		</td>
 		<td>
-			<input type="text" id="toDate" name="toDate" title="Latest date will be used if no date is selected">
-			<img src="../images/calendar_icon.gif" alt="" width="16" height="16" id="getDateFieldTo" style="cursor:pointer;" title="$i18n.getString( "date_selector" )" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''">			
+			<input type="text" id="toDate" name="toDate" title="Latest date will be used if no date is selected">			
 		</td>
 	</tr>  
     <tr>
@@ -79,19 +77,15 @@
 
 <script type="text/javascript">
 	window.onload = modeHandler;
-
-    Calendar.setup({
-        inputField     :    "fromDate",      // id of the input field
-        ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
-        button         :    "getDateFieldFrom"   // trigger for the calendar (button ID)
-    });
-</script>
-<script type="text/javascript">
-    Calendar.setup({
-        inputField     :    "toDate",      // id of the input field
-        ifFormat       :    "$i18n.getString("format.date.label")",       // format of the input field
-        button         :    "getDateFieldTo"   // trigger for the calendar (button ID)
-    });
+	
+	$(document).ready(function(){
+	
+		datePickerInRange( 'fromDate' , 'toDate' );
+	
+	});
+	
+	
+	
 </script>
 </form>
 

@@ -250,6 +250,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             url: path + 'getAllIndicatorGroups' + type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
+            idProperty: 'id',
             sortInfo: { field: 'name', direction: 'ASC' },
             autoLoad: true
         });
@@ -259,6 +260,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			baseParams: {indicatorGroupId:0},
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
+            idProperty: 'id',
             sortInfo: { field: 'name', direction: 'ASC' },
             autoLoad: false,
             listeners: {
@@ -372,6 +374,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
+            idProperty: 'mapLayerPath',
             autoLoad: true,
             listeners: {
                 'load': {
