@@ -34,7 +34,6 @@ import static org.hisp.dhis.util.InternalProcessUtil.setCurrentRunningProcess;
 import org.amplecode.cave.process.ProcessCoordinator;
 import org.amplecode.cave.process.ProcessExecutor;
 import org.hisp.dhis.datamart.DataMartInternalProcess;
-import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
@@ -62,13 +61,6 @@ public class ExportDataMartExportAction
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
-    }
-
-    private DataMartService dataMartService;
-
-    public void setDataMartService( DataMartService dataMartService )
-    {
-        this.dataMartService = dataMartService;
     }
 
     // -------------------------------------------------------------------------

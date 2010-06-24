@@ -27,13 +27,22 @@ package org.hisp.dhis.datamart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+
+import java.util.Collection;
+
 import org.amplecode.cave.process.SerialToGroup;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.process.AbstractStatementInternalProcess;
 
 /**
- * @author Lars Helge Overland
+ * Either the identifier or the DataMartExport object must be set. The
+ * identifier is given priority.
  * 
- * @version $Id: DataMartInternalProcess.java 6222 2008-11-07 12:20:46Z larshelg $
+ * @author Lars Helge Overland
  */
 public class DataMartInternalProcess
     extends AbstractStatementInternalProcess implements SerialToGroup
@@ -61,6 +70,19 @@ public class DataMartInternalProcess
         this.id = id;
     }
 
+    private Collection<Integer> dataElementIds;
+    private Collection<Integer> indicatorIds;
+    private Collection<Integer> periodIds;
+    private Collection<Integer> organisationUnitIds;
+    
+    public void setExport( DataMartExport export )
+    {
+        this.dataElementIds = getIdentifiers( DataElement.class, export.getDataElements() );
+        this.indicatorIds = getIdentifiers( Indicator.class, export.getIndicators() );
+        this.periodIds = getIdentifiers( Period.class, export.getPeriods() );
+        this.organisationUnitIds = getIdentifiers( OrganisationUnit.class, export.getOrganisationUnits() );
+    }
+
     // -------------------------------------------------------------------------
     // SerialToGroup implementation
     // -------------------------------------------------------------------------
@@ -78,6 +100,13 @@ public class DataMartInternalProcess
     protected void executeStatements()
         throws Exception
     {
-        dataMartService.export( id );
+        if ( id != null )
+        {
+            dataMartService.export( id );
+        }
+        else
+        {
+            dataMartService.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds );
+        }
     }
 }

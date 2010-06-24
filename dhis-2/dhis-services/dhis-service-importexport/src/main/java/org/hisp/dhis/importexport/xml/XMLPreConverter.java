@@ -27,11 +27,6 @@ package org.hisp.dhis.importexport.xml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *
- * @author bobj
- * @version created 31-May-2010
- */
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -62,14 +57,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * GenericXMLConvertor transforms imported foreign XML to dxf
- *
+ * GenericXMLConvertor transforms imported foreign XML to dxf.
+ * 
  * @author bobj
  */
-@Component("preConverter")
+@Component( "preConverter" )
 public class XMLPreConverter
 {
-
     private final Log log = LogFactory.getLog( XMLPreConverter.class );
 
     public static final String DXF_ROOT = "dxf";
@@ -88,14 +82,17 @@ public class XMLPreConverter
     protected URIResolver resolver;
 
     /**
-     * This method is called for an anonymous xml stream ie. we don't yet know if or how to transform it
+     * This method is called for an anonymous xml stream ie. we don't yet know
+     * if or how to transform it
+     * 
      * @param xmlDataStream
      * @param params
      * @param state
      * @return
      * @throws ImportException
      */
-    public XMLReader transform( InputStream xmlDataStream, ImportParams params, ProcessState state ) throws ImportException
+    public XMLReader transform( InputStream xmlDataStream, ImportParams params, ProcessState state )
+        throws ImportException
     {
         XMLReader dxfReader = null;
 
@@ -105,15 +102,13 @@ public class XMLPreConverter
 
         QName rootName = null;
 
-
         BufferedInputStream bufin = new BufferedInputStream( xmlDataStream );
         Map<QName, String> attributes = new HashMap<QName, String>();
 
-
         try
         {
-             XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
-             XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( xmlDataStream );
+            XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
+            XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( xmlDataStream );
 
             // buffer enough space to read root element
             bufin.mark( BUFFER_SIZE );
@@ -128,8 +123,8 @@ public class XMLPreConverter
                 String value = streamReader.getAttributeValue( i );
                 attributes.put( attribute, value );
             }
+            
             bufin.reset();
-
 
             log.info( "Importing " + rootName.toString() );
 
@@ -139,7 +134,8 @@ public class XMLPreConverter
                 // Native DXF stream - no transform required
 
                 // -----------------------------------------------------------------
-                // Retrieve namespace and minor version from root element and set on
+                // Retrieve namespace and minor version from root element and
+                // set on
                 // import params. Use default if not found.
                 // -----------------------------------------------------------------
 
@@ -151,24 +147,27 @@ public class XMLPreConverter
 
                 // no transform required
                 dxfReader = XMLFactory.getXMLReader( streamReader );
-
-            } else
-            {        // use the stringified form of the qname as an id
+            }
+            else
+            {
+                // use the stringified form of the qname as an id
                 xsltIdentifierTag = rootName.toString();
                 log.debug( "Tag for transformer: " + xsltIdentifierTag );
 
                 dxfReader = this.transform( streamReader, params, state, xsltParams, xsltIdentifierTag );
             }
-        } catch ( Exception ex )
+        }
+        catch ( Exception ex )
         {
             log.info( ex );
             throw new ImportException( "Failed to transform xml stream" );
         }
+        
         return dxfReader;
     }
 
     /**
-     *
+     * 
      * @param streamReader
      * @param params
      * @param state
@@ -193,7 +192,7 @@ public class XMLPreConverter
         XMLEventReader2 pipeoutput = pipe.getOutput();
 
         StAXResult result = new StAXResult( pipeinput ); // Set result of transform to input of pipe
-        //tt.transform( source, result, resolver );
+        // tt.transform( source, result, resolver );
         tt.transform( source, result, null );
         log.info( "Transform successful" );
 

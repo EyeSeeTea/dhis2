@@ -28,8 +28,8 @@ package org.hisp.dhis.datamart;
  */
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.indicator.Indicator;
@@ -48,13 +48,13 @@ public class DataMartExport
     
     private String name;
     
-    private Set<DataElement> dataElements = new HashSet<DataElement>();
+    private Collection<DataElement> dataElements = new HashSet<DataElement>();
     
-    private Set<Indicator> indicators = new HashSet<Indicator>();
+    private Collection<Indicator> indicators = new HashSet<Indicator>();
     
-    private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+    private Collection<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
     
-    private Set<Period> periods = new HashSet<Period>();
+    private Collection<Period> periods = new HashSet<Period>();
 
     private RelativePeriods relatives;
     
@@ -66,8 +66,8 @@ public class DataMartExport
     {   
     }
 
-    public DataMartExport( String name, Set<DataElement> dataElements, Set<Indicator> indicators,
-        Set<OrganisationUnit> organisationUnits, Set<Period> periods, RelativePeriods relatives )
+    public DataMartExport( String name, Collection<DataElement> dataElements, Collection<Indicator> indicators,
+        Collection<OrganisationUnit> organisationUnits, Collection<Period> periods, RelativePeriods relatives )
     {
         this.name = name;
         this.dataElements = dataElements;
@@ -101,42 +101,42 @@ public class DataMartExport
         this.name = name;
     }
 
-    public Set<DataElement> getDataElements()
+    public Collection<DataElement> getDataElements()
     {
         return dataElements;
     }
 
-    public void setDataElements( Set<DataElement> dataElements )
+    public void setDataElements( Collection<DataElement> dataElements )
     {
         this.dataElements = dataElements;
     }
 
-    public Set<Indicator> getIndicators()
+    public Collection<Indicator> getIndicators()
     {
         return indicators;
     }
 
-    public void setIndicators( Set<Indicator> indicators )
+    public void setIndicators( Collection<Indicator> indicators )
     {
         this.indicators = indicators;
     }
 
-    public Set<OrganisationUnit> getOrganisationUnits()
+    public Collection<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
     }
 
-    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
+    public void setOrganisationUnits( Collection<OrganisationUnit> organisationUnits )
     {
         this.organisationUnits = organisationUnits;
     }
 
-    public Set<Period> getPeriods()
+    public Collection<Period> getPeriods()
     {
         return periods;
     }
 
-    public void setPeriods( Set<Period> periods )
+    public void setPeriods( Collection<Period> periods )
     {
         this.periods = periods;
     }

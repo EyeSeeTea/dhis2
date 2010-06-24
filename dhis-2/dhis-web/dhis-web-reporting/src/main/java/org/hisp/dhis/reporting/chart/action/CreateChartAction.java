@@ -28,7 +28,6 @@ package org.hisp.dhis.reporting.chart.action;
  */
 
 import static org.hisp.dhis.datamart.DataMartInternalProcess.PROCESS_TYPE;
-import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 import static org.hisp.dhis.util.InternalProcessUtil.PROCESS_KEY_REPORT;
 import static org.hisp.dhis.util.InternalProcessUtil.setCurrentRunningProcess;
 
@@ -38,10 +37,9 @@ import org.amplecode.cave.process.ProcessCoordinator;
 import org.amplecode.cave.process.ProcessExecutor;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.datamart.DataMartExport;
 import org.hisp.dhis.datamart.DataMartInternalProcess;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
@@ -104,12 +102,11 @@ public class CreateChartAction
         ProcessExecutor executor = processCoordinator.newProcess( PROCESS_TYPE, owner );
         
         DataMartInternalProcess process = (DataMartInternalProcess) executor.getProcess();
-        
-        process.setDataElementIds( new HashSet<Integer>() );
-        process.setIndicatorIds( getIdentifiers( Indicator.class, chart.getIndicators() ) );
-        process.setPeriodIds( getIdentifiers( Period.class, chart.getPeriods() ) );
-        process.setOrganisationUnitIds( getIdentifiers( OrganisationUnit.class, chart.getOrganisationUnits() ) );
 
+        DataMartExport export = new DataMartExport( null, new HashSet<DataElement>(), chart.getIndicators(), chart.getOrganisationUnits(), chart.getPeriods(), null );
+        
+        process.setExport( export );
+        
         processCoordinator.requestProcessExecution( executor );
         
         setCurrentRunningProcess( PROCESS_KEY_REPORT, executor.getId() );

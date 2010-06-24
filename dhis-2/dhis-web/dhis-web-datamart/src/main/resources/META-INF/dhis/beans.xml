@@ -13,8 +13,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="processCoordinator"/>
     <property name="currentUserService"
       ref="org.hisp.dhis.user.CurrentUserService"/>
-    <property name="dataMartService"
-      ref="org.hisp.dhis.datamart.DataMartService"/>
   </bean>
   
   <bean id="org.hisp.dhis.datamart.action.GetExportStatusAction"
