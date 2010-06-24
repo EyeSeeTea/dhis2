@@ -648,8 +648,7 @@
 
 		<action name="defineProgramAssociationsForm"
 			class="org.hisp.dhis.patient.action.program.SetupAssociationsTreeAction">
-			<result name="success" type="chain">getProgramAssociationOptions
-			</result>
+			<result name="success" type="chain">getProgramAssociationOptions</result>
 			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
 		</action>
 
