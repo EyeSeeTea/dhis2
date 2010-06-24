@@ -36,6 +36,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.namespace.QName;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -80,6 +81,14 @@ public class DefaultXMLStreamReader
         final int eventType = reader.getEventType();
 
         return eventType == START_ELEMENT || eventType == END_ELEMENT ? reader.getLocalName() : null;
+    }
+
+    @Override
+    public QName getElementQName()
+    {
+        final int eventType = reader.getEventType();
+
+        return eventType == START_ELEMENT || eventType == END_ELEMENT ? reader.getName() : null;
     }
 
     @Override
