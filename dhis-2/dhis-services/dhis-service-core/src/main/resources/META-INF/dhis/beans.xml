@@ -1348,13 +1348,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   
   <bean id="authenticationManager"
     class="org.springframework.security.authentication.ProviderManager">
-    <property name="providers">
-      <list>
-        <ref local="daoAuthenticationProvider"/>
-      </list>
-    </property>
+    <property name="providers" ref="daoAuthenticationProvider"/>
+    <property name="authenticationEventPublisher" ref="defaultAuthenticationEventPublisher" />
   </bean>
   
+  <bean id="defaultAuthenticationEventPublisher" class="org.springframework.security.authentication.DefaultAuthenticationEventPublisher" />
+
   <bean id="daoAuthenticationProvider"
     class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
     <property name="userDetailsService" ref="userDetailsService"/>

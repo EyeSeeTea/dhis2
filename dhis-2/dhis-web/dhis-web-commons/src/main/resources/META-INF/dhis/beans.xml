@@ -277,7 +277,7 @@
 		class="org.springframework.security.web.context.HttpSessionContextIntegrationFilter" />
 
 	<bean id="authenticationProcessingFilter"
-		class="org.springframework.security.web.authentication.AuthenticationProcessingFilter">
+		class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
         <property name="authenticationFailureHandler" ref="failureHandler" />
         <property name="authenticationSuccessHandler" ref="successHandler" />
