@@ -256,7 +256,7 @@ public class SaveChartAction
 
     public String execute()
     {
-        Chart chart = new Chart();
+        Chart chart = id == null ? new Chart() : chartService.getChart( id );
 
         List<Indicator> indicators = new ArrayList<Indicator>();
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
@@ -274,7 +274,6 @@ public class SaveChartAction
         
         Collections.sort( periods, new AscendingPeriodComparator() );
         
-        chart.setId( id != null ? id : 0 );
         chart.setTitle( title );
         chart.setType( type );
         chart.setSize( size );
@@ -287,8 +286,6 @@ public class SaveChartAction
         chart.setPeriods( periods );
         chart.setOrganisationUnits( organisationUnits );
 
-        //TODO currently not in use
-        
         RelativePeriods relatives = new RelativePeriods();
         
         relatives.setReportingMonth( reportingMonth );
@@ -305,7 +302,7 @@ public class SaveChartAction
         
         chart.setRelatives( relatives );
         
-        chartService.saveOrUpdate( chart );
+        chartService.saveChart( chart );
         
         return SUCCESS;
     }

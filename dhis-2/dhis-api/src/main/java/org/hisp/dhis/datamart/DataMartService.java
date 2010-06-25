@@ -39,6 +39,7 @@ import org.hisp.dhis.dimension.DimensionOption;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.RelativePeriods;
 
 /**
  * @author Lars Helge Overland
@@ -58,7 +59,7 @@ public interface DataMartService
      * @return the number of exported values.
      */
     int export( int id );
-    
+
     /**
      * Exports to data mart for the given arguments.
      * 
@@ -70,6 +71,19 @@ public interface DataMartService
      */
     int export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
         Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
+    
+    /**
+     * Exports to data mart for the given arguments.
+     * 
+     * @param dataElementIds the data element identifiers.
+     * @param indicatorIds the indicator identifiers.
+     * @param periodIds the period identifiers.
+     * @param organisationUnitIds the organisation unit identifiers.
+     * @param relatives the RelativePeriods.
+     * @return the number of exported values.
+     */
+    int export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, RelativePeriods relatives );
 
     // ----------------------------------------------------------------------
     // AggregatedDataValue

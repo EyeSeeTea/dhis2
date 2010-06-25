@@ -36,6 +36,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.process.AbstractStatementInternalProcess;
 
 /**
@@ -74,6 +75,7 @@ public class DataMartInternalProcess
     private Collection<Integer> indicatorIds;
     private Collection<Integer> periodIds;
     private Collection<Integer> organisationUnitIds;
+    private RelativePeriods relatives;
     
     public void setExport( DataMartExport export )
     {
@@ -81,6 +83,7 @@ public class DataMartInternalProcess
         this.indicatorIds = getIdentifiers( Indicator.class, export.getIndicators() );
         this.periodIds = getIdentifiers( Period.class, export.getPeriods() );
         this.organisationUnitIds = getIdentifiers( OrganisationUnit.class, export.getOrganisationUnits() );
+        this.relatives = export.getRelatives();
     }
 
     // -------------------------------------------------------------------------
@@ -106,7 +109,7 @@ public class DataMartInternalProcess
         }
         else
         {
-            dataMartService.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds );
+            dataMartService.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, relatives );
         }
     }
 }

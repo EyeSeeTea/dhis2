@@ -48,6 +48,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.process.OutputHolderState;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +95,13 @@ public class DefaultDataMartService
     // -------------------------------------------------------------------------
 
     @Transactional
+    public int export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds )
+    {
+        return export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, null );
+    }
+    
+    @Transactional
     public int export( int id )
     {
         DataMartExport dataMartExport = getDataMartExport( id );
@@ -115,8 +123,13 @@ public class DefaultDataMartService
     
     @Transactional
     public int export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds )
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, RelativePeriods relatives )
     {
+        if ( relatives != null )
+        {
+            periodIds.addAll( getIdentifiers( Period.class, periodService.reloadPeriods( relatives.getRelativePeriods( 1, null, false ) ) ) );
+        }
+        
         return dataMartEngine.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, new OutputHolderState() );
     }
 

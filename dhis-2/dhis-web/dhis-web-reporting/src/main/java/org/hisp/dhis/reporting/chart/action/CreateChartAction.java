@@ -103,7 +103,7 @@ public class CreateChartAction
         
         DataMartInternalProcess process = (DataMartInternalProcess) executor.getProcess();
 
-        DataMartExport export = new DataMartExport( null, new HashSet<DataElement>(), chart.getIndicators(), chart.getOrganisationUnits(), chart.getPeriods(), null );
+        DataMartExport export = new DataMartExport( null, new HashSet<DataElement>(), chart.getIndicators(), chart.getOrganisationUnits(), chart.getPeriods(), chart.getRelatives() );
         
         process.setExport( export );
         
