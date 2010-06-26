@@ -41,8 +41,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.CrossTabDataValue;
-import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
+import org.hisp.dhis.datamart.crosstab.CrossTabService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.period.Period;
@@ -61,13 +61,13 @@ public class AverageIntAggregator
     // Dependencies
     // -------------------------------------------------------------------------
 
-    protected DataMartStore dataMartStore;
-    
-    public void setDataMartStore( DataMartStore dataMartStore )
+    private CrossTabService crossTabService;
+
+    public void setCrossTabService( CrossTabService crossTabService )
     {
-        this.dataMartStore = dataMartStore;
+        this.crossTabService = crossTabService;
     }
-    
+
     protected AggregationCache aggregationCache;
         
     public void setAggregationCache( AggregationCache aggregationCache )
@@ -80,7 +80,7 @@ public class AverageIntAggregator
     // -------------------------------------------------------------------------
 
     public Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy )
+        final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy, String key )
     {
         if ( operandIndexMap == null || operandIndexMap.size() == 0 )
         {
@@ -97,7 +97,7 @@ public class AverageIntAggregator
         for ( final Integer unitId : unitIds )
         {
             final Collection<CrossTabDataValue> crossTabValues = 
-                dataMartStore.getCrossTabDataValues( operandIndexMap, aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), unitId );
+                crossTabService.getCrossTabDataValues( operandIndexMap, aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), unitId, key );
             
             final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
                 period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>

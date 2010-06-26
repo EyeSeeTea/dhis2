@@ -103,9 +103,9 @@ public class DefaultDataElementDataMart
     // -------------------------------------------------------------------------
     
     public int exportDataValues( final Collection<DataElementOperand> operands, final Collection<Integer> periodIds, 
-        final Collection<Integer> organisationUnitIds, final DataElementAggregator dataElementAggregator )
+        final Collection<Integer> organisationUnitIds, final DataElementAggregator dataElementAggregator, String key )
     {
-        final Map<DataElementOperand, Integer> operandIndexMap = crossTabService.getOperandIndexMap( operands );
+        final Map<DataElementOperand, Integer> operandIndexMap = crossTabService.getOperandIndexMap( operands, key );
         
         final Collection<Period> periods = getPeriods( periodIds );
 
@@ -129,7 +129,7 @@ public class DefaultDataElementDataMart
                 {
                     final int level = aggregationCache.getLevelOfOrganisationUnit( unit.getId() );
                     
-                    final Map<DataElementOperand, Double> valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy );
+                    final Map<DataElementOperand, Double> valueMap = dataElementAggregator.getAggregatedValues( currentOperandIndexMap, period, unit, level, hierarchy, key );
                     
                     final PeriodType periodType = period.getPeriodType();
                     
