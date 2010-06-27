@@ -50,7 +50,6 @@ import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.junit.Test;
 
 /**
@@ -64,7 +63,7 @@ public class AggregationServiceTest
     private final String F = "false";
     
     private AggregationService aggregationService;
-
+    
     private DataElementCategoryCombo categoryCombo;
     
     private DataElementCategoryOptionCombo categoryOptionCombo;
@@ -81,7 +80,6 @@ public class AggregationServiceTest
     private Period periodA;
     private Period periodB;
     private Period periodC;
-    private Period periodD;
     
     private OrganisationUnit unitA;
     private OrganisationUnit unitB;
@@ -161,17 +159,14 @@ public class AggregationServiceTest
         // ---------------------------------------------------------------------
         
         PeriodType monthly = new MonthlyPeriodType();
-        PeriodType quarterly = new QuarterlyPeriodType();
         
         periodA = createPeriod( monthly, mar01, mar31 );
         periodB = createPeriod( monthly, apr01, apr30 );
         periodC = createPeriod( monthly, may01, may31 );
-        periodD = createPeriod( quarterly, mar01, may31 );
         
         periodIds.add( periodService.addPeriod( periodA ) );
         periodIds.add( periodService.addPeriod( periodB ) );
         periodIds.add( periodService.addPeriod( periodC ) );
-        periodIds.add( periodService.addPeriod( periodD ) );
         
         // ---------------------------------------------------------------------
         // Setup OrganisationUnits
@@ -242,6 +237,8 @@ public class AggregationServiceTest
         dataValueService.addDataValue( createDataValue( dataElementB, periodC, unitF, T, categoryOptionCombo ) );
         dataValueService.addDataValue( createDataValue( dataElementB, periodC, unitG, T, categoryOptionCombo ) );
         dataValueService.addDataValue( createDataValue( dataElementB, periodC, unitH, T, categoryOptionCombo ) );
+        
+        aggregationService.clearCache();
     }
 
     @Override
@@ -251,13 +248,56 @@ public class AggregationServiceTest
     }
 
     @Test
-    public void testSumIntDataElementDataMart()
+    public void sumIntDataElement()
     {
-        dataElementA.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
-        
+        assertEquals( 90.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, mar31, unitC ) );
+        assertEquals( 105.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, mar31, unitF ) );
+        assertEquals( 150.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, mar31, unitB ) );
+
+        assertEquals( 255.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, may31, unitC ) );
+        assertEquals( 345.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, may31, unitF ) );
+        assertEquals( 580.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, may31, unitB ) );
+    }
+    
+    @Test
+    public void sumBoolDataElement()
+    {
+        assertEquals( 1.0, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, mar31, unitC ) );
+        assertEquals( 2.0, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, mar31, unitF ) );
+        assertEquals( 3.0, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, mar31, unitB ) );
+
+        assertEquals( 2.0, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, may31, unitC ) );
+        assertEquals( 7.0, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, may31, unitF ) );
+        assertEquals( 10.0, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, may31, unitB ) );
+    }
+    
+    @Test
+    public void averageIntDataElement()
+    {
+        dataElementA.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE );
         dataElementService.updateDataElement( dataElementA );
         
         assertEquals( 90.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, mar31, unitC ) );
         assertEquals( 105.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, mar31, unitF ) );
+        assertEquals( 150.0, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, mar31, unitB ) );
+
+        assertEquals( 85.2, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, may31, unitC ), 0.1 );
+        assertEquals( 115.3, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, may31, unitF ), 0.1 );
+        assertEquals( 193.3, aggregationService.getAggregatedDataValue( dataElementA, categoryOptionCombo, mar01, may31, unitB ), 0.1 );
+    }
+    
+    @Test
+    public void averageBoolDataElement()
+    {
+        dataElementB.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE );
+        dataElementService.updateDataElement( dataElementB );
+        
+        assertEquals( 1.0, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, mar31, unitC ) );
+        assertEquals( 0.67, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, mar31, unitF ), 0.01 );
+        assertEquals( 0.6, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, mar31, unitB ) );
+        
+        assertEquals( 0.66, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, may31, unitC ), 0.01 );
+        assertEquals( 0.78, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, may31, unitF ), 0.01 );
+        assertEquals( 0.67, aggregationService.getAggregatedDataValue( dataElementB, categoryOptionCombo, mar01, may31, unitB ), 0.01 );
     }
 }

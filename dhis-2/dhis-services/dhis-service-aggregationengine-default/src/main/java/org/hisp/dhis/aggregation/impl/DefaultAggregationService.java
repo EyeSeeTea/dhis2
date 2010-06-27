@@ -30,6 +30,7 @@ package org.hisp.dhis.aggregation.impl;
 import java.util.Date;
 
 import org.hisp.dhis.aggregation.AggregationService;
+import org.hisp.dhis.aggregation.impl.cache.AggregationCache;
 import org.hisp.dhis.aggregation.impl.dataelement.AbstractDataElementAggregation;
 import org.hisp.dhis.aggregation.impl.indicator.IndicatorAggregation;
 import org.hisp.dhis.dataelement.DataElement;
@@ -83,6 +84,13 @@ public class DefaultAggregationService
         this.indicatorAggregation = indicatorAggregation;
     }
     
+    private AggregationCache aggregationCache;
+
+    public void setAggregationCache( AggregationCache aggregationCache )
+    {
+        this.aggregationCache = aggregationCache;
+    }
+
     // -------------------------------------------------------------------------
     // DataElement
     // -------------------------------------------------------------------------
@@ -116,6 +124,11 @@ public class DefaultAggregationService
         OrganisationUnit organisationUnit )
     {
         return indicatorAggregation.getAggregatedDenominatorValue( indicator, startDate, endDate, organisationUnit );
+    }
+    
+    public void clearCache()
+    {
+        aggregationCache.clearCache();
     }
     
     // -------------------------------------------------------------------------

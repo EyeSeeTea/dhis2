@@ -54,16 +54,22 @@ public class AverageIntDataElementAggregation
 
         boolean valuesRegistered = false;
 
-        double[] sums = getSumAndRelevantDays( dataElement.getId(), optionCombo.getId(), aggregationStartDate, aggregationEndDate, 
-            organisationUnit.getId() );
-
-        if ( sums[1] > 0 )
+        OrganisationUnitHierarchy hierarchy = aggregationCache.getOrganisationUnitHierarchy();
+        
+        Collection<Integer> organisationUnitIds = hierarchy.getChildren( organisationUnit.getId() );
+        
+        for ( Integer id : organisationUnitIds )
         {
-            double average = sums[0] / sums[1];
-
-            totalSum += average;
-
-            valuesRegistered = true;
+            double[] sums = getSumAndRelevantDays( dataElement.getId(), optionCombo.getId(), aggregationStartDate, aggregationEndDate, id );
+    
+            if ( sums[1] > 0 )
+            {
+                double average = sums[0] / sums[1];
+    
+                totalSum += average;
+    
+                valuesRegistered = true;
+            }
         }
 
         if ( valuesRegistered )
@@ -89,13 +95,11 @@ public class AverageIntDataElementAggregation
      */
     protected Collection<DataValue> getDataValues( int dataElementId, int optionComboId, int organisationUnitId,
         Date startDate, Date endDate )
-    {
-        OrganisationUnitHierarchy hierarchy = aggregationCache.getOrganisationUnitHierarchy();
-        
+    {   
         Collection<Integer> periods = aggregationCache.getPeriodIds( startDate, endDate );
         
         Collection<DataValue> values = aggregationStore.getDataValues( organisationUnitId, dataElementId, optionComboId, periods );
-
+        
         return values;
     }
 
