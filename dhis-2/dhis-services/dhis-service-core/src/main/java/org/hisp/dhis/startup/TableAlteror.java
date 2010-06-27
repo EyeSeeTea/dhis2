@@ -68,6 +68,8 @@ public class TableAlteror
     @Transactional
     public void execute()
     {
+        executeSql( "drop table orgunithierarchystructure" );
+        executeSql( "drop table orgunithierarchy" );
         executeSql( "drop table datavalueaudit" );
         executeSql( "drop table columnorder" );
         executeSql( "drop table roworder" );
