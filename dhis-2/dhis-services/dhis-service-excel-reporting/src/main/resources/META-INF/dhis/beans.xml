@@ -63,15 +63,15 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<bean id="org.hisp.dhis.reportexcel.chart.ExtBookmarkChartStore" 
-		class="org.hisp.dhis.reportexcel.chart.hibernate.HibernateExtBookmarkStore">		
-		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-		<property name="clazz" value="org.hisp.dhis.validation.ValidationRule" />
+		class="org.hisp.dhis.reportexcel.chart.hibernate.HibernateExtBookmarkStore">			
+		<property name="clazz" value="org.hisp.dhis.reportexcel.chart.ExtBookmarkChart" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 	
 	<bean id="org.hisp.dhis.reportexcel.chart.ExtBookmarkChartService" 
 		class="org.hisp.dhis.reportexcel.chart.DefaultExtBookmarkChartService">
-		<property name="extBookmarkChartStore" ref="org.hisp.dhis.reportexcel.chart.ExtBookmarkChartStore" />		
+		<property name="extBookmarkChartStore" ref="org.hisp.dhis.reportexcel.chart.ExtBookmarkChartStore" />	
+		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />	
 	</bean>
 
 

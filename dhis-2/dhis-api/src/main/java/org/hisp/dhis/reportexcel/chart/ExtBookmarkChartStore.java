@@ -29,16 +29,16 @@ package org.hisp.dhis.reportexcel.chart;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
 /**
  * @author Tran Thanh Tri
  */
 
 public interface ExtBookmarkChartStore
-    extends GenericStore<ExtBookmarkChart>
+    extends GenericIdentifiableObjectStore<ExtBookmarkChart>
 {
 
-    Collection<ExtBookmarkChart> getALLExtBookmarkChart();
+    Collection<ExtBookmarkChart> getALLExtBookmarkChart( String username );
 
 }

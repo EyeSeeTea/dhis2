@@ -12,13 +12,15 @@
 			<generator class="native" />
 		</id>
 
-		<property name="name" column="name" not-null="true" />
+		<property name="name" column="name" not-null="true" unique="true"/>
 
-		<property name="type" column="type" not-null="true" />
+		<property name="title" column="title" not-null="true" />
+		
+		<property name="xtitle" column="xtitle" not-null="true" />		
 
 		<property name="username" column="username" not-null="true" />
 		
-		<property name="description" not-null="true" />
+		<property name="description" />
 
 		<property name="jsonValueStore" column="json" not-null="true" length="10000000"/>
 

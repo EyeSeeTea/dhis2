@@ -35,7 +35,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.reportexcel.chart.ExtBookmarkChart;
 import org.hisp.dhis.reportexcel.chart.ExtBookmarkChartStore;
-import org.hisp.dhis.user.CurrentUserService;
 
 /**
  * @author Tran Thanh Tri
@@ -44,27 +43,18 @@ import org.hisp.dhis.user.CurrentUserService;
 public class HibernateExtBookmarkStore
     extends HibernateGenericStore<ExtBookmarkChart>
     implements ExtBookmarkChartStore
-{
+{      
+  
 
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
+    @SuppressWarnings( "unchecked" )
     @Override
-    public Collection<ExtBookmarkChart> getALLExtBookmarkChart()
+    public Collection<ExtBookmarkChart> getALLExtBookmarkChart( String username )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( ExtBookmarkChart.class );
 
-        criteria.add( Restrictions.eq( "username", currentUserService.getCurrentUsername() ) );
+        criteria.add( Restrictions.eq( "username", username ) );
 
         return criteria.list();
     }

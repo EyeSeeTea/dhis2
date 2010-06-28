@@ -1430,6 +1430,34 @@
 				/dhis-web-excel-reporting/jsonChartValues.vm
 			</result>
 		</action>
+		
+		<action name="bookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.BookmarkChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonExtBookmarkChart.vm
+			</result>
+		</action>
+		
+		<action name="deleteBookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.DeleleBookmarkChartAction">
+			<result name="success" type="velocity-json">
+				../dhis-web-commons/ajax/jsonResponseSuccess.vm
+			</result>
+		</action>
+		
+		<action name="getBookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.GetBookmartChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonExtBookmarkChart.vm
+			</result>
+		</action>
+		
+		<action name="getAllBookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.GetAllBookmarkChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonExtBookmarkCharts.vm
+			</result>
+		</action>
 
 
 

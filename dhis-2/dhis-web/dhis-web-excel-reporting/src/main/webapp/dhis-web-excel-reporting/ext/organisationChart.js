@@ -216,72 +216,8 @@ Ext.onReady(function(){
 					}
 					
 				}
-			}
-				
-			/*
-			
-			if(SELECTED_ORGID==''){
-				alert("Please select organisation unit !");
-			}else if(periods==''){
-				alert("Please select period !");
-			}else{	
-			
-				var xaxis = periods.split(',');	
-				
-				if($("#axis-x-de-pc").css("display")=="block"){				
-					yaxis = dataElementComboPc.getValue();
-					url = path + 'generatePeriodsDEChart' + type;	
-					xTitle =  i18n_dataelements + ":" + $("#data-elements-pc").val();						
-				}else{
-					yaxis = indicatorsComboPc.getValue();
-					url = path + 'generatePeriodsInChart' + type;	
-					xTitle =  i18n_indicators + ":" + $("#indicators-pc").val();
-				}
-
-				if(yaxis==''){
-					if($("#axis-x-de-pc").css("display")=="block"){	
-						alert("Please select data element !");	
-					}else{
-						alert("Please select indicator !");	
-					}					
-				}else{	
-				
-					var chartType = columnChartRadio.getGroupValue();			
-					
-					if( chartType == FULL_CHART_TYPE ){
-						var store = new Ext.data.JsonStore({
-							url: url,
-							baseParams: { format: 'json', xaxis: xaxis, yaxis: yaxis},	
-							root: 'data',		
-							fields: ['name', 'value', 'total'],				
-							autoLoad: true	
-						});
-						
-						viewFullChart( xTitle, "Full Style Chart", PARENT, ORGANISATION_UNIT, store );
-						
-					}else{		
-						
-						var store = new Ext.data.JsonStore({
-							url: url,
-							baseParams: { format: 'json', xaxis: xaxis, yaxis: yaxis},	
-							root: 'data',		
-							fields: ['name', 'value'],				
-							autoLoad: true	
-						});
-
-						
-						if( chartType == PIE_CHART_TYPE ){
-							viewPieChart( xTitle, "Pie Chart", store	);
-						}else if( chartType == LINE_CHART_TYPE ){
-							viewLineChart( xTitle , "Line Chart", store	);
-						}else{
-							viewColumnChart( xTitle , "Column Chart", store	);
-						}
-					}
-				}
-			
-			}
-			*/
+			}			
+		
 		}
 	});
 	

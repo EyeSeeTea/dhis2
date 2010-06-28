@@ -29,10 +29,13 @@ package org.hisp.dhis.reportexcel.chart;
 
 import java.util.Collection;
 
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * @author Tran Thanh Tri
  */
-
+@Transactional
 public class DefaultExtBookmarkChartService
     implements ExtBookmarkChartService
 {
@@ -47,12 +50,19 @@ public class DefaultExtBookmarkChartService
         this.extBookmarkChartStore = extBookmarkChartStore;
     }
 
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
     // -------------------------------------------------------------------------
     // Implemented
     // -------------------------------------------------------------------------
 
     @Override
-    public void delete( int id )
+    public void deleteExtBookmarkChart( int id )
     {
         extBookmarkChartStore.delete( extBookmarkChartStore.get( id ) );
     }
@@ -60,8 +70,7 @@ public class DefaultExtBookmarkChartService
     @Override
     public Collection<ExtBookmarkChart> getALLExtBookmarkChart()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return extBookmarkChartStore.getALLExtBookmarkChart( currentUserService.getCurrentUsername() );
     }
 
     @Override
@@ -71,15 +80,12 @@ public class DefaultExtBookmarkChartService
     }
 
     @Override
-    public int save( ExtBookmarkChart extBookmarkChart )
+    public int saveExtBookmarkChart( ExtBookmarkChart extBookmarkChart )
     {
+        extBookmarkChart.setUsername( currentUserService.getCurrentUsername() );        
+
         return extBookmarkChartStore.save( extBookmarkChart );
     }
-
-    @Override
-    public void update( ExtBookmarkChart extBookmarkChart )
-    {
-        extBookmarkChartStore.update( extBookmarkChart );
-    }
+   
 
 }

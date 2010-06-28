@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.chart;
+package org.hisp.dhis.reportexcel.chart.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,21 +27,37 @@ package org.hisp.dhis.reportexcel.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.reportexcel.chart.ExtBookmarkChart;
+import org.hisp.dhis.reportexcel.chart.ExtBookmarkChartService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
+ * 
+ *         BookmarkChartAction.java Jun 23, 2010 2:24:26 PM
  */
-@SuppressWarnings( "serial" )
-public class ExtBookmarkChart
-    extends IdentifiableObject
+public class BookmarkChartAction
+    implements Action
 {
-    private String title;
 
-    public String getTitle()
+    // -------------------------------------------
+    // Dependency
+    // -------------------------------------------
+
+    private ExtBookmarkChartService extBookmarkChartService;
+
+    public void setExtBookmarkChartService( ExtBookmarkChartService extBookmarkChartService )
     {
-        return title;
+        this.extBookmarkChartService = extBookmarkChartService;
     }
+  
+
+    // -------------------------------------------
+    // Input
+    // -------------------------------------------
+
+    private String title;
 
     public void setTitle( String title )
     {
@@ -50,73 +66,58 @@ public class ExtBookmarkChart
 
     private String xtitle;
 
-    public String getXtitle()
-    {
-        return xtitle;
-    }
-
     public void setXtitle( String xtitle )
     {
         this.xtitle = xtitle;
     }
 
-    private String username;
+    private String name;
 
-    public String getUsername()
+    public void setName( String name )
     {
-        return username;
+        this.name = name;
     }
 
-    public void setUsername( String username )
+    private String descriptions;
+
+    public void setDescriptions( String descriptions )
     {
-        this.username = username;
+        this.descriptions = descriptions;
     }
 
-    private String jsonValueStore;
+    private String json;
 
-    public String getJsonValueStore()
+    public void setJson( String json )
     {
-        return jsonValueStore;
+        this.json = json;
     }
 
-    public void setJsonValueStore( String jsonValueStore )
+    // -------------------------------------------
+    // Output
+    // -------------------------------------------
+
+    private ExtBookmarkChart extBookmarkChart;
+
+    public ExtBookmarkChart getExtBookmarkChart()
     {
-        this.jsonValueStore = jsonValueStore;
-
-    }
-
-    // -------------------------------------------------------------------------
-    // hashCode and equals
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + id;
-        return result;
+        return extBookmarkChart;
     }
 
     @Override
-    public boolean equals( Object obj )
+    public String execute()
+        throws Exception
     {
-        if ( this == obj )
-            return true;
-        if ( obj == null )
-            return false;
-        if ( getClass() != obj.getClass() )
-            return false;
-        ExtBookmarkChart other = (ExtBookmarkChart) obj;
-        if ( id != other.getId() )
-            return false;
-        return true;
-    }
 
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
-    }
+        extBookmarkChart = new ExtBookmarkChart();
 
+        extBookmarkChart.setName( name );
+        extBookmarkChart.setTitle( title );
+        extBookmarkChart.setXtitle( xtitle );
+        extBookmarkChart.setDescription( descriptions );
+        extBookmarkChart.setJsonValueStore( json );        
+
+        extBookmarkChartService.saveExtBookmarkChart( extBookmarkChart );
+
+        return SUCCESS;
+    }
 }
