@@ -110,7 +110,18 @@ public class AddPatientAction
     private String gender;
 
     private String bloodGroup;
+
+    // -------------------------------------------------------------------------
+    // OutPut
+    // -------------------------------------------------------------------------
     
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
 
     // -------------------------------------------------------------------------
     // Input - others
@@ -298,7 +309,7 @@ public class AddPatientAction
         // Save patient
         //-------------------------------------------------------------------------
         
-            patientService.createPatient( patient, organisationUnit, representativeId,
+        id =  patientService.createPatient( patient, organisationUnit, representativeId,
                 relationshipTypeId,  patientAttributeValues );
 
         return SUCCESS;

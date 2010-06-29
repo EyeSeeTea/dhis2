@@ -405,7 +405,7 @@
 
 		<action name="addPatient"
 			class="org.hisp.dhis.patient.action.patient.AddPatientAction">
-			<result name="success" type="redirect">patientform.action</result>
+			<result name="success" type="chain">showProgramEnrollmentForm</result>
 			<param name="requiredAuthorities">F_PATIENT_ADD</param>
 		</action>
 

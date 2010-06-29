@@ -131,10 +131,15 @@ td.error {padding-left:1em}
             #if($organisationUnit.code == "null")
                 #set($organisationUnit.code = "" );
             #end
-            <input type="text" id="orgunitcode" name="orgunitcode" disabled="disabled" value="$organisationUnit.code" maxlength="9" size="10"/>
-            -<input type="text" id="progcode" name="progcode" maxlength="1" size="1" class='idfield  #validate( "default"  $identifierType.mandatory ) '/>
-            -<input type="text" id="yearcode" name="yearcode" maxlength="2" size="2" value="$year" class="{validate:{required:true,minlength:2}}"/>
-            -<input type="text" id="benicode" name="benicode" maxlength="4" size="4" class="{validate:{required:true,minlength:4}}"/>
+				<table>
+					<tr align="center" valign="top">
+						<td><input type="text" id="orgunitcode" name="orgunitcode" disabled="disabled" value="$organisationUnit.code" maxlength="9" size="10"/> <br/> <font color="red">OrgUnit<br>Code</font></td>
+						<td> - <input type="text" id="progcode" name="progcode" maxlength="1" size="1" class='idfield  #validate( "default"  $identifierType.mandatory ) '/> <br/> <font color="red">Prg<br>Code</font></td>
+						<td> - <input type="text" id="yearcode" name="yearcode" maxlength="2" size="2" value="$year" class="{validate:{required:true,minlength:2}}"/> <br/> <font color="red">Year</font></td>
+						<td> - <input type="text" id="benicode" name="benicode" maxlength="4" size="4" class="{validate:{required:true,minlength:4}}"/> <br/> <font color="red">Benificiary<br>Code</font></td>
+						
+					</tr>
+				</table>
             </td>
         #else
             <td class="input-column"><input type="text" id="iden$identifierType.id" name="iden$identifierType.id"  data="{related:$identifierType.related}"  class='idfield  #validate( "default"  $identifierType.mandatory ) '/></td>
