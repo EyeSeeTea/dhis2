@@ -3,7 +3,9 @@
 // Page init
 // -----------------------------------------------------------------------------
 
-$( document ).ready( function()
+$( document ).ready( function() { pageInit(); } );
+
+function pageInit()
 {
 	// Zebra stripes in lists
 	
@@ -95,7 +97,7 @@ $( document ).ready( function()
 		{
 			window.location.href = currentPath + 'about.action' + backURL;
 		});
-} );
+}
 
 // -----------------------------------------------------------------------------
 // Menu functions
