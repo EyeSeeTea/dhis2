@@ -34,7 +34,7 @@ div#header
 {
   background-image: url('logo_background.png');
   background-repeat: repeat-x;
-  height: 83px;
+  height: 71px;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -49,7 +49,7 @@ img#header1
 img#header2
 {
   position: absolute;
-  top: 9px;
+  top: 7px;
   left: 35px;
 }
 
@@ -95,13 +95,13 @@ img#menuSeparator5
 
 .menuLink
 {
-  height: 68px;
+  height: 64px;
   width: 98px;
   font-size: 12px;
   color: #ffffff;
   font-weight: bold;
   text-align: center;
-  line-height: 59px;
+  line-height: 53px;
   cursor: pointer;
 }
 
@@ -136,7 +136,7 @@ div#menuLink4
 span#headerText
 {
   position: absolute;
-  top: 26px;
+  top: 24px;
   left: 228px;
   color: white;
   font-size: 17px;
@@ -166,21 +166,21 @@ span#popupHeaderText
 div#menuDropDown1
 {
   position: absolute;
-  top: 76px;
+  top: 72px;
   left: 580px;
 }
 
 div#menuDropDown2
 {
   position: absolute;
-  top: 76px;
+  top: 72px;
   left: 680px;
 }
 
 div#menuDropDown3
 {
   position: absolute;
-  top: 76px;
+  top: 72px;
   left: 780px;
 }
 
@@ -223,14 +223,14 @@ div#menuDropDown3
 {
   background-color: #33669b;
   height: 472px;
-  width: 250px;
+  width: 235px;
   float: left;
   position: absolute;
-  top: 85px;
-  left: 10px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #10375f;
+  top: 79px;
+  left: 0px;
+  border-top: 1px solid #10375f;
+  border-right: 1px solid #10375f;
+  border-bottom: 1px solid #10375f;
   filter: alpha(opacity=90);
   opacity: 0.90;
 }
@@ -245,8 +245,8 @@ div#menuDropDown3
 {
   font-size: 14px;
   margin-top: 16px;
-  margin-right: 17px;
-  margin-left: 17px;
+  margin-right: 15px;
+  margin-left: 15px;
   background-color: #265687;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -260,8 +260,8 @@ div#menuDropDown3
 
 #leftBarContents ul
 {
-  margin-left: 40px;
-  list-style-type: square;
+  margin-left: 26px;
+  list-style-type: none;
   color: white;
 }
 
@@ -346,7 +346,7 @@ div#menuDropDown3
 
 #mainPage 
 {
-  margin: 102px 10px 10px 300px;
+  margin: 96px 10px 10px 270px;
 }
 
 #popupPage 

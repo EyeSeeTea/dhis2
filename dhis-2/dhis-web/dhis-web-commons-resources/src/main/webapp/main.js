@@ -159,7 +159,7 @@ function LeftBar()
     this.showAnimated = function()
     {
         setMenuVisible();        
-        setMainPageLeftMargin( '300px' );
+        setMainPageLeftMargin( '270px' );
         $( 'div#leftBar' ).show( 'fast' );
         $( 'span#showLeftBar' ).hide( 'fast' );
     };
