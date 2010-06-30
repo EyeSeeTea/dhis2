@@ -47,7 +47,9 @@ import org.hisp.dhis.source.Source;
 public class OrganisationUnit
     extends Source implements DimensionOptionElement
 {
-    private static final Pattern COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
+    private static final Pattern JSON_COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
+
+    private static final Pattern GML_COORDINATE_PATTERN = Pattern.compile("[\\-0-9.]+,[\\-0-9.]+");
     
     private Set<OrganisationUnit> children = new HashSet<OrganisationUnit>();
 
@@ -161,7 +163,7 @@ public class OrganisationUnit
         
         if ( coordinates != null && !coordinates.trim().isEmpty() )
         {
-            Matcher matcher = COORDINATE_PATTERN.matcher( coordinates );
+            Matcher matcher = JSON_COORDINATE_PATTERN.matcher( coordinates );
             
             while ( matcher.find() )
             {
@@ -183,10 +185,12 @@ public class OrganisationUnit
             for ( String c : collection )
             {
                 builder.append( "[[" );
-                            
-                for ( String coordinate : c.split( "\\s" ) )
+
+                Matcher matcher = GML_COORDINATE_PATTERN.matcher(c);
+                
+                while(matcher.find())
                 {
-                    builder.append( "[" + coordinate + "]," );
+                    builder.append("[" + c.subSequence( matcher.start(), matcher.end()) + "]," );
                 }
                 
                 builder.deleteCharAt( builder.lastIndexOf( "," ) );            
