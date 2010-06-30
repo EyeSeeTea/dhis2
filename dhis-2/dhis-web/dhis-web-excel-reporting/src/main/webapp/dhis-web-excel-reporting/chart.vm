@@ -1,5 +1,4 @@
-﻿
-<h3>$i18n.getString( "chart" )</h3>
+﻿<h3>$i18n.getString( "chart" )</h3>
 <br>
 <form name="chart">
 <div id="container">
@@ -246,8 +245,8 @@
 					PARENT = Ext.util.JSON.decode(r.responseText).parent.name;	
 					
 					var hasChild = Ext.util.JSON.decode(r.responseText).hasChild;
-					if( hasChild ) tabs.get(2).enable();
-					else tabs.get(2).disable();
+					if( hasChild ) tabs.get(3).enable();
+					else tabs.get(3).disable();
 					
 					var isRoot = Ext.util.JSON.decode(r.responseText).isRoot;
 					if( isRoot ) fullChartRadio.disable();
@@ -318,7 +317,7 @@
 		#if(!$!organisationUnit)			
 			disableTabs();
 		#else if(!$organisationUnit.hasChild())
-			tabs.get(2).disable();
+			tabs.get(3).disable();
 		#end
 		
 		#if($root)
