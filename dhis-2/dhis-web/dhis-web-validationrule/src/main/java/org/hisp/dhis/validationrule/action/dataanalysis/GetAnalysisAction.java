@@ -180,7 +180,7 @@ public class GetAnalysisAction
             
             log.info( "From date: " + fromDate + ", To date: " + toDate + ", Organisation unit: " + unit + ", Std dev: " + standardDeviation + ", Key: " + key );
             log.info( "Nr of data elements: " + dataElements.size() + " Nr of periods: " + periods.size() );
-        
+
             DataAnalysisService service = serviceProvider.provide( key );
             
             if ( service != null )
