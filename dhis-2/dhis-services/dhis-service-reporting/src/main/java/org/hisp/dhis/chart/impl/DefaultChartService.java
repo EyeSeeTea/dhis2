@@ -149,7 +149,10 @@ public class DefaultChartService
     {
         Chart chart = getChart( id );
         
-        chart.setRelativePeriods( periodService.reloadPeriods( chart.getRelatives().getRelativePeriods( 1, null, false ) ) );
+        if ( chart.getRelatives() != null )
+        {
+            chart.setRelativePeriods( periodService.reloadPeriods( chart.getRelatives().getRelativePeriods( 1, null, false ) ) );
+        }
         
         chart.setFormat( format );        
         chart.init();

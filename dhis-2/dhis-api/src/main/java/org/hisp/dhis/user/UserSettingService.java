@@ -41,6 +41,8 @@ public interface UserSettingService
 {
     String ID = UserSettingService.class.getName();
 
+    final String AUTO_SAVE_DATA_ENTRY_FORM = "autoSaveDataEntryForm";
+    
     /**
      * Saves the name/value pair as a user setting connected to the currently
      * logged in user.

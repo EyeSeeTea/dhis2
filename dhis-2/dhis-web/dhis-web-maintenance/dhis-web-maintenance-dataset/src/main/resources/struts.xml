@@ -110,7 +110,7 @@
     <!-- Show add DataSet form chain -->
     
     <action name="addDataSetForm"
-      class="org.hisp.dhis.dataset.action.DataElementListAction">
+      class="org.hisp.dhis.dataset.action.DataElementListFilteredByGroup">
       <result name="success" type="chain">dataElementGroupListAddChain</result>
       <param name="requiredAuthorities">F_DATASET_ADD</param>
     </action>
@@ -256,7 +256,8 @@
       class="org.hisp.dhis.dataset.action.dataentryform.ViewDataEntryFormAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-dataset/viewDataEntryForm.vm</param>
-      <param name="javascripts">javascript/dataEntryForm.js,javascript/FCK/fckeditor.js
+      <param name="javascripts">
+      javascript/FCK/fckeditor.js, javascript/dataEntryForm.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
       ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
       <param name="stylesheets">css/cde.css</param>
@@ -265,6 +266,11 @@
     <action name="saveDataEntryForm"
       class="org.hisp.dhis.dataset.action.dataentryform.SaveDataEntryFormAction">
       <result name="success" type="redirect">dataSet.action</result>
+    </action>
+    
+    <action name="autoSaveDataEntryForm"
+      class="org.hisp.dhis.dataset.action.dataentryform.AutoSaveDataEntryFormAction">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-dataset/responseSuccess.vm</result>
     </action>
     
     <action name="validateDataEntryForm"
