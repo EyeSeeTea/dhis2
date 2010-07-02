@@ -75,6 +75,8 @@ public class SearchAction
 
     private static final String KEY_DATABROWSERTABLE = "dataBrowserTableResults";
 
+    private static final String TRUE = "on";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -250,6 +252,13 @@ public class SearchAction
     public void setParent( String parent )
     {
         this.parent = parent;
+    }
+
+    private String drillDownCheckBox;
+
+    public void setDrillDownCheckBox( String drillDownCheckBox )
+    {
+        this.drillDownCheckBox = drillDownCheckBox;
     }
 
     private String orgunitid;
@@ -463,9 +472,17 @@ public class SearchAction
         else if ( searchOption.equals( "OrganisationUnit" ) )
         {
             selectedUnit = selectionManager.getSelectedOrganisationUnit();
+
+            if ( (drillDownCheckBox != null) && drillDownCheckBox.equals( TRUE ) )
+            {
+                parent = String.valueOf( selectedUnit.getId() );
+            }
+
+            // This one is used for itself
             if ( parent != null )
             {
                 Integer parentInt = Integer.parseInt( parent );
+
                 // Show DataElement values only for specified organization unit
                 dataBrowserTable = dataBrowserService.getCountDataElementsForOrgUnitInPeriod( parentInt, fromDate,
                     toDate, periodType );
@@ -530,4 +547,5 @@ public class SearchAction
             col.setName( dataBrowserService.convertDate( monthlyPeriodType, col.getName(), format ) );
         }
     }
+
 }

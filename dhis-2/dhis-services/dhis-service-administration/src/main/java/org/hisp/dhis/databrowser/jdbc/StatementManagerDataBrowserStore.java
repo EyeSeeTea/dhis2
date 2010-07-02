@@ -10,6 +10,7 @@ import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.databrowser.DataBrowserStore;
 import org.hisp.dhis.databrowser.DataBrowserTable;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,6 +29,13 @@ public class StatementManagerDataBrowserStore
 
     @Autowired
     private StatementManager statementManager;
+
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
 
     // -------------------------------------------------------------------------
     // DataBrowserStore implementation
@@ -64,7 +72,7 @@ public class StatementManagerDataBrowserStore
             table.incrementQueryCount();
 
             // Create the column names.
-            table.addColumnName( "DataSet" );
+            table.addColumnName( "drilldown_data_set" );
             table.addColumnName( "counts_of_aggregated_values" );
             table.createStructure( resultSet );
             table.addColumnToAllRows( resultSet );
@@ -109,7 +117,7 @@ public class StatementManagerDataBrowserStore
             TimeUtils.stop();
 
             table.incrementQueryCount();
-            table.addColumnName( "DataElementGroup" );
+            table.addColumnName( "drilldown_data_element_group" );
             table.addColumnName( "counts_of_aggregated_values" );
             table.createStructure( resultSet );
             table.addColumnToAllRows( resultSet );
@@ -157,7 +165,7 @@ public class StatementManagerDataBrowserStore
             TimeUtils.stop();
 
             table.incrementQueryCount();
-            table.addColumnName( "OrgUnitGroup" );
+            table.addColumnName( "drilldown_orgunit_group" );
             table.addColumnName( "counts_of_aggregated_values" );
             table.createStructure( resultSet );
             table.addColumnToAllRows( resultSet );
@@ -199,7 +207,7 @@ public class StatementManagerDataBrowserStore
             table.incrementQueryCount();
 
             table.createStructure( resultSet );
-            table.addColumnName( "DataElement" );
+            table.addColumnName( "drilldown_data_element" );
         }
         catch ( SQLException e )
         {
@@ -240,7 +248,7 @@ public class StatementManagerDataBrowserStore
             TimeUtils.stop();
 
             table.incrementQueryCount();
-            table.addColumnName( "DataElementGroup" );
+            table.addColumnName( "drilldown_data_element_group" );
             table.createStructure( resultSet );
         }
         catch ( SQLException e )
@@ -278,7 +286,7 @@ public class StatementManagerDataBrowserStore
             TimeUtils.stop();
             table.incrementQueryCount();
 
-            table.addColumnName( "DataElement" );
+            table.addColumnName( "drilldown_data_element" );
             table.createStructure( resultSet );
         }
         catch ( SQLException e )
@@ -301,10 +309,7 @@ public class StatementManagerDataBrowserStore
             StringBuffer sqlsb = new StringBuffer();
             sqlsb.append( "(SELECT o.organisationunitid, o.name AS OrganisationUnit " );
             sqlsb.append( "FROM organisationunit o " );
-            sqlsb.append( "JOIN datavalue as dv ON (o.organisationunitid = dv.sourceid) " );
             sqlsb.append( "WHERE o.parentid = '" + orgUnitParent + "' " );
-            sqlsb.append( "AND dv.periodid IN " + splitListHelper( betweenPeriods ) + " " );
-            sqlsb.append( "GROUP BY o.organisationunitid, o.name " );
             sqlsb.append( "ORDER BY o.name)" );
 
             String sql = sqlsb.toString();
@@ -318,7 +323,7 @@ public class StatementManagerDataBrowserStore
 
             table.createStructure( resultSet );
 
-            table.addColumnName( "OrganisationUnit" );
+            table.addColumnName( "drilldown_organisation_unit" );
         }
         catch ( SQLException e )
         {
@@ -352,11 +357,12 @@ public class StatementManagerDataBrowserStore
 
             TimeUtils.start();
             ResultSet resultSet = getScrollableResult( sql, holder );
+
             table.setQueryTime( TimeUtils.getMillis() );
             TimeUtils.stop();
 
             table.incrementQueryCount();
-            table.addColumnName( "DataElement" );
+            table.addColumnName( "drilldown_data_element" );
             table.createStructure( resultSet );
         }
         catch ( SQLException e )
@@ -438,8 +444,7 @@ public class StatementManagerDataBrowserStore
         {
             i++;
 
-            sqlsb
-                .append( "(SELECT de.dataelementid, de.name AS DataElement, COUNT(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
+            sqlsb.append( "(SELECT de.dataelementid, de.name AS DataElement, COUNT(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
             sqlsb.append( "FROM dataelement de JOIN datavalue dv ON (de.dataelementid = dv.dataelementid) " );
             sqlsb.append( "JOIN dataelementgroupmembers degm ON (de.dataelementid = degm.dataelementid) " );
             sqlsb.append( "JOIN period p ON (dv.periodid = p.periodid) " );
@@ -489,23 +494,17 @@ public class StatementManagerDataBrowserStore
         {
             i++;
 
-            sqlsb
-                .append( " (SELECT deg.dataelementgroupid, deg.name, COUNT(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startdate AS ColumnHeader " );
+            sqlsb.append( " (SELECT deg.dataelementgroupid, deg.name, COUNT(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startdate AS ColumnHeader " );
             sqlsb.append( "FROM dataelementgroup AS deg " );
-            sqlsb
-                .append( "INNER JOIN dataelementgroupmembers AS degm ON deg.dataelementgroupid = degm.dataelementgroupid " );
+            sqlsb.append( "INNER JOIN dataelementgroupmembers AS degm ON deg.dataelementgroupid = degm.dataelementgroupid " );
             sqlsb.append( "INNER JOIN datavalue AS dv ON degm.dataelementid = dv.dataelementid " );
             sqlsb.append( "INNER JOIN period AS p ON dv.periodid = p.periodid " );
             sqlsb.append( "INNER JOIN organisationunit AS ou ON dv.sourceid = ou.organisationunitid " );
             sqlsb.append( "INNER JOIN orgunitgroupmembers AS ougm ON ou.organisationunitid = ougm.organisationunitid " );
-            sqlsb
-                .append( "WHERE p.periodid =  '" + periodid + "' AND ougm.orgunitgroupid =  '" + orgUnitGroupId + "' " );
+            sqlsb.append( "WHERE p.periodid =  '" + periodid + "' AND ougm.orgunitgroupid =  '" + orgUnitGroupId + "' " );
             sqlsb.append( "GROUP BY deg.dataelementgroupid,deg.name,p.periodid,p.startdate) " );
 
-            if ( i == betweenPeriodIds.size() )
-                sqlsb.append( "ORDER BY PeriodId " );
-            else
-                sqlsb.append( "\n UNION \n" );
+            sqlsb.append( i == betweenPeriodIds.size() ? "ORDER BY PeriodId " : "\n UNION \n" );            
         }
 
         try
@@ -518,7 +517,6 @@ public class StatementManagerDataBrowserStore
             table.incrementQueryCount();
 
             numResults = table.addColumnToAllRows( resultSet );
-
         }
         catch ( SQLException e )
         {
@@ -538,33 +536,25 @@ public class StatementManagerDataBrowserStore
         StatementHolder holder = statementManager.getHolder();
 
         Integer numResults = 0;
-        StringBuffer sqlsb = new StringBuffer();
+        StringBuffer sqlsbDescentdants = new StringBuffer();
 
-        int i = 0;
-        for ( Integer periodid : betweenPeriodIds )
-        {
-            i++;
+        dropView( "view_count_descentdants" );
+        
+        sqlsbDescentdants.append( "CREATE VIEW view_count_descentdants AS " );
+        setUpQueryForDrillDownDescendants( sqlsbDescentdants, orgUnitParent, betweenPeriodIds );
 
-            sqlsb
-                .append( "(SELECT o.organisationunitid, o.name AS OrganisationUnit, COUNT(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
-            sqlsb.append( "FROM organisationunit o JOIN datavalue dv ON (o.organisationunitid = dv.sourceid) " );
-            sqlsb.append( "JOIN period p ON (dv.periodid = p.periodid) " );
-            sqlsb.append( "WHERE o.parentid = '" + orgUnitParent + "' AND dv.periodid = '" + periodid + "' " );
-            sqlsb.append( "GROUP BY o.organisationunitid, o.name, p.periodid, p.startDate) " );
-
-            if ( i == betweenPeriodIds.size() )
-                sqlsb.append( "ORDER BY PeriodId " );
-            else
-                sqlsb.append( " UNION " );
-        }
-
+        TimeUtils.start();
+        
         try
         {
-            TimeUtils.start();
-            ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            holder.getStatement().executeUpdate( sqlsbDescentdants.toString() );
 
+            setUpQueryForDrillDownViewTable( sqlsbDescentdants );
+
+            ResultSet resultSet = getScrollableResult( sqlsbDescentdants.toString(), holder );
+
+            table.addQueryTime( TimeUtils.getMillis() );
+            
             table.incrementQueryCount();
 
             numResults = table.addColumnToAllRows( resultSet );
@@ -579,6 +569,8 @@ public class StatementManagerDataBrowserStore
             holder.close();
         }
 
+        TimeUtils.stop();
+        
         return numResults;
     }
 
@@ -595,8 +587,7 @@ public class StatementManagerDataBrowserStore
         {
             i++;
 
-            sqlsb
-                .append( "(SELECT de.dataelementid, de.name AS DataElementGroup, Count(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
+            sqlsb.append( "(SELECT de.dataelementid, de.name AS DataElement, Count(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
             sqlsb.append( "FROM dataelement AS de " );
             sqlsb.append( "INNER JOIN datavalue AS dv ON (de.dataelementid = dv.dataelementid) " );
             sqlsb.append( "INNER JOIN datasetmembers AS dsm ON (de.dataelementid = dsm.dataelementid) " );
@@ -675,11 +666,122 @@ public class StatementManagerDataBrowserStore
     private ResultSet getScrollableResult( String sql, StatementHolder holder )
         throws SQLException
     {
-        // The current code for building the DataBrowserTable requires that a
-        // scrollable ResultSet must be used for PostgreSQL.
         Connection con = holder.getConnection();
         Statement stm = con.createStatement( ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY );
         stm.execute( sql );
         return stm.getResultSet();
+    }
+
+    private void setUpQueryForDrillDownDescendants( StringBuffer sb, Integer orgUnitSelected,
+        List<Integer> betweenPeriodIds )
+    {
+        int i = 0;
+        int loopSize = betweenPeriodIds.size();
+        int curLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnitSelected );
+        int maxLevel = organisationUnitService.getNumberOfOrganisationalLevels();
+        int diffLevel = maxLevel - curLevel;
+        String orgIndex = this.getTableIndexByDiffLevel( diffLevel );
+
+        for ( Integer periodid : betweenPeriodIds )
+        {
+            i++;
+
+            /**
+             * The current organisation unit
+             */
+            sb.append( "SELECT DISTINCT o.organisationunitid AS parentid, o.name AS OrganisationUnit, COUNT(value) as countdv_descendants, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
+            sb.append( "FROM OrganisationUnit o " );
+            sb.append( "JOIN DataValue dv ON ( dv.sourceid = o.organisationunitid ) " );
+            sb.append( "JOIN Period p ON ( p.periodid = dv.periodid ) " );
+            sb.append( "WHERE o.parentid = '" + orgUnitSelected + "' " );
+            sb.append( "AND dv.periodid = '" + periodid + "' " );
+            sb.append( "GROUP BY o.organisationunitid, OrganisationUnit, p.periodid, p.startDate " );
+            sb.append( "UNION " );
+
+            /**
+             * All descendant levels of selected organisation unit
+             */
+            sb.append( "SELECT DISTINCT ou" + orgIndex + ".organisationunitid AS parentid, ou"  + orgIndex + ".name AS OrganisationUnit, COUNT(value) as countdv_descendants, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
+            sb.append( "FROM DataValue dv " );
+            sb.append( "JOIN OrganisationUnit ou ON ( ou.organisationunitid = dv.sourceid ) " );
+            this.setUpQueryForJOINTable( sb, diffLevel );
+            sb.append( "JOIN Period p ON ( p.periodid = dv.periodid ) " );
+            sb.append( "WHERE dv.periodid = '" + periodid + "' " );
+            sb.append( "AND dv.sourceid IN " );
+            sb.append( "( " );
+            sb.append( this.setUpQueryGetDescendants( curLevel, maxLevel, orgUnitSelected ) );
+            sb.append( " ) " );
+            sb.append( "GROUP BY ou" + orgIndex + ".organisationunitid, OrganisationUnit, p.periodid, p.startDate " );
+
+            if ( i < loopSize )
+            {
+                sb.append( "UNION " );
+            }
+        }
+    }
+
+    private String setUpQueryGetDescendants( int curLevel, int maxLevel, Integer orgUnitSelected )
+    {
+        int j = curLevel;
+
+        String oldSQL = "SELECT DISTINCT idlevel" + (j + 1) + " FROM OrgunitStructure os WHERE os.idlevel" + (j)
+            + " = '" + orgUnitSelected + "'";
+
+        for ( j++; j < (maxLevel); j++ )
+        {
+            oldSQL = "SELECT DISTINCT idlevel" + (j + 1) + " as descendant FROM OrgunitStructure os WHERE idlevel"
+                + (j) + " IN ( " + oldSQL + " ) ";
+        }
+
+        return oldSQL;
+    }
+
+    private void setUpQueryForDrillDownViewTable( StringBuffer sb )
+    {
+        sb.delete( 0, sb.capacity() );
+
+        sb.append( "SELECT parentid, OrganisationUnit, sum(countdv_descendants) AS counts_of_aggregated_values, periodid, columnheader " );
+        sb.append( "FROM view_count_descentdants " );
+        sb.append( "GROUP BY parentid, OrganisationUnit, periodid, columnheader " );
+        sb.append( "ORDER BY periodid; " );
+    }
+
+    private void setUpQueryForJOINTable( StringBuffer sb, int diffLevel )
+    {
+        for ( int i = 1; i < diffLevel; i++ )
+        {
+            sb.append( "JOIN OrganisationUnit ou" + (i) + " ON ( ou" + (((i == 1) && (i != 0)) ? "" : (i - 1))
+                + ".parentid = ou" + (i) + ".organisationunitid ) " );
+        }
+    }
+
+    private String getTableIndexByDiffLevel( int diffLevel )
+    {
+        if ( diffLevel == 0 )
+        {
+            return "";
+        }
+
+        int index = diffLevel - 1;
+
+        return (index == 0) ? "" : index + "";
+    }
+
+    public void dropView( String view )
+    {
+        final StatementHolder holder = statementManager.getHolder();
+        
+        try
+        {
+            holder.getStatement().executeUpdate( "DROP VIEW IF EXISTS " + view );
+        }
+        catch ( SQLException ex )
+        {
+            throw new RuntimeException( "Failed to drop view: " + view, ex );
+        }
+        finally
+        {
+            holder.close();
+        }
     }
 }
