@@ -98,6 +98,7 @@
   </table>
   <input type="hidden" name="dataSetIdField" id="dataSetIdField" value="$dataSet.id" />
 </form>
+
 <script>
 	var i18n_save_success = '$encoder.jsEscape( $i18n.getString( "save_success" ) , "'" )';
 	
@@ -115,7 +116,7 @@
 	function timedCount()
 	{
 		validateDataEntryForm();
-		t=setTimeout("timedCount()", 300000);//300000 -> 5 mins
+		t=setTimeout("timedCount()", 20000);//1000 -> 1s
 		byId( 'message' ).style.display = 'none';
 	}
 	
