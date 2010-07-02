@@ -28,6 +28,7 @@ package org.hisp.dhis.importexport.xml;
  */
 
 import java.io.InputStream;
+import org.hisp.dhis.importexport.ImportException;
 
 /**
  * 
@@ -45,5 +46,5 @@ public interface XSLTLocator
      * 
      */
     public InputStream getTransformerByTag( String identifier )
-        throws Exception;
+        throws ImportException;
 }

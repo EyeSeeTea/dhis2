@@ -123,8 +123,7 @@ public class DefaultImportService
 
             } catch ( Exception ex )
             {
-                log.info( ex );
-                throw new ImportException( "Failed to import data in zip package" );
+                throw new ImportException( "Failed to import data in zip package", ex );
             } finally
             {
                 if (tempFile != null) {
@@ -144,8 +143,7 @@ public class DefaultImportService
                     xmlDataStream = new BufferedInputStream( new GZIPInputStream( bufin ) );
                 } catch ( IOException ex )
                 {
-                    log.info( ex );
-                    throw new ImportException("Corrupt gzip stream");
+                    throw new ImportException("Corrupt gzip stream", ex);
                 }
             } else
             {
@@ -153,7 +151,7 @@ public class DefaultImportService
                 xmlDataStream = bufin;
             }
 
-            XMLReader dxfReader = preConverter.transform( xmlDataStream, params, state );
+            XMLReader dxfReader = preConverter.processStream( xmlDataStream, params, state );
 
             converter.read( dxfReader, params, state );
 
