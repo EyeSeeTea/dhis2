@@ -170,13 +170,11 @@ mapfish.GeoStat = OpenLayers.Class({
             selectFeature.activate();
         }
 */        
-        
         this.setUrl(this.url);
         this.legendDiv = Ext.get(options.legendDiv);
     },
  
     setUrl: function(url) {
-    
         // get features from web service if a url is specified
         this.url = url;
         if (this.url) {

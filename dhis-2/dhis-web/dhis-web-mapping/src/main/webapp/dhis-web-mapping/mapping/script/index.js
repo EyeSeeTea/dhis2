@@ -4032,44 +4032,46 @@ function getChoroplethData() {
 	MASK.show();
     
     var l = MAP.getLayersByName('Polygon layer')[0];
+    
     if (LABELS[thematicMap]) {
         toggleFeatureLabelsPolygons(false, l);
     }
-    FEATURE[thematicMap] = l.features;    
+    
+    FEATURE[thematicMap] = l.features;
 	
     var indicatorId = Ext.getCmp('indicator_cb').getValue();
 	var dataElementId = Ext.getCmp('dataelement_cb').getValue();
     var periodId = Ext.getCmp('period_cb').getValue();
     var mapLayerPath = MAPDATA[thematicMap].mapLayerPath;
-	var url;
+	var dataUrl;
 	var params = new Object();
 	params.periodId = periodId;
 	
 	if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
 		params.mapLayerPath = mapLayerPath;
 		if (VALUETYPE.polygon == map_value_type_indicator) {
-			url = 'getIndicatorMapValuesByMap';
+			dataUrl = 'getIndicatorMapValuesByMap';
 			params.indicatorId = indicatorId;
 		}
 		else if (VALUETYPE.polygon == map_value_type_dataelement) {
-			url = 'getDataMapValuesByMap';
+			dataUrl = 'getDataMapValuesByMap';
 			params.dataElementId = dataElementId;
 		}
 	}
 	else {
-		params.level = mapLayerPath;
+		params.level = URL;
 		if (VALUETYPE.polygon == map_value_type_indicator) {
-			url = 'getIndicatorMapValuesByLevel';
+			dataUrl = 'getIndicatorMapValuesByLevel';
 			params.indicatorId = indicatorId;
 		}
 		else if (VALUETYPE.polygon == map_value_type_dataelement) {
-			url = 'getDataMapValuesByLevel';
+			dataUrl = 'getDataMapValuesByLevel';
 			params.dataElementId = dataElementId;
 		}
 	}
 
     Ext.Ajax.request({
-        url: path + url + type,
+        url: path + dataUrl + type,
         method: 'POST',
         params: params,
         success: function(r) {
@@ -4157,35 +4159,35 @@ function getSymbolData() {
 	var dataElementId = Ext.getCmp('dataelement_cb2').getValue();
     var periodId = Ext.getCmp('period_cb2').getValue();
     var mapLayerPath = MAPDATA[thematicMap2].mapLayerPath;
-	var url;
+	var dataUrl;
 	var params = new Object();
 	params.periodId = periodId;
 	
 	if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
 		params.mapLayerPath = mapLayerPath;
 		if (VALUETYPE.point == map_value_type_indicator) {
-			url = 'getIndicatorMapValuesByMap';
+			dataUrl = 'getIndicatorMapValuesByMap';
 			params.indicatorId = indicatorId;
 		}
 		else if (VALUETYPE.point == map_value_type_dataelement) {
-			url = 'getDataMapValuesByMap';
+			dataUrl = 'getDataMapValuesByMap';
 			params.dataElementId = dataElementId;
 		}
 	}
 	else {
-		params.level = mapLayerPath;
+		params.level = URL;
 		if (VALUETYPE.point == map_value_type_indicator) {
-			url = 'getIndicatorMapValuesByLevel';
+			dataUrl = 'getIndicatorMapValuesByLevel';
 			params.indicatorId = indicatorId;
 		}
 		else if (VALUETYPE.point == map_value_type_dataelement) {
-			url = 'getDataMapValuesByLevel';
+			dataUrl = 'getDataMapValuesByLevel';
 			params.dataElementId = dataElementId;
 		}
 	}
 
     Ext.Ajax.request({
-        url: path + url + type,
+        url: path + dataUrl + type,
         method: 'POST',
         params: params,
         success: function(r) {
