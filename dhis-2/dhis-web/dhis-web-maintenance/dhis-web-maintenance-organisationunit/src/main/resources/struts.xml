@@ -60,7 +60,7 @@
 					../dhis-web-commons/util/validate/jquery.validate.js,
 					../dhis-web-commons/util/jquery.metadata.js,
 					../dhis-web-commons/util/validate/additional-methods.js,
-					../dhis-web-commons/util/validate/messages_locale.js
+					../dhis-web-commons/validationMessages.action
 			</param>
 			<param name="requiredAuthorities">F_ORGANISATIONUNIT_ADD</param>
 		</action>
@@ -97,7 +97,7 @@
 					../dhis-web-commons/util/validate/jquery.validate.js,
 					../dhis-web-commons/util/jquery.metadata.js,
 					../dhis-web-commons/util/validate/additional-methods.js,
-					../dhis-web-commons/util/validate/messages_locale.js
+					../dhis-web-commons/validationMessages.action
 			</param>
 			<param name="requiredAuthorities">F_ORGANISATIONUNIT_UPDATE</param>
 		</action>
@@ -156,7 +156,7 @@
 			<param name="page">/dhis-web-maintenance-organisationunit/addOrganisationUnitGroupForm.vm</param>
 			<param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/organisationUnitGroup.js
 			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-     		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+     		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
 			<param name="requiredAuthorities">F_ORGUNITGROUP_ADD</param>
 		</action>		
 
@@ -179,7 +179,7 @@
 			<param name="page">/dhis-web-maintenance-organisationunit/updateOrganisationUnitGroupForm.vm</param>
 			<param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/organisationUnitGroup.js
 			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>			
+      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>			
 		</action>
 
 		<action name="updateOrganisationUnitGroup"
@@ -275,7 +275,7 @@
 			<param name="page">/dhis-web-maintenance-organisationunit/addOrganisationUnitGroupSetForm.vm</param>
 			<param name="javascripts">javascript/organisationUnitGroupSet.js
 			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
 			<param name="requiredAuthorities">F_ORGUNITGROUPSET_ADD</param>
 		</action>
 
@@ -285,7 +285,7 @@
 			<param name="page">/dhis-web-maintenance-organisationunit/updateOrganisationUnitGroupSetForm.vm</param>
 			<param name="javascripts">javascript/organisationUnitGroupSet.js
 			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
 			<param name="requiredAuthorities">F_ORGUNITGROUPSET_UPDATE</param>
 		</action>
 
@@ -358,7 +358,7 @@
 			<param name="page">/dhis-web-maintenance-organisationunit/saveOrganisationUnitLevelForm.vm</param>
 			<param name="menu">/dhis-web-maintenance-organisationunit/menu.vm</param>
 			<param name="javascripts">../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js
+      		,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action
       		</param>
 		</action>
 

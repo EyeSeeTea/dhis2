@@ -429,3 +429,8 @@ function getInt(str,i,minlength,maxlength) {
 		}
 	return null;
 }
+
+function validatorFormat( text )
+{
+	return $.validator.format( text );
+}

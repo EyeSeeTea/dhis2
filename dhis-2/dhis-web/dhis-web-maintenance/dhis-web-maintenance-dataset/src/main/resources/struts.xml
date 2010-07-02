@@ -49,7 +49,7 @@
       <result name="success" type="chain">section</result>
       <param name="javascripts">javascript/section.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
     </action>
     
      <action name="validateSection"
@@ -74,7 +74,7 @@
       <param name="menu">/dhis-web-maintenance-dataset/menu.vm</param>
       <param name="javascripts">javascript/dataSet.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
     </action>
     
     <action name="updateSection"
@@ -127,7 +127,7 @@
       <param name="page">/dhis-web-maintenance-dataset/addDataSet.vm</param>
       <param name="javascripts">javascript/shortName.js,javascript/dataSet.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
       <param name="requiredAuthorities">F_DATASET_ADD</param>
     </action>
     
@@ -157,7 +157,7 @@
       <param name="page">/dhis-web-maintenance-dataset/editDataSet.vm</param>
       <param name="javascripts">javascript/dataSet.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
       <param name="requiredAuthorities">F_DATASET_UPDATE</param>
     </action>
     
@@ -259,7 +259,7 @@
       <param name="javascripts">
       javascript/FCK/fckeditor.js, javascript/dataEntryForm.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
       <param name="stylesheets">css/cde.css</param>
     </action>
     
@@ -333,7 +333,7 @@
 	  <param name="menu">/dhis-web-maintenance-dataset/menu.vm</param>
 	  <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/shortName.js,javascript/dataSet.js
       ,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js,javascript/multiDataSet.js
-      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/util/validate/messages_locale.js</param>
+      ,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
 	</action>
 	
 	<action name="saveAssignMultiDataSetForOrgunit"
