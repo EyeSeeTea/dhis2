@@ -46,7 +46,7 @@
 				<option value ="null">[ $i18n.getString( "select_mode" ) ]</option>
 				<option value ="DataSet">$i18n.getString( "data_sets" )</option>
 				<option value ="DataElementGroup">$i18n.getString( "data_element_groups" )</option>
-				<option value ="OrganisationUnitGroup">$i18n.getString( "Organisation unit groups" )</option>
+				<option value ="OrganisationUnitGroup">$i18n.getString( "organisation_unit_groups" )</option>
 				<option value ="OrganisationUnit">$i18n.getString( "organisation_units" )</option>
 			</select>
 		</td>
@@ -78,7 +78,7 @@
 <br/>
 
 <div>
-	<input type="submit" value="$i18n.getString( 'browser' )" />
+	<input type="submit" value="$i18n.getString( 'browse' )" />
 </div>
 
 </form>
