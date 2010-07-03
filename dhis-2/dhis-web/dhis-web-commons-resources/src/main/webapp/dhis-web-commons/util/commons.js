@@ -399,7 +399,7 @@ function setMessage( message )
  */
 function setWaitMessage( message )
 {
-	setMessage( message + "&nbsp;&nbsp;&nbsp;<img src='../../images/ajax-loader-bar-small.gif'>" );
+	setMessage( message + "&nbsp;&nbsp;&nbsp;<img src='../images/ajax-loader-bar-small.gif'>" );
 }
 
 /**
@@ -438,7 +438,7 @@ function updateHeaderMessage( message )
  */
 function setHeaderWaitMessage( message )
 {
-	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../../images/ajax-loader-bar-small.gif'>" );
+	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../images/ajax-loader-bar-small.gif'>" );
     $( 'div#headerMessage' ).slideDown();
 }
 
@@ -449,7 +449,7 @@ function setHeaderWaitMessage( message )
  */
 function updateHeaderWaitMessage( message )
 {
-	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../../images/ajax-loader-bar-small.gif'>" );
+	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../images/ajax-loader-bar-small.gif'>" );
 }
 
 /**
