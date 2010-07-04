@@ -73,7 +73,7 @@ public class SumBoolDataElementAggregation
         Collection<Integer> periods = aggregationCache.getPeriodIds( startDate, endDate );
 
         Collection<DataValue> values = aggregationStore.getDataValues( hierarchy.getChildren( organisationUnitId ), dataElementId, optionComboId, periods );
-
+        
         return values;
     }
 

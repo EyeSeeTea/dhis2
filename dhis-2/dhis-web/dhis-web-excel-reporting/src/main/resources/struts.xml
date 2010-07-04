@@ -1328,7 +1328,7 @@
 			<param name="page">/dhis-web-excel-reporting/chart.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
 			<param name="javascripts">
-				../dhis-web-commons/ouwt/ouwt.js,
+				../dhis-web-commons/ouwt/ouwt.js,				
 				ext/adapter/ext/ext-base.js,
 				ext/ext-all.js,
 				ext/ux/MultiSelect.js,
@@ -1367,11 +1367,25 @@
 				/dhis-web-excel-reporting/jsonPeriodTypes.vm
 			</result>
 		</action>
+		
+		<action name="getOrganisationUnitGroup"
+			class="org.hisp.dhis.reportexcel.chart.action.GetPeriodTypesAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonPeriodTypes.vm
+			</result>
+		</action>
 
 		<action name="getOrganisationUnitAndParent"
 			class="org.hisp.dhis.reportexcel.chart.action.GetOrganisationUnitAndParentAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-excel-reporting/jsonOrganisationUnitAndParentAction.vm
+			</result>
+		</action>
+		
+		<action name="getChildrenOrganisationUnit"
+			class="org.hisp.dhis.reportexcel.chart.action.GetChildrenOrganisationUnitAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonOrganisationUnits.vm
 			</result>
 		</action>
 
@@ -1400,6 +1414,48 @@
 			class="org.hisp.dhis.reportexcel.chart.action.GeneratePeriodsInChartAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-excel-reporting/jsonChartValues.vm
+			</result>
+		</action>
+		
+		<action name="generateOrganisationDEChart"
+			class="org.hisp.dhis.reportexcel.chart.action.GenerateOrganisationDEChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonChartValues.vm
+			</result>
+		</action>
+		
+		<action name="generateOrganisationInChart"
+			class="org.hisp.dhis.reportexcel.chart.action.GenerateOrganisationInChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonChartValues.vm
+			</result>
+		</action>
+		
+		<action name="bookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.BookmarkChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonExtBookmarkChart.vm
+			</result>
+		</action>
+		
+		<action name="deleteBookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.DeleleBookmarkChartAction">
+			<result name="success" type="velocity-json">
+				../dhis-web-commons/ajax/jsonResponseSuccess.vm
+			</result>
+		</action>
+		
+		<action name="getBookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.GetBookmartChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonExtBookmarkChart.vm
+			</result>
+		</action>
+		
+		<action name="getAllBookmarkChart"
+			class="org.hisp.dhis.reportexcel.chart.action.GetAllBookmarkChartAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/jsonExtBookmarkCharts.vm
 			</result>
 		</action>
 

@@ -83,6 +83,14 @@ public class Chart
     private RelativePeriods relatives;
 
     // -------------------------------------------------------------------------
+    // Transient properties
+    // -------------------------------------------------------------------------
+
+    private List<Period> relativePeriods = new ArrayList<Period>();
+    
+    private List<Period> allPeriods = new ArrayList<Period>();
+    
+    // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
@@ -94,7 +102,13 @@ public class Chart
     {
         this.title = title;
     }
-
+    
+    public void init()
+    {
+        allPeriods.addAll( periods );
+        allPeriods.addAll( relativePeriods );        
+    }
+    
     // -------------------------------------------------------------------------
     // hashCode, equals, toString
     // -------------------------------------------------------------------------
@@ -325,5 +339,25 @@ public class Chart
     public void setRelatives( RelativePeriods relatives )
     {
         this.relatives = relatives;
+    }
+
+    public List<Period> getRelativePeriods()
+    {
+        return relativePeriods;
+    }
+
+    public void setRelativePeriods( List<Period> relativePeriods )
+    {
+        this.relativePeriods = relativePeriods;
+    }
+
+    public List<Period> getAllPeriods()
+    {
+        return allPeriods;
+    }
+
+    public void setAllPeriods( List<Period> allPeriods )
+    {
+        this.allPeriods = allPeriods;
     }
 }

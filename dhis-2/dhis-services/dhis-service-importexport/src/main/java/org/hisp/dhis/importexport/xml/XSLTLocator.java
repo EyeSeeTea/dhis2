@@ -1,11 +1,5 @@
 package org.hisp.dhis.importexport.xml;
 
-
-import java.io.InputStream;
-import javax.xml.namespace.QName;
-import org.hisp.dhis.external.location.LocationManager;
-import org.w3c.dom.Node;
-
 /*
  * Copyright (c) 2004-2005, University of Oslo
  * All rights reserved.
@@ -33,20 +27,24 @@ import org.w3c.dom.Node;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.InputStream;
+import org.hisp.dhis.importexport.ImportException;
+
 /**
- *
+ * 
  * @author bobj
  * @version created 30-Apr-2010
  */
-public interface XSLTLocator {
-
+public interface XSLTLocator
+{
     /**
      * Look up an xslt stylesheet on the basis of a known identifier
-     *
+     * 
      * @param identifier
-     * @return xslt stylesheet opened in InputStream or null if no stylesheet found
-     *
+     * @return xslt stylesheet opened in InputStream or null if no stylesheet
+     *         found
+     * 
      */
-     public InputStream getTransformerByTag(String identifier) throws Exception;
-
+    public InputStream getTransformerByTag( String identifier )
+        throws ImportException;
 }

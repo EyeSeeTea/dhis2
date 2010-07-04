@@ -1,5 +1,3 @@
-package org.hisp.dhis.jdbc.batchhandler;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,65 +25,49 @@ package org.hisp.dhis.jdbc.batchhandler;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+package org.hisp.dhis.settings.action.user;
 
-import org.amplecode.quick.JdbcConfiguration;
-import org.amplecode.quick.batchhandler.AbstractBatchHandler;
+import org.hisp.dhis.user.UserSettingService;
+
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * @author Lars Helge Overland
- * @version $Id: DataValueCrossTabBatchHandler.java 5074 2008-05-02 11:51:09Z larshelg $
+ * @author Chau Thu Tran
+ * @version GetAvailableAutoSaveDataEntryFormAction.java Jun 23, 2010 3:49:11 PM
  */
-public class DataValueCrossTabBatchHandler
-    extends AbstractBatchHandler<Object>
+public class SetAutoSaveDataEntryFormAction
+    extends ActionSupport
 {
     // -------------------------------------------------------------------------
-    // Constructor
+    // Dependency
     // -------------------------------------------------------------------------
- 
-    public DataValueCrossTabBatchHandler( JdbcConfiguration configuration )
+
+    private UserSettingService userSettingService;
+
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        super( configuration, true, true );
+        this.userSettingService = userSettingService;
     }
 
     // -------------------------------------------------------------------------
-    // AbstractBatchHandler implementation
+    // Output
     // -------------------------------------------------------------------------
 
-    protected void setTableName()
+    private Boolean autoSave;
+
+    public void setAutoSave( Boolean autoSave )
     {
-        statementBuilder.setTableName( "datavaluecrosstab" );
+        this.autoSave = autoSave;
     }
-    
-    @Override
-    protected String getInsertStatementOpening()
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute() throws Exception
     {
-        return statementBuilder.getNoColumnInsertStatementOpening();
-    }
-    
-    protected void setUniqueColumns()
-    {
-        // Cannot be known
-    }
-    
-    protected void setUniqueValues( Object object )
-    {
-        throw new UnsupportedOperationException();
-    }
-    
-    protected void setColumns()
-    {
-        // Columns should not be set
-    }
-    
-    @SuppressWarnings( "unchecked" )
-    protected void setValues( Object object )
-    {
-        List<String> values = (List<String>) object;
-        
-        for ( String value : values )
-        {
-            statementBuilder.setValue( value );
-        }
+        userSettingService.saveUserSetting( UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM, autoSave );
+
+        return SUCCESS;
     }
 }

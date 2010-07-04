@@ -49,8 +49,6 @@ public abstract class AbstractDataElementAggregation
 
     protected final String TRUE = "true";
 
-    protected final String FALSE = "false";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -122,11 +120,7 @@ public abstract class AbstractDataElementAggregation
         Collection<DataValue> dataValues = getDataValues( dataElementId, optionComboId, organisationUnitId,
             aggregationStartDate, aggregationEndDate );
 
-        double[] fraction = getAggregateOfValues( dataValues, aggregationStartDate, aggregationEndDate,
+        return getAggregateOfValues( dataValues, aggregationStartDate, aggregationEndDate,
             aggregationStartDate, aggregationEndDate );
-
-        double sums[] = { fraction[0], fraction[1] };
-
-        return sums;
     }    
 }

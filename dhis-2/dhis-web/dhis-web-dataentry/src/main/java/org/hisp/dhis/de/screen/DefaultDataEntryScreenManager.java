@@ -338,7 +338,7 @@ public class DefaultDataEntryScreenManager
 
                 if ( dataElement == null )
                 {
-                    log.info( "Data Element does not exist in system : " + dataElementId );
+                    log.error( "Data Element does not exist in system : " + dataElementId );
                     
                     return "Data Element does not exist in system : " + dataElementId;
                 }
@@ -620,7 +620,11 @@ public class DefaultDataEntryScreenManager
 
                 if ( dataElement == null )
                 {
-                    throw new RuntimeException( "Data Element Id: " + dataElementId + " not found" );
+                    //throw new RuntimeException( "Data Element Id: " + dataElementId + " not found" );
+                	
+                	log.error( "Data Element Id: " + dataElementId + " not found in this data set" );
+                    
+                    return "Data Element Id :" + dataElementId + " not found in this data set";
                 }
 
                 // -------------------------------------------------------------
@@ -893,6 +897,8 @@ public class DefaultDataEntryScreenManager
 
         for ( DataElement element : dataSet.getDataElements() )
         {
+        	log.info( "Data Element in data set: " + element.getId() );
+        	
             map.put( element.getId(), element );
         }
 

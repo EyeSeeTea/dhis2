@@ -1,4 +1,4 @@
-package org.hisp.dhis.period;
+package org.hisp.dhis.reportexcel.chart.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,63 +26,60 @@ package org.hisp.dhis.period;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import org.hisp.dhis.reportexcel.chart.ExtBookmarkChart;
+import org.hisp.dhis.reportexcel.chart.ExtBookmarkChartService;
 
-import java.util.Calendar;
-import java.util.Date;
+import com.opensymphony.xwork2.Action;
 
 /**
- * PeriodType for relative periods. Relative periods means periods relative to
- * a date, eg. current month, last three months, last six months, or so far this year.
- * This month will typically be used for reporting purposes and not for data entry.
- * The createPeriod-method will return the current month. The createPeriod( Date )
- * method will return the month in which the date resides.
+ * @author Tran Thanh Tri
  * 
- * @author Lars Helge Overland
- * @version $Id$
+ *         GetBookmartChartAction.java Jun 23, 2010 2:51:57 PM
  */
-public class RelativePeriodType
-    extends PeriodType
+public class GetBookmartChartAction
+    implements Action
 {
-    /**
-     * The name of the RelativePeriodType, which is "Relative".
-     */
-    public static final String NAME = "Relative";
 
-    // -------------------------------------------------------------------------
-    // PeriodType functionality
-    // -------------------------------------------------------------------------
+    // -------------------------------------------
+    // Dependency
+    // -------------------------------------------
 
-    @Override
-    public String getName()
+    private ExtBookmarkChartService extBookmarkChartService;
+
+    public void setExtBookmarkChartService( ExtBookmarkChartService extBookmarkChartService )
     {
-        return NAME;
-    }
-    
-    @Override
-    public Period createPeriod()
-    {
-        return createPeriod( createCalendarInstance().getTime() );
+        this.extBookmarkChartService = extBookmarkChartService;
     }
 
-    @Override
-    public Period createPeriod( Date date )
+    // -------------------------------------------
+    // Input
+    // -------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        Calendar cal = createCalendarInstance( date );
-        
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMinimum( Calendar.DAY_OF_MONTH ) );
-        
-        Date startDate = cal.getTime();
-        
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-        
-        Date endDate = cal.getTime();
-        
-        return new Period( this, startDate, endDate );
+        this.id = id;
+    }
+
+    // -------------------------------------------
+    // Output
+    // -------------------------------------------
+
+    private ExtBookmarkChart extBookmarkChart;
+
+    public ExtBookmarkChart getExtBookmarkChart()
+    {
+        return extBookmarkChart;
     }
 
     @Override
-    public int getFrequencyOrder()
+    public String execute()
+        throws Exception
     {
-        return 0;
+        extBookmarkChart = extBookmarkChartService.getExtBookmarkChart( id );        
+        
+        return SUCCESS;
     }
+
 }

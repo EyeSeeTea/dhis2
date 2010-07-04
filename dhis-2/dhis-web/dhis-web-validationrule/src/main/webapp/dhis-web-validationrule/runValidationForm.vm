@@ -1,7 +1,7 @@
 
 <h3>$encoder.htmlEncode( $i18n.getString( "run_validation" ) ) #openHelp( "validationRuleAnalysis" )</h3>
 
-<form id="runValidationForm" class="form" action="runValidationAction.action" method="post" onsubmit="return validateRunValidation()">
+<div id="analysisInput">
 
 <table>
     <tr>
@@ -37,29 +37,18 @@
     	<td style="height:10px" colspan="2"></td>
     </tr>
     <tr>
-        <td>$i18n.getString( 'select_organisation_unit' ):</td>
-        <td>
-    	    <select id="includeChildren" name="includeChildren" style="width:20em">
-                <option value="true" selected="selected">$i18n.getString( "organisation_unit_with_children" )</option>
-                <option value="false">$i18n.getString( "organisation_unit_only" )</option>
-            </select>
-        </td>
-    </tr>
-    <tr>
         <td colspan="2">
     		<div id="selectionTree" style="width:35em;height:350px;overflow:auto;border:1px solid #cccccc"></div>
     	</td>
     </tr>
     <tr>
     	<td>
-    		<input type="submit" value="$i18n.getString( 'validate' )" style="width:10em">
+    		<input type="button" value="$i18n.getString( 'validate' )" style="width:10em" onclick="validateRunValidation()">
     	</td>
     	<td></td>
     </tr>
 </table>
 	
-</form>
-
 <span id="message"></span>
 
 <script type="text/javascript">
@@ -71,3 +60,7 @@
 		datePickerInRange( 'startDate' , 'endDate' );	
 	});
 </script>
+
+</div>
+
+<div id="analysisResult"></div>

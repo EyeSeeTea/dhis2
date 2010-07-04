@@ -149,7 +149,13 @@ public class DefaultChartService
     {
         Chart chart = getChart( id );
         
-        chart.setFormat( format );
+        if ( chart.getRelatives() != null )
+        {
+            chart.setRelativePeriods( periodService.reloadPeriods( chart.getRelatives().getRelativePeriods( 1, null, false ) ) );
+        }
+        
+        chart.setFormat( format );        
+        chart.init();
         
         return getJFreeChart( chart, true );
     }
@@ -171,6 +177,8 @@ public class DefaultChartService
         chart.setPeriods( periods );
         chart.setOrganisationUnits( organisationUnits );
         chart.setFormat( format );
+        
+        chart.init();
         
         return getJFreeChart( chart, false );
     }
@@ -423,7 +431,7 @@ public class DefaultChartService
         
         if ( chart != null )
         {
-            Period selectedPeriod = chart.getPeriods().get( 0 );
+            Period selectedPeriod = chart.getAllPeriods().get( 0 );
             OrganisationUnit selectedOrganisationUnit = chart.getOrganisationUnits().get( 0 );
             
             for ( Indicator indicator : chart.getIndicators() )
@@ -438,7 +446,7 @@ public class DefaultChartService
                     // Regular dataset
                     // ---------------------------------------------------------
 
-                    for ( Period period : chart.getPeriods() )
+                    for ( Period period : chart.getAllPeriods() )
                     {
                         final Double value = dataMartService.getAggregatedValue( indicator, period, selectedOrganisationUnit );
 
@@ -460,7 +468,7 @@ public class DefaultChartService
                     
                     if ( chart.isRegression() )
                     {
-                        for ( Period period : chart.getPeriods() )
+                        for ( Period period : chart.getAllPeriods() )
                         {
                             final double value = regression.predict( columnIndex++ );
                             
@@ -542,9 +550,9 @@ public class DefaultChartService
         {
             subTitle.setText( chart.getOrganisationUnits().get( 0 ).getName() );
         }
-        else if ( chart.isDimension( DIMENSION_ORGANISATIONUNIT ) && chart.getPeriods().size() > 0 )
+        else if ( chart.isDimension( DIMENSION_ORGANISATIONUNIT ) && chart.getAllPeriods().size() > 0 )
         {
-            subTitle.setText( format.formatPeriod( chart.getPeriods().get( 0 ) ) );
+            subTitle.setText( format.formatPeriod( chart.getAllPeriods().get( 0 ) ) );
         }
         
         return subTitle;

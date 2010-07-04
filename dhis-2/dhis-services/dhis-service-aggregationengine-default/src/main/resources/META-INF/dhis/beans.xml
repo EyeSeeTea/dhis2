@@ -25,6 +25,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="org.hisp.dhis.aggregation.impl.dataelement.AverageBoolDataElementAggregation"/>
 	<property name="indicatorAggregation"
 	  ref="org.hisp.dhis.aggregation.impl.indicator.IndicatorAggregation"/>
+    <property name="aggregationCache"
+      ref="org.hisp.dhis.aggregation.impl.cache.AggregationCache"/>
   </bean>
   
   <bean id="org.hisp.dhis.aggregation.impl.cache.AggregationCache"

@@ -75,14 +75,12 @@ public class LocManagerXSLTLocator implements XSLTLocator
                 result = locationManager.getInputStream( "transform/" + transformerNode.getTextContent() );
             } else
             {
-                log.info( "xpath search returned no result - no stylsheet configured for " + identifier );
                 throw new ImportException( "No transformer configured for this format" );
             }
 
         } catch ( LocationManagerException ex )
         {
-            log.info( "File error locating transform:" + ex.getCause() );
-            throw new ImportException( "Missing transformer for this format" );
+            throw new ImportException( "Missing transformer for this format", ex );
         }
         return result;
     }

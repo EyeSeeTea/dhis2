@@ -195,37 +195,14 @@ public interface PeriodService
     Collection<Period> getPeriods( Period period, Collection<DataElement> dataElements, Collection<? extends Source> sources );
     
     /**
-     * Returns a Period of type Relative. The Period will be persisted if it does
-     * not exist.
+     * Enforces that each Period in the given collection is loaded in the current
+     * session. Persists the Period if it does not exist.
      * 
-     * @param date the date defining the base month for the Period generation.
-     * @param startMonths the number of months of which to add to or subtract from the
-     *        base month.
-     * @param endMonths the number of months of which to add to or subtract from the
-     *        base month.
-     * @throws IllegalArgumentException if start months is equal to or greater than
-     *         end months.
-     * @return a Period of type Relative.
+     * @param periods the list of Periods.
+     * @return the list of Periods.
      */
-    Period getRelativePeriod( Date date, int startMonths, int endMonths );
+    List<Period> reloadPeriods( List<Period> periods );
     
-    /**
-     * Returns a Period of type Relative. The Period will be persisted if it does
-     * not exist.
-     * 
-     * @param date the date indicating in which month the start date will be. The
-     *        start date is always the first day in the month. 
-     * @param months the number of months the period will span. A positive value
-     *        will return a period with current month's start date as start date
-     *        and the month ( value - 1 ) months ahead in time's end date as end
-     *        date. A negative value will return a period with current month's end
-     *        date as end date and the month ( value - 1 ) months back in time's
-     *        start date as start date.
-     * @throws IllegalArgumentException if 0 is passed as second argument.
-     * @return a Period of type Relative.
-     */
-    Period getRelativePeriod( Date date, int months );
-
     /**
      * Returns historyLength number of Periods chronologically ending with lastPeriod.
      * 

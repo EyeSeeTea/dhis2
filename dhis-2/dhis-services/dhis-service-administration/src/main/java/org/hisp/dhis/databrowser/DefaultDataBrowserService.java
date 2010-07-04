@@ -131,6 +131,7 @@ public class DefaultDataBrowserService
         dataBrowserStore.setStructureForOrgUnitBetweenPeriods( table, orgUnitParent, betweenPeriodIds );
 
         Integer numResults = dataBrowserStore.setCountOrgUnitsBetweenPeriods( table, orgUnitParent, betweenPeriodIds );
+
         if ( numResults == 0 )
         {
             table.addZeroColumn();
@@ -197,25 +198,32 @@ public class DefaultDataBrowserService
 
         return table;
     }
-
+    
     public DataBrowserTable getCountDataElementsForOrgUnitInPeriod( Integer orgUnitGroupId, String startDate,
         String endDate, PeriodType periodType )
     {
         if ( startDate == null || startDate.length() == 0 )
+        {
             startDate = STARTDATE;
+        }
         if ( endDate == null || endDate.length() == 0 )
+        {
             endDate = ENDDATE;
-
-        List<Integer> betweenPeriodIds = getAllPeriodIdsBetweenDatesOnPeriodType( startDate, endDate, periodType );
+        }
 
         DataBrowserTable table = new DataBrowserTable();
+        
+        List<Integer> betweenPeriodIds = getAllPeriodIdsBetweenDatesOnPeriodType( startDate, endDate, periodType );
 
         dataBrowserStore.setDataElementStructureForOrgUnitBetweenPeriods( table, orgUnitGroupId, betweenPeriodIds );
 
         int numRows = dataBrowserStore.setCountDataElementsForOrgUnitBetweenPeriods( table, orgUnitGroupId,
             betweenPeriodIds );
+        
         if ( numRows == 0 )
+        {
             table.addZeroColumn();
+        }
 
         return table;
     }

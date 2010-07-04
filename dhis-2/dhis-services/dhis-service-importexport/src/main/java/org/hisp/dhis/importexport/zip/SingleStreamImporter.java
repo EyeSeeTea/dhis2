@@ -63,7 +63,7 @@ public class SingleStreamImporter implements ZipImporter
     @Override
     public void importData( ImportParams params, ProcessState state, ZipFile zipFile ) throws Exception
     {
-        XMLReader dxfReader = preConverter.transform( getXMLStream(zipFile), params, state);
+        XMLReader dxfReader = preConverter.processStream( getXMLStream(zipFile), params, state);
         converter.read( dxfReader, params, state );
     }
 }

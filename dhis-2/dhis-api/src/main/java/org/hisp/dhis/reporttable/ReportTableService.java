@@ -28,11 +28,8 @@ package org.hisp.dhis.reporttable;
  */
 
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.period.Period;
 
 /**
  * @author Lars Helge Overland
@@ -76,25 +73,6 @@ public interface ReportTableService
      * @param reportTable the ReportTable to remove.
      */
     void removeReportTable( ReportTable reportTable );
-    
-    /**
-     * Retrieves a List of Periods of the RelativePeriodType.
-     * 
-     * @param relatives the RelativePeriods.
-     * @param months the number of months back in time which will be used as
-     *        basis for the generation of relative Periods.
-     *        
-     * @return a Collection of Periods of the RelativePeriodType.
-     */
-    List<Period> getRelativePeriods( ReportTable reportTable, int months, I18nFormat format );
-    
-    /**
-     * Returns the current date subtracted with the given number of months.
-     * 
-     * @param months the numner of months.
-     * @return a Date.
-     */
-    Date getDateFromPreviousMonth( int months );
     
     /**
      * Saves a ReportTable.

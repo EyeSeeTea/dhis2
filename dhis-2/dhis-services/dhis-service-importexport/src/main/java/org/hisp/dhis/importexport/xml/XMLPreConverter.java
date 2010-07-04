@@ -27,11 +27,6 @@ package org.hisp.dhis.importexport.xml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *
- * @author bobj
- * @version created 31-May-2010
- */
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -57,13 +52,14 @@ import org.codehaus.stax2.XMLStreamReader2;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.importexport.ImportException;
 import org.hisp.dhis.importexport.ImportParams;
-import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.hisp.dhis.importexport.dxf.converter.DXFConverter.*;
+
 /**
- * GenericXMLConvertor transforms imported foreign XML to dxf
- *
+ * GenericXMLConvertor transforms imported foreign XML to dxf.
+ * 
  * @author bobj
  */
 @Component("preConverter")
@@ -71,8 +67,6 @@ public class XMLPreConverter
 {
 
     private final Log log = LogFactory.getLog( XMLPreConverter.class );
-
-    public static final String DXF_ROOT = "dxf";
 
     public static final int BUFFER_SIZE = 2000;
 
@@ -88,14 +82,17 @@ public class XMLPreConverter
     protected URIResolver resolver;
 
     /**
-     * This method is called for an anonymous xml stream ie. we don't yet know if or how to transform it
+     * This method is called for an anonymous xml stream ie. we don't yet know
+     * if or how to processStream it
+     * 
      * @param xmlDataStream
      * @param params
      * @param state
      * @return
      * @throws ImportException
      */
-    public XMLReader transform( InputStream xmlDataStream, ImportParams params, ProcessState state ) throws ImportException
+    public XMLReader processStream( InputStream xmlDataStream, ImportParams params, ProcessState state )
+        throws ImportException
     {
         XMLReader dxfReader = null;
 
@@ -105,18 +102,16 @@ public class XMLPreConverter
 
         QName rootName = null;
 
-
         BufferedInputStream bufin = new BufferedInputStream( xmlDataStream );
         Map<QName, String> attributes = new HashMap<QName, String>();
 
-
         try
         {
-             XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
-             XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( xmlDataStream );
-
-            // buffer enough space to read root element
+            // buffer enough space to read root elemen
             bufin.mark( BUFFER_SIZE );
+
+            XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory.newInstance();
+            XMLStreamReader2 streamReader = (XMLStreamReader2) factory.createXMLStreamReader( bufin );
 
             // move to document root
             streamReader.nextTag();
@@ -128,32 +123,27 @@ public class XMLPreConverter
                 String value = streamReader.getAttributeValue( i );
                 attributes.put( attribute, value );
             }
+
             bufin.reset();
+
+            // recreate stream reader to reclaim root element
+            streamReader = (XMLStreamReader2) factory.createXMLStreamReader( bufin );
 
 
             log.info( "Importing " + rootName.toString() );
 
             // first test if its a dxf stream
-            if ( rootName.getLocalPart().equals( DXF_ROOT ) )
+            if ( rootName.getLocalPart().equals( DXFROOT ) )
             {
                 // Native DXF stream - no transform required
 
-                // -----------------------------------------------------------------
-                // Retrieve namespace and minor version from root element and set on
-                // import params. Use default if not found.
-                // -----------------------------------------------------------------
+                log.info( "Importing dxf native stream" );
 
-                params.setNamespace( defaultIfEmpty( rootName.getNamespaceURI(), ImportParams.NAMESPACE_10 ) );
-                String version = attributes.get( new QName( ImportParams.ATTRIBUTE_MINOR_VERSION ) );
-                params.setMinorVersion( version != null ? version : ImportParams.MINOR_VERSION_10 );
-
-                log.info( "Using DXF namespace '" + params.getNamespace() + "' version '" + params.getMinorVersion() + "'" );
-
-                // no transform required
+                // no processStream required
                 dxfReader = XMLFactory.getXMLReader( streamReader );
-
             } else
-            {        // use the stringified form of the qname as an id
+            {
+                // use the stringified form of the qname as an id
                 xsltIdentifierTag = rootName.toString();
                 log.debug( "Tag for transformer: " + xsltIdentifierTag );
 
@@ -161,46 +151,53 @@ public class XMLPreConverter
             }
         } catch ( Exception ex )
         {
-            log.info( ex );
-            throw new ImportException( "Failed to transform xml stream" );
+            throw new ImportException( "Failed to transform xml stream", ex );
         }
+
         return dxfReader;
     }
 
     /**
-     *
+     * 
      * @param streamReader
      * @param params
      * @param state
      * @param xsltParams
      * @param xsltTag
      * @return
-     * @throws Exception
+     * @throws ImportException
      */
     public DefaultXMLEventReader transform( XMLStreamReader2 streamReader, ImportParams params, ProcessState state,
-        Map<String, String> xsltParams, String xsltTag )
-        throws Exception
+        Map<String, String> xsltParams, String xsltTag ) throws ImportException
     {
         DefaultXMLEventReader dxfReader;
         InputStream sheetStream = xsltLocator.getTransformerByTag( xsltTag );
         Source sheet = new StreamSource( sheetStream );
-        TransformerTask tt = new TransformerTask( sheet, xsltParams );
 
-        Source source = new StAXSource( streamReader );
+        try
+        {
+            TransformerTask tt = new TransformerTask( sheet, xsltParams );
 
-        XMLPipe pipe = new XMLPipe(); // Make a pipe to capture output of transform
-        XMLEventWriter pipeinput = pipe.getInput();
-        XMLEventReader2 pipeoutput = pipe.getOutput();
 
-        StAXResult result = new StAXResult( pipeinput ); // Set result of transform to input of pipe
-        //tt.transform( source, result, resolver );
-        tt.transform( source, result, null );
-        log.info( "Transform successful" );
+            Source source = new StAXSource( streamReader );
 
-        // Set dxfReader to output of pipe
-        dxfReader = new DefaultXMLEventReader( (XMLEventReader2) pipeoutput );
+            XMLPipe pipe = new XMLPipe(); // Make a pipe to capture output of processStream
+            XMLEventWriter pipeinput = pipe.getInput();
+            XMLEventReader2 pipeoutput = pipe.getOutput();
 
-        streamReader.close();
+            StAXResult result = new StAXResult( pipeinput ); // Set result of processStream to input of pipe
+            // tt.processStream( source, result, resolver );
+            tt.transform( source, result, null );
+            log.info( "Transform successful" );
+
+            // Set dxfReader to output of pipe
+            dxfReader = new DefaultXMLEventReader( (XMLEventReader2) pipeoutput );
+
+            streamReader.close();
+        } catch ( Exception ex )
+        {
+            throw new ImportException( "Failed to transform stream", ex );
+        }
 
         return dxfReader;
     }

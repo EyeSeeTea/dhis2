@@ -27,7 +27,7 @@ package org.hisp.dhis.importexport.dxf.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.importexport.ImportParams.MINOR_VERSION_11;
+import static org.hisp.dhis.importexport.dxf.converter.DXFConverter.*;
 
 import java.util.ArrayList;
 import java.util.Collection;

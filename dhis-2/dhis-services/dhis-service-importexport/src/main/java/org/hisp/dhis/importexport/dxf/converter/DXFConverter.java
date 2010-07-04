@@ -27,6 +27,7 @@ package org.hisp.dhis.importexport.dxf.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import javax.xml.namespace.QName;
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.staxwax.reader.XMLReader;
@@ -113,6 +114,7 @@ import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.source.Source;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
 
 /**
  * DXFConverter class
@@ -124,6 +126,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DXFConverter 
 {
+
+    public static final String DXFROOT = "dxf";
+    public static final String ATTRIBUTE_MINOR_VERSION = "minorVersion";
+    public static final String ATTRIBUTE_EXPORTED = "exported";
+    public static final String NAMESPACE_10 = "http://dhis2.org/schema/dxf/1.0";
+    public static final String MINOR_VERSION_10 = "1.0";
+    public static final String MINOR_VERSION_11 = "1.1";
+
     private final Log log = LogFactory.getLog( DXFConverter.class );
 
     // -------------------------------------------------------------------------
@@ -268,6 +278,17 @@ public class DXFConverter
             importObjectService.deleteImportObjects();
             log.info( "Deleted previewed objects" );
         }
+
+        
+        if (!reader.moveToStartElement( DXFROOT, DXFROOT)) {
+            throw new RuntimeException("Couldn't find dxf root element");
+        }
+        QName rootName = reader.getElementQName();
+
+        params.setNamespace( defaultIfEmpty( rootName.getNamespaceURI(), NAMESPACE_10 ) );
+        String version = reader.getAttributeValue( ATTRIBUTE_MINOR_VERSION  );
+        params.setMinorVersion( version != null ? version : MINOR_VERSION_10 );
+        log.debug( "Importing dxf1 minor version " + version );
 
         while ( reader.next() )
         {

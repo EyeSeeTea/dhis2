@@ -14,7 +14,7 @@
 										validateUpdateOrganisationUnit();
 									}
 				});
-				jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
+				jQuery.validator.setMessages( validationMessage );
 				jQuery("#name").focus();
 				datePickerInRange( 'openingDate', 'closedDate' );
 			}

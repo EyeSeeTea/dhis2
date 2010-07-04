@@ -9,7 +9,7 @@
         <description>Excel template import</description>
     </transform>
     <transform tag="SDMX_CSD">
-        <xslt>sdmx_csd2dxf.xsl</xslt>
+        <xslt>cross2dxf.xsl</xslt>
         <description>SDMX-HD Cross Sectional Data Import</description>
     </transform>
 </transforms>

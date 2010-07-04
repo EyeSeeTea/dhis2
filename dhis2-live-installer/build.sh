@@ -39,6 +39,10 @@ docs)
 cd $DHIS2_DOCS
 mvn package ;;
 
+live)
+echo "Builidng DHIS2 Live Package"
+cd $DHIS2_SRC/dhis-live/
+mvn clean package -Dtest=skip -DfailIfNoTests=false;;
 
 installer)
 echo "Building installer"

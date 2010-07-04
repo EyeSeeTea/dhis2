@@ -805,9 +805,11 @@ function datePickerInRange ( startdate, enddate )
  * @param tableId the id of table you want to sort * * 
  */
 
-function tableSorter( tableId )
+function tableSorter( tableId, sortList )
 {
-	$("#" + tableId ).tablesorter(); 
+	if(sortList==undefined) sortList = [[0,0]];
+	
+	$("#" + tableId ).tablesorter({sortList:sortList}); 
 }
 
 function setSelectionRange( input, selectionStart, selectionEnd ) 

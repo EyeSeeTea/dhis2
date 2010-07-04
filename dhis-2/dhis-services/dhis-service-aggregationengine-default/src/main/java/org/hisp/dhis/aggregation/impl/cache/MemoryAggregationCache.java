@@ -49,10 +49,8 @@ import org.hisp.dhis.period.PeriodService;
 public class MemoryAggregationCache
     implements AggregationCache
 {
-    private OrganisationUnitHierarchy hierarchyCache = null;
-    
-    private Map<String, Period> periodCache = new HashMap<String, Period>();
-    
+    private OrganisationUnitHierarchy hierarchyCache = null;    
+    private Map<String, Period> periodCache = new HashMap<String, Period>();    
     private Map<String, Collection<Integer>> periodIdCache = new HashMap<String, Collection<Integer>>();
     
     private static final String SEPARATOR = "-";
@@ -143,22 +141,13 @@ public class MemoryAggregationCache
     
     public double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate, OrganisationUnit organisationUnit )
     {
-        //String key = dataElement.getId() + SEPARATOR + optionCombo.getId() + "-" + startDate.toString() + "-" + endDate.toString() + "-" + organisationUnit.getId();
-        
-        /*Double value = aggregatedValueCache.get( key );
-        
-        if ( value != null )
-        {
-            return value.doubleValue();
-        }*/
-        
-        Double value = aggregationService.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );
-        
-        /*if ( value != AggregationService.NO_VALUES_REGISTERED )
-        {
-            aggregatedValueCache.put( key, value );
-        }*/
-        
-        return value.doubleValue();
+        return aggregationService.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );
+    }
+
+    public void clearCache()
+    {
+        hierarchyCache = null;
+        periodCache.clear();
+        periodIdCache.clear();
     }
 }
