@@ -130,6 +130,8 @@ public interface PeriodService
      */
     Collection<Period> getPeriodsBetweenDates( PeriodType periodType, Date startDate, Date endDate );
 
+    Collection<Period> getPeriodsBetweenOrSpanningDates( Date startDate, Date endDate );
+    
     /**
      * Returns all Intersecting Periods between the startDate and endDate based on PeriodType
      * For example if the startDate is 2007-05-01 and endDate is 2007-08-01 and periodType is Quartely

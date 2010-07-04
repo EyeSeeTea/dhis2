@@ -51,8 +51,6 @@ public class MemoryAggregationCache
 
     private final ThreadLocal<Map<String, Collection<Integer>>> intersectingPeriodCache = new ThreadLocal<Map<String,Collection<Integer>>>();
 
-    private final ThreadLocal<Map<String, Collection<Integer>>> periodsBetweenDatesCache = new ThreadLocal<Map<String,Collection<Integer>>>();
-
     private final ThreadLocal<Map<String, Period>> periodCache = new ThreadLocal<Map<String,Period>>();
 
     private final ThreadLocal<Map<String, Integer>> organisationUnitLevelCache = new ThreadLocal<Map<String, Integer>>();
@@ -102,31 +100,7 @@ public class MemoryAggregationCache
         
         return periods;
     }
-    
-    public Collection<Integer> getPeriodsBetweenDates( final Date startDate, final Date endDate )
-    {
-        final String key = startDate.toString() + SEPARATOR + endDate.toString();
         
-        Map<String, Collection<Integer>> cache = periodsBetweenDatesCache.get();
-        
-        Collection<Integer> periods = null;
-        
-        if ( cache != null && ( periods = cache.get( key ) ) != null )
-        {
-            return periods;
-        }
-        
-        periods = ConversionUtils.getIdentifiers( Period.class, periodService.getPeriodsBetweenDates( startDate, endDate ) );
-        
-        cache = ( cache == null ) ? new HashMap<String, Collection<Integer>>() : cache;
-        
-        cache.put( key, periods );
-        
-        periodsBetweenDatesCache.set( cache );
-        
-        return periods;
-    }
-    
     public Period getPeriod( final int id )
     {
         final String key = String.valueOf( id );
@@ -178,7 +152,6 @@ public class MemoryAggregationCache
     public void clearCache()
     {
         intersectingPeriodCache.remove();
-        periodsBetweenDatesCache.remove();
         periodCache.remove();
         organisationUnitLevelCache.remove();
     }

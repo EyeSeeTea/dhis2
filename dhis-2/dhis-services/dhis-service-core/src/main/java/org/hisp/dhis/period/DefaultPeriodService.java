@@ -111,10 +111,15 @@ public class DefaultPeriodService
     {
         return periodStore.getPeriodsBetweenDates( startDate, endDate );
     }
-
+    
     public Collection<Period> getPeriodsBetweenDates( PeriodType periodType, Date startDate, Date endDate )
     {
         return periodStore.getPeriodsBetweenDates( periodType, startDate, endDate );
+    }
+
+    public Collection<Period> getPeriodsBetweenOrSpanningDates( Date startDate, Date endDate )
+    {
+        return periodStore.getPeriodsBetweenOrSpanningDates( startDate, endDate );
     }
 
     public Collection<Period> getIntersectingPeriodsByPeriodType( PeriodType periodType, Date startDate, Date endDate )
