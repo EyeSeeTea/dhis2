@@ -93,7 +93,7 @@ public class AverageIntSingleValueAggregator
         final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
             period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
 
-        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>(); // <Operand, total value>
+        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>( entries.size() ); // <Operand, total value>
         
         for ( final Entry<DataElementOperand, double[]> entry : entries.entrySet() ) 
         {

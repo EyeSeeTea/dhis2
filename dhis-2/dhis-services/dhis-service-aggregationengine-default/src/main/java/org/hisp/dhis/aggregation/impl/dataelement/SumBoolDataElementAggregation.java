@@ -41,7 +41,6 @@ import org.hisp.dhis.period.Period;
 import static org.hisp.dhis.system.util.MathUtils.getFloor;
 import static org.hisp.dhis.system.util.DateUtils.getDays;
 
-
 /**
  * @author Lars Helge Overland
  * @version $Id: SumBoolDataElementAggregation.java 4753 2008-03-14 12:48:50Z larshelg $
@@ -70,7 +69,7 @@ public class SumBoolDataElementAggregation
     {
         OrganisationUnitHierarchy hierarchy = aggregationCache.getOrganisationUnitHierarchy();
         
-        Collection<Integer> periods = aggregationCache.getPeriodIds( startDate, endDate );
+        Collection<Integer> periods = aggregationCache.getIntersectingPeriodIds( startDate, endDate );
 
         Collection<DataValue> values = aggregationStore.getDataValues( hierarchy.getChildren( organisationUnitId ), dataElementId, optionComboId, periods );
         

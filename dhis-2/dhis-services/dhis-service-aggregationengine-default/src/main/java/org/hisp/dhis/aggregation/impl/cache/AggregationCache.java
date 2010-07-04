@@ -46,7 +46,7 @@ public interface AggregationCache
     
     Period getPeriod( int periodId );
     
-    Collection<Integer> getPeriodIds( Date startDate, Date endDate );
+    Collection<Integer> getIntersectingPeriodIds( Date startDate, Date endDate );
     
     double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate, OrganisationUnit organisationUnit );
     

@@ -96,7 +96,7 @@ public class AverageIntDataElementAggregation
     protected Collection<DataValue> getDataValues( int dataElementId, int optionComboId, int organisationUnitId,
         Date startDate, Date endDate )
     {   
-        Collection<Integer> periods = aggregationCache.getPeriodIds( startDate, endDate );
+        Collection<Integer> periods = aggregationCache.getIntersectingPeriodIds( startDate, endDate );
         
         Collection<DataValue> values = aggregationStore.getDataValues( organisationUnitId, dataElementId, optionComboId, periods );
         
@@ -128,7 +128,7 @@ public class AverageIntDataElementAggregation
      *        aggregation period
      * @param aggregationEndDate The original end date of the entire aggregation
      *        period
-     * @return The numerator and denominator of the AVERAGE value
+     * @return The AVERAGE value.
      */
     protected double[] getAggregateOfValues( Collection<DataValue> dataValues, Date startDate, Date endDate,
         Date aggregationStartDate, Date aggregationEndDate )

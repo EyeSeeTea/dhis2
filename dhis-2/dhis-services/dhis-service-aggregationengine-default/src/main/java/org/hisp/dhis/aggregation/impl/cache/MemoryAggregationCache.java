@@ -114,7 +114,7 @@ public class MemoryAggregationCache
         return period;
     }
     
-    public Collection<Integer> getPeriodIds( Date startDate, Date endDate )
+    public Collection<Integer> getIntersectingPeriodIds( Date startDate, Date endDate )
     {
         String key = startDate.toString() + SEPARATOR + endDate.toString();
         
