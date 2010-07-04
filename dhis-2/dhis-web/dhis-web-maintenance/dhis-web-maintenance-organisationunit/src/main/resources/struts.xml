@@ -22,7 +22,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-organisationunit/organisationUnit.vm</param>
 			<param name="menu">/dhis-web-maintenance-organisationunit/menuWithTree.vm</param>
-			<param name="menuTreeHeight">321</param>
+			<param name="menuTreeHeight">384</param>
 			<param name="javascripts">
 					../dhis-web-commons/ouwt/ouwt.js,
 					javascript/organisationUnit.js
@@ -126,7 +126,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-organisationunit/organisationUnitGroup.vm</param>
 			<param name="menu">/dhis-web-maintenance-organisationunit/menu.vm</param>
-			<param name="menuTreeHeight">321</param>
+			<param name="menuTreeHeight">384</param>
 			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/organisationUnitGroup.js</param>
 			<interceptor-ref name="organisationUnitTreeStack" />
 		</action>
@@ -239,7 +239,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-organisationunit/organisationUnitGroupSet.vm</param>
 			<param name="menu">/dhis-web-maintenance-organisationunit/menu.vm</param>
-			<param name="menuTreeHeight">321</param>
+			<param name="menuTreeHeight">384</param>
 			<param name="javascripts">javascript/organisationUnitGroupSet.js</param>
 		</action>
 
@@ -313,7 +313,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-organisationunit/hierarchyOperations.vm</param>
 			<param name="menu">/dhis-web-maintenance-organisationunit/menuWithTree.vm</param>
-			<param name="menuTreeHeight">321</param>
+			<param name="menuTreeHeight">384</param>
 			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/hierarchyOperations.js</param>
 			<interceptor-ref name="organisationUnitTreeStack" />
 			<param name="requiredAuthorities">F_ORGANISATIONUNIT_MOVE</param>

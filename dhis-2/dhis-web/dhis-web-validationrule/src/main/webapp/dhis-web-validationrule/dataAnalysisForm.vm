@@ -115,6 +115,8 @@
 <span id="message"></span>
 
 <script type="text/javascript">
+  var i18n_analysing_please_wait = '$encoder.jsEscape( $i18n.getString( "analysing_please_wait" ) , "'")';
+  
   jQuery(document).ready(function(){
 		datePickerInRange( 'fromDate' , 'toDate' );	
 	});

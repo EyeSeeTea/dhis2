@@ -10,7 +10,7 @@ function analyseData()
 {
 	if ( analysisFormIsValid() == true )
 	{
-		setWaitMessage( "Analysing data, please wait..." );
+		setWaitMessage( i18n_analysing_please_wait );
 		
 		var url = "getAnalysis.action" +
 			"?key=" + $( "#key" ).val() +
@@ -49,4 +49,17 @@ function analysisFormIsValid()
 	}
 	
 	return true;
+}
+
+function getFollowUpAnalysis()
+{
+	setWaitMessage( i18n_analysing_please_wait );
+	
+	var url = "getAnalysis.action?key=followup";
+	
+	$.get( url, function( data ) {
+		hideMessage();
+		$( "div#analysisResult" ).show();
+		$( "div#analysisResult" ).html( data );
+	} );
 }

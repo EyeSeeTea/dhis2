@@ -47,12 +47,12 @@ import org.apache.commons.math.analysis.SplineInterpolator;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.UnivariateRealInterpolator;
 import org.apache.commons.math.stat.regression.SimpleRegression;
+import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.chart.ChartStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -109,13 +109,6 @@ public class DefaultChartService
         this.chartStore = chartStore;
     }    
     
-    private DataMartService dataMartService;
-    
-    public void setDataMartService( DataMartService dataMartService )
-    {
-        this.dataMartService = dataMartService;
-    }
-    
     private PeriodService periodService;
     
     public void setPeriodService( PeriodService periodService )
@@ -135,6 +128,13 @@ public class DefaultChartService
     public void setMinMaxDataElementService( MinMaxDataElementService minMaxDataElementService )
     {
         this.minMaxDataElementService = minMaxDataElementService;
+    }
+    
+    private AggregationService aggregationService;
+
+    public void setAggregationService( AggregationService aggregationService )
+    {
+        this.aggregationService = aggregationService;
     }
 
     // -------------------------------------------------------------------------
@@ -448,7 +448,8 @@ public class DefaultChartService
 
                     for ( Period period : chart.getAllPeriods() )
                     {
-                        final Double value = dataMartService.getAggregatedValue( indicator, period, selectedOrganisationUnit );
+                        //final Double value = dataMartService.getAggregatedValue( indicator, period, selectedOrganisationUnit );
+                        final Double value = aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), selectedOrganisationUnit );
 
                         regularDataSet.addValue( value != null ? value : 0, indicator.getShortName(), chart.getFormat().formatPeriod( period ) );
                         
@@ -487,7 +488,8 @@ public class DefaultChartService
 
                     for ( OrganisationUnit unit : chart.getOrganisationUnits() )
                     {
-                        final Double value = dataMartService.getAggregatedValue( indicator, selectedPeriod, unit );
+                        //final Double value = dataMartService.getAggregatedValue( indicator, selectedPeriod, unit );
+                        final Double value = aggregationService.getAggregatedIndicatorValue( indicator, selectedPeriod.getStartDate(), selectedPeriod.getEndDate(), unit );
                         
                         regularDataSet.addValue( value != null ? value : 0, indicator.getShortName(), unit.getShortName() );
                         

@@ -8,5 +8,5 @@
     #introListImgItem( "viewAnalysisForm.action?key=stddevoutlier" "stddevoutlier_analysis" "validationanalysis" )
     #introListImgItem( "viewAnalysisForm.action?key=minmaxoutlier" "minmaxoutlier_analysis" "validationanalysis" )
     #introListImgItem( "viewAnalysisForm.action?key=gap" "gap_analysis" "validationanalysis" )
-    #introListImgItem( "getAnalysis.action?key=followup" "followup_analysis" "validationanalysis" )
+    #introListImgItem( "viewFollowUpAnalysisForm.action" "followup_analysis" "validationanalysis" )
 </ul>
