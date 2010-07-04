@@ -6,6 +6,11 @@
 	  position: absolute;
 	  display: none;
 	}
+	
+	th.formatLabel
+	{
+	  text-align: center;
+	}
 
 </style>
 
@@ -139,11 +144,11 @@
 	<br/><br/>
 	$i18n.getString( "no_data_found" )
 #else	
-	<table id="drillDownTable">
+	<table id="drillDownTable" class="listTable" border="1">
 	<thead>
 		<tr>
 		#foreach ( $col in $allColumnsConverted )
-			<th title="$col.metaValue">$i18n.getString( $col.name )</th>
+			<th title="$col.metaValue" class="formatLabel">$i18n.getString( $col.name )</th>
 		#end
 		</tr>
 	</thead>
@@ -156,18 +161,14 @@
 			<tr #if ($i%2 == 1) class="odd" #else class="par" #end >
 			#if ( $searchOption=="OrganisationUnit" && !$parent && $rowMeta.id)
 			#set ( $urlLink = "searchResult.action?searchOption=OrganisationUnit&amp;selectedUnitChanger=" + $rowMeta.id + "&amp;periodType=" + $periodTypeId + "&amp;toDate=" + $toDate + "&amp;fromDate=" + $fromDate )
-				<td style="min-width:200px" onclick="javascript:viewDrillDownMenu( '$urlLink', '$rowMeta.id' );">
-					<!--a href="searchResult.action?searchOption=OrganisationUnit&amp;parent=$rowMeta.id&amp;periodType=$periodTypeId&amp;toDate=$toDate&amp;fromDate=$fromDate&amp;selectedUnitChanger=$rowMeta.id"
-					title="$i18n.getString('see_datasets_for') $rowMeta.name $i18n.getString('by_drilldown_option')">$rowMeta.name</a-->
-					<a>$rowMeta.name</a>
-				</td>
+				<td style="min-width:200px;cursor:pointer" onclick="javascript:viewDrillDownMenu( '$urlLink', '$rowMeta.id' );" title="$i18n.getString('click_on_this_orgunit')">$rowMeta.name</td>
 			#elseif ( $rowMeta.id && !$parent )
 				<td style="min-width:200px"><a href="searchResult.action?searchOption=$searchOption&amp;parent=$rowMeta.id&amp;periodType=$periodTypeId&amp;toDate=$toDate&amp;fromDate=$fromDate">$rowMeta.name</a></td>
 			#else
 				<td style="min-width:200px">$rowMeta.name</td>
 			#end
 			#foreach ( $rowItem in $col )
-				<td style="min-width:80px;text-align:right">#if ( $rowItem > 0 )$rowItem #else<span style="color:red;font-weight:bold;">$rowItem</span> #end</td>
+				<td style="min-width:80px;text-align:right">#if ( $rowItem > 0 )$rowItem #else<span style="color:blue;font-weight:bold;">$rowItem</span> #end</td>
 			#end
 			</tr>
 		#end
@@ -190,12 +191,12 @@
 
 	<div id="drillDownMenu" class="menuDropDownArea" onmouseover="cancelHideDropDownTimeout()" onmouseout="hideDropDownTimeout()">
 	  <ul class="menuDropDownBox">
-		<li class="menuDropDownItem" onclick='viewDrillDownData( "current_level" )'>$i18n.getString( "view_data_at_this_level" )&nbsp;</li>
 		<li class="menuDropDownItem" onclick='viewDrillDownData( "descendant_level" )'>$i18n.getString( "view_data_at_descendant_levels" )&nbsp;</li>
+		<li class="menuDropDownItem" onclick='viewDrillDownData( "current_level" )'>$i18n.getString( "view_data_at_this_level" )&nbsp;</li>
 	  </ul>
 	</div>
-	
+
 	<script type="text/javascript">
-		loadListeners();
+		loadListeners();		
 	</script>
 	

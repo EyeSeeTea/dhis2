@@ -131,7 +131,8 @@ public class AverageIntAggregator
         double relevantDays = 0.0;
         double existingValue = 0.0;
         double existingRelevantDays = 0.0;
-
+        double duration = 0.0;
+        
         int dataValueLevel = 0;
         
         for ( final CrossTabDataValue crossTabValue : crossTabValues )
@@ -142,54 +143,58 @@ public class AverageIntAggregator
             currentEndDate = period.getEndDate();
 
             dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
+
+            duration = getDaysInclusive( currentStartDate, currentEndDate );
             
-            for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
-            {
-                if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel )  )
+            if ( duration > 0 )
+            {            
+                for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
                 {
-                    value = 0.0;
-                    
-                    try
+                    if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel )  )
                     {
-                        value = Double.parseDouble( entry.getValue() );
+                        value = 0.0;
+                        relevantDays = 0.0;               
+                        
+                        try
+                        {
+                            value = Double.parseDouble( entry.getValue() );
+                        }
+                        catch ( NumberFormatException ex )
+                        {
+                            log.warn( "Value skipped, not numeric: '" + entry.getValue() + 
+                                "', for data element with id: '" + entry.getKey() +
+                                "', for period with id: '" + crossTabValue.getPeriodId() +
+                                "', for source with id: '" + crossTabValue.getSourceId() + "'" );
+                        }
+                        
+                        if ( currentStartDate.compareTo( startDate ) >= 0 && currentEndDate.compareTo( endDate ) <= 0 ) // Value is within period
+                        {
+                            relevantDays = getDaysInclusive( currentStartDate, currentEndDate );
+                        }
+                        else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans whole period
+                        {
+                            relevantDays = getDaysInclusive( startDate, endDate );
+                        }
+                        else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0
+                            && currentEndDate.compareTo( endDate ) <= 0 ) // Value spans period start
+                        {
+                            relevantDays = getDaysInclusive( startDate, currentEndDate );
+                        }
+                        else if ( currentStartDate.compareTo( startDate ) >= 0 && currentStartDate.compareTo( endDate ) <= 0
+                            && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans period end
+                        {
+                            relevantDays = getDaysInclusive( currentStartDate, endDate );
+                        }
+                        
+                        value = value * relevantDays;
+                        
+                        existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
+                        existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
+                        
+                        final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
+                        
+                        totalSums.put( entry.getKey(), values );
                     }
-                    catch ( NumberFormatException ex )
-                    {
-                        log.warn( "Value skipped, not numeric: '" + entry.getValue() + 
-                            "', for data element with id: '" + entry.getKey() +
-                            "', for period with id: '" + crossTabValue.getPeriodId() +
-                            "', for source with id: '" + crossTabValue.getSourceId() + "'" );
-                    }
-                                        
-                    relevantDays = 0.0;
-                    
-                    if ( currentStartDate.compareTo( startDate ) >= 0 && currentEndDate.compareTo( endDate ) <= 0 ) // Value is within period
-                    {
-                        relevantDays = getDaysInclusive( currentStartDate, currentEndDate );
-                    }
-                    else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans whole period
-                    {
-                        relevantDays = getDaysInclusive( startDate, endDate );
-                    }
-                    else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0
-                        && currentEndDate.compareTo( endDate ) <= 0 ) // Value spans period start
-                    {
-                        relevantDays = getDaysInclusive( startDate, currentEndDate );
-                    }
-                    else if ( currentStartDate.compareTo( startDate ) >= 0 && currentStartDate.compareTo( endDate ) <= 0
-                        && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans period end
-                    {
-                        relevantDays = getDaysInclusive( currentStartDate, endDate );
-                    }
-                    
-                    value = value * relevantDays;
-                    
-                    existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
-                    existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
-                    
-                    final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
-                    
-                    totalSums.put( entry.getKey(), values );
                 }
             }
         }                    

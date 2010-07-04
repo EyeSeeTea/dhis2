@@ -40,6 +40,7 @@ import org.hisp.dhis.databrowser.MetaValue;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -135,6 +136,17 @@ public class SearchAction
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
+    }
+
+    // -------------------------------------------------------------------------
+    // I18n
+    // -------------------------------------------------------------------------
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -525,7 +537,8 @@ public class SearchAction
      */
     private void setExportPDFVariables()
     {
-        SessionUtils.setSessionVar( KEY_DATABROWSERTITLENAME, searchOption + " - " + getParentName() );
+        SessionUtils.setSessionVar( KEY_DATABROWSERTITLENAME, i18n.getString( searchOption )
+            + ((searchOption.equals( "OrganisationUnit" ) == true) ? " - " + getParentName() : "") );
         SessionUtils.setSessionVar( KEY_DATABROWSERFROMDATE, fromDate );
         SessionUtils.setSessionVar( KEY_DATABROWSERTODATE, toDate );
         SessionUtils.setSessionVar( KEY_DATABROWSERPERIODTYPE, periodTypeId );

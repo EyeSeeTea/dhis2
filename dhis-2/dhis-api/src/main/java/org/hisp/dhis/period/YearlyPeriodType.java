@@ -83,7 +83,7 @@ public class YearlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 6;
+        return 365;
     }
 
     // -------------------------------------------------------------------------

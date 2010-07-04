@@ -93,7 +93,7 @@ public class AverageIntSingleValueAggregator
         final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
             period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
 
-        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>(); // <Operand, total value>
+        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>( entries.size() ); // <Operand, total value>
         
         for ( final Entry<DataElementOperand, double[]> entry : entries.entrySet() ) 
         {
@@ -119,6 +119,7 @@ public class AverageIntSingleValueAggregator
         double relevantDays = 0.0;
         double existingValue = 0.0;
         double existingRelevantDays = 0.0;
+        double duration = 0.0;
 
         int dataValueLevel = 0;
         
@@ -131,37 +132,41 @@ public class AverageIntSingleValueAggregator
 
             dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
             
-            for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
-            {
-                if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel )  )
+            duration = getDaysInclusive( currentStartDate, currentEndDate );
+            
+            if ( duration > 0 )
+            {            
+                for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
                 {
-                    value = 0.0;
-                    
-                    try
+                    if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel )  )
                     {
-                        value = Double.parseDouble( entry.getValue() );
+                        value = 0.0;
+                        relevantDays = 0.0;             
+                        
+                        try
+                        {
+                            value = Double.parseDouble( entry.getValue() );
+                        }
+                        catch ( NumberFormatException ex )
+                        {
+                            log.warn( "Value skipped, not numeric: '" + entry.getValue() + 
+                                "', for data element with id: '" + entry.getKey() +
+                                "', for period with id: '" + crossTabValue.getPeriodId() +
+                                "', for source with id: '" + crossTabValue.getSourceId() + "'" );
+                        }
+    
+                        if ( currentStartDate.compareTo( endDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0 ) // Value is intersecting
+                        {
+                            relevantDays = getDaysInclusive( startDate, endDate );
+                        }
+                        
+                        existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
+                        existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
+                        
+                        final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
+                        
+                        totalSums.put( entry.getKey(), values );
                     }
-                    catch ( NumberFormatException ex )
-                    {
-                        log.warn( "Value skipped, not numeric: '" + entry.getValue() + 
-                            "', for data element with id: '" + entry.getKey() +
-                            "', for period with id: '" + crossTabValue.getPeriodId() +
-                            "', for source with id: '" + crossTabValue.getSourceId() + "'" );
-                    }
-
-                    relevantDays = 0.0;
-                    
-                    if ( currentStartDate.compareTo( endDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0 ) // Value is intersecting
-                    {
-                        relevantDays = getDaysInclusive( startDate, endDate );
-                    }
-                    
-                    existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
-                    existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
-                    
-                    final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
-                    
-                    totalSums.put( entry.getKey(), values );
                 }
             }
         }                    

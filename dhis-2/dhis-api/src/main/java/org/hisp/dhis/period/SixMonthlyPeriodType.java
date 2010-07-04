@@ -86,7 +86,7 @@ public class SixMonthlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 5;
+        return 182;
     }
 
     // -------------------------------------------------------------------------

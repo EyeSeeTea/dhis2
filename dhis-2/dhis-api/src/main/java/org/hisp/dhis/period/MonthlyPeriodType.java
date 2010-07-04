@@ -84,7 +84,7 @@ public class MonthlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 3;
+        return 31;
     }
 
     // -------------------------------------------------------------------------

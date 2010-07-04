@@ -5,7 +5,7 @@
 
 * 
 {
-  font-family: tahoma, sans-serif;
+  font-family: arial, sans-serif;
   line-height: 125%;
 }
 
@@ -136,10 +136,11 @@ div#menuLink4
 span#headerText
 {
   position: absolute;
-  top: 24px;
+  top: 23px;
   left: 228px;
+  font-weight: lighter;
   color: white;
-  font-size: 17px;
+  font-size: 13pt;
 }
 
 div#popupHeader 
@@ -221,14 +222,14 @@ div#menuDropDown3
 
 #leftBar
 {
-  background-color: #33669b;
-  height: 472px;
+  background-color: #35699f;
+  height: 474px;
   width: 235px;
   float: left;
   position: absolute;
-  top: 79px;
+  top: 71px;
   left: 0px;
-  border-top: 1px solid #10375f;
+  padding-top: 6px;
   border-right: 1px solid #10375f;
   border-bottom: 1px solid #10375f;
   filter: alpha(opacity=90);
@@ -292,37 +293,43 @@ div#menuDropDown3
 
 .page h1 
 {
-  font-size: 14pt;
+  font-size: 16pt;
+  font-weight: lighter;
   color: #606060;
 }
 
 .page h2 
 {
-  font-size: 13pt;
+  font-size: 15pt;
+  font-weight: lighter;
   color: #606060;
 }
 
 .page h3 
 {
-  font-size: 12pt;
+  font-size: 14pt;
+  font-weight: lighter;
   color: #606060;
 }
 
 .page h4 
 {
-  font-size: 11pt;
+  font-size: 13pt;
+  font-weight: lighter;
   color: #606060;
 }
 
 .page h5 
 {
-  font-size: 10pt;
+  font-size: 12pt;
+  font-weight: lighter;
   color: #606060;
 }
 
 .page h6 
 {
-  font-size: 9pt;
+  font-size: 11pt;
+  font-weight: lighter;
   color: #606060;
 }
 

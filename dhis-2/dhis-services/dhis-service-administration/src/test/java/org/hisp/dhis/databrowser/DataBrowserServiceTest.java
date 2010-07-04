@@ -231,7 +231,7 @@ public class DataBrowserServiceTest
         assertNotSame( "Querytime more than 0", 0, table.getQueryTime() );
 
         assertEquals( "Metacolumns", 3, table.getColumns().size() );
-        assertEquals( "OrganisationUnit", table.getColumns().get( 0 ).getName() );
+        assertEquals( "drilldown_organisation_unit", table.getColumns().get( 0 ).getName() );
         assertEquals( "Period column header", "2005-03-01", table.getColumns().get( 1 ).getName() );
         assertEquals( "Period column header", "2005-04-01", table.getColumns().get( 2 ).getName() );
 
@@ -266,7 +266,7 @@ public class DataBrowserServiceTest
         assertNotSame( "Querytime more than 0", 0, table.getQueryTime() );
 
         assertEquals( "Metacolumns", 2, table.getColumns().size() );
-        assertEquals( "OrganisationUnit", table.getColumns().get( 0 ).getName() );
+        assertEquals( "drilldown_organisation_unit", table.getColumns().get( 0 ).getName() );
         // Service layer adds "zero-column"
         assertEquals( "counts_of_aggregated_values", table.getColumns().get( 1 ).getName() );
 

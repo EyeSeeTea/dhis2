@@ -28,6 +28,7 @@ package org.hisp.dhis.dataprune.jdbc;
  */
 
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataprune.DataPruneStore;
@@ -63,30 +64,76 @@ public class JdbcDataPruneStore implements DataPruneStore
         
         String orgUnitIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( OrganisationUnit.class, orgUnits )) ;
         
-        String sql = "delete from datasetlocksource where sourceid in (" + orgUnitIds + ");" + 
-                        "delete from completedatasetregistration where sourceid in (" + orgUnitIds + ");" +
-                        "delete from datasetsource where sourceid in (" + orgUnitIds + ");" +
-                        "delete from frequencyoverrideassociation where sourceid in (" + orgUnitIds + ");" +
-                        "delete from minmaxdataelement where sourceid in (" + orgUnitIds + ");" +
-                        "delete from orgunitgroupmembers where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from usermembership where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from datamartexportorgunits where orgunitid in (" + orgUnitIds + ");" +
-                        "delete from excelgroup_associations where organisationid in (" + orgUnitIds + ");" +
-                        "delete from reportexcel_associations where organisationid in (" + orgUnitIds + ");" +
-                        "delete from maporganisationunitrelation where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from maporganisationunitrelation where mapid in (select mapid from map where organisationunitid in (" + orgUnitIds + "));" +
-                        "delete from map where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from patientidentifier where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from program_organisationunits where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from chart_organisationunits where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from reporttable_organisationunits where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from datavalue_audit where (dataelementid, periodid, sourceid, categoryoptioncomboid) in (select dataelementid, periodid, sourceid, categoryoptioncomboid from datavalue where sourceid in (" + orgUnitIds + "));" + 
-                        "delete from datavalue where sourceid in (" + orgUnitIds + ");" + 
-                        "delete from organisationunit where organisationunitid in (" + orgUnitIds + ");" +
-                        "delete from source where sourceid in (" + orgUnitIds + ");";
-        
         long before = System.currentTimeMillis();
+        
+        String sql = "delete from datasetlocksource where sourceid in (" + orgUnitIds + ");";
         jdbcTemplate.execute( sql );
+        
+        sql = "delete from completedatasetregistration where sourceid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from datasetsource where sourceid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from frequencyoverrideassociation where sourceid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from minmaxdataelement where sourceid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from orgunitgroupmembers where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from usermembership where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from datamartexportorgunits where orgunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from excelgroup_associations where organisationid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from reportexcel_associations where organisationid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from maporganisationunitrelation where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from maporganisationunitrelation where mapid in (select mapid from map where organisationunitid in ("
+            + orgUnitIds + "));";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from map where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from patientidentifier where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from program_organisationunits where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from chart_organisationunits where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from reporttable_organisationunits where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from datavalue_audit where (dataelementid, periodid, sourceid, categoryoptioncomboid) in (select dataelementid, periodid, sourceid, categoryoptioncomboid from datavalue where sourceid in ("
+            + orgUnitIds + "));";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from datavalue where sourceid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "update organisationunit set parentid=null where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from organisationunit where organisationunitid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+
+        sql = "delete from source where sourceid in (" + orgUnitIds + ");";
+        jdbcTemplate.execute( sql );
+        
         log.info( "Deleting " + orgUnits.size() + " organisations units sucessfully in " + (System.currentTimeMillis() - before) + " ms.");
     }
 }

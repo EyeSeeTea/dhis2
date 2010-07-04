@@ -138,10 +138,9 @@ public class SumBoolAggregator
                 {
                     if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
                     {
-                        value = 0;
-                        
-                        relevantDays = 0;
-                        factor = 0;
+                        value = 0.0;                        
+                        relevantDays = 0.0;
+                        factor = 0.0;
 
                         if ( currentStartDate.compareTo( startDate ) >= 0 && currentEndDate.compareTo( endDate ) <= 0 ) // Value is within period
                         {

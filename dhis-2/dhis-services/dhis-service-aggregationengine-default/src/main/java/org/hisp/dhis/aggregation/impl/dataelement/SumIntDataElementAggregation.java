@@ -68,7 +68,7 @@ public class SumIntDataElementAggregation
     {
         OrganisationUnitHierarchy hierarchy = aggregationCache.getOrganisationUnitHierarchy();
         
-        Collection<Integer> periods = aggregationCache.getPeriodIds( startDate, endDate );
+        Collection<Integer> periods = aggregationCache.getIntersectingPeriodIds( startDate, endDate );
         
         Collection<DataValue> values = aggregationStore.getDataValues( hierarchy.getChildren( organisationUnitId ), dataElementId, optionComboId, periods );
         

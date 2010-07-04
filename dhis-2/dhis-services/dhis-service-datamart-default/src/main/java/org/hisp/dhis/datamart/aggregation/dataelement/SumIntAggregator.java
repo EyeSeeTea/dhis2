@@ -141,6 +141,10 @@ public class SumIntAggregator
                 {
                     if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
                     {
+                        value = 0.0;
+                        relevantDays = 0.0;
+                        factor = 0.0;                        
+                        
                         try
                         {
                             value = Double.parseDouble( entry.getValue() );
@@ -152,9 +156,6 @@ public class SumIntAggregator
                                 "', for period with id: '" + crossTabValue.getPeriodId() +
                                 "', for source with id: '" + crossTabValue.getSourceId() + "'" );
                         }
-                        
-                        relevantDays = 0;
-                        factor = 0;
                         
                         if ( currentStartDate.compareTo( startDate ) >= 0 && currentEndDate.compareTo( endDate ) <= 0 ) // Value is within period
                         {

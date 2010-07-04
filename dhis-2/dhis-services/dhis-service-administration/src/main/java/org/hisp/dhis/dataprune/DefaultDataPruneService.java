@@ -28,10 +28,8 @@ package org.hisp.dhis.dataprune;
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,9 +71,7 @@ public class DefaultDataPruneService
         }
 
         List<OrganisationUnit> deletedOrgUnits = pruneOrganisationUnitLocal( organisationUnit );
-
-        Collections.reverse( deletedOrgUnits );
-
+        
         dataPruneStore.deleteMultiOrganisationUnit( deletedOrgUnits );
     }
 
