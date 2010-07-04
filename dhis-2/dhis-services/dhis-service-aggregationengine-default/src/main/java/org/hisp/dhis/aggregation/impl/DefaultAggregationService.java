@@ -38,6 +38,8 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
+import static org.hisp.dhis.dataelement.DataElement.*;
+
 /**
  * @author Lars Helge Overland
  * @version $Id: DefaultAggregationService.java 5116 2008-05-08 10:51:21Z larshelg $
@@ -137,23 +139,19 @@ public class DefaultAggregationService
 
     private AbstractDataElementAggregation getInstance( String valueType, String aggregationOperator )
     {
-        if ( valueType.equals( DataElement.VALUE_TYPE_INT )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_SUM ) )
+        if ( valueType.equals( VALUE_TYPE_INT ) && aggregationOperator.equals( AGGREGATION_OPERATOR_SUM ) )
         {
             return sumIntDataElementAggregation;
         }
-        else if ( valueType.equals( DataElement.VALUE_TYPE_BOOL )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_SUM ) )
+        else if ( valueType.equals( VALUE_TYPE_BOOL ) && aggregationOperator.equals( AGGREGATION_OPERATOR_SUM ) )
         {
             return sumBoolDataElementAggregation;
         }
-        else if ( valueType.equals( DataElement.VALUE_TYPE_INT )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_AVERAGE ) )
+        else if ( valueType.equals( VALUE_TYPE_INT ) && aggregationOperator.equals( AGGREGATION_OPERATOR_AVERAGE ) )
         {
             return averageIntDataElementAggregation;
         }
-        else if ( valueType.equals( DataElement.VALUE_TYPE_BOOL )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_AVERAGE ) )
+        else if ( valueType.equals( VALUE_TYPE_BOOL ) && aggregationOperator.equals( AGGREGATION_OPERATOR_AVERAGE ) )
         {
             return averageBoolDataElementAggregation;
         }

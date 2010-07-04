@@ -84,7 +84,7 @@ public class WeeklyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 2;
+        return 7;
     }
 
     // -------------------------------------------------------------------------

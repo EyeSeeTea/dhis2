@@ -86,7 +86,7 @@ public class QuarterlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 4;
+        return 92;
     }
 
     // -------------------------------------------------------------------------

@@ -86,7 +86,7 @@ public class TwoYearlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 7;
+        return 730;
     }
 
     // -------------------------------------------------------------------------
