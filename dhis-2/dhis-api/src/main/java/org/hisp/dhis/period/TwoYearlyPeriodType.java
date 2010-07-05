@@ -48,6 +48,8 @@ public class TwoYearlyPeriodType
      */
     public static final String NAME = "TwoYearly";
 
+    public static final int FREQUENCY_ORDER = 730;
+
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
@@ -86,7 +88,7 @@ public class TwoYearlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 730;
+        return FREQUENCY_ORDER;
     }
 
     // -------------------------------------------------------------------------

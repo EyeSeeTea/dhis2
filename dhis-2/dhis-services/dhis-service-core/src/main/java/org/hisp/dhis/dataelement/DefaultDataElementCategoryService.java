@@ -396,7 +396,7 @@ public class DefaultDataElementCategoryService
             Set<DataElementCategoryOptionCombo> categoryOptionCombos = dataElement.getCategoryCombo()
                 .getOptionCombos();
 
-            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder() : new TwoYearlyPeriodType().getFrequencyOrder(); // Assume lowest frequency if no PeriodType
+            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder() : TwoYearlyPeriodType.FREQUENCY_ORDER; // Assume lowest frequency if no PeriodType
             
             if ( categoryOptionCombos.size() > 1 && !(dataElement instanceof CalculatedDataElement) )
             {

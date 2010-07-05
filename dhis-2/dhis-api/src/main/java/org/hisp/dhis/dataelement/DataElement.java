@@ -42,6 +42,7 @@ import org.hisp.dhis.dimension.DimensionOption;
 import org.hisp.dhis.dimension.DimensionOptionElement;
 import org.hisp.dhis.dimension.DimensionType;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.TwoYearlyPeriodType;
 
 /**
  * A DataElement is a definition (meta-information about) of the entities that
@@ -323,7 +324,7 @@ public class DataElement
     {
         PeriodType periodType = getPeriodType();
         
-        return periodType != null ? periodType.getFrequencyOrder() : 0;
+        return periodType != null ? periodType.getFrequencyOrder() : TwoYearlyPeriodType.FREQUENCY_ORDER;
     }
 
     /**

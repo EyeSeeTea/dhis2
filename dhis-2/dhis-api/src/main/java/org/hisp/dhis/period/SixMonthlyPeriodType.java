@@ -47,6 +47,8 @@ public class SixMonthlyPeriodType
      * The name of the SixMonthlyPeriodType, which is "SixMonthly".
      */
     public static final String NAME = "SixMonthly";
+    
+    public static final int FREQUENCY_ORDER = 182;
 
     // -------------------------------------------------------------------------
     // PeriodType functionality
@@ -86,7 +88,7 @@ public class SixMonthlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 182;
+        return FREQUENCY_ORDER;
     }
 
     // -------------------------------------------------------------------------
