@@ -6,32 +6,41 @@
 <input type="hidden" id="id" name="id" value="$!id">
 <input type="hidden" id="mode" name="mode" value="$!mode">
 
-#if ( $mode == "status" )
+#if ( $mode == "status" ) <!-- Keep the process running and show status -->
 	<script type="text/javascript">
 	   getTableStatus();
 	</script>
 #end
 
-<!-- Report mode and no report parameters: proceed to generate report tables and view report -->
-
-#if ( $mode == "report" && $!reportParams.isSet() == false )
-    <script type="text/javascript">
-       runAndViewReport( "$id", "$url" );
-    </script>
-#end
-
-<!-- Report table mode and no report parameters: proceed to generate report table -->
-
-#if ( $mode == "table" && $!reportParams.isSet() == false )
+#if ( $mode == "table" && $!reportParams.isSet() == false ) <!-- Create table, nothing to ask -->
 	<script type="text/javascript">
-		createTable( "$id" );
+		createTable( '$id' );
 	</script>
 #end
 
-<!-- Report / report table parameters exists: input parameters -->
-
 <table>
-    
+	
+	<!-- Data source -->
+	
+	#if ( $mode == "report" )
+	
+    <tr>
+        <th>$i18n.getString( "data_source" )</th>
+    </tr>
+    <tr>
+    	<td>
+			<select id="doDataMart" name="doDataMart" style="width:325px">
+				<option value="true">$i18n.getString( "aggregate_data" )</a>
+				<option value="false">$i18n.getString( "use_existing_data" )</a>
+			</select>
+		</td>
+	</tr>
+    <tr>
+        <td colspan="4" style="height:10px"></td>
+    </tr>
+	
+	#end
+	
     <!-- Reporting month -->
     
     #if ( $!reportParams.isParamReportingMonth() )
@@ -102,16 +111,12 @@
     
     <tr>        
         <td>
-        #if ( $mode == "table" && $!reportParams.isSet() )
-            <input type="button" value="$i18n.getString( 'ok' )" onclick="createTable( '$id' )" style="width:120px">
-        #end
         #if ( $mode == "table" || $mode == "status" )
+            <input type="button" value="$i18n.getString( 'ok' )" onclick="createTable( '$id' )" style="width:120px">        
             <input type="button" value="$i18n.getString( 'back' )" onclick="javascript:window.location.href='displayManageTableForm.action'" style="width:120px">
         #end
-        #if ( $mode == "report" && $!reportParams.isSet() )
-            <input type="button" value="$i18n.getString( 'ok' )" style="width:120px" onclick="runAndViewReport( '$id', '$url' )">
-        #end
         #if ( $mode == "report" )
+            <input type="button" value="$i18n.getString( 'ok' )" style="width:120px" onclick="runAndViewReport( '$id', '$url' )">
             <input type="button" value="$i18n.getString( 'back' )" onclick="javascript:window.location.href='displayViewReportForm.action'" style="width:120px">
         #end
         </td>

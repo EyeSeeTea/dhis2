@@ -143,7 +143,7 @@ public class DefaultReportTableService
 
     @Transactional
     public void createReportTables( int id, String mode, Integer reportingPeriod, 
-        Integer parentOrganisationUnitId, Integer organisationUnitId, I18nFormat format )
+        Integer parentOrganisationUnitId, Integer organisationUnitId, boolean doDataMart, I18nFormat format )
     {
         for ( ReportTable reportTable : getReportTables( id, mode ) )
         {
@@ -204,7 +204,7 @@ public class DefaultReportTableService
             // Create report table
             // -----------------------------------------------------------------
 
-            createReportTable( reportTable, true );
+            createReportTable( reportTable, doDataMart );
         }
     }
 

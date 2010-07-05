@@ -16,7 +16,7 @@ var tempUrl = null;
 
 function runAndViewReport( reportId, reportUrl )
 {
-    var url = "createTable.action?id=" + reportId + "&mode=report";
+    var url = "createTable.action?id=" + reportId + "&doDataMart=" + getListValue( "doDataMart" ) + "&mode=report";
     
     if ( document.getElementById( "reportingPeriod" ) != null )
     {
@@ -74,7 +74,7 @@ function reportStatusReceived( xmlObject )
     }
     else
     {
-        setWaitMessage( i18n_please_wait + ". " + statusMessage + "..."  );
+        setWaitMessage( i18n_please_wait + " - " + statusMessage );
         
         waitAndGetReportStatus( 2000 );
     }
