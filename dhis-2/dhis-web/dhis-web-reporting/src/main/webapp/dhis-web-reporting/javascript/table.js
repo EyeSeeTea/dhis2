@@ -182,13 +182,20 @@ function validateCollections()
         return false;
     }
     
+    if ( bothOrganisationUnitReportParamsChecked() )
+    {
+    	setMessage( i18n_cannot_select_orgunit_and_parent_orgunit_param );
+    	
+    	return false;
+    }
+    
     if ( !hasElements( "selectedPeriods" ) && !relativePeriodsChecked() )
     {
         setMessage( i18n_must_select_at_least_one_period );
         
         return false;
     }
-    
+        
     return true;
 }
 
@@ -222,6 +229,17 @@ function relativePeriodsChecked()
 function organisationUnitReportParamsChecked()
 {
     if ( isChecked( "paramParentOrganisationUnit" ) == true ||
+         isChecked( "paramOrganisationUnit" ) == true )
+    {
+        return true;
+    }
+    
+    return false;
+}
+
+function bothOrganisationUnitReportParamsChecked()
+{
+	if ( isChecked( "paramParentOrganisationUnit" ) == true &&
          isChecked( "paramOrganisationUnit" ) == true )
     {
         return true;
