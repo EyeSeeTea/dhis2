@@ -41,7 +41,7 @@
     </tr>
     <tr>
         <td>
-            <select id="reportingPeriod" name="reportingPeriod" style="min-width:325px">               
+            <select id="reportingPeriod" name="reportingPeriod" style="width:325px">               
                 #foreach ( $key in $reportingPeriods.keySet() )
                     <option value="$key">$reportingPeriods.get( $key )</option>
                 #end
@@ -61,25 +61,15 @@
     <tr>
         <th>$i18n.getString( "parent_organisationunit" )</th>
     </tr>
-    <tr>
-        <td>
-        	<select id="organisationUnitLevelParent" style="min-width:325px" onchange="getOrganisationUnitsParent()">
-        		<option value="-1">[ $i18n.getString( "select_organisation_unit_level" ) ]</option>
-        		#foreach( $level in $levels )
-        			<option value="$level.level">$level.name</option>
-		        #end
-	        </select>
-        </td>
-	</tr>
-	<tr>
-		<td>
-			<select id="parentOrganisationUnitId" name="parentOrganisationUnitId" style="min-width:325px">
-				#foreach( $unit in $organisationUnits )
-					<option value="$unit.id">$unit.name</option>
-				#end
-			</select>
-		</td>
-	</tr>
+    <td>
+		<div id="selectionTree" style="width:325px; height:270px"></div>	            
+		<script type="text/javascript">
+			selectionTreeSelection.setMultipleSelectionAllowed( false );
+			selectionTreeSelection.setListenerFunction( paramParentOrganisationUnitSet );
+			selectionTree.clearSelectedOrganisationUnits();
+		    selectionTree.buildSelectionTree();
+		</script>
+    </td>
     <tr>
         <td colspan="4" style="height:10px"></td>
     </tr>
@@ -93,25 +83,15 @@
 	<tr>
         <th>$i18n.getString( "organisation_unit" )</th>
     </tr>
-	<tr>
-        <td>
-            <select id="organisationUnitLevelSingle" style="min-width:325px" onchange="getOrganisationUnitsSingle()">
-                <option value="-1">[ $i18n.getString( "select_organisation_unit_level" ) ]</option>
-                #foreach( $level in $levels )
-                    <option value="$level.level">$level.name</option>
-                #end
-            </select>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <select id="organisationUnitId" name="organisationUnitId" style="min-width:325px">
-                #foreach( $unit in $organisationUnits )
-                    <option value="$unit.id">$unit.name</option>
-                #end
-            </select>
-        </td>
-    </tr>
+    <td>
+		<div id="selectionTree" style="width:325px; height:270px"></div>	            
+		<script type="text/javascript">
+			selectionTreeSelection.setMultipleSelectionAllowed( false );
+			selectionTreeSelection.setListenerFunction( paramOrganisationUnitSet );
+			selectionTree.clearSelectedOrganisationUnits();
+		    selectionTree.buildSelectionTree();
+		</script>
+    </td>
     <tr>
         <td colspan="4" style="height:10px"></td>
     </tr>

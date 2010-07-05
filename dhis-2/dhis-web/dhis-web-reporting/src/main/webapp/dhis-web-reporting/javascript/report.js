@@ -1,4 +1,17 @@
 
+var paramParentOrganisationUnit = null;
+var paramOrganisationUnit = null;
+
+function paramParentOrganisationUnitSet( id )
+{
+	paramParentOrganisationUnit = id;
+}
+
+function paramOrganisationUnitSet( id )
+{
+	paramOrganisationUnit = id;
+}
+
 var tempUrl = null;
 
 function runAndViewReport( reportId, reportUrl )
@@ -10,14 +23,14 @@ function runAndViewReport( reportId, reportUrl )
         url += "&reportingPeriod=" + getListValue( "reportingPeriod" );
     }
     
-    if ( document.getElementById( "parentOrganisationUnitId" ) != null )
+    if ( paramParentOrganisationUnit != null )
     {
-        url += "&parentOrganisationUnitId=" + getListValue( "parentOrganisationUnitId" );
+        url += "&parentOrganisationUnitId=" + paramParentOrganisationUnit;
     }
     
-    if ( document.getElementById( "organisationUnitId" ) != null )
+    if ( paramOrganisationUnit != null )
     {
-        url += "&organisationUnitId=" + getListValue( "organisationUnitId" );
+        url += "&organisationUnitId=" + paramOrganisationUnit;
     }
     
 	tempUrl = reportUrl;
