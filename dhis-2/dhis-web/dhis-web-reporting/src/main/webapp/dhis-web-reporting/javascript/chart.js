@@ -3,55 +3,6 @@
 // View chart
 // -----------------------------------------------------------------------------
 
-var tempChartId;
-
-function runAndViewChart( chartId )
-{
-	setHeaderWaitMessage( i18n_please_wait );
-	
-    tempChartId = chartId;
-    
-    var request = new Request();
-    request.setCallbackSuccess( runAndViewChartReceived );    
-    request.send( "createChart.action?id=" + chartId );
-}
-
-function runAndViewChartReceived( messageElement )
-{
-    getChartStatus();
-}
-
-function getChartStatus()
-{
-    var url = "getStatus.action";
-    
-    var request = new Request();
-    request.setResponseTypeXML( "status" );
-    request.setCallbackSuccess( chartStatusReceived );    
-    request.send( url );
-}
-
-function chartStatusReceived( xmlObject )
-{
-    var statusMessage = getElementValue( xmlObject, "statusMessage" );
-    var finished = getElementValue( xmlObject, "finished" );
-    
-    updateHeaderWaitMessage( statusMessage );
-    
-    if ( finished == "true" )
-    {
-    	hideHeaderMessage();
-    	
-        var url = "viewChart.action?id=" + tempChartId;
-        
-        viewChart( url );
-    }
-    else
-    {
-        setTimeout( "getChartStatus();", 2000 );
-    }
-}
-
 function viewChart( url )
 {
     window.open( url, "_blank", "directories=no, height=560, width=760, location=no, menubar=no, status=no, toolbar=no, resizable=yes, scrollbars=yes" );

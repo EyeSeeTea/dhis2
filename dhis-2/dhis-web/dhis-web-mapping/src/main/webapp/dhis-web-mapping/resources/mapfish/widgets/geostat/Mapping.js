@@ -149,7 +149,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
     
         mapStore = new Ext.data.JsonStore({
-            url: path + 'getAllMaps' + type,
+            url: path_mapping + 'getAllMaps' + type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
@@ -157,7 +157,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         });
             
         gridStore = new Ext.data.JsonStore({
-            url: path + 'getAvailableMapOrganisationUnitRelations' + type,
+            url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
             root: 'mapOrganisationUnitRelations',
             fields: ['id', 'organisationUnit', 'organisationUnitId', 'featureId'],
             sortInfo: { field: 'organisationUnit', direction: 'ASC' },
@@ -283,7 +283,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                                 var mlp = Ext.getCmp('maps_cb').getValue();
                                 
                                 Ext.Ajax.request({
-                                    url: path + 'deleteMapOrganisationUnitRelationsByMap' + type,
+                                    url: path_mapping + 'deleteMapOrganisationUnitRelationsByMap' + type,
                                     method: 'GET',
                                     params: { mapLayerPath: mlp },
                                     success: function( responseObject ) {
@@ -339,7 +339,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 								params += '&mapLayerPath=' + mlp;
 								
 								Ext.Ajax.request({
-									url: path + 'deleteMapOrganisationUnitRelations' + type + params,
+									url: path_mapping + 'deleteMapOrganisationUnitRelations' + type + params,
 									method: 'GET',
 									success: function( responseObject ) {
 										Ext.getCmp('grid_gp').getStore().baseParams = { mapLayerPath: mlp, format: 'json' };
@@ -367,14 +367,14 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 								var mlp = Ext.getCmp('maps_cb').getValue();
 								
 								Ext.Ajax.request({
-									url: path + 'getMapOrganisationUnitRelationByFeatureId' + type,
+									url: path_mapping + 'getMapOrganisationUnitRelationByFeatureId' + type,
 									method: 'POST',
 									params: {featureId:mapping.relation, mapLayerPath:mlp},
 									success: function( responseObject ) {
 										var mour = Ext.util.JSON.decode( responseObject.responseText ).mapOrganisationUnitRelation[0];
 										if (mour.featureId == '') {
 											Ext.Ajax.request({
-												url: path + 'addOrUpdateMapOrganisationUnitRelation' + type,
+												url: path_mapping + 'addOrUpdateMapOrganisationUnitRelation' + type,
 												method: 'POST',
 												params: { mapLayerPath:mlp, organisationUnitId:id, featureId:mapping.relation },
 												success: function( responseObject ) {

@@ -48,6 +48,8 @@ public class WeeklyPeriodType
      */
     public static final String NAME = "Weekly";
 
+    public static final int FREQUENCY_ORDER = 7;
+
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
@@ -84,7 +86,7 @@ public class WeeklyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 7;
+        return FREQUENCY_ORDER;
     }
 
     // -------------------------------------------------------------------------

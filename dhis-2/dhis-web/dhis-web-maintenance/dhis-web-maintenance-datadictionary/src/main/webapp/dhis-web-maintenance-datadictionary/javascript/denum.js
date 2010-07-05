@@ -171,7 +171,8 @@ function openDenum( type, formula, description, aggregationOperator )
 	var url = "editDenum.action?type=" + type + "&formula=" + formula + 
         "&description=" + description + "&aggregationOperator=" + aggregationOperator;
     						
-    var dialog = window.open( url, "_blank", "directories=no, height=560, width=790, location=no, menubar=no, status=no, toolbar=no, resizable=yes, scrollbars=yes" );
+    var dialog = window.open( url, "_blank", 
+    	"directories=no, height=600, width=790, location=no, menubar=no, status=no, toolbar=no, resizable=yes, scrollbars=yes" );
 }
 
 function insertText( inputAreaName, inputText, radioGroupName )

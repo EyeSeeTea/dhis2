@@ -149,7 +149,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		var mls = Ext.getCmp('maplegendset_cb').getValue();
 		var bounds = [];
 		Ext.Ajax.request({
-			url: path + 'getMapLegendsByMapLegendSet' + type,
+			url: path_mapping + 'getMapLegendsByMapLegendSet' + type,
 			method: 'POST',
 			params: { mapLegendSetId: mls },
 			success: function(r) {
@@ -181,7 +181,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
     
         mapViewStore = new Ext.data.JsonStore({
-            url: path + 'getAllMapViews' + type,
+            url: path_mapping + 'getAllMapViews' + type,
             root: 'mapViews',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -191,7 +191,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function() {
                         if (PARAMETER) {
                             Ext.Ajax.request({
-                                url: path + 'getMapView' + type,
+                                url: path_mapping + 'getMapView' + type,
                                 method: 'POST',
                                 params: { id: PARAMETER },
 								success: function(r) {
@@ -247,7 +247,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
     
         indicatorGroupStore = new Ext.data.JsonStore({
-            url: path + 'getAllIndicatorGroups' + type,
+            url: path_mapping + 'getAllIndicatorGroups' + type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
             idProperty: 'id',
@@ -256,7 +256,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
         
         indicatorStore = new Ext.data.JsonStore({
-            url: path + 'getIndicatorsByIndicatorGroup' + type,
+            url: path_mapping + 'getIndicatorsByIndicatorGroup' + type,
 			baseParams: {indicatorGroupId:0},
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
@@ -288,7 +288,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
 		
 		dataElementGroupStore = new Ext.data.JsonStore({
-			url: path + 'getAllDataElementGroups' + type,
+			url: path_mapping + 'getAllDataElementGroups' + type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -296,7 +296,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
 		
 		dataElementStore = new Ext.data.JsonStore({
-            url: path + 'getDataElementsByDataElementGroup' + type,
+            url: path_mapping + 'getDataElementsByDataElementGroup' + type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -327,14 +327,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
         
         periodTypeStore = new Ext.data.JsonStore({
-            url: path + 'getAllPeriodTypes' + type,
+            url: path_mapping + 'getAllPeriodTypes' + type,
             root: 'periodTypes',
             fields: ['name'],
             autoLoad: true
         });
             
         periodStore = new Ext.data.JsonStore({
-            url: path + 'getPeriodsByPeriodType' + type,
+            url: path_mapping + 'getPeriodsByPeriodType' + type,
             baseParams: { name: 0 },
             root: 'periods',
             fields: ['id', 'name'],
@@ -347,7 +347,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             var mst = MAPVIEW.mapSourceType;
 
                             Ext.Ajax.request({
-                                url: path + 'setMapSourceTypeUserSetting' + type,
+                                url: path_mapping + 'setMapSourceTypeUserSetting' + type,
                                 method: 'POST',
                                 params: { mapSourceType: mst },
 								success: function(r) {
@@ -370,7 +370,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
             
         mapStore = new Ext.data.JsonStore({
-            url: path + 'getAllMaps' + type,
+            url: path_mapping + 'getAllMaps' + type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
@@ -389,7 +389,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
 		
 		predefinedMapLegendSetStore = new Ext.data.JsonStore({
-            url: path + 'getMapLegendSetsByType' + type,
+            url: path_mapping + 'getMapLegendSetsByType' + type,
             baseParams: { type: map_legend_type_predefined },
             root: 'mapLegendSets',
             fields: ['id', 'name'],
@@ -399,7 +399,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function() {
 						if (MAPVIEW) {
 							Ext.Ajax.request({
-								url: path + 'getMapLegendSet' + type,
+								url: path_mapping + 'getMapLegendSet' + type,
 								method: 'POST',
 								params: { id: MAPVIEW.mapLegendSetId },
 								success: function(r) {
@@ -441,7 +441,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         var mId = Ext.getCmp('mapview_cb').getValue();
                         
                         Ext.Ajax.request({
-                            url: path + 'getMapView' + type,
+                            url: path_mapping + 'getMapView' + type,
                             method: 'POST',
                             params: { id: mId },
                             success: function(r) {
@@ -606,7 +606,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         var iId = Ext.getCmp('indicator_cb').getValue();
                         
                         Ext.Ajax.request({
-                            url: path + 'getMapLegendSetByIndicator' + type,
+                            url: path_mapping + 'getMapLegendSetByIndicator' + type,
                             method: 'POST',
                             params: { indicatorId: iId, format: 'json' },
 
@@ -694,7 +694,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 						/* TODO legend set
 						
                         Ext.Ajax.request({
-                            url: path + 'getMapLegendSetByIndicator' + type,
+                            url: path_mapping + 'getMapLegendSetByIndicator' + type,
                             method: 'POST',
                             params: { indicatorId: iId },
 
@@ -816,11 +816,76 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         },
         
+        {
+            xtype: 'textfield',
+            id: 'map_tf',
+            fieldLabel: i18n_parent_orgunit,
+            typeAhead: true,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            emptyText: emptytext,
+			labelSeparator: labelseparator,
+            selectOnFocus: true,
+            width: combo_width,
+            listeners: {
+                'focus': {
+                    fn: function() {
+                        function showTree() {
+                            var w = new Ext.Window({
+                                title: 'Select parent organisation unit',
+                                autoScroll: true,
+                                width: 400,
+                                height: 500,
+                                items: {
+                                    xtype: 'treepanel',
+                                    loader: new Ext.tree.TreeLoader({
+                                        dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
+                                    }),
+                                    root: {
+                                        id: TOPLEVELUNIT.id,
+                                        text: TOPLEVELUNIT.name,
+                                        nodeType: 'async',
+                                        draggable: false
+                                    }
+                                }
+                            }).show();
+                        }
+                        
+                        if (TOPLEVELUNIT.id) {
+                            showTree();
+                        }
+                        else {
+                            Ext.Ajax.request({
+                                url: path_commons + 'getOrganisationUnits' + type,
+                                params: { level: 1 },
+                                method: 'POST',
+                                success: function(r) {
+                                    var rootNode = Ext.util.JSON.decode(r.responseText).organisationUnits[0];
+                                    TOPLEVELUNIT.id = rootNode.id;
+                                    TOPLEVELUNIT.name = rootNode.name;
+                                    
+                                    showTree();          
+                                },
+                                failure: function(r) {
+                                    alert('getOrganisationUnits');
+                                }
+                            });
+                        }
+                    },
+                    scope: this
+                }
+            }
+        },
+        
         { html: '<br>' },
 		
 		{
             xtype: 'combo',
-            fieldLabel: i18n_legend_type ,
+            fieldLabel: i18n_legend_type,
             id: 'maplegendtype_cb',
             editable: false,
             valueField: 'value',
@@ -879,7 +944,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            fieldLabel: i18n_legend_set ,
+            fieldLabel: i18n_legend_set,
             id: 'maplegendset_cb',
             editable: false,
             valueField: 'id',
@@ -903,7 +968,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'combo',
-            fieldLabel: i18n_method ,
+            fieldLabel: i18n_method,
             id: 'method',
             editable: false,
             valueField: 'value',
@@ -1099,14 +1164,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 				
             if (MAPSOURCE == map_source_type_database) {
                 if (URL == FACILITY_LEVEL) {
-                    this.setUrl(path + 'getPointShapefile.action?level=' + URL);
+                    this.setUrl(path_mapping + 'getPointShapefile.action?level=' + URL);
                 }
                 else {
-                    this.setUrl(path + 'getPolygonShapefile.action?level=' + URL);
+                    this.setUrl(path_mapping + 'getPolygonShapefile.action?level=' + URL);
                 }
             }
             else if (MAPSOURCE == map_source_type_geojson) {
-                this.setUrl(path + 'getGeoJson.action?name=' + URL);
+                this.setUrl(path_mapping + 'getGeoJson.action?name=' + URL);
             }
 			else if (MAPSOURCE == map_source_type_shapefile) {
 				this.setUrl(path_geoserver + wfs + URL + output);
@@ -1119,7 +1184,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             !Ext.getCmp('period_cb').getValue() ||
             !Ext.getCmp('map_cb').getValue() ) {
             if (exception) {
-                Ext.messageRed.msg( i18n_thematic_map , i18n_form_is_not_complete );
+                Ext.messageRed.msg( i18n_thematic_map, i18n_form_is_not_complete );
             }
             return;
         }

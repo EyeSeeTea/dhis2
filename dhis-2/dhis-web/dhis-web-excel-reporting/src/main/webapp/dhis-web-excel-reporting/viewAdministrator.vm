@@ -7,7 +7,6 @@
 	#introListImgItem( "listAllExcelItemGroup.action" "excel_item" "program" )
     #introListImgItem( "listAllExcelTemplates.action" "excel_template_management" , "excel")
 	#introListImgItem( "javascript: cleanUp();" "clean_up" "clean-up")
-
 </ul>
 <script>
 	function go(action){
@@ -21,7 +20,6 @@
 	}
 	
 	function cleanUpCompleted( xmlObject ){	
-		setMessage(xmlObject.firstChild.nodeValue);
+		setHeaderDelayMessage(xmlObject.firstChild.nodeValue);
 	}
 </script>
-<span id="message" style="top:100px;right:5px;position:fixed;width:200px;z-index:10002" onclick="hideById(this.id);"></span>

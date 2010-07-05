@@ -47,6 +47,8 @@ LEGEND[thematicMap].classes = LEGEND[thematicMap2].classes = 5;
 VALUETYPE = new Object();
 VALUETYPE.polygon = map_value_type_indicator;
 VALUETYPE.point = map_value_type_indicator;
+/* Top level organisation unit */
+TOPLEVELUNIT = new Object();
 
 /* Detect mapview parameter in URL */
 function getUrlParam(strParamName){var output='';var strHref=window.location.href;if(strHref.indexOf('?')>-1){var strQueryString=strHref.substr(strHref.indexOf('?')).toLowerCase();var aQueryString=strQueryString.split('&');for(var iParam=0;iParam<aQueryString.length;iParam++){if(aQueryString[iParam].indexOf(strParamName.toLowerCase()+'=')>-1){var aParam=aQueryString[iParam].split('=');output=aParam[1];break;}}}return unescape(output);}
@@ -165,7 +167,7 @@ Ext.onReady( function() {
 	/* Base layers */
 	function addBaseLayersToMap() {
 		Ext.Ajax.request({
-			url: path + 'getMapLayersByType' + type,
+			url: path_mapping + 'getMapLayersByType' + type,
 			params: { type: map_layer_type_baselayer },
 			method: 'POST',
 			success: function(r) {
@@ -203,34 +205,34 @@ Ext.onReady( function() {
 	var mapViewParam = PARAMETER || 0;
 	
 	Ext.Ajax.request({
-		url: path + 'getBaseCoordinate' + type,
+		url: path_mapping + 'getBaseCoordinate' + type,
 		method: 'GET',
 		success: function(r) {
 			var bc = Ext.util.JSON.decode( r.responseText ).baseCoordinate;
 			BASECOORDINATE = {longitude:bc[0].longitude, latitude:bc[0].latitude};
 			
 			Ext.Ajax.request({
-				url: path + 'getMapView' + type,
+				url: path_mapping + 'getMapView' + type,
 				method: 'GET',
 				params: { id: mapViewParam },
 				success: function(r) {
 					var mst = Ext.util.JSON.decode(r.responseText).mapView[0].mapSourceType;
 					
 					Ext.Ajax.request({
-						url: path + 'getMapSourceTypeUserSetting' + type,
+						url: path_mapping + 'getMapSourceTypeUserSetting' + type,
 						method: 'GET',
 						success: function(r) {
 							var ms = Ext.util.JSON.decode(r.responseText).mapSource;
 							MAPSOURCE = PARAMETER ? mst : ms;
 							
 							Ext.Ajax.request({
-								url: path + 'setMapSourceTypeUserSetting' + type,
+								url: path_mapping + 'setMapSourceTypeUserSetting' + type,
 								method: 'POST',
 								params: { mapSourceType: MAPSOURCE },
 								success: function() {
 			
 	/* Section: mapview */
-	var viewStore=new Ext.data.JsonStore({url:path+'getAllMapViews'+type,root:'mapViews',fields:['id','name'],id:'id',sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var viewStore=new Ext.data.JsonStore({url:path_mapping+'getAllMapViews'+type,root:'mapViews',fields:['id','name'],id:'id',sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
 	var viewNameTextField=new Ext.form.TextField({id:'viewname_tf',emptyText:'',width:combo_width,hideLabel:true});
 	var viewComboBox=new Ext.form.ComboBox({id:'view_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:emptytext,selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:viewStore});
 	var view2ComboBox=new Ext.form.ComboBox({id:'view2_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:emptytext,selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:viewStore});
@@ -290,7 +292,7 @@ Ext.onReady( function() {
 					}
 					
 					Ext.Ajax.request({
-						url: path + 'getAllMapViews' + type,
+						url: path_mapping + 'getAllMapViews' + type,
 						method: 'GET',
 						success: function(r) {
 							var mapViews = Ext.util.JSON.decode(r.responseText).mapViews;
@@ -303,7 +305,7 @@ Ext.onReady( function() {
 							}
 					
 							Ext.Ajax.request({
-								url: path + 'addOrUpdateMapView' + type,
+								url: path_mapping + 'addOrUpdateMapView' + type,
 								method: 'POST',
 								params: { name: vn, mapValueType: mvt, indicatorGroupId: ig, indicatorId: ii, dataElementGroupId: deg, dataElementId: de, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: 2, classes: c, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
 								success: function(r) {
@@ -350,7 +352,7 @@ Ext.onReady( function() {
 					}
 					
 					Ext.Ajax.request({
-						url: path + 'deleteMapView' + type,
+						url: path_mapping + 'deleteMapView' + type,
 						method: 'POST',
 						params: {id: v},
 						success: function(r) {
@@ -395,7 +397,7 @@ Ext.onReady( function() {
 					}
 					
 					Ext.Ajax.request({
-						url: path + 'addMapViewToDashboard' + type,
+						url: path_mapping + 'addMapViewToDashboard' + type,
 						method: 'POST',
 						params: { id: v2 },
 
@@ -690,7 +692,7 @@ Ext.onReady( function() {
 	var automaticMapLegendSetClassesComboBox=new Ext.form.ComboBox({id:'automaticmaplegendsetclasses_cb',isFormField:true,hideLabel:true,editable:false,valueField:'value',displayField:'value',mode:'local',emptyText:emptytext,triggerAction:'all',value:5,width:combo_number_width,minListWidth:combo_number_width,store:new Ext.data.SimpleStore({fields:['value'],data:[[1],[2],[3],[4],[5],[6],[7],[8]]})});
 	var automaticMapLegendSetLowColorColorPalette=new Ext.ux.ColorField({id:'automaticmaplegendsetlowcolor_cp',isFormField:true,hideLabel:true,allowBlank:false,width:combo_width,minListWidth:combo_width,value:"#FFFF00"});
 	var automaticMapLegendSetHighColorColorPalette=new Ext.ux.ColorField({id:'automaticmaplegendsethighcolor_cp',isFormField:true,hideLabel:true,allowBlank:false,width:combo_width,minListWidth:combo_width,value:"#FF0000"});
-	var automaticMapLegendSetStore=new Ext.data.JsonStore({url:path+'getMapLegendSetsByType'+type,baseParams:{type:map_legend_type_automatic},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var automaticMapLegendSetStore=new Ext.data.JsonStore({url:path_mapping+'getMapLegendSetsByType'+type,baseParams:{type:map_legend_type_automatic},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
 	
 	var automaticMapLegendSetComboBox = new Ext.form.ComboBox({
         id: 'automaticmaplegendset_cb',
@@ -714,7 +716,7 @@ Ext.onReady( function() {
 					var lsid = Ext.getCmp('automaticmaplegendset_cb').getValue();
 					
 					Ext.Ajax.request({
-						url: path + 'getMapLegendSetIndicators' + type,
+						url: path_mapping + 'getMapLegendSetIndicators' + type,
 						method: 'POST',
 						params: { id:lsid },
 						success: function(r) {
@@ -739,7 +741,7 @@ Ext.onReady( function() {
 		}					
     });
 	
-	var automaticMapLegendSetIndicatorStore=new Ext.data.JsonStore({url:path+'getAllIndicators'+type,root:'indicators',fields:['id','name','shortName'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var automaticMapLegendSetIndicatorStore=new Ext.data.JsonStore({url:path_mapping+'getAllIndicators'+type,root:'indicators',fields:['id','name','shortName'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
 	var automaticMapLegendSetIndicatorMultiSelect=new Ext.ux.Multiselect({id:'automaticmaplegendsetindicator_ms',isFormField:true,hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:multiselect_width,height:getMultiSelectHeight(),store:automaticMapLegendSetIndicatorStore});
 	var automaticMapLegendSet2ComboBox=new Ext.form.ComboBox({id:'automaticmaplegendset2_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:emptytext,selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:automaticMapLegendSetStore});
 
@@ -782,7 +784,7 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Ajax.request({
-                        url: path + 'getAllMapLegendSets' + type,
+                        url: path_mapping + 'getAllMapLegendSets' + type,
                         method: 'GET',
 						success: function(r) {
                             var mapLegendSets = Ext.util.JSON.decode(r.responseText).mapLegendSets;
@@ -794,7 +796,7 @@ Ext.onReady( function() {
                             }
                             
                             Ext.Ajax.request({
-                                url: path + 'addOrUpdateMapLegendSet' + type,
+                                url: path_mapping + 'addOrUpdateMapLegendSet' + type,
                                 method: 'POST',
                                 params: { name: ln, type: map_legend_type_automatic, method: 2, classes: lc, colorLow: llc, colorHigh: lhc },
                                 success: function(r) {
@@ -860,7 +862,7 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Ajax.request({
-                        url: path + 'assignIndicatorsToMapLegendSet.action' + params,
+                        url: path_mapping + 'assignIndicatorsToMapLegendSet.action' + params,
                         method: 'POST',
                         params: { id: ls },
 
@@ -899,7 +901,7 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Ajax.request({
-                        url: path + 'deleteMapLegendSet' + type,
+                        url: path_mapping + 'deleteMapLegendSet' + type,
                         method: 'GET',
                         params: { id: ls },
                         success: function(r) {
@@ -981,8 +983,8 @@ Ext.onReady( function() {
     });
 	
 	/* Section: predefined legend set */
-	var predefinedMapLegendStore=new Ext.data.JsonStore({url:path+'getAllMapLegends'+type,root:'mapLegends',id:'id',fields:['id','name','startValue','endValue','color','displayString'],autoLoad:true});
-	var predefinedMapLegendSetStore=new Ext.data.JsonStore({url:path+'getMapLegendSetsByType'+type,baseParams:{type:map_legend_type_predefined},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var predefinedMapLegendStore=new Ext.data.JsonStore({url:path_mapping+'getAllMapLegends'+type,root:'mapLegends',id:'id',fields:['id','name','startValue','endValue','color','displayString'],autoLoad:true});
+	var predefinedMapLegendSetStore=new Ext.data.JsonStore({url:path_mapping+'getMapLegendSetsByType'+type,baseParams:{type:map_legend_type_predefined},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
 	var predefinedMapLegendNameTextField=new Ext.form.TextField({id:'predefinedmaplegendname_tf',isFormField:true,hideLabel:true,emptyText:emptytext,width:combo_width});
 	var predefinedMapLegendStartValueTextField=new Ext.form.TextField({id:'predefinedmaplegendstartvalue_tf',isFormField:true,hideLabel:true,emptyText:emptytext,width:combo_number_width,minListWidth:combo_number_width});
 	var predefinedMapLegendEndValueTextField=new Ext.form.TextField({id:'predefinedmaplegendendvalue_tf',isFormField:true,hideLabel:true,emptyText:emptytext,width:combo_number_width,minListWidth:combo_number_width});
@@ -1029,7 +1031,7 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Ajax.request({
-                        url: path + 'getAllMapLegends' + type,
+                        url: path_mapping + 'getAllMapLegends' + type,
                         method: 'GET',
 						success: function(r) {
                             var mapLegends = Ext.util.JSON.decode(r.responseText).mapLegends;
@@ -1041,7 +1043,7 @@ Ext.onReady( function() {
                             }
 
                             Ext.Ajax.request({
-                                url: path + 'addOrUpdateMapLegend' + type,
+                                url: path_mapping + 'addOrUpdateMapLegend' + type,
                                 method: 'POST',
                                 params: { name: mln, startValue: mlsv, endValue: mlev, color: mlc },
                                 success: function(r) {
@@ -1088,7 +1090,7 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Ajax.request({
-                        url: path + 'deleteMapLegend' + type,
+                        url: path_mapping + 'deleteMapLegend' + type,
                         method: 'POST',
                         params: { id: mlv },
                         success: function(r) {
@@ -1165,7 +1167,7 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Ajax.request({
-                        url: path + 'addOrUpdateMapLegendSet.action' + params,
+                        url: path_mapping + 'addOrUpdateMapLegendSet.action' + params,
                         method: 'POST',
                         params: { name: mlsv, type: map_legend_type_predefined },
                         success: function(r) {
@@ -1206,7 +1208,7 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Ajax.request({
-                        url: path + 'deleteMapLegendSet' + type,
+                        url: path_mapping + 'deleteMapLegendSet' + type,
                         method: 'POST',
                         params: { id: mlsv },
                         success: function(r) {
@@ -1401,13 +1403,13 @@ Ext.onReady( function() {
     });
 
     /* Section: register maps */
-	var organisationUnitLevelStore=new Ext.data.JsonStore({url:path+'getOrganisationUnitLevels'+type,id:'id',baseParams:{format:'json'},root:'organisationUnitLevels',fields:['id','level','name'],autoLoad:true});
-	var organisationUnitStore=new Ext.data.JsonStore({url:path+'getOrganisationUnitsAtLevel'+type,baseParams:{level:1,format:'json'},root:'organisationUnits',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
-	var existingMapsStore=new Ext.data.JsonStore({url:path+'getAllMaps'+type,baseParams:{format:'jsonmin'},root:'maps',fields:['id','name','mapLayerPath','organisationUnitLevel'],autoLoad:true});
+	var organisationUnitLevelStore=new Ext.data.JsonStore({url:path_mapping+'getOrganisationUnitLevels'+type,id:'id',baseParams:{format:'json'},root:'organisationUnitLevels',fields:['id','level','name'],autoLoad:true});
+	var organisationUnitStore=new Ext.data.JsonStore({url:path_mapping+'getOrganisationUnitsAtLevel'+type,baseParams:{level:1,format:'json'},root:'organisationUnits',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
+	var existingMapsStore=new Ext.data.JsonStore({url:path_mapping+'getAllMaps'+type,baseParams:{format:'jsonmin'},root:'maps',fields:['id','name','mapLayerPath','organisationUnitLevel'],autoLoad:true});
 	var wmsMapStore=new GeoExt.data.WMSCapabilitiesStore({url:path_geoserver+ows});
-	var geojsonStore=new Ext.data.JsonStore({url:path+'getGeoJsonFiles'+type,root:'files',fields:['name'],autoLoad:true});
+	var geojsonStore=new Ext.data.JsonStore({url:path_mapping+'getGeoJsonFiles'+type,root:'files',fields:['name'],autoLoad:true});
 	var nameColumnStore=new Ext.data.SimpleStore({fields:['name'],data:[]});
-	var baseCoordinateStore=new Ext.data.JsonStore({url:path+'getBaseCoordinate'+type,root:'baseCoordinate',fields:['longitude','latitude'],autoLoad:true});
+	var baseCoordinateStore=new Ext.data.JsonStore({url:path_mapping+'getBaseCoordinate'+type,root:'baseCoordinate',fields:['longitude','latitude'],autoLoad:true});
 	var organisationUnitComboBox=new Ext.form.ComboBox({id:'organisationunit_cb',fieldLabel:'Organisation unit',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:organisationUnitStore});
 	var organisationUnitLevelComboBox=new Ext.form.ComboBox({id:'organisationunitlevel_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:organisationUnitLevelStore});
 	var newNameTextField=new Ext.form.TextField({id:'newname_tf',emptyText:emptytext,hideLabel:true,width:combo_width});
@@ -1436,7 +1438,7 @@ Ext.onReady( function() {
 					var n = Ext.getCmp('maplayerpath_cb').getValue();
 					
 					Ext.Ajax.request({
-						url: path + 'getGeoJson' + type,
+						url: path_mapping + 'getGeoJson' + type,
 						method: 'POST',
 						params: {name: n},
 						success: function(r) {
@@ -1644,7 +1646,7 @@ Ext.onReady( function() {
             var oui = Ext.getCmp('organisationunit_cb').getValue();*/
     
             Ext.Ajax.request({
-                url: path + 'getOrganisationUnitsAtLevel' + type,
+                url: path_mapping + 'getOrganisationUnitsAtLevel' + type,
                 method: 'POST',
                 params: { level: 1, format: 'json' },
 
@@ -1697,7 +1699,7 @@ Ext.onReady( function() {
                     }
 
                     Ext.Ajax.request({
-                        url: path + 'getAllMaps' + type,
+                        url: path_mapping + 'getAllMaps' + type,
                         method: 'GET',
                         success: function(r) {
                             var maps = Ext.util.JSON.decode(r.responseText).maps;
@@ -1715,7 +1717,7 @@ Ext.onReady( function() {
 							var source = mlp ? mlp : mlpwms;
 							
                             Ext.Ajax.request({
-                                url: path + 'addOrUpdateMap' + type,
+                                url: path_mapping + 'addOrUpdateMap' + type,
                                 method: 'POST',
                                 params: { name: nn, mapLayerPath: source, type: t, sourceType: MAPSOURCE, organisationUnitId: oui, organisationUnitLevelId: ouli, nameColumn: nc, longitude: lon, latitude: lat, zoom: zoom},
                                 success: function(r) {
@@ -1775,7 +1777,7 @@ Ext.onReady( function() {
             }
            
             Ext.Ajax.request({
-                url: path + 'addOrUpdateMap' + type,
+                url: path_mapping + 'addOrUpdateMap' + type,
                 method: 'GET',
                 params: { name: en, mapLayerPath: em, nameColumn: nc, longitude: lon, latitude: lat, zoom: zoom },
 
@@ -1817,7 +1819,7 @@ Ext.onReady( function() {
             }
             
             Ext.Ajax.request({
-                url: path + 'deleteMap' + type,
+                url: path_mapping + 'deleteMap' + type,
                 method: 'GET',
                 params: { mapLayerPath: mlp },
                 success: function(r) {
@@ -1892,7 +1894,7 @@ Ext.onReady( function() {
                     var mlp = Ext.getCmp('editmap_cb').getValue();
                     
                     Ext.Ajax.request({
-                        url: path + 'getMapByMapLayerPath' + type,
+                        url: path_mapping + 'getMapByMapLayerPath' + type,
                         method: 'GET',
                         params: { mapLayerPath: mlp, format: 'json' },
 
@@ -1912,7 +1914,7 @@ Ext.onReady( function() {
 					
 					if (MAPSOURCE == map_source_type_geojson) {
 						Ext.Ajax.request({
-							url: path + 'getGeoJson' + type,
+							url: path_mapping + 'getGeoJson' + type,
 							method: 'POST',
 							params: {name: mlp},
 							success: function(r) {
@@ -2228,7 +2230,7 @@ Ext.onReady( function() {
 	var mapLayerFillOpacityComboBox=new Ext.form.ComboBox({id:'maplayerfillopacity_cb',hideLabel:true,editable:true,valueField:'value',displayField:'value',mode:'local',triggerAction:'all',width:combo_number_width,minListWidth:combo_number_width,value:0.5,store:new Ext.data.SimpleStore({fields:['value'],data:[[0.0],[0.1],[0.2],[0.3],[0.4],[0.5],[0.6],[0.7],[0.8],[0.9],[1.0]]})});
 	var mapLayerStrokeColorColorField=new Ext.ux.ColorField({id:'maplayerstrokecolor_cf',hideLabel:true,allowBlank:false,width:combo_width,value:'#222222'});
 	var mapLayerStrokeWidthComboBox=new Ext.form.ComboBox({id:'maplayerstrokewidth_cb',hideLabel:true,editable:true,valueField:'value',displayField:'value',mode:'local',triggerAction:'all',width:combo_number_width,minListWidth:combo_number_width,value:2,store:new Ext.data.SimpleStore({fields:['value'],data:[[0],[1],[2],[3],[4]]})});
-	var mapLayerStore=new Ext.data.JsonStore({url:path+'getMapLayersByType'+type,baseParams:{type:map_layer_type_overlay},root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var mapLayerStore=new Ext.data.JsonStore({url:path_mapping+'getMapLayersByType'+type,baseParams:{type:map_layer_type_overlay},root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
 	var mapLayerComboBox=new Ext.form.ComboBox({id:'maplayer_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:emptytext,hideLabel:true,selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:mapLayerStore});
     
     var deleteMapLayerButton = new Ext.Button({
@@ -2245,7 +2247,7 @@ Ext.onReady( function() {
             }
             
             Ext.Ajax.request({
-                url: path + 'deleteMapLayer' + type,
+                url: path_mapping + 'deleteMapLayer' + type,
                 method: 'POST',
                 params: { id: ml },
 
@@ -2302,7 +2304,7 @@ Ext.onReady( function() {
 					}
 					
 					Ext.Ajax.request({
-						url: path + 'getAllMapLayers' + type,
+						url: path_mapping + 'getAllMapLayers' + type,
 						method: 'GET',
 						success: function(r) {
 							var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
@@ -2317,7 +2319,7 @@ Ext.onReady( function() {
 							var ms = MAPSOURCE == map_source_type_geojson ? mlmsf : mlwmso;
 							
 							Ext.Ajax.request({
-								url: path + 'addOrUpdateMapLayer' + type,
+								url: path_mapping + 'addOrUpdateMapLayer' + type,
 								method: 'POST',
 								params: { name: mln, type: 'overlay', mapSource: ms, fillColor: mlfc, fillOpacity: mlfo, strokeColor: mlsc, strokeWidth: mlsw },
 								success: function(r) {
@@ -2434,7 +2436,7 @@ Ext.onReady( function() {
     var mapLayerBaseLayersUrlTextField=new Ext.form.TextField({id:'maplayerbaselayersurl_tf',emptyText:emptytext,hideLabel:true,width:combo_width});
     var mapLayerBaseLayersLayerTextField=new Ext.form.TextField({id:'maplayerbaselayerslayer_tf',emptyText:emptytext,hideLabel:true,width:combo_width});
     
-    var mapLayerBaseLayerStore=new Ext.data.JsonStore({url:path+'getMapLayersByType'+type,baseParams:{ type:map_layer_type_baselayer },root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+    var mapLayerBaseLayerStore=new Ext.data.JsonStore({url:path_mapping+'getMapLayersByType'+type,baseParams:{ type:map_layer_type_baselayer },root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
 	var mapLayerBaseLayerComboBox=new Ext.form.ComboBox({id:'maplayerbaselayers_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:emptytext,hideLabel:true,selectOnFocus:true,width:combo_width,minListWidth:combo_width,store:mapLayerBaseLayerStore});
     
     var deleteMapLayerBaseLayersButton = new Ext.Button({
@@ -2451,7 +2453,7 @@ Ext.onReady( function() {
             }
             
             Ext.Ajax.request({
-                url: path + 'deleteMapLayer' + type,
+                url: path_mapping + 'deleteMapLayer' + type,
                 method: 'POST',
                 params: { id: ml },
                 success: function(r) {
@@ -2461,7 +2463,7 @@ Ext.onReady( function() {
                     
                     if (MAP.baseLayer && mln == MAP.baseLayer.name) {                    
                         Ext.Ajax.request({
-                            url: path + 'getMapLayersByType' + type,
+                            url: path_mapping + 'getMapLayersByType' + type,
                             params: { type: map_layer_type_baselayer },
                             method: 'POST',
                             success: function(r) {
@@ -2513,7 +2515,7 @@ Ext.onReady( function() {
 					}
 					
 					Ext.Ajax.request({
-						url: path + 'getMapLayersByType' + type,
+						url: path_mapping + 'getMapLayersByType' + type,
                         params: { type: map_layer_type_baselayer },
 						method: 'POST',
 						success: function(r) {
@@ -2527,7 +2529,7 @@ Ext.onReady( function() {
 							}
 					
 							Ext.Ajax.request({
-								url: path + 'addOrUpdateMapLayer' + type,
+								url: path_mapping + 'addOrUpdateMapLayer' + type,
 								method: 'POST',
 								params: { name: mlbn, type: map_layer_type_baselayer, mapSource: mlbu, layer: mlbl, fillColor: '', fillOpacity: 0, strokeColor: '', strokeWidth: 0 },
 								success: function(r) {
@@ -2659,7 +2661,7 @@ Ext.onReady( function() {
                                         MAPSOURCE = msv;
                                         
 										Ext.Ajax.request({
-											url: path + 'setMapSourceTypeUserSetting' + type,
+											url: path_mapping + 'setMapSourceTypeUserSetting' + type,
 											method: 'POST',
 											params: { mapSourceType: msv },
 											success: function(r) {
@@ -2679,7 +2681,10 @@ Ext.onReady( function() {
 													if (Ext.getCmp('register_chb').checked) {
 														mapping.show();
 														shapefilePanel.show();
-													}
+													}                                                   
+
+                                                    Ext.getCmp('map_cb').showField();
+                                                    Ext.getCmp('map_tf').hideField();
 												}
 												else if (MAPSOURCE == map_source_type_shapefile) {
 													Ext.getCmp('register_chb').enable();
@@ -2688,12 +2693,18 @@ Ext.onReady( function() {
 														mapping.show();
 														shapefilePanel.show();
 													}
+
+                                                    Ext.getCmp('map_cb').showField();
+                                                    Ext.getCmp('map_tf').hideField();
 												}
 												else if (MAPSOURCE == map_source_type_database) {
 													Ext.getCmp('register_chb').disable();
 													
 													mapping.hide();
 													shapefilePanel.hide();
+                                                    
+                                                    Ext.getCmp('map_cb').hideField();
+                                                    Ext.getCmp('map_tf').showField();
 												}
 												
 												if (MAP.layers.length > 2) {
@@ -2803,7 +2814,7 @@ Ext.onReady( function() {
 							var bla = Ext.getCmp('baselatitude_cb').getRawValue();
 							
 							Ext.Ajax.request({
-								url: path + 'setBaseCoordinate' + type,
+								url: path_mapping + 'setBaseCoordinate' + type,
 								method: 'POST',
 								params: {longitude:blo, latitude:bla},
 								
@@ -2884,7 +2895,7 @@ Ext.onReady( function() {
     
 	function addOverlaysToMap() {
 		Ext.Ajax.request({
-			url: path + 'getMapLayersByType' + type,
+			url: path_mapping + 'getMapLayersByType' + type,
             params: { type: map_layer_type_overlay },
 			method: 'POST',
 			success: function(r) {
@@ -3682,7 +3693,15 @@ Ext.onReady( function() {
 	Ext.getCmp('bounds_tf2').hideField();
 	Ext.getCmp('dataelementgroup_cb2').hideField();
 	Ext.getCmp('dataelement_cb2').hideField();
-	
+    
+    if (MAPSOURCE == map_source_type_database) {
+        Ext.getCmp('map_cb').hideField();
+        Ext.getCmp('map_tf').showField();
+    }
+    else {
+        Ext.getCmp('map_cb').showField();
+        Ext.getCmp('map_tf').hideField();
+    }
 	
     Ext.get('loading').fadeOut({remove: true});
 	
@@ -3732,14 +3751,14 @@ var featureWindow = new Ext.Window({
 });
 
 var periodTypeTimeseriesStore = new Ext.data.JsonStore({
-    url: path + 'getAllPeriodTypes' + type,
+    url: path_mapping + 'getAllPeriodTypes' + type,
     root: 'periodTypes',
     fields: ['name'],
     autoLoad: true
 });
 
 var periodTimeseriesStore = new Ext.data.JsonStore({
-    url: path + 'getPeriodsByPeriodType' + type,
+    url: path_mapping + 'getPeriodsByPeriodType' + type,
     baseParams: { name: 0 },
     root: 'periods',
     fields: ['id', 'name', 'value'],
@@ -3847,7 +3866,7 @@ function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
     }
     
     mapValueTimeseriesStore = new Ext.data.JsonStore({
-        url: path + 'getIndicatorMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
+        url: path_mapping + 'getIndicatorMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
         root: 'mapvalues',
         fields:['orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
         autoLoad: false,
@@ -3975,7 +3994,7 @@ function onHoverUnselectPoint(feature) {
 /* Section: map data */
 function loadMapData(redirect, position) {
     Ext.Ajax.request({
-        url: path + 'getMapByMapLayerPath' + type,
+        url: path_mapping + 'getMapByMapLayerPath' + type,
         method: 'POST',
         params: { mapLayerPath: URL },
         success: function(r) {
@@ -4071,7 +4090,7 @@ function getChoroplethData() {
 	}
 
     Ext.Ajax.request({
-        url: path + dataUrl + type,
+        url: path_mapping + dataUrl + type,
         method: 'POST',
         params: params,
         success: function(r) {
@@ -4094,7 +4113,7 @@ function getChoroplethData() {
 
 			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
                 Ext.Ajax.request({
-                    url: path + 'getAvailableMapOrganisationUnitRelations' + type,
+                    url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
                     method: 'POST',
                     params: { mapLayerPath: mapLayerPath },
                     success: function(r) {
@@ -4187,7 +4206,7 @@ function getSymbolData() {
 	}
 
     Ext.Ajax.request({
-        url: path + dataUrl + type,
+        url: path_mapping + dataUrl + type,
         method: 'POST',
         params: params,
         success: function(r) {
@@ -4210,7 +4229,7 @@ function getSymbolData() {
 
 			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
                 Ext.Ajax.request({
-                    url: path + 'getAvailableMapOrganisationUnitRelations' + type,
+                    url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
                     method: 'POST',
                     params: { mapLayerPath: mapLayerPath },
                     success: function(r) {
@@ -4319,7 +4338,7 @@ function getAutoAssignOrganisationUnitData(position) {
     var level = MAPDATA[organisationUnitAssignment].organisationUnitLevel;
 
     Ext.Ajax.request({
-        url: path + 'getOrganisationUnitsAtLevel' + type,
+        url: path_mapping + 'getOrganisationUnitsAtLevel' + type,
         method: 'POST',
         params: { level: level },
         success: function(r) {
@@ -4352,7 +4371,7 @@ function getAutoAssignOrganisationUnitData(position) {
 			MASK.show();
 
 			Ext.Ajax.request({
-				url: path + 'addOrUpdateMapOrganisationUnitRelations' + type,
+				url: path_mapping + 'addOrUpdateMapOrganisationUnitRelations' + type,
 				method: 'POST',
 				params: { mapLayerPath: mlp, relations: relations },
 

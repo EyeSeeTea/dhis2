@@ -166,27 +166,29 @@ public class GetAnalysisAction
     public String execute()
     {
         Set<DataElement> dataElements = new HashSet<DataElement>();
+        Collection<Period> periods = null;
+        OrganisationUnit unit = null;
         
         if ( fromDate != null && toDate != null && dataSets != null && organisationUnit != null )
         {
-            Collection<Period> periods = periodService.getPeriodsBetweenDates( format.parseDate( fromDate ), format.parseDate( toDate ) ); //TODO improve
+            periods = periodService.getPeriodsBetweenDates( format.parseDate( fromDate ), format.parseDate( toDate ) ); //TODO improve
 
             for ( String id : dataSets )
             {
                 dataElements.addAll( dataSetService.getDataSet( Integer.parseInt( id ) ).getDataElements() );
             }
         
-            OrganisationUnit unit = organisationUnitService.getOrganisationUnit( organisationUnit );
+            unit = organisationUnitService.getOrganisationUnit( organisationUnit );
             
             log.info( "From date: " + fromDate + ", To date: " + toDate + ", Organisation unit: " + unit + ", Std dev: " + standardDeviation + ", Key: " + key );
             log.info( "Nr of data elements: " + dataElements.size() + " Nr of periods: " + periods.size() );
-
-            DataAnalysisService service = serviceProvider.provide( key );
-            
-            if ( service != null )
-            {      
-                dataValues = service.analyse( unit, dataElements, periods, standardDeviation );
-            }
+        }
+        
+        DataAnalysisService service = serviceProvider.provide( key );
+        
+        if ( service != null ) // Follow-up analysis has no input params
+        {      
+            dataValues = service.analyse( unit, dataElements, periods, standardDeviation );
         }
         
         return SUCCESS;

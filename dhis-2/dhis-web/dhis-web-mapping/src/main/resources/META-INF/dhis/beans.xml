@@ -25,6 +25,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 	</bean>
 
+	<bean id="org.hisp.dhis.mapping.action.GetOrganisationUnitChildrenAction"
+		class="org.hisp.dhis.mapping.action.GetOrganisationUnitChildrenAction"
+		scope="prototype">
+		<property name="organisationUnitService"
+			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	</bean>
+
 	<!-- Map -->
 
 	<bean id="org.hisp.dhis.mapping.action.AddOrUpdateMapAction"

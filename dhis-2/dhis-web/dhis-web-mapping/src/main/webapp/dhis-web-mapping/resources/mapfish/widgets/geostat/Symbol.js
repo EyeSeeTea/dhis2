@@ -149,7 +149,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 		var mls = Ext.getCmp('maplegendset_cb2').getValue();
 		var bounds = [];
 		Ext.Ajax.request({
-			url: path + 'getMapLegendsByMapLegendSet' + type,
+			url: path_mapping + 'getMapLegendsByMapLegendSet' + type,
 			method: 'POST',
 			params: { mapLegendSetId: mls },
 			success: function(r) {
@@ -181,7 +181,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
     
         mapViewStore2 = new Ext.data.JsonStore({
-            url: path + 'getAllMapViews' + type,
+            url: path_mapping + 'getAllMapViews' + type,
             root: 'mapViews',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -191,7 +191,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     fn: function() {
                         if (PARAMETER) {
                             Ext.Ajax.request({
-                                url: path + 'getMapView' + type,
+                                url: path_mapping + 'getMapView' + type,
                                 method: 'POST',
                                 params: { id: PARAMETER },
 								success: function(r) {
@@ -247,7 +247,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
     
         indicatorGroupStore2 = new Ext.data.JsonStore({
-            url: path + 'getAllIndicatorGroups' + type,
+            url: path_mapping + 'getAllIndicatorGroups' + type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -255,7 +255,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
         
         indicatorStore2 = new Ext.data.JsonStore({
-            url: path + 'getIndicatorsByIndicatorGroup' + type,
+            url: path_mapping + 'getIndicatorsByIndicatorGroup' + type,
 			baseParams: {indicatorGroupId:0},
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
@@ -286,7 +286,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		dataElementGroupStore2 = new Ext.data.JsonStore({
-			url: path + 'getAllDataElementGroups' + type,
+			url: path_mapping + 'getAllDataElementGroups' + type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -294,7 +294,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		dataElementStore2 = new Ext.data.JsonStore({
-            url: path + 'getDataElementsByDataElementGroup' + type,
+            url: path_mapping + 'getDataElementsByDataElementGroup' + type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -325,14 +325,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
         
         periodTypeStore2 = new Ext.data.JsonStore({
-            url: path + 'getAllPeriodTypes' + type,
+            url: path_mapping + 'getAllPeriodTypes' + type,
             root: 'periodTypes',
             fields: ['name'],
             autoLoad: true
         });
             
         periodStore2 = new Ext.data.JsonStore({
-            url: path + 'getPeriodsByPeriodType' + type,
+            url: path_mapping + 'getPeriodsByPeriodType' + type,
             baseParams: { name: 0 },
             root: 'periods',
             fields: ['id', 'name'],
@@ -345,7 +345,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             var mst = MAPVIEW.mapSourceType;
 
                             Ext.Ajax.request({
-                                url: path + 'setMapSourceTypeUserSetting' + type,
+                                url: path_mapping + 'setMapSourceTypeUserSetting' + type,
                                 method: 'POST',
                                 params: { mapSourceType: mst },
 								success: function(r) {
@@ -368,7 +368,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
             
         mapStore2 = new Ext.data.JsonStore({
-            url: path + 'getAllMaps' + type,
+            url: path_mapping + 'getAllMaps' + type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
@@ -386,7 +386,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		predefinedMapLegendSetStore2 = new Ext.data.JsonStore({
-            url: path + 'getMapLegendSetsByType' + type,
+            url: path_mapping + 'getMapLegendSetsByType' + type,
             baseParams: { type: map_legend_type_predefined },
             root: 'mapLegendSets',
             fields: ['id', 'name'],
@@ -396,7 +396,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     fn: function() {
 						if (MAPVIEW) {
 							Ext.Ajax.request({
-								url: path + 'getMapLegendSet' + type,
+								url: path_mapping + 'getMapLegendSet' + type,
 								method: 'POST',
 								params: { id: MAPVIEW.mapLegendSetId },
 								success: function(r) {
@@ -438,7 +438,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var mId = Ext.getCmp('mapview_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path + 'getMapView' + type,
+                            url: path_mapping + 'getMapView' + type,
                             method: 'POST',
                             params: { id: mId },
                             success: function(r) {
@@ -603,7 +603,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var iId = Ext.getCmp('indicator_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path + 'getMapLegendSetByIndicator' + type,
+                            url: path_mapping + 'getMapLegendSetByIndicator' + type,
                             method: 'POST',
                             params: { indicatorId: iId, format: 'json' },
 
@@ -691,7 +691,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 						/* TODO legend set
 						
                         Ext.Ajax.request({
-                            url: path + 'getMapLegendSetByIndicator' + type,
+                            url: path_mapping + 'getMapLegendSetByIndicator' + type,
                             method: 'POST',
                             params: { indicatorId: iId },
 
