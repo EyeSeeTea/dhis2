@@ -3,14 +3,14 @@
 #foreach( $unit in $units )
 { 
   "id": ${unit.id}, 
-  "text": "${unit.name}",
+  "text": "$encoder.jsEncode( ${unit.name} )",
   #if( $unit.hasChild() )
   "children": [
   #set( $innerSize = $unit.children.size() )
   #foreach( $child in $unit.children )
   {
     "id": ${child.id},
-    "text": "${child.name}"
+    "text": "$encoder.jsEncode( ${child.name} )"
   }#if( $velocityCount < $innerSize ),#end
   #end
   ]
