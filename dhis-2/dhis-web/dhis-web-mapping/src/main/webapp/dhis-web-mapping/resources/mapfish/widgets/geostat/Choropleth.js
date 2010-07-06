@@ -835,23 +835,55 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'focus': {
                     fn: function() {
                         function showTree() {
+                            var value, rawvalue;
                             var w = new Ext.Window({
+                                id: 'orgunit_w',
                                 title: 'Select parent organisation unit',
+                                closeAction: 'hide',
                                 autoScroll: true,
-                                width: 400,
-                                height: 500,
-                                items: {
-                                    xtype: 'treepanel',
-                                    loader: new Ext.tree.TreeLoader({
-                                        dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
-                                    }),
-                                    root: {
-                                        id: TOPLEVELUNIT.id,
-                                        text: TOPLEVELUNIT.name,
-                                        nodeType: 'async',
-                                        draggable: false
+                                width: 280,
+                                autoHeight: true,
+                                height: 'auto',
+                                boxMaxHeight: 500,
+                                items: [
+                                    {
+                                        xtype: 'treepanel',
+                                        id: 'orgunit_tp',
+                                        bodyStyle: 'padding:7px',
+                                        loader: new Ext.tree.TreeLoader({
+                                            dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
+                                        }),
+                                        root: {
+                                            id: TOPLEVELUNIT.id,
+                                            text: TOPLEVELUNIT.name,
+                                            nodeType: 'async',
+                                            draggable: false
+                                        },
+                                        listeners: {
+                                            'click': {
+                                                fn: function(n) {
+                                                    if (n.hasChildNodes()) {
+                                                        Ext.getCmp('map_tf').setValue(n.attributes.text);
+                                                        Ext.getCmp('map_tf').value = n.attributes.id;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        items: [
+                                            {
+                                                xtype: 'button',
+                                                text: 'OK',
+                                                handler: function() {
+                                                    Ext.getCmp('orgunit_w').hide();
+                                                }                                                
+                                            }
+                                        ]
                                     }
-                                }
+                                ]
                             }).show();
                         }
                         
