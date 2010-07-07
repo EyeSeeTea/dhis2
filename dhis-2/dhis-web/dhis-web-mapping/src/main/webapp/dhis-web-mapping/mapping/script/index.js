@@ -4129,7 +4129,7 @@ function getChoroplethData() {
                         
                         applyValues();
                     }
-                });           
+                });
 			}
 			else if (MAPSOURCE == map_source_type_database) {
 				for (var i = 0; i < mapvalues.length; i++) {

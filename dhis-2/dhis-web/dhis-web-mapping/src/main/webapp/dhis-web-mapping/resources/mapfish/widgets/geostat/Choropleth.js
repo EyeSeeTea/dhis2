@@ -878,6 +878,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                 xtype: 'button',
                                                 text: 'OK',
                                                 handler: function() {
+                                                    choropleth.newUrl = Ext.getCmp('map_tf').value;
+                                                    choropleth.classify(false);
                                                     Ext.getCmp('orgunit_w').hide();
                                                 }                                                
                                             }
@@ -1199,7 +1201,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     this.setUrl(path_mapping + 'getPointShapefile.action?level=' + URL);
                 }
                 else {
-                    this.setUrl(path_mapping + 'getPolygonShapefile.action?level=' + URL);
+                    this.setUrl(path_mapping + 'getPolygonShapefile.action?id=' + URL);
                 }
             }
             else if (MAPSOURCE == map_source_type_geojson) {
@@ -1210,11 +1212,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			}
         }
         
-        var cb = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue : Ext.getCmp('dataelement_cb').getValue;
+        var mapValueTypeCmp = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue : Ext.getCmp('dataelement_cb').getValue;
+        var mapCmp = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_cb').getValue : Ext.getCmp('map_tf').getValue();
                 
-        if (!cb ||
-            !Ext.getCmp('period_cb').getValue() ||
-            !Ext.getCmp('map_cb').getValue() ) {
+        if (!mapValueTypeCmp || !Ext.getCmp('period_cb').getValue() || !mapCmp ) {
             if (exception) {
                 Ext.messageRed.msg( i18n_thematic_map, i18n_form_is_not_complete );
             }
