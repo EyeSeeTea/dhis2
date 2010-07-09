@@ -199,10 +199,20 @@ mapfish.GeoStat = OpenLayers.Class({
         this.layer.removeFeatures(this.layer.features);
         this.layer.addFeatures(format.read(doc));
         this.requestSuccess(request);
+        
+        if (ACTIVEPANEL == thematicMap) {
+            choropleth.classify(false);
+        }
+        else if (ACTIVEPANEL == thematicMap2) {
+            symbol.classify(false);
+        }
+        else if (ACTIVEPANEL == organisationUnitAssignment) {
+            mapping.classify(false);
+        }
 
-		if (URL) {
-			loadMapData(ACTIVEPANEL, false);
-		}
+		// if (URL) {
+			// loadMapData(ACTIVEPANEL, false);
+		// }
     },
 
     /**

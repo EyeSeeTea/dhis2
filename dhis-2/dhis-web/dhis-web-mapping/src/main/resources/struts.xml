@@ -84,6 +84,12 @@
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>
+        
+        <action name="getDataMapValuesByParentId"
+            class="org.hisp.dhis.mapping.action.GetDataMapValuesByParentIdAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
 
 		<action name="getIndicatorMapValuesByMap"
 			class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction">
@@ -99,6 +105,12 @@
 		
 		<action name="getIndicatorMapValuesByMapAndFeatureId"
             class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAndFeatureIdAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
+		
+		<action name="getIndicatorMapValuesByParentId"
+            class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByParentIdAction">
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>

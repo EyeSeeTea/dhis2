@@ -142,7 +142,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 	imageLegend: false,
 	
 	bounds: false,
-     
+    
+    parentId: false,
+    
     newUrl: false,
 	
 	applyPredefinedLegend: function() {
@@ -158,7 +160,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 				var bounds = [];
 				for (var i = 0; i < mapLegends.length; i++) {
 					if (bounds[bounds.length-1] != mapLegends[i].startValue) {
-						if (bounds.length != 0) {
+						if (bounds.length !== 0) {
 							colors.push(new mapfish.ColorRgb(240,240,240));
 						}
 						bounds.push(mapLegends[i].startValue);
@@ -808,8 +810,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('mapview_cb').reset();
                         }
                         
-                        this.newUrl = Ext.getCmp('map_cb').getValue();
-                        this.classify(false);
+                        choropleth.loadByUrl(Ext.getCmp('map_cb').getValue());
+                        
+                        // this.newUrl = Ext.getCmp('map_cb').getValue();
+                        // this.classify(false);
                     },
                     scope: this
                 }
@@ -857,7 +861,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                             id: TOPLEVELUNIT.id,
                                             text: TOPLEVELUNIT.name,
                                             nodeType: 'async',
-                                            draggable: false
+                                            draggable: false,
+                                            expanded: true
                                         },
                                         listeners: {
                                             'click': {
@@ -865,7 +870,20 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                     if (n.hasChildNodes()) {
                                                         Ext.getCmp('map_tf').setValue(n.attributes.text);
                                                         Ext.getCmp('map_tf').value = n.attributes.id;
+                                                        Ext.getCmp('map_tf').node = n;
+                                                        alert(n.attributes.id);
+                                                        alert(n.id);
                                                     }
+                                                }
+                                            },
+                                            'expandnode': {
+                                                fn: function(n) {
+                                                    Ext.getCmp('orgunit_w').syncSize();
+                                                }
+                                            },
+                                            'collapsenode': {
+                                                fn: function(n) {
+                                                    Ext.getCmp('orgunit_w').syncSize();
                                                 }
                                             }
                                         }
@@ -878,8 +896,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                 xtype: 'button',
                                                 text: 'OK',
                                                 handler: function() {
-                                                    choropleth.newUrl = Ext.getCmp('map_tf').value;
-                                                    choropleth.classify(false);
+                                                    choropleth.loadById(Ext.getCmp('map_tf').value);
                                                     Ext.getCmp('orgunit_w').hide();
                                                 }                                                
                                             }
@@ -1134,36 +1151,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.coreComp.setUrl(this.url);
     },
 
-    /**
-     * Method: requestSuccess
-     *      Calls onReady callback function and mark the widget as ready.
-     *      Called on Ajax request success.
-     */
     requestSuccess: function(request) {
         this.ready = true;
 
-        // if widget is rendered, hide the optional mask
         if (this.loadMask && this.rendered) {
             this.loadMask.hide();
         }
     },
 
-    /**
-     * Method: requestFailure
-     *      Displays an error message on the console.
-     *      Called on Ajax request failure.
-     */
     requestFailure: function(request) {
         OpenLayers.Console.error( i18n_ajax_request_failed );
     },
     
-    /**
-     * Method: getColors
-     *    Retrieves the colors from form elements
-     *
-     * Returns:
-     * {Array(<mapfish.Color>)} an array of two colors (start, end)
-     */
     getColors: function() {
         var colorA = new mapfish.ColorRgb();
         colorA.setFromHex(Ext.getCmp('colorA_cf').getValue());
@@ -1171,69 +1170,299 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         colorB.setFromHex(Ext.getCmp('colorB_cf').getValue());
         return [colorA, colorB];
     },
+    
+    loadById: function(id) {
+        if (id != choropleth.parentId) {
+            choropleth.parentId = id;
+            
+            var n = Ext.getCmp('map_tf').node;
+            
+            function getKeys(obj) {
+var temp = [];
+for( var k in obj) {
+   if(obj.hasOwnProperty(k)) {
+      temp.push(k);
+   }
+}
+return temp;
+}
 
-    /**
-     * Method: classify
-     *
-     * Parameters:
-     * exception - {Boolean} If true show a message box to user if either
-     *      the widget isn't ready, or no indicator is specified, or no
-     *      method is specified.
-     */
-    classify: function(exception, position) {
-        if (!this.ready) {
-            Ext.MessageBox.alert( i18n_error , i18n_component_init_not_complete );
-            return;
-        }
-		
-		if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic) {
-			Ext.getCmp('maplegendset_cb').hideField();
-		}
-		else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_predefined) {
-			Ext.getCmp('maplegendset_cb').showField();
-		}
-        
-        if (this.newUrl) {
-            URL = this.newUrl;
-				
-            if (MAPSOURCE == map_source_type_database) {
-                if (URL == FACILITY_LEVEL) {
-                    this.setUrl(path_mapping + 'getPointShapefile.action?level=' + URL);
-                }
-                else {
-                    this.setUrl(path_mapping + 'getPolygonShapefile.action?id=' + URL);
-                }
+alert(getKeys(n));
+alert(n.childNodes);
+alert(getKeys(n.childNodes[0]));
+            
+            
+            
+            
+            
+            
+            alert("isLeaf: " + n.childNodes[0].isLeaf());
+            // TODO: finne level på denne orguniten + 1. hardkodes til 2 for å teste districts
+            var level = 2;
+            if (level+1 < FACILITY_LEVEL) {
+                choropleth.setUrl(path_mapping + 'getPolygonShapefile.action?id=' + id);
             }
-            else if (MAPSOURCE == map_source_type_geojson) {
-                this.setUrl(path_mapping + 'getGeoJson.action?name=' + URL);
+            else {
+                choropleth.setUrl(path_mapping + 'getPointShapefile.action?id=' + id);
+            }
+        }
+    },
+    
+    loadByUrl: function(url) {
+        if (url != choropleth.newUrl) {
+            choropleth.newUrl = url;
+            
+            if (MAPSOURCE == map_source_type_geojson) {
+                choropleth.setUrl(path_mapping + 'getGeoJson.action?name=' + url);
             }
 			else if (MAPSOURCE == map_source_type_shapefile) {
-				this.setUrl(path_geoserver + wfs + URL + output);
+				choropleth.setUrl(path_geoserver + wfs + url + output);
 			}
         }
-        
-        var mapValueTypeCmp = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue : Ext.getCmp('dataelement_cb').getValue;
-        var mapCmp = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_cb').getValue : Ext.getCmp('map_tf').getValue();
-                
-        if (!mapValueTypeCmp || !Ext.getCmp('period_cb').getValue() || !mapCmp ) {
-            if (exception) {
-                Ext.messageRed.msg( i18n_thematic_map, i18n_form_is_not_complete );
-            }
-            return;
-        }
-
-		MASK.msg = i18n_loading;
-        MASK.show();
-
-		if (!this.newUrl) {
-			loadMapData(thematicMap, position);
+    },
+    
+    displayMapLegendTypeFields: function() {
+        if (LEGEND[thematicMap].type == map_legend_type_automatic) {
+			Ext.getCmp('maplegendset_cb').hideField();
+		}
+		else if (LEGEND[thematicMap].type == map_legend_type_predefined) {
+			Ext.getCmp('maplegendset_cb').showField();
 		}
     },
+    
+    validateForm: function(exception) {
+        if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator) {
+            if (!Ext.getCmp('indicator_cb').getValue()) {
+                if (exception) {
+                    Ext.messageRed.msg(i18n_thematic_map, i18n_form_is_not_complete);
+                }
+                return false;
+            }
+        }
+        else if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_dataelement) {
+            if (!Ext.getCmp('indicator_cb').getValue()) {
+                if (exception) {
+                    Ext.messageRed.msg(i18n_thematic_map, i18n_form_is_not_complete);
+                }
+                return false;
+            }
+        }
+        
+        var cmp = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf') : Ext.getCmp('map_cb');
+        
+        if (!Ext.getCmp('period_cb').getValue() || !cmp.getValue()) {
+            if (exception) {
+                Ext.messageRed.msg(i18n_thematic_map, i18n_form_is_not_complete);
+            }
+            return false;
+        }
+        
+        return true;
+    },
+    
+    getIndicatorOrDataElementId: function() {
+        return VALUETYPE.polygon == map_value_type_indicator ?
+            Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+    },
+    
+    applyValues: function() {
+        var options = {};
+        choropleth.indicator = options.indicator = 'value';
+        options.method = Ext.getCmp('method').getValue();
+        options.numClasses = Ext.getCmp('numClasses').getValue();
+        options.colors = choropleth.getColors();
+        
+        choropleth.coreComp.updateOptions(options);
+        choropleth.coreComp.applyClassification();
+        choropleth.classificationApplied = true;
+    
+        MASK.hide();
+    },
 
-    /**
-     * Method: onRender
-     * Called by EXT when the component is rendered.
-     */
+    classify: function(exception, position) {
+        if (MAPSOURCE == map_source_type_database) {
+            choropleth.classifyDatabase(exception, position);
+        }
+        else {
+            choropleth.classifyFile(exception, position);
+        }
+    },
+    
+    classifyDatabase: function(exception, position) {
+		choropleth.displayMapLegendTypeFields();
+        if (choropleth.validateForm(exception)) {
+        
+            MASK.msg = i18n_creating_choropleth;
+            MASK.show();        
+            
+            MAPDATA[ACTIVEPANEL].name = Ext.getCmp('map_tf').getValue();
+            // MAPDATA[ACTIVEPANEL].organisationUnit = 'Country';
+            // MAPDATA[ACTIVEPANEL].organisationUnitLevel = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getValue() : Ext.getCmp('map_cb2').getValue();
+            MAPDATA[ACTIVEPANEL].nameColumn = 'name';
+            MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
+            MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
+            MAPDATA[ACTIVEPANEL].zoom = 7;
+            
+            if (!position) {
+                if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
+                    MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+                }
+                MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+            }
+            
+            if (MAPVIEW) {
+                if (MAPVIEW.longitude && MAPVIEW.latitude && MAPVIEW.zoom) {
+                    MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
+                }
+                else {
+                    MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+                }
+                MAPVIEW = false;
+            }
+            
+            var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
+            FEATURE[thematicMap] = polygonLayer.features;
+            
+            if (LABELS[thematicMap]) {
+                toggleFeatureLabelsPolygons(false, polygonLayer);
+            }
+            
+            var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
+                Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+            var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
+                'getIndicatorMapValuesByParentId' : 'getDataMapValuesByPeriodId';
+            var periodId = Ext.getCmp('period_cb').getValue();
+            var parentId = choropleth.parentId;
+            
+            Ext.Ajax.request({
+                url: path_mapping + dataUrl + type,
+                method: 'POST',
+                params: {id:indicatorOrDataElementId, periodId:periodId, parentId:parentId},
+                success: function(r) {
+                    var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
+                    EXPORTVALUES = getExportDataValueJSON(mapvalues);
+                    
+                    if (mapvalues.length == 0) {
+                        Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
+                        MASK.hide();
+                        return;
+                    }
+                    
+                    for (var i = 0; i < mapvalues.length; i++) {
+                        for (var j = 0; j < FEATURE[thematicMap].length; j++) {
+                            if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
+                                FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    choropleth.applyValues();
+                },
+                failure: function(r) {
+                    alert('Error: ' + dataUrl);
+                }
+            });
+        }
+    },
+    
+    classifyFile: function(exception, position) {
+		choropleth.displayMapLegendTypeFields();
+        if (choropleth.validateForm(exception)) {
+        
+            MASK.msg = i18n_creating_choropleth;
+            MASK.show();
+            
+            Ext.Ajax.request({
+                url: path_mapping + 'getMapByMapLayerPath' + type,
+                method: 'POST',
+                params: { mapLayerPath: choropleth.newUrl },
+                success: function(r) {
+                    MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
+                    
+                    MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
+                    MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
+                    MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
+                    MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
+                    
+                    if (!position) {
+                        if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
+                            MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+                        }
+                        MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+                    }
+                    
+                    if (MAPVIEW) {
+                        if (MAPVIEW.longitude && MAPVIEW.latitude && MAPVIEW.zoom) {
+                            MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
+                        }
+                        else {
+                            MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+                        }
+                        MAPVIEW = false;
+                    }
+            
+                    var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
+                    FEATURE[thematicMap] = polygonLayer.features;
+                    
+                    if (LABELS[thematicMap]) {
+                        toggleFeatureLabelsPolygons(false, polygonLayer);
+                    }
+            
+                    var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
+                        Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+                    var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
+                        'getIndicatorMapValuesByMap' : 'getDataMapValuesByMap';
+                    var periodId = Ext.getCmp('period_cb').getValue();
+                    var mapLayerPath = choropleth.newUrl;
+                    
+                    Ext.Ajax.request({
+                        url: path_mapping + dataUrl + type,
+                        method: 'POST',
+                        params: {id:indicatorOrDataElementId, periodId:periodId, mapLayerPath:mapLayerPath},
+                        success: function(r) {
+                            var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
+                            EXPORTVALUES = getExportDataValueJSON(mapvalues);
+                            var mv = new Array();
+                            var mour = new Array();
+                            var nameColumn = MAPDATA[thematicMap].nameColumn;
+                            var options = {};
+                            
+                            if (mapvalues.length == 0) {
+                                Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
+                                MASK.hide();
+                                return;
+                            }
+                            
+                            for (var i = 0; i < mapvalues.length; i++) {
+                                mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
+                            }
+                            
+                            Ext.Ajax.request({
+                                url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
+                                method: 'POST',
+                                params: { mapLayerPath: mapLayerPath },
+                                success: function(r) {
+                                    var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
+                                   
+                                    for (var i = 0; i < relations.length; i++) {
+                                        mour[relations[i].featureId] = relations[i].organisationUnit;
+                                    }
+
+                                    for (var j = 0; j < FEATURE[thematicMap].length; j++) {
+                                        FEATURE[thematicMap][j].attributes.value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]] || 0;
+                                    }
+                                    
+                                    choropleth.applyValues();
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    },
+            
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Choropleth.superclass.onRender.apply(this, arguments);
         if(this.loadMask){

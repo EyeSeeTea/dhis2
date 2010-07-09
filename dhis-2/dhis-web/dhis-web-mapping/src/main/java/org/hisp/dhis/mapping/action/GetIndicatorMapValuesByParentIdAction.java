@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -38,18 +39,25 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetDataMapValuesByMapAction
+public class GetIndicatorMapValuesByParentIdAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private MappingService mappingService;
 
     public void setMappingService( MappingService mappingService )
     {
         this.mappingService = mappingService;
+    }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
     }
 
     // -------------------------------------------------------------------------
@@ -70,11 +78,11 @@ public class GetDataMapValuesByMapAction
         this.periodId = periodId;
     }
 
-    private String mapLayerPath;
+    private int parentId;    
 
-    public void setMapLayerPath( String mapLayerPath )
+    public void setParentId( int parentId )
     {
-        this.mapLayerPath = mapLayerPath;
+        this.parentId = parentId;
     }
 
     // -------------------------------------------------------------------------
@@ -91,12 +99,15 @@ public class GetDataMapValuesByMapAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedDataMapValues( id, periodId, mapLayerPath );
-
+        int level = organisationUnitService.getOrganisationUnit( parentId ).getChildren().iterator().next().getLevel();
+        System.out.println("! ! ! ! ! ! !: " + organisationUnitService.getOrganisationUnit( parentId ).getLevel());        
+        
+        object = mappingService.getAggregatedIndicatorMapValues( id, periodId, level );
+        
         return SUCCESS;
     }
 }
