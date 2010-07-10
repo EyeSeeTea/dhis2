@@ -258,13 +258,13 @@ public class GetDataElementListAction
             allResult = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
         }
 
+        Collections.sort( allResult, dataElementComparator );
+
         total = allResult.size();
             
         paging.setTotal( total );
 
         dataElements = getBlockElement( allResult, paging.getStartPos(), paging.getPageSize() );
-
-        Collections.sort( dataElements, dataElementComparator );
 
         displayPropertyHandler.handle( dataElements );
 
