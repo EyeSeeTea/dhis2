@@ -69,10 +69,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
-    <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByParentIdAction"
-        class="org.hisp.dhis.mapping.action.GetDataMapValuesByParentIdAction" scope="prototype">
+    <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByParentOrganisationUnitAction"
+        class="org.hisp.dhis.mapping.action.GetDataMapValuesByParentOrganisationUnitAction" scope="prototype">
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-        <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     </bean>
 
 	<bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction"
@@ -90,10 +89,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
-    <bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByParentIdAction"
-        class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByParentIdAction" scope="prototype">
+    <bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByParentOrganisationUnitAction"
+        class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByParentOrganisationUnitAction" scope="prototype">
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     </bean>
 
 	<bean id="org.hisp.dhis.mapping.action.SetMapSourceTypeUserSettingAction"

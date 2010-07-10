@@ -1314,7 +1314,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
             var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
-                'getIndicatorMapValuesByParentId' : 'getDataMapValuesByPeriodId';
+                'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
             var periodId = Ext.getCmp('period_cb').getValue();
             var parentId = choropleth.parentId;
             

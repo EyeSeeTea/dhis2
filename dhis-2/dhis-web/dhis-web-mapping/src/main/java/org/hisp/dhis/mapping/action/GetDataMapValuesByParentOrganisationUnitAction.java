@@ -53,13 +53,6 @@ public class GetDataMapValuesByParentOrganisationUnitAction
         this.mappingService = mappingService;
     }
     
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
