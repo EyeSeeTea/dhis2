@@ -145,6 +145,10 @@ public class TableAlteror
         //drop table reporttable_categoryoptioncombos
         executeSql( "DROP table reporttable_categoryoptioncombos" );
         
+        // drop unused label column from section table
+        executeSql( "ALTER TABLE section DROP COLUMN label" );
+        executeSql( "DROP TABLE sectionmembers" );
+        
         log.info( "Tables updated" );
     }
 

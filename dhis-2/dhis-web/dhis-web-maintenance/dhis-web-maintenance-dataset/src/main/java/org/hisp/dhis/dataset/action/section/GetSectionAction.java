@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.action;
+package org.hisp.dhis.dataset.action.section;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,87 +27,106 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-import org.hisp.dhis.aggregation.AggregatedMapValue;
-import org.hisp.dhis.mapping.MappingService;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataset.Section;
+import org.hisp.dhis.dataset.SectionService;
+import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 
 import com.opensymphony.xwork2.Action;
 
-/**
- * @author Jan Henrik Overland
- * @version $Id$
- */
-public class GetIndicatorMapValuesByParentIdAction
+public class GetSectionAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
-    private MappingService mappingService;
 
-    public void setMappingService( MappingService mappingService )
-    {
-        this.mappingService = mappingService;
-    }
-    
-    private OrganisationUnitService organisationUnitService;
+    private SectionService sectionService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setSectionService( SectionService sectionService )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.sectionService = sectionService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
+    private DisplayPropertyHandler displayPropertyHandler;
 
-    private int id;
-
-    public void setId( int id )
+    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
     {
-        this.id = id;
+        this.displayPropertyHandler = displayPropertyHandler;
     }
 
-    private int periodId;
+    private Comparator<DataElement> dataElementComparator;
 
-    public void setPeriodId( int periodId )
+    public void setDataElementComparator( Comparator<DataElement> dataElementComparator )
     {
-        this.periodId = periodId;
-    }
-
-    private int parentId;    
-
-    public void setParentId( int parentId )
-    {
-        this.parentId = parentId;
+        this.dataElementComparator = dataElementComparator;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input & output
     // -------------------------------------------------------------------------
 
-    private Collection<AggregatedMapValue> object;
+    private int sectionId;
 
-    public Collection<AggregatedMapValue> getObject()
+    public int getSectionId()
     {
-        return object;
+        return sectionId;
+    }
+
+    public void setSectionId( int sectionId )
+    {
+        this.sectionId = sectionId;
+    }
+
+    private Section section;
+
+    public Section getSection()
+    {
+        return section;
+    }
+
+    private List<DataElement> sectionDataElements;
+
+    public List<DataElement> getSectionDataElements()
+    {
+        return sectionDataElements;
+    }    
+
+    private DataElementCategoryCombo categoryCombo;    
+
+    public void setCategoryCombo( DataElementCategoryCombo categoryCombo )
+    {
+        this.categoryCombo = categoryCombo;
+    }
+
+    public DataElementCategoryCombo getCategoryCombo()
+    {
+        return categoryCombo;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
-    
+
     public String execute()
         throws Exception
     {
-        int level = organisationUnitService.getOrganisationUnit( parentId ).getChildren().iterator().next().getLevel();
-        System.out.println("! ! ! ! ! ! !: " + organisationUnitService.getOrganisationUnit( parentId ).getLevel());        
-        
-        object = mappingService.getAggregatedIndicatorMapValues( id, periodId, level );
-        
+        section = sectionService.getSection( sectionId );
+
+        sectionDataElements = new ArrayList<DataElement>( section.getDataElements() );       
+
+        categoryCombo = section.getDataElements().iterator().next().getCategoryCombo();
+
+        Collections.sort( sectionDataElements, dataElementComparator );
+
+        displayPropertyHandler.handle( sectionDataElements );
+
         return SUCCESS;
     }
 }

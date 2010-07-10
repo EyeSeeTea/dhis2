@@ -42,8 +42,6 @@ public interface AggregationService
 {
     String ID = AggregationService.class.getName();
 
-    static final double NO_VALUES_REGISTERED = -1.0;
-
     /**
      * Calculates the aggregated value based on the aggregation operator defined
      * in the given dataelement.
@@ -52,10 +50,10 @@ public interface AggregationService
      * @param startDate the start date of the aggregation period.
      * @param endDate the end date of the aggregation period.
      * @param organisationUnit the OrganisationUnit to aggregate over.
-     * @return the aggregated value.
+     * @return the aggregated value or null if no values are found.
      * @throws AggregationStoreException
      */
-    double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate,
+    Double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate,
         OrganisationUnit organisationUnit );
 
     /**
@@ -65,10 +63,10 @@ public interface AggregationService
      * @param startDate the start date of the aggregation period.
      * @param endDate the end date of the aggregation period.
      * @param organisationUnit the OrganisationUnit to aggregate over.
-     * @return the aggregated value.
+     * @return the aggregated value or null if no values are found.
      * @throws AggregationStoreException
      */
-    double getAggregatedIndicatorValue( Indicator indicator, Date startDate, Date endDate,
+    Double getAggregatedIndicatorValue( Indicator indicator, Date startDate, Date endDate,
         OrganisationUnit organisationUnit );
 
     /**
@@ -78,10 +76,10 @@ public interface AggregationService
      * @param startDate the start date of the aggregation period.
      * @param endDate the end date of the aggregation period.
      * @param organisationUnit the OrganisationUnit to aggregate over.
-     * @return the aggregated value.
+     * @return the aggregated value or null if no values are found.
      * @throws AggregationStoreException
      */
-    double getAggregatedNumeratorValue( Indicator indicator, Date startDate, Date endDate,
+    Double getAggregatedNumeratorValue( Indicator indicator, Date startDate, Date endDate,
         OrganisationUnit organisationUnit );
 
     /**
@@ -92,10 +90,10 @@ public interface AggregationService
      * @param startDate the start date of the aggregation period.
      * @param endDate the end date of the aggregation period.
      * @param organisationUnit the OrganisationUnit to aggregate over.
-     * @return the aggregated value.
+     * @return the aggregated value or null if no values are found.
      * @throws AggregationStoreException
      */
-    double getAggregatedDenominatorValue( Indicator indicator, Date startDate, Date endDate,
+    Double getAggregatedDenominatorValue( Indicator indicator, Date startDate, Date endDate,
         OrganisationUnit organisationUnit );
     
     void clearCache();

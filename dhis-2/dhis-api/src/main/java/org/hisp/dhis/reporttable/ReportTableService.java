@@ -55,7 +55,7 @@ public interface ReportTableService
      * @param format the I18nFormat to use.
      */
     void createReportTables( int id, String mode, Integer reportingPeriod, 
-        Integer parentOrganisationUnitId, Integer organisationUnitId, I18nFormat format );
+        Integer parentOrganisationUnitId, Integer organisationUnitId, boolean doDataMart, I18nFormat format );
     
     /**
      * Creates a report table. Exports the relevant data to data mart, updates

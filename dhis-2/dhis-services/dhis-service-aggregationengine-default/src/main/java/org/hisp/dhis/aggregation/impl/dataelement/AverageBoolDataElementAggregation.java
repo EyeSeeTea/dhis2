@@ -32,7 +32,6 @@ import static org.hisp.dhis.system.util.DateUtils.getDays;
 import java.util.Collection;
 import java.util.Date;
 
-import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DataValue;
@@ -47,11 +46,10 @@ import org.hisp.dhis.period.Period;
 public class AverageBoolDataElementAggregation
     extends AbstractDataElementAggregation
 {
-    public double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date aggregationStartDate, Date aggregationEndDate,
+    public Double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date aggregationStartDate, Date aggregationEndDate,
         OrganisationUnit organisationUnit )
     {
-        double[] sums = getSumAndRelevantDays( dataElement.getId(), optionCombo.getId(), aggregationStartDate, aggregationEndDate, 
-            organisationUnit.getId() );
+        double[] sums = getSumAndRelevantDays( dataElement, optionCombo, aggregationStartDate, aggregationEndDate, organisationUnit.getId() );
 
         if ( sums[1] > 0 )
         {
@@ -61,11 +59,11 @@ public class AverageBoolDataElementAggregation
         }
         else
         {
-            return AggregationService.NO_VALUES_REGISTERED;
+            return null;
         }
     }
 
-    protected Collection<DataValue> getDataValues( int dataElementId, int optionComboId, int organisationUnitId,
+    protected Collection<DataValue> getDataValues( Integer dataElementId, Integer optionComboId, Integer organisationUnitId,
         Date startDate, Date endDate )
     {
         OrganisationUnitHierarchy hierarchy = aggregationCache.getOrganisationUnitHierarchy();

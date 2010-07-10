@@ -49,7 +49,7 @@ public class OrganisationUnit
 {
     private static final Pattern JSON_COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
 
-    private static final Pattern GML_COORDINATE_PATTERN = Pattern.compile("[\\-0-9.]+,[\\-0-9.]+");
+    private static final Pattern GML_COORDINATE_PATTERN = Pattern.compile("([\\-0-9.]+,[\\-0-9.]+)");
     
     private Set<OrganisationUnit> children = new HashSet<OrganisationUnit>();
 
@@ -186,11 +186,11 @@ public class OrganisationUnit
             {
                 builder.append( "[[" );
 
-                Matcher matcher = GML_COORDINATE_PATTERN.matcher(c);
+                Matcher matcher = GML_COORDINATE_PATTERN.matcher( c );
                 
-                while(matcher.find())
+                while ( matcher.find() )
                 {
-                    builder.append("[" + c.subSequence( matcher.start(), matcher.end()) + "]," );
+                    builder.append( "[" + matcher.group() + "]," );
                 }
                 
                 builder.deleteCharAt( builder.lastIndexOf( "," ) );            

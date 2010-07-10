@@ -37,8 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.customvalue.CustomValue;
 import org.hisp.dhis.customvalue.CustomValueService;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
@@ -57,7 +55,6 @@ import org.hisp.dhis.datalock.DataSetLockService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
-import org.hisp.dhis.de.comments.DefaultStandardCommentsManager;
 import org.hisp.dhis.de.comments.StandardCommentsManager;
 import org.hisp.dhis.de.screen.DataEntryScreenManager;
 import org.hisp.dhis.de.state.SelectedStateManager;
@@ -77,9 +74,8 @@ import com.opensymphony.xwork2.Action;
  */
 public class FormAction
     implements Action
-{
-	private static final Log log = LogFactory.getLog( FormAction.class );
-	
+{   
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -444,7 +440,7 @@ public class FormAction
 
             for ( DataElementCategory cat : categoryCombo.getCategories() )
             {
-                if ( !cat.getCategoryOptions().isEmpty() )
+                if ( cat.getCategoryOptions().size() > 0 )
                 {
                     catColSpan = catColSpan / cat.getCategoryOptions().size();
                     int total = optionCombos.size() / (catColSpan * cat.getCategoryOptions().size());
@@ -506,7 +502,8 @@ public class FormAction
         // Prepare values for unsaved CalculatedDataElements
         // ---------------------------------------------------------------------
 
-        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet, period );
+        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet,
+            period );
 
         // ---------------------------------------------------------------------
         // Make the standard comments available

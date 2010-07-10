@@ -78,7 +78,7 @@ tr.relationship-row{background-color: #BFFFC2; display : none}
           #set( $mark = false )
         
           #foreach( $patient in $patients )
-			#set( $mark = !$mark)
+			##set( $mark = !$mark)
           	<tr #alternate( $mark )>
           		<td>			
 					#set( $nr = ( ( $pagingUtil.currentPage - 1  ) * $pagingUtil.pageSize ) + $velocityCount )
@@ -199,6 +199,11 @@ tr.relationship-row{background-color: #BFFFC2; display : none}
 	                </td>
                </tr>
 			#end
+			#if( $mark )
+                #set( $mark = false )
+              #else
+                #set( $mark = true )
+              #end
     	#end
     	</tbody>
     

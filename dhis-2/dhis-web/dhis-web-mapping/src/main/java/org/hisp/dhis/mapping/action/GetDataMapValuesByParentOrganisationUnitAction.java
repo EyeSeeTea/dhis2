@@ -39,7 +39,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetDataMapValuesByParentIdAction
+public class GetDataMapValuesByParentOrganisationUnitAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -103,9 +103,7 @@ public class GetDataMapValuesByParentIdAction
     public String execute()
         throws Exception
     {
-        int level = organisationUnitService.getOrganisationUnit( parentId ).getChildren().iterator().next().getLevel();
-        
-        object = mappingService.getAggregatedDataMapValues( id, periodId, level );
+        object = mappingService.getDataElementMapValues( id, periodId, parentId );
         
         return SUCCESS;
     }
