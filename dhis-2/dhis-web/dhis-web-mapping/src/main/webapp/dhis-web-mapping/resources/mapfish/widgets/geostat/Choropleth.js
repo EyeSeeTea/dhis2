@@ -868,11 +868,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                             'click': {
                                                 fn: function(n) {
                                                     if (n.hasChildNodes()) {
+                                                        // alert("child id: "+n.attributes.children[0].id);
+
                                                         Ext.getCmp('map_tf').setValue(n.attributes.text);
                                                         Ext.getCmp('map_tf').value = n.attributes.id;
                                                         Ext.getCmp('map_tf').node = n;
-                                                        alert(n.attributes.id);
-                                                        alert(n.id);
                                                     }
                                                 }
                                             },
@@ -1174,37 +1174,21 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     loadById: function(id) {
         if (id != choropleth.parentId) {
             choropleth.parentId = id;
-            
             var n = Ext.getCmp('map_tf').node;
             
-            function getKeys(obj) {
-var temp = [];
-for( var k in obj) {
-   if(obj.hasOwnProperty(k)) {
-      temp.push(k);
-   }
-}
-return temp;
-}
-
-alert(getKeys(n));
-alert(n.childNodes);
-alert(getKeys(n.childNodes[0]));
-            
-            
-            
-            
-            
-            
-            alert("isLeaf: " + n.childNodes[0].isLeaf());
-            // TODO: finne level på denne orguniten + 1. hardkodes til 2 for å teste districts
-            var level = 2;
-            if (level+1 < FACILITY_LEVEL) {
-                choropleth.setUrl(path_mapping + 'getPolygonShapefile.action?id=' + id);
-            }
-            else {
-                choropleth.setUrl(path_mapping + 'getPointShapefile.action?id=' + id);
-            }
+            Ext.Ajax.request({
+                url: path_mapping + 'getOrganisationUnitChildren' + type,
+                method: 'POST',
+                params: {node:n.attributes.id},
+                success: function(r) {
+                    var childIsLeaf = Ext.util.JSON.decode(r.responseText)[0].leaf;
+                    var url = childIsLeaf ? path_mapping + 'getPointShapefile.action?id=' + id : path_mapping + 'getPolygonShapefile.action?id=' + id;
+                    choropleth.setUrl(url);
+                },
+                failure: function() {
+                    alert('Error: getOrganisationUnitChildren');
+                }
+            });
         }
     },
     
