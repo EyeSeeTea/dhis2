@@ -266,7 +266,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                                     Ext.messageRed.msg( i18n_auto_assign , i18n_please_select_map );
                                     return;
                                 }
-                                loadMapData('auto-assignment', true);
+                                mapping.autoAssign(true);
                             },
                             scope: this
                         },
@@ -492,6 +492,70 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         
         MASK.hide();
     },
+    
+    autoAssign: function(position) {
+        MASK.msg = i18n_loading ;
+        MASK.show();
+
+        var level = MAPDATA[organisationUnitAssignment].organisationUnitLevel;
+
+        Ext.Ajax.request({
+            url: path_mapping + 'getOrganisationUnitsAtLevel' + type,
+            method: 'POST',
+            params: { level: level },
+            success: function(r) {
+                FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
+                var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
+                var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
+                var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
+                var count_match = 0;
+                var relations = '';
+                
+                for ( var i = 0; i < FEATURE[thematicMap].length; i++ ) {
+                    FEATURE[thematicMap][i].attributes.compareName = FEATURE[thematicMap][i].attributes[nameColumn].split(' ').join('').toLowerCase();
+                }
+        
+                for ( var i = 0; i < organisationUnits.length; i++ ) {
+                    organisationUnits[i].compareName = organisationUnits[i].name.split(' ').join('').toLowerCase();
+                }
+                
+                for ( var i = 0; i < organisationUnits.length; i++ ) {
+                    for ( var j = 0; j < FEATURE[thematicMap].length; j++ ) {
+                        if (FEATURE[thematicMap][j].attributes.compareName == organisationUnits[i].compareName) {
+                            count_match++;
+                            relations += organisationUnits[i].id + '::' + FEATURE[thematicMap][j].attributes[nameColumn] + ';;';
+                            break;
+                        }
+                    }
+                }
+                
+                MASK.msg = count_match == 0 ? i18n_no + ' ' + i18n_organisation_units + ' ' +  i18n_assigned + '...' : + i18n_assigning +' ' + count_match + ' '+ i18n_organisation_units + '...';
+                MASK.show();
+
+                Ext.Ajax.request({
+                    url: path_mapping + 'addOrUpdateMapOrganisationUnitRelations' + type,
+                    method: 'POST',
+                    params: { mapLayerPath: mlp, relations: relations },
+
+                    success: function(r) {
+                        MASK.msg = i18n_applying_organisation_units_relations ;
+                        MASK.show();
+                        
+                        Ext.messageBlack.msg( i18n_assign + ' ' + i18n_organisation_units, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');
+                        
+                        Ext.getCmp('grid_gp').getStore().reload();
+                        mapping.classify(false, position);
+                    },
+                    failure: function() {
+                        alert( 'Error: addOrUpdateMapOrganisationUnitRelations' );
+                    } 
+                });
+            },
+            failure: function() {
+                alert( i18n_status , i18n_error_while_retrieving_data );
+            } 
+        });
+    },        
 
     classify: function(exception, position) {
         if (mapping.validateForm(exception)) {
@@ -543,7 +607,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         
                     for (var i = 0; i < FEATURE[thematicMap].length; i++) {
                         FEATURE[thematicMap][i].attributes['value'] = 0;
-                    
+
                         for (var j = 0; j < relations.getTotalCount(); j++) {
                             if (relations.getAt(j).data.featureId == FEATURE[thematicMap][i].attributes[nameColumn]) {
                                 FEATURE[thematicMap][i].attributes['value'] = 1;

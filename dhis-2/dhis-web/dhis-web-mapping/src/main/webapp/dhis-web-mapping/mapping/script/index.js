@@ -3994,169 +3994,50 @@ function onHoverUnselectPoint(feature) {
     Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
 }
 
-/* Section: map data */
-function loadMapData(redirect, position) {
-    Ext.Ajax.request({
-        url: path_mapping + 'getMapByMapLayerPath' + type,
-        method: 'POST',
-        params: { mapLayerPath: URL },
-        success: function(r) {
-			MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
+// /* Section: map data */
+// function loadMapData(redirect, position) {
+    // Ext.Ajax.request({
+        // url: path_mapping + 'getMapByMapLayerPath' + type,
+        // method: 'POST',
+        // params: { mapLayerPath: URL },
+        // success: function(r) {
+			// MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
             
-            if (MAPSOURCE == map_source_type_database) {
-                MAPDATA[ACTIVEPANEL].name = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getRawValue() : Ext.getCmp('map_cb2').getRawValue();
-                MAPDATA[ACTIVEPANEL].organisationUnit = 'Country';
-                MAPDATA[ACTIVEPANEL].organisationUnitLevel = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getValue() : Ext.getCmp('map_cb2').getValue();
-                MAPDATA[ACTIVEPANEL].nameColumn = 'name';
-                MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
-                MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
-                MAPDATA[ACTIVEPANEL].zoom = 7;
-            }
-            else if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-                MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
-                MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
-                MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
-                MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
-            }
+            // if (MAPSOURCE == map_source_type_database) {
+                // MAPDATA[ACTIVEPANEL].name = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getRawValue() : Ext.getCmp('map_cb2').getRawValue();
+                // MAPDATA[ACTIVEPANEL].organisationUnit = 'Country';
+                // MAPDATA[ACTIVEPANEL].organisationUnitLevel = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getValue() : Ext.getCmp('map_cb2').getValue();
+                // MAPDATA[ACTIVEPANEL].nameColumn = 'name';
+                // MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
+                // MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
+                // MAPDATA[ACTIVEPANEL].zoom = 7;
+            // }
+            // else if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
+                // MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
+                // MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
+                // MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
+                // MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
+            // }
 			
-			if (!position) {
-				if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
-					MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
-				}
-				MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
-			}
+			// if (!position) {
+				// if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
+					// MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+				// }
+				// MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+			// }
 			
-			if (MAPVIEW) {
-				if (MAPVIEW.longitude && MAPVIEW.latitude && MAPVIEW.zoom) {
-					MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
-				}
-				else {
-					MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
-				}
-				MAPVIEW = false;
-			}
-			
-            if (redirect == organisationUnitAssignment) { getAssignOrganisationUnitData(); }
-            else if (redirect == 'auto-assignment') { getAutoAssignOrganisationUnitData(position); }
-        },
-        failure: function() {
-            alert( i18n_error_while_retrieving_data + ': loadMapData' );
-        } 
-    });
-}
-
-/* Section: mapping */
-function getAssignOrganisationUnitData() {
-	MASK.msg = i18n_creating_map;
-	MASK.show();
-    
-    var l = MAP.getLayersByName('Polygon layer')[0];
-    if (LABELS[organisationUnitAssignment]) {
-        toggleFeatureLabelsAssignment(false, l);
-    }
-    FEATURE[thematicMap] = l.features;
-	
-    var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
-	var relations =	 Ext.getCmp('grid_gp').getStore();
-	var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
-	var noCls = 1;
-	var noAssigned = 0;
-	var options = {};
-	
-	for (var i = 0; i < FEATURE[thematicMap].length; i++) {
-		FEATURE[thematicMap][i].attributes['value'] = 0;
-	
-		for (var j = 0; j < relations.getTotalCount(); j++) {
-			if (relations.getAt(j).data.featureId == FEATURE[thematicMap][i].attributes[nameColumn]) {
-				FEATURE[thematicMap][i].attributes['value'] = 1;
-				noAssigned++;
-				noCls = noCls < 2 ? 2 : noCls;
-				break;
-			}
-		}
-	}
-
-	var color = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? assigned_row_color : unassigned_row_color;
-	noCls = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? 1 : noCls;
-	
-	mapping.indicator = options.indicator = 'value';
-	options.method = 1;
-	options.numClasses = noCls;
-	
-	var colorA = new mapfish.ColorRgb();
-	colorA.setFromHex(color);
-	var colorB = new mapfish.ColorRgb();
-	colorB.setFromHex(assigned_row_color);
-	options.colors = [colorA, colorB];
-	
-	mapping.coreComp.updateOptions(options);
-	mapping.coreComp.applyClassification();
-	mapping.classificationApplied = true;
-	
-	MASK.hide();
-}
-
-/* Section: auto-mapping */
-function getAutoAssignOrganisationUnitData(position) {
-	MASK.msg = i18n_loading ;
-	MASK.show();
-
-    var level = MAPDATA[organisationUnitAssignment].organisationUnitLevel;
-
-    Ext.Ajax.request({
-        url: path_mapping + 'getOrganisationUnitsAtLevel' + type,
-        method: 'POST',
-        params: { level: level },
-        success: function(r) {
-			FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
-			var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
-			var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
-			var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
-			var count_match = 0;
-			var relations = '';
-			
-			for ( var i = 0; i < FEATURE[thematicMap].length; i++ ) {
-				FEATURE[thematicMap][i].attributes.compareName = FEATURE[thematicMap][i].attributes[nameColumn].split(' ').join('').toLowerCase();
-			}
-	
-			for ( var i = 0; i < organisationUnits.length; i++ ) {
-				organisationUnits[i].compareName = organisationUnits[i].name.split(' ').join('').toLowerCase();
-			}
-			
-			for ( var i = 0; i < organisationUnits.length; i++ ) {
-				for ( var j = 0; j < FEATURE[thematicMap].length; j++ ) {
-					if (FEATURE[thematicMap][j].attributes.compareName == organisationUnits[i].compareName) {
-						count_match++;
-						relations += organisationUnits[i].id + '::' + FEATURE[thematicMap][j].attributes[nameColumn] + ';;';
-						break;
-					}
-				}
-			}
-			
-			MASK.msg = count_match == 0 ? i18n_no + ' ' + i18n_organisation_units + ' ' +  i18n_assigned +'...' : + i18n_assigning +' ' + count_match + ' '+ i18n_organisation_units + '...';
-			MASK.show();
-
-			Ext.Ajax.request({
-				url: path_mapping + 'addOrUpdateMapOrganisationUnitRelations' + type,
-				method: 'POST',
-				params: { mapLayerPath: mlp, relations: relations },
-
-				success: function(r) {
-					MASK.msg = i18n_applying_organisation_units_relations ;
-					MASK.show();
-					
-					Ext.messageBlack.msg( i18n_assign + ' ' + i18n_organisation_units, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');
-					
-					Ext.getCmp('grid_gp').getStore().reload();
-					loadMapData(organisationUnitAssignment, position);
-				},
-				failure: function() {
-					alert( 'Error: addOrUpdateMapOrganisationUnitRelations' );
-				} 
-			});
-        },
-        failure: function() {
-            alert( i18n_status , i18n_error_while_retrieving_data );
-        } 
-    });
-}
+			// if (MAPVIEW) {
+				// if (MAPVIEW.longitude && MAPVIEW.latitude && MAPVIEW.zoom) {
+					// MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
+				// }
+				// else {
+					// MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+				// }
+				// MAPVIEW = false;
+			// }
+        // },
+        // failure: function() {
+            // alert( i18n_error_while_retrieving_data + ': loadMapData' );
+        // } 
+    // });
+// }
