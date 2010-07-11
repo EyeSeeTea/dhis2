@@ -208,7 +208,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 										Ext.getCmp('maplegendset_cb2').hideField();
 									}
 									else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
-                                        LEGEND[thematicMap].type = map_legend_type_predefined;
+                                        LEGEND[thematicMap2].type = map_legend_type_predefined;
 										Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
 										Ext.getCmp('method_cb2').hideField();
 										Ext.getCmp('bounds_tf2').hideField();
@@ -479,7 +479,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 									Ext.getCmp('maplegendset_cb2').hideField();
 								}
 								else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
-                                    LEGEND[thematicMap].type = map_legend_type_predefined;
+                                    LEGEND[thematicMap2].type = map_legend_type_predefined;
 									Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
 									Ext.getCmp('method_cb2').hideField();
 									Ext.getCmp('bounds_tf2').hideField();
@@ -840,7 +840,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 items: [
                                     {
                                         xtype: 'treepanel',
-                                        id: 'orgunit_tp',
+                                        id: 'orgunit_tp2',
                                         bodyStyle: 'padding:7px',
                                         loader: new Ext.tree.TreeLoader({
                                             dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
@@ -930,7 +930,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             emptyText: emptytext,
 			labelSeparator: labelseparator,
-            value: LEGEND[thematicMap].type,
+            value: LEGEND[thematicMap2].type,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -943,8 +943,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_predefined && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap].type ) {
-							LEGEND[thematicMap].type = map_legend_type_predefined;
+                        if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_predefined && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap2].type ) {
+							LEGEND[thematicMap2].type = map_legend_type_predefined;
 							Ext.getCmp('method_cb2').hideField();
 							Ext.getCmp('bounds_tf2').hideField();
                             Ext.getCmp('numClasses_cb2').hideField();
@@ -956,8 +956,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 								this.classify(false);
 							}
                         }
-                        else if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap].type) {
-							LEGEND[thematicMap].type = map_legend_type_automatic;
+                        else if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap2].type) {
+							LEGEND[thematicMap2].type = map_legend_type_automatic;
 							Ext.getCmp('method_cb2').showField();
 							if (Ext.getCmp('method_cb2').getValue() == 0) {
 								Ext.getCmp('bounds_tf2').showField();
@@ -1013,7 +1013,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             emptyText: emptytext,
 			labelSeparator: labelseparator,
-            value: LEGEND[thematicMap].method,
+            value: LEGEND[thematicMap2].method,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -1027,13 +1027,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('method_cb2').getValue() == 0 && Ext.getCmp('method_cb2').getValue() != LEGEND[thematicMap].method) {
-							LEGEND[thematicMap].method = 0;
+                        if (Ext.getCmp('method_cb2').getValue() == 0 && Ext.getCmp('method_cb2').getValue() != LEGEND[thematicMap2].method) {
+							LEGEND[thematicMap2].method = 0;
                             Ext.getCmp('bounds_tf2').showField();
                             Ext.getCmp('numClasses_cb2').hideField();
                         }
-                        else if (Ext.getCmp('method_cb2').getValue() != LEGEND[thematicMap].method) {
-							LEGEND[thematicMap].method = Ext.getCmp('method_cb2').getValue();
+                        else if (Ext.getCmp('method_cb2').getValue() != LEGEND[thematicMap2].method) {
+							LEGEND[thematicMap2].method = Ext.getCmp('method_cb2').getValue();
                             Ext.getCmp('bounds_tf2').hideField();
                             Ext.getCmp('numClasses_cb2').showField();
                             
@@ -1065,7 +1065,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             valueField: 'value',
             displayField: 'value',
             mode: 'local',
-            value: LEGEND[thematicMap].classes,
+            value: LEGEND[thematicMap2].classes,
             triggerAction: 'all',
             width: combo_width,
             store: new Ext.data.SimpleStore({
@@ -1079,8 +1079,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('mapview_cb2').reset();
                         }
 						
-						if (Ext.getCmp('numClasses_cb2').getValue() != LEGEND[thematicMap].classes) {
-							LEGEND[thematicMap].classes = Ext.getCmp('numClasses_cb2').getValue();
+						if (Ext.getCmp('numClasses_cb2').getValue() != LEGEND[thematicMap2].classes) {
+							LEGEND[thematicMap2].classes = Ext.getCmp('numClasses_cb2').getValue();
 							this.classify(false);
 						}
                     },
@@ -1192,10 +1192,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     displayMapLegendTypeFields: function() {
-        if (LEGEND[thematicMap].type == map_legend_type_automatic) {
+        if (LEGEND[thematicMap2].type == map_legend_type_automatic) {
 			Ext.getCmp('maplegendset_cb2').hideField();
 		}
-		else if (LEGEND[thematicMap].type == map_legend_type_predefined) {
+		else if (LEGEND[thematicMap2].type == map_legend_type_predefined) {
 			Ext.getCmp('maplegendset_cb2').showField();
 		}
     },
@@ -1290,10 +1290,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 MAPVIEW = false;
             }
             
-            var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
-            FEATURE[thematicMap] = polygonLayer.features;
+            var polygonLayer = MAP.getLayersByName('Point layer')[0];
+            FEATURE[thematicMap2] = polygonLayer.features;
             
-            if (LABELS[thematicMap]) {
+            if (LABELS[thematicMap2]) {
                 toggleFeatureLabelsPolygons(false, polygonLayer);
             }
             
@@ -1319,9 +1319,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     }
                     
                     for (var i = 0; i < mapvalues.length; i++) {
-                        for (var j = 0; j < FEATURE[thematicMap].length; j++) {
-                            if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
-                                FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
+                        for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
+                            if (mapvalues[i].orgUnitName == FEATURE[thematicMap2][j].attributes.name) {
+                                FEATURE[thematicMap2][j].attributes.value = parseFloat(mapvalues[i].value);
                                 break;
                             }
                         }
@@ -1373,9 +1373,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     }
             
                     var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
-                    FEATURE[thematicMap] = polygonLayer.features;
+                    FEATURE[thematicMap2] = polygonLayer.features;
                     
-                    if (LABELS[thematicMap]) {
+                    if (LABELS[thematicMap2]) {
                         toggleFeatureLabelsPolygons(false, polygonLayer);
                     }
             
@@ -1395,7 +1395,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             EXPORTVALUES = getExportDataValueJSON(mapvalues);
                             var mv = new Array();
                             var mour = new Array();
-                            var nameColumn = MAPDATA[thematicMap].nameColumn;
+                            var nameColumn = MAPDATA[thematicMap2].nameColumn;
                             var options = {};
                             
                             if (mapvalues.length == 0) {
@@ -1419,8 +1419,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         mour[relations[i].featureId] = relations[i].organisationUnit;
                                     }
 
-                                    for (var j = 0; j < FEATURE[thematicMap].length; j++) {
-                                        FEATURE[thematicMap][j].attributes.value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]] || 0;
+                                    for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
+                                        FEATURE[thematicMap2][j].attributes.value = mv[mour[FEATURE[thematicMap2][j].attributes[nameColumn]]] || 0;
                                     }
                                     
                                     proportionalSymbol.applyValues();
