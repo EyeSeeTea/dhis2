@@ -3166,13 +3166,13 @@ Ext.onReady( function() {
 		listeners: {
 			'click': {
 				fn: function(n) {
-					if (n.isAncestor(this.getNodeById('xnode-253'))) {
+					if (n.parentNode.attributes.text == 'Base layers') {
 						showWMSLayerOptions(MAP.getLayersByName(n.attributes.layer.name)[0]);
 					}
-                    else if (n.isAncestor(this.getNodeById('xnode-254'))) {
+                    else if (n.parentNode.attributes.text == 'Overlays') {
                         showVectorLayerOptions(MAP.getLayersByName(n.attributes.layer.name)[0]);
                     }
-					else {
+					else if (n.isLeaf()) {
                         showVectorLayerOptions(MAP.getLayersByName(n.attributes.layer)[0]);
 					}
 				}
@@ -3993,51 +3993,3 @@ function onHoverSelectPoint(feature) {
 function onHoverUnselectPoint(feature) {
     Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
 }
-
-// /* Section: map data */
-// function loadMapData(redirect, position) {
-    // Ext.Ajax.request({
-        // url: path_mapping + 'getMapByMapLayerPath' + type,
-        // method: 'POST',
-        // params: { mapLayerPath: URL },
-        // success: function(r) {
-			// MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
-            
-            // if (MAPSOURCE == map_source_type_database) {
-                // MAPDATA[ACTIVEPANEL].name = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getRawValue() : Ext.getCmp('map_cb2').getRawValue();
-                // MAPDATA[ACTIVEPANEL].organisationUnit = 'Country';
-                // MAPDATA[ACTIVEPANEL].organisationUnitLevel = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb').getValue() : Ext.getCmp('map_cb2').getValue();
-                // MAPDATA[ACTIVEPANEL].nameColumn = 'name';
-                // MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
-                // MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
-                // MAPDATA[ACTIVEPANEL].zoom = 7;
-            // }
-            // else if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-                // MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
-                // MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
-                // MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
-                // MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
-            // }
-			
-			// if (!position) {
-				// if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
-					// MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
-				// }
-				// MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
-			// }
-			
-			// if (MAPVIEW) {
-				// if (MAPVIEW.longitude && MAPVIEW.latitude && MAPVIEW.zoom) {
-					// MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
-				// }
-				// else {
-					// MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
-				// }
-				// MAPVIEW = false;
-			// }
-        // },
-        // failure: function() {
-            // alert( i18n_error_while_retrieving_data + ': loadMapData' );
-        // } 
-    // });
-// }

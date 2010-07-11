@@ -385,7 +385,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 													popup.hide();
 													mapping.relation = false;
 													Ext.getCmp('filter_tf').setValue('');
-													loadMapData(organisationUnitAssignment, true);
+													mapping.classify(true);
 												},
 												failure: function() {
 													alert( 'Error: addOrUpdateMapOrganisationUnitRelation' );
