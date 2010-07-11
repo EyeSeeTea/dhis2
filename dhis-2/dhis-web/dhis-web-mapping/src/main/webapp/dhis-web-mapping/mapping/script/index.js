@@ -3685,14 +3685,13 @@ Ext.onReady( function() {
     });
 	
 	Ext.getCmp('maplegendset_cb').hideField();
-	Ext.getCmp('bounds_tf').hideField();
-	Ext.getCmp('dataelementgroup_cb').hideField();
-	Ext.getCmp('dataelement_cb').hideField();
-    
     Ext.getCmp('maplegendset_cb2').hideField();
-	Ext.getCmp('bounds_tf2').hideField();
-	Ext.getCmp('dataelementgroup_cb2').hideField();
-	Ext.getCmp('dataelement_cb2').hideField();
+	Ext.getCmp('bounds_tf').hideField();
+    Ext.getCmp('bounds_tf2').hideField();
+	Ext.getCmp('dataelementgroup_cb').hideField();
+    Ext.getCmp('dataelementgroup_cb2').hideField();
+	Ext.getCmp('dataelement_cb').hideField();
+    Ext.getCmp('dataelement_cb2').hideField();
     
     if (MAPSOURCE == map_source_type_database) {
         Ext.getCmp('map_cb').hideField();
@@ -4037,131 +4036,11 @@ function loadMapData(redirect, position) {
 				MAPVIEW = false;
 			}
 			
-            if (redirect == thematicMap2) { getSymbolData(); }
-            else if (redirect == organisationUnitAssignment) { getAssignOrganisationUnitData(); }
+            if (redirect == organisationUnitAssignment) { getAssignOrganisationUnitData(); }
             else if (redirect == 'auto-assignment') { getAutoAssignOrganisationUnitData(position); }
         },
         failure: function() {
             alert( i18n_error_while_retrieving_data + ': loadMapData' );
-        } 
-    });
-}
-
-
-
-
-/* Section: symbol */
-function getSymbolData() {
-	MASK.msg = i18n_creating_choropleth;
-	MASK.show();
-    
-    var l = MAP.getLayersByName('Point layer')[0];
-    if (LABELS[thematicMap2]) {
-        toggleFeatureLabelsPoints(false, l);
-    }
-    FEATURE[thematicMap2] = l.features;
-	
-    var indicatorId = Ext.getCmp('indicator_cb2').getValue();
-	var dataElementId = Ext.getCmp('dataelement_cb2').getValue();
-    var periodId = Ext.getCmp('period_cb2').getValue();
-    var mapLayerPath = MAPDATA[thematicMap2].mapLayerPath;
-	var dataUrl;
-	var params = new Object();
-	params.periodId = periodId;
-	
-	if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-		params.mapLayerPath = mapLayerPath;
-		if (VALUETYPE.point == map_value_type_indicator) {
-			dataUrl = 'getIndicatorMapValuesByMap';
-			params.indicatorId = indicatorId;
-		}
-		else if (VALUETYPE.point == map_value_type_dataelement) {
-			dataUrl = 'getDataMapValuesByMap';
-			params.dataElementId = dataElementId;
-		}
-	}
-	else {
-		params.level = URL;
-		if (VALUETYPE.point == map_value_type_indicator) {
-			dataUrl = 'getIndicatorMapValuesByLevel';
-			params.indicatorId = indicatorId;
-		}
-		else if (VALUETYPE.point == map_value_type_dataelement) {
-			dataUrl = 'getDataMapValuesByLevel';
-			params.dataElementId = dataElementId;
-		}
-	}
-
-    Ext.Ajax.request({
-        url: path_mapping + dataUrl + type,
-        method: 'POST',
-        params: params,
-        success: function(r) {
-			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-			EXPORTVALUES = getExportDataValueJSON(mapvalues);
-			var mv = new Array();
-            var mour = new Array();
-			var nameColumn = MAPDATA[thematicMap2].nameColumn;
-			var options = {};
-			
-			if (mapvalues.length == 0) {
-				Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
-				MASK.hide();
-				return;
-			}
-            
-            for (var i = 0; i < mapvalues.length; i++) {
-				mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
-			}
-
-			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-                Ext.Ajax.request({
-                    url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
-                    method: 'POST',
-                    params: { mapLayerPath: mapLayerPath },
-                    success: function(r) {
-                        var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
-                       
-                        for (var i = 0; i < relations.length; i++) {
-                            mour[relations[i].featureId] = relations[i].organisationUnit;
-                        }
-
-                        for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
-                            FEATURE[thematicMap2][j].attributes.value = mv[mour[FEATURE[thematicMap2][j].attributes[nameColumn]]] || 0;
-                        }
-                        
-                        applyValues();
-                    }
-                });           
-			}
-			else if (MAPSOURCE == map_source_type_database) {
-				for (var i = 0; i < mapvalues.length; i++) {
-					for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
-						if (mapvalues[i].orgUnitName == FEATURE[thematicMap2][j].attributes.name) {
-							FEATURE[thematicMap2][j].attributes.value = parseFloat(mapvalues[i].value);
-							break;
-						}
-					}
-				}
-                
-                applyValues();
-			}
-            
-            function applyValues() {
-                proportionalSymbol.indicator = options.indicator = 'value';
-                options.method = Ext.getCmp('method_cb2').getValue();
-                options.numClasses = Ext.getCmp('numClasses_cb2').getValue();
-                options.colors = proportionalSymbol.getColors();
-                
-                proportionalSymbol.coreComp.updateOptions(options);
-                proportionalSymbol.coreComp.applyClassification();
-                proportionalSymbol.classificationApplied = true;
-			
-                MASK.hide();
-            }
-        },
-        failure: function() {
-            alert( 'Error: getIndicatorMapValues' );
         } 
     });
 }

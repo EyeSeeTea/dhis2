@@ -203,14 +203,16 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                     'select': {
                         fn: function() {
                             var mlp = Ext.getCmp('maps_cb').getValue();
-                            this.newUrl = mlp;
+                            // mapping.newUrl = mlp;
 							
                             Ext.getCmp('grid_gp').getStore().baseParams = { mapLayerPath: mlp };
                             Ext.getCmp('grid_gp').getStore().reload();
 							
 							Ext.getCmp('filter_tf').enable();
 							
-							mapping.classify(false);
+							// mapping.classify(false);
+                            
+                            mapping.loadByUrl(mlp);
                         },
                         scope: this
                     }
@@ -447,51 +449,120 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         colorB.setFromHex(Ext.getCmp('colorB_cf').getValue());
         return [colorA, colorB];
     },
-
-    /**
-     * Method: classify
-     *
-     * Parameters:
-     * exception - {Boolean} If true show a message box to user if either
-     *      the widget isn't ready, or no indicator is specified, or no
-     *      method is specified.
-     */
-    classify: function(exception, position) {
-        if (!this.ready) {
-            Ext.MessageBox.alert( i18n_error , i18n_component_init_not_complete );
-            return;
-        }
-        
-        if (this.newUrl) {
-            URL = this.newUrl;
-			
-			if (MAPSOURCE == map_source_type_geojson) {
-				this.setUrl(path + 'getGeoJson.action?name=' + URL);
-			}
-			else if (MAPSOURCE == map_source_type_shapefile) {
-				this.setUrl(path_geoserver + wfs + URL + output);
-			}
-        }
-        
+    
+    validateForm: function(exception) {
         if (!Ext.getCmp('maps_cb').getValue()) {
                 if (exception) {
                     Ext.messageRed.msg( i18n_assign + ' ' + i18n_organisation_units, i18n_please_select_map );
                 }
-                return;
+                return false;
         }
+        return true;
+    },
+    
+    loadByUrl: function(url) {
+        if (url != mapping.newUrl) {
+            mapping.newUrl = url;
+            
+            if (MAPSOURCE == map_source_type_geojson) {
+                mapping.setUrl(path_mapping + 'getGeoJson.action?name=' + url);
+            }
+			else if (MAPSOURCE == map_source_type_shapefile) {
+				mapping.setUrl(path_geoserver + wfs + url + output);
+			}
+        }
+    },
+    
+    applyValues: function(color, noCls) {
+        var options = {};
         
-		MASK.msg = i18n_loading ;
-        MASK.show();
+        mapping.indicator = options.indicator = 'value';
+        options.method = 1;
+        options.numClasses = noCls;
         
-		if (!this.newUrl) {
-			loadMapData(organisationUnitAssignment, position);
-		}
+        var colorA = new mapfish.ColorRgb();
+        colorA.setFromHex(color);
+        var colorB = new mapfish.ColorRgb();
+        colorB.setFromHex(assigned_row_color);
+        options.colors = [colorA, colorB];
+        
+        mapping.coreComp.updateOptions(options);
+        mapping.coreComp.applyClassification();
+        mapping.classificationApplied = true;
+        
+        MASK.hide();
     },
 
-    /**
-     * Method: onRender
-     * Called by EXT when the component is rendered.
-     */
+    classify: function(exception, position) {
+        if (mapping.validateForm(exception)) {
+        
+            MASK.msg = i18n_creating_map;
+            MASK.show();
+            
+            Ext.Ajax.request({
+                url: path_mapping + 'getMapByMapLayerPath' + type,
+                method: 'POST',
+                params: { mapLayerPath: mapping.newUrl },
+                success: function(r) {
+                    MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
+                    
+                    MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
+                    MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
+                    MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
+                    MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
+                    
+                    if (!position) {
+                        if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
+                            MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+                        }
+                        MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+                    }
+                    
+                    if (MAPVIEW) {
+                        if (MAPVIEW.longitude && MAPVIEW.latitude && MAPVIEW.zoom) {
+                            MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
+                        }
+                        else {
+                            MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+                        }
+                        MAPVIEW = false;
+                    }
+            
+                    var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
+                    FEATURE[thematicMap] = polygonLayer.features;
+                    
+                    if (LABELS[thematicMap]) {
+                        toggleFeatureLabelsPolygons(false, polygonLayer);
+                    }
+        
+                    var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
+                    var relations =	Ext.getCmp('grid_gp').getStore();
+                    var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
+                    var noCls = 1;
+                    var noAssigned = 0;
+        
+                    for (var i = 0; i < FEATURE[thematicMap].length; i++) {
+                        FEATURE[thematicMap][i].attributes['value'] = 0;
+                    
+                        for (var j = 0; j < relations.getTotalCount(); j++) {
+                            if (relations.getAt(j).data.featureId == FEATURE[thematicMap][i].attributes[nameColumn]) {
+                                FEATURE[thematicMap][i].attributes['value'] = 1;
+                                noAssigned++;
+                                noCls = noCls < 2 ? 2 : noCls;
+                                break;
+                            }
+                        }
+                    }
+
+                    var color = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? assigned_row_color : unassigned_row_color;
+                    noCls = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? 1 : noCls;
+                    
+                    mapping.applyValues(color, noCls);
+                }
+            });
+        }
+    },
+
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Choropleth.superclass.onRender.apply(this, arguments);
         if(this.loadMask){

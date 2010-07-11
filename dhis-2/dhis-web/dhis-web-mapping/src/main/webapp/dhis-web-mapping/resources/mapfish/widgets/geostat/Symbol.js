@@ -1266,8 +1266,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             MASK.show();        
             
             MAPDATA[ACTIVEPANEL].name = Ext.getCmp('map_tf2').getValue();
-            // MAPDATA[ACTIVEPANEL].organisationUnit = 'Country';
-            // MAPDATA[ACTIVEPANEL].organisationUnitLevel = ACTIVEPANEL == thematicMap ? Ext.getCmp('map_cb2').getValue() : Ext.getCmp('map_cb2').getValue();
             MAPDATA[ACTIVEPANEL].nameColumn = 'name';
             MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
             MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
