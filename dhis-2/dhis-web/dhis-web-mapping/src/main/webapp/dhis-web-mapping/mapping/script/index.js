@@ -263,7 +263,7 @@ Ext.onReady( function() {
 					var p = Ext.getCmp('period_cb').getValue();
 					var ms = Ext.getCmp('map_cb').getValue();
 					var mlt = Ext.getCmp('maplegendtype_cb').getValue();
-					var c = Ext.getCmp('numClasses').getValue();
+					var c = Ext.getCmp('numClasses_cb').getValue();
 					var ca = Ext.getCmp('colorA_cf').getValue();
 					var cb = Ext.getCmp('colorB_cf').getValue();
 					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || 0;
@@ -3685,7 +3685,7 @@ Ext.onReady( function() {
     });
 	
 	Ext.getCmp('maplegendset_cb').hideField();
-	Ext.getCmp('bounds').hideField();
+	Ext.getCmp('bounds_tf').hideField();
 	Ext.getCmp('dataelementgroup_cb').hideField();
 	Ext.getCmp('dataelement_cb').hideField();
     
@@ -3696,11 +3696,15 @@ Ext.onReady( function() {
     
     if (MAPSOURCE == map_source_type_database) {
         Ext.getCmp('map_cb').hideField();
+        Ext.getCmp('map_cb2').hideField();
         Ext.getCmp('map_tf').showField();
+        Ext.getCmp('map_tf2').showField();
     }
     else {
         Ext.getCmp('map_cb').showField();
+        Ext.getCmp('map_cb2').showField();
         Ext.getCmp('map_tf').hideField();
+        Ext.getCmp('map_tf2').hideField();
     }
 	
     Ext.get('loading').fadeOut({remove: true});
@@ -4033,8 +4037,7 @@ function loadMapData(redirect, position) {
 				MAPVIEW = false;
 			}
 			
-            if (redirect == thematicMap) { getChoroplethData(); }
-            else if (redirect == thematicMap2) { getSymbolData(); }
+            if (redirect == thematicMap2) { getSymbolData(); }
             else if (redirect == organisationUnitAssignment) { getAssignOrganisationUnitData(); }
             else if (redirect == 'auto-assignment') { getAutoAssignOrganisationUnitData(position); }
         },
@@ -4045,123 +4048,7 @@ function loadMapData(redirect, position) {
 }
 
 
-/* Section: choropleth */
-function getChoroplethData() {
-	MASK.msg = i18n_creating_choropleth;
-	MASK.show();
-    
-    var l = MAP.getLayersByName('Polygon layer')[0];
-    
-    if (LABELS[thematicMap]) {
-        toggleFeatureLabelsPolygons(false, l);
-    }
-    
-    FEATURE[thematicMap] = l.features;
-	
-    var indicatorId = Ext.getCmp('indicator_cb').getValue();
-	var dataElementId = Ext.getCmp('dataelement_cb').getValue();
-    var periodId = Ext.getCmp('period_cb').getValue();
-    var mapLayerPath = MAPDATA[thematicMap].mapLayerPath;
-	var dataUrl;
-	var params = new Object();
-	params.periodId = periodId;
-	
-	if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-		params.mapLayerPath = mapLayerPath;
-		if (VALUETYPE.polygon == map_value_type_indicator) {
-			dataUrl = 'getIndicatorMapValuesByMap';
-			params.indicatorId = indicatorId;
-		}
-		else if (VALUETYPE.polygon == map_value_type_dataelement) {
-			dataUrl = 'getDataMapValuesByMap';
-			params.dataElementId = dataElementId;
-		}
-	}
-	else {
-		params.level = URL;
-		if (VALUETYPE.polygon == map_value_type_indicator) {
-			dataUrl = 'getIndicatorMapValuesByLevel';
-			params.indicatorId = indicatorId;
-		}
-		else if (VALUETYPE.polygon == map_value_type_dataelement) {
-			dataUrl = 'getDataMapValuesByLevel';
-			params.dataElementId = dataElementId;
-		}
-	}
 
-    Ext.Ajax.request({
-        url: path_mapping + dataUrl + type,
-        method: 'POST',
-        params: params,
-        success: function(r) {
-			var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-			EXPORTVALUES = getExportDataValueJSON(mapvalues);
-			var mv = new Array();
-            var mour = new Array();
-			var nameColumn = MAPDATA[thematicMap].nameColumn;
-			var options = {};
-			
-			if (mapvalues.length == 0) {
-				Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
-				MASK.hide();
-				return;
-			}
-            
-            for (var i = 0; i < mapvalues.length; i++) {
-				mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
-			}
-
-			if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_shapefile) {
-                Ext.Ajax.request({
-                    url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
-                    method: 'POST',
-                    params: { mapLayerPath: mapLayerPath },
-                    success: function(r) {
-                        var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
-                       
-                        for (var i = 0; i < relations.length; i++) {
-                            mour[relations[i].featureId] = relations[i].organisationUnit;
-                        }
-
-                        for (var j = 0; j < FEATURE[thematicMap].length; j++) {
-                            FEATURE[thematicMap][j].attributes.value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]] || 0;
-                        }
-                        
-                        applyValues();
-                    }
-                });
-			}
-			else if (MAPSOURCE == map_source_type_database) {
-				for (var i = 0; i < mapvalues.length; i++) {
-					for (var j = 0; j < FEATURE[thematicMap].length; j++) {
-						if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
-							FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
-							break;
-						}
-					}
-				}
-                
-                applyValues();
-			}
-            
-            function applyValues() {
-                choropleth.indicator = options.indicator = 'value';
-                options.method = Ext.getCmp('method').getValue();
-                options.numClasses = Ext.getCmp('numClasses').getValue();
-                options.colors = choropleth.getColors();
-                
-                choropleth.coreComp.updateOptions(options);
-                choropleth.coreComp.applyClassification();
-                choropleth.classificationApplied = true;
-			
-                MASK.hide();
-            }
-        },
-        failure: function() {
-            alert( 'Error: getIndicatorMapValues' );
-        } 
-    });
-}
 
 /* Section: symbol */
 function getSymbolData() {

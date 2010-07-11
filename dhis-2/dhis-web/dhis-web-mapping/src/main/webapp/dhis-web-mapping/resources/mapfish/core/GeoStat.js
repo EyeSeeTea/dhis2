@@ -204,7 +204,7 @@ mapfish.GeoStat = OpenLayers.Class({
             choropleth.classify(false);
         }
         else if (ACTIVEPANEL == thematicMap2) {
-            symbol.classify(false);
+            proportionalSymbol.classify(false);
         }
         else if (ACTIVEPANEL == organisationUnitAssignment) {
             mapping.classify(false);
