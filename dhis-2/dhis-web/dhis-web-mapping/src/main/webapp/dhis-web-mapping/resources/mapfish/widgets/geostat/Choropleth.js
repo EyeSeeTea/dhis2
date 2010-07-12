@@ -353,11 +353,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     alert( 'Error: setMapSourceTypeUserSetting' );
                                 }
                             });
-                            
-                            this.newUrl = MAPVIEW.mapSource;
                         }
-                    },
-                    scope: this
+                    }
                 }
             }
         });
@@ -374,7 +371,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function() {
                         if (MAPVIEW) {
                             Ext.getCmp('map_cb').setValue(MAPVIEW.mapSource);
-                            choropleth.classify(false, true);
+                            choropleth.loadByUrl(MAPVIEW.mapSource);
                         }
                     }
                 }
@@ -801,7 +798,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('mapview_cb').reset();
                         }
                         
-                        choropleth.loadByUrl(Ext.getCmp('map_cb').getValue());
+                        if (Ext.getCmp('map_cb').getValue() != choropleth.newUrl) {
+                            choropleth.loadByUrl(Ext.getCmp('map_cb').getValue());
+                        }
                     },
                     scope: this
                 }
@@ -1181,13 +1180,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     loadByUrl: function(url) {
         if (url != choropleth.newUrl) {
             choropleth.newUrl = url;
-            
+
             if (MAPSOURCE == map_source_type_geojson) {
                 choropleth.setUrl(path_mapping + 'getGeoJson.action?name=' + url);
             }
 			else if (MAPSOURCE == map_source_type_shapefile) {
 				choropleth.setUrl(path_geoserver + wfs + url + output);
 			}
+        }
+        else {
+            choropleth.classify(false);
         }
     },
     
