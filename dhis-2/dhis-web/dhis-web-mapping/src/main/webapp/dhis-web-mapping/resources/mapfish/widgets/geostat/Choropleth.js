@@ -338,7 +338,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         if (MAPVIEW) {
                             Ext.getCmp('period_cb').setValue(MAPVIEW.periodId);
                             var mst = MAPVIEW.mapSourceType;
-
+                            
                             Ext.Ajax.request({
                                 url: path_mapping + 'setMapSourceTypeUserSetting' + type,
                                 method: 'POST',
@@ -370,8 +370,26 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'load': {
                     fn: function() {
                         if (MAPVIEW) {
-                            Ext.getCmp('map_cb').setValue(MAPVIEW.mapSource);
-                            choropleth.loadByUrl(MAPVIEW.mapSource);
+                            if (MAPSOURCE == map_source_type_database) {
+                                Ext.Ajax.request({
+                                    url: path_commons + 'getOrganisationUnit' + type,
+                                    method: 'POST',
+                                    params: {id:MAPVIEW.mapSource},
+                                    success: function(r) {
+                                        var name = Ext.util.JSON.decode(r.responseText).organisationUnit.name;
+                                        Ext.getCmp('map_tf').setValue(name);
+                                        Ext.getCmp('map_tf').value = MAPVIEW.mapSource;
+                                        choropleth.loadById(MAPVIEW.mapSource);
+                                    },
+                                    failure: function() {
+                                        alert('Error: getOrganisationUnit');
+                                    }
+                                });
+                            }
+                            else {
+                                Ext.getCmp('map_cb').setValue(MAPVIEW.mapSource);
+                                choropleth.loadByUrl(MAPVIEW.mapSource);
+                            }
                         }
                     }
                 }
@@ -888,7 +906,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         ]
                                     }
                                 ]
-                            }).show();
+                            });
+                            
+                            var x = Ext.getCmp('center').x + 15;
+                            var y = Ext.getCmp('center').y + 41;
+                            w.setPosition(x,y);
+                            w.show();
                         }
                         
                         if (TOPLEVELUNIT.id) {
@@ -1159,12 +1182,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     loadById: function(id) {
         if (id != choropleth.parentId) {
             choropleth.parentId = id;
-            var n = Ext.getCmp('map_tf').node;
             
             Ext.Ajax.request({
                 url: path_mapping + 'getOrganisationUnitChildren' + type,
                 method: 'POST',
-                params: {node:n.attributes.id},
+                params: {node:choropleth.parentId},
                 success: function(r) {
                     var childIsLeaf = Ext.util.JSON.decode(r.responseText)[0].leaf;
                     var url = childIsLeaf ? path_mapping + 'getPointShapefile.action?id=' + id : path_mapping + 'getPolygonShapefile.action?id=' + id;

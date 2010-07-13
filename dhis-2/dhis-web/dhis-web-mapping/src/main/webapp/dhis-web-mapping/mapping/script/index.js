@@ -261,7 +261,7 @@ Ext.onReady( function() {
 					var de = mvt == map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : 0;
 					var pt = Ext.getCmp('periodtype_cb').getValue();
 					var p = Ext.getCmp('period_cb').getValue();
-					var ms = Ext.getCmp('map_cb').getValue();
+					var ms = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue();
 					var mlt = Ext.getCmp('maplegendtype_cb').getValue();
 					var c = Ext.getCmp('numClasses_cb').getValue();
 					var ca = Ext.getCmp('colorA_cf').getValue();
@@ -2073,26 +2073,17 @@ Ext.onReady( function() {
                     {
                         title: '<span class="panel-tab-title">'+i18n_new+'</span>',
                         id: 'map0',
-                        items:
-                        [
-                            newMapPanel
-                        ]
+                        items: [newMapPanel]
                     },
                     {
                         title: '<span class="panel-tab-title">'+i18n_edit+'</span>',
                         id: 'map1',
-                        items:
-                        [
-                            editMapPanel
-                        ]
+                        items: [editMapPanel]
                     },
                     {
                         title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
                         id: 'map2',
-                        items:
-                        [
-                            deleteMapPanel
-                        ]
+                        items: [deleteMapPanel]
                     }
                 ]
             },
@@ -2326,7 +2317,7 @@ Ext.onReady( function() {
 									Ext.messageBlack.msg( i18n_new_overlay , 'The overlay <span class="x-msg-hl">' + mln + '</span> '+i18n_was_registered+'.');
 									Ext.getCmp('maplayer_cb').getStore().reload();
 							
-									var mapurl = MAPSOURCE == map_source_type_geojson ? path + 'getGeoJson.action?name=' + mlmsf : path_geoserver + wfs + mlwmso + output;
+									var mapurl = MAPSOURCE == map_source_type_geojson ? path_mapping + 'getGeoJson.action?name=' + mlmsf : path_geoserver + wfs + mlwmso + output;
 									
 									MAP.addLayer(
 										new OpenLayers.Layer.Vector(mln, {
@@ -2654,14 +2645,11 @@ Ext.onReady( function() {
 									var msv = Ext.getCmp('mapsource_cb').getValue();
 									var msrw = Ext.getCmp('mapsource_cb').getRawValue();
 
-									if (MAPSOURCE == msv) {
-										Ext.messageRed.msg( i18n_map_source , '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_already_selected+'.');
-									}
-									else {
+									if (MAPSOURCE != msv) {
                                         MAPSOURCE = msv;
-                                        
-										Ext.Ajax.request({
-											url: path_mapping + 'setMapSourceTypeUserSetting' + type,
+
+                                        Ext.Ajax.request({
+                                            url: path_mapping + 'setMapSourceTypeUserSetting' + type,
 											method: 'POST',
 											params: { mapSourceType: msv },
 											success: function(r) {
@@ -2706,10 +2694,12 @@ Ext.onReady( function() {
                                                     Ext.getCmp('map_cb').hideField();
                                                     Ext.getCmp('map_tf').showField();
 												}
-												
+                                                
 												if (MAP.layers.length > 2) {
-													for (var i = MAP.layers.length - 1; i >= 2; i--) {
-														MAP.removeLayer(MAP.layers[i]);
+													for (var i = 0; i < MAP.layers.length; i++) {
+                                                        if (MAP.layers[i].isOverlay) {
+                                                            MAP.removeLayer(MAP.layers[i]);
+                                                        }
 													}
 												}
 												addOverlaysToMap();
@@ -2902,7 +2892,7 @@ Ext.onReady( function() {
 				var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
 				
 				for (var i = 0; i < mapLayers.length; i++) {
-					var mapurl = MAPSOURCE == map_source_type_geojson ? path + 'getGeoJson.action?name=' + mapLayers[i].mapSource : path_geoserver + wfs + mapLayers[i].mapSource + output;
+					var mapurl = MAPSOURCE == map_source_type_shapefile ? path_geoserver + wfs + mapLayers[i].mapSource + output : path_mapping + 'getGeoJson.action?name=' + mapLayers[i].mapSource;
 					var fillColor = mapLayers[i].fillColor;
 					var fillOpacity = parseFloat(mapLayers[i].fillOpacity);
 					var strokeColor = mapLayers[i].strokeColor;
@@ -2933,6 +2923,8 @@ Ext.onReady( function() {
 					treeLayer.events.register('loadend', null, function() {
 						MASK.hide();
 					});
+                    
+                    treeLayer.isOverlay = true;
 						
 					MAP.addLayer(treeLayer);
 				}

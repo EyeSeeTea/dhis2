@@ -345,19 +345,16 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 params: { mapSourceType: mst },
 								success: function(r) {
                                     Ext.getCmp('map_cb2').getStore().reload();
-                                    Ext.getCmp('maps_cb2').getStore().reload();
+                                    Ext.getCmp('maps_cb').getStore().reload();
                                     
-                                    Ext.getCmp('mapsource_cb2').setValue(MAPSOURCE);
+                                    Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                 },
                                 failure: function() {
                                     alert( 'Error: setMapSourceTypeUserSetting' );
                                 }
                             });
-                            
-                            this.newUrl = MAPVIEW.mapSource;
                         }
-                    },
-                    scope: this
+                    }
                 }
             }
         });
@@ -373,8 +370,26 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'load': {
                     fn: function() {
                         if (MAPVIEW) {
-                            Ext.getCmp('map_cb2').setValue(MAPVIEW.mapSource);
-                            proportionalSymbol.classify(false, true);
+                            if (MAPSOURCE == map_source_type_database) {
+                                Ext.Ajax.request({
+                                    url: path_commons + 'getOrganisationUnit' + type,
+                                    method: 'POST',
+                                    params: {id:MAPVIEW.mapSource},
+                                    success: function(r) {
+                                        var name = Ext.util.JSON.decode(r.responseText).organisationUnit.name;
+                                        Ext.getCmp('map_tf2').setValue(name);
+                                        Ext.getCmp('map_tf2').value = MAPVIEW.mapSource;
+                                        proportionalSymbol.loadById(MAPVIEW.mapSource);
+                                    },
+                                    failure: function() {
+                                        alert('Error: getOrganisationUnit');
+                                    }
+                                });
+                            }
+                            else {
+                                Ext.getCmp('map_cb2').setValue(MAPVIEW.mapSource);
+                                proportionalSymbol.loadByUrl(MAPVIEW.mapSource);
+                            }
                         }
                     }
                 }
@@ -442,7 +457,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 								MAPSOURCE = MAPVIEW.mapSourceType;
                                 
                                 Ext.getCmp('mapvaluetype_cb2').setValue(MAPVIEW.mapValueType);
-								VALUETYPE.polygon = MAPVIEW.mapValueType;
+								VALUETYPE.point = MAPVIEW.mapValueType;
                                 
                                 if (MAPVIEW.mapValueType == map_value_type_indicator) {
                                     Ext.getCmp('indicatorgroup_cb2').showField();
@@ -528,14 +543,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('indicator_cb2').showField();
 							Ext.getCmp('dataelementgroup_cb2').hideField();
 							Ext.getCmp('dataelement_cb2').hideField();
-							VALUETYPE.polygon = map_value_type_indicator;
+							VALUETYPE.point = map_value_type_indicator;
 						}
 						else if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_dataelement) {
 							Ext.getCmp('indicatorgroup_cb2').hideField();
 							Ext.getCmp('indicator_cb2').hideField();
 							Ext.getCmp('dataelementgroup_cb2').showField();
 							Ext.getCmp('dataelement_cb2').showField();
-							VALUETYPE.polygon = map_value_type_dataelement;
+							VALUETYPE.point = map_value_type_dataelement;
 						}
 					}
 				}
@@ -801,7 +816,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('mapview_cb2').reset();
                         }
                         
-                        proportionalSymbol.loadByUrl(Ext.getCmp('map_cb2').getValue());
+                        if (Ext.getCmp('map_cb2').getValue() != proportionalSymbol.newUrl) {
+                            proportionalSymbol.loadByUrl(Ext.getCmp('map_cb2').getValue());
+                        }
                     },
                     scope: this
                 }
@@ -889,7 +906,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         ]
                                     }
                                 ]
-                            }).show();
+                            });
+                            
+                            var x = Ext.getCmp('center').x + 15;
+                            var y = Ext.getCmp('center').y + 41;
+                            w.setPosition(x,y);
+                            w.show();
                         }
                         
                         if (TOPLEVELUNIT.id) {
@@ -1160,12 +1182,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     loadById: function(id) {
         if (id != proportionalSymbol.parentId) {
             proportionalSymbol.parentId = id;
-            var n = Ext.getCmp('map_tf2').node;
             
             Ext.Ajax.request({
                 url: path_mapping + 'getOrganisationUnitChildren' + type,
                 method: 'POST',
-                params: {node:n.attributes.id},
+                params: {node:proportionalSymbol.parentId},
                 success: function(r) {
                     var childIsLeaf = Ext.util.JSON.decode(r.responseText)[0].leaf;
                     var url = childIsLeaf ? path_mapping + 'getPointShapefile.action?id=' + id : path_mapping + 'getPolygonShapefile.action?id=' + id;
@@ -1181,13 +1202,16 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     loadByUrl: function(url) {
         if (url != proportionalSymbol.newUrl) {
             proportionalSymbol.newUrl = url;
-            
+
             if (MAPSOURCE == map_source_type_geojson) {
                 proportionalSymbol.setUrl(path_mapping + 'getGeoJson.action?name=' + url);
             }
 			else if (MAPSOURCE == map_source_type_shapefile) {
 				proportionalSymbol.setUrl(path_geoserver + wfs + url + output);
 			}
+        }
+        else {
+            proportionalSymbol.classify(false);
         }
     },
     
@@ -1231,7 +1255,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     getIndicatorOrDataElementId: function() {
-        return VALUETYPE.polygon == map_value_type_indicator ?
+        return VALUETYPE.point == map_value_type_indicator ?
             Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
     },
     
@@ -1288,16 +1312,16 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 MAPVIEW = false;
             }
             
-            var polygonLayer = MAP.getLayersByName('Point layer')[0];
-            FEATURE[thematicMap2] = polygonLayer.features;
+            var pointLayer = MAP.getLayersByName('Point layer')[0];
+            FEATURE[thematicMap2] = pointLayer.features;
             
             if (LABELS[thematicMap2]) {
-                toggleFeatureLabelsPolygons(false, polygonLayer);
+                toggleFeatureLabelsPoints(false, pointLayer);
             }
             
-            var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
+            var indicatorOrDataElementId = VALUETYPE.point == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
-            var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
+            var dataUrl = VALUETYPE.point == map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
             var periodId = Ext.getCmp('period_cb2').getValue();
             var parentId = proportionalSymbol.parentId;
@@ -1370,16 +1394,16 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         MAPVIEW = false;
                     }
             
-                    var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
-                    FEATURE[thematicMap2] = polygonLayer.features;
+                    var pointLayer = MAP.getLayersByName('Point layer')[0];
+                    FEATURE[thematicMap2] = pointLayer.features;
                     
                     if (LABELS[thematicMap2]) {
-                        toggleFeatureLabelsPolygons(false, polygonLayer);
+                        toggleFeatureLabelsPoints(false, pointLayer);
                     }
             
-                    var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
+                    var indicatorOrDataElementId = VALUETYPE.point == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
-                    var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
+                    var dataUrl = VALUETYPE.point == map_value_type_indicator ?
                         'getIndicatorMapValuesByMap' : 'getDataMapValuesByMap';
                     var periodId = Ext.getCmp('period_cb2').getValue();
                     var mapLayerPath = proportionalSymbol.newUrl;
