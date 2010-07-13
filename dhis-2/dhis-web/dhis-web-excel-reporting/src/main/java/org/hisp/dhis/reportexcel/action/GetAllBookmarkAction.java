@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportexcel.action;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,32 +26,60 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.state;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.reportexcel.Bookmark;
+import org.hisp.dhis.reportexcel.BookmarkService;
+import org.hisp.dhis.reportexcel.state.SelectionManager;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public interface SelectionManager
+
+public class GetAllBookmarkAction
+    implements Action
 {
-    public String getDownloadFilePath();
+    // -------------------------------------------
+    // Dependency
+    // -------------------------------------------
 
-    public void setDownloadFilePath( String path );
+    private BookmarkService bookmarkService;
 
-    public String getUploadFilePath();
+    public void setBookmarkService( BookmarkService bookmarkService )
+    {
+        this.bookmarkService = bookmarkService;
+    }
 
-    public void setUploadFilePath( String path );
-    
-    public void setSelectedReportId( Integer id );
-    
-    public Integer getSelectedReportId();
-    
-    public String getRenameFilePath();
+    private SelectionManager selectionManager;
 
-    public void setRenameFilePath( String path );
-    
-    public void setBookmarkType( String type );
-    
-    public String getBookmarkType();
+    public void setSelectionManager( SelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
+
+    // -------------------------------------------
+    // Output
+    // -------------------------------------------
+
+    private List<Bookmark> bookmarks;
+
+    public List<Bookmark> getBookmarks()
+    {
+        return bookmarks;
+    }
+
+    @Override
+    public String execute()
+        throws Exception
+    {
+        bookmarks = new ArrayList<Bookmark>( bookmarkService.getAllBookmark( selectionManager.getBookmarkType() ) );
+
+        return SUCCESS;
+    }
 
 }

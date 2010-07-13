@@ -1,6 +1,4 @@
-package org.hisp.dhis.reportexcel.chart;
-
-import java.util.Collection;
+package org.hisp.dhis.reportexcel.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -29,20 +27,47 @@ import java.util.Collection;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.reportexcel.BookmarkService;
+
+import com.opensymphony.xwork2.Action;
+
 /**
  * @author Tran Thanh Tri
+ * @version $Id$
  */
 
-public interface ExtBookmarkChartService
+public class DeleteBookmarkAction
+    implements Action
 {
+    // -------------------------------------------
+    // Dependency
+    // -------------------------------------------
 
-    int saveExtBookmarkChart( ExtBookmarkChart extBookmarkChart );
-    
-    void deleteExtBookmarkChart ( int id );    
-   
-    Collection<ExtBookmarkChart> getALLExtBookmarkChart();    
-    
-    ExtBookmarkChart getExtBookmarkChart( int id );
-    
+    private BookmarkService bookmarkService;
+
+    public void setBookmarkService( BookmarkService bookmarkService )
+    {
+        this.bookmarkService = bookmarkService;
+    }
+
+    // -------------------------------------------
+    // Input
+    // -------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    @Override
+    public String execute()
+        throws Exception
+    {
+        bookmarkService.deleteBookmark( id );
+
+        return SUCCESS;
+    }
 
 }

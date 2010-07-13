@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportexcel;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,32 +26,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.state;
+
+import java.util.Collection;
+
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
 /**
  * @author Tran Thanh Tri
- * @version $Id$
  */
-public interface SelectionManager
+
+public interface BookmarkStore
+    extends GenericIdentifiableObjectStore<Bookmark>
 {
-    public String getDownloadFilePath();
-
-    public void setDownloadFilePath( String path );
-
-    public String getUploadFilePath();
-
-    public void setUploadFilePath( String path );
-    
-    public void setSelectedReportId( Integer id );
-    
-    public Integer getSelectedReportId();
-    
-    public String getRenameFilePath();
-
-    public void setRenameFilePath( String path );
-    
-    public void setBookmarkType( String type );
-    
-    public String getBookmarkType();
-
+    Collection<Bookmark> getAllBookmark( String type, String username );
 }

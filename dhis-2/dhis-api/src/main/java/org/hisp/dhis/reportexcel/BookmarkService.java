@@ -1,4 +1,6 @@
-package org.hisp.dhis.reportexcel.chart.action;
+package org.hisp.dhis.reportexcel;
+
+import java.util.Collection;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,51 +29,19 @@ package org.hisp.dhis.reportexcel.chart.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.hisp.dhis.reportexcel.chart.ExtBookmarkChart;
-import org.hisp.dhis.reportexcel.chart.ExtBookmarkChartService;
-
-import com.opensymphony.xwork2.Action;
-
 /**
  * @author Tran Thanh Tri
- * 
- *         GetAllBookmarkChartAction.java Jun 23, 2010 2:40:44 PM
  */
-public class GetAllBookmarkChartAction
-    implements Action
+
+
+public interface BookmarkService
 {
-    // -------------------------------------------
-    // Dependency
-    // -------------------------------------------
-
-    private ExtBookmarkChartService extBookmarkChartService;
-
-    public void setExtBookmarkChartService( ExtBookmarkChartService extBookmarkChartService )
-    {
-        this.extBookmarkChartService = extBookmarkChartService;
-    }
-
-    // -------------------------------------------
-    // Output
-    // -------------------------------------------
-
-    private Collection<ExtBookmarkChart> extBookmarkCharts;
-
-    public Collection<ExtBookmarkChart> getExtBookmarkCharts()
-    {
-        return extBookmarkCharts;
-    }
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        extBookmarkCharts = new HashSet<ExtBookmarkChart>( extBookmarkChartService.getALLExtBookmarkChart() );
-        
-        return SUCCESS;
-    }
+    int saveBookmark( Bookmark bookmark );
+    
+    void deleteBookmark( int id );
+    
+    Collection<Bookmark> getAllBookmark( String type );
+    
+    Bookmark getBookmark( int id );
 
 }
