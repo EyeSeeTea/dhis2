@@ -2672,7 +2672,9 @@ Ext.onReady( function() {
 													}                                                   
 
                                                     Ext.getCmp('map_cb').showField();
+                                                    Ext.getCmp('map_cb2').showField();
                                                     Ext.getCmp('map_tf').hideField();
+                                                    Ext.getCmp('map_tf2').hideField();
 												}
 												else if (MAPSOURCE == map_source_type_shapefile) {
 													Ext.getCmp('register_chb').enable();
@@ -2683,7 +2685,9 @@ Ext.onReady( function() {
 													}
 
                                                     Ext.getCmp('map_cb').showField();
+                                                    Ext.getCmp('map_cb2').showField();
                                                     Ext.getCmp('map_tf').hideField();
+                                                    Ext.getCmp('map_tf2').hideField();
 												}
 												else if (MAPSOURCE == map_source_type_database) {
 													Ext.getCmp('register_chb').disable();
@@ -2692,7 +2696,9 @@ Ext.onReady( function() {
 													shapefilePanel.hide();
                                                     
                                                     Ext.getCmp('map_cb').hideField();
+                                                    Ext.getCmp('map_cb2').hideField();
                                                     Ext.getCmp('map_tf').showField();
+                                                    Ext.getCmp('map_tf2').showField();
 												}
                                                 
 												if (MAP.layers.length > 2) {

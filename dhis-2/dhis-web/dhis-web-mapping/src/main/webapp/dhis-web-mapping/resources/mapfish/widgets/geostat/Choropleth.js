@@ -899,7 +899,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                 xtype: 'button',
                                                 text: 'OK',
                                                 handler: function() {
-                                                    choropleth.loadById(Ext.getCmp('map_tf').value);
+                                                    if (Ext.getCmp('map_tf').getValue()) {
+                                                        choropleth.loadById(Ext.getCmp('map_tf').value);
+                                                    }
                                                     Ext.getCmp('orgunit_w').hide();
                                                 }                                                
                                             }
@@ -1180,7 +1182,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     loadById: function(id) {
-        if (id != choropleth.parentId) {
+        if (id != choropleth.parentId || MAPVIEW) {
             choropleth.parentId = id;
             
             Ext.Ajax.request({

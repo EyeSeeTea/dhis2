@@ -899,9 +899,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                 xtype: 'button',
                                                 text: 'OK',
                                                 handler: function() {
-                                                    proportionalSymbol.loadById(Ext.getCmp('map_tf2').value);
+                                                    if (Ext.getCmp('map_tf2').getValue()) {
+                                                        proportionalSymbol.loadById(Ext.getCmp('map_tf2').value);
+                                                    }
                                                     Ext.getCmp('orgunit_w2').hide();
-                                                }                                                
+                                                }                                           
                                             }
                                         ]
                                     }
@@ -1180,7 +1182,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     loadById: function(id) {
-        if (id != proportionalSymbol.parentId) {
+        if (id != proportionalSymbol.parentId || MAPVIEW) {
             proportionalSymbol.parentId = id;
             
             Ext.Ajax.request({
