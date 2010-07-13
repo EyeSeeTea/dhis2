@@ -141,8 +141,6 @@ public class DXFImportServiceTest
 
     private final static String SDMXCROSS2DXF = "cross2dxf.xsl";
 
-    private final static String METADATA = "ExportMetaData.xml";
-
     private ImportObjectService importObjectService;
 
     private ImportDataValueService importDataValueService;
@@ -275,6 +273,7 @@ public class DXFImportServiceTest
         assertObjects( dataASize );
     }
 
+    @Ignore
     @Test
     public void testExcelXImportWithTransform() throws Exception
     {

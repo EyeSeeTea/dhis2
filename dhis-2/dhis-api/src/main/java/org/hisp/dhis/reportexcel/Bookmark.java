@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.chart;
+package org.hisp.dhis.reportexcel;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -33,56 +33,38 @@ import org.hisp.dhis.common.IdentifiableObject;
  * @author Tran Thanh Tri
  */
 @SuppressWarnings( "serial" )
-public class ExtBookmarkChart
+public class Bookmark
     extends IdentifiableObject
 {
-    private String title;
+    public static final String CHART = "CHART";
 
-    public String getTitle()
-    {
-        return title;
-    }
+    public static final String COMPLETED_REPORT = "COMPLETED_REPORT";
 
-    public void setTitle( String title )
-    {
-        this.title = title;
-    }
+    private String contain;
 
-    private String xtitle;
-
-    public String getXtitle()
-    {
-        return xtitle;
-    }
-
-    public void setXtitle( String xtitle )
-    {
-        this.xtitle = xtitle;
-    }
+    private String type;
 
     private String username;
 
-    public String getUsername()
+    private String extraContain;
+
+    // -------------------------------------------------------------------------
+    // support method
+    // -------------------------------------------------------------------------
+
+    public boolean isChart()
     {
-        return username;
+        return this.type.equals( CHART );
     }
 
-    public void setUsername( String username )
+    public boolean isCompletedReport()
     {
-        this.username = username;
+        return this.type.equals( COMPLETED_REPORT );
     }
 
-    private String jsonValueStore;
-
-    public String getJsonValueStore()
+    public boolean hasExtraContain()
     {
-        return jsonValueStore;
-    }
-
-    public void setJsonValueStore( String jsonValueStore )
-    {
-        this.jsonValueStore = jsonValueStore;
-
+        return this.extraContain!=null && this.extraContain!=""; 
     }
 
     // -------------------------------------------------------------------------
@@ -107,10 +89,54 @@ public class ExtBookmarkChart
             return false;
         if ( getClass() != obj.getClass() )
             return false;
-        ExtBookmarkChart other = (ExtBookmarkChart) obj;
+        Bookmark other = (Bookmark) obj;
         if ( id != other.getId() )
             return false;
         return true;
+    }
+
+    // -------------------------------------------------------------------------
+    // getter and setter
+    // -------------------------------------------------------------------------
+
+    public String getContain()
+    {
+        return contain;
+    }
+
+    public void setContain( String contain )
+    {
+        this.contain = contain;
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public void setUsername( String username )
+    {
+        this.username = username;
+    }
+
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
+    public String getExtraContain()
+    {
+        return extraContain;
+    }
+
+    public void setExtraContain( String extraContain )
+    {
+        this.extraContain = extraContain;
     }
 
     @Override

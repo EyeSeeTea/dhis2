@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.chart;
+package org.hisp.dhis.reportexcel;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -29,16 +29,63 @@ package org.hisp.dhis.reportexcel.chart;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Tran Thanh Tri
  */
-
-public interface ExtBookmarkChartStore
-    extends GenericIdentifiableObjectStore<ExtBookmarkChart>
+@Transactional
+public class DefaultBookmarkService
+    implements BookmarkService
 {
 
-    Collection<ExtBookmarkChart> getALLExtBookmarkChart( String username );
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private BookmarkStore bookmarkStore;
+
+    public void setBookmarkStore( BookmarkStore bookmarkStore )
+    {
+        this.bookmarkStore = bookmarkStore;
+    }
+
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Implemented
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void deleteBookmark( int id )
+    {
+        bookmarkStore.delete( bookmarkStore.get( id ) );
+    }
+
+    @Override
+    public Collection<Bookmark> getAllBookmark( String type )
+    {
+        return bookmarkStore.getAllBookmark( type, currentUserService.getCurrentUsername() );
+    }
+
+    @Override
+    public Bookmark getBookmark( int id )
+    {
+        return bookmarkStore.get( id );
+    }
+
+    @Override
+    public int saveBookmark( Bookmark bookmark )
+    {
+        bookmark.setUsername( currentUserService.getCurrentUsername() );
+
+        return bookmarkStore.save( bookmark );
+    }
 
 }

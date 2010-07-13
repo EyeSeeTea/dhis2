@@ -47,5 +47,9 @@ public interface SelectionManager
     public String getRenameFilePath();
 
     public void setRenameFilePath( String path );
+    
+    public void setBookmarkType( String type );
+    
+    public String getBookmarkType();
 
 }

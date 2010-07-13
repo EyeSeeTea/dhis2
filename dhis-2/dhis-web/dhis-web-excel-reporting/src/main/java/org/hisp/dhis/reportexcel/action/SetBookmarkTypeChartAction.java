@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.chart.action;
+package org.hisp.dhis.reportexcel.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,98 +26,36 @@ package org.hisp.dhis.reportexcel.chart.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import org.hisp.dhis.reportexcel.chart.ExtBookmarkChart;
-import org.hisp.dhis.reportexcel.chart.ExtBookmarkChartService;
+import org.hisp.dhis.reportexcel.Bookmark;
+import org.hisp.dhis.reportexcel.state.SelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
- * 
- *         BookmarkChartAction.java Jun 23, 2010 2:24:26 PM
+ * @version $Id$
  */
-public class BookmarkChartAction
+public class SetBookmarkTypeChartAction
     implements Action
 {
-
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
-    private ExtBookmarkChartService extBookmarkChartService;
+    private SelectionManager selectionManager;
 
-    public void setExtBookmarkChartService( ExtBookmarkChartService extBookmarkChartService )
+    public void setSelectionManager( SelectionManager selectionManager )
     {
-        this.extBookmarkChartService = extBookmarkChartService;
-    }
-  
-
-    // -------------------------------------------
-    // Input
-    // -------------------------------------------
-
-    private String title;
-
-    public void setTitle( String title )
-    {
-        this.title = title;
-    }
-
-    private String xtitle;
-
-    public void setXtitle( String xtitle )
-    {
-        this.xtitle = xtitle;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private String descriptions;
-
-    public void setDescriptions( String descriptions )
-    {
-        this.descriptions = descriptions;
-    }
-
-    private String json;
-
-    public void setJson( String json )
-    {
-        this.json = json;
-    }
-
-    // -------------------------------------------
-    // Output
-    // -------------------------------------------
-
-    private ExtBookmarkChart extBookmarkChart;
-
-    public ExtBookmarkChart getExtBookmarkChart()
-    {
-        return extBookmarkChart;
+        this.selectionManager = selectionManager;
     }
 
     @Override
     public String execute()
         throws Exception
     {
-
-        extBookmarkChart = new ExtBookmarkChart();
-
-        extBookmarkChart.setName( name );
-        extBookmarkChart.setTitle( title );
-        extBookmarkChart.setXtitle( xtitle );
-        extBookmarkChart.setDescription( descriptions );
-        extBookmarkChart.setJsonValueStore( json );        
-
-        extBookmarkChartService.saveExtBookmarkChart( extBookmarkChart );
-
+        selectionManager.setBookmarkType( Bookmark.CHART );
+        
         return SUCCESS;
     }
+
 }

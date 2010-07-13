@@ -1,8 +1,4 @@
-package org.hisp.dhis.reportexcel.chart.action;
-
-import org.hisp.dhis.reportexcel.chart.ExtBookmarkChartService;
-
-import com.opensymphony.xwork2.Action;
+package org.hisp.dhis.reportexcel.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -30,25 +26,30 @@ import com.opensymphony.xwork2.Action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import org.hisp.dhis.reportexcel.Bookmark;
+import org.hisp.dhis.reportexcel.BookmarkService;
+
+import com.opensymphony.xwork2.Action;
+
 /**
  * @author Tran Thanh Tri
- * 
- *         DeleleBookmarkChartAction.java Jun 23, 2010 2:35:21 PM
+ * @version $Id$
  */
-public class DeleleBookmarkChartAction
+
+public class GetBookmarkAction
     implements Action
 {
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
-    private ExtBookmarkChartService extBookmarkChartService;
+    private BookmarkService bookmarkService;
 
-    public void setExtBookmarkChartService( ExtBookmarkChartService extBookmarkChartService )
+    public void setBookmarkService( BookmarkService bookmarkService )
     {
-        this.extBookmarkChartService = extBookmarkChartService;
+        this.bookmarkService = bookmarkService;
     }
-   
 
     // -------------------------------------------
     // Input
@@ -61,12 +62,23 @@ public class DeleleBookmarkChartAction
         this.id = id;
     }
 
+    // -------------------------------------------
+    // Output
+    // -------------------------------------------
+
+    private Bookmark bookmark;
+
+    public Bookmark getBookmark()
+    {
+        return bookmark;
+    }
+
     @Override
     public String execute()
         throws Exception
     {
-        extBookmarkChartService.deleteExtBookmarkChart(  id );
-        
+        bookmark = bookmarkService.getBookmark( id );
+
         return SUCCESS;
     }
 

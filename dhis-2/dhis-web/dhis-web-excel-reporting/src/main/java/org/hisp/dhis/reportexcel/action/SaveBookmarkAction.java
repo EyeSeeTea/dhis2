@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.chart.action;
+package org.hisp.dhis.reportexcel.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,59 +26,76 @@ package org.hisp.dhis.reportexcel.chart.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import org.hisp.dhis.reportexcel.chart.ExtBookmarkChart;
-import org.hisp.dhis.reportexcel.chart.ExtBookmarkChartService;
+import org.hisp.dhis.reportexcel.Bookmark;
+import org.hisp.dhis.reportexcel.BookmarkService;
+import org.hisp.dhis.reportexcel.state.SelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
- * 
- *         GetBookmartChartAction.java Jun 23, 2010 2:51:57 PM
+ * @version $Id$
  */
-public class GetBookmartChartAction
+
+public class SaveBookmarkAction
     implements Action
 {
-
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
 
-    private ExtBookmarkChartService extBookmarkChartService;
+    private BookmarkService bookmarkService;
 
-    public void setExtBookmarkChartService( ExtBookmarkChartService extBookmarkChartService )
+    public void setBookmarkService( BookmarkService bookmarkService )
     {
-        this.extBookmarkChartService = extBookmarkChartService;
+        this.bookmarkService = bookmarkService;
+    }
+
+    private SelectionManager selectionManager;
+
+    public void setSelectionManager( SelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
     }
 
     // -------------------------------------------
     // Input
     // -------------------------------------------
 
-    private Integer id;
+    private String description;
 
-    public void setId( Integer id )
+    public void setDescription( String description )
     {
-        this.id = id;
+        this.description = description;
     }
 
-    // -------------------------------------------
-    // Output
-    // -------------------------------------------
+    private String extraContain;
 
-    private ExtBookmarkChart extBookmarkChart;
-
-    public ExtBookmarkChart getExtBookmarkChart()
+    public void setExtraContain( String extraContain )
     {
-        return extBookmarkChart;
+        this.extraContain = extraContain;
+    }
+
+    private String contain;
+
+    public void setContain( String contain )
+    {
+        this.contain = contain;
     }
 
     @Override
     public String execute()
         throws Exception
     {
-        extBookmarkChart = extBookmarkChartService.getExtBookmarkChart( id );        
-        
+        Bookmark bookmark = new Bookmark();
+
+        bookmark.setDescription( description );
+        bookmark.setExtraContain( extraContain );
+        bookmark.setContain( contain );
+        bookmark.setType( selectionManager.getBookmarkType() );
+
+        bookmarkService.saveBookmark( bookmark );
+
         return SUCCESS;
     }
 
