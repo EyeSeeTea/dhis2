@@ -903,7 +903,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                         choropleth.loadById(Ext.getCmp('map_tf').value);
                                                     }
                                                     Ext.getCmp('orgunit_w').hide();
-                                                }                                                
+                                                }
                                             }
                                         ]
                                     }
@@ -1230,7 +1230,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator) {
             if (!Ext.getCmp('indicator_cb').getValue()) {
                 if (exception) {
-                    Ext.messageRed.msg(i18n_thematic_map, i18n_form_is_not_complete);
+                    Ext.message.msg(false, i18n_form_is_not_complete);
                 }
                 return false;
             }
@@ -1238,7 +1238,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         else if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_dataelement) {
             if (!Ext.getCmp('indicator_cb').getValue()) {
                 if (exception) {
-                    Ext.messageRed.msg(i18n_thematic_map, i18n_form_is_not_complete);
+                    Ext.message.msg(false, i18n_form_is_not_complete);
                 }
                 return false;
             }
@@ -1248,7 +1248,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         if (!Ext.getCmp('period_cb').getValue() || !cmp.getValue()) {
             if (exception) {
-                Ext.messageRed.msg(i18n_thematic_map, i18n_form_is_not_complete);
+                Ext.message.msg(false, i18n_form_is_not_complete);
             }
             return false;
         }
@@ -1337,7 +1337,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     EXPORTVALUES = getExportDataValueJSON(mapvalues);
                     
                     if (mapvalues.length == 0) {
-                        Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
+                        Ext.message.msg(false, i18n_current_selection_no_data );
                         MASK.hide();
                         return;
                     }
@@ -1423,7 +1423,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             var options = {};
                             
                             if (mapvalues.length == 0) {
-                                Ext.messageRed.msg( i18n_thematic_map, i18n_current_selection_no_data );
+                                Ext.message.msg(false, i18n_current_selection_no_data );
                                 MASK.hide();
                                 return;
                             }

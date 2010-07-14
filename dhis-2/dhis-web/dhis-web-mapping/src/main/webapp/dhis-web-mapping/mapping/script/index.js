@@ -272,22 +272,22 @@ Ext.onReady( function() {
 					var zoom = parseInt(MAP.getZoom());
 					
 					if (!vn) {
-						Ext.messageRed.msg( i18n_new_map_view , i18n_map_view_form_is_not_complete );
+						Ext.message.msg(false, i18n_map_view_form_is_not_complete);
 						return;
 					}
                     
                     if (!ii && !de) {
-                        Ext.messageRed.msg( i18n_new_map_view, i18n_thematic_map_form_is_not_complete );
+                        Ext.message.msg(false, i18n_thematic_map_form_is_not_complete );
 						return;
 					}
 					
 					if (!pt || !p || !ms || !c) {
-						Ext.messageRed.msg( i18n_new_map_view, i18n_thematic_map_form_is_not_complete );
+						Ext.message.msg(false, i18n_thematic_map_form_is_not_complete );
 						return;
 					}
 					
 					if (validateInput(vn) == false) {
-						Ext.messageRed.msg( i18n_new_map_view , i18n_map_view_name_cannot_be_longer_than_25_characters );
+						Ext.message.msg(false, i18n_map_view_name_cannot_be_longer_than_25_characters );
 						return;
 					}
 					
@@ -299,7 +299,7 @@ Ext.onReady( function() {
 							
 							for (var i = 0; i < mapViews.length; i++) {
 								if (mapViews[i].name == vn) {
-									Ext.messageRed.msg(	i18n_new_map_view , i18n_there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>.');
+									Ext.message.msg(false, i18n_there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>.');
 									return;
 								}
 							}
@@ -309,7 +309,7 @@ Ext.onReady( function() {
 								method: 'POST',
 								params: { name: vn, mapValueType: mvt, indicatorGroupId: ig, indicatorId: ii, dataElementGroupId: deg, dataElementId: de, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: 2, classes: c, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
 								success: function(r) {
-									Ext.messageBlack.msg( i18n_new_map_view, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
+									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().reload();
 									Ext.getCmp('mapview_cb').getStore().reload();
 									Ext.getCmp('viewname_tf').reset();
@@ -347,7 +347,7 @@ Ext.onReady( function() {
 					var name = Ext.getCmp('view_cb').getStore().getById(v).get('name');
 					
 					if (!v) {
-						Ext.messageRed.msg( i18n_delete_map_view , i18n_please_select_a_map_view );
+						Ext.message.msg(false, i18n_please_select_a_map_view );
 						return;
 					}
 					
@@ -356,7 +356,7 @@ Ext.onReady( function() {
 						method: 'POST',
 						params: {id: v},
 						success: function(r) {
-							Ext.messageBlack.msg( i18n_delete_map_view , 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted );
+							Ext.message.msg(true, 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted );
 							Ext.getCmp('view_cb').getStore().reload();
 							Ext.getCmp('view_cb').clearValue();
 							Ext.getCmp('mapview_cb').getStore().reload();
@@ -392,17 +392,16 @@ Ext.onReady( function() {
 					var nv = Ext.getCmp('view2_cb').getRawValue();
 					
 					if (!v2) {
-						Ext.messageRed.msg( i18n_dashboard_map_view , i18n_please_select_a_map_view );
+						Ext.message.msg(false, i18n_please_select_a_map_view );
 						return;
 					}
 					
 					Ext.Ajax.request({
 						url: path_mapping + 'addMapViewToDashboard' + type,
 						method: 'POST',
-						params: { id: v2 },
-
+						params: {id:v2},
 						success: function(r) {
-							Ext.messageBlack.msg( i18n_dashboard_map_view, i18n_the_view + ' <span class="x-msg-hl">' + nv + '</span> ' + i18n_was_added_to_dashboard );
+							Ext.message.msg(true, i18n_the_view + ' <span class="x-msg-hl">' + nv + '</span> ' + i18n_was_added_to_dashboard );
 							
 							Ext.getCmp('view_cb').getStore().reload();
 							Ext.getCmp('view_cb').reset();
@@ -564,7 +563,7 @@ Ext.onReady( function() {
 						var title = Ext.getCmp('exportimagetitle_tf').getValue();
 						
 						if (!title) {
-							Ext.messageRed.msg( i18n_export_map_as_image , i18n_please_enter_map_title );
+							Ext.message.msg(false, i18n_please_enter_map_title );
 						}
                         else {						
 							var q = Ext.getCmp('exportimagequality_cb').getValue();
@@ -595,7 +594,7 @@ Ext.onReady( function() {
 						}
 					}
 					else {
-						Ext.messageRed.msg( i18n_export_map_as_image , i18n_please_render_map_fist );
+						Ext.message.msg(false, i18n_please_render_map_fist );
 					}
 				}
 			}	
@@ -676,7 +675,7 @@ Ext.onReady( function() {
                         exportForm.submit();
 					}
 					else {
-						Ext.messageRed.msg( i18n_export_excel, i18n_please_render_map_fist );
+						Ext.message.msg(false, i18n_please_render_map_fist );
 					}
 				}
 			}	
@@ -774,12 +773,12 @@ Ext.onReady( function() {
                     var lhc = Ext.getCmp('automaticmaplegendsethighcolor_cp').getValue();
                     
                     if (!ln || !lc) {
-                        Ext.messageRed.msg( i18n_new_legend_set, i18n_form_is_not_complete );
+                        Ext.message.msg(false, i18n_form_is_not_complete );
                         return;
                     }
                     
                     if (validateInput(ln) == false) {
-                        Ext.messageRed.msg( i18n_new_legend_set,  i18n_name_can_not_longer_than_25 );
+                        Ext.message.msg(false, i18n_name_can_not_longer_than_25);
                         return;
                     }
                     
@@ -790,7 +789,7 @@ Ext.onReady( function() {
                             var mapLegendSets = Ext.util.JSON.decode(r.responseText).mapLegendSets;
                             for (var i = 0; i < mapLegendSets.length; i++) {
                                 if (ln == mapLegendSets[i].name) {
-                                    Ext.messageRed.msg( i18n_new_legend_set, i18n_a_legend_set_called+' <span class="x-msg-hl">' + ln + '</span> ' + i18n_already_exists );
+                                    Ext.message.msg(false, i18n_a_legend_set_called+' <span class="x-msg-hl">' + ln + '</span> ' + i18n_already_exists );
                                     return;
                                 }
                             }
@@ -800,7 +799,7 @@ Ext.onReady( function() {
                                 method: 'POST',
                                 params: { name: ln, type: map_legend_type_automatic, method: 2, classes: lc, colorLow: llc, colorHigh: lhc },
                                 success: function(r) {
-                                    Ext.messageBlack.msg( i18n_new_legend_set , i18n_legend_set + ' <span class="x-msg-hl">' + ln + '</span> ' + i18n_was_registered);
+                                    Ext.message.msg(true, i18n_legend_set + ' <span class="x-msg-hl">' + ln + '</span> ' + i18n_was_registered);
                                     Ext.getCmp('automaticmaplegendset_cb').getStore().reload();
                                     Ext.getCmp('automaticmaplegendsetname_tf').reset();
                                     Ext.getCmp('automaticmaplegendsetclasses_cb').reset();
@@ -841,12 +840,12 @@ Ext.onReady( function() {
                     var lims = Ext.getCmp('automaticmaplegendsetindicator_ms').getValue();
                     
                     if (!ls) {
-                        Ext.messageRed.msg( i18n_assign_to_indocator , i18n_please_select_a_legend_set );
+                        Ext.message.msg(false, i18n_please_select_a_legend_set );
                         return;
                     }
                     
                     if (!lims) {
-                        Ext.messageRed.msg( i18n_link_legend_set_to_indicator , i18n_please_select_at_least_one_indicator );
+                        Ext.message.msg(false, i18n_please_select_at_least_one_indicator );
                         return;
                     }
                     
@@ -867,7 +866,7 @@ Ext.onReady( function() {
                         params: { id: ls },
 
                         success: function(r) {
-                            Ext.messageBlack.msg( i18n_assign_to_indocator , i18n_legend_set+'<span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
+                            Ext.message.msg(true, i18n_legend_set+'<span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             Ext.getCmp('automaticmaplegendset_cb').getStore().reload();
                         },
                         failure: function() {
@@ -896,7 +895,7 @@ Ext.onReady( function() {
                     var lsrw = Ext.getCmp('automaticmaplegendset2_cb').getRawValue();
                     
                     if (!ls) {
-                        Ext.messageRed.msg( i18n_delete + ' ' + i18n_legend_set, i18n_please_select_a_legend_set );
+                        Ext.message.msg(false, i18n_please_select_a_legend_set );
                         return;
                     }
                     
@@ -905,7 +904,7 @@ Ext.onReady( function() {
                         method: 'GET',
                         params: { id: ls },
                         success: function(r) {
-                            Ext.messageBlack.msg( i18n_delete + ' ' + i18n_legend_set , i18n_legend_set + ' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_deleted );
+                            Ext.message.msg(true, i18n_legend_set + ' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_deleted );
                             Ext.getCmp('automaticmaplegendset_cb').getStore().reload();
                             Ext.getCmp('automaticmaplegendset_cb').reset();
 							Ext.getCmp('automaticmaplegendset2_cb').reset();
@@ -1021,12 +1020,12 @@ Ext.onReady( function() {
                     var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
 					
 					if (!mln || mlsv == "" || mlev == "" || !mlc) {
-                        Ext.messageRed.msg(	i18n_new_legend , i18n_form_is_not_complete );
+                        Ext.message.msg(false, i18n_form_is_not_complete );
                         return;
                     }
                     
                     if (!validateInput(mln)) {
-                        Ext.messageRed.msg( i18n_new_legend, i18n_name_can_not_longer_than_25 );
+                        Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
                         return;
                     }
                     
@@ -1037,7 +1036,7 @@ Ext.onReady( function() {
                             var mapLegends = Ext.util.JSON.decode(r.responseText).mapLegends;
                             for (var i = 0; i < mapLegends.length; i++) {
                                 if (mln == mapLegends[i].name) {
-                                    Ext.messageRed.msg( i18n_new_legend , i18n_legend + '<span class="x-msg-hl">' + ln + '</span> ' + i18n_already_exists);
+                                    Ext.message.msg(false, i18n_legend + '<span class="x-msg-hl">' + ln + '</span> ' + i18n_already_exists);
                                     return;
                                 }
                             }
@@ -1047,7 +1046,7 @@ Ext.onReady( function() {
                                 method: 'POST',
                                 params: { name: mln, startValue: mlsv, endValue: mlev, color: mlc },
                                 success: function(r) {
-                                    Ext.messageBlack.msg(i18n_new_legend, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
+                                    Ext.message.msg(true, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
                                     Ext.getCmp('predefinedmaplegend_cb').getStore().reload();
                                     Ext.getCmp('predefinedmaplegendname_tf').reset();
                                     Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
@@ -1085,7 +1084,7 @@ Ext.onReady( function() {
                     var mlrv = Ext.getCmp('predefinedmaplegend_cb').getRawValue();
                     
                     if (!mlv) {
-                        Ext.messageRed.msg( i18n_delete + ' ' + i18n_legend, i18n_please_select_a_legend );
+                        Ext.message.msg(false, i18n_please_select_a_legend );
                         return;
                     }
                     
@@ -1094,7 +1093,7 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: { id: mlv },
                         success: function(r) {
-                            Ext.messageBlack.msg(i18n_delete + ' ' + i18n_legend , i18n_legend+ ' <span class="x-msg-hl">' + mlrv + '</span> ' + i18n_was_deleted);
+                            Ext.message.msg(true, i18n_legend+ ' <span class="x-msg-hl">' + mlrv + '</span> ' + i18n_was_deleted);
                             Ext.getCmp('predefinedmaplegend_cb').getStore().reload();
                             Ext.getCmp('predefinedmaplegend_cb').reset();
                         },
@@ -1138,7 +1137,7 @@ Ext.onReady( function() {
 										var temp_ev = predefinedMapLegendStore.getById(array[j]).get('endValue');
 										for (var k = sv+1; k < ev; k++) {
 											if (k > temp_sv && k < temp_ev) {
-												Ext.messageRed.msg( i18n_new_legend_set , i18n_overlapping_legends_are_not_allowed );
+												Ext.message.msg(false, i18n_overlapping_legends_are_not_allowed );
 												return;
 											}
 										}
@@ -1148,12 +1147,12 @@ Ext.onReady( function() {
 						}
 					}
 					else {
-						Ext.messageRed.msg( i18n_new_legend_set , i18n_please_select_at_least_one_legend );
+						Ext.message.msg(false, i18n_please_select_at_least_one_legend );
                         return;
 					}
 					
                     if (!mlsv) {
-                        Ext.messageRed.msg( i18n_new_legend_set, i18n_form_is_not_complete );
+                        Ext.message.msg(false, i18n_form_is_not_complete );
                         return;
                     }
                     
@@ -1171,7 +1170,7 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: { name: mlsv, type: map_legend_type_predefined },
                         success: function(r) {
-                            Ext.messageBlack.msg( i18n_new_legend_set , i18n_new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + i18n_was_registered );
+                            Ext.message.msg(true, i18n_new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + i18n_was_registered );
                             Ext.getCmp('predefinedmaplegendset_cb').getStore().reload();
 							Ext.getCmp('maplegendset_cb').getStore().reload();
 							Ext.getCmp('predefinedmaplegendsetname_tf').reset();
@@ -1203,7 +1202,7 @@ Ext.onReady( function() {
                     var mlsrv = Ext.getCmp('predefinedmaplegendset_cb').getRawValue();
                     
                     if (!mlsv) {
-                        Ext.messageRed.msg( i18n_delete + ' ' + i18n_legend_set, i18n_please_select_a_legend_set );
+                        Ext.message.msg(false, i18n_please_select_a_legend_set );
                         return;
                     }
                     
@@ -1212,7 +1211,7 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: { id: mlsv },
                         success: function(r) {
-                            Ext.messageBlack.msg(i18n_delete + ' ' + i18n_legend_set, i18n_legend_set + ' <span class="x-msg-hl">' + mlsrv + '</span> ' + i18n_was_deleted);
+                            Ext.message.msg(true, i18n_legend_set + ' <span class="x-msg-hl">' + mlsrv + '</span> ' + i18n_was_deleted);
                             Ext.getCmp('predefinedmaplegendset_cb').getStore().reload();
                             Ext.getCmp('predefinedmaplegendset_cb').reset();
 							Ext.getCmp('maplegendset_cb').getStore().reload();
@@ -1642,14 +1641,10 @@ Ext.onReady( function() {
 		cls: 'aa_med',
         handler: function()
         {
-            /*var nm = Ext.getCmp('newmap_cb').getValue();
-            var oui = Ext.getCmp('organisationunit_cb').getValue();*/
-    
             Ext.Ajax.request({
                 url: path_mapping + 'getOrganisationUnitsAtLevel' + type,
                 method: 'POST',
-                params: { level: 1, format: 'json' },
-
+                params: {level:1},
                 success: function(r) {
                     var oui = Ext.util.JSON.decode( r.responseText ).organisationUnits[0].id;
                     var ouli = Ext.getCmp('organisationunitlevel_cb').getValue();
@@ -1663,37 +1658,37 @@ Ext.onReady( function() {
                     var zoom = Ext.getCmp('newzoom_cb').getValue();
                      
                     if (!nn || !oui || !ouli || !nc || !lon || !lat) {
-						Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_form_is_not_complete );
+						Ext.message.msg(false, i18n_form_is_not_complete );
 						return;
 					}
 					else if (!mlp && !mlpwms) {
-						Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_form_is_not_complete );
+						Ext.message.msg(false, i18n_form_is_not_complete );
 						return;
                     }
                     
                     if (validateInput(nn) == false) {
-                        Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
+                        Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
                         return;
                     }
                     
                     if (!Ext.num(parseFloat(lon), false)) {
-                        Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_longitude_x + '</span>' + i18n_must_be_a_number);
+                        Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_longitude_x + '</span>' + i18n_must_be_a_number);
                         return;
                     }
                     else {
                         if (lon < -180 || lon > 180) {
-                            Ext.messageRed.msg( i18n_new + ' ' + i18n_map , '<span class="x-msg-hl">' + i18n_longitude_x + '</span> ' + i18n_must_be_between_180_and_180);
+                            Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_longitude_x + '</span> ' + i18n_must_be_between_180_and_180);
                             return;
                         }
                     }
                     
                     if (!Ext.num(parseFloat(lat), false)) {
-                        Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_a_number);
+                        Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_a_number);
                         return;
                     }
                     else {
                         if (lat < -90 || lat > 90) {
-                            Ext.messageRed.msg( i18n_new + ' ' + i18n_map, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_between_90_and_90);
+                            Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_between_90_and_90);
                             return;
                         }
                     }
@@ -1705,11 +1700,11 @@ Ext.onReady( function() {
                             var maps = Ext.util.JSON.decode(r.responseText).maps;
                             for (var i = 0; i < maps.length; i++) {
                                 if (maps[i].name == nn) {
-                                    Ext.messageRed.msg( i18n_new + ' ' + i18n_map, ' <span class="x-msg-hl">' + nn + '</span>.');
+                                    Ext.message.msg(false, i18n_map + ' <span class="x-msg-hl">' + nn + '</span>' + i18n_already_exists + '.');
                                     return;
                                 }
                                 else if (maps[i].mapLayerPath == mlp) {
-                                    Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_the_source_file+' <span class="x-msg-hl">' + mlp + '</span> ' + i18n_already_exists );
+                                    Ext.message.msg(false, i18n_the_source_file+' <span class="x-msg-hl">' + mlp + '</span> ' + i18n_already_exists );
                                     return;
                                 }
                             }
@@ -1721,7 +1716,7 @@ Ext.onReady( function() {
                                 method: 'POST',
                                 params: { name: nn, mapLayerPath: source, type: t, sourceType: MAPSOURCE, organisationUnitId: oui, organisationUnitLevelId: ouli, nameColumn: nc, longitude: lon, latitude: lat, zoom: zoom},
                                 success: function(r) {
-                                    Ext.messageBlack.msg( i18n_new + ' ' + i18n_map, i18n_map+' <span class="x-msg-hl">' + nn + '</span> (<span class="x-msg-hl">' + source + '</span>) ' + i18n_was_registered );
+                                    Ext.message.msg(true, i18n_map+' <span class="x-msg-hl">' + nn + '</span> (<span class="x-msg-hl">' + source + '</span>) ' + i18n_was_registered );
                                     
                                     Ext.getCmp('map_cb').getStore().reload();
                                     Ext.getCmp('maps_cb').getStore().reload();
@@ -1767,12 +1762,12 @@ Ext.onReady( function() {
 			var t = Ext.getCmp('type_cb').getValue();
 			
             if (!en || !em || !nc || !lon || !lat) {
-                Ext.messageRed.msg( i18n_new + ' ' + i18n_map, i18n_form_is_not_complete );
+                Ext.message.msg(false, i18n_form_is_not_complete );
                 return;
             }
             
             if (validateInput(en) == false) {
-                Ext.messageRed.msg( i18n_new + ' ' + i18n_map , i18n_name_can_not_longer_than_25 );
+                Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
                 return;
             }
            
@@ -1780,9 +1775,8 @@ Ext.onReady( function() {
                 url: path_mapping + 'addOrUpdateMap' + type,
                 method: 'GET',
                 params: { name: en, mapLayerPath: em, nameColumn: nc, longitude: lon, latitude: lat, zoom: zoom },
-
                 success: function(r) {
-                    Ext.messageBlack.msg( i18n_new + ' ' + i18n_map,  i18n_map + ' <span class="x-msg-hl">' + en + '</span> (<span class="x-msg-hl">' + em + '</span>)' + i18n_was_updated );
+                    Ext.message.msg(true,  i18n_map + ' <span class="x-msg-hl">' + en + '</span> (<span class="x-msg-hl">' + em + '</span>)' + i18n_was_updated );
                     
                     Ext.getCmp('map_cb').getStore().reload();
                     Ext.getCmp('maps_cb').getStore().reload();
@@ -1814,7 +1808,7 @@ Ext.onReady( function() {
             var mn = Ext.getCmp('deletemap_cb').getRawValue();
             
             if (!mlp) {
-                Ext.messageRed.msg( i18n_delete + ' ' + i18n_map, i18n_please_select_a_map );
+                Ext.message.msg(false, i18n_please_select_a_map );
                 return;
             }
             
@@ -1823,7 +1817,7 @@ Ext.onReady( function() {
                 method: 'GET',
                 params: { mapLayerPath: mlp },
                 success: function(r) {
-                    Ext.messageBlack.msg( i18n_edit + ' ' + i18n_map, i18n_map + ' <span class="x-msg-hl">' + mn + '</span> (<span class="x-msg-hl">' + mlp + '</span>) ' + i18n_was_deleted );
+                    Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + mn + '</span> (<span class="x-msg-hl">' + mlp + '</span>) ' + i18n_was_deleted );
                     
                     Ext.getCmp('map_cb').getStore().reload();
 					
@@ -2233,17 +2227,16 @@ Ext.onReady( function() {
             var mln = Ext.getCmp('maplayer_cb').getRawValue();
             
             if (!ml) {
-                Ext.messageRed.msg( i18n_delete_overlay, i18n_please_select_an_overlay );
+                Ext.message.msg(false, i18n_please_select_an_overlay );
                 return;
             }
             
             Ext.Ajax.request({
                 url: path_mapping + 'deleteMapLayer' + type,
                 method: 'POST',
-                params: { id: ml },
-
+                params: {id:ml},
                 success: function(r) {
-                    Ext.messageBlack.msg( i18n_delete_overlay , i18n_overlay + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
+                    Ext.message.msg(true, i18n_overlay + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
                     Ext.getCmp('maplayer_cb').getStore().reload();
                     Ext.getCmp('maplayer_cb').reset();
                 },
@@ -2281,16 +2274,16 @@ Ext.onReady( function() {
 					var mlwmso = Ext.getCmp('maplayerpathwmsoverlay_tf').getValue();
 					
 					if (!mln) {
-						Ext.messageRed.msg( i18n_new_overlay, i18n_overlay_form_is_not_complete );
+						Ext.message.msg(false, i18n_overlay_form_is_not_complete );
 						return;
 					}
 					else if (!mlmsf && !mlwmso) {
-						Ext.messageRed.msg( i18n_new_overlay, i18n_overlay_form_is_not_complete );
+						Ext.message.msg(false, i18n_overlay_form_is_not_complete );
 						return;
 					}
 					
 					if (validateInput(mln) == false) {
-						Ext.messageRed.msg( i18n_new_overlay , i18n_overlay_name_cannot_be_longer_than_25_characters );
+						Ext.message.msg(false, i18n_overlay_name_cannot_be_longer_than_25_characters );
 						return;
 					}
 					
@@ -2302,7 +2295,7 @@ Ext.onReady( function() {
 							
 							for (i in mapLayers) {
 								if (mapLayers[i].name == mln) {
-									Ext.messageRed.msg( i18n_new_overlay , i18n_name + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_is_already_in_use+'.');
+									Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_is_already_in_use+'.');
 									return;
 								}
 							}
@@ -2314,7 +2307,7 @@ Ext.onReady( function() {
 								method: 'POST',
 								params: { name: mln, type: 'overlay', mapSource: ms, fillColor: mlfc, fillOpacity: mlfo, strokeColor: mlsc, strokeWidth: mlsw },
 								success: function(r) {
-									Ext.messageBlack.msg( i18n_new_overlay , 'The overlay <span class="x-msg-hl">' + mln + '</span> '+i18n_was_registered+'.');
+									Ext.message.msg(true, 'The overlay <span class="x-msg-hl">' + mln + '</span> '+i18n_was_registered+'.');
 									Ext.getCmp('maplayer_cb').getStore().reload();
 							
 									var mapurl = MAPSOURCE == map_source_type_geojson ? path_mapping + 'getGeoJson.action?name=' + mlmsf : path_geoserver + wfs + mlwmso + output;
@@ -2439,7 +2432,7 @@ Ext.onReady( function() {
             var mln = Ext.getCmp('maplayerbaselayers_cb').getRawValue();
             
             if (!ml) {
-                Ext.messageRed.msg( i18n_delete_baselayer, i18n_please_select_a_baselayer );
+                Ext.message.msg(false, i18n_please_select_a_baselayer );
                 return;
             }
             
@@ -2448,7 +2441,7 @@ Ext.onReady( function() {
                 method: 'POST',
                 params: { id: ml },
                 success: function(r) {
-                    Ext.messageBlack.msg( i18n_delete_baselayer , i18n_baselayer + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
+                    Ext.message.msg(true, i18n_baselayer + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
                     Ext.getCmp('maplayerbaselayers_cb').getStore().reload();
                     Ext.getCmp('maplayerbaselayers_cb').reset();
                     
@@ -2496,12 +2489,12 @@ Ext.onReady( function() {
 					var mlbl = Ext.getCmp('maplayerbaselayerslayer_tf').getValue();
 					
 					if (!mlbn || !mlbu || !mlbl) {
-						Ext.messageRed.msg( i18n_new_baselayer, i18n_baselayer_form_is_not_complete );
+						Ext.message.msg(false, i18n_baselayer_form_is_not_complete );
 						return;
 					}
 					
 					if (validateInput(mlbn) == false) {
-						Ext.messageRed.msg( i18n_new_baselayer , i18n_baselayer_name_cannot_be_longer_than_25_characters );
+						Ext.message.msg(false, i18n_baselayer_name_cannot_be_longer_than_25_characters );
 						return;
 					}
 					
@@ -2514,7 +2507,7 @@ Ext.onReady( function() {
 							
 							for (i in mapLayers) {
 								if (mapLayers[i].name == mlbn) {
-									Ext.messageRed.msg( i18n_new_baselayer , i18n_name + ' <span class="x-msg-hl">' + mlbn + '</span> '+i18n_is_already_in_use+'.');
+									Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mlbn + '</span> '+i18n_is_already_in_use+'.');
 									return;
 								}
 							}
@@ -2524,7 +2517,7 @@ Ext.onReady( function() {
 								method: 'POST',
 								params: { name: mlbn, type: map_layer_type_baselayer, mapSource: mlbu, layer: mlbl, fillColor: '', fillOpacity: 0, strokeColor: '', strokeWidth: 0 },
 								success: function(r) {
-									Ext.messageBlack.msg( i18n_new_baselayer , 'The base layer <span class="x-msg-hl">' + mlbn + '</span> '+i18n_was_registered+'.');
+									Ext.message.msg(true, 'The base layer <span class="x-msg-hl">' + mlbn + '</span> '+i18n_was_registered+'.');
 									Ext.getCmp('maplayerbaselayers_cb').getStore().reload();
 									MAP.addLayers([
                                         new OpenLayers.Layer.WMS(
@@ -2710,7 +2703,7 @@ Ext.onReady( function() {
 												}
 												addOverlaysToMap();
 												
-												Ext.messageBlack.msg( i18n_map_source, '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_saved_as_map_source+'.');
+												Ext.message.msg(true, '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_saved_as_map_source+'.');
 											},
 											failure: function() {
 												alert( i18n_status, i18n_error_while_saving_data );
@@ -2813,10 +2806,9 @@ Ext.onReady( function() {
 								url: path_mapping + 'setBaseCoordinate' + type,
 								method: 'POST',
 								params: {longitude:blo, latitude:bla},
-								
 								success: function() {
 									BASECOORDINATE = {longitude:blo, latitude:bla};
-									Ext.messageBlack.msg( i18n_base_coordinate , i18n_longitude_x + ' <span class="x-msg-hl">' + blo + '</span> '+i18n_and+' '+i18n_latitude_y+' <span class="x-msg-hl">' + bla + '</span> ' + i18n_was_saved_as_base_coordinate);
+									Ext.message.msg(true, i18n_longitude_x + ' <span class="x-msg-hl">' + blo + '</span> '+i18n_and+' '+i18n_latitude_y+' <span class="x-msg-hl">' + bla + '</span> ' + i18n_was_saved_as_base_coordinate);
 									Ext.getCmp('newlongitude_cb').getStore().reload();
 									Ext.getCmp('newlongitude_cb').setValue(blo);
 									Ext.getCmp('newlatitude_cb').setValue(bla);

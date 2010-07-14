@@ -543,7 +543,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 					
 					if (bounds[i] < this.minVal || bounds[i] > this.maxVal)
 					{
-						Ext.messageRed.msg('Fixed breaks', 'Class breaks must be higher than <span class="x-msg-hl">' + this.minVal + '</span> and lower than <span class="x-msg-hl">' + this.maxVal + '</span>.');
+						Ext.message.msg(false, 'Class breaks must be higher than <span class="x-msg-hl">' + this.minVal + '</span> and lower than <span class="x-msg-hl">' + this.maxVal + '</span>.');
 					}
 				}
 				

@@ -263,7 +263,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             handler: function()
                             {
                                 if (!Ext.getCmp('maps_cb').getValue()) {
-                                    Ext.messageRed.msg( i18n_auto_assign , i18n_please_select_map );
+                                    Ext.message.msg(false, i18n_please_select_map );
                                     return;
                                 }
                                 mapping.autoAssign(true);
@@ -278,7 +278,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             isVisible: false,
                             handler: function() {
                                 if (!Ext.getCmp('maps_cb').getValue()) {
-                                    Ext.messageRed.msg( i18n_remove_all_relations, i18n_please_select_map );
+                                    Ext.message.msg(false, i18n_please_select_map );
                                     return;
                                 }
                                 
@@ -293,7 +293,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                                         Ext.getCmp('grid_gp').getStore().baseParams = { mapLayerPath: mlp, format: 'json' };
                                         Ext.getCmp('grid_gp').getStore().reload();
                                         
-                                        Ext.messageBlack.msg( i18n_remove_all_relations , i18n_all_relations_for_the_map + '<span class="x-msg-hl">' + Ext.getCmp('maps_cb').getRawValue() + '</span> ' + i18n_removed);
+                                        Ext.message.msg(true, i18n_all_relations_for_the_map + '<span class="x-msg-hl">' + Ext.getCmp('maps_cb').getRawValue() + '</span> ' + i18n_removed);
                                         
                                         mapping.classify(true, true);
                                     },
@@ -313,7 +313,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             handler: function()
                             {
                                 if (!Ext.getCmp('maps_cb').getValue()) {
-                                    Ext.messageRed.msg( i18n_remove_relation , i18n_please_select_map );
+                                    Ext.message.msg(false, i18n_please_select_map );
                                     return;
                                 }
                                 
@@ -322,7 +322,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 								var msg;
 								
                                 if (selection == '') {
-                                    Ext.messageRed.msg( i18n_remove_relation , i18n_please_select_least_one_organisation_unit_in_the_list );
+                                    Ext.message.msg(false, i18n_please_select_least_one_organisation_unit_in_the_list );
                                     return;
                                 }
 								
@@ -343,11 +343,11 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 								Ext.Ajax.request({
 									url: path_mapping + 'deleteMapOrganisationUnitRelations' + type + params,
 									method: 'GET',
-									success: function( responseObject ) {
+									success: function(r) {
 										Ext.getCmp('grid_gp').getStore().baseParams = { mapLayerPath: mlp, format: 'json' };
 										Ext.getCmp('grid_gp').getStore().reload();
 										
-										Ext.messageBlack.msg( i18n_remove_relation , msg);
+										Ext.message.msg(true, msg);
 										
 										mapping.classify(true, true);
 									},
@@ -380,7 +380,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 												method: 'POST',
 												params: { mapLayerPath:mlp, organisationUnitId:id, featureId:mapping.relation },
 												success: function( responseObject ) {
-													Ext.messageBlack.msg( i18n_assign + ' ' + i18n_organisation_units , '<span class="x-msg-hl">' + mapping.relation + '</span> (' + i18n_map + ') ' + i18n_assigned_to + ' <span class="x-msg-hl">' + name + '</span> (' + i18n_database + ').');
+													Ext.message.msg(true, '<span class="x-msg-hl">' + mapping.relation + '</span> (' + i18n_map + ') ' + i18n_assigned_to + ' <span class="x-msg-hl">' + name + '</span> (' + i18n_database + ').');
 													Ext.getCmp('grid_gp').getStore().reload();
 													popup.hide();
 													mapping.relation = false;
@@ -393,7 +393,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 											});
 										}
 										else {
-											Ext.messageRed.msg( i18n_assign + ' ' + i18n_organisation_units , '<span class="x-msg-hl">' + name + '</span> ' + i18n_is_already_assigned );
+											Ext.message.msg(false, '<span class="x-msg-hl">' + name + '</span> ' + i18n_is_already_assigned );
 										}
 									}
 								});
@@ -453,7 +453,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
     validateForm: function(exception) {
         if (!Ext.getCmp('maps_cb').getValue()) {
                 if (exception) {
-                    Ext.messageRed.msg( i18n_assign + ' ' + i18n_organisation_units, i18n_please_select_map );
+                    Ext.message.msg(false, i18n_please_select_map );
                 }
                 return false;
         }
@@ -535,13 +535,12 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                 Ext.Ajax.request({
                     url: path_mapping + 'addOrUpdateMapOrganisationUnitRelations' + type,
                     method: 'POST',
-                    params: { mapLayerPath: mlp, relations: relations },
-
+                    params: {mapLayerPath:mlp, relations:relations},
                     success: function(r) {
                         MASK.msg = i18n_applying_organisation_units_relations ;
                         MASK.show();
                         
-                        Ext.messageBlack.msg( i18n_assign + ' ' + i18n_organisation_units, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');
+                        Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');
                         
                         Ext.getCmp('grid_gp').getStore().reload();
                         mapping.classify(false, position);
