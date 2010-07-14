@@ -251,7 +251,7 @@ Ext.onReady( function() {
 				isFormField: true,
 				hideLabel: true,
 				cls: 'window-button',
-				text: i18n_save ,
+				text: i18n_save,
 				handler: function() {
 					var vn = Ext.getCmp('viewname_tf').getValue();
                     var mvt = Ext.getCmp('mapvaluetype_cb').getValue();
@@ -277,12 +277,12 @@ Ext.onReady( function() {
 					}
                     
                     if (!ii && !de) {
-                        Ext.message.msg(false, i18n_thematic_map_form_is_not_complete );
+                        Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
 						return;
 					}
 					
 					if (!pt || !p || !ms || !c) {
-						Ext.message.msg(false, i18n_thematic_map_form_is_not_complete );
+						Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
 						return;
 					}
 					
@@ -344,17 +344,17 @@ Ext.onReady( function() {
 				cls: 'window-button',
 				handler: function() {
 					var v = Ext.getCmp('view_cb').getValue();
-					var name = Ext.getCmp('view_cb').getStore().getById(v).get('name');
 					
-					if (!v) {
-						Ext.message.msg(false, i18n_please_select_a_map_view );
+                    if (!v) {
+						Ext.message.msg(false, i18n_please_select_a_map_view);
 						return;
 					}
+					var name = Ext.getCmp('view_cb').getStore().getById(v).get('name');				
 					
 					Ext.Ajax.request({
 						url: path_mapping + 'deleteMapView' + type,
 						method: 'POST',
-						params: {id: v},
+						params: {id:v},
 						success: function(r) {
 							Ext.message.msg(true, 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted );
 							Ext.getCmp('view_cb').getStore().reload();
@@ -3254,6 +3254,7 @@ Ext.onReady( function() {
             expand: {
                 fn: function() {
                     choroplethLayer.setVisibility(false);
+                    proportionalSymbolLayer.setVisibility(false);
                     mapping.classify(false, true);
                     ACTIVEPANEL = organisationUnitAssignment;
                 }

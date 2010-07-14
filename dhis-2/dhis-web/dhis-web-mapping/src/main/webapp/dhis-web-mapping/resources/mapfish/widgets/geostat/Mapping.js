@@ -293,7 +293,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                                         Ext.getCmp('grid_gp').getStore().baseParams = { mapLayerPath: mlp, format: 'json' };
                                         Ext.getCmp('grid_gp').getStore().reload();
                                         
-                                        Ext.message.msg(true, i18n_all_relations_for_the_map + '<span class="x-msg-hl">' + Ext.getCmp('maps_cb').getRawValue() + '</span> ' + i18n_removed);
+                                        Ext.message.msg(true, i18n_all_relations_for_the_map + '<span class="x-msg-hl"> ' + Ext.getCmp('maps_cb').getRawValue() + '</span> ' + i18n_removed);
                                         
                                         mapping.classify(true, true);
                                     },
@@ -540,7 +540,8 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                         MASK.msg = i18n_applying_organisation_units_relations ;
                         MASK.show();
                         
-                        Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned +'.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');
+                        Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + ' (map <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>, db <span class="x-msg-hl">' + organisationUnits.length + '</span>).');
+                        // Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + '.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');                        
                         
                         Ext.getCmp('grid_gp').getStore().reload();
                         mapping.classify(false, position);
