@@ -335,7 +335,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 									msg = i18n_selected_relations_removed;
 								}
 								else {
-									msg = '<span class="x-msg-hl">' + selection[0].data['organisationUnit'] + '</span>' + i18n_remove_selected;
+									msg = '<span class="x-msg-hl">' + selection[0].data['organisationUnit'] + '</span> ' + i18n_removed;
 								}
 								
 								params += '&mapLayerPath=' + mlp;
@@ -380,7 +380,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 												method: 'POST',
 												params: { mapLayerPath:mlp, organisationUnitId:id, featureId:mapping.relation },
 												success: function( responseObject ) {
-													Ext.message.msg(true, '<span class="x-msg-hl">' + mapping.relation + '</span> (' + i18n_map + ') ' + i18n_assigned_to + ' <span class="x-msg-hl">' + name + '</span> (' + i18n_database + ').');
+													Ext.message.msg(true, '<span class="x-msg-hl">' + mapping.relation + '</span> (' + i18n_in_the_map + ') ' + i18n_assigned_to + ' <span class="x-msg-hl">' + name + '</span> (' + i18n_database + ').');
 													Ext.getCmp('grid_gp').getStore().reload();
 													popup.hide();
 													mapping.relation = false;
