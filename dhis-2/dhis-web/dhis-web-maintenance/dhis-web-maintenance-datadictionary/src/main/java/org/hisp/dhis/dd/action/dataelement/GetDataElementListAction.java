@@ -34,7 +34,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.datadictionary.comparator.DataDictionaryNameComparator;
@@ -44,11 +43,7 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
 import org.hisp.dhis.options.datadictionary.DataDictionaryModeManager;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.system.paging.Paging;
-import org.hisp.dhis.util.RequestUtil;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -56,7 +51,7 @@ import com.opensymphony.xwork2.Action;
  *          ch_bharath1 $
  */
 public class GetDataElementListAction
-    implements Action
+    extends ActionPagingSupport
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -157,54 +152,14 @@ public class GetDataElementListAction
     {
         return dataElementGroupId;
     }
-
-    private Integer currentPage;
     
-    public void setCurrentPage( Integer currentPage )
-    {
-        this.currentPage = currentPage;
-    }
-
-    private Integer pageSize;
-    
-    public void setPageSize( Integer pageSize )
-    {
-        this.pageSize = pageSize;
-    }
-    
-    private Integer defaultPageSize = 50;
-    
-    public void setDefaultPageSize( Integer defaultPageSize )
-    {
-        this.defaultPageSize = defaultPageSize;
-    }
-    
-    private Paging paging;
-    
-    public Paging getPaging()
-    {
-        return paging;
-    }
-
-    private Integer total;
-    
-    public Integer getTotal()
-    {
-        return total;
-    }
-
     // -------------------------------------------------------------------------
-    // Action implemantation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @SuppressWarnings( "unchecked" )
     public String execute()
     {
-        paging = new Paging( RequestUtil.getCurrentLink(ServletActionContext.getRequest()) + "?listAll=true", pageSize == null ? defaultPageSize : pageSize );
-        
-        paging.setCurrentPage( currentPage == null ? 0 : currentPage );
-        
-        
         if ( dataDictionaryId == null ) // None, get current data dictionary
         {
             dataDictionaryId = dataDictionaryModeManager.getCurrentDataDictionary();
@@ -236,38 +191,46 @@ public class GetDataElementListAction
 
         List<DataElement> allResult;
         
+        
+        System.out.println("ALLL: " + dataElementService.getNumberOfDataElements());
+        
         if ( dataDictionaryId != null && dataElementGroupId == null )
         {
-            allResult = new ArrayList<DataElement>( dataDictionaryService
-                .getDataElementsByDictionaryId( dataDictionaryId ) );
+            allResult = new ArrayList<DataElement>( dataDictionaryService.getDataElementsByDictionaryId( dataDictionaryId ) );
+
+            Collections.sort( allResult, dataElementComparator );
+            this.paging = createPaging( allResult.size() );
+            dataElements = getBlockElement( allResult, paging.getStartPos(), paging.getPageSize() );
         }
         else if ( dataDictionaryId == null && dataElementGroupId != null )
         {
             allResult = new ArrayList<DataElement>( dataElementService.getDataElementsByGroupId( dataElementGroupId ) );
+            
+            Collections.sort( allResult, dataElementComparator );
+            this.paging = createPaging( allResult.size() );
+            dataElements = getBlockElement( allResult, paging.getStartPos(), paging.getPageSize() );
         }
         else if ( dataDictionaryId != null && dataElementGroupId != null )
         {
             Collection<DataElement> dictionary = dataDictionaryService.getDataElementsByDictionaryId( dataDictionaryId );
 
             Collection<DataElement> members = dataElementService.getDataElementsByGroupId( dataElementGroupId );
-
+            
             allResult = new ArrayList<DataElement>( CollectionUtils.intersection( dictionary, members ) );
+
+            Collections.sort( allResult, dataElementComparator );
+            this.paging = createPaging( allResult.size() );
+            dataElements = getBlockElement( allResult, paging.getStartPos(), paging.getPageSize() );
         }
         else
         {
-            allResult = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
+            this.paging = createPaging( dataElementService.getNumberOfDataElements() );
+
+            dataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements( paging.getStartPos(), paging.getPageSize() ) );
         }
 
-        Collections.sort( allResult, dataElementComparator );
-
-        total = allResult.size();
-            
-        paging.setTotal( total );
-
-        dataElements = getBlockElement( allResult, paging.getStartPos(), paging.getPageSize() );
-
         displayPropertyHandler.handle( dataElements );
-
+        
         return SUCCESS;
     }
 

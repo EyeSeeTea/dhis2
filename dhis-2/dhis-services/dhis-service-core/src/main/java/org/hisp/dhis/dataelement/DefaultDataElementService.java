@@ -634,4 +634,14 @@ public class DefaultDataElementService
     {
         return dataElementStore.getAllGeneratedOperands( dataElements );
     }
+
+    public Collection<DataElement> getAllDataElements( int from, int to )
+    {
+        return dataElementStore.getAllDataElements( from, to );
+    }
+
+    public int getNumberOfDataElements()
+    {
+        return dataElementStore.getNumberOfDataElements();
+    }
 }

@@ -281,4 +281,8 @@ public interface DataElementStore
      * @return a collection of all Operands.
      */
     Collection<DataElementOperand> getAllGeneratedOperands( Collection<DataElement> dataElements );    
+
+    int getNumberOfDataElements();
+    
+    Collection<DataElement> getAllDataElements(int from, int to);
 }

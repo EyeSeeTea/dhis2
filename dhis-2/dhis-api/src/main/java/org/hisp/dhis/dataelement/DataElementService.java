@@ -507,5 +507,10 @@ public interface DataElementService
      * @param dataElements the DataElements.
      * @return a collection of all Operands.
      */
-    Collection<DataElementOperand> getAllGeneratedOperands( Collection<DataElement> dataElements );    
+    Collection<DataElementOperand> getAllGeneratedOperands( Collection<DataElement> dataElements );
+    
+    int getNumberOfDataElements();
+    
+    Collection<DataElement> getAllDataElements(int from, int to);
+
 }
