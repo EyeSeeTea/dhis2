@@ -27,70 +27,64 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Collection;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.aggregation.AggregatedMapValue;
+import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 import com.opensymphony.xwork2.Action;
-
-import java.util.Collections;
 
 /**
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetOrganisationUnitsWithPolygonsAction
+public class GetDataMapValuesByParentOrganisationUnitAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private MappingService mappingService;
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setMappingService( MappingService mappingService )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.mappingService = mappingService;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private int id;
+
+    public void setId( int id )
+    {
+        this.id = id;
     }
 
-    private Comparator<OrganisationUnit> organisationUnitComparator;
+    private int periodId;
 
-    public void setOrganisationUnitComparator( Comparator<OrganisationUnit> organisationUnitComparator )
+    public void setPeriodId( int periodId )
     {
-        this.organisationUnitComparator = organisationUnitComparator;
+        this.periodId = periodId;
     }
 
-    private DisplayPropertyHandler displayPropertyHandler;
+    private int parentId;    
 
-    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
+    public void setParentId( int parentId )
     {
-        this.displayPropertyHandler = displayPropertyHandler;
+        this.parentId = parentId;
     }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Collection<AggregatedMapValue> object;
 
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }    
-    
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private List<OrganisationUnit> object;
-
-    public List<OrganisationUnit> getObject()
+    public Collection<AggregatedMapValue> getObject()
     {
         return object;
     }
@@ -98,25 +92,12 @@ public class GetOrganisationUnitsWithPolygonsAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
     {
-        object = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnit( id ).getChildren() );
-        
-        CollectionUtils.filter( object, new Predicate()
-            {
-                public boolean evaluate( Object object )
-                {
-                    return ((OrganisationUnit) object).hasCoordinates();
-                }
-            } );
-
-        Collections.sort( object, organisationUnitComparator );
-        
-        displayPropertyHandler.handle( object );
+        object = mappingService.getDataElementMapValues( id, periodId, parentId );
         
         return SUCCESS;
     }
 }
-

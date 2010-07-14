@@ -27,70 +27,64 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Collection;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.aggregation.AggregatedMapValue;
+import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 import com.opensymphony.xwork2.Action;
-
-import java.util.Collections;
 
 /**
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetOrganisationUnitsWithPolygonsAction
+public class GetIndicatorMapValuesByParentOrganisationUnitAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private MappingService mappingService;
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setMappingService( MappingService mappingService )
     {
-        this.organisationUnitService = organisationUnitService;
-    }
-
-    private Comparator<OrganisationUnit> organisationUnitComparator;
-
-    public void setOrganisationUnitComparator( Comparator<OrganisationUnit> organisationUnitComparator )
-    {
-        this.organisationUnitComparator = organisationUnitComparator;
-    }
-
-    private DisplayPropertyHandler displayPropertyHandler;
-
-    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
-    {
-        this.displayPropertyHandler = displayPropertyHandler;
+        this.mappingService = mappingService;
     }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private int id;
 
-    public void setId( Integer id )
+    public void setId( int id )
     {
         this.id = id;
-    }    
-    
+    }
+
+    private int periodId;
+
+    public void setPeriodId( int periodId )
+    {
+        this.periodId = periodId;
+    }
+
+    private int parentId;    
+
+    public void setParentId( int parentId )
+    {
+        this.parentId = parentId;
+    }
+
     // -------------------------------------------------------------------------
-    // Output
+    // Input
     // -------------------------------------------------------------------------
 
-    private List<OrganisationUnit> object;
+    private Collection<AggregatedMapValue> object;
 
-    public List<OrganisationUnit> getObject()
+    public Collection<AggregatedMapValue> getObject()
     {
         return object;
     }
@@ -98,25 +92,12 @@ public class GetOrganisationUnitsWithPolygonsAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
     {
-        object = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnit( id ).getChildren() );
-        
-        CollectionUtils.filter( object, new Predicate()
-            {
-                public boolean evaluate( Object object )
-                {
-                    return ((OrganisationUnit) object).hasCoordinates();
-                }
-            } );
-
-        Collections.sort( object, organisationUnitComparator );
-        
-        displayPropertyHandler.handle( object );
+        object = mappingService.getIndicatorMapValues( id, periodId, parentId );
         
         return SUCCESS;
     }
 }
-
