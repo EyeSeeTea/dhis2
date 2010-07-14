@@ -55,13 +55,13 @@ pre.code{
 .msg .x-box-mc {
     font-size:12px;
     color:#111;
-    padding:8px 15px;
+    padding:8px 12px;
 }
 #msg-div {
     position:absolute;
     left:35%;
     top:10px;
-    width:400px;
+    width:360px;
     z-index:20000;
 }
 .x-grid3-row-body p {

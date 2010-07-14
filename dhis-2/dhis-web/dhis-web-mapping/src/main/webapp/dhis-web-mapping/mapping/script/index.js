@@ -2236,7 +2236,7 @@ Ext.onReady( function() {
                 method: 'POST',
                 params: {id:ml},
                 success: function(r) {
-                    Ext.message.msg(true, i18n_overlay + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
+                    Ext.message.msg(true, i18n_overlay + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted);
                     Ext.getCmp('maplayer_cb').getStore().reload();
                     Ext.getCmp('maplayer_cb').reset();
                 },
@@ -2295,7 +2295,7 @@ Ext.onReady( function() {
 							
 							for (i in mapLayers) {
 								if (mapLayers[i].name == mln) {
-									Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_is_already_in_use+'.');
+									Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_is_already_in_use);
 									return;
 								}
 							}
@@ -2307,7 +2307,7 @@ Ext.onReady( function() {
 								method: 'POST',
 								params: { name: mln, type: 'overlay', mapSource: ms, fillColor: mlfc, fillOpacity: mlfo, strokeColor: mlsc, strokeWidth: mlsw },
 								success: function(r) {
-									Ext.message.msg(true, 'The overlay <span class="x-msg-hl">' + mln + '</span> '+i18n_was_registered+'.');
+									Ext.message.msg(true, 'The overlay <span class="x-msg-hl">' + mln + '</span> '+i18n_was_registered);
 									Ext.getCmp('maplayer_cb').getStore().reload();
 							
 									var mapurl = MAPSOURCE == map_source_type_geojson ? path_mapping + 'getGeoJson.action?name=' + mlmsf : path_geoserver + wfs + mlwmso + output;
@@ -2403,7 +2403,7 @@ Ext.onReady( function() {
 		listeners: {
 			show: {
 				fn: function() {
-					if (MAPSOURCE == map_source_type_geojson) {
+					if (MAPSOURCE == map_source_type_geojson || MAPSOURCE == map_source_type_database) {
 						mapLayerMapSourceFileComboBox.show();
 						mapLayerPathWMSOverlayTextField.hide();
 					}
@@ -2441,7 +2441,7 @@ Ext.onReady( function() {
                 method: 'POST',
                 params: { id: ml },
                 success: function(r) {
-                    Ext.message.msg(true, i18n_baselayer + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted+'.');
+                    Ext.message.msg(true, i18n_baselayer + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted);
                     Ext.getCmp('maplayerbaselayers_cb').getStore().reload();
                     Ext.getCmp('maplayerbaselayers_cb').reset();
                     
@@ -2507,7 +2507,7 @@ Ext.onReady( function() {
 							
 							for (i in mapLayers) {
 								if (mapLayers[i].name == mlbn) {
-									Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mlbn + '</span> '+i18n_is_already_in_use+'.');
+									Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mlbn + '</span> '+i18n_is_already_in_use);
 									return;
 								}
 							}
@@ -2517,7 +2517,7 @@ Ext.onReady( function() {
 								method: 'POST',
 								params: { name: mlbn, type: map_layer_type_baselayer, mapSource: mlbu, layer: mlbl, fillColor: '', fillOpacity: 0, strokeColor: '', strokeWidth: 0 },
 								success: function(r) {
-									Ext.message.msg(true, 'The base layer <span class="x-msg-hl">' + mlbn + '</span> '+i18n_was_registered+'.');
+									Ext.message.msg(true, 'The base layer <span class="x-msg-hl">' + mlbn + '</span> '+i18n_was_registered);
 									Ext.getCmp('maplayerbaselayers_cb').getStore().reload();
 									MAP.addLayers([
                                         new OpenLayers.Layer.WMS(
@@ -2703,7 +2703,7 @@ Ext.onReady( function() {
 												}
 												addOverlaysToMap();
 												
-												Ext.message.msg(true, '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_saved_as_map_source+'.');
+												Ext.message.msg(true, '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_saved_as_map_source);
 											},
 											failure: function() {
 												alert( i18n_status, i18n_error_while_saving_data );
