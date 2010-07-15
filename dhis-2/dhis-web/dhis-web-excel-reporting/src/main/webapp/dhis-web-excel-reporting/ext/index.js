@@ -20,26 +20,19 @@ Ext.onReady(function()
 });
 
 
-function viewFullChart( xTitle, title, colTitle, lineTitle, store )
+function viewFullChart( xTitle, title, colTitle, lineTitle, store, hasBookmark )
 {
-	var random = (Math.floor(Math.random() *  11) + 1) * 100;
+
+	if(hasBookmark==undefined) hasBookmark = true;
 	
-	new Ext.Window(
-	{		
-		id:'view-full-chart-window'+random,	
-		title:'<span>'+ title +'</span>',	
-		layout:'fit',		
-		defaults:{layout:'fit',
-		bodyStyle:'padding:2px; border:0px'},
-		width:600,
-		height:500,
-		collapsible: true,
-        maximizable: true,
-		items: new Ext.chart.ColumnChart({				
+	var random = (Math.floor(Math.random() *  11) + 1) * 100;
+		
+	chart = new Ext.chart.ColumnChart({				
 				id:'full-chart' + random,	
 				store: store,				
 				url: Ext.chart.Chart.CHART_URL,
-				xField: 'name',				
+				xField: 'name',		
+				region: 'center',	
 				extraStyle: {
 				   legend:
 					{
@@ -86,28 +79,72 @@ function viewFullChart( xTitle, title, colTitle, lineTitle, store )
 						}
 				}]
 
-			})
-	}).show();
+			});
+	
+	bookmark = new Ext.FormPanel({
+            title: 'Bookmark',
+			id: 'form-panel-fullchart-' + random,
+            region: 'west',
+            split: true,
+            width: 200,
+            collapsible: true,
+            margins:'3 0 3 3',
+            cmargins:'3 3 3 3',
+			labelWidth: 75,
+			items:[	
+					{
+						xtype: 'label',						
+						fieldLabel: 'Descriptions',												
+					},{
+						xtype: 'textarea',
+						id: 'fullchart-bookmark-descriptions-' + random,
+						fieldLabel: 'Descriptions',						
+						hideLabel:true,
+						width:190,
+						allowBlank: false
+					}
+			],
+			buttons: [{
+				text: 'Save',
+				handler: function() {					
+					descriptions = Ext.getCmp('fullchart-bookmark-descriptions-' + random).getValue();
+					bookmarkChart( xTitle, title, store, descriptions );
+				}
+			}]
+        });
+	
+	var window = new Ext.Window(
+	{		
+		id:'view-line-chart-window'+random,	
+		title:'<span>'+ title +'</span>',				
+		defaults:{bodyStyle:'padding:2px; border:0px'},
+		width:800,
+		height:500,
+		collapsible: true,
+        maximizable: true,
+		plain:true,
+        layout: 'border'		
+	});
+	
+	window.add(chart);
+	
+	if( hasBookmark ){
+		window.add(bookmark);
+	}
+	
+	window.show();
 		
 
 }
 
-function viewPieChart( xTitle, title, store )
+function viewPieChart( xTitle, title, store, hasBookmark )
 {
-	var random = (Math.floor(Math.random() *  11) + 1) * 100;
 	
-	new Ext.Window(
-	{		
-		id:'view-pie-chart-window'+random,	
-		title:'<span>'+ title +'</span>',	
-		layout:'fit',		
-		defaults:{layout:'fit',
-		bodyStyle:'padding:2px; border:0px'},
-		width:600,
-		height:500,
-		collapsible: true,
-        maximizable: true,
-		items: new Ext.chart.PieChart({				
+	if(hasBookmark==undefined) hasBookmark = true;
+
+	var random = (Math.floor(Math.random() *  11) + 1) * 100;	
+	
+	chart = new Ext.chart.PieChart({				
 				id:'pie-chart' + random,	
 				store: store,
 				dataField: 'value',
@@ -125,29 +162,73 @@ function viewPieChart( xTitle, title, store )
 						}
 					}
 
+				},
+				region: 'center'
+			});
+	
+	bookmark = new Ext.FormPanel({
+            title: 'Bookmark',
+			id: 'form-panel-piechart-' + random,
+            region: 'west',
+            split: true,
+            width: 200,
+            collapsible: true,
+            margins:'3 0 3 3',
+            cmargins:'3 3 3 3',
+			labelWidth: 75,
+			items:[	
+					{
+						xtype: 'label',						
+						fieldLabel: 'Descriptions',												
+					},{
+						xtype: 'textarea',
+						id: 'piechart-bookmark-descriptions-' + random,
+						fieldLabel: 'Descriptions',						
+						hideLabel:true,
+						width:190,
+						allowBlank: false
+					}
+			],
+			buttons: [{
+				text: 'Save',
+				handler: function() {					
+					descriptions = Ext.getCmp('piechart-bookmark-descriptions-' + random).getValue();
+					bookmarkChart( xTitle, title, store, descriptions );
 				}
-			})
-	}).show();
+			}]
+        });
+	
+	var window = new Ext.Window(
+	{		
+		id:'view-line-chart-window'+random,	
+		title:'<span>'+ title +'</span>',				
+		defaults:{bodyStyle:'padding:2px; border:0px'},
+		width:800,
+		height:500,
+		collapsible: true,
+        maximizable: true,
+		plain:true,
+        layout: 'border'		
+	});
+	
+	window.add(chart);
+	
+	if( hasBookmark ){
+		window.add(bookmark);
+	}
+	
+	window.show();
 		
 }
 
 
-function viewLineChart( xTitle, title, store )
+function viewLineChart( xTitle, title, store, hasBookmark )
 {
+	if(hasBookmark==undefined) hasBookmark = true;
+	
 	var random = (Math.floor(Math.random() *  11) + 1) * 100;
 	
-	new Ext.Window(
-	{		
-		id:'view-line-chart-window'+random,	
-		title:'<span>'+ title +'</span>',	
-		layout:'fit',		
-		defaults:{layout:'fit',
-		bodyStyle:'padding:2px; border:0px'},
-		width:600,
-		height:500,
-		collapsible: true,
-        maximizable: true,
-		items: new Ext.chart.LineChart({				
+	chart = new Ext.chart.LineChart({				
 				id:'linechart' + random,	
 				store: store,
 				yField: 'value',
@@ -160,28 +241,72 @@ function viewLineChart( xTitle, title, store )
 				   xAxis: {
 						labelRotation: -60
 					}
-				}
-			})
-	}).show();
-		
-}
-
-function viewColumnChart( xTitle, title, store )
-{
-	var random = (Math.floor(Math.random() *  11) + 1) * 100;
+				},
+				region: 'center'
+			});
 	
-	new Ext.Window(
+	bookmark = new Ext.FormPanel({
+            title: 'Bookmark',
+			id: 'form-panel-linechart-' + random,
+            region: 'west',
+            split: true,
+            width: 200,
+            collapsible: true,
+            margins:'3 0 3 3',
+            cmargins:'3 3 3 3',
+			labelWidth: 75,
+			items:[	
+					{
+						xtype: 'label',						
+						fieldLabel: 'Descriptions',												
+					},{
+						xtype: 'textarea',
+						id: 'linechart-bookmark-descriptions-' + random,
+						fieldLabel: 'Descriptions',						
+						hideLabel:true,
+						width:190,
+						allowBlank: false
+					}
+			],
+			buttons: [{
+				text: 'Save',
+				handler: function() {					
+					descriptions = Ext.getCmp('linechart-bookmark-descriptions-' + random).getValue();
+					bookmarkChart( xTitle, title, store, descriptions );
+				}
+			}]
+        });
+	
+	var window = new Ext.Window(
 	{		
-		id:'view-column-chart-window'+random,	
-		title:'<span>'+ title +'</span>',	
-		layout:'fit',		
-		defaults:{layout:'fit',
-		bodyStyle:'padding:2px; border:0px'},
-		width:600,
+		id:'view-line-chart-window'+random,	
+		title:'<span>'+ title +'</span>',				
+		defaults:{bodyStyle:'padding:2px; border:0px'},
+		width:800,
 		height:500,
 		collapsible: true,
         maximizable: true,
-		items:[ new Ext.chart.ColumnChart({				
+		plain:true,
+        layout: 'border'		
+	});
+	
+	window.add(chart);
+	
+	if( hasBookmark ){
+		window.add(bookmark);
+	}
+	
+	window.show();
+		
+}
+
+function viewColumnChart( xTitle, title, store , hasBookmark )
+{	
+	if(hasBookmark==undefined) hasBookmark = true;
+	
+	var random = (Math.floor(Math.random() *  11) + 1) * 100;
+	
+	chart = new Ext.chart.ColumnChart({				
 				id:'columnchart' + random,	
 				store: store,
 				yField: 'value',
@@ -194,15 +319,95 @@ function viewColumnChart( xTitle, title, store )
 				   xAxis: {
 						labelRotation: -60
 					}
+				},
+				region: 'center'
+			});
+	bookmark = new Ext.FormPanel({
+            title: 'Bookmark',
+			id: 'form-panel-column-' + random,
+            region: 'west',
+            split: true,
+            width: 200,
+            collapsible: true,
+            margins:'3 0 3 3',
+            cmargins:'3 3 3 3',
+			labelWidth: 75,
+			items:[	
+					{
+						xtype: 'label',						
+						fieldLabel: 'Descriptions',												
+					},{
+						xtype: 'textarea',
+						id: 'columnchart-bookmark-descriptions-' + random,
+						fieldLabel: 'Descriptions',						
+						hideLabel:true,
+						width:190,
+						allowBlank: false
+					}
+			],
+			buttons: [{
+				text: 'Save',
+				handler: function() {					
+					descriptions = Ext.getCmp('columnchart-bookmark-descriptions-' + random).getValue();
+					bookmarkChart( xTitle, title, store, descriptions );
 				}
-			}),
-			
-			]
-	}).show();
+			}]
+        });
+	
+	var window = new Ext.Window(
+	{		
+		id:'view-column-chart-window'+random,	
+		title:'<span>'+ title +'</span>',				
+		defaults:{bodyStyle:'padding:2px; border:0px'},
+		width:800,
+		height:500,
+		collapsible: true,
+        maximizable: true,
+		plain:true,
+        layout: 'border'			
+	});
+	
+	window.add(chart);
+	
+	if( hasBookmark ){
+		window.add(bookmark);
+	}
+	
+	window.show();
+		
 		
 }
 
-
+function bookmarkChart( xTitle, title, store, description)
+{
+	if( description=='' ){
+		alert('Please enter description!');
+	}else{
+		size = store.getTotalCount();
+		
+		var contain = '{"data":['
+		store.each(function( item, i ){
+			contain += '{"name":"' + item.get('name') + '","value":' + item.get('value') + ', "total":' + item.get('total') + '}';
+			if( i < size -1 ){contain += ','}
+		});
+		contain += ']}';	
+		
+		var extraContain = '{"xtitle":"' + xTitle + '"';
+		extraContain += ', "title":"' + title + '"';
+		extraContain += '}';
+		
+		Ext.Ajax.request({
+			url: path + 'saveBookmark' + type,
+			method: 'POST',
+			params: { format:'json', description: description, contain: contain, extraContain: extraContain },
+			success: function( json ) {
+				getAllBookmartChart();
+			}
+		});	
+		
+	}
+	
+}
 
 var pieChartRadio = new Ext.form.Radio({
 	name: 'chart-type',
@@ -421,6 +626,95 @@ function switchAxisxDeIn( a, b)
 		$("#"+b).css("display", "none");
 	}
 	
+}
+function deleteBookmark( id )
+{
+	if(window.confirm(' Do you want delete ?')){
+		Ext.Ajax.request({
+			url: path + 'deleteBookmark' + type,
+			method: 'POST',
+			params: {format:'json', id: id},
+			success: function( json ) {
+				getAllBookmartChart();
+			}
+		});
+	}
+}
+
+
+function getAllBookmartChart()
+{
+	Ext.Ajax.request({
+		url: path + 'getAllBookmark' + type,
+		method: 'POST',
+		params: { format:'json' },
+		success: function( json ) {
+			var bookmarks =  Ext.util.JSON.decode(json.responseText).bookmarks;
+			
+			var html = '<table class="listTable" width="100%">';
+			html += '<thead>';
+			html += '<tr>';
+			html += '<th>Description</th>';
+			html += '<th class="{sorter: false}"></th>'
+			html += '</tr>';
+			html += '</thead>';
+			
+			html += '<tbody id="list">';
+			var r = true;
+			for (var i = 0; i < bookmarks.length; i++) 
+			{
+				xtitle = bookmarks[i].extraContain.xtitle;
+				title = bookmarks[i].extraContain.title;
+				
+				if( r ){
+					html += '<tr class="listRow">';
+					r = false;
+				}else{
+					html += '<tr class="listAlternateRow">';
+					r=true;
+				}
+				html += '<td>' + bookmarks[i].description + '</td>';
+				html += '<td width="50px">';
+				html += '<a href="javascript:viewBookmarkChart(' + bookmarks[i].id + ', \'' + xtitle + '\', \'' + title + '\');">';
+				html += '<img src="images/chart-icon.png"/>';
+				html += '</a>';
+				html += '<a href="javascript:deleteBookmark(' + bookmarks[i].id + ');">';
+				html += '<img src="../images/delete.png"/>';
+				html += '</a>';
+				html += '</td>';
+				html += '</tr>';
+			}			
+			html += '</tbody>';
+			html += '</table>';
+			
+			jQuery('#bookmark').html( html );
+		}
+	});
+
+}
+
+function viewBookmarkChart( id, xTitle, title )
+{
+	var store = new Ext.data.JsonStore({
+		url: path + 'viewBookmarkChart' + type,
+		baseParams: { format: 'json', id: id },	
+		root: 'data',		
+		fields: ['name', 'value', 'total'],				
+		autoLoad: true	
+	});	
+	
+	var chartType = columnChartRadio.getGroupValue();
+	
+	if( chartType == FULL_CHART_TYPE ){
+		viewFullChart( xTitle, "Full Style Chart", PARENT, ORGANISATION_UNIT, store, false );
+	}else if( chartType == PIE_CHART_TYPE ){
+		viewPieChart( xTitle, "Pie Chart", store, false );
+	}else if( chartType == LINE_CHART_TYPE ){
+		viewLineChart( xTitle , "Line Chart", store, false );
+	}else{
+		viewColumnChart( xTitle , "Column Chart", store, false );
+	}
+					
 }
 
 

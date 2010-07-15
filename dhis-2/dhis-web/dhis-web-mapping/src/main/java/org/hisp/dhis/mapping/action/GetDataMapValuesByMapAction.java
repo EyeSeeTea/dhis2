@@ -56,11 +56,11 @@ public class GetDataMapValuesByMapAction
     // Input
     // -------------------------------------------------------------------------
 
-    private int dataElementId;
+    private int id;
 
-    public void setDataElementId( int dataElementId )
+    public void setId( int id )
     {
-        this.dataElementId = dataElementId;
+        this.id = id;
     }
 
     private int periodId;
@@ -95,7 +95,7 @@ public class GetDataMapValuesByMapAction
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedDataMapValues( dataElementId, periodId, mapLayerPath );
+        object = mappingService.getAggregatedDataMapValues( id, periodId, mapLayerPath );
 
         return SUCCESS;
     }

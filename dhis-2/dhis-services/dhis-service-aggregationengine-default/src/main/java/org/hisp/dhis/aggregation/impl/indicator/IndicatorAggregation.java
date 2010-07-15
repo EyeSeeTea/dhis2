@@ -37,7 +37,6 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.aggregation.impl.cache.AggregationCache;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -53,6 +52,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 public class IndicatorAggregation
 {
     private static final String NULL_REPLACEMENT = "0";
+
+    private static final Pattern OPERAND_PATTERN = Pattern.compile( "(\\[\\d+\\" + SEPARATOR + "\\d+\\])" );
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -83,7 +84,7 @@ public class IndicatorAggregation
     // Indicator aggregation
     // -------------------------------------------------------------------------
     
-    public double getAggregatedIndicatorValue( Indicator indicator, Date startDate, Date endDate,
+    public Double getAggregatedIndicatorValue( Indicator indicator, Date startDate, Date endDate,
         OrganisationUnit organisationUnit )
     {
         double numeratorValue = calculateExpression( generateExpression( indicator.getNumerator(), startDate,
@@ -94,7 +95,7 @@ public class IndicatorAggregation
         
         if ( numeratorValue == INVALID || denominatorValue == INVALID || denominatorValue == 0.0 )
         {
-            return AggregationService.NO_VALUES_REGISTERED;
+            return null;
         }
         else
         {
@@ -121,10 +122,6 @@ public class IndicatorAggregation
         return calculateExpression( generateExpression( indicator.getDenominator(),
             startDate, endDate, organisationUnit ) );
     }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods for Indicator aggregation
-    // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
     // Supportive methods
@@ -159,17 +156,14 @@ public class IndicatorAggregation
     {    	
         try
         {        	
-        	Pattern pattern = Pattern.compile( "(\\[\\d+\\.\\d+\\])" );
+            Matcher matcher = OPERAND_PATTERN.matcher( formula );
             
-            Matcher matcher = pattern.matcher( formula );
             StringBuffer buffer = new StringBuffer();            
             
             while ( matcher.find() )
             {
-                String replaceString = matcher.group();
+                String replaceString = matcher.group().replaceAll( "[\\[\\]]", "" );
                 
-                replaceString = replaceString.replaceAll( "[\\[\\]]", "" );
-
                 String dataElementIdString = replaceString.substring( 0, replaceString.indexOf( SEPARATOR ) );                
                 String optionComboIdString = replaceString.substring( replaceString.indexOf( SEPARATOR ) + 1, replaceString.length() );
                 
@@ -180,9 +174,9 @@ public class IndicatorAggregation
                 
                 DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
 
-                double aggregatedValue = aggregationCache.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );                
+                Double aggregatedValue = aggregationCache.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );                
                 
-                if ( aggregatedValue == AggregationService.NO_VALUES_REGISTERED )
+                if ( aggregatedValue == null )
                 {
                     replaceString = NULL_REPLACEMENT;
                 }

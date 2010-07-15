@@ -55,7 +55,7 @@ public class ExcelUtils
     private static Matcher matcher = null;
 
     public static final String ZERO = "0.0";
-
+    
     public static final String TEXT = "TEXT";
 
     public static final String NUMBER = "NUMBER";
@@ -239,7 +239,7 @@ public class ExcelUtils
             }
             else if ( type.equalsIgnoreCase( ExcelUtils.NUMBER ) )
             {
-                if ( value.equals( ZERO ) )
+                if ( value == null )
                 {
                     cellPOI.setCellType( POI_CELLSTYLE_BLANK );
                 }
@@ -282,7 +282,7 @@ public class ExcelUtils
             }
             else if ( type.equalsIgnoreCase( ExcelUtils.NUMBER ) )
             {
-                if ( value.equals( ZERO ) )
+                if ( value == null  )
                 {
                     cellPOI.setCellType( POI_CELLSTYLE_BLANK );
                 }

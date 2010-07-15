@@ -49,8 +49,6 @@ public abstract class AbstractDataElementAggregation
 
     protected final String TRUE = "true";
 
-    protected final String FALSE = "false";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -82,7 +80,7 @@ public abstract class AbstractDataElementAggregation
      * @param aggregationEndDate End date
      * @param organisationUnit The organisationUnit
      */
-    public abstract double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate,
+    public abstract Double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate,
         OrganisationUnit organisationUnit );
     
     /**
@@ -96,7 +94,7 @@ public abstract class AbstractDataElementAggregation
      * @param hierarchy the organisation unit hierarchy
      * @return collection a datavalues
      */
-    protected abstract Collection<DataValue> getDataValues( int dataElementId, int optionComboId, int organisationUnitId,
+    protected abstract Collection<DataValue> getDataValues( Integer dataElementId, Integer optionComboId, Integer organisationUnitId,
         Date startDate, Date endDate );    
     
     protected abstract double[] getAggregateOfValues( Collection<DataValue> values, Date startDate, Date endDate,
@@ -116,17 +114,15 @@ public abstract class AbstractDataElementAggregation
      * @return double array with sum of the data values at position 0 and number
      *         of relevant days at position 1
      */
-    protected double[] getSumAndRelevantDays( int dataElementId, int optionComboId, Date aggregationStartDate,
-        Date aggregationEndDate, int organisationUnitId )
+    protected double[] getSumAndRelevantDays( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, Date aggregationStartDate,
+        Date aggregationEndDate, Integer organisationUnitId )
     {
-        Collection<DataValue> dataValues = getDataValues( dataElementId, optionComboId, organisationUnitId,
+        Integer categoryOptionComboId = categoryOptionCombo != null ? categoryOptionCombo.getId() : null;
+        
+        Collection<DataValue> dataValues = getDataValues( dataElement.getId(), categoryOptionComboId, organisationUnitId,
             aggregationStartDate, aggregationEndDate );
 
-        double[] fraction = getAggregateOfValues( dataValues, aggregationStartDate, aggregationEndDate,
+        return getAggregateOfValues( dataValues, aggregationStartDate, aggregationEndDate,
             aggregationStartDate, aggregationEndDate );
-
-        double sums[] = { fraction[0], fraction[1] };
-
-        return sums;
     }    
 }

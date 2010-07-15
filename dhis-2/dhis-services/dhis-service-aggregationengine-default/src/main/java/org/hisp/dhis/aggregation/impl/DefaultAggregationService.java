@@ -30,12 +30,16 @@ package org.hisp.dhis.aggregation.impl;
 import java.util.Date;
 
 import org.hisp.dhis.aggregation.AggregationService;
+import org.hisp.dhis.aggregation.impl.cache.AggregationCache;
 import org.hisp.dhis.aggregation.impl.dataelement.AbstractDataElementAggregation;
 import org.hisp.dhis.aggregation.impl.indicator.IndicatorAggregation;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import static org.hisp.dhis.system.util.DateUtils.*;
+
+import static org.hisp.dhis.dataelement.DataElement.*;
 
 /**
  * @author Lars Helge Overland
@@ -69,6 +73,13 @@ public class DefaultAggregationService
         this.averageIntDataElementAggregation = averageIntDataElementAggregation;
     }
 
+    private AbstractDataElementAggregation averageIntSingleValueAggregation;
+    
+    public void setAverageIntSingleValueAggregation( AbstractDataElementAggregation averageIntSingleValueAggregation )
+    {
+        this.averageIntSingleValueAggregation = averageIntSingleValueAggregation;
+    }
+
     private AbstractDataElementAggregation averageBoolDataElementAggregation;
 
     public void setAverageBoolDataElementAggregation( AbstractDataElementAggregation averageBoolDataElementAggregation )
@@ -83,15 +94,22 @@ public class DefaultAggregationService
         this.indicatorAggregation = indicatorAggregation;
     }
     
+    private AggregationCache aggregationCache;
+
+    public void setAggregationCache( AggregationCache aggregationCache )
+    {
+        this.aggregationCache = aggregationCache;
+    }
+
     // -------------------------------------------------------------------------
     // DataElement
     // -------------------------------------------------------------------------
 
-    public double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate,
+    public Double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate,
         OrganisationUnit organisationUnit )
     {
         AbstractDataElementAggregation dataElementAggregation = 
-            getInstance( dataElement.getType(), dataElement.getAggregationOperator() );        
+            getInstance( dataElement.getType(), dataElement.getAggregationOperator(), startDate, endDate, dataElement );        
 
         return dataElementAggregation.getAggregatedValue( dataElement, optionCombo, startDate, endDate, organisationUnit );
     }
@@ -100,47 +118,52 @@ public class DefaultAggregationService
     // Indicator
     // -------------------------------------------------------------------------
 
-    public double getAggregatedIndicatorValue( Indicator indicator, Date startDate, Date endDate,
+    public Double getAggregatedIndicatorValue( Indicator indicator, Date startDate, Date endDate,
         OrganisationUnit organisationUnit )
     {
         return indicatorAggregation.getAggregatedIndicatorValue( indicator, startDate, endDate, organisationUnit );
     }
 
-    public double getAggregatedNumeratorValue( Indicator indicator, Date startDate, Date endDate,
+    public Double getAggregatedNumeratorValue( Indicator indicator, Date startDate, Date endDate,
         OrganisationUnit organisationUnit )
     {
         return indicatorAggregation.getAggregatedNumeratorValue( indicator, startDate, endDate, organisationUnit );
     }
 
-    public double getAggregatedDenominatorValue( Indicator indicator, Date startDate, Date endDate,
+    public Double getAggregatedDenominatorValue( Indicator indicator, Date startDate, Date endDate,
         OrganisationUnit organisationUnit )
     {
         return indicatorAggregation.getAggregatedDenominatorValue( indicator, startDate, endDate, organisationUnit );
+    }
+    
+    public void clearCache()
+    {
+        aggregationCache.clearCache();
     }
     
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private AbstractDataElementAggregation getInstance( String valueType, String aggregationOperator )
+    private AbstractDataElementAggregation getInstance( String valueType, String aggregationOperator, Date startDate, Date endDate, DataElement dataElement )
     {
-        if ( valueType.equals( DataElement.VALUE_TYPE_INT )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_SUM ) )
+        if ( valueType.equals( VALUE_TYPE_INT ) && aggregationOperator.equals( AGGREGATION_OPERATOR_SUM ) )
         {
             return sumIntDataElementAggregation;
         }
-        else if ( valueType.equals( DataElement.VALUE_TYPE_BOOL )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_SUM ) )
+        else if ( valueType.equals( VALUE_TYPE_BOOL ) && aggregationOperator.equals( AGGREGATION_OPERATOR_SUM ) )
         {
             return sumBoolDataElementAggregation;
         }
-        else if ( valueType.equals( DataElement.VALUE_TYPE_INT )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_AVERAGE ) )
+        else if ( valueType.equals( VALUE_TYPE_INT ) && aggregationOperator.equals( AGGREGATION_OPERATOR_AVERAGE ) && dataElement.getFrequencyOrder() >= getDaysInclusive( startDate, endDate ) )
+        {
+            return averageIntSingleValueAggregation;
+        }
+        else if ( valueType.equals( VALUE_TYPE_INT ) && aggregationOperator.equals( AGGREGATION_OPERATOR_AVERAGE ) )
         {
             return averageIntDataElementAggregation;
         }
-        else if ( valueType.equals( DataElement.VALUE_TYPE_BOOL )
-            && aggregationOperator.equals( DataElement.AGGREGATION_OPERATOR_AVERAGE ) )
+        else if ( valueType.equals( VALUE_TYPE_BOOL ) && aggregationOperator.equals( AGGREGATION_OPERATOR_AVERAGE ) )
         {
             return averageBoolDataElementAggregation;
         }

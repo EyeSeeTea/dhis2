@@ -133,6 +133,14 @@ public class HibernatePeriodStore
     }
 
     @SuppressWarnings( "unchecked" )
+    public Collection<Period> getPeriodsBetweenOrSpanningDates( Date startDate, Date endDate )
+    {
+        String hql = "from Period p where ( p.startDate >= :startDate and p.endDate <= :endDate ) or ( p.startDate <= :startDate and p.endDate >= :endDate )";
+        
+        return sessionFactory.getCurrentSession().createQuery( hql ).setDate( "startDate", startDate ).setDate( "endDate", endDate ).list();
+    }
+    
+    @SuppressWarnings( "unchecked" )
     public Collection<Period> getIntersectingPeriodsByPeriodType( PeriodType periodType, Date startDate, Date endDate )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -153,7 +161,7 @@ public class HibernatePeriodStore
         Criteria criteria = session.createCriteria( Period.class );
         criteria.add( Restrictions.gt( "endDate", startDate ) );
         criteria.add( Restrictions.lt( "startDate", endDate ) );
-
+        
         return criteria.list();
     }
 
@@ -205,7 +213,9 @@ public class HibernatePeriodStore
             return period; // Already in session, no reload needed
         }
 
-        return getPeriod( period.getStartDate(), period.getEndDate(), period.getPeriodType() );
+        Period storedPeriod = getPeriod( period.getStartDate(), period.getEndDate(), period.getPeriodType() );
+        
+        return storedPeriod != null ? storedPeriod.copyTransientProperties( period ) : null;
     }
 
     public Period reloadForceAddPeriod( Period period )

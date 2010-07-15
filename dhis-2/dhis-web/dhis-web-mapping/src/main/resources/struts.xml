@@ -38,6 +38,12 @@
 				/dhis-web-mapping/jsonminOrganisationUnits.vm</result>
 		</action>
 
+		<action name="getOrganisationUnitChildren"
+			class="org.hisp.dhis.mapping.action.GetOrganisationUnitChildrenAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-mapping/jsonOrganisationUnitChildren.vm</result>
+		</action>
+
 		<!-- Map -->
 
 		<action name="addOrUpdateMap"
@@ -78,6 +84,12 @@
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>
+        
+        <action name="getDataMapValuesByParentOrganisationUnit"
+            class="org.hisp.dhis.mapping.action.GetDataMapValuesByParentOrganisationUnitAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
 
 		<action name="getIndicatorMapValuesByMap"
 			class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction">
@@ -93,6 +105,12 @@
 		
 		<action name="getIndicatorMapValuesByMapAndFeatureId"
             class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAndFeatureIdAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
+        </action>
+		
+		<action name="getIndicatorMapValuesByParentOrganisationUnit"
+            class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByParentOrganisationUnitAction">
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>

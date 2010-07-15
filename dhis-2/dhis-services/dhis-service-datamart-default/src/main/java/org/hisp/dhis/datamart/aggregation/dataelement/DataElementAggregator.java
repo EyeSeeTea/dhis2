@@ -47,7 +47,7 @@ public interface DataElementAggregator
     final String TRUE = "true";
 
     Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Period period, final OrganisationUnit unit, int unitLevel, final OrganisationUnitHierarchy hierarchy );
+        final Period period, final OrganisationUnit unit, int unitLevel, final OrganisationUnitHierarchy hierarchy, String key );
     
     Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 
         final Date startDate, final Date endDate, final Date aggregationStartDate, final Date aggregationEndDate, int unitLevel );

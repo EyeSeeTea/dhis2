@@ -399,7 +399,7 @@ function setMessage( message )
  */
 function setWaitMessage( message )
 {
-	setMessage( message + "&nbsp;&nbsp;&nbsp;<img src='../../images/ajax-loader-bar-small.gif'>" );
+	setMessage( message + "&nbsp;&nbsp;&nbsp;<img src='../images/ajax-loader-bar-small.gif'>" );
 }
 
 /**
@@ -438,7 +438,7 @@ function updateHeaderMessage( message )
  */
 function setHeaderWaitMessage( message )
 {
-	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../../images/ajax-loader-bar-small.gif'>" );
+	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../images/ajax-loader-bar-small.gif'>" );
     $( 'div#headerMessage' ).slideDown();
 }
 
@@ -449,7 +449,7 @@ function setHeaderWaitMessage( message )
  */
 function updateHeaderWaitMessage( message )
 {
-	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../../images/ajax-loader-bar-small.gif'>" );
+	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;<img src='../images/ajax-loader-bar-small.gif'>" );
 }
 
 /**
@@ -765,9 +765,30 @@ function datePicker( id )
 		dayNamesMin: dayNamesMin,
 		showOn: 'both',
 		buttonImage: '../images/calendar.png',
-		buttonImageOnly: true
+		buttonImageOnly: true		
 	});
 }
+
+/**
+ * Create jQuery datepicker for input text with id * * 
+ * @param id the id of input filed which you want enter date *
+ */
+function datePickerValid( id )
+{
+	$("#" + id).datepicker(
+	{
+		dateFormat:dateFormat,
+		changeMonth: true,
+		changeYear: true,			
+		monthNamesShort: monthNames,
+		dayNamesMin: dayNamesMin,
+		showOn: 'both',
+		buttonImage: '../images/calendar.png',
+		buttonImageOnly: true,
+		maxDate: '+0d +0w'
+	});
+}
+
 
 /**
  * Create jQuery datepicker for start date and end ate text with id * * 
@@ -805,9 +826,11 @@ function datePickerInRange ( startdate, enddate )
  * @param tableId the id of table you want to sort * * 
  */
 
-function tableSorter( tableId )
+function tableSorter( tableId, sortList )
 {
-	$("#" + tableId ).tablesorter(); 
+	if(sortList==undefined) sortList = [[0,0]];
+	
+	$("#" + tableId ).tablesorter({sortList:sortList}); 
 }
 
 function setSelectionRange( input, selectionStart, selectionEnd ) 

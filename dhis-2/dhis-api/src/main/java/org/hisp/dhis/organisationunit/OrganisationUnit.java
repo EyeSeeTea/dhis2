@@ -28,7 +28,6 @@ package org.hisp.dhis.organisationunit;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +46,9 @@ import org.hisp.dhis.source.Source;
 public class OrganisationUnit
     extends Source implements DimensionOptionElement
 {
-    private static final Pattern COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
+    private static final Pattern JSON_COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
+
+    private static final Pattern COORDINATE_PATTERN = Pattern.compile("([\\-0-9.]+,[\\-0-9.]+)");
     
     private Set<OrganisationUnit> children = new HashSet<OrganisationUnit>();
 
@@ -155,38 +156,47 @@ public class OrganisationUnit
         return coordinates != null && coordinates.trim().length() > 0;
     }
     
-    public Collection<String> getCoordinatesAsCollection()
+    public List<CoordinatesTuple> getCoordinatesAsList()
     {
-        Collection<String> collection = new ArrayList<String>();
+        List<CoordinatesTuple> list = new ArrayList<CoordinatesTuple>();
         
         if ( coordinates != null && !coordinates.trim().isEmpty() )
         {
-            Matcher matcher = COORDINATE_PATTERN.matcher( coordinates );
-            
-            while ( matcher.find() )
+            Matcher jsonMatcher = JSON_COORDINATE_PATTERN.matcher( coordinates );
+
+            while ( jsonMatcher.find() )
             {
-                collection.add( matcher.group().replaceAll( "\\]\\,", "] " ).replaceAll( "[\\[\\]]", "" ) );
+                CoordinatesTuple tuple = new CoordinatesTuple();
+                
+                Matcher matcher = COORDINATE_PATTERN.matcher( jsonMatcher.group() );
+                
+                while ( matcher.find() )
+                {
+                    tuple.addCoordinates( matcher.group() );
+                }
+                
+                list.add( tuple );
             }
         }
         
-        return collection;
+        return list;
     }
     
-    public void setCoordinatesFromCollection( Collection<String> collection )
+    public void setCoordinatesFromList( List<CoordinatesTuple> list )
     {
         StringBuilder builder = new StringBuilder();
         
-        if ( collection != null && collection.size() > 0 )
+        if ( list != null && list.size() > 0 )
         {
             builder.append( "[" );
             
-            for ( String c : collection )
+            for ( CoordinatesTuple tuple : list )
             {
                 builder.append( "[[" );
-                            
-                for ( String coordinate : c.split( "\\s" ) )
+
+                for ( String coordinates : tuple.getCoordinatesTuple() )
                 {
-                    builder.append( "[" + coordinate + "]," );
+                    builder.append( "[" + coordinates + "]," );
                 }
                 
                 builder.deleteCharAt( builder.lastIndexOf( "," ) );            

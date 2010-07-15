@@ -27,7 +27,6 @@ package org.hisp.dhis.aggregation.impl.cache;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +40,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.system.util.ConversionUtils;
 
 /**
  * @author Lars Helge Overland
@@ -49,11 +49,9 @@ import org.hisp.dhis.period.PeriodService;
 public class MemoryAggregationCache
     implements AggregationCache
 {
-    private OrganisationUnitHierarchy hierarchyCache = null;
-    
-    private Map<String, Period> periodCache = new HashMap<String, Period>();
-    
-    private Map<String, Collection<Integer>> periodIdCache = new HashMap<String, Collection<Integer>>();
+    private OrganisationUnitHierarchy hierarchyCache = null;    
+    private Map<String, Period> periodCache = new HashMap<String, Period>();    
+    private Map<String, Collection<Integer>> intersectingPeriodsCache = new HashMap<String, Collection<Integer>>();
     
     private static final String SEPARATOR = "-";
 
@@ -116,49 +114,33 @@ public class MemoryAggregationCache
         return period;
     }
     
-    public Collection<Integer> getPeriodIds( Date startDate, Date endDate )
+    public Collection<Integer> getIntersectingPeriodIds( Date startDate, Date endDate )
     {
         String key = startDate.toString() + SEPARATOR + endDate.toString();
         
-        Collection<Integer> periodIds = periodIdCache.get( key );
+        Collection<Integer> periodIds = intersectingPeriodsCache.get( key );
         
         if ( periodIds != null )
         {
             return periodIds;
         }
         
-        Collection<Period> periods = periodService.getIntersectingPeriods( startDate, endDate );
-        
-        periodIds = new ArrayList<Integer>();
-        
-        for ( Period period : periods )
-        {
-            periodIds.add( period.getId() );
-        }
-        
-        periodIdCache.put( key, periodIds );
+        periodIds = ConversionUtils.getIdentifiers( Period.class, periodService.getIntersectingPeriods( startDate, endDate ) );
+                
+        intersectingPeriodsCache.put( key, periodIds );
         
         return periodIds;
     }    
     
-    public double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate, OrganisationUnit organisationUnit )
+    public Double getAggregatedDataValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date startDate, Date endDate, OrganisationUnit organisationUnit )
     {
-        //String key = dataElement.getId() + SEPARATOR + optionCombo.getId() + "-" + startDate.toString() + "-" + endDate.toString() + "-" + organisationUnit.getId();
-        
-        /*Double value = aggregatedValueCache.get( key );
-        
-        if ( value != null )
-        {
-            return value.doubleValue();
-        }*/
-        
-        Double value = aggregationService.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );
-        
-        /*if ( value != AggregationService.NO_VALUES_REGISTERED )
-        {
-            aggregatedValueCache.put( key, value );
-        }*/
-        
-        return value.doubleValue();
+        return aggregationService.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );
+    }
+
+    public void clearCache()
+    {
+        hierarchyCache = null;
+        periodCache.clear();
+        intersectingPeriodsCache.clear();
     }
 }

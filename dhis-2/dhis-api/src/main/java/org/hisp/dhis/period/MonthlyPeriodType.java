@@ -48,6 +48,8 @@ public class MonthlyPeriodType
      */
     public static final String NAME = "Monthly";
 
+    public static final int FREQUENCY_ORDER = 31;
+
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
@@ -84,7 +86,7 @@ public class MonthlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 3;
+        return FREQUENCY_ORDER;
     }
 
     // -------------------------------------------------------------------------

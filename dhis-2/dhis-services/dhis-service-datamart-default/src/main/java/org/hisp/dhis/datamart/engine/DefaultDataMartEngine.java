@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.ProcessState;
@@ -249,6 +250,8 @@ public class DefaultDataMartEngine
         // Create and trim crosstabtable
         // ---------------------------------------------------------------------
 
+        String key = RandomStringUtils.randomAlphanumeric( 8 );
+        
         if ( crossTabService.validateCrossTabTable( allDataElementOperands ) != 0 )
         {
             int excess = crossTabService.validateCrossTabTable( allDataElementOperands );
@@ -266,11 +269,11 @@ public class DefaultDataMartEngine
 
         Collection<Integer> childrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnitIds );
         
-        final Collection<DataElementOperand> emptyOperands = crossTabService.populateCrossTabTable( allDataElementOperands, getIntersectingIds( periodIds ), childrenIds );
+        final Collection<DataElementOperand> emptyOperands = crossTabService.populateCrossTabTable( allDataElementOperands, getIntersectingIds( periodIds ), childrenIds, key );
 
         log.info( "Populated crosstab table: " + TimeUtils.getHMS() );
                 
-        crossTabService.trimCrossTabTable( emptyOperands );
+        crossTabService.trimCrossTabTable( emptyOperands, key );
 
         log.info( "Trimmed crosstab table: " + TimeUtils.getHMS() );
         
@@ -282,35 +285,35 @@ public class DefaultDataMartEngine
 
         if ( sumIntDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( sumIntDataElementOperands, periodIds, organisationUnitIds, sumIntAggregator );
+            count += dataElementDataMart.exportDataValues( sumIntDataElementOperands, periodIds, organisationUnitIds, sumIntAggregator, key );
         
             log.info( "Exported values for data element operands with sum aggregation operator of type number (" + sumIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
         }
 
         if ( averageIntDataElementOperands.size() > 0 )
         {            
-            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periodIds, organisationUnitIds, averageIntAggregator );
+            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periodIds, organisationUnitIds, averageIntAggregator, key );
         
             log.info( "Exported values for data element operands with average aggregation operator of type number (" + averageIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
         }
 
         if ( averageIntDataElementOperands.size() > 0 )
         {            
-            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periodIds, organisationUnitIds, averageIntSingleValueAggregator );
+            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periodIds, organisationUnitIds, averageIntSingleValueAggregator, key );
         
             log.info( "Exported values for data element operands with average aggregation operator with single value of type number (" + averageIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
         }
 
         if ( sumBoolDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( sumBoolDataElementOperands, periodIds, organisationUnitIds, sumBoolAggregator );
+            count += dataElementDataMart.exportDataValues( sumBoolDataElementOperands, periodIds, organisationUnitIds, sumBoolAggregator, key );
             
             log.info( "Exported values for data element operands with sum aggregation operator of type yes/no (" + sumBoolDataElementOperands.size() + "): " + TimeUtils.getHMS() );
         }
 
         if ( averageBoolDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( averageBoolDataElementOperands, periodIds, organisationUnitIds, averageBoolAggregator );
+            count += dataElementDataMart.exportDataValues( averageBoolDataElementOperands, periodIds, organisationUnitIds, averageBoolAggregator, key );
             
             log.info( "Exported values for data element operands with average aggregation operator of type yes/no (" + averageBoolDataElementOperands.size() + "): " + TimeUtils.getHMS() );
         }
@@ -323,7 +326,7 @@ public class DefaultDataMartEngine
 
         if ( indicatorIds != null && indicatorIds.size() > 0 )
         {
-            count += indicatorDataMart.exportIndicatorValues( indicatorIds, periodIds, organisationUnitIds, dataElementInIndicatorOperands );
+            count += indicatorDataMart.exportIndicatorValues( indicatorIds, periodIds, organisationUnitIds, dataElementInIndicatorOperands, key );
             
             log.info( "Exported values for indicators (" + indicatorIds.size() + "): " + TimeUtils.getHMS() );
         }
@@ -336,12 +339,12 @@ public class DefaultDataMartEngine
 
         if ( calculatedDataElementIds != null && calculatedDataElementIds.size() > 0 )
         {
-            count += calculatedDataElementDataMart.exportCalculatedDataElements( calculatedDataElementIds, periodIds, organisationUnitIds, dataElementInCalculatedDataElementOperands );
+            count += calculatedDataElementDataMart.exportCalculatedDataElements( calculatedDataElementIds, periodIds, organisationUnitIds, dataElementInCalculatedDataElementOperands, key );
             
             log.info( "Exported values for calculated data elements (" + calculatedDataElementIds.size() + "): " + TimeUtils.getHMS() );
         }
 
-        crossTabService.dropCrossTabTable();
+        crossTabService.dropCrossTabTable( key );
         
         log.info( "Export process completed: " + TimeUtils.getHMS() );
         

@@ -47,6 +47,8 @@ public class YearlyPeriodType
      */
     public static final String NAME = "Yearly";
 
+    public static final int FREQUENCY_ORDER = 365;
+
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
@@ -83,7 +85,7 @@ public class YearlyPeriodType
     @Override
     public int getFrequencyOrder()
     {
-        return 6;
+        return FREQUENCY_ORDER;
     }
 
     // -------------------------------------------------------------------------

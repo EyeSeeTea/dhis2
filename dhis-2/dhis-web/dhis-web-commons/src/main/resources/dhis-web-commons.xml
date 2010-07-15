@@ -277,6 +277,10 @@
 		<action name="i18nJavaScriptSupport" class="org.hisp.dhis.commons.action.NoAction">
 			<result name="success" type="velocity">/dhis-web-commons/i18n/i18n.vm</result>			
 		</action>
+		
+		<action name="validationMessages" class="org.hisp.dhis.commons.action.NoAction">
+			<result name="success" type="velocity">/dhis-web-commons/util/validate/message.vm</result>			
+		</action>
 
 
 	</package>

@@ -19,14 +19,12 @@
           <col width="20">
           <col width="20">
           <col width="20">
-          <col width="20">
 		  <col width="20">
 		  <col width="20">
           <col width="20">
           <col width="20">
-          
-          <thead>	  
-
+          	
+          <thead>
           <tr>
             <th>$i18n.getString( "name" )</th>
             <th style="text-align:center" colspan="9" class="{sorter: false}">$i18n.getString( "operations" )</th>
@@ -50,10 +48,7 @@
                 </td>
                 <td style="text-align:center">
                   <a href="javascript:viewDataEntryForm( '$dataSet.id' )" title="$i18n.getString( "design_data_entry_form" )"><img src="../images/edit_layout.png" alt="$i18n.getString( "design_data_entry_form" )"></a>
-                </td>  
-				<td style="text-align:center">
-                  <a href="javascript:showsection( $dataSet.id )" title="$i18n.getString( "view_section_management" )"><img src="../images/edit_sections.png" alt="$i18n.getString( "view_section_management" )"></a>
-                </td>  
+                </td>				  
                 <td style="text-align:center">
                   <a href="javascript:window.location.href='displayCompulsoryDataElementsForm.action?id=${dataSet.id}'" title="$i18n.getString( "edit_compulsory_data_elements" )"><img src="../images/edit_compulsory_data_elements.png" alt="$i18n.getString( "edit_compulsory_data_elements" )"></a>
                 </td>  

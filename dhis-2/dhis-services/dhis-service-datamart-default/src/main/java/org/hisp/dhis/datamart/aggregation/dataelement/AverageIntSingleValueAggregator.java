@@ -41,8 +41,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.CrossTabDataValue;
-import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
+import org.hisp.dhis.datamart.crosstab.CrossTabService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.period.Period;
@@ -61,13 +61,13 @@ public class AverageIntSingleValueAggregator
     // Dependencies
     // -------------------------------------------------------------------------
 
-    protected DataMartStore dataMartStore;
-    
-    public void setDataMartStore( DataMartStore dataMartStore )
+    private CrossTabService crossTabService;
+
+    public void setCrossTabService( CrossTabService crossTabService )
     {
-        this.dataMartStore = dataMartStore;
+        this.crossTabService = crossTabService;
     }
-    
+
     protected AggregationCache aggregationCache;
         
     public void setAggregationCache( AggregationCache aggregationCache )
@@ -80,20 +80,20 @@ public class AverageIntSingleValueAggregator
     // -------------------------------------------------------------------------
 
     public Map<DataElementOperand, Double> getAggregatedValues( final Map<DataElementOperand, Integer> operandIndexMap, 
-        final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy )
+        final Period period, final OrganisationUnit unit, int unitLevel, OrganisationUnitHierarchy hierarchy, String key )
     {
         if ( operandIndexMap == null || operandIndexMap.size() == 0 )
         {
             return new HashMap<DataElementOperand, Double>();
         }
         
-        final Collection<CrossTabDataValue> crossTabValues = dataMartStore.getCrossTabDataValues( operandIndexMap, 
-            aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), hierarchy.getChildren( unit.getId() ) );
+        final Collection<CrossTabDataValue> crossTabValues = crossTabService.getCrossTabDataValues( operandIndexMap, 
+            aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), hierarchy.getChildren( unit.getId() ), key );
         
         final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
             period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
 
-        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>(); // <Operand, total value>
+        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>( entries.size() ); // <Operand, total value>
         
         for ( final Entry<DataElementOperand, double[]> entry : entries.entrySet() ) 
         {
@@ -119,6 +119,7 @@ public class AverageIntSingleValueAggregator
         double relevantDays = 0.0;
         double existingValue = 0.0;
         double existingRelevantDays = 0.0;
+        double duration = 0.0;
 
         int dataValueLevel = 0;
         
@@ -131,37 +132,41 @@ public class AverageIntSingleValueAggregator
 
             dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
             
-            for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
-            {
-                if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel )  )
+            duration = getDaysInclusive( currentStartDate, currentEndDate );
+            
+            if ( duration > 0 )
+            {            
+                for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
                 {
-                    value = 0.0;
-                    
-                    try
+                    if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel )  )
                     {
-                        value = Double.parseDouble( entry.getValue() );
+                        value = 0.0;
+                        relevantDays = 0.0;             
+                        
+                        try
+                        {
+                            value = Double.parseDouble( entry.getValue() );
+                        }
+                        catch ( NumberFormatException ex )
+                        {
+                            log.warn( "Value skipped, not numeric: '" + entry.getValue() + 
+                                "', for data element with id: '" + entry.getKey() +
+                                "', for period with id: '" + crossTabValue.getPeriodId() +
+                                "', for source with id: '" + crossTabValue.getSourceId() + "'" );
+                        }
+    
+                        if ( currentStartDate.compareTo( endDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0 ) // Value is intersecting
+                        {
+                            relevantDays = getDaysInclusive( startDate, endDate );
+                        }
+                        
+                        existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
+                        existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
+                        
+                        final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
+                        
+                        totalSums.put( entry.getKey(), values );
                     }
-                    catch ( NumberFormatException ex )
-                    {
-                        log.warn( "Value skipped, not numeric: '" + entry.getValue() + 
-                            "', for data element with id: '" + entry.getKey() +
-                            "', for period with id: '" + crossTabValue.getPeriodId() +
-                            "', for source with id: '" + crossTabValue.getSourceId() + "'" );
-                    }
-
-                    relevantDays = 0.0;
-                    
-                    if ( currentStartDate.compareTo( endDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0 ) // Value is intersecting
-                    {
-                        relevantDays = getDaysInclusive( startDate, endDate );
-                    }
-                    
-                    existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
-                    existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
-                    
-                    final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
-                    
-                    totalSums.put( entry.getKey(), values );
                 }
             }
         }                    

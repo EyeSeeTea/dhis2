@@ -6,7 +6,7 @@ Ext.onReady(function(){
 		autoWidth :true,		
 		typeAhead: true,
 		displayField: 'name',
-		valueField: 'name',
+		valueField: 'id',
 		typeAhead: true,
 		mode: 'remote',
 		triggerAction: 'all',
@@ -60,7 +60,7 @@ Ext.onReady(function(){
 		listWidth:400,
 		width:400,
 		resizable: true,
-		mode: 'remote',
+		mode: 'local',
 		triggerAction: 'all',
 		emptyText: i18n_dataelements,
 		selectOnFocus:true,
@@ -103,7 +103,7 @@ Ext.onReady(function(){
 		listWidth:400,
 		width:400,
 		resizable: true,
-		mode: 'remote',
+		mode: 'local',
 		triggerAction: 'all',
 		emptyText: i18n_indicators,
 		selectOnFocus:true,
@@ -157,11 +157,13 @@ Ext.onReady(function(){
 				if($("#axis-x-de-pc").css("display")=="block"){				
 					yaxis = dataElementComboPc.getValue();
 					url = path + 'generatePeriodsDEChart' + type;	
-					xTitle =  i18n_dataelements + ":" + $("#data-elements-pc").val();						
+					xTitle =  "[" + i18n_dataelements + ":" + $("#data-elements-pc").val();						
+					xTitle += "-" + i18n_organisation + ":" + ORGANISATION_UNIT + "]";
 				}else{
 					yaxis = indicatorsComboPc.getValue();
 					url = path + 'generatePeriodsInChart' + type;	
-					xTitle =  i18n_indicators + ":" + $("#indicators-pc").val();
+					xTitle =  "[" + i18n_indicators + ":" + $("#indicators-pc").val();
+					xTitle += "-" + i18n_organisation + ":" + ORGANISATION_UNIT + "]";
 				}
 
 				if(yaxis==''){
@@ -172,38 +174,26 @@ Ext.onReady(function(){
 					}					
 				}else{	
 				
-					var chartType = columnChartRadio.getGroupValue();			
+					var chartType = columnChartRadio.getGroupValue();	
 					
-					if( chartType == FULL_CHART_TYPE ){
-						var store = new Ext.data.JsonStore({
-							url: url,
-							baseParams: { format: 'json', xaxis: xaxis, yaxis: yaxis},	
-							root: 'data',		
-							fields: ['name', 'value', 'total'],				
-							autoLoad: true	
-						});
-						
-						viewFullChart( xTitle, "Full Style Chart", PARENT, ORGANISATION_UNIT, store );
-						
-					}else{		
-						
-						var store = new Ext.data.JsonStore({
-							url: url,
-							baseParams: { format: 'json', xaxis: xaxis, yaxis: yaxis},	
-							root: 'data',		
-							fields: ['name', 'value'],				
-							autoLoad: true	
-						});
+					var store = new Ext.data.JsonStore({
+						url: url,
+						baseParams: { format: 'json', xaxis: xaxis, yaxis: yaxis},	
+						root: 'data',		
+						fields: ['name', 'value', 'total'],				
+						autoLoad: true	
+					});
 
-						
-						if( chartType == PIE_CHART_TYPE ){
-							viewPieChart( xTitle, "Pie Chart", store	);
-						}else if( chartType == LINE_CHART_TYPE ){
-							viewLineChart( xTitle , "Line Chart", store	);
-						}else{
-							viewColumnChart( xTitle , "Column Chart", store	);
-						}
+					if( chartType == FULL_CHART_TYPE ){
+						viewFullChart( xTitle, "Full Style Chart", PARENT, ORGANISATION_UNIT, store );
+					}else if( chartType == PIE_CHART_TYPE ){
+						viewPieChart( xTitle, "Pie Chart", store	);
+					}else if( chartType == LINE_CHART_TYPE ){
+						viewLineChart( xTitle , "Line Chart", store	);
+					}else{
+						viewColumnChart( xTitle , "Column Chart", store	);
 					}
+				
 				}
 			
 			}

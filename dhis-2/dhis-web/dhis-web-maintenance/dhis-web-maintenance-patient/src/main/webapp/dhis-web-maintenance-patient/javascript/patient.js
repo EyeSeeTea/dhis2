@@ -624,3 +624,72 @@ function jumpToPage( baseLink )
 	var currentPage = jQuery("#jumpToPage").val();
 	window.location.href = baseLink +"pageSize=" + pageSize +"&currentPage=" +currentPage;
 }
+
+function toggleRelationshipRow(this_)
+{
+	if( jQuery(this_).attr("checked") ) 
+	{
+		jQuery("tr.relationship-row").each(function(){jQuery(this).show()});
+	}else {
+		jQuery("tr.relationship-row").each(function(){jQuery(this).hide()});
+	}
+}
+
+/**
+ * Overwrite showDetails() of common.js
+ * This method will show details div on a pop up instead of show the div in the main table's column.
+ * So we will have more place for the main column of the table.
+ * @return
+ */
+
+function showDetails()
+{
+	var detailArea = $("#detailsArea");
+	var top = (f_clientHeight() / 2) - 200;	
+	if ( top < 0 ) top = 0; 
+    var left = screen.width - detailArea.width() - 100;
+    detailArea.css({"left":left+"px","top":top+"px"});
+    detailArea.show('fast');
+    
+}
+
+/**
+ *  Get document width, hieght, scroll positions
+ *  Work with all browsers
+ * @return
+ */
+
+function f_clientWidth() {
+	return f_filterResults (
+		window.innerWidth ? window.innerWidth : 0,
+		document.documentElement ? document.documentElement.clientWidth : 0,
+		document.body ? document.body.clientWidth : 0
+	);
+}
+function f_clientHeight() {
+	return f_filterResults (
+		window.innerHeight ? window.innerHeight : 0,
+		document.documentElement ? document.documentElement.clientHeight : 0,
+		document.body ? document.body.clientHeight : 0
+	);
+}
+function f_scrollLeft() {
+	return f_filterResults (
+		window.pageXOffset ? window.pageXOffset : 0,
+		document.documentElement ? document.documentElement.scrollLeft : 0,
+		document.body ? document.body.scrollLeft : 0
+	);
+}
+function f_scrollTop() {
+	return f_filterResults (
+		window.pageYOffset ? window.pageYOffset : 0,
+		document.documentElement ? document.documentElement.scrollTop : 0,
+		document.body ? document.body.scrollTop : 0
+	);
+}
+function f_filterResults(n_win, n_docel, n_body) {
+	var n_result = n_win ? n_win : 0;
+	if (n_docel && (!n_result || (n_result > n_docel)))
+		n_result = n_docel;
+	return n_body && (!n_result || (n_result > n_body)) ? n_body : n_result;
+}

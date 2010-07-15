@@ -8,7 +8,7 @@ Ext.onReady(function(){
 		displayField: 'name',
 		valueField: 'id',
 		typeAhead: true,
-		mode: 'remote',
+		mode: 'local',
 		triggerAction: 'all',
 		emptyText: i18n_period,
 		selectOnFocus:true,
@@ -20,7 +20,7 @@ Ext.onReady(function(){
 		autoWidth :true,
 		typeAhead: true,
 		displayField: 'name',
-		valueField: 'name',
+		valueField: 'id',
 		typeAhead: true,
 		mode: 'remote',
 		triggerAction: 'all',
@@ -109,7 +109,7 @@ Ext.onReady(function(){
 		listWidth:400,
 		width:400,
 		resizable: true,
-		mode: 'remote',
+		mode: 'local',
 		triggerAction: 'all',
 		emptyText: i18n_indicator_groups,
 		selectOnFocus:true,
@@ -168,11 +168,13 @@ Ext.onReady(function(){
 				if($("#axis-x-de").css("display")=="block"){
 					xaxis = Ext.getCmp('selected-dataelement').getValue();					
 					url = path + 'generateDataElementChart' + type;					
-					xTitle = i18n_dataelements + ":" + $("#data-elements").val();
+					xTitle =  "[" + i18n_dataelements + ":" + $("#data-elements-pc").val();						
+					xTitle += "-" + i18n_organisation + ":" + ORGANISATION_UNIT + "]";
 				}else{
 					xaxis = Ext.getCmp('selected-indicators').getValue();
 					url = path + 'generateIndicatorChart' + type;		
-					xTitle = i18n_indicators + ":" + $("#indicators-pc").val();
+					xTitle =  "[" + i18n_indicators + ":" + $("#indicators-pc").val();
+					xTitle += "-" + i18n_organisation + ":" + ORGANISATION_UNIT + "]";
 				}
 				
 				
@@ -183,37 +185,27 @@ Ext.onReady(function(){
 						alert("Please select indicator !");	
 					}					
 				}else{
+					
+					xaxis = xaxis.split(',');	
 				
 					var chartType = columnChartRadio.getGroupValue();
 
+					var store = new Ext.data.JsonStore({
+						url: url,
+						baseParams: { format: 'json', xaxis: xaxis, yaxis: period},	
+						root: 'data',		
+						fields: ['name', 'value', 'total'],				
+						autoLoad: true	
+					});
+
 					if( chartType == FULL_CHART_TYPE ){
-						var store = new Ext.data.JsonStore({
-							url: url,
-							baseParams: { format: 'json', xaxis: xaxis.split(','), yaxis: period},	
-							root: 'data',		
-							fields: ['name', 'value', 'total'],				
-							autoLoad: true	
-						});
-						
 						viewFullChart( xTitle, "Full Style Chart", PARENT, ORGANISATION_UNIT, store );
-						
-					}else{	
-				
-						var store = new Ext.data.JsonStore({
-							url: url,
-							baseParams: { format: 'json', xaxis: xaxis.split(','), yaxis: period},	
-							root: 'data',		
-							fields: ['name', 'value'],				
-							autoLoad: true	
-						});
-						
-						if( chartType == PIE_CHART_TYPE ){
-							viewPieChart( xTitle, "Pie Chart", store);
-						}else if( chartType == LINE_CHART_TYPE ){
-							viewLineChart( xTitle , "Line Chart", store	);
-						}else{
-							viewColumnChart( xTitle, "Column Chart", store	);
-						}
+					}else if( chartType == PIE_CHART_TYPE ){
+						viewPieChart( xTitle, "Pie Chart", store	);
+					}else if( chartType == LINE_CHART_TYPE ){
+						viewLineChart( xTitle , "Line Chart", store	);
+					}else{
+						viewColumnChart( xTitle , "Column Chart", store	);
 					}
 				}
 			

@@ -14,7 +14,7 @@
 										     validateAddPatientAttribute();
 									}
 				});
-				jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
+				jQuery.validator.setMessages( validationMessage );
 				jQuery("#nameField").focus();
 				jQuery("#attributeComboRow").hide();
 			}
@@ -42,6 +42,17 @@
 		<td width="20em"><label for="mandatory">$i18n.getString( "mandatory" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select id="mandatory" name="mandatory" style="min-width:20em">
+				<option value="true" >$i18n.getString( "yes" )</option>
+				<option value="false" selected="selected">$i18n.getString( "no" )</option>
+			</select>
+		</td>		
+		<td></td>				
+	</tr>
+    
+    <tr>
+    	<td width="20em"><label for="inheritable">$i18n.getString( "inheritable" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td>
+			<select id="inheritable" name="inheritable" style="min-width:20em">
 				<option value="true" >$i18n.getString( "yes" )</option>
 				<option value="false" selected="selected">$i18n.getString( "no" )</option>
 			</select>

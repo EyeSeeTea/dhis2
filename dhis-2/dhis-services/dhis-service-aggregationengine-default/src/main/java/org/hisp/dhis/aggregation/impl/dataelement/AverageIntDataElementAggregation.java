@@ -32,7 +32,6 @@ import static org.hisp.dhis.system.util.DateUtils.getDays;
 import java.util.Collection;
 import java.util.Date;
 
-import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DataValue;
@@ -47,33 +46,32 @@ import org.hisp.dhis.period.Period;
 public class AverageIntDataElementAggregation
     extends AbstractDataElementAggregation
 {
-    public double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date aggregationStartDate, Date aggregationEndDate,
+    public Double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo optionCombo, Date aggregationStartDate, Date aggregationEndDate,
         OrganisationUnit organisationUnit )
     {
         double totalSum = 0;
 
         boolean valuesRegistered = false;
 
-        double[] sums = getSumAndRelevantDays( dataElement.getId(), optionCombo.getId(), aggregationStartDate, aggregationEndDate, 
-            organisationUnit.getId() );
-
-        if ( sums[1] > 0 )
+        OrganisationUnitHierarchy hierarchy = aggregationCache.getOrganisationUnitHierarchy();
+        
+        Collection<Integer> organisationUnitIds = hierarchy.getChildren( organisationUnit.getId() );
+        
+        for ( Integer id : organisationUnitIds )
         {
-            double average = sums[0] / sums[1];
-
-            totalSum += average;
-
-            valuesRegistered = true;
+            double[] sums = getSumAndRelevantDays( dataElement, optionCombo, aggregationStartDate, aggregationEndDate, id );
+    
+            if ( sums[1] > 0 )
+            {
+                double average = sums[0] / sums[1];
+    
+                totalSum += average;
+    
+                valuesRegistered = true;
+            }
         }
 
-        if ( valuesRegistered )
-        {
-            return totalSum;
-        }
-        else
-        {
-            return AggregationService.NO_VALUES_REGISTERED;
-        }
+        return valuesRegistered ? totalSum : null;
     }
 
     /**
@@ -87,15 +85,13 @@ public class AverageIntDataElementAggregation
      *         and hierarchy.
      * @throws AggregationStoreException
      */
-    protected Collection<DataValue> getDataValues( int dataElementId, int optionComboId, int organisationUnitId,
+    protected Collection<DataValue> getDataValues( Integer dataElementId, Integer optionComboId, Integer organisationUnitId,
         Date startDate, Date endDate )
-    {
-        OrganisationUnitHierarchy hierarchy = aggregationCache.getOrganisationUnitHierarchy();
-        
-        Collection<Integer> periods = aggregationCache.getPeriodIds( startDate, endDate );
+    {   
+        Collection<Integer> periods = aggregationCache.getIntersectingPeriodIds( startDate, endDate );
         
         Collection<DataValue> values = aggregationStore.getDataValues( organisationUnitId, dataElementId, optionComboId, periods );
-
+        
         return values;
     }
 
@@ -124,7 +120,7 @@ public class AverageIntDataElementAggregation
      *        aggregation period
      * @param aggregationEndDate The original end date of the entire aggregation
      *        period
-     * @return The numerator and denominator of the AVERAGE value
+     * @return The AVERAGE value.
      */
     protected double[] getAggregateOfValues( Collection<DataValue> dataValues, Date startDate, Date endDate,
         Date aggregationStartDate, Date aggregationEndDate )

@@ -1,6 +1,7 @@
 package org.hisp.dhis.reports.activeplan.action;
 
-//do date from and to
+//@23-06-2010 - Date from and to is solved.
+//Todo merging of cells for same village
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,11 +70,16 @@ import org.xml.sax.SAXParseException;
 import com.opensymphony.xwork2.Action;
 import java.util.HashSet;
 import jxl.write.Label;
-import jxl.write.Number;
 import jxl.write.WritableCell;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.patient.PatientIdentifier;
+import org.hisp.dhis.patient.PatientIdentifierType;
+import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
+import org.hisp.dhis.relationship.Relationship;
+import org.hisp.dhis.relationship.RelationshipService;
+import org.hisp.dhis.relationship.RelationshipTypeService;
 
 public class ActivePlanReportsResultAction implements Action
 {
@@ -82,6 +88,20 @@ public class ActivePlanReportsResultAction implements Action
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    private RelationshipService relationshipService;
+
+    public void setRelationshipService( RelationshipService relationshipService )
+    {
+        this.relationshipService = relationshipService;
+    }
+
+    RelationshipTypeService relationshipTypeService;
+
+    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
+    {
+        this.relationshipTypeService = relationshipTypeService;
+    }
 
     private StatementManager statementManager;
 
@@ -162,12 +182,12 @@ public class ActivePlanReportsResultAction implements Action
 
     private ProgramService programService;
 
-    public void setProgramService(ProgramService programService) 
+    public void setProgramService( ProgramService programService )
     {
-		this.programService = programService;
-	}
+        this.programService = programService;
+    }
 
-	private ProgramInstanceService programInstanceService;
+    private ProgramInstanceService programInstanceService;
 
     public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
@@ -193,6 +213,13 @@ public class ActivePlanReportsResultAction implements Action
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
+    }
+
+    private PatientIdentifierTypeService patientIdentifierTypeService;
+
+    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
+    {
+        this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
     private PatientAttributeValueService patientAttributeValueService;
@@ -422,18 +449,17 @@ public class ActivePlanReportsResultAction implements Action
         rowList = new ArrayList<Integer>();
         colList = new ArrayList<Integer>();
         System.out.println( "startDate = " + startDate + " endDate = " + endDate + " reportname  = " + reportFileNameTB );
+        Calendar c = Calendar.getInstance();
+        c.setTime( format.parseDate( startDate ) );
+        c.add( Calendar.DATE, -1 );  // number of days to add
+        startDate = format.formatDate( c.getTime() );  // dt is now the new date
+        c.setTime( format.parseDate( endDate ) );
+        c.add( Calendar.DATE, 1 );  // number of days to add
+        endDate = format.formatDate( c.getTime() );  // dt is now the new date
         sDate = format.parseDate( startDate );
-
         eDate = format.parseDate( endDate );
-
-        // deCodeTotalList = new DeCodesXML();
-
         inputTemplatePath = System.getenv( "DHIS2_HOME" ) + File.separator + raFolderName + File.separator + "template" + File.separator + reportFileNameTB;
-
         outputReportPath = System.getenv( "DHIS2_HOME" ) + File.separator + raFolderName + File.separator + "output" + File.separator + UUID.randomUUID().toString() + ".xls";
-
-        //System.out.println(" reportList " + reportList);
-
 
         generatFeedbackReport();
         statementManager.destroy();
@@ -462,7 +488,7 @@ public class ActivePlanReportsResultAction implements Action
 
         // OrgUnit Related Info
         selectedOrgUnit = new OrganisationUnit();
-        System.out.println("______________ " + reportLevelTB);
+        // System.out.println("______________ " + reportLevelTB);
         selectedOrgUnit = organisationUnitService.getOrganisationUnit( ouIDTB );
 
         //Collection<PatientIdentifier> patientIdentifiers = patientIdentifierService.getPatientIdentifiersByOrgUnit( selectedOrgUnit );
@@ -473,8 +499,8 @@ public class ActivePlanReportsResultAction implements Action
         // Getting Programs
         rowCount = 0;
         List<String> deCodesList = getDECodes( deCodesXMLFileName );
-        Program curProgram = programService.getProgram( Integer.parseInt( reportLevelTB ));
-		System.out.println( "curProgram = " + curProgram.getName() );
+        Program curProgram = programService.getProgram( Integer.parseInt( reportLevelTB ) );
+//		/System.out.println( "curProgram = " + curProgram.getName() );
         String tempStr = "";
 
         int villageAttrId = 0;
@@ -496,76 +522,50 @@ public class ActivePlanReportsResultAction implements Action
                 if ( sType.equalsIgnoreCase( "rowStart" ) )
                 {
                     rowStart = Integer.parseInt( deCodeString );
-                } else
+                } else if ( deCodeString.equalsIgnoreCase( "FACILITY" ) )
                 {
-                    if ( deCodeString.equalsIgnoreCase( "FACILITY" ) )
+                    tempStr = selectedOrgUnit.getShortName();
+                } else if ( deCodeString.equalsIgnoreCase( "FACILITYP" ) )
+                {
+                    OrganisationUnit orgUnitP = new OrganisationUnit();
+                    orgUnitP = selectedOrgUnit.getParent();
+                    if ( orgUnitP != null )
                     {
-                        tempStr = selectedOrgUnit.getShortName();
-                    } else
+                        tempStr = orgUnitP.getName();
+                    }
+                } else if ( deCodeString.equalsIgnoreCase( "FACILITYPP" ) )
+                {
+                    OrganisationUnit orgUnitP = new OrganisationUnit();
+                    OrganisationUnit orgUnitPP = new OrganisationUnit();
+                    orgUnitP = selectedOrgUnit.getParent();
+                    if ( orgUnitP != null )
                     {
-                        if ( deCodeString.equalsIgnoreCase( "FACILITYP" ) )
+                        orgUnitPP = orgUnitP.getParent();
+                        if ( orgUnitPP != null )
                         {
-                            OrganisationUnit orgUnitP = new OrganisationUnit();
-                            orgUnitP = selectedOrgUnit.getParent();
-                            if ( orgUnitP != null )
-                            {
-                                tempStr = orgUnitP.getName();
-                            }
-                        } else
-                        {
-                            if ( deCodeString.equalsIgnoreCase( "FACILITYPP" ) )
-                            {
-                                OrganisationUnit orgUnitP = new OrganisationUnit();
-                                OrganisationUnit orgUnitPP = new OrganisationUnit();
-                                orgUnitP = selectedOrgUnit.getParent();
-                                if ( orgUnitP != null )
-                                {
-                                    orgUnitPP = orgUnitP.getParent();
-                                    if ( orgUnitPP != null )
-                                    {
-                                        tempStr = orgUnitPP.getName();
-                                    }
-                                }
-                            } else
-                            {
-                                if ( deCodeString.equalsIgnoreCase( "NA" ) )
-                                {
-                                    tempStr = " ";
-                                } else
-                                {
-                                    if ( deCodeString.equalsIgnoreCase( "PERIOD-MONTH" ) )
-                                    {
-                                        //sheet0.addCell(new Label(tempColNo, tempRowNo, simpleDateFormat.format(startDate.getStartDate()), wCellformat));
-                                    } else
-                                    {
-                                        if ( sType.equalsIgnoreCase( "programStages" ) )
-                                        {
-                                            String[] stages = deCodeString.split( "," );
-                                            for ( String stage : stages )
-                                            {
-                                                programStagesList.add( programStageService.getProgramStage( Integer.parseInt( stage ) ) );
-                                            }
-                                            //
-                                        } else
-                                        {
-                                            if ( sType.equalsIgnoreCase( "immunizationPS" ) )
-                                            {
-                                                psDeIds = deCodeString;
-                                            } else
-                                            {
-                                                if ( sType.equalsIgnoreCase( "caseAttributeVillage" ) )
-                                                {
-                                                    villageAttrId = Integer.parseInt( deCodeString );
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            tempStr = orgUnitPP.getName();
                         }
                     }
+                } else if ( deCodeString.equalsIgnoreCase( "NA" ) )
+                {
+                    tempStr = " ";
+                } else if ( deCodeString.equalsIgnoreCase( "PERIOD-MONTH" ) )
+                {
+                    //sheet0.addCell(new Label(tempColNo, tempRowNo, simpleDateFormat.format(startDate.getStartDate()), wCellformat));
+                } else if ( sType.equalsIgnoreCase( "programStages" ) )
+                {
+                    String[] stages = deCodeString.split( "," );
+                    for ( String stage : stages )
+                    {
+                        programStagesList.add( programStageService.getProgramStage( Integer.parseInt( stage ) ) );
+                    }
+                } else if ( sType.equalsIgnoreCase( "immunizationPS" ) )
+                {
+                    psDeIds = deCodeString;
+                } else if ( sType.equalsIgnoreCase( "caseAttributeVillage" ) )
+                {
+                    villageAttrId = Integer.parseInt( deCodeString );
                 }
-
 
                 if ( deCodeString.equalsIgnoreCase( "PERIOD-MONTH" ) )
                 {
@@ -660,7 +660,7 @@ public class ActivePlanReportsResultAction implements Action
                         }
                         if ( programStageInstance.getDueDate().after( sDate ) && programStageInstance.getDueDate().before( eDate ) )
                         {
-                            System.out.println( "DueDate = " + programStageInstance.getDueDate() + " " + programStageInstance.getExecutionDate() );
+//                            /System.out.println( "DueDate = " + programStageInstance.getDueDate() + " " + programStageInstance.getExecutionDate() );
                             programStageInstances.add( programStageInstance );
                         }
                     }
@@ -668,7 +668,7 @@ public class ActivePlanReportsResultAction implements Action
                 if ( programInstance != null && programStageInstances.size() != 0 )
                 {
                     PIPSIList.put( programInstance, programStageInstances );
-                    System.out.println( "programStageInstances size = " + programStageInstances.size() + " programInstance = " + programInstance.getId() + " patient = " + patient.getFullName() );
+                    //System.out.println( "programStageInstances size = " + programStageInstances.size() + " programInstance = " + programInstance.getId() + " patient = " + patient.getFullName() );
                     //putting patient and pi together
                     patientPIList.put( patient, programInstance );
                     patientList.add( patient );
@@ -682,13 +682,12 @@ public class ActivePlanReportsResultAction implements Action
             int mergeRowStart = 9 + rowCount;
             PatientAttribute villageAttribute = patientAttributeService.getPatientAttribute( villageAttrId );
 
-            if( villageAttribute != null && patientList != null && patientList.size() > 0 )
+            if ( villageAttribute != null && patientList != null && patientList.size() > 0 )
             {
                 sortedPatientList = patientService.sortPatientsByAttribute( patientList, villageAttribute );
-            }
-            else
+            } else
             {
-                sortedPatientList =  patientList;
+                sortedPatientList = patientList;
             }
 
             for ( Patient patient : sortedPatientList )
@@ -704,261 +703,275 @@ public class ActivePlanReportsResultAction implements Action
                 String deNotCollectedNames = "";
                 int ifaCount = 0;
                 int rowNo = rowStart + rowCount;
+                //System.out.println( "______________________________________________________________" +patient.getFullName() );
                 for ( ProgramStageInstance programStageInstance : psiList )
                 {
+                    //System.out.println( "*************************" +patient.getFullName() );
                     count1 = 0;
                     for ( String deCodeString : deCodesList )
                     {
+                        
                         tempStr = "";
                         String sType = (String) serviceType.get( count1 );
                         if ( sType.equalsIgnoreCase( "dataelement" ) )
                         {
-                            DataElement d1e = dataElementService.getDataElement( Integer.parseInt( deCodeString ) );
+                            if ( !deCodeString.equals( "NA" ) )
+                            {
+                                DataElement d1e = dataElementService.getDataElement( Integer.parseInt( deCodeString ) );
 
-                            PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstance, d1e, selectedOrgUnit );
-                            if ( patientDataValue1 == null )
-                            {
-                                tempStr = " ";
-                            } else
-                            {
-                                tempStr = patientDataValue1.getValue();
-                            }
-
-                        } else
-                        {
-                            if ( sType.equalsIgnoreCase( "caseProperty" ) )
-                            {
-                                //_______________________patient name_______________________
-                                if ( deCodeString.equalsIgnoreCase( "Name" ) )
+                                PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstance, d1e, selectedOrgUnit );
+                                if ( patientDataValue1 == null )
                                 {
-                                    tempStr = patient.getFullName();
+                                    tempStr = " ";
                                 } else
                                 {
-                                    if ( deCodeString.equalsIgnoreCase( "DOB" ) )
-                                    {
-                                        //_______________________DateOfBirth_______________________
-                                        Date patientDate = patient.getBirthDate();
-                                        SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat( "yyyy-MM-dd" );
-                                        tempStr = simpleDateFormat1.format( patientDate );
+                                    tempStr = patientDataValue1.getValue();
+                                }
+                            }
 
-                                    } else
+                        } else if ( sType.equalsIgnoreCase( "caseProperty" ) )
+                        {
+                            //_______________________patient name_______________________
+                            if ( deCodeString.equalsIgnoreCase( "Name" ) )
+                            {
+                                tempStr = patient.getFullName();
+                            } else if ( deCodeString.equalsIgnoreCase( "DOB" ) )
+                            {
+                                //_______________________DateOfBirth_______________________
+                                Date patientDate = patient.getBirthDate();
+                                SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat( "yyyy-MM-dd" );
+                                tempStr = simpleDateFormat1.format( patientDate );
+
+                            } else if ( deCodeString.equalsIgnoreCase( "Sex" ) )
+                            {
+                                //______________________Sex_______________________
+                                tempStr = patient.getGender();
+                            } else if ( deCodeString.equalsIgnoreCase( "Age" ) )
+                            {
+                                //______________________Sex_______________________
+                                tempStr = patient.getAge();
+                            }
+                        } else if ( sType.equalsIgnoreCase( "caseAttribute" ) )
+                        {
+                            int deCodeInt = Integer.parseInt( deCodeString );
+
+                            PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( deCodeInt );
+                            PatientAttributeValue patientAttributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );
+                            if ( patientAttributeValue != null )
+                            {
+                                tempStr = patientAttributeValue.getValue();
+                            } else
+                            {
+                                tempStr = " ";
+                            }
+                        } else if ( sType.equalsIgnoreCase( "identifiertype" ) )
+                        {
+                            int deCodeInt = Integer.parseInt( deCodeString );
+                            //_______________________Id. no._______________________
+                            PatientIdentifierType patientIdentifierType = patientIdentifierTypeService.getPatientIdentifierType( deCodeInt );
+                            if ( patientIdentifierType != null )
+                            {
+                                PatientIdentifier patientIdentifier = patientIdentifierService.getPatientIdentifier( patientIdentifierType, patient );
+                                if ( patientIdentifier != null )
+                                {
+                                    tempStr = patientIdentifier.getIdentifier();
+                                } else
+                                {
+                                    tempStr = " ";
+                                }
+                            }
+                        } else if ( sType.equalsIgnoreCase( "relationshipType" ) )
+                        {
+                            int deCodeInt = Integer.parseInt( deCodeString );
+                            Patient representative = patient.getRepresentative();
+                            if ( representative != null )
+                            {
+                                System.out.println( representative + " " + patient + " " + relationshipTypeService.getRelationshipType( deCodeInt ) );
+                                Relationship parentRelationship = relationshipService.getRelationship( representative, patient, relationshipTypeService.getRelationshipType( deCodeInt ) );
+                                if ( parentRelationship != null )
+                                {
+                                    tempStr = representative.getFullName();
+                                }
+                                //System.out.println("Gender = "+gender + " temStr = "+tempStr);
+                            }
+
+                        }// ended if of caseAttributeMFName
+                        else if ( sType.equalsIgnoreCase( "HusbandPhoneNumber" ) || sType.equalsIgnoreCase( "HusbandName" ) )
+                        {
+                            int deCodeInt = Integer.parseInt( deCodeString );
+                            tempStr = patient.getMiddleName() + " " + patient.getLastName();
+                            if ( tempStr == null || tempStr.equals( "" ) )
+                            {
+                                PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( deCodeInt );
+                                PatientAttributeValue patientAttributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );
+                                String husbandName = "";
+                                if ( patientAttributeValue != null )
+                                {
+                                    if ( patientAttributeValue.getValue() != null )
                                     {
-                                        if ( deCodeString.equalsIgnoreCase( "Sex" ) )
+                                        husbandName = patientAttributeValue.getValue();
+                                        cAPhoneNumberName = husbandName;
+                                        //System.out.println( " cAPhoneNumberName = " + cAPhoneNumberName );
+                                    }
+                                    if ( sType.equalsIgnoreCase( "caseAttributeHusband" ) )
+                                    {
+                                        husbandName = patientAttributeValue.getValue();
+                                        if ( cAPhoneNumberName.equals( "Husband" ) )
                                         {
-                                            //______________________Sex_______________________
-                                            tempStr = patient.getGender();
+                                            tempStr = husbandName;
                                         }
                                     }
                                 }
-
-                            } else
+                            }
+                        } else if ( sType.equalsIgnoreCase( "dataelementDueDate" ) )
+                        {
+                            Date dueDate = programStageInstance.getDueDate();
+                            SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat( "yyyy-MM-dd" );
+                            tempStr = simpleDateFormat1.format( dueDate );
+                        } else if ( sType.equalsIgnoreCase( "srno" ) )
+                        {
+                            int tempNum = 1 + rowCount;
+                            tempStr = String.valueOf( tempNum );
+                            // System.out.println( "srno = " + tempNum + " " + tempStr );
+                        } else if ( sType.equalsIgnoreCase( "dataelementTT" ) || sType.equalsIgnoreCase( "dataelementTest" ) )
+                        {
+                            if ( !deCodeString.equals( "NA" ) )
                             {
-                                if ( sType.equalsIgnoreCase( "caseAttribute" ) )
+                                tempStr = "";
+                                if ( deCodeString.contains( "," ) )
                                 {
-                                    int deCodeInt = Integer.parseInt( deCodeString );
-
-                                    PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( deCodeInt );
-                                    PatientAttributeValue patientAttributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );
-                                    if ( patientAttributeValue != null )
+                                    String[] des = deCodeString.split( "," );
+                                    for ( String de : des )
                                     {
-                                        tempStr = patientAttributeValue.getValue();
-                                    } else
-                                    {
-                                        tempStr = " ";
-                                    }
-                                    //System.out.println( "patientAttribute = " + patientAttribute.getName() + " value = " + tempStr );
-                                } else
-                                {
-                                    if ( sType.equalsIgnoreCase( "caseAttributeMFName" ) || sType.equalsIgnoreCase( "caseAttributePN" ) )
-                                    {
-                                        int deCodeInt = Integer.parseInt( deCodeString );
-
-                                        PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( deCodeInt );
-                                        PatientAttributeValue patientAttributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );
-                                        String mFname = "";
-                                        if ( sType.equalsIgnoreCase( "caseAttributePN" ) )
+                                        DataElement d1e = dataElementService.getDataElement( Integer.parseInt( de ) );
+                                        Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
+                                        //System.out.println( "psisList size = " + psisList.size() );
+                                        String dename = d1e.getShortName();
+                                        if ( psisList != null && psisList.size() != 0 )
                                         {
-                                            mFname = patientAttributeValue.getValue();
-                                            cAPhoneNumberName = mFname;
-                                            //System.out.println("name = "+name + " cAPhoneNumberName = "+cAPhoneNumberName);
-                                        } else
-                                        {
-                                            mFname = patientAttributeValue.getValue();
-                                            if ( cAPhoneNumberName.equals( "Mother" ) || cAPhoneNumberName.equals( "Father" ) )
+                                            for ( ProgramStageInstance programStageInstanceName : psisList )
                                             {
-                                                tempStr = mFname;
-                                            }
-                                        }
-                                    }// ended if of caseAttributeMFName
-                                    else
-                                    {
-                                        if ( sType.equalsIgnoreCase( "dataelementDueDate" ) )
-                                        {
-                                            Date dueDate = programStageInstance.getDueDate();
-                                            SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat( "yyyy-MM-dd" );
-                                            tempStr = simpleDateFormat1.format( dueDate );
-                                        } else
-                                        {
-                                            if ( sType.equalsIgnoreCase( "srno" ) )
-                                            {
-                                                int tempNum = 1 + rowCount;
-                                                tempStr = String.valueOf( tempNum );
-                                                // System.out.println( "srno = " + tempNum + " " + tempStr );
-                                            } else
-                                            {
-                                                if ( sType.equalsIgnoreCase( "dataelementTT" ) || sType.equalsIgnoreCase( "dataelementTest" ) )
+                                                if ( !deCollectedNames.contains( dename ) )
                                                 {
-
-                                                    tempStr = "";
-                                                    if ( deCodeString.contains( "," ) )
+                                                    PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstanceName, d1e, selectedOrgUnit );
+                                                    if ( patientDataValue1 != null )
                                                     {
-                                                        String[] des = deCodeString.split( "," );
-                                                        for ( String de : des )
-                                                        {
-                                                            DataElement d1e = dataElementService.getDataElement( Integer.parseInt( de ) );
-                                                            Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
-                                                            //System.out.println( "psisList size = " + psisList.size() );
-                                                            String dename = d1e.getShortName();
-                                                            if ( psisList != null && psisList.size() != 0 )
-                                                            {
-                                                                for ( ProgramStageInstance programStageInstanceName : psisList )
-                                                                {
-                                                                    if ( !deCollectedNames.contains( dename ) )
-                                                                    {
-                                                                        PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstanceName, d1e, selectedOrgUnit );
-                                                                        if ( patientDataValue1 != null )
-                                                                        {
-                                                                            valuePresent = true;
-                                                                            deCollectedNames = deCollectedNames + dename;
-//                                                                            //System.out.println( "deCollectedNames = " + deCollectedNames );
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            if ( !deCollectedNames.contains( dename ) )
-                                                            {
-                                                                if ( !tempStr.trim().equals( "" ) )
-                                                                {
-                                                                    tempStr = tempStr + " + " + dename;
-                                                                } else
-                                                                {
-                                                                    tempStr = dename;
-                                                                }
-
-                                                            }
-                                                            //System.out.println( "tempStr = " + tempStr );
-                                                        }
-                                                    } else
-                                                    {
-                                                        DataElement d1e = dataElementService.getDataElement( Integer.parseInt( deCodeString ) );
-                                                        Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
-                                                        String dename = d1e.getShortName();
-                                                        if ( psisList.size() != 0 )
-                                                        {
-                                                            for ( ProgramStageInstance programStageInstanceName : psisList )
-                                                            {
-                                                                if ( !deCollectedNames.contains( dename ) )
-                                                                {
-                                                                    PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstanceName, d1e, selectedOrgUnit );
-                                                                    if ( patientDataValue1 != null )
-                                                                    {
-                                                                        valuePresent = true;
-                                                                        deCollectedNames = deCollectedNames + dename;
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-
-                                                        if ( !deCollectedNames.contains( dename ) )
-                                                        {
-                                                            if ( !tempStr.trim().equals( "" ) )
-                                                            {
-                                                                tempStr = tempStr + " + " + dename;
-                                                            } else
-                                                            {
-                                                                tempStr = dename;
-                                                            }
-
-                                                        }
-                                                    }
-                                                } else
-                                                {
-                                                    if ( sType.equalsIgnoreCase( "dataelementVisit" ) )
-                                                    {
-                                                        tempStr = programStageInstance.getProgramStage().getName();
-                                                    } else
-                                                    {
-                                                        if ( sType.equalsIgnoreCase( "dataelementIFA" ) )
-                                                        {
-                                                            DataElement d1e = dataElementService.getDataElement( Integer.parseInt( deCodeString ) );
-                                                            Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
-                                                            String dename = d1e.getShortName();
-                                                            if ( psisList != null && psisList.size() != 0 )
-                                                            {
-                                                                for ( ProgramStageInstance programStageInstanceName : psisList )
-                                                                {
-                                                                    if ( !deCollectedNames.contains( dename ) )
-                                                                    {
-                                                                        PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstanceName, d1e, selectedOrgUnit );
-                                                                        if ( patientDataValue1 != null )
-                                                                        {
-                                                                            valuePresent = true;
-                                                                            ifaCount = Integer.parseInt( patientDataValue1.getValue() ) + ifaCount;
-                                                                            deCollectedNames = deCollectedNames + dename;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            if ( deCollectedNames.contains( dename ) )
-                                                            {
-                                                                //System.out.println( "ifaCount = " + ifaCount );
-                                                                if ( ifaCount <= 100 )
-                                                                {
-                                                                    tempStr = String.valueOf( 100 - ifaCount );
-                                                                } else
-                                                                {
-                                                                    tempStr = "";
-                                                                }
-                                                            }
-                                                        } else
-                                                        {
-                                                            if ( sType.equalsIgnoreCase( "immunizationPS" ) )
-                                                            {
-                                                                tempStr = "";
-                                                                Set<DataElement> deList = programStageDEs.get( programStageInstance.getProgramStage() );
-                                                                for ( DataElement de : deList )
-                                                                {
-                                                                    String dename = de.getShortName();
-                                                                    if ( !tempStr.trim().equals( "" ) )
-                                                                    {
-                                                                        tempStr = tempStr + " + " + dename;
-                                                                    } else
-                                                                    {
-                                                                        tempStr = dename;
-                                                                    }
-                                                                    //System.out.println( "dename = " + de.getShortName() );
-                                                                }
-
-                                                            } else
-                                                            {
-                                                                if ( sType.equalsIgnoreCase( "dataelementDueDate" ) )
-                                                                {
-                                                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
-                                                                    tempStr = simpleDateFormat.format( programStageInstance.getDueDate() );
-                                                                }
-                                                            }
-                                                            //programStageDEs
-                                                        }
+                                                        valuePresent = true;
+                                                        deCollectedNames = deCollectedNames + dename;
+//                                                      //System.out.println( "deCollectedNames = " + deCollectedNames );
                                                     }
                                                 }
                                             }
                                         }
+
+                                        if ( !deCollectedNames.contains( dename ) )
+                                        {
+                                            if ( !tempStr.trim().equals( "" ) )
+                                            {
+                                                tempStr = tempStr + " + " + dename;
+                                            } else
+                                            {
+                                                tempStr = dename;
+                                            }
+
+                                        }
+                                        //System.out.println( "tempStr = " + tempStr );
+                                    }
+                                } else
+                                {
+                                    DataElement d1e = dataElementService.getDataElement( Integer.parseInt( deCodeString ) );
+                                    Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
+                                    String dename = d1e.getShortName();
+                                    if ( psisList.size() != 0 )
+                                    {
+                                        for ( ProgramStageInstance programStageInstanceName : psisList )
+                                        {
+                                            if ( !deCollectedNames.contains( dename ) )
+                                            {
+                                                PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstanceName, d1e, selectedOrgUnit );
+                                                if ( patientDataValue1 != null )
+                                                {
+                                                    valuePresent = true;
+                                                    deCollectedNames = deCollectedNames + dename;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if ( !deCollectedNames.contains( dename ) )
+                                    {
+                                        if ( !tempStr.trim().equals( "" ) )
+                                        {
+                                            tempStr = tempStr + " + " + dename;
+                                        } else
+                                        {
+                                            tempStr = dename;
+                                        }
+
+                                    }
+                                }
+                            } else
+                            {
+                                tempStr = "";
+                            }
+                        } else if ( sType.equalsIgnoreCase( "dataelementVisit" ) )
+                        {
+                            tempStr = programStageInstance.getProgramStage().getName();
+                        } else if ( sType.equalsIgnoreCase( "dataelementIFA" ) )
+                        {
+                            DataElement d1e = dataElementService.getDataElement( Integer.parseInt( deCodeString ) );
+                            Collection<ProgramStageInstance> psisList = patientCompletedPSIList.get( patient );
+                            String dename = d1e.getShortName();
+                            if ( psisList != null && psisList.size() != 0 )
+                            {
+                                for ( ProgramStageInstance programStageInstanceName : psisList )
+                                {
+                                    if ( !deCollectedNames.contains( dename ) )
+                                    {
+                                        PatientDataValue patientDataValue1 = patientDataValueService.getPatientDataValue( programStageInstanceName, d1e, selectedOrgUnit );
+                                        if ( patientDataValue1 != null )
+                                        {
+                                            valuePresent = true;
+                                            ifaCount = Integer.parseInt( patientDataValue1.getValue() ) + ifaCount;
+                                            deCollectedNames = deCollectedNames + dename;
+                                        }
                                     }
                                 }
                             }
+
+                            if ( deCollectedNames.contains( dename ) )
+                            {
+                                //System.out.println( "ifaCount = " + ifaCount );
+                                if ( ifaCount <= 100 )
+                                {
+                                    tempStr = String.valueOf( 100 - ifaCount );
+                                } else
+                                {
+                                    tempStr = "";
+                                }
+                            }
+                        } else if ( sType.equalsIgnoreCase( "immunizationPS" ) )
+                        {
+                            tempStr = "";
+                            Set<DataElement> deList = programStageDEs.get( programStageInstance.getProgramStage() );
+                            for ( DataElement de : deList )
+                            {
+                                String dename = de.getShortName();
+                                if ( !tempStr.trim().equals( "" ) )
+                                {
+                                    tempStr = tempStr + " + " + dename;
+                                } else
+                                {
+                                    tempStr = dename;
+                                }
+                            }
+
+                        } else if ( sType.equalsIgnoreCase( "dataelementDueDate" ) )
+                        {
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+                            tempStr = simpleDateFormat.format( programStageInstance.getDueDate() );
                         }
+                        //programStageDEs
                         //int tempRowNo = 11 + rowCount;
                         if ( !sType.equalsIgnoreCase( "rowStart" ) && !sType.equalsIgnoreCase( "reportProperty" ) )
                         {
@@ -966,14 +979,15 @@ public class ActivePlanReportsResultAction implements Action
                             int sheetNo = sheetList.get( count1 );
                             sheet0 = outputReportWorkbook.getSheet( sheetNo );
                             WritableCell cell = sheet0.getWritableCell( tempColNo, rowNo );
-                            //System.out.println( "tempColNo = " + tempColNo + " rowNo = " + rowNo + " value = " + tempStr );
+
+//                            /System.out.println( "tempColNo = " + tempColNo + " rowNo = " + rowNo + " value = " + tempStr );
                             sheet0.addCell( new Label( tempColNo, rowNo, tempStr, wCellformat ) );
                         }
-
                         count1++;
                     }//end of decodelist for loop
                     rowCount++;
                     rowNo++;
+                    //System.out.println( "______________________________________________________________" );
                 }
 
                 count2++;
@@ -991,16 +1005,19 @@ public class ActivePlanReportsResultAction implements Action
                         sheet0.mergeCells( 7, mergeRowStart, 7, mergeRowEnd );
 
                         //System.out.println( "______________________________________________________________" );
-                        System.out.println( "mergeRowStart = " + mergeRowStart + " merge row end = " + mergeRowEnd );
+                        //System.out.println( "mergeRowStart = " + mergeRowStart + " merge row end = " + mergeRowEnd );
                     } else
                     {
                         sheet0.mergeCells( 1, mergeRowStart, 1, mergeRowEnd );
                         sheet0.mergeCells( 2, mergeRowStart, 2, mergeRowEnd );
                         sheet0.mergeCells( 3, mergeRowStart, 3, mergeRowEnd );
+                        sheet0.mergeCells( 4, mergeRowStart, 4, mergeRowEnd );
+                        sheet0.mergeCells( 5, mergeRowStart, 5, mergeRowEnd );
+                        sheet0.mergeCells( 6, mergeRowStart, 6, mergeRowEnd );
+                        sheet0.mergeCells( 7, mergeRowStart, 7, mergeRowEnd );
                         //System.out.println( "______________________________________________________________" );
-                        System.out.println( "mergeRowStart = " + mergeRowStart + " merge row end = " + mergeRowEnd );
+                        //System.out.println( "mergeRowStart = " + mergeRowStart + " merge row end = " + mergeRowEnd );
                     }
-
                 }
                 mergeRowStart = mergeRowEnd + 1;
 
@@ -1013,18 +1030,13 @@ public class ActivePlanReportsResultAction implements Action
 
         outputReportWorkbook.close();
 
-        fileName =
-            reportFileNameTB.replace( ".xls", "" );
-        //System.out.println("fileName = " + fileName);
-
-        fileName +=
-            "_" + selectedOrgUnit.getShortName() + ".xls";
+        fileName = reportFileNameTB.replace( ".xls", "" );
+        fileName += "_" + selectedOrgUnit.getShortName() + ".xls";
         //System.out.println( "fileName = " + fileName + " outputReportPath = " + outputReportPath );
 
         File outputReportFile = new File( outputReportPath );
 
-        inputStream =
-            new BufferedInputStream( new FileInputStream( outputReportFile ) );
+        inputStream = new BufferedInputStream( new FileInputStream( outputReportFile ) );
 
         outputReportFile.deleteOnExit();
     }

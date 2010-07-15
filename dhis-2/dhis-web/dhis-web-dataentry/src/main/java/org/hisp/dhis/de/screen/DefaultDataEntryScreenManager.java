@@ -55,7 +55,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
-import org.hisp.dhis.dataset.SectionService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18n;
@@ -108,14 +107,7 @@ public class DefaultDataEntryScreenManager
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
-    }
-
-    private SectionService sectionService;
-
-    public void setSectionService( SectionService sectionService )
-    {
-        this.sectionService = sectionService;
-    }
+    }    
 
     // -------------------------------------------------------------------------
     // DataEntryScreenManager implementation
@@ -144,6 +136,19 @@ public class DefaultDataEntryScreenManager
     public boolean hasMultiDimensionalDataElement( DataSet dataSet )
     {
         for ( DataElement element : dataSet.getDataElements() )
+        {
+            if ( element.isMultiDimensional() )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    public boolean hasMultiDimensionalDataElement( Section section )
+    {
+        for ( DataElement element : section.getDataElements() )
         {
             if ( element.isMultiDimensional() )
             {
@@ -202,7 +207,7 @@ public class DefaultDataEntryScreenManager
 
     public boolean hasSection( DataSet dataSet )
     {
-        Collection<Section> sections = sectionService.getSectionByDataSet( dataSet );
+        Collection<Section> sections = new ArrayList<Section> ( dataSet.getSections() );
 
         return sections.size() != 0;
     }
@@ -338,7 +343,7 @@ public class DefaultDataEntryScreenManager
 
                 if ( dataElement == null )
                 {
-                    log.info( "Data Element does not exist in system : " + dataElementId );
+                    log.error( "Data Element does not exist in system : " + dataElementId );
                     
                     return "Data Element does not exist in system : " + dataElementId;
                 }
@@ -620,7 +625,11 @@ public class DefaultDataEntryScreenManager
 
                 if ( dataElement == null )
                 {
-                    throw new RuntimeException( "Data Element Id: " + dataElementId + " not found" );
+                    //throw new RuntimeException( "Data Element Id: " + dataElementId + " not found" );
+                	
+                	log.error( "Data Element Id: " + dataElementId + " not found in this data set" );
+                    
+                    return "Data Element Id :" + dataElementId + " not found in this data set";
                 }
 
                 // -------------------------------------------------------------

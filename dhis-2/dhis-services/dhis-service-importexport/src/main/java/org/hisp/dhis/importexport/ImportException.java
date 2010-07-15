@@ -34,15 +34,23 @@ package org.hisp.dhis.importexport;
 public class ImportException extends Exception
 {
 
-    private String message;
+    private String message = null;
+
+    private Exception wrappedEx = null;
 
     public ImportException( String message )
     {
         this.message = message;
     }
 
+    public ImportException( String message, Exception ex )
+    {
+        this.message = message;
+        wrappedEx = ex;
+    }
+
     public String toString()
     {
-        return message;
+        return (wrappedEx==null) ? message : message + ": " + wrappedEx.toString();
     }
 }

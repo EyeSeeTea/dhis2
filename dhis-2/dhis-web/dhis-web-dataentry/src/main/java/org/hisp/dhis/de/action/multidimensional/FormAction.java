@@ -74,7 +74,8 @@ import com.opensymphony.xwork2.Action;
  */
 public class FormAction
     implements Action
-{
+{   
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -439,7 +440,7 @@ public class FormAction
 
             for ( DataElementCategory cat : categoryCombo.getCategories() )
             {
-                if ( !cat.getCategoryOptions().isEmpty() )
+                if ( cat.getCategoryOptions().size() > 0 )
                 {
                     catColSpan = catColSpan / cat.getCategoryOptions().size();
                     int total = optionCombos.size() / (catColSpan * cat.getCategoryOptions().size());
@@ -501,7 +502,8 @@ public class FormAction
         // Prepare values for unsaved CalculatedDataElements
         // ---------------------------------------------------------------------
 
-        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet, period );
+        calculatedValueMap = dataEntryScreenManager.populateValuesForCalculatedDataElements( organisationUnit, dataSet,
+            period );
 
         // ---------------------------------------------------------------------
         // Make the standard comments available

@@ -27,9 +27,8 @@ function showExpressionForm( side, description, expression, textualExpression, p
 		"&textualExpression=" + textualExpression +
 		"&periodTypeName=" + periodTypeName ;
 		
-    var dialog = window.open( url, "_blank", "directories=no, \
-    	height=560, width=790, location=no, menubar=no, status=no, \
-    	toolbar=no, resizable=no");
+    var dialog = window.open( url, "_blank", 
+    	"directories=no, height=600, width=790, location=no, menubar=no, status=no, toolbar=no, resizable=yes, scrollbars=yes" );
 }
 
 function insertText( inputAreaName, inputText )

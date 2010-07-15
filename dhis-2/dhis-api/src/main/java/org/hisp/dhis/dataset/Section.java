@@ -25,9 +25,11 @@ package org.hisp.dhis.dataset;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataelement.DataElementOperand;
 
 public class Section
     implements Serializable
@@ -36,48 +38,36 @@ public class Section
 
     private String name;
 
-    private String label;
+    private String title;
 
     private DataSet dataSet;
 
     private List<DataElement> dataElements = new ArrayList<DataElement>();
+    
+    private Set<DataElementOperand> greyedFields = new HashSet<DataElementOperand>();
 
     private int sortOrder;
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
 
     public Section()
     {
     }
 
-    public Section( int id, DataSet dataSet, List<DataElement> dataElements )
-    {
-        this.id = id;
-        this.dataSet = dataSet;
-        this.dataElements = dataElements;
-    }
-
-    public Section( String name, DataSet dataSet )
+    public Section( String name, String title, DataSet dataSet, List<DataElement> dataElements, Set<DataElementOperand> greyedFields )
     {
         this.name = name;
-        this.dataSet = dataSet;
-    }
-
-    public Section( int id, String name, DataSet dataSet, List<DataElement> dataElements )
-    {
-        this.id = id;
-        this.name = name;
+        this.title = title;
         this.dataSet = dataSet;
         this.dataElements = dataElements;
+        this.greyedFields = greyedFields;
     }
 
-    public int getSortOrder()
-    {
-        return sortOrder;
-    }
-
-    public void setSortOrder( int sortOrder )
-    {
-        this.sortOrder = sortOrder;
-    }
+    // -------------------------------------------------------------------------
+    // hashCode, equals and toString
+    // -------------------------------------------------------------------------
 
     @Override
     public int hashCode()
@@ -86,29 +76,38 @@ public class Section
     }
 
     @Override
-    public boolean equals( Object o )
+    public boolean equals( Object object )
     {
-        if ( this == o )
+        if ( this == object )
         {
             return true;
         }
 
-        if ( o == null )
+        if ( object == null )
         {
             return false;
         }
 
-        if ( !(o instanceof Section) )
+        if ( getClass() != object.getClass() )
         {
             return false;
         }
-        final Section other = (Section) o;
+
+        final Section other = (Section) object;
+
         return name.equals( other.getName() );
     }
 
-    // ------------------------------------------------------------------
-    // getter and setter
-    // ------------------------------------------------------------------
+    @Override
+    public String toString()
+    {
+        return "[" + name + "]";
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
+
     public int getId()
     {
         return id;
@@ -154,13 +153,33 @@ public class Section
         this.dataElements.add( dataElement );
     }
 
-    public String getLabel()
+    public String getTitle()
     {
-        return label;
+        return title;
     }
 
-    public void setLabel( String label )
+    public void setTitle( String title )
     {
-        this.label = label;
+        this.title = title;
+    }
+
+    public int getSortOrder()
+    {
+        return sortOrder;
+    }
+
+    public void setSortOrder( int sortOrder )
+    {
+        this.sortOrder = sortOrder;
+    }
+
+    public void setGreyedFields( Set<DataElementOperand> greyedFields )
+    {
+        this.greyedFields = greyedFields;
+    }
+
+    public Set<DataElementOperand> getGreyedFields()
+    {
+        return greyedFields;
     }
 }
