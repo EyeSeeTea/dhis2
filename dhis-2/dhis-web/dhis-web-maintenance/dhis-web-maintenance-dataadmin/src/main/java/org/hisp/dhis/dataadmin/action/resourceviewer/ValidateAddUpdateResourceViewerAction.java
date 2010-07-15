@@ -143,7 +143,7 @@ public class ValidateAddUpdateResourceViewerAction
 
         for ( String s : sqlquery.split( ";" ) )
         {
-            if ( !s.matches( REGEX_SELECT_QUERY ) && s.toLowerCase().contains( REGEX_SELECT_INTO_QUERY ) )
+            if ( !s.matches( REGEX_SELECT_QUERY ) || s.toLowerCase().contains( REGEX_SELECT_INTO_QUERY ) )
             {
                 message = i18n.getString( "sqlquery_is_invalid" );
 
