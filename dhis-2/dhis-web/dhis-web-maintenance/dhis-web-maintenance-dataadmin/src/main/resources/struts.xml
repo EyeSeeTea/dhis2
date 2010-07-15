@@ -412,5 +412,97 @@
 				/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
 		</action>
 
+		<!-- Resource Viewer -->
+		
+		<action name="getResourceViewerObject" class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction">
+		  <result name="success" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseResourceViewerObject.vm</result>
+		</action>
+		
+		<action name="showResourceViewerListForm" class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerListAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
+			<param name="page">/dhis-web-maintenance-dataadmin/showResourceViewerListForm.vm</param>
+			<param name="javascripts">javascript/resourceViewer.js</param>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_MANAGEMENT</param>
+		</action>
+		
+		<action name="showAddResourceViewerForm" class="org.hisp.dhis.dataadmin.action.NoAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
+			<param name="page">/dhis-web-maintenance-dataadmin/addResourceViewerForm.vm</param>
+			<param name="javascripts">javascript/resourceViewer.js
+			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
+			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_ADD</param>
+		</action>
+		
+		<action name="validateAddUpdateResourceViewer" class="org.hisp.dhis.dataadmin.action.resourceviewer.ValidateAddUpdateResourceViewerAction">
+		  <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+		  <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
+		</action>
+		
+		<action name="addResourceViewer" class="org.hisp.dhis.dataadmin.action.resourceviewer.AddResourceViewerAction">
+			<result name="success" type="redirect">showResourceViewerListForm.action</result>
+			<result name="error" type="redirect">index.action</result>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_ADD</param>
+		</action>
+		
+		<action name="showUpdateResourceViewerForm" class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
+			<param name="page">/dhis-web-maintenance-dataadmin/updateResourceViewerForm.vm</param>
+			<param name="javascripts">javascript/resourceViewer.js
+			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
+			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_UPDATE</param>
+		</action>
+				
+		<action name="updateResourceViewerInstance" class="org.hisp.dhis.dataadmin.action.resourceviewer.UpdateResourceViewerAction">
+			<result name="success" type="redirect">showResourceViewerListForm.action</result>
+			<result name="error" type="redirect">index.action</result>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_ADD</param>
+		</action>
+		
+		<action name="removeResourceViewerObject" class="org.hisp.dhis.dataadmin.action.resourceviewer.RemoveResourceViewerAction">
+		  <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+		  <result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+		  <param name="requiredAuthorities">F_RESOURCEVIEWER_DELETE</param>
+		  <param name="onExceptionReturn">plainTextError</param>
+		</action>
+		
+		<action name="executeResourceViewerQuery"
+			class="org.hisp.dhis.dataadmin.action.resourceviewer.ExecuteResourceViewerQueryAction">
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_EXECUTE</param>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+		
+		<action name="dropAllResourceViewerTables"
+			class="org.hisp.dhis.dataadmin.action.resourceviewer.DropAllResourceViewerTablesAction">
+			<result name="success" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
+			<result name="error" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseError.vm</result>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_REGENERATE</param>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+		
+		<action name="regenerateAllResourceViewerTables"
+			class="org.hisp.dhis.dataadmin.action.resourceviewer.RegenerateAllResourceViewerTablesAction">
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_REGENERATE</param>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+		
+		<action name="showDataResourceViewerForm" class="org.hisp.dhis.dataadmin.action.resourceviewer.ShowUpResourceViewerTableAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
+			<param name="page">/dhis-web-maintenance-dataadmin/showDataResourceViewerForm.vm</param>
+			<param name="javascripts">javascript/resourceViewer.js
+			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
+			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
+			<param name="requiredAuthorities">F_RESOURCEVIEWER_MANAGEMENT</param>
+		</action>
+		
 	</package>
 </struts>

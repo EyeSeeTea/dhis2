@@ -164,6 +164,27 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</property>
   </bean>
 
+  <!-- Resource Viewer -->
+
+  <bean id="org.hisp.dhis.resourceviewer.ResourceViewerStore"
+    class="org.hisp.dhis.hibernate.HibernateGenericStore">
+    <property name="clazz" value="org.hisp.dhis.resourceviewer.ResourceViewer"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.resourceviewer.ResourceViewerExpandStore"
+    class="org.hisp.dhis.resourceviewer.hibernate.HibernateResourceViewerExpandStore">
+  </bean>
+  
+  <bean id="org.hisp.dhis.resourceviewer.ResourceViewerService"
+	class="org.hisp.dhis.resourceviewer.DefaultResourceViewerService">
+	<property name="resourceViewerStore"
+	  ref="org.hisp.dhis.resourceviewer.ResourceViewerStore" />
+	<property name="resourceViewerExpandStore"
+	  ref="org.hisp.dhis.resourceviewer.ResourceViewerExpandStore" />
+  </bean>
+  
+  
   <!-- AOP definitions -->
   
   <aop:config>

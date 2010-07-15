@@ -420,4 +420,66 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                     ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 	</bean>
 
+	<!-- Resource Viewer -->
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerListAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerListAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.ValidateAddUpdateResourceViewerAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.ValidateAddUpdateResourceViewerAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.AddResourceViewerAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.AddResourceViewerAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.UpdateResourceViewerAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.UpdateResourceViewerAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.RemoveResourceViewerAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.RemoveResourceViewerAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.ExecuteResourceViewerQueryAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.ExecuteResourceViewerQueryAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.DropAllResourceViewerTablesAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.DropAllResourceViewerTablesAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.RegenerateAllResourceViewerTablesAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.RegenerateAllResourceViewerTablesAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.ShowUpResourceViewerTableAction"
+		class="org.hisp.dhis.dataadmin.action.resourceviewer.ShowUpResourceViewerTableAction"
+		scope="prototype">
+		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+	</bean>
+	
 </beans>
