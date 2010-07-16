@@ -229,6 +229,10 @@ public class DefaultDataElementService
     {
         return i18n( i18nService, dataElementStore.getDataElementByName( name ) );
     }
+    
+    public Collection<DataElement> searchDataElementByName( String key ){
+    	return i18n( i18nService, dataElementStore.searchDataElementByName( key ) );
+    }
 
     public DataElement getDataElementByAlternativeName( String alternativeName )
     {

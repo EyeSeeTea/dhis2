@@ -125,6 +125,17 @@ public class HibernateDataElementStore
         return (DataElement) criteria.uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
+	public Collection<DataElement> searchDataElementByName( String key ){
+    	
+    	Session session = sessionFactory.getCurrentSession();
+
+         Criteria criteria = session.createCriteria( DataElement.class );
+         criteria.add( Restrictions.ilike( "name", "%" + key + "%" ) );
+
+         return criteria.list();
+    }
+    
     public DataElement getDataElementByAlternativeName( String alternativeName )
     {
         Session session = sessionFactory.getCurrentSession();
