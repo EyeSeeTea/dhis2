@@ -1,5 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
-
+package org.hisp.dhis.sqlview;
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,85 +26,137 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.resourceviewer.ResourceViewer;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
-import org.hisp.dhis.resourceviewer.ResourceViewerTable;
-
-import com.opensymphony.xwork2.ActionSupport;
-
 /**
- * Updates a existing resource viewer in database.
- * 
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-06
+ * @version $Id SqlView.java July 06, 2010$
  */
-public class ShowUpResourceViewerTableAction
-    extends ActionSupport
+public class SqlView
 {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Variables
     // -------------------------------------------------------------------------
 
-    private ResourceViewerService resourceViewerService;
+    private int id;
 
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    private String name;
+
+    private String description;
+
+    private String sqlQuery;
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    public SqlView()
     {
-        this.resourceViewerService = resourceViewerService;
+    }
+
+    public SqlView( String name, String sqlQuery )
+    {
+        this.name = name;
+        this.sqlQuery = sqlQuery;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Getters and setters
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    public int getId()
+    {
+        return id;
+    }
 
-    public void setId( Integer id )
+    public void setId( int id )
     {
         this.id = id;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private ResourceViewer resourceViewerInstance;
-
-    public ResourceViewer getResourceViewerInstance()
+    public String getName()
     {
-        return resourceViewerInstance;
+        return name;
     }
 
-    private ResourceViewerTable resourceViewerTable;
-
-    public ResourceViewerTable getResourceViewerTable()
+    public void setName( String name )
     {
-        return resourceViewerTable;
+        this.name = name;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    public String getSqlQuery()
+    {
+        return sqlQuery;
+    }
+
+    public void setSqlQuery( String sqlQuery )
+    {
+        this.sqlQuery = sqlQuery;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // hashCode, equals and toString
     // -------------------------------------------------------------------------
 
-    public String execute()
+    @Override
+    public int hashCode()
     {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + id;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
 
-        if ( id == null || (id.intValue() == -1) )
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
         {
-            return ERROR;
+            return true;
+        }
+        if ( obj == null )
+        {
+            return false;
+        }
+        if ( getClass() != obj.getClass() )
+        {
+            return false;
         }
 
-        resourceViewerInstance = resourceViewerService.getResourceViewer( id );
+        final SqlView other = (SqlView) obj;
 
-        resourceViewerTable = resourceViewerService.getDataResourceViewerTable( resourceViewerService
-            .setUpViewTableName( resourceViewerInstance.getName() ) );
+        if ( id != other.id )
+        {
+            return false;
+        }
+        if ( name == null )
+        {
+            if ( other.name != null )
+            {
+                return false;
+            }
+        }
+        else if ( !name.equals( other.name ) )
+        {
+            return false;
+        }
 
-        return SUCCESS;
+        return true;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[ Name: " + name + ", sqlQuery: " + sqlQuery + " ]";
     }
 
 }

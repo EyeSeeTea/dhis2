@@ -1,4 +1,4 @@
-package org.hisp.dhis.resourceviewer.hibernate;
+package org.hisp.dhis.sqlview.hibernate;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -39,8 +39,8 @@ import java.util.Set;
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.hibernate.SessionFactory;
-import org.hisp.dhis.resourceviewer.ResourceViewerExpandStore;
-import org.hisp.dhis.resourceviewer.ResourceViewerTable;
+import org.hisp.dhis.sqlview.SqlViewExpandStore;
+import org.hisp.dhis.sqlview.SqlViewTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -49,12 +49,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * @version $Id$
  * @since 2010-07-06
  */
-public class HibernateResourceViewerExpandStore
-    implements ResourceViewerExpandStore
+public class HibernateSqlViewExpandStore
+    implements SqlViewExpandStore
 {
     private static final String PREFIX_SELECT_QUERY = "SELECT * FROM ";
 
-    private static final String PREFIX_VIEWNAME = "__resourceviewer" + "%";
+    private static final String PREFIX_VIEWNAME = "__sqlview" + "%";
 
     private static final String[] types = { "VIEW" };
 
@@ -76,7 +76,7 @@ public class HibernateResourceViewerExpandStore
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<String> getAllResourceViewerNames()
+    public Collection<String> getAllSqlViewNames()
     {
         Connection conn = getConnection();
         DatabaseMetaData mtdt;
@@ -105,22 +105,22 @@ public class HibernateResourceViewerExpandStore
     }
 
     @Override
-    public void setUpDataResourceViewerTable( ResourceViewerTable resourceViewerTable, String viewerTableName )
+    public void setUpDataSqlViewTable( SqlViewTable sqlViewTable, String viewTableName )
     {
         final StatementHolder holder = statementManager.getHolder();
 
         ResultSet rs;
         try
         {
-            rs = this.getScrollableResult( PREFIX_SELECT_QUERY + viewerTableName, holder );
+            rs = this.getScrollableResult( PREFIX_SELECT_QUERY + viewTableName, holder );
         }
         catch ( SQLException e )
         {
-            throw new RuntimeException( "Failed to get data from view " + PREFIX_SELECT_QUERY + viewerTableName, e );
+            throw new RuntimeException( "Failed to get data from view " + PREFIX_SELECT_QUERY + viewTableName, e );
         }
         
-        resourceViewerTable.createViewerStructure( rs );
-        resourceViewerTable.addRecord( rs );
+        sqlViewTable.createViewerStructure( rs );
+        sqlViewTable.addRecord( rs );
 
         holder.close();
     }

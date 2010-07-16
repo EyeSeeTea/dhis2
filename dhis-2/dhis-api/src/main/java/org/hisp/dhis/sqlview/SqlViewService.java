@@ -1,7 +1,7 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.sqlview;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,61 +27,41 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
-
-import com.opensymphony.xwork2.ActionSupport;
+import java.util.Collection;
 
 /**
- * Removes a existing regular expression from the database.
- * 
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-06
+ * @version $Id SqlViewService.java July 06, 2010$
  */
-public class RemoveResourceViewerAction
-    extends ActionSupport
+public interface SqlViewService
 {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
+    String ID = SqlViewService.class.getName();
 
     // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-   
-    private ResourceViewerService resourceViewerService;
-
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
-    {
-        this.resourceViewerService = resourceViewerService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
+    // SqlView
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    int saveSqlView( SqlView sqlView );
 
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
+    void deleteSqlView( SqlView sqlView );
+
+    void updateSqlView( SqlView sqlView );
+
+    SqlView getSqlView( int viewId );
+
+    SqlView getSqlView( String viewName );
+
+    Collection<SqlView> getAllSqlViews();
+
+    String makeUpForQueryStatement( String query );
+
+    String setUpViewTableName( String input );
 
     // -------------------------------------------------------------------------
-    // Action
+    // SqlView Expanded
     // -------------------------------------------------------------------------
 
-    public String execute()
-        throws Exception
-    {
-        if ( id == null || (id.intValue() == -1) )
-        {
-            return ERROR;
-        }
+    Collection<String> getAllSqlViewNames();
 
-        resourceViewerService.deleteResourceViewer( resourceViewerService.getResourceViewer( id ) );
-
-        return SUCCESS;
-    }
+    SqlViewTable getDataSqlViewTable( String viewTableName );
 }

@@ -1,4 +1,5 @@
-package org.hisp.dhis.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,138 +27,80 @@ package org.hisp.dhis.resourceviewer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
+
+import com.opensymphony.xwork2.ActionSupport;
+
 /**
+ * Updates a existing sqlview in database.
+ * 
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-06
+ * @version $Id UpdateSqlViewAction.java July 06, 2010$
  */
-public class ResourceViewer
+public class UpdateSqlViewAction
+    extends ActionSupport
 {
-    // -------------------------------------------------------------------------
-    // Variables
-    // -------------------------------------------------------------------------
-
-    private int id;
-
-    private String name;
-
-    private String description;
-
-    private String sqlQuery;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     // -------------------------------------------------------------------------
-    // Constructors
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public ResourceViewer()
+    private SqlViewService sqlViewService;
+
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-    }
-
-    public ResourceViewer( String name, String sqlQuery )
-    {
-        this.name = name;
-        this.sqlQuery = sqlQuery;
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
-    // Getters and setters
+    // Input
     // -------------------------------------------------------------------------
 
-    public int getId()
-    {
-        return id;
-    }
+    private Integer id;
 
-    public void setId( int id )
+    public void setId( Integer id )
     {
         this.id = id;
     }
 
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
+    private String description;
 
     public void setDescription( String description )
     {
         this.description = description;
     }
 
-    public String getSqlQuery()
-    {
-        return sqlQuery;
-    }
+    private String sqlquery;
 
-    public void setSqlQuery( String sqlQuery )
+    public void setSqlquery( String sqlquery )
     {
-        this.sqlQuery = sqlQuery;
+        this.sqlquery = sqlquery;
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
+    // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
-    public int hashCode()
+    public String execute()
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + id;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
+
+        if ( id == null || (id.intValue() == -1) )
+        {
+            return ERROR;
+        }
+
+        SqlView sqlViewInstance = sqlViewService.getSqlView( id );
+
+        sqlViewInstance.setDescription( description.replaceAll( "\\s+", " " ).trim() );
+        sqlViewInstance.setSqlQuery( sqlViewService.makeUpForQueryStatement( sqlquery ) );
+
+        sqlViewService.updateSqlView( sqlViewInstance );
+
+        return SUCCESS;
     }
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-        if ( obj == null )
-        {
-            return false;
-        }
-        if ( getClass() != obj.getClass() )
-        {
-            return false;
-        }
-
-        final ResourceViewer other = (ResourceViewer) obj;
-
-        if ( id != other.id )
-        {
-            return false;
-        }
-        if ( name == null )
-        {
-            if ( other.name != null )
-            {
-                return false;
-            }
-        }
-        else if ( !name.equals( other.name ) )
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[ Name: " + name + ", sqlQuery: " + sqlQuery + " ]";
-    }
-
 }

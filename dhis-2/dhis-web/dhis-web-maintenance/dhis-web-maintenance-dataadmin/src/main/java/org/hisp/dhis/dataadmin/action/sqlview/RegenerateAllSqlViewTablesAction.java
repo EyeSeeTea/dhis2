@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,19 +27,26 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.resourceviewer.ResourceViewer;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
+import java.sql.SQLException;
+
+import org.amplecode.quick.StatementHolder;
+import org.amplecode.quick.StatementManager;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * Updates a existing resource viewer in database.
+ * Drops all sql-view tables first do regenerate the selected resource
+ * tables and all of sql-view tables
  * 
  * @author Dang Duy Hieu
  * @version $Id$
  * @since 2010-07-06
  */
-public class UpdateResourceViewerAction
+public class RegenerateAllSqlViewTablesAction
     extends ActionSupport
 {
     /**
@@ -51,36 +58,32 @@ public class UpdateResourceViewerAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ResourceViewerService resourceViewerService;
+    @Autowired
+    private StatementManager statementManager;
 
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    private SqlViewService sqlViewService;
+
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
+        this.sqlViewService = sqlViewService;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String message;
 
-    public void setId( Integer id )
+    public String getMessage()
     {
-        this.id = id;
-    }
-
-    private String description;
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    private String sqlquery;
-
-    public void setSqlquery( String sqlquery )
-    {
-        this.sqlquery = sqlquery;
+        return message;
     }
 
     // -------------------------------------------------------------------------
@@ -89,18 +92,29 @@ public class UpdateResourceViewerAction
 
     public String execute()
     {
+        message = "";
+        String viewName = "";
+        final StatementHolder holder = statementManager.getHolder();
 
-        if ( id == null || (id.intValue() == -1) )
+        for ( SqlView sqlView : sqlViewService.getAllSqlViews() )
         {
-            return ERROR;
+            viewName = sqlViewService.setUpViewTableName( sqlView.getName() );
+
+            try
+            {
+                holder.getStatement().executeUpdate( "CREATE VIEW " + viewName + " AS " + sqlView.getSqlQuery() );
+            }
+            catch ( SQLException e )
+            {
+                holder.close();
+                throw new RuntimeException( "Failed to create view: " + viewName, e );
+            }
+
+            message += i18n.getString( "sql_view_table_name" ) + " <strong>[ " + viewName + " ]</strong> "
+                + i18n.getString( "is_created" ) + "<br/>";
         }
 
-        ResourceViewer resourceViewerInstance = resourceViewerService.getResourceViewer( id );
-
-        resourceViewerInstance.setDescription( description.replaceAll( "\\s+", " " ).trim() );
-        resourceViewerInstance.setSqlQuery( resourceViewerService.makeUpForQueryStatement( sqlquery ) );
-
-        resourceViewerService.updateResourceViewer( resourceViewerInstance );
+        holder.close();
 
         return SUCCESS;
     }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,20 +27,18 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.resourceviewer.ResourceViewer;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
+import org.hisp.dhis.sqlview.SqlViewService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
+ * Removes a existing regular expression from the database.
+ * 
  * @author Dang Duy Hieu
  * @version $Id$
- * @since 2010-06-10
+ * @since 2010-07-06
  */
-public class GetResourceViewerListAction
+public class RemoveSqlViewAction
     extends ActionSupport
 {
     /**
@@ -51,37 +49,39 @@ public class GetResourceViewerListAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+   
+    private SqlViewService sqlViewService;
 
-    private ResourceViewerService resourceViewerService;
-
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
-    // Getters & Setters
+    // Input
     // -------------------------------------------------------------------------
 
-    private List<ResourceViewer> resourceViewerObjectList;
+    private Integer id;
 
-    public List<ResourceViewer> getResourceViewerObjectList()
+    public void setId( Integer id )
     {
-        return resourceViewerObjectList;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        resourceViewerObjectList = new ArrayList<ResourceViewer>( resourceViewerService.getAllResourceViewers() );
+        if ( id == null || (id.intValue() == -1) )
+        {
+            return ERROR;
+        }
 
-        System.out.println( "\n\n sqlViewObjectList : " + resourceViewerObjectList + "\n" );
+        sqlViewService.deleteSqlView( sqlViewService.getSqlView( id ) );
 
         return SUCCESS;
     }
-
 }

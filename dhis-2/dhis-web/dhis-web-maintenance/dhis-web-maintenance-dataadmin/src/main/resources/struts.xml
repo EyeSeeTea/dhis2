@@ -171,7 +171,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-dataadmin/resourceTableForm.vm</param>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="javascripts">javascript/resourceTable.js</param>
+			<param name="javascripts">javascript/resourceTable.js,javascript/resourceViewer.js</param>
 		</action>
 
 		<action name="generateResourceTable"
@@ -412,97 +412,96 @@
 				/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
 		</action>
 
-		<!-- Resource Viewer -->
+		<!-- Sql View -->
 		
-		<action name="getResourceViewerObject" class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction">
-		  <result name="success" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseResourceViewerObject.vm</result>
+		<action name="getSqlViewObject" class="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewObjectAction">
+		  <result name="success" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseSqlViewObject.vm</result>
 		</action>
 		
-		<action name="showResourceViewerListForm" class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerListAction">
+		<action name="showSqlViewListForm" class="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewListAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="page">/dhis-web-maintenance-dataadmin/showResourceViewerListForm.vm</param>
-			<param name="javascripts">javascript/resourceViewer.js</param>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_MANAGEMENT</param>
+			<param name="page">/dhis-web-maintenance-dataadmin/showSqlViewListForm.vm</param>
+			<param name="javascripts">javascript/sqlView.js</param>
+			<param name="requiredAuthorities">F_SQLVIEW_MANAGEMENT</param>
 		</action>
 		
-		<action name="showAddResourceViewerForm" class="org.hisp.dhis.dataadmin.action.NoAction">
+		<action name="showAddSqlViewForm" class="org.hisp.dhis.dataadmin.action.NoAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="page">/dhis-web-maintenance-dataadmin/addResourceViewerForm.vm</param>
-			<param name="javascripts">javascript/resourceViewer.js
+			<param name="page">/dhis-web-maintenance-dataadmin/addSqlViewForm.vm</param>
+			<param name="javascripts">javascript/sqlView.js
 			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
 			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_ADD</param>
+			<param name="requiredAuthorities">F_SQLVIEW_ADD</param>
 		</action>
 		
-		<action name="validateAddUpdateResourceViewer" class="org.hisp.dhis.dataadmin.action.resourceviewer.ValidateAddUpdateResourceViewerAction">
+		<action name="validateAddUpdateSqlView" class="org.hisp.dhis.dataadmin.action.sqlview.ValidateAddUpdateSqlViewAction">
 		  <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 		  <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
 		</action>
 		
-		<action name="addResourceViewer" class="org.hisp.dhis.dataadmin.action.resourceviewer.AddResourceViewerAction">
-			<result name="success" type="redirect">showResourceViewerListForm.action</result>
+		<action name="addSqlView" class="org.hisp.dhis.dataadmin.action.sqlview.AddSqlViewAction">
+			<result name="success" type="redirect">showSqlViewListForm.action</result>
 			<result name="error" type="redirect">index.action</result>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_ADD</param>
+			<param name="requiredAuthorities">F_SQLVIEW_ADD</param>
 		</action>
 		
-		<action name="showUpdateResourceViewerForm" class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction">
+		<action name="showUpdateSqlViewForm" class="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewObjectAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="page">/dhis-web-maintenance-dataadmin/updateResourceViewerForm.vm</param>
-			<param name="javascripts">javascript/resourceViewer.js
+			<param name="page">/dhis-web-maintenance-dataadmin/updateSqlViewForm.vm</param>
+			<param name="javascripts">javascript/sqlView.js
 			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
 			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_UPDATE</param>
+			<param name="requiredAuthorities">F_SQLVIEW_UPDATE</param>
 		</action>
 				
-		<action name="updateResourceViewerInstance" class="org.hisp.dhis.dataadmin.action.resourceviewer.UpdateResourceViewerAction">
-			<result name="success" type="redirect">showResourceViewerListForm.action</result>
+		<action name="updateSqlViewInstance" class="org.hisp.dhis.dataadmin.action.sqlview.UpdateSqlViewAction">
+			<result name="success" type="redirect">showSqlViewListForm.action</result>
 			<result name="error" type="redirect">index.action</result>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_ADD</param>
+			<param name="requiredAuthorities">F_SQLVIEW_ADD</param>
 		</action>
 		
-		<action name="removeResourceViewerObject" class="org.hisp.dhis.dataadmin.action.resourceviewer.RemoveResourceViewerAction">
+		<action name="removeSqlViewObject" class="org.hisp.dhis.dataadmin.action.sqlview.RemoveSqlViewAction">
 		  <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 		  <result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
-		  <param name="requiredAuthorities">F_RESOURCEVIEWER_DELETE</param>
+		  <param name="requiredAuthorities">F_SQLVIEW_DELETE</param>
 		  <param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
-		<action name="executeResourceViewerQuery"
-			class="org.hisp.dhis.dataadmin.action.resourceviewer.ExecuteResourceViewerQueryAction">
+		<action name="executeSqlViewQuery"
+			class="org.hisp.dhis.dataadmin.action.sqlview.ExecuteSqlViewQueryAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 			<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_EXECUTE</param>
+			<param name="requiredAuthorities">F_SQLVIEW_EXECUTE</param>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
-		<action name="dropAllResourceViewerTables"
-			class="org.hisp.dhis.dataadmin.action.resourceviewer.DropAllResourceViewerTablesAction">
+		<action name="dropAllSqlViewTables"
+			class="org.hisp.dhis.dataadmin.action.sqlview.DropAllSqlViewTablesAction">
 			<result name="success" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
 			<result name="error" type="velocity-xml">/dhis-web-maintenance-dataadmin/responseError.vm</result>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_REGENERATE</param>
+			<param name="requiredAuthorities">F_SQLVIEW_REGENERATE</param>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
-		<action name="regenerateAllResourceViewerTables"
-			class="org.hisp.dhis.dataadmin.action.resourceviewer.RegenerateAllResourceViewerTablesAction">
+		<action name="regenerateAllSqlViewTables"
+			class="org.hisp.dhis.dataadmin.action.sqlview.RegenerateAllSqlViewTablesAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 			<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_REGENERATE</param>
+			<param name="requiredAuthorities">F_SQLVIEW_REGENERATE</param>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
-		<action name="showDataResourceViewerForm" class="org.hisp.dhis.dataadmin.action.resourceviewer.ShowUpResourceViewerTableAction">
+		<action name="showDataSqlViewForm" class="org.hisp.dhis.dataadmin.action.sqlview.ShowUpSqlViewTableAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="page">/dhis-web-maintenance-dataadmin/showDataResourceViewerForm.vm</param>
-			<param name="javascripts">javascript/resourceViewer.js
+			<param name="page">/dhis-web-maintenance-dataadmin/showDataSqlViewForm.vm</param>
+			<param name="javascripts">javascript/sqlView.js
 			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
 			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
-			<param name="requiredAuthorities">F_RESOURCEVIEWER_MANAGEMENT</param>
+			<param name="requiredAuthorities">F_SQLVIEW_MANAGEMENT</param>
 		</action>
-		
 	</package>
 </struts>

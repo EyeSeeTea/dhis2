@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,25 +27,19 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.SQLException;
-
-import org.amplecode.quick.StatementHolder;
-import org.amplecode.quick.StatementManager;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.resourceviewer.ResourceViewer;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
+import org.hisp.dhis.sqlview.SqlViewTable;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * Updates a existing regular expression to the database.
+ * Updates a existing sqlview in database.
  * 
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-06
+ * @version $Id ShowUpSqlViewTableAction.java July 06, 2010$
  */
-public class ExecuteResourceViewerQueryAction
+public class ShowUpSqlViewTableAction
     extends ActionSupport
 {
     /**
@@ -57,21 +51,11 @@ public class ExecuteResourceViewerQueryAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private StatementManager statementManager;
+    private SqlViewService sqlViewService;
 
-    private ResourceViewerService resourceViewerService;
-
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
@@ -89,11 +73,18 @@ public class ExecuteResourceViewerQueryAction
     // Output
     // -------------------------------------------------------------------------
 
-    private String message;
+    private SqlView sqlViewInstance;
 
-    public String getMessage()
+    public SqlView getSqlViewInstance()
     {
-        return message;
+        return sqlViewInstance;
+    }
+
+    private SqlViewTable sqlViewTable;
+
+    public SqlViewTable getSqlViewTable()
+    {
+        return sqlViewTable;
     }
 
     // -------------------------------------------------------------------------
@@ -102,52 +93,18 @@ public class ExecuteResourceViewerQueryAction
 
     public String execute()
     {
+
         if ( id == null || (id.intValue() == -1) )
         {
-            message = i18n.getString( "resource_viewer_instance_invalid" );
-
             return ERROR;
         }
 
-        ResourceViewer resourceViewerInstance = resourceViewerService.getResourceViewer( id );
-        String viewName = resourceViewerService.setUpViewTableName( resourceViewerInstance.getName() );
-        final StatementHolder holder = statementManager.getHolder();
+        sqlViewInstance = sqlViewService.getSqlView( id );
 
-        try
-        {
-            dropView( viewName, holder );
-
-            holder.getStatement().executeUpdate(
-                "CREATE VIEW " + viewName + " AS " + resourceViewerInstance.getSqlQuery() );
-        }
-        catch ( SQLException e )
-        {
-            throw new RuntimeException( "Failed to create view: " + viewName, e );
-        }
-        finally
-        {
-            holder.close();
-        }
-
-        message = i18n.getString( "resource_viewer_table_name" ) + " <strong>[ " + viewName + " ]</strong> "
-            + i18n.getString( "is_created" );
+        sqlViewTable = sqlViewService.getDataSqlViewTable( sqlViewService
+            .setUpViewTableName( sqlViewInstance.getName() ) );
 
         return SUCCESS;
     }
 
-    // -------------------------------------------------------------------------
-    // Supporting methods
-    // -------------------------------------------------------------------------
-
-    private void dropView( String view, StatementHolder holder )
-    {
-        try
-        {
-            holder.getStatement().executeUpdate( "DROP VIEW IF EXISTS " + view );
-        }
-        catch ( SQLException ex )
-        {
-            throw new RuntimeException( "Failed to drop view: " + view, ex );
-        }
-    }
 }

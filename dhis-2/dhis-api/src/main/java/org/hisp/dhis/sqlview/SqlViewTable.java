@@ -1,4 +1,4 @@
-package org.hisp.dhis.resourceviewer;
+package org.hisp.dhis.sqlview;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -10,7 +10,7 @@ import java.util.List;
  * @author Dang Duy Hieu
  * @version $Id ResourceViewerTable.java July 12, 2010$
  */
-public class ResourceViewerTable
+public class SqlViewTable
 {
     private List<String> headers = new ArrayList<String>();
 
@@ -20,16 +20,16 @@ public class ResourceViewerTable
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ResourceViewerTable()
+    public SqlViewTable()
     {
     }
 
-    public ResourceViewerTable( List<String> headers )
+    public SqlViewTable( List<String> headers )
     {
         this.headers = headers;
     }
 
-    public ResourceViewerTable( List<String> headers, List<List<Object>> records )
+    public SqlViewTable( List<String> headers, List<List<Object>> records )
     {
         this.headers = headers;
         this.records = records;
@@ -148,7 +148,7 @@ public class ResourceViewerTable
             return false;
         }
 
-        final ResourceViewerTable other = (ResourceViewerTable) obj;
+        final SqlViewTable other = (SqlViewTable) obj;
 
         if ( headers == null )
         {

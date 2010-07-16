@@ -412,74 +412,74 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<bean id="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
-              class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
-              scope="prototype">
-          <property name="selectionTreeManager"
-                    ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-          <property name="organisationUnitGroupService" 
-                    ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
+		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
+		scope="prototype">
+		<property name="selectionTreeManager"
+			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
+		<property name="organisationUnitGroupService" 
+			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 	</bean>
 
-	<!-- Resource Viewer -->
+	<!-- Sql View -->
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerObjectAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewObjectAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewObjectAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerListAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.GetResourceViewerListAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewListAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewListAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.ValidateAddUpdateResourceViewerAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.ValidateAddUpdateResourceViewerAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.ValidateAddUpdateSqlViewAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.ValidateAddUpdateSqlViewAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.AddResourceViewerAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.AddResourceViewerAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.AddSqlViewAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.AddSqlViewAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.UpdateResourceViewerAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.UpdateResourceViewerAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.UpdateSqlViewAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.UpdateSqlViewAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.RemoveResourceViewerAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.RemoveResourceViewerAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.RemoveSqlViewAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.RemoveSqlViewAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.ExecuteResourceViewerQueryAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.ExecuteResourceViewerQueryAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.ExecuteSqlViewQueryAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.ExecuteSqlViewQueryAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.DropAllResourceViewerTablesAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.DropAllResourceViewerTablesAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.DropAllSqlViewTablesAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.DropAllSqlViewTablesAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.RegenerateAllResourceViewerTablesAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.RegenerateAllResourceViewerTablesAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.RegenerateAllSqlViewTablesAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.RegenerateAllSqlViewTablesAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
-	<bean id="org.hisp.dhis.dataadmin.action.resourceviewer.ShowUpResourceViewerTableAction"
-		class="org.hisp.dhis.dataadmin.action.resourceviewer.ShowUpResourceViewerTableAction"
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.ShowUpSqlViewTableAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.ShowUpSqlViewTableAction"
 		scope="prototype">
-		<property name="resourceViewerService" ref="org.hisp.dhis.resourceviewer.ResourceViewerService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 	
 </beans>

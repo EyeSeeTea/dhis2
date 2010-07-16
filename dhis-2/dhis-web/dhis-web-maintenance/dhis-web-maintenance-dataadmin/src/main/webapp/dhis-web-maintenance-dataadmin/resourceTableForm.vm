@@ -43,7 +43,7 @@
 
 <p>
     <input type="button" value='$i18n.getString( "generate_resource_tables" )' onclick="generateResourceTable()" style="width:170px">
-    <input type="button" value='$i18n.getString( "regenerate_resource_tables_viewers" )' onclick="regenerateResourceTableAndViewerTables()" style="width:250px">
+    <input type="button" value='$i18n.getString( "regenerate_resource_tables_views" )' onclick="regenerateResourceTableAndViewTables()" style="width:250px">
 </p>
 
 <span id="message"></span>
@@ -58,7 +58,7 @@
 <script type="text/javascript">
     var i18n_generating_resource_tables = '$encoder.jsEscape( $i18n.getString( "generating_resource_tables" ), "'" )';
     var i18n_resource_tables_generated = '$encoder.jsEscape( $i18n.getString( "resource_tables_generated" ), "'" )';
-    var i18n_regenerating_resource_tables_and_viewers = '$encoder.jsEscape( $i18n.getString( "regenerating_resource_tables_and_viewers" ), "'" )';
+    var i18n_regenerating_resource_tables_and_views = '$encoder.jsEscape( $i18n.getString( "regenerating_resource_tables_and_views" ), "'" )';
     var i18n_regenerating_failed = '$encoder.jsEscape( $i18n.getString( "regenerating_failed" ), "'" )';
     var i18n_select_options = '$encoder.jsEscape( $i18n.getString( "select_options" ), "'" )';
 </script>

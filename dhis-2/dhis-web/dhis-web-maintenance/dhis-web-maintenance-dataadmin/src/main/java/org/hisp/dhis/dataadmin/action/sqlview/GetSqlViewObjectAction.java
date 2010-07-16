@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,17 +26,20 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
+
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
+ * Removes a existing regular expression from the database.
+ * 
  * @author Dang Duy Hieu
  * @version $Id$
- * @since 2010-07-07
+ * @since 2010-07-06
  */
-public class ValidateAddUpdateResourceViewerAction
+public class GetSqlViewObjectAction
     extends ActionSupport
 {
     /**
@@ -44,115 +47,55 @@ public class ValidateAddUpdateResourceViewerAction
      */
     private static final long serialVersionUID = 1L;
 
-    private static final String ADD = "add";
-
-    private static final String REGEX_SELECT_QUERY = "^(?i)\\s*(select\\s{1,}).+$";
-    
-    private static final String REGEX_SELECT_INTO_QUERY = " into ";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ResourceViewerService resourceViewerService;
+    private SqlViewService sqlViewService;
 
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
-    }
-
-    // -------------------------------------------------------------------------
-    // I18n
-    // -------------------------------------------------------------------------
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String mode;
+    private Integer id;
 
-    public void setMode( String mode )
+    public void setId( Integer id )
     {
-        this.mode = mode;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private String sqlquery;
-
-    public void setSqlquery( String sqlquery )
-    {
-        this.sqlquery = sqlquery;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private String message;
+    private SqlView sqlViewObject;
 
-    public String getMessage()
+    public SqlView getSqlViewObject()
     {
-        return message;
+        return sqlViewObject;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        message = "";
-
-        if ( (name == null) || (name.trim() == "") )
+        if ( id == null || (id.intValue() == -1) )
         {
-            message = i18n.getString( "name_is_null" );
-
-            return INPUT;
+            return ERROR;
         }
 
-        if ( mode.equals( ADD ) && (resourceViewerService.getResourceViewer( name ) != null) )
-        {
-            message = i18n.getString( "name_in_used" );
-
-            return INPUT;
-        }
-
-        if ( (sqlquery == null) || (sqlquery.trim() == "") )
-        {
-            message = i18n.getString( "sqlquery_is_empty" );
-
-            return INPUT;
-        }
+        sqlViewObject = sqlViewService.getSqlView( id );
         
-        sqlquery = resourceViewerService.makeUpForQueryStatement( sqlquery );
-
-        System.out.println( "\n\n sqlquery = " + sqlquery );
-
-        for ( String s : sqlquery.split( ";" ) )
-        {
-            if ( !s.matches( REGEX_SELECT_QUERY ) || s.toLowerCase().contains( REGEX_SELECT_INTO_QUERY ) )
-            {
-                message = i18n.getString( "sqlquery_is_invalid" );
-
-                return INPUT;
-            }
-        }
-
-        System.out.println( "\n\n message = " + message );
+        System.out.println( "\n\n sqlViewObjectList : " + sqlViewObject.toString() + "\n" );
 
         return SUCCESS;
-    }    
+    }
 }

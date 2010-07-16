@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,27 +26,16 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import java.sql.SQLException;
-
-import org.amplecode.quick.StatementHolder;
-import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.resourceviewer.ResourceViewer;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.sqlview.SqlViewService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * Drops all resource viewer tables first do regenerate the selected resource
- * tables and all of resource viewer tables
- * 
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-06
+ * @version $Id ValidateAddUpdateSqlViewAction.java July 07, 2010$
  */
-public class RegenerateAllResourceViewerTablesAction
+public class ValidateAddUpdateSqlViewAction
     extends ActionSupport
 {
     /**
@@ -54,19 +43,26 @@ public class RegenerateAllResourceViewerTablesAction
      */
     private static final long serialVersionUID = 1L;
 
+    private static final String ADD = "add";
+
+    private static final String REGEX_SELECT_QUERY = "^(?i)\\s*(select\\s{1,}).+$";
+
+    private static final String REGEX_SELECT_INTO_QUERY = " into ";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private StatementManager statementManager;
+    private SqlViewService sqlViewService;
 
-    private ResourceViewerService resourceViewerService;
-
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
+        this.sqlViewService = sqlViewService;
     }
+
+    // -------------------------------------------------------------------------
+    // I18n
+    // -------------------------------------------------------------------------
 
     private I18n i18n;
 
@@ -76,7 +72,32 @@ public class RegenerateAllResourceViewerTablesAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input
+    // -------------------------------------------------------------------------
+
+    private String mode;
+
+    public void setMode( String mode )
+    {
+        this.mode = mode;
+    }
+
+    private String name;
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    private String sqlquery;
+
+    public void setSqlquery( String sqlquery )
+    {
+        this.sqlquery = sqlquery;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input
     // -------------------------------------------------------------------------
 
     private String message;
@@ -93,28 +114,41 @@ public class RegenerateAllResourceViewerTablesAction
     public String execute()
     {
         message = "";
-        String viewName = "";
-        final StatementHolder holder = statementManager.getHolder();
 
-        for ( ResourceViewer resourceViewer : resourceViewerService.getAllResourceViewers() )
+        if ( (name == null) || (name.trim() == "") )
         {
-            viewName = resourceViewerService.setUpViewTableName( resourceViewer.getName() );
+            message = i18n.getString( "name_is_null" );
 
-            try
-            {
-                holder.getStatement().executeUpdate( "CREATE VIEW " + viewName + " AS " + resourceViewer.getSqlQuery() );
-            }
-            catch ( SQLException e )
-            {
-                holder.close();
-                throw new RuntimeException( "Failed to create view: " + viewName, e );
-            }
-
-            message += i18n.getString( "resource_viewer_table_name" ) + " <strong>[ " + viewName + " ]</strong> "
-                + i18n.getString( "is_created" ) + "<br/>";
+            return INPUT;
         }
 
-        holder.close();
+        if ( mode.equals( ADD ) && (sqlViewService.getSqlView( name ) != null) )
+        {
+            message = i18n.getString( "name_in_used" );
+
+            return INPUT;
+        }
+
+        if ( (sqlquery == null) || (sqlquery.trim() == "") )
+        {
+            message = i18n.getString( "sqlquery_is_empty" );
+
+            return INPUT;
+        }
+
+        sqlquery = sqlViewService.makeUpForQueryStatement( sqlquery );
+
+        for ( String s : sqlquery.split( ";" ) )
+        {
+            if ( !s.matches( REGEX_SELECT_QUERY ) || s.toLowerCase().contains( REGEX_SELECT_INTO_QUERY ) )
+            {
+                message = i18n.getString( "sqlquery_is_invalid" )
+                    + "<br/><span style=\"color:blue;font-weight:bold;font-style:italic;\">"
+                    + i18n.getString( "sqlquery_is_welformed" ) + "</span>";
+
+                return INPUT;
+            }
+        }
 
         return SUCCESS;
     }

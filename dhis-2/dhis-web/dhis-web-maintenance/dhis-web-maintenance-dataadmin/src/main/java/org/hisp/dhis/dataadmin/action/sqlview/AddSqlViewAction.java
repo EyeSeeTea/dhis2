@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,20 +26,16 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import org.hisp.dhis.resourceviewer.ResourceViewer;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * Removes a existing regular expression from the database.
- * 
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-06
+ * @version $Id AddSqlViewAction.java July 06, 2010$
  */
-public class GetResourceViewerObjectAction
+public class AddSqlViewAction
     extends ActionSupport
 {
     /**
@@ -47,55 +43,77 @@ public class GetResourceViewerObjectAction
      */
     private static final long serialVersionUID = 1L;
 
+    private static final String REGEX = "\\s+";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ResourceViewerService resourceViewerService;
+    private SqlViewService sqlViewService;
 
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String name;
 
-    public void setId( Integer id )
+    public void setName( String name )
     {
-        this.id = id;
+        this.name = name;
+    }
+
+    private String description;
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    private String sqlquery;
+
+    public void setSqlquery( String sqlquery )
+    {
+        this.sqlquery = sqlquery;
     }
 
     // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private ResourceViewer resourceViewerObject;
-
-    public ResourceViewer getResourceViewerObject()
-    {
-        return resourceViewerObject;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        if ( id == null || (id.intValue() == -1) )
+        if ( (name == null) || (name.trim() == "") )
+        {
+            return ERROR;
+        }
+        if ( (sqlquery == null) || (sqlquery.trim() == "") )
         {
             return ERROR;
         }
 
-        resourceViewerObject = resourceViewerService.getResourceViewer( id );
-        
-        System.out.println( "\n\n resourceViewerObjectList : " + resourceViewerObject.toString() + "\n" );
+        SqlView sqlView = new SqlView();
+
+        sqlView.setName( reduceWhiteSpaces( name ) );
+        sqlView.setDescription( reduceWhiteSpaces( description ) );
+        sqlView.setSqlQuery( sqlViewService.makeUpForQueryStatement( sqlquery ) );
+
+        sqlViewService.saveSqlView( sqlView );
 
         return SUCCESS;
     }
+
+    // -------------------------------------------------------------------------
+    // Supporting methods
+    // -------------------------------------------------------------------------
+
+    private String reduceWhiteSpaces( String input )
+    {
+        return input.replaceAll( REGEX, " " ).trim();
+    }
+
 }

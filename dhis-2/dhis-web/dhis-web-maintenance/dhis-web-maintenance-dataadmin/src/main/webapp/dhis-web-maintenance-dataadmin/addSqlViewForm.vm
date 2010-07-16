@@ -1,19 +1,18 @@
 <script>
 //-----------------------------------------------------------------------
-//init jQuery validation for addResourceViewerForm
+//init jQuery validation for addSqlViewForm
 //-----------------------------------------------------------------------
 	jQuery(document).ready(
 			function()
 			{
-				jQuery("#addResourceViewerForm").validate({
+				jQuery("#addSqlViewForm").validate({
 					 meta:"validate"
 					,errorElement:"td"
 					,submitHandler: function(form)
 									{
-										validateAddUpdateResourceViewer( 'add' );
+										validateAddUpdateSqlView( 'add' );
 									}
 				});
-				//jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
 				jQuery.validator.setMessages( validationMessage );
 				jQuery("#name").focus();
 			}
@@ -24,7 +23,7 @@
 
 <h3>$encoder.htmlEncode( $i18n.getString( "create_new_resource_viewer" ) )</h3>
 
-<form id="addResourceViewerForm" action="addResourceViewer.action" method="post" >
+<form id="addSqlViewForm" action="addSqlView.action" method="post" >
 
 	<table>
 		<tr>
@@ -45,7 +44,7 @@
 		<tr>
 			<td></td>
 			<td><input type="submit" value="$i18n.getString( 'save' )" style="width:10em"/>
-			<input type="button" value="$i18n.getString( 'cancel' )" id="cancel" name="cancel" onclick="window.location.href='showResourceViewerListForm.action'" style="width:10em"/></td>		
+			<input type="button" value="$i18n.getString( 'cancel' )" id="cancel" name="cancel" onclick="window.location.href='showSqlViewListForm.action'" style="width:10em"/></td>		
 		</tr>
 	</table>
 

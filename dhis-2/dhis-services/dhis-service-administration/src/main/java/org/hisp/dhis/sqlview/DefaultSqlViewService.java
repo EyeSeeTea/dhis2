@@ -1,4 +1,4 @@
-package org.hisp.dhis.resourceviewer;
+package org.hisp.dhis.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -39,30 +38,30 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2010-07-06
  */
 @Transactional
-public class DefaultResourceViewerService
-    implements ResourceViewerService
+public class DefaultSqlViewService
+    implements SqlViewService
 {
 
     private static final Pattern p = Pattern.compile( "\\W" );
 
-    private static final String PREFIX_VIEWNAME = "__resourceviewer";
+    private static final String PREFIX_VIEWNAME = "__sqlview";
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericIdentifiableObjectStore<ResourceViewer> resourceViewerStore;
+    private GenericIdentifiableObjectStore<SqlView> sqlViewStore;
 
-    public void setResourceViewerStore( GenericIdentifiableObjectStore<ResourceViewer> resourceViewerStore )
+    public void setSqlViewStore( GenericIdentifiableObjectStore<SqlView> sqlViewStore )
     {
-        this.resourceViewerStore = resourceViewerStore;
+        this.sqlViewStore = sqlViewStore;
     }
 
-    private ResourceViewerExpandStore resourceViewerExpandStore;
+    private SqlViewExpandStore sqlViewExpandStore;
 
-    public void setResourceViewerExpandStore( ResourceViewerExpandStore resourceViewerExpandStore )
+    public void setSqlViewExpandStore( SqlViewExpandStore sqlViewExpandStore )
     {
-        this.resourceViewerExpandStore = resourceViewerExpandStore;
+        this.sqlViewExpandStore = sqlViewExpandStore;
     }
 
     // -------------------------------------------------------------------------
@@ -70,39 +69,39 @@ public class DefaultResourceViewerService
     // -------------------------------------------------------------------------
 
     @Override
-    public void deleteResourceViewer( ResourceViewer resourceViewerObject )
+    public void deleteSqlView( SqlView sqlViewObject )
     {
-        resourceViewerStore.delete( resourceViewerObject );
+        sqlViewStore.delete( sqlViewObject );
     }
 
     @Override
-    public Collection<ResourceViewer> getAllResourceViewers()
+    public Collection<SqlView> getAllSqlViews()
     {
-        return resourceViewerStore.getAll();
+        return sqlViewStore.getAll();
     }
 
     @Override
-    public ResourceViewer getResourceViewer( int viewId )
+    public SqlView getSqlView( int viewId )
     {
-        return resourceViewerStore.get( viewId );
+        return sqlViewStore.get( viewId );
     }
 
     @Override
-    public ResourceViewer getResourceViewer( String viewName )
+    public SqlView getSqlView( String viewName )
     {
-        return resourceViewerStore.getByName( viewName );
+        return sqlViewStore.getByName( viewName );
     }
 
     @Override
-    public int saveResourceViewer( ResourceViewer resourceViewerObject )
+    public int saveSqlView( SqlView sqlViewObject )
     {
-        return resourceViewerStore.save( resourceViewerObject );
+        return sqlViewStore.save( sqlViewObject );
     }
 
     @Override
-    public void updateResourceViewer( ResourceViewer resourceViewerObject )
+    public void updateSqlView( SqlView sqlViewObject )
     {
-        resourceViewerStore.update( resourceViewerObject );
+        sqlViewStore.update( sqlViewObject );
     }
 
     @Override
@@ -127,22 +126,22 @@ public class DefaultResourceViewerService
     }
 
     // -------------------------------------------------------------------------
-    // ResourceViewer Expanded
+    // SqlView expanded
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<String> getAllResourceViewerNames()
+    public Collection<String> getAllSqlViewNames()
     {
-        return resourceViewerExpandStore.getAllResourceViewerNames();
+        return sqlViewExpandStore.getAllSqlViewNames();
     }
 
     @Override
-    public ResourceViewerTable getDataResourceViewerTable( String viewerTableName )
+    public SqlViewTable getDataSqlViewTable( String viewTableName )
     {
-        ResourceViewerTable resourceViewerTable = new ResourceViewerTable();
+        SqlViewTable sqlViewTable = new SqlViewTable();
         
-        resourceViewerExpandStore.setUpDataResourceViewerTable( resourceViewerTable, viewerTableName );
+        sqlViewExpandStore.setUpDataSqlViewTable( sqlViewTable, viewTableName );
         
-        return resourceViewerTable;
+        return sqlViewTable;
     }
 }

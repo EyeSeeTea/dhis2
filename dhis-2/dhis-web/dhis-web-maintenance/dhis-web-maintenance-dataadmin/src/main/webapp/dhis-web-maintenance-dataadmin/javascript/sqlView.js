@@ -1,14 +1,14 @@
 /**
- * Resource Viewer
+ * Sql View
  */
 
-function validateAddUpdateResourceViewer( mode )
+function validateAddUpdateSqlView( mode )
 {
 	var name = $("#name" ).val(); 
 	var sqlquery = $("#sqlquery").val(); 
 
 	$.getJSON(
-		"validateAddUpdateResourceViewer.action",
+		"validateAddUpdateSqlView.action",
 		{
 			"name": name,
 			"sqlquery": sqlquery,
@@ -20,10 +20,10 @@ function validateAddUpdateResourceViewer( mode )
 			{			
 				if ( mode == "add" )
 				{
-					byId("addResourceViewerForm").submit();
+					byId("addSqlViewForm").submit();
 					return;
 				}
-				byId("updateResourceViewerForm").submit();
+				byId("updateSqlViewForm").submit();
 			}
 			else if ( json.response == "input" )
 			{
@@ -34,20 +34,20 @@ function validateAddUpdateResourceViewer( mode )
 
 }
  
-function removeResourceViewerObject( viewId, viewName )
+function removeSqlViewObject( viewId, viewName )
 {
-	removeItem( viewId, viewName, i18n_confirm_delete, 'removeResourceViewerObject.action' );
+	removeItem( viewId, viewName, i18n_confirm_delete, 'removeSqlViewObject.action' );
 }
 
-function showResourceViewerDetails( viewId )
+function showSqlViewDetails( viewId )
 {
     var request = new Request();
-    request.setResponseTypeXML( 'resourceViewerObject' );
-    request.setCallbackSuccess( resourceViewerDetailsReceived );
-    request.send( 'getResourceViewerObject.action?id=' + viewId );
+    request.setResponseTypeXML( 'sqlViewObject' );
+    request.setCallbackSuccess( sqlViewDetailsReceived );
+    request.send( 'getSqlViewObject.action?id=' + viewId );
 }
 
-function resourceViewerDetailsReceived( viewElement )
+function sqlViewDetailsReceived( viewElement )
 {
     setFieldValue( 'nameField', getElementValue( viewElement, 'name' ) );
     
@@ -59,14 +59,14 @@ function resourceViewerDetailsReceived( viewElement )
 }
 
 /**
- * Execute query to create a new viewer
+ * Execute query to create a new view table
  * 
  * @param viewId the item identifier.
  */
-function runResourceViewerQuery( viewId )
+function runSqlViewQuery( viewId )
 {
 	$.getJSON(
-		"executeResourceViewerQuery.action",
+		"executeSqlViewQuery.action",
 		{
 			"id": viewId   
 		},
@@ -96,7 +96,7 @@ function selectALL( checkingStatus )
 	}
 }
 
-function regenerateResourceTableAndViewerTables()
+function regenerateResourceTableAndViewTables()
 {
 	var organisationUnit = byId( "organisationUnit" ).checked;
     var groupSet = byId( "groupSet" ).checked;
@@ -109,13 +109,13 @@ function regenerateResourceTableAndViewerTables()
     if ( organisationUnit || groupSet || dataElementGroupSetStructure || indicatorGroupSetStructure || 
         organisationUnitGroupSetStructure || categoryStructure || categoryOptionComboName )
     {
-        setWaitMessage( i18n_regenerating_resource_tables_and_viewers );
+        setWaitMessage( i18n_regenerating_resource_tables_and_views );
 		
-        var url = "dropAllResourceViewerTables.action";
+        var url = "dropAllSqlViewTables.action";
         
         var request = new Request();
 		request.setResponseTypeXML( 'xmlObject' );
-		request.setCallbackSuccess( regenerateResourceTableAndViewerTablesReceived );
+		request.setCallbackSuccess( regenerateResourceTableAndViewTablesReceived );
         request.send( url );
     }
     else
@@ -124,12 +124,12 @@ function regenerateResourceTableAndViewerTables()
     }
 }
 
-function regenerateResourceTableAndViewerTablesReceived( xmlObject )
+function regenerateResourceTableAndViewTablesReceived( xmlObject )
 {
 	if ( xmlObject.getAttribute( 'type' ) == 'success' )
 	{
 		// Regenerating Resource tables
-		generateResourceTableForViewers();
+		generateResourceTableForViews();
 	}
 	else
 	{
@@ -137,7 +137,7 @@ function regenerateResourceTableAndViewerTablesReceived( xmlObject )
 	}
 }
 
-function generateResourceTableForViewers()
+function generateResourceTableForViews()
 {
     var organisationUnit = byId( "organisationUnit" ).checked;
     var groupSet = byId( "groupSet" ).checked;
@@ -164,7 +164,7 @@ function generateResourceTableForViewers()
         
         var request = new Request();
         request.sendAsPost( params );
-        request.setCallbackSuccess( generateResourceTableForViewersReceived );
+        request.setCallbackSuccess( generateResourceTableForViewsReceived );
         request.send( url );
     }
     else
@@ -173,15 +173,15 @@ function generateResourceTableForViewers()
     }
 }
 
-function generateResourceTableForViewersReceived()
+function generateResourceTableForViewsReceived()
 {
-	generateAllResourceViewerTables();
+	generateAllSqlViewTables();
 }
 
-function generateAllResourceViewerTables()
+function generateAllSqlViewTables()
 {
 	$.getJSON(
-		"regenerateAllResourceViewerTables.action",
+		"regenerateAllSqlViewTables.action",
 		{
 		},
 		function( json )

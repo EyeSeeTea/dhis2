@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,17 +26,20 @@ package org.hisp.dhis.dataadmin.action.resourceviewer;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import org.hisp.dhis.resourceviewer.ResourceViewer;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-06
+ * @version $Id GetSqlViewListAction.java July 10, 2010$
  */
-public class AddResourceViewerAction
+public class GetSqlViewListAction
     extends ActionSupport
 {
     /**
@@ -44,42 +47,26 @@ public class AddResourceViewerAction
      */
     private static final long serialVersionUID = 1L;
 
-    private static final String REGEX = "\\s+";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ResourceViewerService resourceViewerService;
+    private SqlViewService sqlViewService;
 
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Getters & Setters
     // -------------------------------------------------------------------------
 
-    private String name;
+    private List<SqlView> sqlViewObjectList;
 
-    public void setName( String name )
+    public List<SqlView> getSqlViewObjectList()
     {
-        this.name = name;
-    }
-
-    private String description;
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    private String sqlquery;
-
-    public void setSqlquery( String sqlquery )
-    {
-        this.sqlquery = sqlquery;
+        return sqlViewObjectList;
     }
 
     // -------------------------------------------------------------------------
@@ -87,34 +74,11 @@ public class AddResourceViewerAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        if ( (name == null) || (name.trim() == "") )
-        {
-            return ERROR;
-        }
-        if ( (sqlquery == null) || (sqlquery.trim() == "") )
-        {
-            return ERROR;
-        }
-
-        ResourceViewer resourceViewer = new ResourceViewer();
-
-        resourceViewer.setName( reduceWhiteSpaces( name ) );
-        resourceViewer.setDescription( reduceWhiteSpaces( description ) );
-        resourceViewer.setSqlQuery( resourceViewerService.makeUpForQueryStatement( sqlquery ) );
-
-        resourceViewerService.saveResourceViewer( resourceViewer );
+        sqlViewObjectList = new ArrayList<SqlView>( sqlViewService.getAllSqlViews() );
 
         return SUCCESS;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supporting methods
-    // -------------------------------------------------------------------------
-
-    private String reduceWhiteSpaces( String input )
-    {
-        return input.replaceAll( REGEX, " " ).trim();
     }
 
 }

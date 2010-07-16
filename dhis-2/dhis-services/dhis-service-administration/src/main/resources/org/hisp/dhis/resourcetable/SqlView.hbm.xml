@@ -5,7 +5,7 @@
 
 <hibernate-mapping>
 
-  <class name="org.hisp.dhis.resourceviewer.ResourceViewer" table="resourceviewer">
+  <class name="org.hisp.dhis.sqlview.SqlView" table="sqlview">
   
     <id name="id" column="viewid">
       <generator class="native"/>

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.resourceviewer;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -33,7 +33,7 @@ import java.util.Set;
 
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
-import org.hisp.dhis.resourceviewer.ResourceViewerService;
+import org.hisp.dhis.sqlview.SqlViewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,11 +41,10 @@ import com.opensymphony.xwork2.ActionSupport;
 
 /**
  * @author Dang Duy Hieu
- * @version $Id$
- * @since 2010-07-07
+ * @version $Id DropAllSqlViewTablesAction.java July 07, 2010$
  */
 @Transactional
-public class DropAllResourceViewerTablesAction
+public class DropAllSqlViewTablesAction
     extends ActionSupport
 {
     /**
@@ -60,11 +59,11 @@ public class DropAllResourceViewerTablesAction
     @Autowired
     private StatementManager statementManager;
 
-    private ResourceViewerService resourceViewerService;
+    private SqlViewService sqlViewService;
 
-    public void setResourceViewerService( ResourceViewerService resourceViewerService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.resourceViewerService = resourceViewerService;
+        this.sqlViewService = sqlViewService;
     }
 
 
@@ -75,17 +74,10 @@ public class DropAllResourceViewerTablesAction
     public String execute()
         throws Exception
     {
-        Set<String> viewerNames = new HashSet<String>( resourceViewerService.getAllResourceViewerNames() );
-
-        if ( viewerNames != null )
-        {
-            System.out.println( "viewerNames :: " + viewerNames );
-        }
+        Set<String> viewerNames = new HashSet<String>( sqlViewService.getAllSqlViewNames() );
 
         for ( String viewerName : viewerNames )
         {
-            System.out.println( "\n\n viewer name = " + viewerName );
-
             this.dropView( viewerName );
         }
 
