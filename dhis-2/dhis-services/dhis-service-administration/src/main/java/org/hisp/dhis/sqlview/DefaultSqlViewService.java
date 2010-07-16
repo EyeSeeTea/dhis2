@@ -136,6 +136,12 @@ public class DefaultSqlViewService
     }
 
     @Override
+    public boolean isViewTableExists( String viewTableName )
+    {
+        return sqlViewExpandStore.isViewTableExists( viewTableName );
+    }
+	
+    @Override
     public SqlViewTable getDataSqlViewTable( String viewTableName )
     {
         SqlViewTable sqlViewTable = new SqlViewTable();
@@ -144,4 +150,5 @@ public class DefaultSqlViewService
         
         return sqlViewTable;
     }
+
 }

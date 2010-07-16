@@ -475,6 +475,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
+		
+	<bean id="org.hisp.dhis.dataadmin.action.sqlview.CheckViewTableExistenceAction"
+		class="org.hisp.dhis.dataadmin.action.sqlview.CheckViewTableExistenceAction"
+		scope="prototype">
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
+	</bean>
 	
 	<bean id="org.hisp.dhis.dataadmin.action.sqlview.ShowUpSqlViewTableAction"
 		class="org.hisp.dhis.dataadmin.action.sqlview.ShowUpSqlViewTableAction"

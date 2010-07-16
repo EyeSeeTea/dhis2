@@ -16,5 +16,7 @@ public interface SqlViewExpandStore
 
     Collection<String> getAllSqlViewNames();
 
+    boolean isViewTableExists( String viewTableName );
+    
     void setUpDataSqlViewTable( SqlViewTable sqlViewTable, String viewTableName );
 }

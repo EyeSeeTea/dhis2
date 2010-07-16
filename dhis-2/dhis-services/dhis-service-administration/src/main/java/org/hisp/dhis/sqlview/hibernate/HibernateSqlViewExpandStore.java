@@ -38,11 +38,9 @@ import java.util.Set;
 
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
-import org.hibernate.SessionFactory;
 import org.hisp.dhis.sqlview.SqlViewExpandStore;
 import org.hisp.dhis.sqlview.SqlViewTable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Dang Duy Hieu
@@ -54,19 +52,13 @@ public class HibernateSqlViewExpandStore
 {
     private static final String PREFIX_SELECT_QUERY = "SELECT * FROM ";
 
-    private static final String PREFIX_VIEWNAME = "__sqlview" + "%";
+    private static final String PREFIX_VIEWNAME = "__sqlview";
 
     private static final String[] types = { "VIEW" };
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private SessionFactory sessionFactory;
 
     @Autowired
     private StatementManager statementManager;
@@ -78,32 +70,59 @@ public class HibernateSqlViewExpandStore
     @Override
     public Collection<String> getAllSqlViewNames()
     {
-        Connection conn = getConnection();
+        final StatementHolder holder = statementManager.getHolder();
         DatabaseMetaData mtdt;
         Set<String> viewersName = new HashSet<String>();
 
         try
         {
-            mtdt = conn.getMetaData();
+            mtdt = holder.getConnection().getMetaData();
 
-            ResultSet rs = mtdt.getTables( null, null, PREFIX_VIEWNAME, types );
+            ResultSet rs = mtdt.getTables( null, null, PREFIX_VIEWNAME + "%", types );
 
             while ( rs.next() )
             {
                 viewersName.add( rs.getString( "TABLE_NAME" ) );
             }
 
-            conn.close();
         }
         catch ( SQLException e )
         {
             e.printStackTrace();
+        }
+        finally
+        {
+            holder.close();
         }
 
         return viewersName;
 
     }
 
+
+    @Override
+    public boolean isViewTableExists( String viewTableName )
+    {
+        final StatementHolder holder = statementManager.getHolder();
+        DatabaseMetaData mtdt;
+
+        try
+        {
+            mtdt = holder.getConnection().getMetaData();
+            ResultSet rs = mtdt.getTables( null, null, viewTableName.toLowerCase(), types );
+            
+            return rs.next();
+        }
+        catch ( Exception e )
+        {
+            return false;
+        }
+        finally
+        {
+            holder.close();
+        }
+    }
+    
     @Override
     public void setUpDataSqlViewTable( SqlViewTable sqlViewTable, String viewTableName )
     {
@@ -118,7 +137,7 @@ public class HibernateSqlViewExpandStore
         {
             throw new RuntimeException( "Failed to get data from view " + PREFIX_SELECT_QUERY + viewTableName, e );
         }
-        
+
         sqlViewTable.createViewerStructure( rs );
         sqlViewTable.addRecord( rs );
 
@@ -128,11 +147,6 @@ public class HibernateSqlViewExpandStore
     // -------------------------------------------------------------------------
     // Supporting methods
     // -------------------------------------------------------------------------
-
-    private Connection getConnection()
-    {
-        return statementManager.getHolder().getConnection();
-    }
 
     /**
      * Uses StatementManager to obtain a scrollable, read-only ResultSet based

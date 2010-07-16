@@ -27,8 +27,8 @@ package org.hisp.dhis.dataadmin.action.sqlview;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.sqlview.SqlViewService;
-import org.hisp.dhis.sqlview.SqlViewTable;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -36,9 +36,9 @@ import com.opensymphony.xwork2.ActionSupport;
  * Updates a existing sqlview in database.
  * 
  * @author Dang Duy Hieu
- * @version $Id ShowUpSqlViewTableAction.java July 12, 2010$
+ * @version $Id CheckViewTableExistenceAction.java July 16, 2010$
  */
-public class ShowUpSqlViewTableAction
+public class CheckViewTableExistenceAction
     extends ActionSupport
 {
     /**
@@ -58,30 +58,36 @@ public class ShowUpSqlViewTableAction
     }
 
     // -------------------------------------------------------------------------
+    // I18n
+    // -------------------------------------------------------------------------
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
+    // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String viewTableName;
+    private Integer id;
 
-    public void setViewTableName( String viewTableName )
+    public void setId( Integer id )
     {
-        this.viewTableName = viewTableName;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    public String getViewTableName()
-    {
-        return viewTableName;
-    }
+    private String message;
 
-    private SqlViewTable sqlViewTable;
-
-    public SqlViewTable getSqlViewTable()
+    public String getMessage()
     {
-        return sqlViewTable;
+        return message;
     }
 
     // -------------------------------------------------------------------------
@@ -90,7 +96,23 @@ public class ShowUpSqlViewTableAction
 
     public String execute()
     {
-        sqlViewTable = sqlViewService.getDataSqlViewTable( viewTableName );
+        if ( id == null || (id.intValue() == -1) )
+        {
+            message = i18n.getString( "sql_view_instance_invalid" );
+
+            return ERROR;
+        }
+
+        String viewTableName = sqlViewService.setUpViewTableName( sqlViewService.getSqlView( id ).getName() );
+
+        if ( !sqlViewService.isViewTableExists( viewTableName ) )
+        {
+            message = i18n.getString( "sql_view_table_is_not_created_yet" );
+
+            return ERROR;
+        }
+
+        message = viewTableName;
 
         return SUCCESS;
     }

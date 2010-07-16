@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sql View
  */
 
@@ -195,6 +195,28 @@ function generateAllSqlViewTables()
 				setFieldValue( 'warningArea', json.message );
 	
 				showWarning();
+			}
+		}
+	);
+
+}
+
+function showDataSqlViewForm( viewId )
+{
+	$.getJSON(
+		"checkViewTableExistence.action",
+		{
+			"id": viewId
+		},
+		function( json )
+		{
+			if ( json.response == "success" )
+			{
+				window.location.href = "showDataSqlViewForm.action?viewTableName=" + json.message;
+			}
+			else if ( json.response == "error" )
+			{
+				alert( json.message );
 			}
 		}
 	);

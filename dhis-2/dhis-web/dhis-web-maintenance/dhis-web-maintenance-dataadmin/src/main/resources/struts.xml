@@ -493,6 +493,14 @@
 			<param name="requiredAuthorities">F_SQLVIEW_REGENERATE</param>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
+				
+		<action name="checkViewTableExistence"
+			class="org.hisp.dhis.dataadmin.action.sqlview.CheckViewTableExistenceAction">
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<param name="requiredAuthorities">F_SQLVIEW_MANAGEMENT</param>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
 		
 		<action name="showDataSqlViewForm" class="org.hisp.dhis.dataadmin.action.sqlview.ShowUpSqlViewTableAction">
 			<result name="success" type="velocity">/main.vm</result>

@@ -9,7 +9,7 @@
 </style>
 
 
-<h3>$i18n.getString( "view_data_resource_viewer" ) - $resourceViewerInstance.name</h3>
+<h3>$i18n.getString( "view_data_for" ) - $!viewTableName</h3>
 
 	<table class="listTable">
 	<thead>
@@ -25,7 +25,7 @@
 		<tr>
 			#foreach( $columnValue in $row )
 				<td style="text-align:center">
-					#if ($!columnValue) $columnValue 
+					#if ($!columnValue)$columnValue 
 					#else<span style="color:blue;font-weight:bold;">null</span>#end
 				</td>
 			#end
