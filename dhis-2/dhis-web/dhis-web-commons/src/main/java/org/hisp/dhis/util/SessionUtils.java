@@ -38,9 +38,18 @@ public class SessionUtils
     public static final String KEY_PREVIEW_TYPE = "previewType";
     public static final String KEY_PREVIEW_STATUS = "previewStatus";
     
+    public static final String KEY_CURRENT_YEAR = "currentYear";
+    
     public static Object getSessionVar( String name )
     {
         return ActionContext.getContext().getSession().get( name );
+    }
+
+    public static Object getSessionVar( String name, Object defaultValue )
+    {
+        Object object = ActionContext.getContext().getSession().get( name );
+        
+        return object != null ? object : defaultValue; 
     }
 
     public static void setSessionVar( String name, Object value )
