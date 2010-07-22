@@ -25,6 +25,15 @@
 			<param name="javascripts">javascript/dataElement.js,javascript/dataDictionary.js</param>
 			<param name="stylesheets">../dhis-web-commons/paging/paging.css</param>
 		</action>
+		
+		<action name="searchDataElement"
+			class="org.hisp.dhis.dd.action.dataelement.GetDataElementListAction" method="searchDataElementByName">
+			<result name="success" type="velocity-xml">
+				/dhis-web-maintenance-datadictionary/responseDataElements.vm</result>
+			<result name="input" type="velocity-xml">
+				/dhis-web-maintenance-datadictionary/responseInput.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
 
 		<action name="showSortDataElementForm"
 			class="org.hisp.dhis.dd.action.dataelement.GetDataElementListSortOrderAction">
@@ -116,6 +125,7 @@
 				/dhis-web-maintenance-datadictionary/responseInput.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
+		
 
 		<!-- DataElementGroup Editor -->
 

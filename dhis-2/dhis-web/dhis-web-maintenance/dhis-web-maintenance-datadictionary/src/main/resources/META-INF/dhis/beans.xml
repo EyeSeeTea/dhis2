@@ -124,7 +124,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
 		</property>
 	</bean>
-
+	
 	<!-- Data Element Group -->
 
 	<bean

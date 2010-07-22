@@ -125,6 +125,18 @@ public class HibernateDataElementStore
         return (DataElement) criteria.uniqueResult();
     }
 
+    @SuppressWarnings( "unchecked" )
+    public Collection<DataElement> searchDataElementByName( String key )
+    {
+
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( DataElement.class );
+        criteria.add( Restrictions.ilike( "name", "%" + key + "%" ) );
+
+        return criteria.list();
+    }
+    
     public DataElement getDataElementByAlternativeName( String alternativeName )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -493,5 +505,25 @@ public class HibernateDataElementStore
         Number countResult = (Number) query.uniqueResult();
         
         return countResult.intValue();
+    }
+
+    @Override
+    public int countNumberOfSearchDataElementByName( String key )
+    {
+        return searchDataElementByName( key ).size();
+    }
+
+    @Override
+    public Collection<DataElement> searchDataElementByName( String key, int from, int to )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( DataElement.class );
+        criteria.add( Restrictions.ilike( "name", "%" + key + "%" ) );
+        criteria.addOrder( Order.asc( "name" ) );
+        criteria.setFirstResult( from );
+        criteria.setMaxResults( to );
+
+        return criteria.list();
     }
 }

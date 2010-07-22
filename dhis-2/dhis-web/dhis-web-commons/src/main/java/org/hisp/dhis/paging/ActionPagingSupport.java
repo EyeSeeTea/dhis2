@@ -1,5 +1,7 @@
 package org.hisp.dhis.paging;
 
+import java.util.List;
+
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.system.paging.Paging;
 import com.opensymphony.xwork2.ActionSupport;

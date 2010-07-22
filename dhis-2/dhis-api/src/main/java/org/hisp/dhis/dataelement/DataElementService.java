@@ -107,7 +107,14 @@ public interface DataElementService
      *         match.
      */
     DataElement getDataElementByAlternativeName( String alternativeName );
-
+    
+    /**
+     * Returns List of DataElements with a given key.
+     * 
+     * @param key the name of the DataElement to return.
+     * @return List of DataElements with a given key, or all dataelements if no match.
+     */
+    Collection<DataElement> searchDataElementByName( String key );
     /**
      * Returns a DataElement with a given short name.
      * 
@@ -510,7 +517,11 @@ public interface DataElementService
     Collection<DataElementOperand> getAllGeneratedOperands( Collection<DataElement> dataElements );
     
     int getNumberOfDataElements();
-    
-    Collection<DataElement> getAllDataElements(int from, int to);
+
+    Collection<DataElement> getAllDataElements( int from, int to );
+
+    Collection<DataElement> searchDataElementByName( String key, int from, int to );
+
+    int countNumberOfSearchDataElementByName( String key );
 
 }
