@@ -54,7 +54,6 @@ import org.codehaus.stax2.XMLStreamReader2;
 public class DefaultXMLStreamReader
     implements XMLReader
 {
-
     private static final Log log = LogFactory.getLog( DefaultXMLStreamReader.class );
 
     private static final String[] EVENTS =
@@ -69,6 +68,7 @@ public class DefaultXMLStreamReader
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
+    
     public DefaultXMLStreamReader( XMLStreamReader2 reader )
     {
         this.reader = reader;
@@ -77,6 +77,7 @@ public class DefaultXMLStreamReader
     // -------------------------------------------------------------------------
     // XMLReader implementation
     // -------------------------------------------------------------------------
+    
     @Override
     public String getElementName()
     {
@@ -100,8 +101,28 @@ public class DefaultXMLStreamReader
         {
             reader.next();
 
-            return reader.getEventType() == CHARACTERS ? reader.getText() : null;
+            return this.getText();
         } catch ( XMLStreamException ex )
+        {
+            throw new RuntimeException( "Failed to get element value", ex );
+        }
+    }
+
+    @Override
+    public void moveToStartElement( )
+    {
+        try
+        {
+           while (reader.hasNext())  
+           { 
+               reader.next();
+               if( reader.isStartElement())
+               {
+                   break;
+               }
+           } 
+        }
+          catch ( XMLStreamException ex )
         {
             throw new RuntimeException( "Failed to get element value", ex );
         }
@@ -174,7 +195,7 @@ public class DefaultXMLStreamReader
             return reader.next() != END_DOCUMENT;
         } catch ( XMLStreamException ex )
         {
-            throw new RuntimeException( "Failed to move cursor to next element", ex );
+            throw new RuntimeException( "Failed to move cursor to next event", ex );
         }
     }
 
@@ -186,7 +207,7 @@ public class DefaultXMLStreamReader
             return !( reader.next() == END_ELEMENT && reader.getLocalName().equals( endElementName ) );
         } catch ( XMLStreamException ex )
         {
-            throw new RuntimeException( "Failed to move cursor to next element", ex );
+            throw new RuntimeException( "Failed to move cursor to end element", ex );
         }
     }
 
@@ -232,12 +253,13 @@ public class DefaultXMLStreamReader
                     reader.next();
 
                     // Read text if any
-
-                    elements.put( currentElementName, reader.getEventType() == CHARACTERS ? reader.getText() : null );
-                } else
+                    elements.put( currentElementName, this.getText()  );
+                }
+                else
                 {
                     reader.next();
                 }
+
             }
 
             return elements;
@@ -320,5 +342,17 @@ public class DefaultXMLStreamReader
         {
             throw new RuntimeException( "Failed to create XML Event reader", ex );
         }
+    }
+
+    protected String getText()
+        throws XMLStreamException
+    {
+        StringBuffer sb = new StringBuffer();
+        while ( reader.isCharacters() )
+        {
+            sb.append( reader.getText() );
+            reader.next();
+        }
+        return sb.length() == 0 ? null : sb.toString();
     }
 }

@@ -3,6 +3,7 @@ var NS4 = (navigator.appName == "Netscape" && parseInt(navigator.appVersion) < 5
 function addValue( theSel, theText, theValue ) {
     var newOpt = new Option( theText, theValue );
     var selLength = theSel.length;
+    jQuery(newOpt).attr('selected', 'selected');
     theSel.options[ selLength ] = newOpt;
 }
 
@@ -396,4 +397,27 @@ function sortList( id, type ) {
     for (var i=0; i<o.length; i++) {
         obj.options[i] = new Option(o[i].text, o[i].value);
     }
+}
+
+/**
+ * Shows available periods in output forms.
+ */
+function getAvailablePeriods( periodTypeId, availablePeriodsId, selectedPeriodsId, year )
+{
+	$.getJSON( "../dhis-web-commons-ajax-json/getAvailablePeriods.action", {
+		"periodType": $( "#" + periodTypeId ).val(),
+		"year": year },
+		function( json ) {
+			var availableList = document.getElementById( availablePeriodsId );
+			var selectedList = document.getElementById( selectedPeriodsId );
+			clearList( availableList );
+			
+			for ( var i = 0; i < json.periods.length; i++ )
+			{
+				if ( listContains( selectedList, json.periods[i].externalId ) == false )
+				{
+					addValue( availableList, json.periods[i].name, json.periods[i].externalId );
+				}
+			}			
+		} );
 }

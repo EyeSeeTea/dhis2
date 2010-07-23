@@ -1,4 +1,4 @@
-package org.hisp.dhis.reporting.dataset.dataaccess;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,20 +27,52 @@ package org.hisp.dhis.reporting.dataset.dataaccess;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
+
+import com.opensymphony.xwork2.ActionSupport;
+
 /**
- * @author Lars Helge Overland
- * @version $Id: ReportDataAccessException.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Dang Duy Hieu
+ * @version $Id GetSqlViewListAction.java July 10, 2010$
  */
-public class ReportDataAccessException
-    extends Exception
+public class GetSqlViewListAction
+    extends ActionSupport
 {
-    public ReportDataAccessException( String message )
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private SqlViewService sqlViewService;
+
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        super( message );
+        this.sqlViewService = sqlViewService;
     }
-    
-    public ReportDataAccessException( String message, Throwable cause )
+
+    // -------------------------------------------------------------------------
+    // Getters & Setters
+    // -------------------------------------------------------------------------
+
+    private List<SqlView> sqlViewObjectList;
+
+    public List<SqlView> getSqlViewObjectList()
     {
-        super( message, cause );
+        return sqlViewObjectList;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        sqlViewObjectList = new ArrayList<SqlView>( sqlViewService.getAllSqlViews() );
+
+        return SUCCESS;
     }
 }

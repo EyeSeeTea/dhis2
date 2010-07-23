@@ -27,6 +27,7 @@ package org.amplecode.staxwax.reader;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+import java.io.ByteArrayInputStream;
 import javax.xml.stream.XMLStreamException;
 import static junit.framework.Assert.assertEquals;
 
@@ -67,6 +68,8 @@ public class XMLReaderTest {
   private URL relaxNg;
   private String[] specialChars = {"&", "<", ">", "\"", "'"};
 
+
+  private static int BIGTEXTSIZE = 5000; 
   // -------------------------------------------------------------------------
   // Fixture
   // -------------------------------------------------------------------------
@@ -116,6 +119,22 @@ public class XMLReaderTest {
 
       i++;
     }
+  }
+
+  @Test
+  public void testMoveToStartElement() {
+    XMLReader reader = XMLFactory.getXMLReader(inputStreamA);
+    reader.moveToStartElement();
+    assertEquals(COLLECTION_NAME,reader.getElementName());
+    reader.closeReader();
+  }
+
+  @Test
+  public void testEventMoveToStartElement() {
+    XMLReader evReader = XMLFactory.getXMLEventReader( inputStreamA );
+    evReader.moveToStartElement();
+    assertEquals(COLLECTION_NAME,evReader.getElementName());
+    evReader.closeReader();
   }
 
   @Test
@@ -348,5 +367,31 @@ public class XMLReaderTest {
           er.next();
         }
     }
+
+  @Test
+  public void testBigTextRead() {
+
+    char[] bigText = new char[BIGTEXTSIZE];
+    for (int i=0; i<BIGTEXTSIZE; ++i) {
+        bigText[i]='A';
+    }
+
+    //ByteArrayInputStream xmlStream = new ByteArrayInputStream(xmlBuf);
+
+    StringBuilder xml = new StringBuilder(BIGTEXTSIZE*2+40);
+    xml.append( "<root>");
+    xml.append( "<node>"); xml.append(bigText); xml.append( "</node>");
+    xml.append( "<node>"); xml.append(bigText); xml.append( "</node>");
+    xml.append( "</root>");
+
+    ByteArrayInputStream xmlStream = new ByteArrayInputStream(xml.toString().getBytes());
+    XMLReader reader = XMLFactory.getXMLReader(xmlStream);
+
+    reader.moveToStartElement( "node");
+    assertEquals(BIGTEXTSIZE, reader.getElementValue().length());
+    reader.moveToStartElement( "node");
+    assertEquals(BIGTEXTSIZE, reader.getElementValue().length());
+  }
+
 }
 

@@ -86,7 +86,8 @@ Ext.onReady(function(){
 				'select': {
 					fn: function() {						
 						dataElementComboPc.reset();
-						dataElementsStorePc.baseParams = { id: dataElementGroupComboPc.getValue() };											
+						dataElementsStorePc.baseParams = { id: dataElementGroupComboPc.getValue() };	
+						dataElementsStorePc.reload();	
 					},
 					scope: this
 				}
@@ -130,7 +131,8 @@ Ext.onReady(function(){
 				'select': {
 					fn: function() {						
 						indicatorsComboPc.reset();
-						indicatorsStorePc.baseParams = { id: indicatorGroupComboPc.getValue() };													
+						indicatorsStorePc.baseParams = { id: indicatorGroupComboPc.getValue() };		
+						indicatorsStorePc.reload();	
 					},
 					scope: this
 				}
@@ -147,9 +149,9 @@ Ext.onReady(function(){
 			
 			
 			if(SELECTED_ORGID==''){
-				alert("Please select organisation unit !");
+				showWarningMessage("Please select organisation unit !");
 			}else if(periods==''){
-				alert("Please select period !");
+				showWarningMessage("Please select period !");
 			}else{	
 			
 				var xaxis = periods.split(',');	
@@ -168,9 +170,9 @@ Ext.onReady(function(){
 
 				if(yaxis==''){
 					if($("#axis-x-de-pc").css("display")=="block"){	
-						alert("Please select data element !");	
+						showWarningMessage("Please select data element !");	
 					}else{
-						alert("Please select indicator !");	
+						showWarningMessage("Please select indicator !");	
 					}					
 				}else{	
 				
