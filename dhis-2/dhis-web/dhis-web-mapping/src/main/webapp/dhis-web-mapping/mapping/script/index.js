@@ -1801,7 +1801,7 @@ Ext.onReady( function() {
     
     var deleteMapButton = new Ext.Button({
         id: 'deletemap_b',
-        text: i18n_delete + ' ' + i18n_map,
+        text: i18n_delete_map,
 		cls: 'aa_med',
         handler: function() {
             var mlp = Ext.getCmp('deletemap_cb').getValue();
