@@ -17,12 +17,12 @@ if ( selectionTreeSelection )
 
 function validateDataSetReport()
 {
-    if ( !getListValue( "selectedDataSetId" ) || getListValue( "selectedDataSetId" ) == "null" )
+    if ( !getListValue( "dataSetId" ) )
     {
         setMessage( i18n_select_data_set );
         return false;
     }
-    if ( !getListValue( "selectedPeriodIndex" ) || getListValue( "selectedPeriodIndex" ) == "null" )
+    if ( !getListValue( "periodId" ) )
     {
         setMessage( i18n_select_period );
         return false;
@@ -33,11 +33,5 @@ function validateDataSetReport()
         return false;
     }
     
-    return true;
-}
-
-function printDateSetReportPreview()
-{
-	var o = $("div#printDateSetPreviewDiv");
-	o.jqprint(); 
+    document.getElementById( "reportForm" ).submit();
 }

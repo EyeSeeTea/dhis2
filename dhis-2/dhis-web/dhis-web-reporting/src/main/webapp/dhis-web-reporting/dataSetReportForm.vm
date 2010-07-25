@@ -29,7 +29,7 @@
 				#foreach ( $type in $periodTypes )
 					<option value="$type.name">$type.name</option>
 				#end
-			</select><br><br>
+			</select><br>
 			
 	        <select id="periodId" name="periodId" style="width:325px" onchange="displayCompleteness()">
 	        </select>
@@ -60,7 +60,7 @@
     </td>
   </tr>  
   <tr>  
-	<td><input type="submit" value="$i18n.getString( "generate" )" style="width:115px"></td>
+	<td><input type="button" value="$i18n.getString( "generate" )" style="width:115px" onclick="validateDataSetReport()"></td>
 	<td></td>		
   </tr>  
 </table>
