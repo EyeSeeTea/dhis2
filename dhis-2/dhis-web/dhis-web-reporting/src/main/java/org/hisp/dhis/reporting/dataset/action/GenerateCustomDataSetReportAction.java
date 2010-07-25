@@ -113,6 +113,13 @@ public class GenerateCustomDataSetReportAction
         this.periodId = periodId;
     }
 
+    private boolean selectedUnitOnly;
+    
+    public void setSelectedUnitOnly( boolean selectedUnitOnly )
+    {
+        this.selectedUnitOnly = selectedUnitOnly;
+    }
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------      
@@ -138,18 +145,6 @@ public class GenerateCustomDataSetReportAction
     	return this.reportingPeriod;
     }  
    
-    private String selectedUnitOnly;
-    
-    public void setSelectedUnitOnly( String selectedUnitOnly )
-    {
-    	this.selectedUnitOnly = selectedUnitOnly;
-    }
-    
-    public String getSelectedUnitOnly()
-    {
-    	return selectedUnitOnly;
-    }
-    
     // -----------------------------------------------------------------------
     // Action implementation
     // -----------------------------------------------------------------------
@@ -165,7 +160,7 @@ public class GenerateCustomDataSetReportAction
         
         if ( unit != null && dataSet != null && period != null )
         {
-            Map<String, String> aggregatedDataValueMap = dataSetReportService.getAggregatedValueMap( dataSet, unit, period, selectedUnitOnly != null );
+            Map<String, String> aggregatedDataValueMap = dataSetReportService.getAggregatedValueMap( dataSet, unit, period, selectedUnitOnly );
             
             DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryFormByDataSet( dataSet );
             

@@ -37,7 +37,7 @@
   </tr>
   <tr>  	
       <td><label>$i18n.getString( "use_data_for" )<br>$i18n.getString( "selected_unit_only" )</label></td>
-      <td><input type="checkbox" id="selectedUnitOnly" name="selectedUnitOnly" #if( $selectedUnitOnly ) checked="checked" #end onchange="document.getElementById( 'reportForm' ).submit();" ></td>
+      <td><input type="checkbox" id="selectedUnitOnly" name="selectedUnitOnly" value="true"></td>
   </tr>
   <tr>
   	<td colspan="2" style="height:10px"></td>
