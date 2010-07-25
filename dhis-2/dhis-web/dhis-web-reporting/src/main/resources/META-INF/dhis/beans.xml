@@ -553,8 +553,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="dataSetService"
       ref="org.hisp.dhis.dataset.DataSetService"/>
-    <property name="periodService"
-      ref="org.hisp.dhis.period.PeriodService"/>
   </bean>
   
   <bean id="org.hisp.dhis.reporting.completeness.action.GetDataCompletenessAction"
@@ -564,6 +562,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       ref="dataCompletenessServiceProvider"/>
     <property name="dataSetService"
       ref="org.hisp.dhis.dataset.DataSetService"/>
+	<property name="periodService"
+	  ref="org.hisp.dhis.period.PeriodService"/>
   </bean>
   
   <bean id="org.hisp.dhis.reporting.completeness.action.GetDataCompletenessPDFAction"
