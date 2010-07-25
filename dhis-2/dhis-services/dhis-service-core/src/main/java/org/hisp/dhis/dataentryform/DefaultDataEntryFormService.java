@@ -28,15 +28,7 @@ package org.hisp.dhis.dataentryform;
  */
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormAssociation;
-import org.hisp.dhis.dataentryform.DataEntryFormAssociationService;
-import org.hisp.dhis.dataentryform.DataEntryFormService;
-import org.hisp.dhis.dataentryform.DataEntryFormStore;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.program.ProgramStage;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,10 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultDataEntryFormService
     implements DataEntryFormService
 {
-    private static final Pattern DATAENTRYFORM_PATTERN = Pattern.compile( "(<input.*?)[/]?>", Pattern.DOTALL );
-    private static final Pattern OPERAND_PATTERN = Pattern.compile( "value\\[(.*)\\].value:value\\[(.*)\\].value" );
-    private static final String NULL_REPLACEMENT = "";
-    
     // ------------------------------------------------------------------------
     // Dependencies
     // ------------------------------------------------------------------------
@@ -152,64 +140,5 @@ public class DefaultDataEntryFormService
     public Collection<DataEntryForm> getAllDataEntryForms()
     {
         return dataEntryFormStore.getAllDataEntryForms();
-    }
-    
-    public String prepareReportContent( String dataEntryFormCode, Map<String, String> dataValues )
-    {        
-        StringBuffer buffer = new StringBuffer();
-
-        Matcher matDataElement = DATAENTRYFORM_PATTERN.matcher( dataEntryFormCode );
-
-        // ---------------------------------------------------------------------
-        // Iterate through all matching data element fields.
-        // ---------------------------------------------------------------------
-        
-        while ( matDataElement.find() )
-        {       
-            // -----------------------------------------------------------------
-            // Get input HTML code
-            // -----------------------------------------------------------------
-            
-            String dataElementCode = matDataElement.group( 1 );
-            
-            // -----------------------------------------------------------------
-            // Pattern to extract data element ID from data element field
-            // -----------------------------------------------------------------
-
-            Matcher matDataElementId = OPERAND_PATTERN.matcher( dataElementCode );
-            
-            if ( matDataElementId.find() && matDataElementId.groupCount() > 0 )
-            {   
-                // -------------------------------------------------------------
-                // Get data element ID of data element.
-                // -------------------------------------------------------------
-                
-                int dataElementId = Integer.parseInt( matDataElementId.group( 1 ) );
-                int optionComboId = Integer.parseInt( matDataElementId.group( 2 ) ); 
-                
-               // --------------------------------------------------------------
-               // Find existing value of data element in data set.
-               // --------------------------------------------------------------               
-                
-                String dataElementValue = dataValues.get(dataElementId+":"+optionComboId);               
-                
-                if ( dataElementValue == null )
-                {
-                    dataElementValue = NULL_REPLACEMENT;
-                }
-                        
-                dataElementCode = dataElementValue;
-                
-                matDataElement.appendReplacement( buffer, dataElementCode );
-            }
-        }
-
-        // --------------------------------------------------------------
-        // Add remaining text 
-        // --------------------------------------------------------------               
-        
-        matDataElement.appendTail( buffer );
-        
-        return buffer.toString();
     }
 }
