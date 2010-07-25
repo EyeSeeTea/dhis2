@@ -36,21 +36,6 @@ function validateDataSetReport()
     return true;
 }
 
-// -----------------------------------------------------------------------------
-// Generate data source
-// ----------------------------------------------------------------------------
-
-function runAndViewDataSetReport()
-{
-    if ( validateDataSetReport() )
-    {
-        setWaitMessage( i18n_generating_report );
-        
-        document.getElementById("reportForm").action = "generateCustomDataSetReport.action";
-		document.getElementById("reportForm").submit();
-    }
-}
-
 function printDateSetReportPreview()
 {
 	var o = $("div#printDateSetPreviewDiv");

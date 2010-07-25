@@ -455,6 +455,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <!-- DataSetReport Action -->
   
+  <bean id="org.hisp.dhis.reporting.dataset.action.GetDataSetReportOptionsAction"
+	class="org.hisp.dhis.reporting.dataset.action.GetDataSetReportOptionsAction">
+	<property name="dataSetService"
+	  ref="org.hisp.dhis.dataset.DataSetService"/>
+  </bean>
+  
   <bean id="org.hisp.dhis.reporting.dataset.action.NextPeriodsAction"
     class="org.hisp.dhis.reporting.dataset.action.NextPeriodsAction">
     <property name="selectedStateManager"
@@ -487,13 +493,17 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.reporting.dataset.action.GenerateCustomDataSetReportAction" 
     class="org.hisp.dhis.reporting.dataset.action.GenerateCustomDataSetReportAction" 
-    scope="prototype">		
-    <property name="selectedStateManager"
-      ref="org.hisp.dhis.reporting.dataset.state.SelectedStateManager"/>	
+    scope="prototype">	
     <property name="dataEntryFormService"
       ref="org.hisp.dhis.dataentryform.DataEntryFormService"/>
 	<property name="dataSetReportService"
 	  ref="org.hisp.dhis.datasetreport.DataSetReportService"/>
+    <property name="dataSetService"
+      ref="org.hisp.dhis.dataset.DataSetService"/>
+	<property name="periodService"
+	  ref="org.hisp.dhis.period.PeriodService"/>
+    <property name="selectionTreeManager"
+      ref="org.hisp.dhis.oust.manager.SelectionTreeManager"/>		
   </bean>
   
   <bean id="org.hisp.dhis.reporting.dataset.action.GenerateDefaultDataSetReportAction" 

@@ -364,11 +364,7 @@
       <result name="success" type="redirect">showDataSetReportForm.action</result>
     </action>
 	  
-    <action name="dataSetReport" class="org.hisp.dhis.commons.action.NoAction">
-      <result name="success" type="redirect">showDataSetReportForm.action</result>
-    </action>
-    
-    <action name="showDataSetReportForm" class="org.hisp.dhis.reporting.dataset.action.SelectReportAction">      
+    <action name="showDataSetReportForm" class="org.hisp.dhis.reporting.dataset.action.GetDataSetReportOptionsAction">      
       <result name="success" type="velocity">/main.vm</result>
       <param name="menuTreeHeight">420</param>	  
       <param name="page">/dhis-web-reporting/dataSetReportForm.vm</param>

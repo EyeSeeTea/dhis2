@@ -32,17 +32,22 @@ import java.util.Map;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datasetreport.DataSetReportService;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reporting.dataset.state.SelectedStateManager;
+import org.hisp.dhis.period.PeriodService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public class GenerateCustomDataSetReportAction
-    extends AbstractAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -54,14 +59,7 @@ public class GenerateCustomDataSetReportAction
     {
         this.dataEntryFormService = dataEntryFormService;
     }    
-    
-    private SelectedStateManager selectedStateManager;
-
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
-    {
-        this.selectedStateManager = selectedStateManager;
-    }
-    
+        
     private DataSetReportService dataSetReportService;
 
     public void setDataSetReportService( DataSetReportService dataSetReportService )
@@ -69,8 +67,54 @@ public class GenerateCustomDataSetReportAction
         this.dataSetReportService = dataSetReportService;
     }
 
+    private DataSetService dataSetService;
+
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
+    
+    private SelectionTreeManager selectionTreeManager;
+
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    {
+        this.selectionTreeManager = selectionTreeManager;
+    }
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
+
     // -------------------------------------------------------------------------
-    // Parameters
+    // Input
+    // -------------------------------------------------------------------------      
+    
+    private Integer dataSetId;
+    
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    private String periodId;
+
+    public void setPeriodId( String periodId )
+    {
+        this.periodId = periodId;
+    }
+
+    // -------------------------------------------------------------------------
+    // Output
     // -------------------------------------------------------------------------      
     
     private String customDataEntryFormCode;
@@ -113,11 +157,11 @@ public class GenerateCustomDataSetReportAction
     public String execute()
         throws Exception
     {        
-        OrganisationUnit unit = selectedStateManager.getSelectedOrganisationUnit();    
+        OrganisationUnit unit = selectionTreeManager.getSelectedOrganisationUnit();
         
-        DataSet dataSet = selectedStateManager.getSelectedDataSet();
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
 
-        Period period = selectedStateManager.getSelectedPeriod();       
+        Period period = periodService.getPeriodByExternalId( periodId );
         
         if ( unit != null && dataSet != null && period != null )
         {
