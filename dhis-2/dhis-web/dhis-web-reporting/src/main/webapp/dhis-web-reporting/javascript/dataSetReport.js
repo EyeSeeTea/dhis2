@@ -1,21 +1,5 @@
 
 // -----------------------------------------------------------------------------
-// View report
-// ----------------------------------------------------------------------------
-
-function previewDataSetReport()
-{
-	document.getElementById("reportForm").action = "getDataSetReportTypeForPreview.action";
-	document.getElementById("reportForm").submit();	
-}
-
-function generateDataSetReport()
-{
-	document.getElementById("reportForm").action = "getDataSetReportTypeForPDF.action";
-	document.getElementById("reportForm").submit();
-}
-
-// -----------------------------------------------------------------------------
 // Validation
 // ----------------------------------------------------------------------------
 
@@ -56,57 +40,14 @@ function validateDataSetReport()
 // Generate data source
 // ----------------------------------------------------------------------------
 
-var tempPreviewReport;
-
-function runAndViewDataSetReport( previewReport )
+function runAndViewDataSetReport()
 {
     if ( validateDataSetReport() )
     {
-        setWaitMessage( i18n_generating_report + "..." );
+        setWaitMessage( i18n_generating_report );
         
-        tempPreviewReport = previewReport;
-        
-        var request = new Request();
-        request.setCallbackSuccess( runAndViewDataSetReportReceived );    
-        request.send( "createDataSetReportDataSource.action" );
-    }
-}
-
-function runAndViewDataSetReportReceived( messageElement )
-{
-    getDataSetReportStatus();
-}
-
-function getDataSetReportStatus()
-{   
-    var url = "getStatus.action";
-    
-    var request = new Request();
-    request.setResponseTypeXML( "status" );
-    request.setCallbackSuccess( dataSetReportStatusReceived );    
-    request.send( url );
-}
-
-function dataSetReportStatusReceived( xmlObject )
-{
-    var finished = getElementValue( xmlObject, "finished" );
-    
-    if ( finished == "true" )
-    {
-        hideMessage();
-        
-        if ( tempPreviewReport )
-        {
-            previewDataSetReport();
-        }
-        else
-        {
-            generateDataSetReport();
-        }
-    }
-    else
-    {
-        setTimeout( "getDataSetReportStatus();", 2000 );
+        document.getElementById("reportForm").action = "generateCustomDataSetReport.action";
+		document.getElementById("reportForm").submit();
     }
 }
 

@@ -58,8 +58,7 @@
     </td>
   </tr>  
   <tr>  
-	<td><input type="button" value="$i18n.getString( "preview" )" style="width:115px" onclick="runAndViewDataSetReport( true )"><input 
-	           type="button" value="$i18n.getString( "generate" )" style="width:115px" onclick="runAndViewDataSetReport( false )"></td>
+	<td><input type="button" value="$i18n.getString( "generate" )" style="width:115px" onclick="runAndViewDataSetReport()"></td>
 	<td></td>		
   </tr>  
 </table>
