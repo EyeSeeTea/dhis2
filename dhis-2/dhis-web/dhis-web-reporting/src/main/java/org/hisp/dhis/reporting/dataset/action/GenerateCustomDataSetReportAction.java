@@ -43,9 +43,10 @@ import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.order.manager.DataElementOrderManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reporting.dataset.generators.CustomDataSetReportGenerator;
 import org.hisp.dhis.reporting.dataset.state.SelectedStateManager;
 import org.hisp.dhis.reporting.dataset.utils.NumberUtils;
+import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
+import org.hisp.dhis.system.util.FilterUtils;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -147,60 +148,40 @@ public class GenerateCustomDataSetReportAction
         {
             Collection<DataElement> dataElements = dataElementOrderManager.getOrderedDataElements( dataSet );
             
-            //CollectionUtils.filter( dataElements, new AggregateableDataElementPredicate() );
+            FilterUtils.filter( dataElements, new AggregatableDataElementFilter() );
             
             Map<String, String> aggregatedDataValueMap = new TreeMap<String,String>();            
             
             for ( DataElement dataElement : dataElements )
             {
-                DataElementCategoryCombo catCombo = dataElement.getCategoryCombo();                                        
+                DataElementCategoryCombo categoryCombo = dataElement.getCategoryCombo();                                        
                 
-                for ( DataElementCategoryOptionCombo optionCombo : catCombo.getOptionCombos() )
+                for ( DataElementCategoryOptionCombo optionCombo : categoryCombo.getOptionCombos() )
                 {
-                    String value;  
-                    DataValue dataValue;
+                    String value;
                     
-                    if ( dataElement.getType().equals( DataElement.VALUE_TYPE_INT ) )
-                    {
-                    	Double aggregatedValue;
-                    	
-                    	if ( selectedUnitOnly != null )
-                    	{                        		
-                    	    dataValue = dataValueService.getDataValue(orgUnit, dataElement, period, optionCombo);                        		
-                    	    value = ( dataValue != null ) ? dataValue.getValue() : "";
-                    	}
-                    	else
-                    	{                        		
-                    	    aggregatedValue = dataMartStore.getAggregatedValue( dataElement, optionCombo, period, orgUnit );                    		
-                    	    value = ( aggregatedValue != null ) ? NumberUtils.formatDataValue( aggregatedValue ) : "";                      		                    		
-                    	}                 
-                                 
-                        aggregatedDataValueMap.put(dataElement.getId() + ":" + optionCombo.getId(), value );
+                    if ( selectedUnitOnly != null )
+                    {                        		
+                        DataValue dataValue = dataValueService.getDataValue(orgUnit, dataElement, period, optionCombo);                        		
+                        value = ( dataValue != null ) ? dataValue.getValue() : "";
                     }
                     else
-                    {                       	
-                    	if ( selectedUnitOnly != null )
-                    	{                        		
-                    	    dataValue = dataValueService.getDataValue(orgUnit, dataElement, period, optionCombo);                        		
-                    	    value = ( dataValue != null ) ? dataValue.getValue() : "";                    	    
-                    	}
-                    	else
-                    	{
-                    		value = " ";
-                    	} 
-                    	
-                    	aggregatedDataValueMap.put(dataElement.getId() + ":" + optionCombo.getId(), value );
-                    }
+                    {                        		
+                        Double aggregatedValue = dataMartStore.getAggregatedValue( dataElement, optionCombo, period, orgUnit );                    		
+                        value = ( aggregatedValue != null ) ? NumberUtils.formatDataValue( aggregatedValue ) : "";                      		                    		
+                    }                 
+                    
+                    aggregatedDataValueMap.put( dataElement.getId() + ":" + optionCombo.getId(), value );
                 }
             }           
             
             // -----------------------------------------------------------------
-            // Get the custom data entry form if any
+            // Get the custom data entry
             // -----------------------------------------------------------------
 
             DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryFormByDataSet( dataSet );
             
-            customDataEntryFormCode = CustomDataSetReportGenerator.prepareReportContent( dataEntryForm.getHtmlCode(), aggregatedDataValueMap );
+            customDataEntryFormCode = dataEntryFormService.prepareReportContent( dataEntryForm.getHtmlCode(), aggregatedDataValueMap );
             
             reportingUnit = orgUnit.getName();
             

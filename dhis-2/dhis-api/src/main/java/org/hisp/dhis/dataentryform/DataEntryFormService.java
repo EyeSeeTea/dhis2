@@ -28,6 +28,7 @@ package org.hisp.dhis.dataentryform;
  */
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.program.ProgramStage;
@@ -103,4 +104,14 @@ public interface DataEntryFormService
      */
     Collection<DataEntryForm> getAllDataEntryForms();
     
+    /**
+     * Puts in aggregated datavalues in the custom dataentry form and returns
+     * whole report text.
+     * 
+     * @param dataEntryFormCode the data entry form HTML code.
+     * @param a map with aggregated data values mapped to data element operands.
+     * @return data entry form HTML code populated with aggregated data in the
+     *         input fields.
+     */
+    String prepareReportContent( String dataEntryFormCode, Map<String, String> dataValues );    
 }
