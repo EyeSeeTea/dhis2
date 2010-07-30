@@ -19,6 +19,4 @@ public interface SqlViewExpandStore
     boolean isViewTableExists( String viewTableName );
     
     void setUpDataSqlViewTable( SqlViewTable sqlViewTable, String viewTableName );
-    
-    Collection<String> getAllResourceProperties( String resourceTableName );
 }
