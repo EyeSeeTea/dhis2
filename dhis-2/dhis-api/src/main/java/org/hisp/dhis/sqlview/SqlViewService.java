@@ -64,6 +64,8 @@ public interface SqlViewService
     Collection<String> getAllSqlViewNames();
 
     boolean isViewTableExists( String viewTableName );
-    
+
     SqlViewTable getDataSqlViewTable( String viewTableName );
+
+    Collection<String> getAllResourceProperties( String resourceTableName );
 }

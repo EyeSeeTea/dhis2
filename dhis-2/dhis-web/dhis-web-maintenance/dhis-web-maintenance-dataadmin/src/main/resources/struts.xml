@@ -461,9 +461,23 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
 			<param name="page">/dhis-web-maintenance-dataadmin/addSqlViewForm.vm</param>
-			<param name="javascripts">javascript/sqlView.js
-			,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
+			<param name="javascripts">
+				ext/adapter/ext/ext-base.js
+				,ext/ext-all.js
+				,ext/ux/MultiSelect.js
+				,ext/ux/ItemSelector.js
+				,ext/sqlViewExt.js
+				,javascript/sqlViewData.js
+				,javascript/sqlView.js
+				,javascript/jquery.autocomplete.js
+				,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
+				,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action
+			</param>
+			<param name="stylesheets">
+				ext/resources/css/ext-all.css
+				,ext/ux/css/MultiSelect.css
+				,style/jquery.autocomplete.css
+			</param>
 			<param name="requiredAuthorities">F_SQLVIEW_ADD</param>
 		</action>
 		
@@ -542,5 +556,11 @@
 			,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
 			<param name="requiredAuthorities">F_SQLVIEW_MANAGEMENT</param>
 		</action>
+		
+		
+		<action name="getResourceProperties" class="org.hisp.dhis.dataadmin.action.sqlview.GetResourcePropertiesAction">
+		  <result name="success" type="velocity-json">/dhis-web-maintenance-dataadmin/jsonResourceProperties.vm</result>
+		</action>
+		
 	</package>
 </struts>

@@ -151,4 +151,10 @@ public class DefaultSqlViewService
         return sqlViewTable;
     }
 
+    @Override
+    public Collection<String> getAllResourceProperties( String resourceTableName )
+    {
+        return sqlViewExpandStore.getAllResourceProperties( resourceTableName );
+    }
+
 }

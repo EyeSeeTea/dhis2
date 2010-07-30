@@ -2,6 +2,7 @@
 //-----------------------------------------------------------------------
 //init jQuery validation for addSqlViewForm
 //-----------------------------------------------------------------------
+
 	jQuery(document).ready(
 			function()
 			{
@@ -15,6 +16,14 @@
 				});
 				jQuery.validator.setMessages( validationMessage );
 				jQuery("#name").focus();
+				
+				$("#mainDesignQueryDiv").hide("fast");
+				
+				applyAutocompleteSupporting(jQuery.merge(criteria_operators, keywords), "sqlquery", $("#sqlquery").width() );
+				applyAutocompleteSupporting(basic_operators, "resource-property-combo1", $("#resource-property-combo1").width() );
+				applyAutocompleteSupporting(criteria_operators, "criteria_and_property1", $("#criteria_and_property1").width()+50 );
+				applyAutocompleteSupporting(criteria_operators, "criteria_or_property1", $("#criteria_or_property1").width()+50 );
+
 			}
 	);
 
@@ -39,15 +48,92 @@
 		</tr>
 		<tr>
 			<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "sql_statement" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-			<td><textarea type="text" id="sqlquery" name="sqlquery" style="width:80em;height:20em" class="{validate:{required:true,minlength:14}}">SELECT </textarea></td>
+			<td><textarea type="text" id="sqlquery" name="sqlquery" style="width:80em;height:20em" class="{validate:{required:false,minlength:1}}">SELECT </textarea></td>
 		</tr>
 		<tr>
 			<td></td>
 			<td><input type="submit" value="$i18n.getString( 'save' )" style="width:10em"/>
-			<input type="button" value="$i18n.getString( 'cancel' )" id="cancel" name="cancel" onclick="window.location.href='showSqlViewListForm.action'" style="width:10em"/></td>		
+			<input type="button" value="$i18n.getString( 'cancel' )" id="cancel" name="cancel" onclick="window.location.href='showSqlViewListForm.action'" style="width:10em"/>
+			<input type="button" value="$i18n.getString( 'show_advance' )" id="advance_button" name="advance_button" onclick="showOrHideDesignQueryDiv()" style="width:10em"/></td>
 		</tr>
 	</table>
 
 </form>
 
+<br/><br/>
+<div id="mainDesignQueryDiv">
+	<table>
+		<tr id="mainRow">
+			<td>
+				<table>
+				<tr>
+					<td></td>
+					<td align="right"><a href="javascript:closeAppendedField()" title="$i18n.getString( 'close' )">
+					<img src="../images/transparent.gif" alt="$i18n.getString( 'close' )"></a></td>
+				</tr>
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "resource_table" ) ): </label></td>
+					<td><input id="resource-table-combo1"/></td>
+				</tr>
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "field" ) ): </label></td>
+					<td><input id="resource-property-combo1"/></td>
+				</tr>
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "alias" ) ): </label></td>
+					<td><input id="alias-property-text1"/></td>
+				</tr>
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "show" ) ): </label></td>
+					<td align="center"><input type="checkbox" name="show-checkbox"/></td>
+				</tr>
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "sort" ) ): </label></td>
+					<td><input id="sort-property-combo1"/></td>
+				</tr>
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "criteria_and" ) ): </label></td>
+					<td><input type="text" id="criteria_and_property1"/></td>
+				</tr>
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "criteria_or" ) ): </label></td>
+					<td><input type="text" id="criteria_or_property1"/></td>
+				</tr>	
+				<tr>
+					<td><label for="sql_statement">$encoder.htmlEncode( $i18n.getString( "group_by" ) ): </label></td>
+					<td align="center"><input type="checkbox" id="groupby-property-checkbox1"/></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+	</table><br/>
+	<input type="button" id="designQueryButton" value="$i18n.getString( 'generate_query' )" style="width:10em" onclick="setUpQuery()"/>
+	<input type="button" value="$encoder.htmlEncode($i18n.getString( 'add_new_field' ))" onclick="generateQueryColumn('mainRow')"/>
+	<input type="button" value="$encoder.htmlEncode($i18n.getString( 'reset' ))" onclick="removeAllQueryColumn()"/>
+</div>
+
 <span id="message"></span>
+
+<script type="text/javascript">
+
+	/**
+		Global variables
+		@param comboBoxNo comboBoxNo is the default number of comboBoxes
+	*/
+	columnNo = 1;
+	curAppendedColumnId = "";
+	advanceStatus = false;
+	
+	var i18n_resourcetables = "$encoder.jsEscape($i18n.getString( 'select_resourcetables' ) , "'")";
+	var i18n_properties = "$encoder.jsEscape($i18n.getString( 'select_properties' ) , "'")";
+	var i18n_properties_welformed = "$encoder.jsEscape($i18n.getString( 'properties_welformed' ) , "'")";
+	var i18n_syntax_error_parameter_required = "$encoder.jsEscape($i18n.getString( 'syntax_error_parameter_required' ) , "'")";
+	var i18n_sorttypes = "$encoder.jsEscape($i18n.getString( 'select_sorttypes' ) , "'")";
+	var i18n_ascending = "$encoder.jsEscape($i18n.getString( 'ascending' ) , "'")";
+	var i18n_descending = "$encoder.jsEscape($i18n.getString( 'descending' ) , "'")";
+	var i18n_cannot_remove_any_more = "$encoder.jsEscape($i18n.getString( 'cannot_remove_any_more' ) , "'")";
+	var i18n_show_advance = "$encoder.jsEscape($i18n.getString( 'show_advance' ) , "'")";
+	var i18n_hide_advance = "$encoder.jsEscape($i18n.getString( 'hide_advance' ) , "'")";
+	var i18n_close = "$encoder.jsEscape($i18n.getString( 'close' ) , "'")";
+	
+</script>
