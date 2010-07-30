@@ -115,55 +115,42 @@ public class OrganisationUnitImporter
     {
         if ( !object.getName().equals( existing.getName() ) )
         {
-            System.out.println( "1" );
             return false;
         }
         if ( !object.getShortName().equals( existing.getShortName() ) )
         {
-            System.out.println( "2" );
             return false;
         }
         if ( !isSimiliar( object.getCode(), existing.getCode() ) || ( isNotNull( object.getCode(), existing.getCode() ) && !object.getCode().equals( existing.getCode() ) ) )
         {
-            System.out.println( "3" );
             return false;
         }
         if ( !isSimiliar( object.getOpeningDate(), existing.getOpeningDate() ) || ( isNotNull( object.getOpeningDate(), existing.getOpeningDate() ) && !object.getOpeningDate().equals( existing.getOpeningDate() ) ) )
         {
-            System.out.println( "4" );
-            System.out.println( "." + object.getOpeningDate() + "-" + existing.getOpeningDate() + "."); 
             return false;
         }
         if ( !isSimiliar( object.getClosedDate(), existing.getClosedDate() ) || ( isNotNull( object.getClosedDate(), existing.getClosedDate() ) && !object.getClosedDate().equals( existing.getClosedDate() ) ) )
         {
-            System.out.println( "5" );
             return false;
         }
         if ( object.isActive() != existing.isActive() )
         {
-            System.out.println( "6" );
             return false;
         }
         if ( !isSimiliar( object.getComment(), existing.getComment() ) || ( isNotNull( object.getComment(), existing.getComment() ) && !object.getComment().equals( existing.getComment() ) ) )
         {
-            System.out.println( "7" );
             return false;
         }
         if ( !isSimiliar( object.getGeoCode(), existing.getGeoCode() ) || ( isNotNull( object.getGeoCode(), existing.getGeoCode() ) && !object.getGeoCode().equals( existing.getGeoCode() ) ) )
         {
-            System.out.println( "8" );
             return false;
         }
         if ( !isSimiliar( object.getFeatureType(), existing.getFeatureType() ) || ( isNotNull( object.getFeatureType(), existing.getFeatureType() ) && !object.getFeatureType().equals( existing.getFeatureType() ) ) )
         {
-            System.out.println( "9" );
-            System.out.println( "." + object.getFeatureType() + "-" + existing.getFeatureType() + "."); 
             return false;
         }
         if ( !isSimiliar( object.getCoordinates(), existing.getCoordinates() ) || ( isNotNull( object.getCoordinates(), existing.getCoordinates() ) && !object.getCoordinates().equals( existing.getCoordinates() ) ) )
         {
-            System.out.println( "10" );
-            System.out.println( "." + object.getCoordinates() + "-" + existing.getCoordinates() + "."); 
             return false;
         }
         
