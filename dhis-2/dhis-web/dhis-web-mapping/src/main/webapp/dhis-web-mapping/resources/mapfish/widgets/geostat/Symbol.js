@@ -249,7 +249,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         
         indicatorStore2 = new Ext.data.JsonStore({
             url: path_mapping + 'getIndicatorsByIndicatorGroup' + type,
-			baseParams: {indicatorGroupId:0},
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
             idProperty: 'id',
@@ -263,7 +262,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 var name = record.get('name');
                                 name = name.replace('&lt;', '<').replace('&gt;', '>');
                                 record.set('name', name);
-                            },  this
+                            },
+                            this
                         );
                         
                         Ext.getCmp('indicator_cb2').clearValue();
@@ -548,6 +548,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('dataelement_cb2').showField();
 							VALUETYPE.point = map_value_type_dataelement;
 						}
+                        
+                        proportionalSymbol.classify(false, true);
 					}
 				}
 			}
@@ -1231,7 +1233,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         }
         else if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_dataelement) {
-            if (!Ext.getCmp('indicator_cb2').getValue()) {
+            if (!Ext.getCmp('dataelement_cb2').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
                 }
