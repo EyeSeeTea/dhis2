@@ -224,9 +224,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 
                                     Ext.getCmp('indicatorgroup_cb2').setValue(MAPVIEW.indicatorGroupId);
                                     
-                                    var igId = MAPVIEW.indicatorGroupId;
-                                    indicatorStore2.baseParams = { indicatorGroupId: igId, format: 'json' };
-                                    indicatorStore2.reload();
+                                    indicatorStore2.setBaseParam('indicatorGroupId', MAPVIEW.indicatorGroupId);
+                                    indicatorStore2.load();
                                 },
                                 failure: function() {
                                   alert( i18n_status , i18n_error_while_retrieving_data );
@@ -272,8 +271,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         if (MAPVIEW) {
                             Ext.getCmp('indicator_cb2').setValue(MAPVIEW.indicatorId);
                             Ext.getCmp('periodtype_cb2').setValue(MAPVIEW.periodTypeId);
-                            periodStore2.baseParams = {name: MAPVIEW.periodTypeId};
-                            periodStore2.reload();
+                            periodStore2.setBaseParam('name', MAPVIEW.periodTypeId);
+                            periodStore2.load();
                         }
                     }
                 }
@@ -310,8 +309,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         if (MAPVIEW) {
                             Ext.getCmp('dataelement_cb2').setValue(MAPVIEW.dataElementId);
                             Ext.getCmp('periodtype_cb2').setValue(MAPVIEW.periodTypeId);
-                            periodStore2.baseParams = {name: MAPVIEW.periodTypeId};
-                            periodStore2.reload();
+                            periodStore2.setBaseParam('name', MAPVIEW.periodTypeId);
+                            periodStore2.load();
                         }
                     },
                     scope: this
@@ -328,7 +327,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             
         periodStore2 = new Ext.data.JsonStore({
             url: path_mapping + 'getPeriodsByPeriodType' + type,
-            baseParams: { name: 0 },
             root: 'periods',
             fields: ['id', 'name'],
             autoLoad: false,
@@ -337,16 +335,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     fn: function() {
                         if (MAPVIEW) {
                             Ext.getCmp('period_cb2').setValue(MAPVIEW.periodId);
-                            var mst = MAPVIEW.mapSourceType;
 
                             Ext.Ajax.request({
                                 url: path_mapping + 'setMapSourceTypeUserSetting' + type,
                                 method: 'POST',
-                                params: { mapSourceType: mst },
+                                params: { mapSourceType: MAPVIEW.mapSourceType },
 								success: function(r) {
-                                    Ext.getCmp('map_cb2').getStore().reload();
-                                    Ext.getCmp('maps_cb').getStore().reload();
-                                    
+                                    Ext.getCmp('map_cb2').getStore().load();
+                                    Ext.getCmp('maps_cb').getStore().load();
                                     Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                 },
                                 failure: function() {
@@ -466,8 +462,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     Ext.getCmp('dataelement_cb2').hideField();
                                     
                                     Ext.getCmp('indicatorgroup_cb2').setValue(MAPVIEW.indicatorGroupId);
-                                    indicatorStore2.baseParams = { indicatorGroupId: MAPVIEW.indicatorGroupId };
-                                    indicatorStore2.reload();
+                                    indicatorStore2.setBaseParam('indicatorGroupId', MAPVIEW.indicatorGroupId);
+                                    indicatorStore2.load();
                                 }
                                 else if (MAPVIEW.mapValueType == map_value_type_dataelement) {
                                     Ext.getCmp('indicatorgroup_cb2').hideField();
@@ -476,8 +472,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     Ext.getCmp('dataelement_cb2').showField();
                                     
                                     Ext.getCmp('dataelementgroup_cb2').setValue(MAPVIEW.dataElementGroupId);
-                                    dataElementStore2.baseParams = { dataElementGroupId: MAPVIEW.dataElementGroupId };
-                                    dataElementStore2.reload();
+                                    dataElementStore2.setBaseParam('dataElementGroupId', MAPVIEW.dataElementGroupId);
+                                    dataElementStore2.load();
                                 }                                        
 								
 								if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
@@ -582,7 +578,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 						
 						Ext.getCmp('indicator_cb2').clearValue();
 						indicatorStore2.setBaseParam('indicatorGroupId', this.getValue());
-                        indicatorStore2.reload();
+                        indicatorStore2.load();
                     }
                 }
             }
@@ -608,7 +604,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb2').getValue()) {
-                            Ext.getCmp('mapview_cb2').reset();
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
  
                         var iId = Ext.getCmp('indicator_cb2').getValue();
@@ -629,7 +625,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     Ext.getCmp('colorB_cf2').setValue(data.mapLegendSet[0].colorHigh);
                                 }
                                 
-                                proportionalSymbol.classify(false);
+                                proportionalSymbol.classify(false, true);
                             },
                             failure: function()
                             {
@@ -662,11 +658,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb2').getValue()) {
-                            Ext.getCmp('mapview_cb2').reset();
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
-                        Ext.getCmp('dataelement_cb2').reset();
+                        Ext.getCmp('dataelement_cb2').clearValue();
 						dataElementStore2.setBaseParam('dataElementGroupId', this.getValue());
-                        dataElementStore2.reload();
+                        dataElementStore2.load();
                     }
                 }
             }
@@ -692,10 +688,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb2').getValue()) {
-                            Ext.getCmp('mapview_cb2').reset();
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
 						
-						proportionalSymbol.classify(false);
+						proportionalSymbol.classify(false, true);
  
                         // var iId = Ext.getCmp('dataelement_cb2').getValue();
                         
@@ -751,14 +747,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb2').getValue() != '') {
-                            Ext.getCmp('mapview_cb2').reset();
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
                         
-                        var pt = Ext.getCmp('periodtype_cb2').getValue();
-                        Ext.getCmp('period_cb2').getStore().baseParams = { name: pt, format: 'json' };
-                        Ext.getCmp('period_cb2').getStore().reload();
-                    },
-                    scope: this
+                        Ext.getCmp('period_cb2').clearValue();
+                        Ext.getCmp('period_cb2').getStore().setBaseParam('name', this.getValue());
+                        Ext.getCmp('period_cb2').getStore().load();
+                    }
                 }
             }
         },
@@ -783,10 +778,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb2').getValue() != '') {
-                            Ext.getCmp('mapview_cb2').reset();
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
                         
-                        this.classify(false);
+                        this.classify(false, true);
                     },
                     scope: this
                 }
@@ -813,7 +808,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb2').getValue() != '') {
-                            Ext.getCmp('mapview_cb2').reset();
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
                         
                         if (Ext.getCmp('map_cb2').getValue() != proportionalSymbol.newUrl) {
@@ -977,7 +972,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('maplegendset_cb2').showField();
 							
 							if (Ext.getCmp('maplegendset_cb2').getValue()) {
-								this.classify(false);
+								this.classify(false, true);
 							}
                         }
                         else if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap2].type) {
@@ -995,7 +990,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('colorB_cf2').showField();
 							Ext.getCmp('maplegendset_cb2').hideField();
                             
-                            this.classify(false);
+                            this.classify(false, true);
                         }
                     },
                     scope: this
@@ -1061,7 +1056,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('bounds_tf2').hideField();
                             Ext.getCmp('numClasses_cb2').showField();
                             
-                            this.classify(false);
+                            this.classify(false, true);
                         }
                     },
                     scope: this
@@ -1100,12 +1095,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     fn: function() {
                         if (Ext.getCmp('mapview_cb2').getValue() != '') {
-                            Ext.getCmp('mapview_cb2').reset();
+                            Ext.getCmp('mapview_cb2').clearValue();
                         }
 						
 						if (Ext.getCmp('numClasses_cb2').getValue() != LEGEND[thematicMap2].classes) {
 							LEGEND[thematicMap2].classes = Ext.getCmp('numClasses_cb2').getValue();
-							this.classify(false);
+							this.classify(false, true);
 						}
                     },
                     scope: this
@@ -1146,7 +1141,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             text: i18n_refresh,
             handler: function() {
                 this.layer.setVisibility(true);
-                this.classify(true);
+                this.classify(true, true);
             },
             scope: this
         }
@@ -1213,7 +1208,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			}
         }
         else {
-            proportionalSymbol.classify(false);
+            proportionalSymbol.classify(false, true);
         }
     },
     
