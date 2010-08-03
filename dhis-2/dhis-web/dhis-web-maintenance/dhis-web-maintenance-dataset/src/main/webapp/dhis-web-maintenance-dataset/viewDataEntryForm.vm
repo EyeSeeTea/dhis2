@@ -1,5 +1,3 @@
- <script type="text/javascript" src="javascript/FCK/editor/js/fckeditorcode_gecko.js"></script>
-
 <script type="text/javascript">
     var stat = '$status';
     var dataEntryFormId = -1;
@@ -36,12 +34,11 @@
 										validateDataEntryForm();
 									}
 				});
-				jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
+				jQuery.validator.setMessages( validationMessage );
 			}
 	);
 
 </script>
-<input type="hidden" id="curLocaleCode" value="$locale.getLanguage()_$locale.getCountry()"/>
 
 <h3>$i18n.getString( "dataentryform_management" )</h3>
 
@@ -57,7 +54,7 @@
     <tbody>
       <tr>
         <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-        <td><input type="text" id="nameField" name="nameField" value='#if($status == "EDIT")$dataEntryForm.name#end' style="width:20em" maxlength="100" class="{validate:{required:true,minlength:2,maxlength:160}}"></td>
+        <td><input type="text" id="nameField" name="nameField" value='#if($status == "EDIT")$dataEntryForm.name#end' style="width:20em" maxlength="100" class="{validate:{required:true,rangelength:[4,150],alphanumericwithbasicpuncspaces:true,firstletteralphabet:true}}"></td>
       </tr>
       <tr>
         <td><label>$i18n.getString( "dataset" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>

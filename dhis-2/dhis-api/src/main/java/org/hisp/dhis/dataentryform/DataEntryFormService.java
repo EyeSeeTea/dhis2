@@ -101,6 +101,13 @@ public interface DataEntryFormService
      * 
      * @return A collection containing all DataEntryForms.
      */
-    Collection<DataEntryForm> getAllDataEntryForms();
+    Collection<DataEntryForm> getAllDataEntryForms();    
+    
+    /**
+     * Prepare DataEntryForm code
+     * 
+     * @return htmlCode.
+     */
+    String prepareDataEntryFormCode( String preparedCode );
     
 }

@@ -27,6 +27,9 @@ package org.hisp.dhis.dataset.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormAssociation;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
@@ -105,11 +108,11 @@ public class AutoSaveDataEntryFormAction
         else
         {
             dataEntryForm.setName( nameField );
-            dataEntryForm.setHtmlCode( designTextarea );
+            dataEntryForm.setHtmlCode( dataEntryFormService.prepareDataEntryFormCode(designTextarea ));
             dataEntryFormService.updateDataEntryForm( dataEntryForm );
         }
 
         return SUCCESS;
     }
-
+    
 }
