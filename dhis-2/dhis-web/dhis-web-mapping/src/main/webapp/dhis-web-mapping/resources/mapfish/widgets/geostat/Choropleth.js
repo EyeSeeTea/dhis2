@@ -246,7 +246,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             sortInfo: { field: 'name', direction: 'ASC' },
             autoLoad: true
         });
-    
         
         indicatorStore = new Ext.data.JsonStore({
             url: path_mapping + 'getIndicatorsByIndicatorGroup' + type,
@@ -328,7 +327,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
         periodStore = new Ext.data.JsonStore({
             url: path_mapping + 'getPeriodsByPeriodType' + type,
-            baseParams: { name: 0 },
             root: 'periods',
             fields: ['id', 'name'],
             autoLoad: false,
@@ -345,7 +343,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 								success: function(r) {
                                     Ext.getCmp('map_cb').getStore().load();
                                     Ext.getCmp('maps_cb').getStore().load();
-                                    
                                     Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                 },
                                 failure: function() {
@@ -551,6 +548,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('dataelement_cb').showField();
 							VALUETYPE.polygon = map_value_type_dataelement;
 						}
+                        
+                        choropleth.classify(false, true);
 					}
 				}
 			}
@@ -1234,7 +1233,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
         else if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_dataelement) {
-            if (!Ext.getCmp('indicator_cb').getValue()) {
+            if (!Ext.getCmp('dataelement_cb').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
                 }
@@ -1318,7 +1317,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             if (LABELS[thematicMap]) {
                 toggleFeatureLabelsPolygons(false, polygonLayer);
             }
-            
+
             var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
             var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
@@ -1339,7 +1338,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         MASK.hide();
                         return;
                     }
-                    
+
                     for (var i = 0; i < mapvalues.length; i++) {
                         for (var j = 0; j < FEATURE[thematicMap].length; j++) {
                             if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
