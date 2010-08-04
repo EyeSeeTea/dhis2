@@ -41,13 +41,17 @@ function orgUnitSelectValidation()
 	return false;
 }
 
-function orgUnitSelectValidationCompleted(messageElement) {
+function orgUnitSelectValidationCompleted(messageElement)
+{
 	var type = messageElement.getAttribute('type');
 	var message = messageElement.firstChild.nodeValue;
 
-	if (type == 'success') {
+	if (type == 'success')
+	{
 		document.forms['lockingForm'].submit();
-	} else if (type == 'input') {
+	} 
+	else if (type == 'input') 
+	{
 		// setMessage( i18n_loading );
 		document.getElementById('message').innerHTML = message;
 		document.getElementById('message').style.display = 'block';

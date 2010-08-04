@@ -84,10 +84,9 @@
 		<!-- advanced Locking-->
 		<action name="collectiveDataLocking"
 			class="org.hisp.dhis.dataadmin.action.lock.CollectiveDataLockingAction">
-			<result name="success" type="velocity">
-				/dhis-web-maintenance-dataadmin/collectiveDataLockingSuccess.vm</result>
-			<result name="input" type="velocity">
-				/dhis-web-maintenance-dataadmin/collectiveDataLockingError.vm</result>
+			<result name="success" type="velocity">/main.vm </result>
+            <param name="page">/dhis-web-maintenance-dataadmin/collectiveDataLockingStatus.vm</param>
+			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
 		</action>
 		
 		<action name="getDataSetsForOrguntwiseLocking"
