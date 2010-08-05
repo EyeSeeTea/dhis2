@@ -1,4 +1,79 @@
 
+var clickedButtonElement = null;
+	
+function setClickedButtonElementValue( buttonElement )
+{
+	clickedButtonElement = buttonElement.value;
+	document.getElementById("selectBetweenLockUnlock").value = clickedButtonElement;
+}
+
+function validateCollectiveDataLockingForm()
+{		
+	periodIdOptions = document.getElementById("periodId").options;
+		
+	if( periodIdOptions.length > 0 )
+	{
+		var i;
+		for( i=0; i < periodIdOptions.length ; i++ )
+		{
+			if( periodIdOptions[i].selected == true )
+					break;
+		}
+		if( i == periodIdOptions.length )
+		{
+			setHeaderMessage(i18n_period_not_selected);
+			return false;
+		}
+	}
+	else
+	{
+		setHeaderMessage( i18n_period_not_selected );
+		return false;
+	}
+		
+	dataSetIdsOptions = document.getElementById("dataSetIds").options;
+			
+	if( dataSetIdsOptions.length > 0 )
+	{
+		var i;
+		for( i=0; i < dataSetIdsOptions.length ; i++)
+		{
+			if( dataSetIdsOptions[i].selected == true )
+				break;
+		}
+		if( i==dataSetIdsOptions.length )
+		{
+			setHeaderMessage( i18n_dataset_not_selected );
+			return false;
+		}
+	}
+	else
+	{
+		setHeaderMessage( i18n_dataset_not_selected );
+		return false;
+	}
+			
+    if( clickedButtonElement == i18n_lock || clickedButtonElement == i18n_unlock )
+    {
+		orgUnitSelectValidation();
+		return false;
+    }
+	else if( clickedButtonElement == i18n_select_all_at_level || clickedButtonElement == i18n_unselect_all_at_level )
+	{	
+		levelIdOptions = document.getElementById("levelId").options;
+		if(!levelIdOptions.length>0)
+			return false;
+	}
+    else if( clickedButtonElement == i18n_select_all_at_group || clickedButtonElement == i18n_unselect_all_at_group )
+    {
+		ougGroupOptions = document.getElementById("orgGroup").options;
+		if( !ougGroupOptions.length > 0 )
+			return false;
+    } 
+	
+	return true;
+}
+
 //------------------------------------------------------------------------------
 // Organisation Tree
 //------------------------------------------------------------------------------
