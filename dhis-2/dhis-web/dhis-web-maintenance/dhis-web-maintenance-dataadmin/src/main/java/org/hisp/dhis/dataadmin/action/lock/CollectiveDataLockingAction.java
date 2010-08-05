@@ -56,7 +56,6 @@ import com.opensymphony.xwork2.Action;
  * @author
  * @version
  */
-
 public class CollectiveDataLockingAction
     implements Action
 {
@@ -242,10 +241,6 @@ public class CollectiveDataLockingAction
             organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( levelId.intValue() );
             selectedOrganisationUnitsSource = getCurrentUserOrgnaisationUnits();
             selectedOrganisationUnitsSource.retainAll( convert( organisationUnits ) );
-            // System.out.println(
-            // "reched select all at level organisationUnits size :" +
-            // organisationUnits.size() + "selectedOrganisationUnitsSource :" +
-            // selectedOrganisationUnitsSource.size());
             applyCollectiveDataLock( selectedOrganisationUnitsSource );
 
             message = i18n.getString( "select_all_at_level_saved" );
@@ -320,15 +315,12 @@ public class CollectiveDataLockingAction
         }
         else if ( selectionValue.equalsIgnoreCase( childtree ) )
         {
-
             selectedOrganisationUnitsSource = new HashSet<Source>();
+            
             for ( OrganisationUnit organisationUnitsElement : organisationUnits )
             {
                 selectedOrganisationUnitsSource.addAll( convert( organisationUnitService
                     .getOrganisationUnitWithChildren( organisationUnitsElement.getId() ) ) );
-
-                // selectedOrganisationUnitsSource.addAll( convert(
-                // getChildOrgUnitTree( organisationUnitsElement ) ) );
             }
 
             if ( selectBetweenLockUnlock.equalsIgnoreCase( lock ) )
@@ -366,9 +358,7 @@ public class CollectiveDataLockingAction
         {
             Set<Source> dataSetOrganisationUnits = dataSet.getSources();
             selectedOrganisationUnitsSource.retainAll( dataSetOrganisationUnits );
-            // System.out.println(
-            // "inside applylock selectedOrganisationUnitsSource size"
-            // +selectedOrganisationUnitsSource.size());
+            
             for ( Period period : selectedPeriods )
             {
                 DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );

@@ -56,38 +56,6 @@
             <param name="page">/dhis-web-maintenance-dataadmin/collectiveDataLockingStatus.vm</param>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
 		</action>
-				
-		<action name="updateLockedDataSets"
-			class="org.hisp.dhis.dataadmin.action.lock.UpdateLockedDataSets">
-			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-maintenance-dataadmin/index.vm</param>
-			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-		</action>
-		
-		<action name="defineLockOnDataSetOrgunitAndPeriod"
-			class="org.hisp.dhis.dataadmin.action.lock.DefineLockOnDataSetOrgunitAndPeriod">
-			<result name="success" type="chain">getLockSelectionTree </result>
-		</action>
-		
-		<action name="selectLevel"
-			class="org.hisp.dhis.dataadmin.action.lock.SelectLevelAction">
-			<result name="success" type="chain">getLockSelectionTree </result>
-		</action>
-		
-		<action name="unselectLevel"
-			class="org.hisp.dhis.dataadmin.action.lock.UnselectLevelAction">
-			<result name="success" type="chain">getLockSelectionTree </result>
-		</action>
-		
-		<action name="selectAll"
-			class="org.hisp.dhis.dataadmin.action.lock.SelectAllAction">
-			<result name="success" type="chain">getLockSelectionTree </result>
-		</action>
-		
-		<action name="unselectAll"
-			class="org.hisp.dhis.dataadmin.action.lock.UnselectAllAction">
-			<result name="success" type="chain">getLockSelectionTree </result>
-		</action>
 		
 		<action name="getPeriodsForLock"
 			class="org.hisp.dhis.dataadmin.action.lock.GetPeriodsForLockAction">
