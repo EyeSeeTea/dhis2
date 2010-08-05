@@ -33,15 +33,6 @@
 			<param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/datasetLockReport.js</param>
 		</action>
 		
-		<action name="orgUnitValidate"
-			class="org.hisp.dhis.dataadmin.action.lock.OrgUnitValidateAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseOrgUnitSelectSuccess.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseOrgUnitSelectError.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
-		</action>
-		
 		<action name="getDataSetsForPeriodType"
 			class="org.hisp.dhis.dataadmin.action.lock.GetDataSetsForPeriodTypeAction">
 			<result name="success" type="velocity">
