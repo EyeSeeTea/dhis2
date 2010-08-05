@@ -1182,20 +1182,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         if (id != choropleth.parentId || MAPVIEW) {
             choropleth.parentId = id;
             choropleth.setUrl(path_mapping + 'getGeoJson.action?parentId=' + choropleth.parentId);
-            
-            // Ext.Ajax.request({
-                // url: path_mapping + 'getGeoJson' + type,
-                // method: 'POST',
-                // params: {parentId:choropleth.parentId},
-                // success: function(r) {
-                    // var childIsLeaf = Ext.util.JSON.decode(r.responseText)[0].leaf;
-                    // var url = childIsLeaf ? path_mapping + 'getPointShapefile.action?id=' + id : path_mapping + 'getPolygonShapefile.action?id=' + id;
-                    // choropleth.setUrl(url);
-                // },
-                // failure: function() {
-                    // alert('Error: getOrganisationUnitChildren');
-                // }
-            // });
         }
     },
     

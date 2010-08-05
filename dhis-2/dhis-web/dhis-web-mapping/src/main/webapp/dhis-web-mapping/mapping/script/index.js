@@ -1437,7 +1437,7 @@ Ext.onReady( function() {
 					var n = Ext.getCmp('maplayerpath_cb').getValue();
 					
 					Ext.Ajax.request({
-						url: path_mapping + 'getGeoJson' + type,
+						url: path_mapping + 'getGeoJsonFromFile' + type,
 						method: 'POST',
 						params: {name: n},
 						success: function(r) {
@@ -1908,7 +1908,7 @@ Ext.onReady( function() {
 					
 					if (MAPSOURCE == map_source_type_geojson) {
 						Ext.Ajax.request({
-							url: path_mapping + 'getGeoJson' + type,
+							url: path_mapping + 'getGeoJsonFromFile' + type,
 							method: 'POST',
 							params: {name: mlp},
 							success: function(r) {
@@ -2310,7 +2310,7 @@ Ext.onReady( function() {
 									Ext.message.msg(true, 'The overlay <span class="x-msg-hl">' + mln + '</span> '+i18n_was_registered);
 									Ext.getCmp('maplayer_cb').getStore().load();
 							
-									var mapurl = MAPSOURCE == map_source_type_geojson ? path_mapping + 'getGeoJson.action?name=' + mlmsf : path_geoserver + wfs + mlwmso + output;
+									var mapurl = MAPSOURCE == map_source_type_geojson ? path_mapping + 'getGeoJsonFromFile.action?name=' + mlmsf : path_geoserver + wfs + mlwmso + output;
 									
 									MAP.addLayer(
 										new OpenLayers.Layer.Vector(mln, {
@@ -2890,7 +2890,7 @@ Ext.onReady( function() {
 				var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
 				
 				for (var i = 0; i < mapLayers.length; i++) {
-					var mapurl = MAPSOURCE == map_source_type_shapefile ? path_geoserver + wfs + mapLayers[i].mapSource + output : path_mapping + 'getGeoJson.action?name=' + mapLayers[i].mapSource;
+					var mapurl = MAPSOURCE == map_source_type_shapefile ? path_geoserver + wfs + mapLayers[i].mapSource + output : path_mapping + 'getGeoJsonFromFile.action?name=' + mapLayers[i].mapSource;
 					var fillColor = mapLayers[i].fillColor;
 					var fillOpacity = parseFloat(mapLayers[i].fillOpacity);
 					var strokeColor = mapLayers[i].strokeColor;
