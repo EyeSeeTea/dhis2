@@ -9,7 +9,7 @@ import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import com.opensymphony.xwork2.Action;
 
 public class OrgUnitValidateAction
-implements Action
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -21,6 +21,7 @@ implements Action
     {
         this.selectionTreeManager = selectionTreeManager;
     }
+    
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
@@ -31,9 +32,11 @@ implements Action
     {
         return message;
     }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
+    
     public String execute()
         throws Exception
     {
@@ -42,7 +45,8 @@ implements Action
         
         if ( organisationUnits == null || organisationUnits.size() == 0 )
         {
-            message = "Please Select Org Unit";        
+            message = "Please select organisation unit";
+            
             return INPUT;
         }
 

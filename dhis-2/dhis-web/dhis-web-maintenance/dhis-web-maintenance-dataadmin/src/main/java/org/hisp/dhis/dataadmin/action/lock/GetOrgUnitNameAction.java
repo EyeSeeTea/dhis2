@@ -33,7 +33,7 @@ import com.opensymphony.xwork2.Action;
  */
 
 public class GetOrgUnitNameAction
-implements Action
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -49,6 +49,7 @@ implements Action
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
+    
     private Integer selectedOrgUnitId;
     
     public void setSelectedOrgUnitId(Integer selectedOrgUnitId)
@@ -66,6 +67,7 @@ implements Action
     public String execute()
     {
         organisationUnit = organisationUnitService.getOrganisationUnit( selectedOrgUnitId.intValue() );
+        
         return SUCCESS;
     }
 }
