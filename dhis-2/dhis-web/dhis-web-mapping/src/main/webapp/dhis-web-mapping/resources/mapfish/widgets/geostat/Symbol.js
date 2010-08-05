@@ -1203,7 +1203,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             proportionalSymbol.newUrl = url;
 
             if (MAPSOURCE == map_source_type_geojson) {
-                proportionalSymbol.setUrl(path_mapping + 'getGeoJson.action?name=' + url);
+                proportionalSymbol.setUrl(path_mapping + 'getGeoJsonFromFile.action?name=' + url);
             }
 			else if (MAPSOURCE == map_source_type_shapefile) {
 				proportionalSymbol.setUrl(path_geoserver + wfs + url + output);
