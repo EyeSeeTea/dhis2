@@ -644,20 +644,32 @@ Ext.onReady( function() {
 				cls: 'window-button',
 				text: i18n_export_excel,
 				handler: function() {
-					if (ACTIVEPANEL == thematicMap
-						&& Ext.getCmp('period_cb').getValue()!='' 
-						&& Ext.getCmp('indicator_cb').getValue()!=''
-						&& Ext.getCmp('map_cb').getValue()!='') {
-												
-						var title = Ext.getCmp('exportexceltitle_ft').getValue();
-						var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;	
-						var includeLegend = Ext.getCmp('exportexcelincludelegend_chb').getValue();
-						var includeValues = Ext.getCmp('exportexcelincludevalue_chb').getValue();
-						var period = Ext.getCmp('period_cb').getValue();
-						var indicator = Ext.getCmp('indicator_cb').getValue();
-						
-						Ext.getCmp('exportexceltitle_ft').clearValue();
-											
+                    var indicatorOrDataElement, period, mapOrOrganisationUnit;
+					if (ACTIVEPANEL == thematicMap) {
+                        indicatorOrDataElement = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ?
+                            Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+                        period = Ext.getCmp('period_cb').getValue();
+                        mapOrOrganisationUnit = MAPSOURCE == map_source_type_database ?
+                            Ext.getCmp('map_tf').getValue() : Ext.getCmp('map_cb').getValue();
+                    }
+                    else if (ACTIVEPANEL == thematicMap2) {
+                        indicatorOrDataElement = Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator ?
+                            Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
+                        period = Ext.getCmp('period_cb2').getValue();
+                        mapOrOrganisationUnit = MAPSOURCE == map_source_type_database ?
+                            Ext.getCmp('map_tf2').getValue() : Ext.getCmp('map_cb2').getValue();
+                    }
+                    
+                    if (indicatorOrDataElement && period && mapOrOrganisationUnit) {
+                        var title = Ext.getCmp('exportexceltitle_ft').getValue();
+                        var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;	
+                        var includeLegend = Ext.getCmp('exportexcelincludelegend_chb').getValue();
+                        var includeValues = Ext.getCmp('exportexcelincludevalue_chb').getValue();
+                        var period = Ext.getCmp('period_cb').getValue();
+                        var indicator = Ext.getCmp('indicator_cb').getValue();
+                        
+                        Ext.getCmp('exportexceltitle_ft').clearValue();
+                                            
                         var exportForm = document.getElementById('exportForm');
                         exportForm.action = '../exportExcel.action';
                         
@@ -673,10 +685,10 @@ Ext.onReady( function() {
                         document.getElementById('dataValuesField').value = EXPORTVALUES;
 
                         exportForm.submit();
-					}
-					else {
-						Ext.message.msg(false, i18n_please_render_map_fist );
-					}
+                    }
+                    else {
+                        Ext.message.msg(false, i18n_please_render_map_fist );
+                    }
 				}
 			}	
 		]
