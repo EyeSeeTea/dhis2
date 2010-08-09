@@ -1,7 +1,7 @@
-package org.hisp.dhis.sqlview;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,45 +27,59 @@ package org.hisp.dhis.sqlview;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.sqlview.SqlViewService;
+
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
  * @author Dang Duy Hieu
- * @version $Id SqlViewService.java July 06, 2010$
+ * @version $Id GetSqlViewListAction.java July 20, 2010$
  */
-public interface SqlViewService
+public class GetResourcePropertiesAction
+    extends ActionSupport
 {
-    String ID = SqlViewService.class.getName();
-
     // -------------------------------------------------------------------------
-    // SqlView
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    int saveSqlView( SqlView sqlView );
+    private SqlViewService sqlViewService;
 
-    void deleteSqlView( SqlView sqlView );
-
-    void updateSqlView( SqlView sqlView );
-
-    SqlView getSqlView( int viewId );
-
-    SqlView getSqlView( String viewName );
-
-    Collection<SqlView> getAllSqlViews();
-
-    String makeUpForQueryStatement( String query );
-
-    String setUpViewTableName( String input );
+    public void setSqlViewService( SqlViewService sqlViewService )
+    {
+        this.sqlViewService = sqlViewService;
+    }
 
     // -------------------------------------------------------------------------
-    // SqlView Expanded
+    // Getters & Setters
     // -------------------------------------------------------------------------
 
-    Collection<String> getAllSqlViewNames();
+    private String name;
 
-    boolean isViewTableExists( String viewTableName );
-    
-    SqlViewTable getDataSqlViewTable( String viewTableName );
-    
-    Collection<String> getAllResourceProperties( String resourceTableName );
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    private List<String> resourceProperties;
+
+    public List<String> getResourceProperties()
+    {
+        return resourceProperties;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        resourceProperties = new ArrayList<String>( sqlViewService.getAllResourceProperties( name ) );
+
+        return SUCCESS;
+    }
+
 }
