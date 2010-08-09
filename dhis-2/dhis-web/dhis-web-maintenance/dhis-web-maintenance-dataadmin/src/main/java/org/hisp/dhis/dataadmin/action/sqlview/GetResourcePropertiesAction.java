@@ -1,4 +1,4 @@
-package org.hisp.dhis.commons.action;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,39 +27,58 @@ package org.hisp.dhis.commons.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.sqlview.SqlViewService;
+
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * @author Lars Helge Overland
- * @version $Id NoAction.java Dang Duy Hieu May 04, 2010$
+ * @author Dang Duy Hieu
+ * @version $Id GetSqlViewListAction.java July 20, 2010$
  */
-public class NoAction
-    implements Action
+public class GetResourcePropertiesAction
+    extends ActionSupport
 {
-    // TODO remove not required with struts2
-
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private String backUrl;
+    private SqlViewService sqlViewService;
 
-    public String getBackUrl()
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        return backUrl;
+        this.sqlViewService = sqlViewService;
     }
 
-    public void setBackUrl( String backUrl )
+    // -------------------------------------------------------------------------
+    // Getters & Setters
+    // -------------------------------------------------------------------------
+
+    private String name;
+
+    public void setName( String name )
     {
-        this.backUrl = backUrl;
+        this.name = name;
+    }
+
+    private List<String> resourceProperties;
+
+    public List<String> getResourceProperties()
+    {
+        return resourceProperties;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-    
+
     public String execute()
+        throws Exception
     {
+        resourceProperties = new ArrayList<String>( sqlViewService.getAllResourceProperties( name ) );
+
         return SUCCESS;
     }
 

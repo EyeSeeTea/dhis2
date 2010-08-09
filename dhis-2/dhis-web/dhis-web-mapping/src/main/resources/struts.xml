@@ -384,7 +384,8 @@
 			<result name="MultiPolygon" type="velocity-json">/dhis-web-mapping/polygonShapefile.vm</result>
 		</action>
 
-		<action name="getGeoJsonFromFile" class="org.hisp.dhis.mapping.action.GetGeoJsonAction">
+		<action name="getGeoJsonFromFile"
+            class="org.hisp.dhis.mapping.action.GetGeoJsonAction">
 			<result name="success" type="stream">
 				<param name="contentType">application/json</param>
 				<param name="inputName">inputStream</param>

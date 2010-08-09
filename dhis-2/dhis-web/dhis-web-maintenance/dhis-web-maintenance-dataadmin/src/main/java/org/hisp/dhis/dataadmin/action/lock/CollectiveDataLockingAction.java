@@ -356,8 +356,12 @@ public class CollectiveDataLockingAction
     {
         for ( DataSet dataSet : dataSets )
         {
-            Set<Source> dataSetOrganisationUnits = dataSet.getSources();
-            selectedOrganisationUnitsSource.retainAll( dataSetOrganisationUnits );
+            Set<Source> dataSetOrganisationUnits = dataSet.getSources();            
+            Set<Source> selOrgUnitSource = new HashSet<Source>();
+            
+            selOrgUnitSource.addAll( selectedOrganisationUnitsSource );
+            
+            selOrgUnitSource.retainAll( dataSetOrganisationUnits );
             
             for ( Period period : selectedPeriods )
             {
@@ -365,8 +369,8 @@ public class CollectiveDataLockingAction
                 if ( dataSetLock != null )
                 {
                     Set<Source> lockedOrganisationUnitsSource = dataSetLock.getSources();
-                    selectedOrganisationUnitsSource.removeAll( lockedOrganisationUnitsSource );
-                    dataSetLock.getSources().addAll( selectedOrganisationUnitsSource );
+                    selOrgUnitSource.removeAll( lockedOrganisationUnitsSource );
+                    dataSetLock.getSources().addAll( selOrgUnitSource );
                     dataSetLock.setTimestamp( new Date() );
                     dataSetLock.setStoredBy( currentUserService.getCurrentUsername() );
                     dataSetLockService.updateDataSetLock( dataSetLock );
@@ -375,7 +379,7 @@ public class CollectiveDataLockingAction
                 {
                     dataSetLock = new DataSetLock();
                     dataSetLock.setPeriod( period );
-                    dataSetLock.setSources( selectedOrganisationUnitsSource );
+                    dataSetLock.setSources( selOrgUnitSource );
                     dataSetLock.setDataSet( dataSet );
                     dataSetLock.setTimestamp( new Date() );
                     dataSetLock.setStoredBy( currentUserService.getCurrentUsername() );
@@ -390,7 +394,10 @@ public class CollectiveDataLockingAction
         for ( DataSet dataSet : dataSets )
         {
             Set<Source> dataSetOrganisationUnits = dataSet.getSources();
-            selectedOrganisationUnitsSource.retainAll( dataSetOrganisationUnits );
+            Set<Source> selOrgUnitSource = new HashSet<Source>();
+            
+            selOrgUnitSource.addAll( selectedOrganisationUnitsSource );
+            selOrgUnitSource.retainAll( dataSetOrganisationUnits );
 
             for ( Period period : selectedPeriods )
             {
@@ -398,8 +405,8 @@ public class CollectiveDataLockingAction
                 if ( dataSetLock != null )
                 {
                     Set<Source> lockedOrganisationUnitsSource = dataSetLock.getSources();
-                    selectedOrganisationUnitsSource.retainAll( lockedOrganisationUnitsSource );
-                    dataSetLock.getSources().removeAll( selectedOrganisationUnitsSource );
+                    selOrgUnitSource.retainAll( lockedOrganisationUnitsSource );
+                    dataSetLock.getSources().removeAll( selOrgUnitSource );
                     dataSetLock.setTimestamp( new Date() );
                     dataSetLock.setStoredBy( currentUserService.getCurrentUsername() );
                     dataSetLockService.updateDataSetLock( dataSetLock );
@@ -428,8 +435,6 @@ public class CollectiveDataLockingAction
         }
         return orgUnitTree;
     }
-
-    // getChildOrgUnitTree end
 
     public Set<Source> getCurrentUserOrgnaisationUnits()
     {

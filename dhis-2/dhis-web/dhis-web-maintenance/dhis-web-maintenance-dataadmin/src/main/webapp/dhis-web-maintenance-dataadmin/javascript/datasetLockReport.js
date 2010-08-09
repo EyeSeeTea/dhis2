@@ -1,5 +1,7 @@
 
 var clickedButtonElement = null;
+var numberOfSelects = 0;
+var selectedOrgunits = new Array();
 	
 function setClickedButtonElementValue( buttonElement )
 {
@@ -21,13 +23,13 @@ function validateCollectiveDataLockingForm()
 		}
 		if( i == periodIdOptions.length )
 		{
-			setHeaderMessage(i18n_period_not_selected);
+			setHeaderDelayMessage(i18n_period_not_selected);
 			return false;
 		}
 	}
 	else
 	{
-		setHeaderMessage( i18n_period_not_selected );
+		setHeaderDelayMessage( i18n_period_not_selected );
 		return false;
 	}
 		
@@ -43,20 +45,23 @@ function validateCollectiveDataLockingForm()
 		}
 		if( i==dataSetIdsOptions.length )
 		{
-			setHeaderMessage( i18n_dataset_not_selected );
+			setHeaderDelayMessage( i18n_dataset_not_selected );
 			return false;
 		}
 	}
 	else
 	{
-		setHeaderMessage( i18n_dataset_not_selected );
+		setHeaderDelayMessage( i18n_dataset_not_selected );
 		return false;
 	}
 			
     if( clickedButtonElement == i18n_lock || clickedButtonElement == i18n_unlock )
     {
-		orgUnitSelectValidation();
-		return false;
+		if ( selectedOrgunits == null || selectedOrgunits.length <= 0 )
+		{
+			setHeaderDelayMessage( i18n_organisation_unit_not_selected );
+			return false;			
+		}
     }
 	else if( clickedButtonElement == i18n_select_all_at_level || clickedButtonElement == i18n_unselect_all_at_level )
 	{	
@@ -79,9 +84,7 @@ function validateCollectiveDataLockingForm()
 //------------------------------------------------------------------------------
 function treeClicked() {
 	numberOfSelects++;
-
-	setMessage(i18n_loading);
-
+	
 	document.getElementById("Lock").disabled = true;
 	document.getElementById("Unlock").disabled = true;
 }
@@ -90,47 +93,12 @@ function selectCompleted(selectedUnits) {
 	numberOfSelects--;
 
 	if (numberOfSelects <= 0) {
-		hideMessage();
 
 		document.getElementById("Lock").disabled = false;
 		document.getElementById("Unlock").disabled = false;
 	}
-}
-
-function selectReceived() {
-	selectionTree.buildSelectionTree();
-}
-// ------------------------------------------------------------------------------
-// Tree Selection validation Method
-// ------------------------------------------------------------------------------
-function orgUnitSelectValidation()
-{
-	var request = new Request();
-	request.setResponseTypeXML('message');
-	request.setCallbackSuccess(orgUnitSelectValidationCompleted);
-
-	var requestString = 'orgUnitValidate.action';
-
-	request.send(requestString);
-
-	return false;
-}
-
-function orgUnitSelectValidationCompleted(messageElement)
-{
-	var type = messageElement.getAttribute('type');
-	var message = messageElement.firstChild.nodeValue;
-
-	if (type == 'success')
-	{
-		document.forms['lockingForm'].submit();
-	} 
-	else if (type == 'input') 
-	{
-		// setMessage( i18n_loading );
-		document.getElementById('message').innerHTML = message;
-		document.getElementById('message').style.display = 'block';
-	}
+	
+	selectedOrgunits = selectedUnits;
 }
 
 // ------------------------------------------------------------------------------
