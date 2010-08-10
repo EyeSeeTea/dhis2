@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.lock;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,49 +27,59 @@ package org.hisp.dhis.dataadmin.action.lock;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.sqlview.SqlViewService;
 
-import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * @author Brajesh Murari
- * @version $Id$
+ * @author Dang Duy Hieu
+ * @version $Id GetSqlViewListAction.java July 20, 2010$
  */
-public class UnselectAllAction
-    implements Action
-    {
+public class GetResourcePropertiesAction
+    extends ActionSupport
+{
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SelectionTreeManager selectionTreeManager;
+    private SqlViewService sqlViewService;
 
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.selectionTreeManager = selectionTreeManager;
+        this.sqlViewService = sqlViewService;
     }
-        
-    public SelectionTreeManager getSelectionTreeManager( )
+
+    // -------------------------------------------------------------------------
+    // Getters & Setters
+    // -------------------------------------------------------------------------
+
+    private String name;
+
+    public void setName( String name )
     {
-        return selectionTreeManager;
+        this.name = name;
     }
-        
-    // -------------------------------------------------------------------------
-    // Action
-    // -------------------------------------------------------------------------
-       
-    public String execute() throws Exception {
-        	
-       Set<OrganisationUnit> selectedUnits = (Set<OrganisationUnit>) selectionTreeManager.getSelectedOrganisationUnits();
-       Set<OrganisationUnit> selectedUnitsForUnlock = (Set<OrganisationUnit>) selectionTreeManager.getLockOnSelectedOrganisationUnits();
-       selectedUnits.addAll(selectedUnitsForUnlock);
-       selectionTreeManager.clearLockOnSelectedOrganisationUnits();
-       selectionTreeManager.clearSelectedOrganisationUnits();
-       selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
-    				        
-       return SUCCESS;   	
-       }
+
+    private List<String> resourceProperties;
+
+    public List<String> getResourceProperties()
+    {
+        return resourceProperties;
     }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        resourceProperties = new ArrayList<String>( sqlViewService.getAllResourceProperties( name ) );
+
+        return SUCCESS;
+    }
+
+}
