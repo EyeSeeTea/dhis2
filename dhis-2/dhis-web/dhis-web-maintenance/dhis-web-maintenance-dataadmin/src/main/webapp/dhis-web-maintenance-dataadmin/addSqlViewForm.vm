@@ -16,11 +16,12 @@
 		jQuery.validator.setMessages( validationMessage );
 		jQuery("#name").focus();
 		
+		hideById("mainDesignQueryDiv");
 		initHtml(i18n_resourcetables, i18n_sorttypes);
 		initField("resource-table-combo1", "sort-property-combo1");
 		applyAutocompleteSupporting(jQuery.merge(criteria_clone, keywords), "sqlquery", $("#sqlquery").width() );
-		applyAutocompleteSupporting(criteria_operators, "criteria_and_property1", $("#criteria_and_property1").width()+50 );
-		applyAutocompleteSupporting(criteria_operators, "criteria_or_property1", $("#criteria_or_property1").width()+50 );
+		applyAutocompleteSupporting(criteria_operators, "criteria_and_property1", 225 );
+		applyAutocompleteSupporting(criteria_operators, "criteria_or_property1", 225 );
 	});
 
 </script>
