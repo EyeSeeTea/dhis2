@@ -1,23 +1,7 @@
 <script>
-//-----------------------------------------------------------------------
-//init jQuery validation for editDataSetForm
-//-----------------------------------------------------------------------
-	jQuery(document).ready(
-			function()
-			{
-				jQuery("#editDataSetForm").validate({
-					 meta:"validate"
-					,errorElement:"td"
-					,submitHandler: function(form)
-									{
-										validateEditDataSet();
-									}
-				});
-				jQuery.validator.setMessages( validationMessage );
-				jQuery("#name").focus();
-			}
-	);
-
+	jQuery(document).ready(	function(){
+			validation( 'editDataSetForm', validateEditDataSet );				
+	});
 </script>
 
 <h3>$i18n.getString( "edit_dataset" )</h3>
