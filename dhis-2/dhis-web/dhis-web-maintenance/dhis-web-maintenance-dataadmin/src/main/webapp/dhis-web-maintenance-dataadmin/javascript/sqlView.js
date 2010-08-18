@@ -528,9 +528,9 @@ function combineQuery()
 	var curValue = $("#sqlquery").val().trim();
 	var result = selectQuery + "\n" + fromQuery + "\n";
 	result += (whereQuery == "WHERE ") == true ? "" : whereQuery + "\n";
-	result += (sortQuery == "ORDER BY ") == true ? "" : sortQuery + "\n";
-	result += (havingbyQuery == "HAVING ") == true ? "" : havingbyQuery + "\n";
 	result += (groupbyQuery == "GROUP BY ") == true ? "" : groupbyQuery + "\n";
+	result += (havingbyQuery == "HAVING ") == true ? "" : havingbyQuery + "\n";
+	result += (sortQuery == "ORDER BY ") == true ? "" : sortQuery + "\n";
 	
 	if ( curValue != "SELECT" )
 	{
@@ -590,8 +590,8 @@ function generateQueryColumn( mainId, insertPos )
 	}
 	
 	initField( resourceComboId+columnIndex, sortComboId+columnIndex );
-	applyAutocompleteSupporting( criteria_operators, criteriaANDFieldId+columnIndex, $("#"+criteriaANDFieldId+columnIndex).width()+50 );
-	applyAutocompleteSupporting( criteria_operators, criteriaORFieldId+columnIndex, $("#"+criteriaORFieldId+columnIndex).width()+50 );
+	applyAutocompleteSupporting( criteria_operators, criteriaANDFieldId+columnIndex, 225 );
+	applyAutocompleteSupporting( criteria_operators, criteriaORFieldId+columnIndex, 225 );
 }
 
 function getIndexById( elementId )

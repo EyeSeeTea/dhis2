@@ -467,8 +467,9 @@
 			<param name="page">
 				/dhis-web-maintenance-dataadmin/showDataSqlViewForm.vm</param>
 			<param name="javascripts">javascript/sqlView.js
-				,../dhis-web-commons/util/validate/jquery.validate.js,../dhis-web-commons/util/jquery.metadata.js
-				,../dhis-web-commons/util/validate/additional-methods.js,../dhis-web-commons/validationMessages.action</param>
+				,../dhis-web-commons/util/validate/jquery.validate.js
+				,../dhis-web-commons/util/validate/additional-methods.js
+				,../dhis-web-commons/validationMessages.action</param>
 			<param name="requiredAuthorities">F_SQLVIEW_MANAGEMENT</param>
 		</action>
 		

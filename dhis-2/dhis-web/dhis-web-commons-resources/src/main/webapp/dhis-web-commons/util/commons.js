@@ -767,6 +767,9 @@ function datePicker( id )
 		buttonImage: '../images/calendar.png',
 		buttonImageOnly: true		
 	});
+	s = jQuery("#" + id );		
+	if( s.val()=='' ) s.val( getCurrentDate() );	
+	s.keypress(function(event) {return;});
 }
 
 /**
@@ -775,7 +778,7 @@ function datePicker( id )
  */
 function datePickerValid( id )
 {
-	$("#" + id).datepicker(
+	jQuery("#" + id).datepicker(
 	{
 		dateFormat:dateFormat,
 		changeMonth: true,
@@ -787,6 +790,10 @@ function datePickerValid( id )
 		buttonImageOnly: true,
 		maxDate: '+0d +0w'
 	});
+	
+	s = jQuery("#" + id );		
+	if( s.val()=='' ) s.val( getCurrentDate() );	
+	s.keypress(function(event) {return;});
 }
 
 
@@ -810,7 +817,7 @@ function datePickerInRange ( startdate, enddate )
 		showAnim:'',
 		showOn: 'both',
 		buttonImage: '../images/calendar.png',
-		buttonImageOnly: true,
+		buttonImageOnly: true,	
 		onSelect: function(selectedDate)
 		{
 			var option = this.id == startdate ? "minDate" : "maxDate";
@@ -819,6 +826,20 @@ function datePickerInRange ( startdate, enddate )
 			dates.not(this).datepicker("option", option, date);
 		}
 	});
+	s = jQuery("#" + startdate );
+	e = jQuery("#" + enddate );
+	
+	if( s.val()=='' ) s.val( getCurrentDate() );
+	if( e.val()=='' ) e.val( getCurrentDate() );	
+	
+	e.keypress(function(event) {return;});
+	s.keypress(function(event) {return;});
+
+}
+
+function getCurrentDate()
+{	
+	return jQuery.datepicker.formatDate( dateFormat , new Date() ) ;
 }
 
 /**
@@ -942,3 +963,42 @@ function MaskAjaxProccess()
 	
 }
 var MaskAjaxProccess = new MaskAjaxProccess();	
+
+/**
+ * Clock screen by mask  * 
+ */
+function lockScreen()
+{
+	jQuery.blockUI({ message: 'Please wait ... ', css: { 
+		border: 'none', 
+		padding: '15px', 
+		backgroundColor: '#000', 
+		'-webkit-border-radius': '10px', 
+		'-moz-border-radius': '10px', 
+		opacity: .5, 
+		color: '#fff'			
+	} }); 
+}
+/**
+ * unClock screen   * 
+ */
+function unLockScreen()
+{
+	jQuery.unblockUI();
+}
+
+/**
+ * Create validator for fileds in form  * 
+ */
+ 
+function validation( formId, submitHandler, beforeValidateHandler )
+{
+	jQuery("#" + formId ).validate({
+		 meta:"validate"
+		,errorElement:"td"
+		,beforeValidateHandler:beforeValidateHandler
+		,submitHandler: submitHandler
+	});
+	
+	jQuery('#' + formId + ' input[type=text]')[0].focus();
+}

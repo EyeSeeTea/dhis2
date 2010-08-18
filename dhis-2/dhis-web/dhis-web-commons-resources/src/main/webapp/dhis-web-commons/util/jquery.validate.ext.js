@@ -72,7 +72,8 @@ jQuery.validator.addMethod("letterswithbasicpunc", function(value, element) {
 
 jQuery.validator.addMethod("alphanumericwithbasicpuncspaces", function(value,
     element) {
-    return this.optional(element) || /^[\w-.,()\/'\"\s]+$/i.test(value);
+    //return this.optional(element) || /^[\w-.,()\/'\"\s]+$/i.test(value);
+	return this.optional(element) || !(/^[~`!@#^*+{}:;?|[]]$/i.test(value));
 }, "Please Letters, numbers, spaces or some special chars like .,-,(,) only ");
 
 jQuery.validator
@@ -453,3 +454,10 @@ function validatorFormat( text )
 {
     return $.validator.format( text );
 }
+
+// --------------------------------------------------------------------------
+// Set Message for validatior
+// --------------------------------------------------------------------------
+jQuery(document).ready( function(){
+	jQuery.validator.setMessages( validationMessage );
+});

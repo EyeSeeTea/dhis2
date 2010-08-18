@@ -42,6 +42,8 @@ import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.sqlview.SqlViewExpandStore;
 import org.hisp.dhis.sqlview.SqlViewTable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Dang Duy Hieu
@@ -63,6 +65,9 @@ public class HibernateSqlViewExpandStore
 
     @Autowired
     private StatementManager statementManager;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     // -------------------------------------------------------------------------
     // Implementing methods
@@ -152,7 +157,7 @@ public class HibernateSqlViewExpandStore
 
         try
         {
-            ResultSet rs = holder.getStatement().executeQuery( "SELECT * FROM " + resourceTableName + " LIMIT 1");
+            ResultSet rs = holder.getStatement().executeQuery( "SELECT * FROM " + resourceTableName + " LIMIT 1" );
             ResultSetMetaData rsmd = rs.getMetaData();
 
             int countCols = rsmd.getColumnCount();
@@ -175,6 +180,24 @@ public class HibernateSqlViewExpandStore
         return propertiesName;
     }
 
+    @Override
+    public String testSqlGrammar( String sql )
+    {
+        String errorMessage = "";
+
+        try
+        {
+            jdbcTemplate.queryForList( sql );
+        }
+        catch ( BadSqlGrammarException bge )
+        {
+            errorMessage = setUpMessage( bge.getRootCause().toString() );
+            return errorMessage;
+        }
+
+        return errorMessage;
+    }
+
     // -------------------------------------------------------------------------
     // Supporting methods
     // -------------------------------------------------------------------------
@@ -194,6 +217,16 @@ public class HibernateSqlViewExpandStore
         Statement stm = con.createStatement( ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY );
         stm.execute( sql );
         return stm.getResultSet();
+    }
+
+    private String setUpMessage( String input )
+    {
+        input = "<span style='color:red;font-size:13px;font-weight:bold;font-style:italic;'>"
+            + input.replaceFirst( "(?i)\\s*error:", "</span><br/><br/><b>ERROR:</b>" )
+                   .replaceFirst( "(?i)\\s*hint:", "<br/><b>HINT:</b>" )
+                   .replaceFirst( "(?i)\\s*Position:", "<br/><b>POSITION:</b>" );
+
+        return input;
     }
 
 }
