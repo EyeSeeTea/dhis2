@@ -70,7 +70,6 @@ function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSave
 {
     var field = document.getElementById( 'value[' + dataElementId + '].value' + ':' +  'value[' + optionComboId + '].value');
     var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML; 
-	var organisationUnitId = getFieldValue( 'organisationUnitId' );
     
     field.style.backgroundColor = '#ffffcc';   
     
@@ -113,7 +112,7 @@ function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSave
 
                     if ( value < min )
                     {
-                        var valueSaver = new ValueSaver( organisationUnitId, dataElementId, optionComboId, field.value, '#ffcccc' );
+                        var valueSaver = new ValueSaver( dataElementId, optionComboId, field.value, '#ffcccc' );
                         valueSaver.save();
                         
                         window.alert( i18n_value_of_data_element_less + '\n\n' + dataElementName );
@@ -123,7 +122,7 @@ function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSave
 
                     if ( value > max )
                     {
-                        var valueSaver = new ValueSaver( organisationUnitId, dataElementId, optionComboId, field.value, '#ffcccc' );
+                        var valueSaver = new ValueSaver( dataElementId, optionComboId, field.value, '#ffcccc' );
                         valueSaver.save();
                         
                         window.alert( i18n_value_of_data_element_greater + '\n\n' + dataElementName);
@@ -135,7 +134,7 @@ function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSave
         }
     }
 
-    var valueSaver = new ValueSaver( organisationUnitId, dataElementId, optionComboId, field.value, '#ccffcc', '' );
+    var valueSaver = new ValueSaver( dataElementId, optionComboId, field.value, '#ccffcc', '' );
     valueSaver.save();    
     
     if ( type == 'int')
@@ -147,23 +146,21 @@ function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSave
 
 function saveBoolean( dataElementId, optionComboId, selectedOption )
 {
-	var organisationUnitId = getFieldValue( 'organisationUnitId' );
-	
     selectedOption.style.backgroundColor = '#ffffcc';
     
-    var valueSaver = new ValueSaver( organisationUnitId, dataElementId, optionComboId, selectedOption.options[selectedOption.selectedIndex].value, '#ccffcc', selectedOption );
+    var valueSaver = new ValueSaver( dataElementId, optionComboId, selectedOption.options[selectedOption.selectedIndex].value, '#ccffcc', selectedOption );
     valueSaver.save();
 }
 
 function saveDate( dataElementId, dataElementName )
 {
-	var organisationUnitId = getFieldValue( 'organisationUnitId' );	
+	
 	var field = document.getElementById( 'value[' + dataElementId + '].date' );
     var type = document.getElementById( 'value[' + dataElementId + '].valueType' ).innerHTML;
     
     field.style.backgroundColor = '#ffffcc';
     
-    var valueSaver = new ValueSaver( organisationUnitId, dataElementId, '', field.value, '#ccffcc', '' );
+    var valueSaver = new ValueSaver( dataElementId, '', field.value, '#ccffcc', '' );
     valueSaver.save();
 }
 
@@ -171,12 +168,11 @@ function saveComment( dataElementId, optionComboId, commentValue )
 {
     var field = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comment' );                
     var select = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comments' );
-	var organisationUnitId = getFieldValue( 'organisationUnitId' );
     
     field.style.backgroundColor = '#ffffcc';
     select.style.backgroundColor = '#ffffcc';
     
-    var commentSaver = new CommentSaver( organisationUnitId, dataElementId, optionComboId, commentValue );
+    var commentSaver = new CommentSaver( dataElementId, optionComboId, commentValue );
     commentSaver.save();
 }
 
@@ -196,17 +192,16 @@ function isInt( value )
 // Saver objects
 // -----------------------------------------------------------------------------
 
-function ValueSaver( organisationUnitId_, dataElementId_, optionComboId_, value_, resultColor_, selectedOption_ )
+function ValueSaver( dataElementId_, optionComboId_, value_, resultColor_, selectedOption_ )
 {
     var SUCCESS = '#ccffcc';
     var ERROR = '#ccccff';
 
-	var organisationUnitId = organisationUnitId_;
     var dataElementId = dataElementId_;
     var optionComboId = optionComboId_;
     var value = value_;
     var resultColor = resultColor_;
-    var selectedOption = selectedOption_; 	
+    var selectedOption = selectedOption_; 
     
     this.save = function()
     {
@@ -214,7 +209,7 @@ function ValueSaver( organisationUnitId_, dataElementId_, optionComboId_, value_
         request.setCallbackSuccess( handleResponse );
         request.setCallbackError( handleHttpError );
         request.setResponseTypeXML( 'status' );
-        request.send( 'saveValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
+        request.send( 'saveValue.action?dataElementId=' +
                 dataElementId + '&value=' + value );
     };
     
@@ -267,14 +262,13 @@ function ValueSaver( organisationUnitId_, dataElementId_, optionComboId_, value_
     }
 }
 
-function CommentSaver( organisationUnitId_, dataElementId_, optionComboId_, value_ )
+function CommentSaver( dataElementId_, optionComboId_, value_ )
 {
     var SUCCESS = '#ccffcc';
     var ERROR = '#ccccff';
 
     var dataElementId = dataElementId_;
     var optionComboId = optionComboId_
-	var organisationUnitId = organisationUnitId_;    
     var value = value_;
     
     this.save = function()
@@ -283,7 +277,7 @@ function CommentSaver( organisationUnitId_, dataElementId_, optionComboId_, valu
         request.setCallbackSuccess( handleResponse );
         request.setCallbackError( handleHttpError );
         request.setResponseTypeXML( 'status' );
-        request.send( 'saveComment.action?organisationUnitId=' + organisationUnitId+ 'dataElementId=' +
+        request.send( 'saveComment.action?dataElementId=' +
                 dataElementId + '&optionComboId=' + optionComboId + '&comment=' + value );
     };
     
