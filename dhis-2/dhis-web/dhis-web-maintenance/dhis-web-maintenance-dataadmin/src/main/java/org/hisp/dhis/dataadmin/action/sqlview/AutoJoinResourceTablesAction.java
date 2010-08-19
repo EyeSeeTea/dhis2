@@ -1,7 +1,7 @@
-package org.hisp.dhis.sqlview;
+package org.hisp.dhis.dataadmin.action.sqlview;
 
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,81 @@ package org.hisp.dhis.sqlview;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 import java.util.Collection;
+
+import org.hisp.dhis.sqlview.SqlViewService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Dang Duy Hieu
- * @version $Id SqlViewService.java July 06, 2010$
+ * @version $Id AutoJoinResourceTablesAction.java Aug 16, 2010$
  */
-public interface SqlViewService
+public class AutoJoinResourceTablesAction
+    implements Action
 {
-    String ID = SqlViewService.class.getName();
 
     // -------------------------------------------------------------------------
-    // SqlView
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    int saveSqlView( SqlView sqlView );
+    private SqlViewService sqlViewService;
 
-    void deleteSqlView( SqlView sqlView );
-
-    void updateSqlView( SqlView sqlView );
-
-    SqlView getSqlView( int viewId );
-
-    SqlView getSqlView( String viewName );
-
-    Collection<SqlView> getAllSqlViews();
-
-    String makeUpForQueryStatement( String query );
-
-    String setUpViewTableName( String input );
+    public void setSqlViewService( SqlViewService sqlViewService )
+    {
+        this.sqlViewService = sqlViewService;
+    }
 
     // -------------------------------------------------------------------------
-    // SqlView Expanded
+    // Input
     // -------------------------------------------------------------------------
 
-    Collection<String> getAllSqlViewNames();
+    private Collection<String> tableList;
 
-    boolean isViewTableExists( String viewTableName );
+    public void setTableList( Collection<String> tableList )
+    {
+        this.tableList = tableList;
+    }
 
-    SqlViewTable getDataSqlViewTable( String viewTableName );
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    Collection<String> getAllResourceProperties( String resourceTableName );
+    private String fromJoinQuery;
 
-    String testSqlGrammar( String sql );
-    
-    String setUpJoinQuery( Collection<String> tableList );
+    public String getFromJoinQuery()
+    {
+        return fromJoinQuery;
+    }
 
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+    {
+        fromJoinQuery = "FROM "
+            + (tableList.contains( "_IndicatorGroupSetStructure" ) ? "_IndicatorGroupSetStructure AS _icgss" : "");
+
+        tableList.remove( "_IndicatorGroupSetStructure" );
+
+        if ( !tableList.isEmpty() )
+        {
+            if ( fromJoinQuery.equalsIgnoreCase( "from _indicatorgroupsetstructure" ) )
+            {
+                fromJoinQuery += ", ";
+            }
+
+            if ( tableList.size() == 1 )
+            {
+                fromJoinQuery += tableList.iterator().next();
+            }
+            else if ( tableList.size() > 1 )
+            {
+                fromJoinQuery += sqlViewService.setUpJoinQuery( tableList );
+            }
+        }
+
+        return SUCCESS;
+    }
 }
