@@ -1,7 +1,10 @@
 <script>
 	jQuery(document).ready(	function(){
-			validation( 'editDataSetForm', validateEditDataSet );				
+			validation( 'editDataSetForm', validateEditDataSet );
 	});
+	
+	var previousName = '';
+	
 </script>
 
 <h3>$i18n.getString( "edit_dataset" )</h3>

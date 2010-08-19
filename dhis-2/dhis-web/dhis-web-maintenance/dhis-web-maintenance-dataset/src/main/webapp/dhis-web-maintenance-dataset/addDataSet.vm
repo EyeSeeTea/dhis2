@@ -1,7 +1,10 @@
 <script>
 	jQuery(document).ready(	function(){
-			validation( 'addDataSetForm', validateAddDataSet );				
+			validation( 'addDataSetForm', validateAddDataSet );
 	});
+	
+	var previousName = '';
+
 </script>
 
 <h3>$i18n.getString( "add_dataset" )</h3>
@@ -108,6 +111,3 @@
 </form>
 
 <span id="message"></span>
-<script>
-	
-</script>
