@@ -1,5 +1,3 @@
-package org.hisp.dhis.oust.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,88 +24,76 @@ package org.hisp.dhis.oust.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.dataset.action.pivotassociation;
 
-import java.util.Collection;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.dataset.PivotDataSetAssociationTable;
+import org.hisp.dhis.dataset.PivotDataSetAssociationTableService;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: RemoveSelectedOrganisationUnitAction.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Chau Thu Tran
+ * @version $ID : GetPivotDataSetAssocicationTable.java 11:09:50 AM Jul 30, 2010
  */
-public class RemoveSelectedOrganisationUnitAction
+public class GetPivotDataSetAssocicationTableAction
     implements Action
 {
-    private static final Log LOG = LogFactory.getLog( RemoveSelectedOrganisationUnitAction.class );
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
+    private PivotDataSetAssociationTableService associationTableService;
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input
     // -------------------------------------------------------------------------
 
-    private int id;
+    private Integer level;
 
-    public void setId( int organisationUnitId )
+    private String periodTypeName;
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private PivotDataSetAssociationTable associationtable;
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    public PivotDataSetAssociationTable getAssociationtable()
     {
-        this.id = organisationUnitId;
+        return associationtable;
     }
 
-    private Collection<OrganisationUnit> selectedUnits;
-
-    public Collection<OrganisationUnit> getSelectedUnits()
+    public void setPeriodTypeName( String periodTypeName )
     {
-        return selectedUnits;
+        this.periodTypeName = periodTypeName;
+    }
+
+    public void setAssociationTableService( PivotDataSetAssociationTableService associationTableService )
+    {
+        this.associationTableService = associationTableService;
+    }
+
+    public void setLevel( Integer level )
+    {
+        this.level = level;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
-    { 
-        try
-        {
-            OrganisationUnit unit = organisationUnitService.getOrganisationUnit( id );
+    {
 
-            if ( unit == null )
-            {
-                throw new RuntimeException( "OrganisationUnit with id " + id + " doesn't exist" );
-            }
-
-            selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();            
-            selectedUnits.remove( unit );           
-            selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
-        }
-        catch ( Exception e )
-        {
-            LOG.error( e.getMessage(), e );
-
-            throw e;
-        }
+        associationtable = associationTableService.getPivotDataSetAssociationTable( level, periodTypeName );
 
         return SUCCESS;
     }

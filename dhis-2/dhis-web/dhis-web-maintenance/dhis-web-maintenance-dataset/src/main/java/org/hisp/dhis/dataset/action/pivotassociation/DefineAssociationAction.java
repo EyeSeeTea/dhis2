@@ -1,5 +1,3 @@
-package org.hisp.dhis.oust.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,89 +24,94 @@ package org.hisp.dhis.oust.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.dataset.action.pivotassociation;
 
-import java.util.Collection;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: RemoveSelectedOrganisationUnitAction.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Chau Thu Tran
+ * @version $ID : DefineAssociationAction.java 4:49:05 PM Jul 30, 2010
  */
-public class RemoveSelectedOrganisationUnitAction
+public class DefineAssociationAction
     implements Action
 {
-    private static final Log LOG = LogFactory.getLog( RemoveSelectedOrganisationUnitAction.class );
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    private DataSetService dataSetService;
+
     private OrganisationUnitService organisationUnitService;
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private Integer dataSetId;
+
+    private Integer organisationId;
+
+    private boolean assigned;
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
+
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    public void setOrganisationId( Integer organisationId )
+    {
+        this.organisationId = organisationId;
+    }
+
+    public void setAssigned( boolean assigned )
+    {
+        this.assigned = assigned;
+    }
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
     }
 
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input/output
-    // -------------------------------------------------------------------------
-
-    private int id;
-
-    public void setId( int organisationUnitId )
-    {
-        this.id = organisationUnitId;
-    }
-
-    private Collection<OrganisationUnit> selectedUnits;
-
-    public Collection<OrganisationUnit> getSelectedUnits()
-    {
-        return selectedUnits;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
-    { 
-        try
+    {
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+        OrganisationUnit orgunit = organisationUnitService.getOrganisationUnit( organisationId );
+
+        if ( assigned )
         {
-            OrganisationUnit unit = organisationUnitService.getOrganisationUnit( id );
-
-            if ( unit == null )
-            {
-                throw new RuntimeException( "OrganisationUnit with id " + id + " doesn't exist" );
-            }
-
-            selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();            
-            selectedUnits.remove( unit );           
-            selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
+            dataSet.getSources().add( orgunit );
+            orgunit.getDataSets().add( dataSet );
         }
-        catch ( Exception e )
+        else
         {
-            LOG.error( e.getMessage(), e );
-
-            throw e;
+            dataSet.getSources().remove( orgunit );
+            orgunit.getDataSets().remove( dataSet );
         }
+
+        dataSetService.updateDataSet( dataSet );
 
         return SUCCESS;
     }
+
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.oust.action;
+package org.hisp.dhis.dataset.action.pivotassociation;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,25 +27,20 @@ package org.hisp.dhis.oust.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: RemoveSelectedOrganisationUnitAction.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Lars Helge Overland
+ * @version $Id$
  */
-public class RemoveSelectedOrganisationUnitAction
+public class GetOrganisationUnitLevelsAction
     implements Action
 {
-    private static final Log LOG = LogFactory.getLog( RemoveSelectedOrganisationUnitAction.class );
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -56,59 +51,26 @@ public class RemoveSelectedOrganisationUnitAction
     {
         this.organisationUnitService = organisationUnitService;
     }
-
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-
+    
     // -------------------------------------------------------------------------
-    // Input/output
+    // Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private List<OrganisationUnitLevel> levels;
 
-    public void setId( int organisationUnitId )
+    public List<OrganisationUnitLevel> getLevels()
     {
-        this.id = organisationUnitId;
+        return levels;
     }
-
-    private Collection<OrganisationUnit> selectedUnits;
-
-    public Collection<OrganisationUnit> getSelectedUnits()
-    {
-        return selectedUnits;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
-    { 
-        try
-        {
-            OrganisationUnit unit = organisationUnitService.getOrganisationUnit( id );
-
-            if ( unit == null )
-            {
-                throw new RuntimeException( "OrganisationUnit with id " + id + " doesn't exist" );
-            }
-
-            selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();            
-            selectedUnits.remove( unit );           
-            selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
-        }
-        catch ( Exception e )
-        {
-            LOG.error( e.getMessage(), e );
-
-            throw e;
-        }
-
+    {
+        levels = organisationUnitService.getOrganisationUnitLevels();
+        
         return SUCCESS;
     }
 }
