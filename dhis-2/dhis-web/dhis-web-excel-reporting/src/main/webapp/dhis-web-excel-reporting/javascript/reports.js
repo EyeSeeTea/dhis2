@@ -6,57 +6,6 @@ var strReportType = '';
 var reportId;
 
 /*
-*	Open Add Report Excel Window
-*/
-function openAddReportExcel() {	
-	
-	byId( "reportExcelAddUpdateButton" ).onclick = function (e) { validateAddReportExcel(); };
-	enable( "name" );
-	enable( "reportType" );
-	
-	$( "#report" ).showAtCenter( true );
-}
-
-/*
-*	Validate Add Report Excel
-*/
-function validateAddReportExcel() {
-	
-	strReportType = byId("reportType").value;
-	
-	var request = new Request();
-	request.setResponseTypeXML( 'datalement' );
-	request.setCallbackSuccess( validateAddReportExcelReceived );
-	
-	var params = "name=" + byId("name").value;
-		params += "&excel=" + byId("excelTemplateFile").value;
-		params += "&reportType=" + byId("reportType").value;
-		params += "&periodRow=" + byId("periodRow").value;
-		params += "&periodCol=" + byId("periodColumn").value;
-		params += "&organisationRow=" + byId("organisationRow").value;
-		params += "&organisationCol=" + byId("organisationColumn").value;
-		params += "&groupName=" + byId("group").value;
-	
-	request.sendAsPost(params);
-	request.send( "validateAddReportExcel.action" );
-	
-}
-
-function validateAddReportExcelReceived( xmlObject ) {
-
-	var type = xmlObject.getAttribute( 'type' );
-	
-	if ( type == 'error' )
-	{
-		setMessage(xmlObject.firstChild.nodeValue);
-	}
-	else if ( type == 'success' )
-	{		
-		addReportExcel();			
-	}
-}
-
-/*
 *	Add Report Excel
 */
 function addReportExcel() {	

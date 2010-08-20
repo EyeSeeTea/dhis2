@@ -1,3 +1,5 @@
+package org.hisp.dhis.dataset.action.section;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,54 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.reportexcel.action;
-
-import org.hisp.dhis.reportexcel.ReportExcel;
-import org.hisp.dhis.reportexcel.ReportExcelService;
-
-/**
- * @author Tran Thanh Tri
- * @version $Id$
- */
-public class ValidateAddReportExcelAction
-    extends ActionSupport
+public class OpenAddSectionAction
 {
-    // -------------------------------------------
-    // Dependency
-    // -------------------------------------------
-
-    private ReportExcelService reportService;
-
-    public void setReportService( ReportExcelService reportService )
-    {
-        this.reportService = reportService;
-    }
-
-    // -------------------------------------------
-    // Input & Output
-    // -------------------------------------------
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String execute()
-        throws Exception
-    {
-        ReportExcel reportExcel = reportService.getReportExcel( name );
-
-        if ( reportExcel != null )
-        {
-            message = i18n.getString( "name_ready_exist" );
-
-            return ERROR;
-        }
-
-        return SUCCESS;
-    }
 
 }

@@ -1,4 +1,3 @@
-
 <h3>$i18n.getString('reports') #openHelp( "excelReportingListOfReports" )</h3>
 <table width=100%>
 	<tr>
@@ -6,7 +5,7 @@
 			$i18n.getString( "filter_by_name" ): <input type="text" onkeyup="filterValues( this.value , 1)" style="width:300px"/>
 		</td>
 		<td align=right>			
-			<input type="button" onclick="openAddReportExcel()" value="$i18n.getString('add')" style="width:100px"/>
+			<input type="button" onclick="window.location = 'addReportExcelForm.action'" value="$i18n.getString('add')" style="width:100px"/>
 			<input type="button" value="$i18n.getString( "cancel" )" onclick="window.location='administration.action'" style="width:100px">			
 		</td>
 	</tr>
@@ -143,73 +142,9 @@
 	}
 	
 </script>
-<div id="report" style="position:fixed;display:none;width:450px;z-index:11;background-color: white;border: medium solid silver;height:250px;padding:20px;">
-	<div id="close" style="position:absolute;top:2px;right:2px;cursor: pointer;color:red;" onclick="hideById('report');deleteDivEffect();">[x]</div>
-	<input type="hidden" value="" id="id"/>
-	<table>
-		<tr>
-			<td><label>$i18n.getString('name')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-			<td><input type="text" id="name"  style="width:20em"/></td>
-		</tr>
-		<tr>
-			<td><label>$i18n.getString('excel_template')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-			<td>
-				<input type="text" id="excelTemplateFile"  style="width:18em"/>
-				<a href="javascript:getListExcelTemplate();"><img align="absmiddle" src="../images/excel.png" style="cursor:pointer;width:20px;"></a>
-			</td>
-		</tr>
-		<tr>
-			<td><label>$i18n.getString('report_type')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-			<td>
-				<select type="text" id="reportType" name="reportType" style="min-width:20em">
-					<option value='NORMAL'>$i18n.getString('NORMAL')</option>					
-					<option value='CATEGORY'>$i18n.getString('CATEGORY')</option>					
-					<option value='PERIOD_COLUMN_LISTING'>$i18n.getString('PERIOD_COLUMN_LISTING')</option>	
-					<option value='ORGANIZATION_GROUP_LISTING'>$i18n.getString('ORGANIZATION_GROUP_LISTING')</option>									
-				</select>
-			</td>
-		</tr>	
-		<tr>		
-			<td><label>$i18n.getString('group')</label></td>
-			<td><input type="text" id="group" style="width:20em"/></td>
-		<td>		
-		<tr>
-			<td><label>$i18n.getString('period_postion_row')</label></td>
-			<td><input type="text" id="periodRow"   style="width:10em"/></td>
-		</tr>
-		<tr>
-			<td><label>$i18n.getString('period_postion_column')</label></td>
-			<td><input type="text" id="periodColumn" style="width:10em"/></td>
-		</tr>
-		<tr>
-			<td><label>$i18n.getString('organisation_position_row')</label></td>
-			<td><input type="text" id="organisationRow" style="width:10em"/></td>
-		</tr>
-
-		<tr>		
-			<td><label>$i18n.getString('organisation_position_column')</label></td>
-			<td><input type="text" id="organisationColumn" style="width:10em"/></td>
-		<td>
-		
-	</table>
-	<p align="center">
-	<input type="button" value="$i18n.getString('ok')" id="reportExcelAddUpdateButton" />
-	<input type="button" value="$i18n.getString('cancel')" onclick="hideById('report');deleteDivEffect();"/>
-	</p>
-</div>
 
 <script>
-	jQuery(document).ready(function(){	
-        $("#group").autocomplete("getReportExcelGroups.action", {
-            width: 260,
-            formatItem:function (row){
-                return row[0];
-            },
-            formatResult:function (row){
-                return row[0];
-            },
-            selectFirst: true
-		});
+	jQuery(document).ready(function(){	       
 		
 		tableSorter( 'listTable' );	
     });
