@@ -23,4 +23,6 @@ public interface SqlViewExpandStore
     Collection<String> getAllResourceProperties( String resourceTableName );
     
     String testSqlGrammar( String sql );
+    
+    String setUpJoinQuery( Collection<String> tables );
 }

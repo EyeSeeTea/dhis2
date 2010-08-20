@@ -119,13 +119,6 @@ public class SaveValueAction
         this.value = value;
     }
 
-    private int organisationUnitId;
-
-    public void setOrganisationUnitId( int organisationUnitId )
-    {
-        this.organisationUnitId = organisationUnitId;
-    }
-
     private int dataElementId;
 
     public void setDataElementId( int dataElementId )
@@ -136,6 +129,13 @@ public class SaveValueAction
     public int getDataElementId()
     {
         return dataElementId;
+    }
+
+    private int organisationUnitId;
+
+    public void setOrganisationUnitId( int organisationUnitId )
+    {
+        this.organisationUnitId = organisationUnitId;
     }
 
     private int statusCode;

@@ -380,14 +380,11 @@ public class DefaultCaseAggregationMappingService
         
         queryWhere = queryWhere.replace( "$ENDDATE$",   "" + period.getEndDate()  );
         queryWhere = queryWhere.replace( "$STARTDATE$", "" + period.getStartDate() );
-        queryWhere = queryWhere.replace( "$ORGUNITID$", "" + organisationUnit.getId() );
-        
-//        queryWhere = queryWhere.replace( "$ENDDATE$",   "" + "2010-08-01"  );
-//        queryWhere = queryWhere.replace( "$STARTDATE$", "" + "2010-08-31" );
-//        queryWhere = queryWhere.replace( "$ORGUNITID$", "" + "37" );
-        
+        queryWhere = queryWhere.replace( "$ORGUNITID$", "" + organisationUnit.getId() );      
+ 
         System.out.println("queryyyyyyyyyyyy 123:\n "+queryFrom + queryWhere );
         System.out.println("=================================================");
+
         return queryFrom + queryWhere;
     }
     
@@ -524,7 +521,7 @@ public class DefaultCaseAggregationMappingService
                     tmpWhereQuery += "$ALIAS_PATIENTATTRIBUTEVALUE$.patientAttribute.id = " + caseAttributeId + " and "
                                   + " $ALIAS_PATIENTATTRIBUTEVALUE$.patient.id = " + " $ALIAS_PROGRAMINSTANCE$.patient.id  and "
                                   + " $ALIAS_PROGRAMINSTANCE$.id = $ALIAS_PROGRAMSTAGEINSTANCE$.programInstance.id  " ; 
-                    
+
                     if( condition.getRightExpression() != null && condition.getOperator() != null )
                     {
                         // build query for the right expression of current condition.
@@ -554,6 +551,7 @@ public class DefaultCaseAggregationMappingService
                         }
                         
                     }
+                  
                     if ( !singleExpression )
                     {
                         tmpWhereQuery += ")";
@@ -565,13 +563,13 @@ public class DefaultCaseAggregationMappingService
                     casePropertyName = arrExp[1];
                     tmpWhereQuery   += " $ALIAS_PATIENT$.id = $ALIAS_PROGRAMINSTANCE$.patient.id and "
                                     + " $ALIAS_PROGRAMINSTANCE$.id = $ALIAS_PROGRAMSTAGEINSTANCE$.programInstance.id  "  ;
-                    
+          
                     if( condition.getRightExpression() != null && condition.getOperator() != null )
                     {
                         // build query for the right expression of current condition.
                         
                         List<String> listRightArg = parseExpression( condition.getRightExpression());
-                        
+                  
                         if( listRightArg.size() != 1 )
                         {
                             // current not supported ... [DE.1.2.3] > [DE.1.2.3] + 100 ???
@@ -600,8 +598,7 @@ public class DefaultCaseAggregationMappingService
                         tmpWhereQuery += ")";
                     }
                 }
-            }
-            
+            }         
          
             //-----------------------------------------------------------------------------------------
             // Replace alias
@@ -746,12 +743,14 @@ public class DefaultCaseAggregationMappingService
     
     public static void main( String[] args )
     {
+
         //String string = "SUM@ COND{ ([DE:8.57.1]) < ([VL:2500]) } AND COND{ ([CP:gender]) = ([VL:'M']) }   ";
         
         //String string = "COUNT@ COND{ ( [DE:1.13.1] ) < ( [VL:2500] ) } AND COND{ ( [DE:1.16.1] ) = ( [VL:2500] ) } ";
         // String string = "COUNT@ COND{ ( [CP:GENDER] ) < ( [VL:23] ) } ";
         //String string = "COUNT@ COND{ ( [CP:GENDER] ) = ( [VL:'F'] ) } AND COND{ ( [DE:1.13.1] ) < ( [VL:2500] ) }";
         String string = "COUNT@ SCOND{ ( [DE:8.75.1] ) } AND COND{ ( [CP:gender] ) = ( [VL:'F'] ) }";
+        
         DefaultCaseAggregationMappingService test = new DefaultCaseAggregationMappingService();
         CaseAggregationQuery query = test.scan( string );
         System.out.println( test.buildQuery(  null, null, query ) );

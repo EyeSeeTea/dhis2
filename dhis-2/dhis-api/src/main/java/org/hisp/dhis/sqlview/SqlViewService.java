@@ -70,4 +70,7 @@ public interface SqlViewService
     Collection<String> getAllResourceProperties( String resourceTableName );
 
     String testSqlGrammar( String sql );
+    
+    String setUpJoinQuery( Collection<String> tableList );
+
 }
