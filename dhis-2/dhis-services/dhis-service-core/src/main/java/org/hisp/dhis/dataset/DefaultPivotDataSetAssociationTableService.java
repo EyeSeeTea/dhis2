@@ -85,8 +85,6 @@ public class DefaultPivotDataSetAssociationTableService
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService
             .getOrganisationUnitsAtLevel( level ) );
 
-        List<DataSet> dataSets = new ArrayList<DataSet>();
-
         List<AggregatedDataSetAssociation> associations = new ArrayList<AggregatedDataSetAssociation>();
 
         Map<Integer, Collection<DataSet>> dataSetMap = getDataSetMap( organisationUnits );
@@ -97,13 +95,14 @@ public class DefaultPivotDataSetAssociationTableService
         if ( dataSetsByPeriodType.size() > 0 )
         {
             Collections.sort( dataSetsByPeriodType, new DataSetNameComparator() );
-            dataSets.addAll( dataSetsByPeriodType );
 
             for ( OrganisationUnit orgunit : organisationUnits )
             {
+                Collection<DataSet> dataSetCollection = dataSetMap.get( orgunit.getId() );
+                
                 for ( DataSet dataSet : dataSetsByPeriodType )
                 {
-                    boolean assigned = dataSetMap.get( orgunit.getId() ).contains( dataSet );
+                    boolean assigned = dataSetCollection.contains( dataSet );
 
                     AggregatedDataSetAssociation assoc = new AggregatedDataSetAssociation();
                     assoc.setOrganisationUnitId( orgunit.getId() );
@@ -118,7 +117,7 @@ public class DefaultPivotDataSetAssociationTableService
 
         PivotDataSetAssociationTable table = new PivotDataSetAssociationTable();
         table.setOrganisationUnits( organisationUnits );
-        table.setDataSets( dataSets );
+        table.setDataSets( dataSetsByPeriodType );
         table.setAssociations( associations );
 
         return table;
