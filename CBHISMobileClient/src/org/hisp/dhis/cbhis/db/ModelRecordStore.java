@@ -20,7 +20,9 @@ import org.hisp.dhis.cbhis.model.DataElement;
 public class ModelRecordStore {
 
     public static final String FORM_DB = "FORM";
-    public static final String DATAELEMENT_DB = "DATAELEMENT";   
+    public static final String ORGUNIT_DB = "ORGUNIT";
+    public static final String DATAELEMENT_DB = "DATAELEMENT";
+    public static final String ACTIVITY_DB = "ACTIVITY";   
     
     private String dbName;   
 
