@@ -939,6 +939,8 @@ function unLockScreen()
  
 function validation( formId, submitHandler, beforeValidateHandler )
 {
+	var nameField = jQuery('#' + formId + ' input[type=text]')[0];
+
 	jQuery("#" + formId ).validate({
 		 meta:"validate"
 		,errorElement:"td"
@@ -946,7 +948,10 @@ function validation( formId, submitHandler, beforeValidateHandler )
 		,submitHandler: submitHandler
 	});
 	
-	jQuery('#' + formId + ' input[type=text]')[0].focus();
+	if ( nameField )
+	{
+		nameField.focus();
+	}
 }
 
 function showErrorMessage( message, time )
