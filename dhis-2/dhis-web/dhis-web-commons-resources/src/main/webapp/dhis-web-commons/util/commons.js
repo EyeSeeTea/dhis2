@@ -911,65 +911,11 @@ function insertTextCommon( inputAreaName, inputText )
 }
 
 /**
- * Create Mask with proccessing * 
- */
-function MaskAjaxProccess()
-{	
-	this.processWidth = 100;
-	this.processHeight = 100;
-	
-	this.width = document.documentElement.clientWidth;
-	this.height = document.documentElement.clientHeight;	
-	this.mask = document.createElement( 'div' );
-	
-	this.mask.id = "mask";
-	this.mask.style.position = "fixed";
-	this.mask.style.display = "none";
-	this.mask.style.top = 0;
-	this.mask.style.width = this.width + "px";
-	this.mask.style.height = this.height + "px";
-	this.mask.style.background = "#000000";
-	this.mask.style.opacity = 0.5;
-	this.mask.style.zIndex = 10;
-	
-	this.process = document.createElement( 'div' );
-	this.process.id = "process";
-	this.process.style.display = "none";
-	this.process.style.position = "fixed";	
-	this.process.style.background = "#000000";
-	this.process.style.backgroundRepeat = "no-repeat";
-	this.process.style.width = this.processWidth + "px";
-	this.process.style.height = this.processHeight + "px";
-	this.process.style.backgroundImage = "url(../images/ajax-loader-preview.gif)";
-	this.process.style.top = ((this.height / 2) - (this.processHeight/2)) + "px";
-	this.process.style.left = ((this.width / 2) - (this.processWidth/2)) + "px";	
-	this.process.style.zIndex = 11;
-	this.process.style.border = "#CCCCCC 3px solid";
-		
-	this.show = function()
-	{		
-		document.body.appendChild(this.process);
-		document.body.appendChild( this.mask );
-			
-		$('#mask' ).fadeIn(1000);
-		$('#process' ).fadeIn(1000);		
-	}	
-	
-	this.hide = function()
-	{			
-		$('#mask'  ).fadeOut(1000);		
-		$('#process'  ).fadeOut(1000);		
-	}	
-	
-}
-var MaskAjaxProccess = new MaskAjaxProccess();	
-
-/**
  * Clock screen by mask  * 
  */
 function lockScreen()
 {
-	jQuery.blockUI({ message: 'Please wait ... ', css: { 
+	jQuery.blockUI({ message: i18n_waiting , css: { 
 		border: 'none', 
 		padding: '15px', 
 		backgroundColor: '#000', 
@@ -993,6 +939,8 @@ function unLockScreen()
  
 function validation( formId, submitHandler, beforeValidateHandler )
 {
+	var nameField = jQuery('#' + formId + ' input[type=text]')[0];
+
 	jQuery("#" + formId ).validate({
 		 meta:"validate"
 		,errorElement:"td"
@@ -1000,5 +948,23 @@ function validation( formId, submitHandler, beforeValidateHandler )
 		,submitHandler: submitHandler
 	});
 	
-	jQuery('#' + formId + ' input[type=text]')[0].focus();
+	if ( nameField )
+	{
+		nameField.focus();
+	}
+}
+
+function showErrorMessage( message, time )
+{
+	jQuery.growlUI( i18n_error, message, 'error', time ); 	
+}
+
+function showSuccessMessage( message, time )
+{
+	jQuery.growlUI( i18n_success, message, 'success', time ); 	
+}
+
+function showWarningMessage( message, time )
+{
+	jQuery.growlUI( i18n_warning, message, 'warning', time ); 	
 }

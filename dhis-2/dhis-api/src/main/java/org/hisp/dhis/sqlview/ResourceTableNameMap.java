@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action;
+package org.hisp.dhis.sqlview;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,34 +26,33 @@ package org.hisp.dhis.dataadmin.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import com.opensymphony.xwork2.Action;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Dang Duy Hieu
+ * @version $Id ResourceTableNameMap.java Aug 10, 2010$
  */
-public class NoAction
-    implements Action
+public class ResourceTableNameMap
 {
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
+    private static Map<String, String> resourceNameMap;
 
-    private String message;
-
-    public String getMessage()
+    static
     {
-        return message;
+        resourceNameMap = new HashMap<String, String>();
+
+        resourceNameMap.put( "_cocn", "_categoryoptioncomboname" );
+        resourceNameMap.put( "_cs", "_categorystructure" );
+        resourceNameMap.put( "_degss", "_dataelementgroupsetstructure" );
+        resourceNameMap.put( "_icgss", "_indicatorgroupsetstructure" );
+        resourceNameMap.put( "_ous", "_orgunitstructure" );
+        resourceNameMap.put( "_ougss", "_orgunitgroupsetstructure" );
+        resourceNameMap.put( "_oustgss", "_organisationunitgroupsetstructure" );
+
     }
 
-    public void setMessage( String message )
+    public static String getNameByAlias( String alias )
     {
-        this.message = message;
-    }
-
-    public String execute()
-    {        
-        return SUCCESS;
+        return resourceNameMap.get( alias );
     }
 }
