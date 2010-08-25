@@ -49,15 +49,17 @@ function hideHelpContent()
  * 
  * @param filter the filter.
  */
-function filterValues( filter )
+function filterValues( filter, columnIndex )
 {
+	if( columnIndex==undefined ) columnIndex = 0;
+	
     var list = document.getElementById( 'list' );
     
     var rows = list.getElementsByTagName( 'tr' );
     
     for ( var i = 0; i < rows.length; ++i )
     {
-        var cell = rows[i].getElementsByTagName( 'td' )[0];
+        var cell = rows[i].getElementsByTagName( 'td' )[columnIndex - 1];
         
         var value = cell.firstChild.nodeValue;
 
@@ -98,21 +100,21 @@ function getListValue( listId )
 /**
  * Hides the document element with the given identifier.
  * 
- * @param elementId the element identifier.
+ * @param id the element identifier.
  */
-function hideById( elementId )
+function hideById( id )
 {
-  document.getElementById( elementId ).style.display = "none";
+  jQuery("#" + id).hide();
 }
 
 /**
  * Shows the document element with the given identifier.
  * 
- * @param elementId the element identifier.
+ * @param id the element identifier.
  */
-function showById( elementId )
+function showById( id )
 {
-  document.getElementById( elementId ).style.display = "block";
+  jQuery("#" + id).show();
 }
 
 /**
@@ -122,8 +124,14 @@ function showById( elementId )
  */
 function hasText( inputId )
 {
-    return document.getElementById( inputId ).value != "";
+    return trim( getFieldValue( inputId ) ) != "";
 }
+
+function trim( string )
+{
+	return jQuery.trim( string );
+}
+
 
 /**
  * Returns true if the element with the given identifier is checked, false if not
@@ -133,14 +141,7 @@ function hasText( inputId )
  */
 function isChecked( checkboxId )
 {
-    var checkBox = document.getElementById( checkboxId );
-    
-    if ( checkBox )
-    {
-        return checkBox.checked;
-    }
-    
-    return false;
+	return jQuery( "#" + checkboxId ).attr("checked");   
 }
 
 /**
@@ -148,25 +149,17 @@ function isChecked( checkboxId )
  */
 function check( checkBoxId )
 {
-    var checkBox = document.getElementById( checkBoxId );
-    
-    if ( checkBox )
-    {
-        checkBox.checked = true;
-    }
+    jQuery( "#" + checkBoxId ).attr("checked", true );
 }
+
+
 
 /**
  * Unchecks the checkbox with the given identifier if the checkbox exists.
  */
 function uncheck( checkBoxId )
 {
-    var checkBox = document.getElementById( checkBoxId );
-    
-    if ( checkBox )
-    {
-        checkBox.checked = false;
-    }
+    jQuery( "#" + checkBoxId ).attr("checked", false );
 }
 
 /**
@@ -174,12 +167,7 @@ function uncheck( checkBoxId )
  */
 function enable( elementId )
 {
-    var element = document.getElementById( elementId );
-    
-    if ( element )
-    {
-        element.disabled = false;
-    }
+    jQuery( "#" + elementId ).attr("disabled", false );
 }
 
 /**
@@ -187,14 +175,8 @@ function enable( elementId )
  */
 function disable( elementId )
 {
-    var element = document.getElementById( elementId );
-    
-    if ( element )
-    {
-        element.disabled = true;
-    }
+    jQuery( "#" + elementId ).attr("disabled", true );
 }
-
 /**
  * Enables the element with the given identifier if the element exists in parent window of frame.
  */
@@ -255,7 +237,7 @@ function disableParent( elementId )
  */
 function hasElements( listId )
 {
-    return document.getElementById( listId ).options.length > 0;
+    return jQuery( "#" + listId ).children().length > 0;
 }
 
 /**
@@ -265,7 +247,7 @@ function hasElements( listId )
  */
 function isNotNull( elementId )
 {
-    return document.getElementById( elementId ) != null ? true : false;
+    return  jQuery("#" + elementId).length  == 1;
 }
 
 /**
@@ -309,7 +291,7 @@ function htmlEncode( str )
  * @param parentElement the DOM object.
  * @param childElementName the name of the element.
  */
-function getElementValue( parentElement, childElementName )
+function getElementaValue( parentElement, childElementName )
 {
     var textNode = parentElement.getElementsByTagName( childElementName )[0].firstChild;
     
@@ -371,7 +353,7 @@ function setFieldValue( fieldId, value )
  */
 function getFieldValue( fieldId )
 {
-    return htmlEncode( document.getElementById( fieldId ).value );
+    return jQuery("#" + fieldId).val();
 }
 
 // -----------------------------------------------------------------------------
@@ -911,60 +893,6 @@ function insertTextCommon( inputAreaName, inputText )
 }
 
 /**
- * Create Mask with proccessing * 
- */
-function MaskAjaxProccess()
-{	
-	this.processWidth = 100;
-	this.processHeight = 100;
-	
-	this.width = document.documentElement.clientWidth;
-	this.height = document.documentElement.clientHeight;	
-	this.mask = document.createElement( 'div' );
-	
-	this.mask.id = "mask";
-	this.mask.style.position = "fixed";
-	this.mask.style.display = "none";
-	this.mask.style.top = 0;
-	this.mask.style.width = this.width + "px";
-	this.mask.style.height = this.height + "px";
-	this.mask.style.background = "#000000";
-	this.mask.style.opacity = 0.5;
-	this.mask.style.zIndex = 10;
-	
-	this.process = document.createElement( 'div' );
-	this.process.id = "process";
-	this.process.style.display = "none";
-	this.process.style.position = "fixed";	
-	this.process.style.background = "#000000";
-	this.process.style.backgroundRepeat = "no-repeat";
-	this.process.style.width = this.processWidth + "px";
-	this.process.style.height = this.processHeight + "px";
-	this.process.style.backgroundImage = "url(../images/ajax-loader-preview.gif)";
-	this.process.style.top = ((this.height / 2) - (this.processHeight/2)) + "px";
-	this.process.style.left = ((this.width / 2) - (this.processWidth/2)) + "px";	
-	this.process.style.zIndex = 11;
-	this.process.style.border = "#CCCCCC 3px solid";
-		
-	this.show = function()
-	{		
-		document.body.appendChild(this.process);
-		document.body.appendChild( this.mask );
-			
-		$('#mask' ).fadeIn(1000);
-		$('#process' ).fadeIn(1000);		
-	}	
-	
-	this.hide = function()
-	{			
-		$('#mask'  ).fadeOut(1000);		
-		$('#process'  ).fadeOut(1000);		
-	}	
-	
-}
-var MaskAjaxProccess = new MaskAjaxProccess();	
-
-/**
  * Clock screen by mask  * 
  */
 function lockScreen()
@@ -987,6 +915,21 @@ function unLockScreen()
 	jQuery.unblockUI();
 }
 
+function showErrorMessage( message, time )
+{
+	jQuery.growlUI( i18n_error, message, 'error', time ); 	
+}
+
+function showSuccessMessage( message, time )
+{
+	jQuery.growlUI( i18n_success, message, 'success', time ); 	
+}
+
+function showWarningMessage( message, time )
+{
+	jQuery.growlUI( i18n_warning, message, 'warning', time ); 	
+}
+
 /**
  * Create validator for fileds in form  * 
  */
@@ -995,9 +938,9 @@ function validation( formId, submitHandler, beforeValidateHandler )
 {
 	var nameField = jQuery('#' + formId + ' input[type=text]')[0];
 
-	jQuery("#" + formId ).validate({
+	var validator = jQuery("#" + formId ).validate({
 		 meta:"validate"
-		,errorElement:"td"
+		,errorElement:"span"
 		,beforeValidateHandler:beforeValidateHandler
 		,submitHandler: submitHandler
 	});
@@ -1006,4 +949,22 @@ function validation( formId, submitHandler, beforeValidateHandler )
 	{
 		nameField.focus();
 	}
+	
+	return validator;
+}
+/**
+ * Add validation rule remote for input field
+* @param inputId is id for input field
+* @param url is ajax request url
+* @param params is array of param will send to server by ajax request
+ */
+function checkValueIsExist( inputId, url, params )
+{
+	jQuery("#" + inputId).rules("add",{
+		remote: {
+			url:url,
+			type:'post',
+			data:params
+		}
+	});
 }
