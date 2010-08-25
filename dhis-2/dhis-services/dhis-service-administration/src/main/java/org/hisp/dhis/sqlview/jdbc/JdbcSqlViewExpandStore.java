@@ -1,4 +1,4 @@
-package org.hisp.dhis.sqlview.hibernate;
+package org.hisp.dhis.sqlview.jdbc;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
