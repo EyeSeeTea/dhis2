@@ -348,6 +348,7 @@ div#headerMessage
   cursor: default;
   background: #c8d0d4;
   font-family: tahoma, verdana, sans-serif;
+  z-index: 9999999999999;
 }
 
 .calendar table 
@@ -361,6 +362,7 @@ div#headerMessage
   cursor: default;
   background: #c8d0d4;
   font-family: tahoma, verdana, sans-serif;
+  z-index: 9999999999999;
 }
 
 /* Header part -- contains navigation buttons and day names. */
@@ -728,6 +730,6 @@ table thead tr .header
 div.error { background: url(../images/error.png) no-repeat 10px 10px }
 div.success { background: url(../images/success.png) no-repeat 10px 10px }
 div.warning { background: url(../images/warning.png) no-repeat 10px 10px }
-div.growlUI h1, div.growlUI h2 { color: white; padding: 5px 5px 5px 75px; text-align: left;font-size:medium }
+div.growlUI h1, div.growlUI h2 { color: white; padding: 10px 10px 10px 75px; text-align: left;font-size:medium }
 div.growlUI h2 { font-size: small }
 
