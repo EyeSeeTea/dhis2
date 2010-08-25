@@ -1,3 +1,5 @@
+<SCRIPT src="javascript/dataEntry.js" type="text/javascript"></SCRIPT>
+
 <form id="selectRecordingForm" name="selectRecordingForm" method="post" action="selectDataRecording.action">
 
 <input type="hidden" id="id" name="id" value="$patient.id">
