@@ -170,8 +170,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			}
 		});
 	},
-	
-    initComponent : function() {
+    
+    initComponent: function() {
     
         mapViewStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMapViews' + type,
@@ -189,36 +189,46 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 params: { id: PARAMETER },
 								success: function(r) {
 									PARAMETER = false;
-                                    MAPVIEW = Ext.util.JSON.decode(r.responseText).mapView[0];
+                                    MAPVIEW = getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
                                     MAPSOURCE = MAPVIEW.mapSourceType;
                                     MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
                                     
 									Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                     Ext.getCmp('mapview_cb').setValue(MAPVIEW.id);
-									
-									if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
+                                    
+                                    if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
                                         LEGEND[thematicMap].type = map_legend_type_automatic;
-										Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
-										Ext.getCmp('numClasses_cb').setValue(MAPVIEW.classes);
-										Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
-										Ext.getCmp('colorB_cf').setValue(MAPVIEW.colorHigh);
-										
-										Ext.getCmp('method_cb').showField();
-										Ext.getCmp('bounds_tf').hideField();
-										Ext.getCmp('numClasses_cb').showField();
-										Ext.getCmp('colorA_cf').showField();
-										Ext.getCmp('colorB_cf').showField();
-										Ext.getCmp('maplegendset_cb').hideField();
-									}
+                                        Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
+                                        Ext.getCmp('maplegendset_cb').hideField();
+                                        Ext.getCmp('method_cb').showField();
+                                        Ext.getCmp('method_cb').setValue(MAPVIEW.method);
+                                        Ext.getCmp('colorA_cf').showField();
+                                        Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
+                                        Ext.getCmp('colorB_cf').showField();
+                                        Ext.getCmp('colorB_cf').setValue(MAPVIEW.colorHigh);
+                                        
+                                        if (MAPVIEW.method == classify_with_bounds) {
+                                            Ext.getCmp('numClasses_cb').hideField();
+                                            Ext.getCmp('bounds_tf').showField();
+                                            Ext.getCmp('bounds_tf').setValue('80,100');
+                                        }
+                                        else {
+                                            Ext.getCmp('bounds_tf').hideField();
+                                            Ext.getCmp('numClasses_cb').showField();
+                                            Ext.getCmp('numClasses_cb').setValue(MAPVIEW.classes);
+                                        }
+                                    }
 									else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
                                         LEGEND[thematicMap].type = map_legend_type_predefined;
-										Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
-										Ext.getCmp('method_cb').hideField();
-										Ext.getCmp('bounds_tf').hideField();
-										Ext.getCmp('numClasses_cb').hideField();
-										Ext.getCmp('colorA_cf').hideField();
-										Ext.getCmp('colorB_cf').hideField();
-										Ext.getCmp('maplegendset_cb').showField();
+                                        Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
+                                        Ext.getCmp('method_cb').hideField();
+                                        Ext.getCmp('bounds_tf').hideField();
+                                        Ext.getCmp('numClasses_cb').hideField();
+                                        Ext.getCmp('colorA_cf').hideField();
+                                        Ext.getCmp('colorB_cf').hideField();
+                                        Ext.getCmp('maplegendset_cb').showField();
+                                        
+                                        Ext.getCmp('maplegendset_cb').setValue(MAPVIEW.mapLegendSetId);
 										
 										predefinedMapLegendSetStore.load();
 									}
@@ -474,7 +484,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             method: 'POST',
                             params: { id: mId },
                             success: function(r) {
-                                MAPVIEW = Ext.util.JSON.decode(r.responseText).mapView[0];
+                                MAPVIEW = getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
 								MAPSOURCE = MAPVIEW.mapSourceType;
                                 
                                 Ext.getCmp('mapvaluetype_cb').setValue(MAPVIEW.mapValueType);
@@ -501,19 +511,27 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     dataElementStore.load();
                                 }                                        
 								
-								if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
+                                if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
                                     LEGEND[thematicMap].type = map_legend_type_automatic;
 									Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
-									Ext.getCmp('numClasses_cb').setValue(MAPVIEW.classes);
-									Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
-									Ext.getCmp('colorB_cf').setValue(MAPVIEW.colorHigh);
-									
+                                    Ext.getCmp('maplegendset_cb').hideField();
 									Ext.getCmp('method_cb').showField();
-									Ext.getCmp('bounds_tf').hideField();
-									Ext.getCmp('numClasses_cb').showField();
-									Ext.getCmp('colorA_cf').showField();
-									Ext.getCmp('colorB_cf').showField();
-									Ext.getCmp('maplegendset_cb').hideField();
+                                    Ext.getCmp('method_cb').setValue(MAPVIEW.method);
+                                    Ext.getCmp('colorA_cf').showField();
+									Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
+                                    Ext.getCmp('colorB_cf').showField();
+									Ext.getCmp('colorB_cf').setValue(MAPVIEW.colorHigh);
+                                    
+                                    if (MAPVIEW.method == classify_with_bounds) {
+                                        Ext.getCmp('numClasses_cb').hideField();
+                                        Ext.getCmp('bounds_tf').showField();
+                                        Ext.getCmp('bounds_tf').setValue('80,100');
+                                    }
+                                    else {
+                                        Ext.getCmp('bounds_tf').hideField();
+                                        Ext.getCmp('numClasses_cb').showField();
+                                        Ext.getCmp('numClasses_cb').setValue(MAPVIEW.classes);
+                                    }
 								}
 								else if (MAPVIEW.mapLegendType == map_legend_type_predefined) {
                                     LEGEND[thematicMap].type = map_legend_type_predefined;
@@ -1006,7 +1024,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND[thematicMap].type) {
 							LEGEND[thematicMap].type = map_legend_type_automatic;
 							Ext.getCmp('method_cb').showField();
-							if (Ext.getCmp('method_cb').getValue() == 0) {
+							if (Ext.getCmp('method_cb').getValue() == classify_with_bounds) {
 								Ext.getCmp('bounds_tf').showField();
 								Ext.getCmp('numClasses_cb').hideField();
 							}
@@ -1066,16 +1084,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: [
-					[1, i18n_equal_intervals],
-					[2, i18n_equal_group_count],
-					[0, i18n_fixed_breaks]
+					[2, i18n_equal_intervals],
+					[3, i18n_equal_group_count],
+					[1, i18n_fixed_breaks]
 				]
             }),
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('method_cb').getValue() == 0 && Ext.getCmp('method_cb').getValue() != LEGEND[thematicMap].method) {
-							LEGEND[thematicMap].method = 0;
+                        if (Ext.getCmp('method_cb').getValue() == classify_with_bounds && Ext.getCmp('method_cb').getValue() != LEGEND[thematicMap].method) {
+							LEGEND[thematicMap].method = classify_with_bounds;
                             Ext.getCmp('bounds_tf').showField();
                             Ext.getCmp('numClasses_cb').hideField();
                         }

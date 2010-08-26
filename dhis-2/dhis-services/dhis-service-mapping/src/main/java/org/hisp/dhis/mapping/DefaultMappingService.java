@@ -735,7 +735,7 @@ public class DefaultMappingService
 
     public int addMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
         int dataElementGroupId, int dataElementId, String periodTypeName, int periodId, String mapSourceType,
-        String mapSource, String mapLegendType, int method, int classes, String colorLow, String colorHigh,
+        String mapSource, String mapLegendType, int method, int classes, String bounds, String colorLow, String colorHigh,
         int mapLegendSetId, String longitude, String latitude, int zoom )
     {
         MapView mapView = new MapView();
@@ -772,6 +772,7 @@ public class DefaultMappingService
         mapView.setMapLegendType( mapLegendType );
         mapView.setMethod( method );
         mapView.setClasses( classes );
+        mapView.setBounds( bounds );
         mapView.setColorLow( colorLow );
         mapView.setColorHigh( colorHigh );
         mapView.setMapLegendSet( mapLegendSet );
@@ -789,7 +790,7 @@ public class DefaultMappingService
 
     public void addOrUpdateMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
         int dataElementGroupId, int dataElementId, String periodTypeName, int periodId, String mapSource,
-        String mapLegendType, int method, int classes, String colorLow, String colorHigh, int mapLegendSetId,
+        String mapLegendType, int method, int classes, String bounds, String colorLow, String colorHigh, int mapLegendSetId,
         String longitude, String latitude, int zoom )
     {
         IndicatorGroup indicatorGroup = null;
@@ -838,6 +839,7 @@ public class DefaultMappingService
             mapView.setMapLegendType( mapLegendType );
             mapView.setMethod( method );
             mapView.setClasses( classes );
+            mapView.setBounds( bounds );
             mapView.setColorLow( colorLow );
             mapView.setColorHigh( colorHigh );
             mapView.setMapLegendSet( mapLegendSet );
@@ -850,7 +852,7 @@ public class DefaultMappingService
         else
         {
             mapView = new MapView( name, mapValueType, indicatorGroup, indicator, dataElementGroup, dataElement,
-                periodType, period, mapSourceType, mapSource, mapLegendType, method, classes, colorLow, colorHigh,
+                periodType, period, mapSourceType, mapSource, mapLegendType, method, classes, bounds, colorLow, colorHigh,
                 mapLegendSet, longitude, latitude, zoom );
 
             addMapView( mapView );
