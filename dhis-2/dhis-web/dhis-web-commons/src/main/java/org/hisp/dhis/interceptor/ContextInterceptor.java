@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataset;
+package org.hisp.dhis.interceptor;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,54 +27,43 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-public interface SectionStore
+import org.hisp.dhis.system.database.DatabaseInfoProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.Interceptor;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class ContextInterceptor
+    implements Interceptor
 {
-    String ID = SectionStore.class.getName();
+    private static final String KEY_IN_MEMORY_DATABASE = "inMemoryDatabase";
+    
+    @Autowired
+    private DatabaseInfoProvider databaseInfoProvider;
 
-    /**
-     * Adds a Section.
-     * 
-     * @param section the Section to add.
-     * @return the generated identifier.
-     */
-    int addSection( Section section );
+    @Override
+    public void destroy()
+    {
+    }
 
-    /**
-     * Updates a Section.
-     * 
-     * @param section the Section to update.
-     */
-    void updateSection( Section section );
+    @Override
+    public void init()
+    {
+    }
 
-    /**
-     * Deletes a Section.
-     * 
-     * @param section the Section to delete.
-     */
-    void deleteSection( Section section );   
-
-    /**
-     * Retrieves the Section with the given identifier.
-     * 
-     * @param id the identifier of the Section to retrieve.
-     * @return the Section.
-     */
-    Section getSection( int id );
-
-    /**
-     * Retrieves the Section with the given name.
-     * 
-     * @param name the name of the Section to retrieve.
-     * @return the Section.
-     */
-    Section getSectionByName( String name, DataSet dataSet );
-
-    /**
-     * Retrieves all Sections.
-     * 
-     * @return a Collection of Sections.
-     */
-    Collection<Section> getAllSections();   
+    @Override
+    public String intercept( ActionInvocation invocation )
+        throws Exception
+    {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put( KEY_IN_MEMORY_DATABASE, databaseInfoProvider.isInMemory() );
+        invocation.getStack().push( map );
+        return invocation.invoke();
+    }
 }
