@@ -173,10 +173,12 @@ Ext.onReady( function() {
 			success: function(r) {
                 var baseLayer = new OpenLayers.Layer.WMS(
                     'World',
-                    'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
-                    {layers: 'Health Regional Africa Meningitis Meningitis Observed'}
+                    // 'http://iridl.ldeo.columbia.edu/cgi-bin/wms_dev/wms.pl',
+                    // {layers: 'Health Regional Africa Meningitis Meningitis Observed'}
+                    'http://labs.metacarta.com/wms/vmap0',
+                    {layers: 'basic'}
                 );
-            
+                
                 MAP.addLayers([baseLayer]);
                 MAP.layers[0].setVisibility(false);
                 
