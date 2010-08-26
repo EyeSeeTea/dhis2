@@ -5,10 +5,13 @@
 
 package org.hisp.dhis.cbhis.gui;
 
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.midlet.*;
+import javax.microedition.io.Connector;
+import javax.microedition.io.HttpConnection;
 import javax.microedition.lcdui.*;
 import javax.microedition.rms.RecordStoreException;
 import org.hisp.dhis.cbhis.connection.DownloadManager;
@@ -19,6 +22,9 @@ import org.hisp.dhis.cbhis.model.Activity;
 import org.hisp.dhis.cbhis.model.DataElement;
 import org.hisp.dhis.cbhis.model.OrgUnit;
 import org.hisp.dhis.cbhis.model.ProgramStageForm;
+import org.hisp.dhis.cbhis.util.AlertUtil;
+
+import com.sun.midp.io.Base64;
 
 /**
  * @author abyotag_adm
@@ -65,6 +71,8 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 	private Command okCommand;
 	private Command lgnFrmExtCmd;
 	private Command lgnFrmLgnCmd;
+	// add one more command to open setting form
+	private Command lgnFrmSettingCmd;
 	private Command orgUnitBackCmd;
 	// add one more back command for the downloaded forms list
 	private Command downloadedBckCmd;
@@ -153,8 +161,15 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 			if (command == lgnFrmExtCmd) {
 				exitMIDlet();
 			} else if (command == lgnFrmLgnCmd) {
+				// Action when user login
 				login();
-				switchDisplayable(null, getMainMenuList());
+				Form waitForm = new Form("Making connection");
+				waitForm.append("Please wait........");
+				switchDisplayable(null, waitForm);
+			} else if (command == lgnFrmSettingCmd) {
+				// method to show "change server url" form
+				loadSettings();
+				switchDisplayable(null, getSettingsForm());
 			}
 		} else if (displayable == mainMenuList) {
 			if (command == List.SELECT_COMMAND) {
@@ -164,11 +179,20 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 			}
 		} else if (displayable == settingsForm) {
 			if (command == setngsBakCmd) {
-				switchDisplayable(null, getMainMenuList());
+				if (login) {
+					switchDisplayable(null, getMainMenuList());
+				} else {
+					switchDisplayable(null, getLoginForm());
+				}
 			} else if (command == setngsSaveCmd) {
 				// should try to save global parameters.......
-				saveSettings();
-				switchDisplayable(null, getMainMenuList());
+				if (login) {
+					saveSettings();
+					switchDisplayable(null, getMainMenuList());
+				} else {
+					saveSettings();
+					switchDisplayable(null, getLoginForm());
+				}
 			}
 		} else if (displayable == orgUnitList) {
 			if (command == orgUnitBackCmd) {
@@ -199,6 +223,15 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 			exitCommand = new Command("Exit", Command.EXIT, 0);
 		}
 		return exitCommand;
+	}
+
+	// Command to handle setting
+	private Command getSettingCmd() {
+		if (this.lgnFrmSettingCmd == null) {
+			this.lgnFrmSettingCmd = new Command("Change Server URL",
+					Command.SCREEN, 1);
+		}
+		return lgnFrmSettingCmd;
 	}
 
 	/**
@@ -418,8 +451,8 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 	 */
 	public Form getSettingsForm() {
 		if (settingsForm == null) {
-			settingsForm = new Form("Configurable Parameters", new Item[] {
-					getUrl(), getAdminPass() });
+			settingsForm = new Form("Configurable Parameters",
+					new Item[] { getUrl() });
 			settingsForm.addCommand(getSetngsBakCmd());
 			settingsForm.addCommand(getSetngsSaveCmd());
 			settingsForm.setCommandListener(this);
@@ -593,6 +626,8 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 					getPassword() });
 			loginForm.addCommand(getLgnFrmExtCmd());
 			loginForm.addCommand(getLgnFrmLgnCmd());
+			// One more command to change serverURL
+			loginForm.addCommand(getSettingCmd());
 			loginForm.setCommandListener(this);
 		}
 		return loginForm;
@@ -607,6 +642,11 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 		if (userName == null) {
 			userName = new TextField("Username", "", 32, TextField.ANY
 					| TextField.SENSITIVE);
+			SettingsRectordStore store = getSettingRectordStore();
+			if (store.get("user") != null) {
+				userName.setString(store.get("user"));
+			}
+			store = null;
 		}
 		return userName;
 	}
@@ -727,22 +767,78 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 	}
 
 	private void login() {
+		// Create a new thread to handle login action.
+		Thread loginThread = new Thread() {
+			public void run() {
+				try {
+					SettingsRectordStore recordStore = CBHISMIDlet.this
+							.getSettingRectordStore();
 
-		if (getUserName().getString() != null
-				&& getPassword().getString() != null) {
-			if (getUserName().getString().trim().length() != 0
-					&& getPassword().getString().trim().length() != 0) {
-				login = true;
+					// for the first time use, the default URL
+					// http://localhost:8080/ will be applied automatically
+					if (recordStore.get("url").equals("")) {
+						recordStore.put("url", "http://localhost:8080/");
+						recordStore.save();
+					}
+
+					HttpConnection connection = (HttpConnection) Connector
+							.open(recordStore.get("url")
+									+ "dhis-web-cbhis-api/api/cbhis/v0.1");
+					System.out.println(recordStore.get("url")
+							+ "dhis-web-cbhis-api/api/cbhis/v0.1");
+					getUrl().setString(recordStore.get("url"));
+					connection.setRequestMethod(HttpConnection.GET);
+					connection.setRequestProperty("Content-Type",
+							"application/x-www-form-urlencoded");
+					byte[] arrayBytes = (userName.getString() + ":" + password
+							.getString()).getBytes();
+					connection.setRequestProperty("Authorization", "Basic "
+							+ Base64.encode(arrayBytes, 0, arrayBytes.length));
+
+					if (connection.getResponseCode() == HttpConnection.HTTP_OK) {
+						CBHISMIDlet.this.login = true;
+						// everytime a user login successfully, save username
+						// and password in RMS
+						recordStore.put("user", userName.getString());
+						recordStore.put("password", password.getString());
+						// save OrgUnit of the currrent user to database
+						DownloadManager downloadManager = new DownloadManager(
+								CBHISMIDlet.this, getUrl().getString(),
+								recordStore.get("user"),
+								recordStore.get("password"),
+								DownloadManager.DOWNLOAD_ORGUNIT);
+						downloadManager.start();
+						recordStore.save();
+						switchDisplayable(null, getMainMenuList());
+					} else {
+						CBHISMIDlet.this.login = false;
+						switchDisplayable(
+								AlertUtil
+										.getErrorAlert("Wrong username or password."),
+								getLoginForm());
+					}
+					connection.close();
+				} catch (IOException e) {
+					switchDisplayable(
+							AlertUtil
+									.getErrorAlert("Unable to connect to server. Please check the URL."),
+							getLoginForm());
+				} catch (RecordStoreException e) {
+					System.out.println(e.getMessage());
+				}
 			}
-		}
-		// Take action based on login value
-		if (login) {
-			System.out.println("Login successfull");
+		};
+		loginThread.start();
+	}
 
-		} else {
-			System.out.println("Login failed...");
+	private SettingsRectordStore getSettingRectordStore() {
+		SettingsRectordStore reccordStore = null;
+		try {
+			reccordStore = new SettingsRectordStore("SETTINGS");
+		} catch (RecordStoreException e) {
+			e.printStackTrace();
 		}
-		login = false;
+		return reccordStore;
 	}
 
 	private void saveSettings() {
@@ -752,7 +848,6 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 		try {
 			settingsRecord = new SettingsRectordStore("SETTINGS");
 			settingsRecord.put("url", url.getString());
-			settingsRecord.put("adminPass", adminPass.getString());
 			settingsRecord.save();
 		} catch (RecordStoreException rse) {
 		}
@@ -763,9 +858,7 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 
 		try {
 			settingsRecord = new SettingsRectordStore("SETTINGS");
-
 			getUrl().setString(settingsRecord.get("url"));
-			getAdminPass().setString(settingsRecord.get("adminPass"));
 		} catch (RecordStoreException rse) {
 		}
 	}
@@ -782,8 +875,9 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 
 	private void browseForms() {
 		loadSettings();
+		// user real username and password
 		downloadManager = new DownloadManager(this, getUrl().getString(),
-				"admin", getAdminPass().getString(),
+				userName.getString().trim(), password.getString().trim(),
 				DownloadManager.DOWNLOAD_FORMS);
 		downloadManager.start();
 	}
@@ -806,8 +900,9 @@ public class CBHISMIDlet extends MIDlet implements CommandListener {
 
 	private void downloadForm(int formId) {
 		loadSettings();
+		// user real username nad password
 		downloadManager = new DownloadManager(this, getUrl().getString(),
-				"admin", getAdminPass().getString(),
+				userName.getString().trim(), password.getString().trim(),
 				DownloadManager.DOWNLOAD_FORM, formId);
 		downloadManager.start();
 	}

@@ -81,19 +81,19 @@ public class DownloadManager extends Thread {
     public void run()
     {       
         if( task.equals( DOWNLOAD_FORMS)){
-            download( rootUrl + "cbhis-webservice/forms",  FORMS_TAG );
+            download( rootUrl + "dhis-web-cbhis-webservice/cbhis-webservice/forms",  FORMS_TAG );
             cbhisMIDlet.displayFormsForDownload(programStagesVector);
         }
         else if( task.equals( DOWNLOAD_FORM)){
-            download( rootUrl + "cbhis-webservice/forms/"+param,  FORM_TAG );
+			download(rootUrl + "dhis-web-cbhis-webservice/cbhis-webservice/forms/" + param,  FORM_TAG );
             cbhisMIDlet.saveForm(form);
             cbhisMIDlet.renderForm(form, cbhisMIDlet.getDataEntryForm());
         }
         else if( task.equals( DOWNLOAD_ORGUNIT)){
         	//download OrgUnits and save to RMS then download Activities
-            download( rootUrl + "api/cbhis/v0.1/",  ORGUNIT_TAG );
+            download( rootUrl + "dhis-web-cbhis-api/api/cbhis/v0.1/",  ORGUNIT_TAG );
             cbhisMIDlet.saveOrgUnits(orgunitVector);
-            cbhisMIDlet.displayOrgUnitToDownloadActivities();
+//            cbhisMIDlet.displayOrgUnitToDownloadActivities();
         }else if(task.equals(DOWNLOAD_ACTIVITYPLAN)){
         	download( rootUrl,  ACTIVITYPLAN_TAG );
         	cbhisMIDlet.saveActivities(activitiesVector);
