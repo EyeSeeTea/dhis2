@@ -191,6 +191,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 									PARAMETER = false;
                                     MAPVIEW = Ext.util.JSON.decode(r.responseText).mapView[0];
                                     MAPSOURCE = MAPVIEW.mapSourceType;
+                                    MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
+                                    
 									Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                     Ext.getCmp('mapview_cb').setValue(MAPVIEW.id);
 									
@@ -218,14 +220,36 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 										Ext.getCmp('maplegendset_cb').showField();
 										
 										predefinedMapLegendSetStore.load();
-									}										
+									}
+									
+									Ext.getCmp('mapvaluetype_cb').setValue(MAPVIEW.mapValueType);
 										
-									MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
+									if (MAPVIEW.mapValueType == map_value_type_indicator) {
+                                        VALUETYPE.polygon = map_value_type_indicator;
+                                        
+                                        Ext.getCmp('indicator_cb').showField();
+                                        Ext.getCmp('indicatorgroup_cb').showField();
+                                        Ext.getCmp('dataelementgroup_cb').hideField();
+                                        Ext.getCmp('dataelement_cb').hideField();
 
-                                    Ext.getCmp('indicatorgroup_cb').setValue(MAPVIEW.indicatorGroupId);
+                                        Ext.getCmp('indicatorgroup_cb').setValue(MAPVIEW.indicatorGroupId);
                                     
-                                    indicatorStore.setBaseParam('indicatorGroupId', MAPVIEW.indicatorGroupId);
-                                    indicatorStore.load();
+                                        indicatorStore.setBaseParam('indicatorGroupId', MAPVIEW.indicatorGroupId);
+                                        indicatorStore.load();
+                                    }
+                                    else if (MAPVIEW.mapValueType == map_value_type_dataelement) {
+                                        VALUETYPE.polygon = map_value_type_dataelement;
+                                        
+                                        Ext.getCmp('indicator_cb').hideField();
+                                        Ext.getCmp('indicatorgroup_cb').hideField();
+                                        Ext.getCmp('dataelementgroup_cb').showField();
+                                        Ext.getCmp('dataelement_cb').showField();
+
+                                        Ext.getCmp('dataelementgroup_cb').setValue(MAPVIEW.dataElementGroupId);
+                                    
+                                        dataElementStore.setBaseParam('dataElementGroupId', MAPVIEW.dataElementGroupId);
+                                        dataElementStore.load();
+                                    }
                                 },
                                 failure: function() {
                                   alert( i18n_status , i18n_error_while_retrieving_data );
