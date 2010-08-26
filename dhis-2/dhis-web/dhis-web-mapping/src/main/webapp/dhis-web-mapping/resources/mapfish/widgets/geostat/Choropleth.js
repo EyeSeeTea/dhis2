@@ -197,6 +197,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     Ext.getCmp('mapview_cb').setValue(MAPVIEW.id);
 									
 									if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
+                                        LEGEND[thematicMap].type = map_legend_type_automatic;
 										Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
 										Ext.getCmp('numClasses_cb').setValue(MAPVIEW.classes);
 										Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
@@ -501,6 +502,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 }                                        
 								
 								if (MAPVIEW.mapLegendType == map_legend_type_automatic) {
+                                    LEGEND[thematicMap].type = map_legend_type_automatic;
 									Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_automatic);
 									Ext.getCmp('numClasses_cb').setValue(MAPVIEW.classes);
 									Ext.getCmp('colorA_cf').setValue(MAPVIEW.colorLow);
