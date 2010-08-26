@@ -164,16 +164,15 @@ public class DefaultMappingService
         {
             Double value = aggregationService.getAggregatedDataValue( dataElement, null, period.getStartDate(), period.getEndDate(), organisationUnit );
             
-            if ( value != null )
-            { 
-                AggregatedMapValue mapValue = new AggregatedMapValue();
-                mapValue.setOrganisationUnitId( organisationUnit.getId() );
-                mapValue.setOrganisationUnitName( organisationUnit.getName() );
-                mapValue.setPeriodId( period.getId() );
-                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+            value = value != null ? value : 0; // TODO improve
+            
+            AggregatedMapValue mapValue = new AggregatedMapValue();
+            mapValue.setOrganisationUnitId( organisationUnit.getId() );
+            mapValue.setOrganisationUnitName( organisationUnit.getName() );
+            mapValue.setPeriodId( period.getId() );
+            mapValue.setValue( MathUtils.getRounded( value, 2 ) );
                 
-                values.add( mapValue );
-            }
+            values.add( mapValue );
         }
         
         return values;
@@ -232,16 +231,15 @@ public class DefaultMappingService
         {
             Double value = aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), organisationUnit );
             
-            if ( value != null )
-            {
-                AggregatedMapValue mapValue = new AggregatedMapValue();
-                mapValue.setOrganisationUnitId( organisationUnit.getId() );
-                mapValue.setOrganisationUnitName( organisationUnit.getName() );
-                mapValue.setPeriodId( period.getId() );
-                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+            value = value != null ? value : 0; // TODO improve
+            
+            AggregatedMapValue mapValue = new AggregatedMapValue();
+            mapValue.setOrganisationUnitId( organisationUnit.getId() );
+            mapValue.setOrganisationUnitName( organisationUnit.getName() );
+            mapValue.setPeriodId( period.getId() );
+            mapValue.setValue( MathUtils.getRounded( value, 2 ) );
                 
-                values.add( mapValue );
-            }
+            values.add( mapValue );
         }
         
         return values;
