@@ -132,6 +132,7 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
     setClassification: function() {
         var values = [];
         // var features = this.layer.features;
+        
         for (var i = 0; i < FEATURE[thematicMap].length; i++) {
             values.push(FEATURE[thematicMap][i].attributes[this.indicator]);
         }
