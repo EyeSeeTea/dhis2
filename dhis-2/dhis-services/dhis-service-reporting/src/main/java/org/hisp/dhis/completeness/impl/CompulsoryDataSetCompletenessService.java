@@ -37,7 +37,7 @@ import org.hisp.dhis.source.Source;
 /**
  * @author Lars Helge Overland
  */
-public class ObjectiveDataSetCompletenessService
+public class CompulsoryDataSetCompletenessService
     extends AbstractDataSetCompletenessService
 {    
     public int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period )
@@ -48,5 +48,10 @@ public class ObjectiveDataSetCompletenessService
     public int getRegistrationsOnTime( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline )
     {
         return completenessStore.getRegistrations( dataSet, children, period, deadline );
+    }
+    
+    public int getSources( DataSet dataSet, Collection<? extends Source> children )
+    {
+        return dataSetService.getSourcesAssociatedWithDataSet( dataSet, children );
     }
 }
