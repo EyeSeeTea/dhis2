@@ -3199,19 +3199,20 @@ Ext.onReady( function() {
                                     }
                                 }
                             }
-                        },
-                        {
-                            html: 'Locate feature',
-                            listeners: {
-                                'click': {
-                                    fn: function() {
-                                        locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 173, Ext.getCmp('center').y + 50);
-                                        locateFeatureWindow.show();
-                                        vectorLayerOptionsWindow.hide();
-                                    }
-                                }
-                            }
-                        }                                        
+                        }
+                        // ,
+                        // {
+                            // html: 'Locate feature',
+                            // listeners: {
+                                // 'click': {
+                                    // fn: function() {
+                                        // locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 173, Ext.getCmp('center').y + 50);
+                                        // locateFeatureWindow.show();
+                                        // vectorLayerOptionsWindow.hide();
+                                    // }
+                                // }
+                            // }
+                        // }                                        
                     ]
                 }
             ]
