@@ -1371,6 +1371,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     }
 
                     for (var i = 0; i < mapvalues.length; i++) {
+alert(i);                    
                         for (var j = 0; j < FEATURE[thematicMap].length; j++) {
                             if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
                                 FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
