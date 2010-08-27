@@ -2952,7 +2952,8 @@ Ext.onReady( function() {
 	}
 	
 	addOverlaysToMap();
-    
+        
+    /* Section: layer options */
     function showWMSLayerOptions(layer) {
         if (Ext.getCmp('baselayeroptions_w')) {
             Ext.getCmp('baselayeroptions_w').destroy();
@@ -3061,6 +3062,68 @@ Ext.onReady( function() {
             Ext.getCmp('vectorlayeroptions_w').destroy();
         }
         
+        var data = [];
+        var layer = MAP.getLayersByName('Polygon layer')[0];
+        
+        for (var i = 0; i < layer.features.length; i++) {
+            data.push([i, layer.features[i].data.name]);
+        }
+        
+        var featureStore = new Ext.data.ArrayStore({
+            mode: 'local',
+            autoDestroy: true,
+            idProperty: 'i',
+            fields: ['i', 'name'],
+            data: [data]
+        });
+        
+        var locateFeatureWindow = new Ext.Window({
+            id: 'locatefeature_w',
+            title: 'Locate features',
+            layout: 'fit',
+            closeAction: 'hide',
+            defaults: {layout: 'fit', bodyStyle:'padding:8px; border:0px'},
+            width: 200,
+            items: [
+                {
+                    xtype: 'panel',
+                    items: [
+                        {
+                            xtype: 'panel',
+                            items: [
+                                { html: '<div class="window-field-label-first">Feature name</div>' },
+                                {
+                                    xtype: 'textfield',
+                                    id: 'locatefeature_tf'
+                                },
+                                { html: '<div class="window-field-label"></div>' },
+                                {
+                                    xtype: 'grid',
+                                    id: 'featuregrid_gp',
+                                    autoHeight: true,
+                                    store: featureStore,
+                                    cm: new Ext.grid.ColumnModel({
+                                        columns: [
+                                            {   
+                                                id: 'name',
+                                                header: 'Features',
+                                                dataIndex: 'name',
+                                                width: 200
+                                            }
+                                        ]
+                                    }),
+                                    sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+                                    viewConfig: {forceFit: true},
+                                    sortable: true,
+                                    // autoExpandColumn: 'name'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });                    
+        
         var vectorLayerOptionsWindow = new Ext.Window({
             id: 'vectorlayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
@@ -3136,7 +3199,19 @@ Ext.onReady( function() {
                                     }
                                 }
                             }
-                        }
+                        },
+                        {
+                            html: 'Locate feature',
+                            listeners: {
+                                'click': {
+                                    fn: function() {
+                                        locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 173, Ext.getCmp('center').y + 50);
+                                        locateFeatureWindow.show();
+                                        vectorLayerOptionsWindow.hide();
+                                    }
+                                }
+                            }
+                        }                                        
                     ]
                 }
             ]
@@ -3954,6 +4029,11 @@ function onHoverUnselectPolygon(feature) {
 }
 
 function onClickSelectPolygon(feature) {
+
+// function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
+    // var l = MAP.getLayersByName('Polygon layer')[0];
+    // l.drawFeature(feature,{'fillColor':'blue'});
+
 	FEATURE[thematicMap] = feature;
 
 	var east_panel = Ext.getCmp('east');
