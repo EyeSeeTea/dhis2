@@ -307,7 +307,6 @@
 				../dhis-web-commons/util/validate/jquery.validate.js,
 				../dhis-web-commons/util/jquery.metadata.js,
 				../dhis-web-commons/util/validate/additional-methods.js,
-				../dhis-web-commons/validationMessages.action,
 				javascript/minMaxValidation.js </param>
 		</action>
 		
