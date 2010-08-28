@@ -74,6 +74,7 @@
        <td align="center">&nbsp;</td>
     <td align="center">&nbsp;</td>
     <td align="left"><input type="submit" id="submitButton" style="width:10em" value="$i18n.getString( 'generate' )">
+	<input type="button" onclick="removeMinMaxValue()" id="" style="width:10em" value="$i18n.getString( 'remove' )">
 	  <input type="button"" style="width:10em" onClick="window.location.href='listReportExcel.action'" value="$i18n.getString( 'cancel' )"></td>
   
   </tr>
