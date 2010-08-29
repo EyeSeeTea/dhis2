@@ -433,7 +433,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         var name = Ext.util.JSON.decode(r.responseText).organisationUnit.name;
                                         Ext.getCmp('map_tf2').setValue(name);
                                         Ext.getCmp('map_tf2').value = MAPVIEW.mapSource;
-                                        proportionalSymbol.loadById(MAPVIEW.mapSource);
+                                        proportionalSymbol.loadFromDatabase(MAPVIEW.mapSource);
                                     },
                                     failure: function() {
                                         alert('Error: getOrganisationUnit');
@@ -442,7 +442,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             }
                             else {
                                 Ext.getCmp('map_cb2').setValue(MAPVIEW.mapSource);
-                                proportionalSymbol.loadByUrl(MAPVIEW.mapSource);
+                                proportionalSymbol.loadFromFile(MAPVIEW.mapSource);
                             }
                         }
                     }
@@ -881,7 +881,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         }
                         
                         if (Ext.getCmp('map_cb2').getValue() != proportionalSymbol.newUrl) {
-                            proportionalSymbol.loadByUrl(Ext.getCmp('map_cb2').getValue());
+                            proportionalSymbol.loadFromFile(Ext.getCmp('map_cb2').getValue());
                         }
                     },
                     scope: this
@@ -965,9 +965,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                 width: 133,
                                                 handler: function() {
                                                     if (Ext.getCmp('map_tf2').getValue() && Ext.getCmp('map_tf2').getValue() != choropleth.parentId) {
-                                                        MASK.msg = i18n_loading_geojson;
-                                                        MASK.show();
-                                                        proportionalSymbol.loadById(Ext.getCmp('map_tf2').value);
+                                                        proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
                                                     }
                                                     Ext.getCmp('orgunit_w2').hide();
                                                 }
@@ -1256,14 +1254,17 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         return [colorA, colorB];
     },
     
-    loadById: function(id) {
+    loadFromDatabase: function(id) {
         if (id != proportionalSymbol.parentId || MAPVIEW) {
+            MASK.msg = i18n_loading_geojson;
+            MASK.show();
+
             proportionalSymbol.parentId = id;
             proportionalSymbol.setUrl(path_mapping + 'getGeoJson.action?parentId=' + proportionalSymbol.parentId);
         }
     },
     
-    loadByUrl: function(url) {
+    loadFromFile: function(url) {
         if (url != proportionalSymbol.newUrl) {
             proportionalSymbol.newUrl = url;
 
