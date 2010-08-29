@@ -233,7 +233,7 @@ public class DefaultMappingService
         for ( OrganisationUnit organisationUnit : parent.getChildren() )
         {
             if ( organisationUnit.hasCoordinates() )
-            {
+            {    
                 Double value = aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), organisationUnit );
                 
                 value = value != null ? value : 0; // TODO improve
