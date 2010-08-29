@@ -162,17 +162,20 @@ public class DefaultMappingService
         
         for ( OrganisationUnit organisationUnit : parent.getChildren() )
         {
-            Double value = aggregationService.getAggregatedDataValue( dataElement, null, period.getStartDate(), period.getEndDate(), organisationUnit );
-            
-            value = value != null ? value : 0; // TODO improve
-            
-            AggregatedMapValue mapValue = new AggregatedMapValue();
-            mapValue.setOrganisationUnitId( organisationUnit.getId() );
-            mapValue.setOrganisationUnitName( organisationUnit.getName() );
-            mapValue.setPeriodId( period.getId() );
-            mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+            if ( organisationUnit.hasCoordinates() )
+            {
+                Double value = aggregationService.getAggregatedDataValue( dataElement, null, period.getStartDate(), period.getEndDate(), organisationUnit );
                 
-            values.add( mapValue );
+                value = value != null ? value : 0; // TODO improve
+                
+                AggregatedMapValue mapValue = new AggregatedMapValue();
+                mapValue.setOrganisationUnitId( organisationUnit.getId() );
+                mapValue.setOrganisationUnitName( organisationUnit.getName() );
+                mapValue.setPeriodId( period.getId() );
+                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+                    
+                values.add( mapValue );
+            }
         }
         
         return values;
@@ -229,17 +232,20 @@ public class DefaultMappingService
         
         for ( OrganisationUnit organisationUnit : parent.getChildren() )
         {
-            Double value = aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), organisationUnit );
-            
-            value = value != null ? value : 0; // TODO improve
-            
-            AggregatedMapValue mapValue = new AggregatedMapValue();
-            mapValue.setOrganisationUnitId( organisationUnit.getId() );
-            mapValue.setOrganisationUnitName( organisationUnit.getName() );
-            mapValue.setPeriodId( period.getId() );
-            mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+            if ( organisationUnit.hasCoordinates() )
+            {    
+                Double value = aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), organisationUnit );
                 
-            values.add( mapValue );
+                value = value != null ? value : 0; // TODO improve
+                
+                AggregatedMapValue mapValue = new AggregatedMapValue();
+                mapValue.setOrganisationUnitId( organisationUnit.getId() );
+                mapValue.setOrganisationUnitName( organisationUnit.getName() );
+                mapValue.setPeriodId( period.getId() );
+                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+                    
+                values.add( mapValue );
+            }
         }
         
         return values;
