@@ -923,6 +923,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         xtype: 'treepanel',
                                         id: 'orgunit_tp2',
                                         bodyStyle: 'padding:7px',
+                                        height: getMultiSelectHeight(),
+                                        autoScroll: true,
                                         loader: new Ext.tree.TreeLoader({
                                             dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
                                         }),
