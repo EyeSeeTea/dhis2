@@ -201,18 +201,24 @@ mapfish.GeoStat = OpenLayers.Class({
         this.requestSuccess(request);
         
         if (ACTIVEPANEL == thematicMap) {
+            if (!choropleth.isFormComplete()) {
+                MASK.hide();
+            }
             choropleth.classify(false);
         }
         else if (ACTIVEPANEL == thematicMap2) {
+            if (!proportionalSymbol.isFormComplete()) {
+                MASK.hide();
+            }
             proportionalSymbol.classify(false);
         }
         else if (ACTIVEPANEL == organisationUnitAssignment) {
             mapping.classify(false);
         }
+        
+        
 
-		// if (URL) {
-			// loadMapData(ACTIVEPANEL, false);
-		// }
+        // MASK.hide();
     },
 
     /**
