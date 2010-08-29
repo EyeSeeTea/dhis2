@@ -229,7 +229,7 @@ public class DefaultMappingService
         OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
         Indicator indicator = indicatorService.getIndicator( indicatorId );
         Period period = periodService.getPeriod( periodId );
-        
+
         for ( OrganisationUnit organisationUnit : parent.getChildren() )
         {
             if ( organisationUnit.hasCoordinates() )
