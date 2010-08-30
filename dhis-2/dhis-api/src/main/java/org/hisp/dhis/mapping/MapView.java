@@ -39,17 +39,7 @@ import org.hisp.dhis.period.PeriodType;
  * @version $Id$
  */
 public class MapView
-{
-    public static final String MAP_SOURCE_TYPE_DATABASE = "database";
-
-    public static final String MAP_SOURCE_TYPE_GEOJSON = "geojson";
-
-    public static final String MAP_SOURCE_TYPE_SHAPEFILE = "shapefile";
-
-    public static final String MAP_VALUE_TYPE_INDICATOR = "indicator";
-
-    public static final String MAP_VALUE_TYPE_DATAELEMENT = "dataelement";
-
+{ 
     private int id;
 
     private String name;
@@ -64,9 +54,15 @@ public class MapView
 
     private DataElement dataElement;
 
+    private String mapDateType;
+
     private PeriodType periodType;
 
     private Period period;
+
+    private String fromDate;
+
+    private String toDate;
 
     private String mapSourceType;
 
@@ -97,9 +93,10 @@ public class MapView
     }
 
     public MapView( String name, String mapValueType, IndicatorGroup indicatorGroup, Indicator indicator,
-        DataElementGroup dataElementGroup, DataElement dataElement, PeriodType periodType, Period period,
-        String mapSourceType, String mapSource, String mapLegendType, int method, int classes, String bounds,
-        String colorLow, String colorHigh, MapLegendSet mapLegendSet, String longitude, String latitude, int zoom )
+        DataElementGroup dataElementGroup, DataElement dataElement, String mapDateType, PeriodType periodType,
+        Period period, String fromDate, String toDate, String mapSourceType, String mapSource, String mapLegendType,
+        int method, int classes, String bounds, String colorLow, String colorHigh, MapLegendSet mapLegendSet,
+        String longitude, String latitude, int zoom )
     {
         this.name = name;
         this.mapValueType = mapValueType;
@@ -107,8 +104,11 @@ public class MapView
         this.indicator = indicator;
         this.dataElementGroup = dataElementGroup;
         this.dataElement = dataElement;
+        this.mapDateType = mapDateType;
         this.periodType = periodType;
         this.period = period;
+        this.fromDate = fromDate;
+        this.toDate = toDate;
         this.mapSourceType = mapSourceType;
         this.mapSource = mapSource;
         this.mapLegendType = mapLegendType;
@@ -231,6 +231,16 @@ public class MapView
         this.dataElement = dataElement;
     }
 
+    public String getMapDateType()
+    {
+        return mapDateType;
+    }
+
+    public void setMapDateType( String mapDateType )
+    {
+        this.mapDateType = mapDateType;
+    }
+
     public PeriodType getPeriodType()
     {
         return periodType;
@@ -249,6 +259,26 @@ public class MapView
     public void setPeriod( Period period )
     {
         this.period = period;
+    }
+
+    public String getFromDate()
+    {
+        return fromDate;
+    }
+
+    public void setFromDate( String fromDate )
+    {
+        this.fromDate = fromDate;
+    }
+
+    public String getToDate()
+    {
+        return toDate;
+    }
+
+    public void setToDate( String toDate )
+    {
+        this.toDate = toDate;
     }
 
     public String getMapSourceType()

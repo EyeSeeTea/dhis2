@@ -29,6 +29,8 @@ package org.hisp.dhis.mapping.action;
 
 import static org.hisp.dhis.mapping.MappingService.KEY_MAP_SOURCE_TYPE;
 import static org.hisp.dhis.mapping.MappingService.MAP_SOURCE_TYPE_GEOJSON;
+import static org.hisp.dhis.mapping.MappingService.KEY_MAP_DATE_TYPE;
+import static org.hisp.dhis.mapping.MappingService.MAP_DATE_TYPE_FIXED;
 
 import org.hisp.dhis.user.UserSettingService;
 
@@ -38,7 +40,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetMapSourceTypeUserSettingAction
+public class GetMapUserSettingsAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -56,21 +58,31 @@ public class GetMapSourceTypeUserSettingAction
     // Output
     // -------------------------------------------------------------------------
     
-    private String object;
+    private String mapSourceType;
 
-    public String getObject()
+    public String getMapSourceType()
     {
-        return object;
+        return mapSourceType;
+    }
+    
+    private String mapDateType;
+    
+    public String getMapDateType()
+    {
+        return mapDateType;
     }
     
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+
     public String execute()
         throws Exception
     {
-        object = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+        mapSourceType = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+        
+        mapDateType = (String) userSettingService.getUserSetting( KEY_MAP_DATE_TYPE, MAP_DATE_TYPE_FIXED );
         
         return SUCCESS;
     }

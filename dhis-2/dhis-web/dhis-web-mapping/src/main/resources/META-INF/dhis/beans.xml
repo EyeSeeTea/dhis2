@@ -94,14 +94,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
-	<bean id="org.hisp.dhis.mapping.action.SetMapSourceTypeUserSettingAction"
-		class="org.hisp.dhis.mapping.action.SetMapSourceTypeUserSettingAction"
-		scope="prototype">
-		<property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
-	</bean>
+    <bean id="org.hisp.dhis.mapping.action.GetMapUserSettingsAction"
+        class="org.hisp.dhis.mapping.action.GetMapUserSettingsAction"
+        scope="prototype">
+        <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
+    </bean>
 
-	<bean id="org.hisp.dhis.mapping.action.GetMapSourceTypeUserSettingAction"
-		class="org.hisp.dhis.mapping.action.GetMapSourceTypeUserSettingAction"
+	<bean id="org.hisp.dhis.mapping.action.SetMapUserSettingsAction"
+		class="org.hisp.dhis.mapping.action.SetMapUserSettingsAction"
 		scope="prototype">
 		<property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
 	</bean>

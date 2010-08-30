@@ -6,6 +6,8 @@ var MAP;
 var BASECOORDINATE;
 /* Geojson, shapefile or database */
 var MAPSOURCE;
+/* Fixed periods or from-to dates */
+var MAPDATETYPE;
 /* A map object */
 var MAPDATA = new Object();
 MAPDATA[thematicMap] = new Object();
@@ -211,18 +213,21 @@ Ext.onReady( function() {
 				params: { id: mapViewParam },
 				success: function(r) {
 					var mst = Ext.util.JSON.decode(r.responseText).mapView[0].mapSourceType;
+                    var mdt = Ext.util.JSON.decode(r.responseText).mapView[0].mapDateType;
 					
 					Ext.Ajax.request({
-						url: path_mapping + 'getMapSourceTypeUserSetting' + type,
+						url: path_mapping + 'getMapUserSettings' + type,
 						method: 'GET',
 						success: function(r) {
-							var ms = Ext.util.JSON.decode(r.responseText).mapSource;
-							MAPSOURCE = PARAMETER ? mst : ms;
+							var mst_mv = Ext.util.JSON.decode(r.responseText).mapSource;
+                            var mdt_mv = Ext.util.JSON.decode(r.responseText).mapDateType;
+							MAPSOURCE = PARAMETER ? mst : mst_mv;
+                            MAPDATETYPE = PARAMETER ? mdt : mdt_mv;
 							
 							Ext.Ajax.request({
-								url: path_mapping + 'setMapSourceTypeUserSetting' + type,
+								url: path_mapping + 'setMapUserSettings' + type,
 								method: 'POST',
-								params: { mapSourceType: MAPSOURCE },
+								params: { mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE },
 								success: function() {
 			
 	/* Section: mapview */
@@ -2605,7 +2610,7 @@ Ext.onReady( function() {
 						displayField: 'text',
 						isFormField: true,
 						width: combo_width_fieldset,
-						minListWidth: combo_list_width_fieldset,
+						minListWidth: combo_width_fieldset,
 						mode: 'local',
 						triggerAction: 'all',
 						value: MAPSOURCE,
@@ -2804,7 +2809,56 @@ Ext.onReady( function() {
 						}
 					}
 				]
-			}
+			},
+            
+			{
+				xtype:'fieldset',
+				columnWidth: 0.5,
+				title: '&nbsp;<span class="panel-tab-title">'+i18n_date_type+'</span>&nbsp;',
+				collapsible: true,
+				animCollapse: true,
+				autoHeight:true,
+				items: [
+                    {
+                        xtype: 'combo',
+                        id: 'mapdatetype_cb',
+                        fieldLabel: i18n_date_type,
+                        labelSeparator: labelseparator,
+                        editable: false,
+                        valueField: 'value',
+                        displayField: 'text',
+                        mode: 'local',
+                        value: map_date_type_fixed,
+                        triggerAction: 'all',
+						width: combo_width_fieldset,
+						minListWidth: combo_width_fieldset,
+                        store: new Ext.data.SimpleStore({
+                            fields: ['value', 'text'],
+                            data: [[map_date_type_fixed, 'Fixed periods'], [map_date_type_from_to, 'From-to dates']]
+                        }),
+                        listeners: {
+                            'select': {
+                                fn: function() {
+                                    var mdtv = Ext.getCmp('mapdatetype_cb').getValue();
+                                    var mdtrv = Ext.getCmp('mapdatetype_cb').getRawValue();
+                                    
+                                    if (mdtv != MAPDATETYPE) {
+                                        Ext.Ajax.request({
+                                            url: path_mapping + 'setMapDateTypeUserSetting' + type,
+                                            method: 'POST',
+                                            params: {mapDateType: mdtv},
+                                            success: function() {
+                                                MAPDATETYPE = mdtv;
+                                                Ext.message.msg(true, '<span class="x-msg-hl">' + mdtrv + '</span> '+i18n_saved_as_date_type);
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
         ],
         listeners: {
             expand: {
@@ -3752,7 +3806,7 @@ Ext.onReady( function() {
         Ext.getCmp('map_tf2').showField();
     }
     else {
-        Ext.getCmp('map_cb').showField();
+        Ext.getCmp('map_cb').showField()
         Ext.getCmp('map_cb2').showField();
         Ext.getCmp('map_tf').hideField();
         Ext.getCmp('map_tf2').hideField();
@@ -3993,6 +4047,20 @@ function onHoverUnselectPolygon(feature) {
 }
 
 function onClickSelectPolygon(feature) {
+    
+    var dp = new Ext.DatePicker({});
+    
+    var dpw = new Ext.Window({
+        items: [
+            {
+                xtype: 'panel',
+                items: [dp]
+            }
+        ]
+    });
+    
+    dpw.show();    
+
 
 // function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
 // var l = MAP.getLayersByName('Polygon layer')[0];

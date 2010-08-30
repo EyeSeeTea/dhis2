@@ -52,8 +52,20 @@ public interface MappingService
 
     final String MAP_SOURCE_TYPE_SHAPEFILE = "shapefile";
 
-    final String MAP_TEMPL_DIR = "map_temp";
+    final String MAP_VALUE_TYPE_INDICATOR = "indicator";
 
+    final String MAP_VALUE_TYPE_DATAELEMENT = "dataelement";
+
+    final String MAPLEGENDSET_TYPE_AUTOMATIC = "automatic";
+
+    final String MAPLEGENDSET_TYPE_PREDEFINED = "predefined";
+    
+    final String KEY_MAP_DATE_TYPE = "dateType";
+
+    final String MAP_DATE_TYPE_FIXED = "fixed";
+
+    final String MAP_DATE_TYPE_FROM_TO = "from-to";
+    
     // -------------------------------------------------------------------------
     // DataMapValue
     // -------------------------------------------------------------------------
@@ -62,8 +74,9 @@ public interface MappingService
 
     Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level );
 
-    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId, int parentOrganisationUnitId );
-    
+    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId,
+        int parentOrganisationUnitId );
+
     // -------------------------------------------------------------------------
     // IndicatorMapValue
     // -------------------------------------------------------------------------
@@ -76,7 +89,7 @@ public interface MappingService
     Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level );
 
     Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId );
-    
+
     // -------------------------------------------------------------------------
     // Map
     // -------------------------------------------------------------------------
@@ -379,17 +392,17 @@ public interface MappingService
 
     int addMapView( MapView mapView );
 
-    int addMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId, int dataElementGroupId,
-        int dataElementId, String periodTypeName, int periodId, String mapSourceType, String mapSource,
-        String mapLegendType, int method, int classes, String bounds, String colorLow, String colorHigh, int mapLegendSetId,
-        String longitude, String latitude, int zoom );
+    int addMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
+        int dataElementGroupId, int dataElementId, String periodTypeName, int periodId, String mapSourceType,
+        String mapSource, String mapLegendType, int method, int classes, String bounds, String colorLow,
+        String colorHigh, int mapLegendSetId, String longitude, String latitude, int zoom );
 
     void updateMapView( MapView mapView );
 
     void addOrUpdateMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
-        int dataElementGroupId, int dataElementId, String periodTypeName, int periodId, String mapSource,
-        String mapLegendType, int method, int classes, String bounds, String colorLow, String colorHigh, int mapLegendSetId,
-        String longitude, String latitude, int zoom );
+        int dataElementGroupId, int dataElementId, String periodTypeName, int periodId,
+        String fromDate, String toDate, String mapSource, String mapLegendType, int method, int classes, String bounds,
+        String colorLow, String colorHigh, int mapLegendSetId, String longitude, String latitude, int zoom );
 
     void deleteMapView( MapView view );
 

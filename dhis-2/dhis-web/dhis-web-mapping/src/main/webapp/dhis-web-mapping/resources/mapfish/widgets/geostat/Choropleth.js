@@ -220,6 +220,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
                                     
 									Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
+                                    Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
                                     Ext.getCmp('mapview_cb').setValue(MAPVIEW.id);
                                     VALUETYPE.polygon = MAPVIEW.mapValueType;
                                     
@@ -846,16 +847,49 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             listeners: {
                 'select': {
                     fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue() != '') {
+                        if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').clearValue();
                         }
                         
-                        this.classify(false, true);
-                    },
-                    scope: this
+                        choropleth.classify(false, true);
+                    }
                 }
             }
         },
+        
+        {
+            xtype: 'datefield',
+            id: 'fromdate_df',
+            fieldLabel: 'From date',
+            width: combo_width,
+            listeners: {
+                'select': {
+                    fn: function() {
+                        if (Ext.getCmp('mapview_cb').getValue()) {
+                            Ext.getCmp('mapview_cb').clearValue();
+                        }                        
+                        choropleth.classify(false, true);
+                    }
+                }
+            }
+        },
+        
+        {
+            xtype: 'datefield',
+            id: 'todate_df',
+            fieldLabel: 'To date',
+            width: combo_width,
+            listeners: {
+                'select': {
+                    fn: function() {
+                        if (Ext.getCmp('mapview_cb').getValue()) {
+                            Ext.getCmp('mapview_cb').clearValue();
+                        }                        
+                        choropleth.classify(false, true);
+                    }
+                }
+            }
+        },                        
         
         {
             xtype: 'combo',

@@ -109,6 +109,20 @@ public class AddOrUpdateMapViewAction
         this.periodId = periodId;
     }
 
+    private String fromDate;
+
+    public void setFromDate( String fromDate )
+    {
+        this.fromDate = fromDate;
+    }
+
+    private String toDate;
+
+    public void setToDate( String toDate )
+    {
+        this.toDate = toDate;
+    }
+
     private String mapSource;
 
     public void setMapSource( String mapSource )
@@ -136,9 +150,9 @@ public class AddOrUpdateMapViewAction
     {
         this.classes = classes;
     }
-    
+
     private String bounds;
-    
+
     public void setBounds( String bounds )
     {
         this.bounds = bounds;
@@ -194,8 +208,8 @@ public class AddOrUpdateMapViewAction
         throws Exception
     {
         mappingService.addOrUpdateMapView( name, mapValueType, indicatorGroupId, indicatorId, dataElementGroupId,
-            dataElementId, periodTypeId, periodId, mapSource, mapLegendType, method, classes, bounds, colorLow, colorHigh,
-            mapLegendSetId, longitude, latitude, zoom );
+            dataElementId, periodTypeId, periodId, fromDate, toDate, mapSource, mapLegendType, method,
+            classes, bounds, colorLow, colorHigh, mapLegendSetId, longitude, latitude, zoom );
 
         return SUCCESS;
     }
