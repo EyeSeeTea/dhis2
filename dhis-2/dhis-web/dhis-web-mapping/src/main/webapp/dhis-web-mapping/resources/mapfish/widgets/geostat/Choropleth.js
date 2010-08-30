@@ -859,6 +859,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             fieldLabel: 'From date',
             format: 'Y-m-d',
             hidden: true,
+            emptyText: emptytext,
+			labelSeparator: labelseparator,
             width: combo_width,
             listeners: {
                 'select': {
@@ -878,6 +880,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             fieldLabel: 'To date',
             format: 'Y-m-d',
             hidden: true,
+            emptyText: emptytext,
+			labelSeparator: labelseparator,
             width: combo_width,
             listeners: {
                 'select': {
