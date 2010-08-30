@@ -218,7 +218,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     MAPVIEW = getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
                                     MAPSOURCE = MAPVIEW.mapSourceType;
                                     MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
-                                    
+
 									Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                     Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
                                     Ext.getCmp('mapview_cb').setValue(MAPVIEW.id);
@@ -285,6 +285,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         dataElementStore.setBaseParam('dataElementGroupId', MAPVIEW.dataElementGroupId);
                                         dataElementStore.load();
                                     }
+                                    
+                                    if (MAPDATETYPE == map_date_type_fixed) {
+                                        Ext.getCmp('periodtype_cb').showField();
+                                        Ext.getCmp('period_cb').showField();
+                                        Ext.getCmp('fromdate_df').hideField();
+                                        Ext.getCmp('todate_df').hideField();
+                                    }
+                                    else {
+                                        Ext.getCmp('periodtype_cb').hideField();
+                                        Ext.getCmp('period_cb').hideField();
+                                        Ext.getCmp('fromdate_df').showField();
+                                        Ext.getCmp('todate_df').showField();
+                                    }
                                 },
                                 failure: function() {
                                   alert( i18n_status , i18n_error_while_retrieving_data );
@@ -329,9 +342,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                         if (MAPVIEW) {
                             Ext.getCmp('indicator_cb').setValue(MAPVIEW.indicatorId);
-                            Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
-                            periodStore.setBaseParam('name', MAPVIEW.periodTypeId);
-                            periodStore.load();
+                            
+                            if (MAPVIEW.mapDateType == map_date_type_fixed) {
+                                Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
+                                periodStore.setBaseParam('name', MAPVIEW.periodTypeId);
+                                periodStore.load();
+                            }
+                            else if (MAPVIEW.mapDateType == map_date_type_from_to) {
+                                Ext.getCmp('fromdate_df').setValue(new Date(MAPVIEW.fromDate));
+                                Ext.getCmp('todate_df').setValue(new Date(MAPVIEW.toDate));
+                            }
                         }
                     }
                 }
@@ -367,9 +387,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                         if (MAPVIEW) {
                             Ext.getCmp('dataelement_cb').setValue(MAPVIEW.dataElementId);
-                            Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
-                            periodStore.setBaseParam('name', MAPVIEW.periodTypeId);
-                            periodStore.load();
+                            
+                            if (MAPVIEW.mapDateType == map_date_type_fixed) {
+                                Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
+                                periodStore.setBaseParam('name', MAPVIEW.periodTypeId);
+                                periodStore.load();
+                            }
+                            else if (MAPVIEW.mapDateType == map_date_type_from_to) {
+                                Ext.getCmp('fromdate_df').setValue(new Date(MAPVIEW.fromDate));
+                                Ext.getCmp('todate_df').setValue(new Date(MAPVIEW.toDate));
+                            }
                         }
                     },
                     scope: this
@@ -394,12 +421,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function() {
                         if (MAPVIEW) {
                             Ext.getCmp('period_cb').setValue(MAPVIEW.periodId);
-
+                                
                             Ext.Ajax.request({
-                                url: path_mapping + 'setMapSourceTypeUserSetting' + type,
+                                url: path_mapping + 'setMapUserSettings' + type,
                                 method: 'POST',
-                                params: { mapSourceType: MAPVIEW.mapSourceType },
-								success: function(r) {
+                                params: {mapSourceType: MAPVIEW.mapSourceType, mapDateType: MAPDATETYPE },
+                                success: function(r) {
                                     Ext.getCmp('map_cb').getStore().load();
                                     Ext.getCmp('maps_cb').getStore().load();
                                     Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
@@ -760,39 +787,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').clearValue();
                         }
-						
 						choropleth.classify(false, true);
- 
-                        // var iId = Ext.getCmp('dataelement_cb').getValue();
-                        
-						/* TODO legend set
-						
-                        Ext.Ajax.request({
-                            url: path_mapping + 'getMapLegendSetByIndicator' + type,
-                            method: 'POST',
-                            params: { indicatorId: iId },
-
-                            success: function( responseObject ) {
-                                var data = Ext.util.JSON.decode(responseObject.responseText);
-                                
-                                if (data.mapLegendSet[0].id != '') {
-                                   // Ext.getCmp('method_cb').setValue(data.mapLegendSet[0].method);
-                                    Ext.getCmp('numClasses_cb').setValue(data.mapLegendSet[0].classes);
-
-                                    Ext.getCmp('colorA_cf').setValue(data.mapLegendSet[0].colorLow);
-                                    Ext.getCmp('colorB_cf').setValue(data.mapLegendSet[0].colorHigh);
-                                }
-                                
-                                choropleth.classify(false);
-                            },
-                            failure: function()
-                            {
-                              alert( i18n_status , i18n_error_while_retrieving_data );
-                            } 
-                        });
-						*/
-                    },
-                    scope: this
+                    }
                 }
             }
         },
@@ -861,6 +857,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'datefield',
             id: 'fromdate_df',
             fieldLabel: 'From date',
+            format: 'Y-m-d',
+            hidden: true,
             width: combo_width,
             listeners: {
                 'select': {
@@ -878,6 +876,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'datefield',
             id: 'todate_df',
             fieldLabel: 'To date',
+            format: 'Y-m-d',
+            hidden: true,
             width: combo_width,
             listeners: {
                 'select': {
@@ -1191,7 +1191,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            fieldLabel: i18n_classes ,
+            fieldLabel: i18n_classes,
 			labelSeparator: labelseparator,
             id: 'numClasses_cb',
             editable: false,
