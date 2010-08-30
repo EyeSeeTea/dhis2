@@ -2625,13 +2625,13 @@ Ext.onReady( function() {
 									var msrw = Ext.getCmp('mapsource_cb').getRawValue();
 
 									if (MAPSOURCE != msv) {
-                                        MAPSOURCE = msv;
-
                                         Ext.Ajax.request({
-                                            url: path_mapping + 'setMapSourceTypeUserSetting' + type,
+                                            url: path_mapping + 'setMapUserSettings' + type,
 											method: 'POST',
-											params: { mapSourceType: msv },
+											params: {mapSourceType: msv, mapDateType: MAPDATETYPE },
 											success: function(r) {
+                                                MAPSOURCE = msv;
+                                                
 												Ext.getCmp('map_cb').getStore().load();
 												Ext.getCmp('maps_cb').getStore().load();
 												Ext.getCmp('mapview_cb').getStore().load();
@@ -2844,9 +2844,9 @@ Ext.onReady( function() {
                                     
                                     if (mdtv != MAPDATETYPE) {
                                         Ext.Ajax.request({
-                                            url: path_mapping + 'setMapDateTypeUserSetting' + type,
+                                            url: path_mapping + 'setMapUserSettings' + type,
                                             method: 'POST',
-                                            params: {mapDateType: mdtv},
+                                            params: {mapSourceType: MAPSOURCE, mapDateType: mdtv},
                                             success: function() {
                                                 MAPDATETYPE = mdtv;
                                                 Ext.message.msg(true, '<span class="x-msg-hl">' + mdtrv + '</span> '+i18n_saved_as_date_type);
