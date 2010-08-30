@@ -109,10 +109,7 @@ public class DefaultValidationRuleService
             {
                 if ( (relevantRules = getRelevantValidationRules( dataSet )).size() > 0 )
                 {
-                    for ( Period period : relevantPeriods ) // TODO use only
-                    // period with
-                    // validation rule
-                    // period type
+                    for ( Period period : relevantPeriods ) // TODO use only period with validation rule period type
                     {
                         validationViolations.addAll( validate( period, source, relevantRules ) );
                     }
@@ -253,13 +250,11 @@ public class DefaultValidationRuleService
     {
         final Collection<ValidationRule> relevantValidationRules = new HashSet<ValidationRule>();
 
-        for ( final ValidationRule validationRule : validationRules )
+        for ( ValidationRule validationRule : validationRules )
         {
-            // Check periodType of the validationRule
-
             if ( validationRule.getPeriodType() == dataSet.getPeriodType() )
             {
-                for ( final DataElement dataElement : dataSet.getDataElements() )
+                for ( DataElement dataElement : dataSet.getDataElements() )
                 {
                     if ( validationRule.getLeftSide().getDataElementsInExpression().contains( dataElement )
                         || validationRule.getRightSide().getDataElementsInExpression().contains( dataElement ) )
