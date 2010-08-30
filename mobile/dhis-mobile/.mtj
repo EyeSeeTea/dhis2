@@ -8,8 +8,8 @@
       <configuration active="true" name="DefaultFxPhone1">
          <device group="Sun Java(TM) Wireless Toolkit 2.5.2_01 for CLDC" name="DefaultColorPhone"/>
          <symbolSet name="DefaultFxPhone1">
-            <symbol name="MMAPI" value="1.2"/>
             <symbol name="screen.isColor" value="true"/>
+            <symbol name="MMAPI" value="1.2"/>
             <symbol name="descriptor" value="FX Emulator"/>
             <symbol name="screen.bitDepth" value="16"/>
             <symbol name="JSR82" value="1.1"/>
