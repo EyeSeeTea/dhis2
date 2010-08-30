@@ -268,7 +268,7 @@ public class TableAlteror
         }
         catch ( Exception ex )
         {
-            log.info( ex );
+            log.debug( ex );
 
             return -1;
         }
