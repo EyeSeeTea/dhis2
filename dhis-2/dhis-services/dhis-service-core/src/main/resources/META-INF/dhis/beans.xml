@@ -265,8 +265,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<property name="expressionStore" ref="org.hisp.dhis.expression.ExpressionStore" />
 		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
 		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-		<property name="categoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+		<property name="aggregatedDataValueService" ref="org.hisp.dhis.aggregation.AggregatedDataValueService"/>
+		<property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.validation.ValidationRuleService" class="org.hisp.dhis.validation.DefaultValidationRuleService">
@@ -275,6 +275,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			ref="org.hisp.dhis.validation.ValidationRuleGroupStore" />
 		<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService"/>
+		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService"/>
 	</bean>
 
 	<bean id="org.hisp.dhis.dataelement.DataElementCategoryService"
@@ -1477,7 +1479,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
 		<aop:aspect ref="statementInterceptor">
 			<aop:around
-				pointcut="execution( * org.hisp.dhis.validation.ValidationRuleService.validate(..) )"
+				pointcut="execution( * org.hisp.dhis.validation.ValidationRuleService.validate*(..) )"
 				method="intercept" />
 			<aop:around
 				pointcut="execution( * org.hisp.dhis.dataanalysis.DataAnalysisService.analyse(..) )"

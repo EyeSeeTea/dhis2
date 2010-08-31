@@ -30,7 +30,6 @@ package org.hisp.dhis.validationrule.action;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -39,7 +38,6 @@ import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
-import org.hisp.dhis.source.Source;
 import org.hisp.dhis.util.SessionUtils;
 import org.hisp.dhis.validation.ValidationResult;
 import org.hisp.dhis.validation.ValidationRuleGroup;
@@ -133,6 +131,13 @@ public class RunValidationAction
     {
         return validationResults;
     }
+    
+    private boolean aggregate;
+
+    public void setAggregate( boolean aggregate )
+    {
+        this.aggregate = aggregate;
+    }
 
     // -------------------------------------------------------------------------
     // Execute
@@ -140,32 +145,49 @@ public class RunValidationAction
 
     public String execute()
     {
-        Collection<? extends Source> sources = selectionTreeManager.getReloadedSelectedOrganisationUnits();
+        OrganisationUnit unit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
 
-        Collection<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
-
-        for ( Source source : sources )
+        if ( aggregate ) // Aggregate data source
         {
-            organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( source.getId() ) );
+            Collection<OrganisationUnit> organisationUnits = unit.getChildren();
+            
+            if ( validationRuleGroupId == -1 )
+            {
+                log.info( "Validating aggregate data for all rules" );
+
+                validationResults = new ArrayList<ValidationResult>( validationRuleService.validateAggregate( format
+                    .parseDate( startDate ), format.parseDate( endDate ), organisationUnits ) );
+            }
+            else
+            {
+                ValidationRuleGroup group = validationRuleService.getValidationRuleGroup( validationRuleGroupId );
+
+                log.info( "Validating aggregate data for rules for group: '" + group.getName() + "'" );
+
+                validationResults = new ArrayList<ValidationResult>( validationRuleService.validateAggregate( format
+                    .parseDate( startDate ), format.parseDate( endDate ), organisationUnits, group ) );
+            }
         }
-
-        sources = organisationUnits;
-
-        if ( validationRuleGroupId == -1 )
+        else // Captured data source
         {
-            log.info( "Validating all rules" );
+            Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitWithChildren( unit.getId() );
 
-            validationResults = new ArrayList<ValidationResult>( validationRuleService.validate( format
-                .parseDate( startDate ), format.parseDate( endDate ), sources ) );
-        }
-        else
-        {
-            ValidationRuleGroup group = validationRuleService.getValidationRuleGroup( validationRuleGroupId );
-
-            log.info( "Validating rules for group: '" + group.getName() + "'" );
-
-            validationResults = new ArrayList<ValidationResult>( validationRuleService.validate( format
-                .parseDate( startDate ), format.parseDate( endDate ), sources, group ) );
+            if ( validationRuleGroupId == -1 )
+            {
+                log.info( "Validating captured data for all rules" );
+    
+                validationResults = new ArrayList<ValidationResult>( validationRuleService.validate( format
+                    .parseDate( startDate ), format.parseDate( endDate ), organisationUnits ) );
+            }
+            else
+            {
+                ValidationRuleGroup group = validationRuleService.getValidationRuleGroup( validationRuleGroupId );
+    
+                log.info( "Validating captured data for rules for group: '" + group.getName() + "'" );
+    
+                validationResults = new ArrayList<ValidationResult>( validationRuleService.validate( format
+                    .parseDate( startDate ), format.parseDate( endDate ), organisationUnits, group ) );
+            }
         }
 
         Collections.sort( validationResults, new ValidationResultComparator() );

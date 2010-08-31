@@ -35,10 +35,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -87,19 +88,77 @@ public class DefaultValidationRuleService
     {
         this.periodService = periodService;
     }
+    
+    private DataSetService dataSetService;
+    
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
+
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
 
     // -------------------------------------------------------------------------
     // ValidationRule business logic
     // -------------------------------------------------------------------------
+    
+    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources )
+    {
+        Collection<Period> periods = periodService.getPeriodsBetweenDates( startDate, endDate );
+        
+        Collection<ValidationRule> validationRules = getAllValidationRules();
 
+        Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
+        
+        for ( Source source : sources  )
+        {
+            for ( Period period : periods )
+            {
+                validationViolations.addAll( validate( period, source, validationRules, true ) );
+            }
+        }
+        
+        return validationViolations;
+    }
+
+    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources, ValidationRuleGroup group )
+    {
+        Collection<Period> periods = periodService.getPeriodsBetweenDates( startDate, endDate );
+        
+        Collection<DataSet> dataSets = dataSetService.getDataSetsBySources( sources );
+        
+        Collection<DataElement> dataElements = dataElementService.getDataElementsByDataSets( dataSets );
+        
+        Collection<ValidationRule> validationRules = getValidationRulesByDataElements( dataElements );
+
+        validationRules.retainAll( group.getMembers() );
+        
+        Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
+
+        for ( Source source : sources  )
+        {
+            for ( Period period : periods )
+            {
+                validationViolations.addAll( validate( period, source, validationRules, true ) );
+            }
+        }
+        
+        return validationViolations;
+    }
+    
     public Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<? extends Source> sources )
     {
         Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
 
-        Collection<Period> relevantPeriods = periodService.getPeriodsBetweenDates( startDate, endDate );
-
         Map<DataSet, Collection<ValidationRule>> relevantValidationRulesMap = getRelevantValidationRulesMap( sources );
                 
+        Collection<Period> relevantPeriods = periodService.getPeriodsBetweenDates( startDate, endDate );
+
         for ( Source source : sources )
         {
             for ( DataSet dataSet : source.getDataSets() )
@@ -112,7 +171,7 @@ public class DefaultValidationRuleService
                     {
                         if ( dataSet.getPeriodType().equals( period.getPeriodType() ) )
                         {
-                            validationViolations.addAll( validate( period, source, relevantRules ) );
+                            validationViolations.addAll( validate( period, source, relevantRules, false ) );
                         }
                     }
                 }
@@ -122,7 +181,6 @@ public class DefaultValidationRuleService
         return validationViolations;
     }
 
-    @SuppressWarnings( "unchecked" )
     public Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<? extends Source> sources,
         ValidationRuleGroup group )
     {
@@ -136,7 +194,8 @@ public class DefaultValidationRuleService
         {
             for ( DataSet dataSet : source.getDataSets() )
             {
-                Collection<ValidationRule> relevantRules = CollectionUtils.intersection( relevantValidationRulesMap.get( dataSet ), group.getMembers() );
+                Collection<ValidationRule> relevantRules = relevantValidationRulesMap.get( dataSet );
+                relevantRules.retainAll( group.getMembers() );
                 
                 if ( relevantRules != null && relevantRules.size() > 0 )
                 {
@@ -144,7 +203,7 @@ public class DefaultValidationRuleService
                     {
                         if ( dataSet.getPeriodType().equals( period.getPeriodType() ) )
                         {
-                            validationViolations.addAll( validate( period, source, relevantRules ) );
+                            validationViolations.addAll( validate( period, source, relevantRules, false ) );
                         }
                     }
                 }
@@ -164,7 +223,7 @@ public class DefaultValidationRuleService
 
         for ( DataSet dataSet : source.getDataSets() )
         {
-            Collection<ValidationRule> relevantRules = relevantValidationRulesMap.get( dataSet );
+            Collection<ValidationRule> relevantRules = relevantValidationRulesMap.get( dataSet ); //TODO incorrect, fix
             
             if ( relevantRules != null && relevantRules.size() > 0 )
             {
@@ -172,7 +231,7 @@ public class DefaultValidationRuleService
                 {
                     if ( dataSet.getPeriodType().equals( period.getPeriodType() ) )
                     {
-                        validationViolations.addAll( validate( period, source, relevantRules ) );
+                        validationViolations.addAll( validate( period, source, relevantRules, false ) );
                     }
                 }
             }
@@ -183,7 +242,7 @@ public class DefaultValidationRuleService
 
     public Collection<ValidationResult> validate( DataSet dataSet, Period period, Source source )
     {
-        return validate( period, source, getRelevantValidationRules( dataSet ) );
+        return validate( period, source, getRelevantValidationRules( dataSet ), false );
     }
 
     // -------------------------------------------------------------------------
@@ -199,7 +258,7 @@ public class DefaultValidationRuleService
      * @returns a collection of rules that did not pass validation.
      */
     private Collection<ValidationResult> validate( final Period period, final Source source,
-        final Collection<ValidationRule> validationRules )
+        final Collection<ValidationRule> validationRules, boolean aggregate )
     {
         final Collection<ValidationResult> validationResults = new HashSet<ValidationResult>();
 
@@ -210,8 +269,8 @@ public class DefaultValidationRuleService
 
         for ( final ValidationRule validationRule : validationRules )
         {
-            leftSide = expressionService.getExpressionValue( validationRule.getLeftSide(), period, source, true, false );
-            rightSide = expressionService.getExpressionValue( validationRule.getRightSide(), period, source, true, false );
+            leftSide = expressionService.getExpressionValue( validationRule.getLeftSide(), period, source, true, aggregate );
+            rightSide = expressionService.getExpressionValue( validationRule.getRightSide(), period, source, true, aggregate );
 
             if ( leftSide != null && rightSide != null )
             {

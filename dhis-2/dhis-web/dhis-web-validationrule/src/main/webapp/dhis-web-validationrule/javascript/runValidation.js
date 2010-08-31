@@ -21,8 +21,10 @@ function runValidationCompleted( messageElement )
     	setWaitMessage( "Analysing data, please wait..." );
     	
         var url = 'runValidationAction.action?startDate=' + getFieldValue( 'startDate' ) +
-        	'&endDate=' + getFieldValue( 'endDate' ) + '&validationRuleGroupId=' + $( "#validationRuleGroupId" ).val();
-        	        
+        	'&endDate=' + getFieldValue( 'endDate' ) + 
+        	'&validationRuleGroupId=' + $( '#validationRuleGroupId' ).val() +
+        	'&aggregate=' + getListValue( 'aggregate' );
+        	
 		$.get( url, function( data ) {
 			$( "div#analysisInput" ).hide();
 			$( "div#analysisResult" ).show();
@@ -49,4 +51,18 @@ function viewValidationResultDetails( validationRuleId, sourceId, periodId )
 	var dialog = window.open( url, "_blank", "directories=no, \
     		 height=550, width=500, location=no, menubar=no, status=no, \
     		 toolbar=no, resizable=yes");
+}
+
+function aggregateChanged()
+{
+	var aggregate = getListValue( 'aggregate' );
+	
+	if ( aggregate == "true" )
+	{
+		$( "span#info" ).html( i18n_aggregate_data_info );
+	}
+	else
+	{		
+		$( "span#info" ).html( i18n_captured_data_info );
+	}
 }

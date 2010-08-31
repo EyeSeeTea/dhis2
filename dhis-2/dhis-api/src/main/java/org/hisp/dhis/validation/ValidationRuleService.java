@@ -47,12 +47,18 @@ public interface ValidationRuleService
     // ValidationRule business logic
     // -------------------------------------------------------------------------
 
+    Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources );
+    
+    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources, ValidationRuleGroup group );
+    
     /**
      * Validate DataValues.
      * 
      * @param startDate the start date.
      * @param endDate the end date.
      * @param sources a collection of Sources.
+     * @param aggregate indicates whether aggregated or raw data should be used
+     *        to evaluate the validation expression.
      * @return a collection of ValidationResults for each validation violation. 
      */
     Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<? extends Source> sources );
@@ -64,6 +70,8 @@ public interface ValidationRuleService
      * @param endDate the end date.
      * @param sources a collection of Sources.
      * @param group a group of ValidationRules.
+     * @param aggregate indicates whether aggregated or raw data should be used
+     *        to evaluate the validation expression.
      * @return a collection of ValidationResults for each validation violation. 
      */
     Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<? extends Source> sources, ValidationRuleGroup group );
