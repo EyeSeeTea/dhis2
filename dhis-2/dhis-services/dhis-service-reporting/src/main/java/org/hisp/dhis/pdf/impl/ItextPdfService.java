@@ -191,8 +191,20 @@ public class ItextPdfService
             table.addCell( getItalicCell( i18n.getString( "numerator_description" ), 1, ITALIC ) );
             table.addCell( getTextCell( indicator.getNumeratorDescription(), TEXT ) );
 
+            table.addCell( getItalicCell( i18n.getString( "numerator_aggregation_operator" ), 1, ITALIC ) );
+            table.addCell( getTextCell( indicator.getNumeratorAggregationOperator(), TEXT ) );
+
+            table.addCell( getItalicCell( i18n.getString( "numerator_formula" ), 1, ITALIC ) );
+            table.addCell( getTextCell( indicator.getNumerator(), TEXT ) );
+
             table.addCell( getItalicCell( i18n.getString( "denominator_description" ), 1, ITALIC ) );
             table.addCell( getTextCell( indicator.getDenominatorDescription(), TEXT ) );
+
+            table.addCell( getItalicCell( i18n.getString( "denominator_aggregation_operator" ), 1, ITALIC ) );
+            table.addCell( getTextCell( indicator.getDenominatorAggregationOperator(), TEXT ) );
+
+            table.addCell( getItalicCell( i18n.getString( "denominator_formula" ), 1, ITALIC ) );
+            table.addCell( getTextCell( indicator.getDenominator(), TEXT ) );
 
             table.addCell( getCell( 2, 30 ) );
 
@@ -288,8 +300,7 @@ public class ItextPdfService
         closeDocument( document );
     }
 
-    public void writeValidationResult( List<ValidationResult> results, OutputStream out, I18n i18n,
-        I18nFormat format )
+    public void writeValidationResult( List<ValidationResult> results, OutputStream out, I18n i18n, I18nFormat format )
     {
         Document document = openDocument( out );
         initFont();
@@ -326,14 +337,14 @@ public class ItextPdfService
 
                 table.addCell( getTextCell( unit.getName(), TEXT ) );
                 table.addCell( getTextCell( format.formatPeriod( period ), TEXT ) );
-                table.addCell( getTextCell( validationResult.getValidationRule().getLeftSide().getDescription(),
-                    TEXT ) );
+                table
+                    .addCell( getTextCell( validationResult.getValidationRule().getLeftSide().getDescription(), TEXT ) );
                 table.addCell( getTextCell( String.valueOf( validationResult.getLeftsideValue() ) ) );
-                table.addCell( getTextCell( i18n.getString( validationResult.getValidationRule().getOperator() ),
-                    1, ALIGN_CENTER ) );
+                table.addCell( getTextCell( i18n.getString( validationResult.getValidationRule().getOperator() ), 1,
+                    ALIGN_CENTER ) );
                 table.addCell( getTextCell( String.valueOf( validationResult.getRightsideValue() ) ) );
-                table.addCell( getTextCell( validationResult.getValidationRule().getRightSide().getDescription(),
-                    TEXT ) );
+                table
+                    .addCell( getTextCell( validationResult.getValidationRule().getRightSide().getDescription(), TEXT ) );
             }
         }
 

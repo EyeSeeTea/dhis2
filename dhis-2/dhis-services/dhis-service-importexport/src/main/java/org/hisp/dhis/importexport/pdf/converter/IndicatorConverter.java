@@ -105,12 +105,18 @@ public class IndicatorConverter
 
             table.addCell( getItalicCell( i18n.getString( "numerator_aggregation_operator" ), 1, ITALIC ) );
             table.addCell( getTextCell( i18n.getString( indicator.getNumeratorAggregationOperator() ) ) );
+            
+            table.addCell( getItalicCell( i18n.getString( "numerator_formula" ), 1, ITALIC ) );
+            table.addCell( getTextCell( indicator.getNumerator(), TEXT ) );
 
             table.addCell( getItalicCell( i18n.getString( "denominator_description" ), 1, ITALIC ) );
             table.addCell( getTextCell( indicator.getDenominatorDescription(), TEXT ) );
 
             table.addCell( getItalicCell( i18n.getString( "denominator_aggregation_operator" ), 1, ITALIC ) );
             table.addCell( getTextCell( i18n.getString( indicator.getDenominatorAggregationOperator() ) ) );
+            
+            table.addCell( getItalicCell( i18n.getString( "denominator_formula" ), 1, ITALIC ) );
+            table.addCell( getTextCell( indicator.getDenominator(), TEXT ) );
 
             table.addCell( getCell( 2, 30 ) );
 
