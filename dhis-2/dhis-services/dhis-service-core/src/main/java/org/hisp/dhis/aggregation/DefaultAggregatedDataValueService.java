@@ -32,19 +32,29 @@ public class DefaultAggregatedDataValueService
     // AggregatedDataValue
     // -------------------------------------------------------------------------
     
-    public Double getAggregatedValue( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
+    public Double getAggregatedDataValue( int dataElement, int period, int organisationUnit )
     {
-        return aggregatedDataValueStore.getAggregatedValue( dataElement, period, organisationUnit );
+        return aggregatedDataValueStore.getAggregatedDataValue( dataElement, period, organisationUnit );
     }
     
-    public Double getAggregatedValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit )
+    public Double getAggregatedValue( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
     {
-        return aggregatedDataValueStore.getAggregatedValue( dataElement, dimensionOption, period, organisationUnit );
+        return aggregatedDataValueStore.getAggregatedDataValue( dataElement.getId(), period.getId(), organisationUnit.getId() );
+    }
+    
+    public Double getAggregatedDataValue( int dataElement, int categoryOptionCombo, int period, int organisationUnit )
+    {
+        return aggregatedDataValueStore.getAggregatedDataValue( dataElement, categoryOptionCombo, period, organisationUnit );
     }
     
     public Double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit organisationUnit )
     {
-        return aggregatedDataValueStore.getAggregatedValue( dataElement, categoryOptionCombo, period, organisationUnit );
+        return aggregatedDataValueStore.getAggregatedDataValue( dataElement.getId(), categoryOptionCombo.getId(), period.getId(), organisationUnit.getId() );
+    }
+
+    public Double getAggregatedValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit )
+    {
+        return aggregatedDataValueStore.getAggregatedDataValue( dataElement, dimensionOption, period, organisationUnit );
     }
     
     public Collection<AggregatedDataValue> getAggregatedDataValues( int dataElementId, Collection<Integer> periodIds, Collection<Integer> organisationUnitIds )
@@ -75,9 +85,14 @@ public class DefaultAggregatedDataValueService
     // AggregatedIndicatorValue
     // -------------------------------------------------------------------------
     
-    public Double getAggregatedValue( Indicator indicator, Period period, OrganisationUnit unit )
+    public Double getAggregatedIndicatorValue( int indicator, int period, int organisationUnit )
     {
-        return aggregatedDataValueStore.getAggregatedValue( indicator, period, unit );
+        return aggregatedDataValueStore.getAggregatedIndicatorValue( indicator, period, organisationUnit );
+    }
+    
+    public Double getAggregatedValue( Indicator indicator, Period period, OrganisationUnit organisationUnit )
+    {
+        return aggregatedDataValueStore.getAggregatedIndicatorValue( indicator.getId(), period.getId(), organisationUnit.getId() );
     }
     
     public Collection<AggregatedIndicatorValue> getAggregatedIndicatorValues( Collection<Integer> periodIds, Collection<Integer> organisationUnitIds )

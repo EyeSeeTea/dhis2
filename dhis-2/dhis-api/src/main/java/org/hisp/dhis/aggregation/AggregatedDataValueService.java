@@ -107,7 +107,7 @@ public interface AggregatedDataValueService
      * @param organisationUnit The OrganisationUnit.
      * @return the aggregated value, or -1 if no value exists.
      */
-    Double getAggregatedValue( Indicator indicator, Period period, OrganisationUnit unit );
+    Double getAggregatedValue( Indicator indicator, Period period, OrganisationUnit organisationUnit );
 
     /**
      * Gets a collection of AggregatedIndicatorValues.

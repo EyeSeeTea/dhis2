@@ -23,7 +23,6 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.dimension.DimensionOption;
 import org.hisp.dhis.dimension.DimensionType;
-import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.objectmapper.AggregatedDataMapValueRowMapper;
@@ -48,19 +47,32 @@ public class JdbcAggregatedDataValueStore
     // AggregatedDataValue
     // -------------------------------------------------------------------------
     
-    public Double getAggregatedValue( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
+    public Double getAggregatedDataValue( int dataElement, int period, int organisationUnit )
     {
         final String sql = 
             "SELECT SUM(value) " +
             "FROM aggregateddatavalue " +
-            "WHERE dataelementid = " + dataElement.getId() + " " +
-            "AND periodid = " + period.getId() + " " +
-            "AND organisationunitid = " + organisationUnit.getId();
+            "WHERE dataelementid = " + dataElement + " " +
+            "AND periodid = " + period + " " +
+            "AND organisationunitid = " + organisationUnit;
         
         return statementManager.getHolder().queryForDouble( sql );
     }
 
-    public Double getAggregatedValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit )
+    public Double getAggregatedDataValue( int dataElement, int categoryOptionCombo, int period, int organisationUnit )
+    {
+        final String sql =
+            "SELECT value " +
+            "FROM aggregateddatavalue " +
+            "WHERE dataelementid = " + dataElement + " " +
+            "AND categoryoptioncomboid = " + categoryOptionCombo + " " +
+            "AND periodid = " + period + " " +
+            "AND organisationunitid = " + organisationUnit;
+        
+        return statementManager.getHolder().queryForDouble( sql );
+    }
+
+    public Double getAggregatedDataValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit )
     {
         if ( dimensionOption.getDimensionType().equals( DimensionType.CATEGORY ) )
         {
@@ -78,20 +90,6 @@ public class JdbcAggregatedDataValueStore
         }
         
         throw new IllegalArgumentException();
-    }
-    
-    public Double getAggregatedValue( DataElement dataElement, 
-        DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit organisationUnit )
-    {
-        final String sql =
-            "SELECT value " +
-            "FROM aggregateddatavalue " +
-            "WHERE dataelementid = " + dataElement.getId() + " " +
-            "AND categoryoptioncomboid = " + categoryOptionCombo.getId() + " " +
-            "AND periodid = " + period.getId() + " " +
-            "AND organisationunitid = " + organisationUnit.getId();
-        
-        return statementManager.getHolder().queryForDouble( sql );
     }
     
     public Collection<AggregatedDataValue> getAggregatedDataValues( int dataElementId, 
@@ -178,14 +176,14 @@ public class JdbcAggregatedDataValueStore
     // AggregatedIndicatorValue
     // -------------------------------------------------------------------------
 
-    public Double getAggregatedValue( Indicator indicator, Period period, OrganisationUnit organisationUnit )
+    public Double getAggregatedIndicatorValue( int indicator, int period, int organisationUnit )
     {
         final String sql =
             "SELECT value " +
             "FROM aggregatedindicatorvalue " +
-            "WHERE indicatorid = " + indicator.getId() + " " +
-            "AND periodid = " + period.getId() + " " +
-            "AND organisationunitid = " + organisationUnit.getId();
+            "WHERE indicatorid = " + indicator + " " +
+            "AND periodid = " + period + " " +
+            "AND organisationunitid = " + organisationUnit;
         
         return statementManager.getHolder().queryForDouble( sql );
     }

@@ -4,12 +4,10 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.dimension.DimensionOption;
-import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 
@@ -24,24 +22,13 @@ public interface AggregatedDataValueStore
     /**
      * Gets the total aggregated value from the datamart table for the given parameters.
      * 
-     * @param dataElement The DataElement.
-     * @param period The Period.
-     * @param organisationUnit The OrganisationUnit.
+     * @param dataElement The DataElement identifier.
+     * @param period The Period identifier.
+     * @param organisationUnit The OrganisationUnit identifier.
      * @return the aggregated value.
      */
-    Double getAggregatedValue( DataElement dataElement, Period period, OrganisationUnit organisationUnit );
+    Double getAggregatedDataValue( int dataElement, int period, int organisationUnit );
 
-    /**
-     * Gets the total aggregated value from the datamart table for the given parameters.
-     * 
-     * @param dataElement The DataElement.
-     * @param dimensionOptionElement the DimensionOptionElement.
-     * @param period The Period.
-     * @param organisationUnit The OrganisationUnit.
-     * @return the aggregated value.
-     */
-    Double getAggregatedValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit );
-    
     /**
      * Gets the aggregated value from the datamart table for the given parameters.
      * 
@@ -51,7 +38,18 @@ public interface AggregatedDataValueStore
      * @param organisationUnit The OrganisationUnit.
      * @return the aggregated value, or -1 if no value exists.
      */
-    Double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit organisationUnit );
+    Double getAggregatedDataValue( int dataElement, int categoryOptionCombo, int period, int organisationUnit );
+    
+    /**
+     * Gets the total aggregated value from the datamart table for the given parameters.
+     * 
+     * @param dataElement The DataElement.
+     * @param dimensionOptionElement the DimensionOptionElement.
+     * @param period The Period.
+     * @param organisationUnit The OrganisationUnit.
+     * @return the aggregated value.
+     */
+    Double getAggregatedDataValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit );
     
     /**
      * Gets a collection of AggregatedDataValues.
@@ -102,12 +100,12 @@ public interface AggregatedDataValueStore
     /**
      * Gets the aggregated value from the datamart table for the given parameters.
      * 
-     * @param indicator The Indicator.
-     * @param period The Period.
-     * @param organisationUnit The OrganisationUnit.
+     * @param indicator The Indicator identifier.
+     * @param period The Period identifier.
+     * @param organisationUnit The OrganisationUnit identifier.
      * @return the aggregated value, or -1 if no value exists.
      */
-    Double getAggregatedValue( Indicator indicator, Period period, OrganisationUnit unit );
+    Double getAggregatedIndicatorValue( int indicator, int period, int organisationUnit );
 
     /**
      * Gets a collection of AggregatedIndicatorValues.
