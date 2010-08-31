@@ -38,12 +38,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
@@ -117,13 +117,13 @@ public class DefaultMappingService
         this.userSettingService = userSettingService;
     }
 
-    private DataMartStore dataMartStore;
-
-    public void setDataMartStore( DataMartStore dataMartStore )
-    {
-        this.dataMartStore = dataMartStore;
-    }
+    private AggregatedDataValueService aggregatedDataValueService;
     
+    public void setAggregatedDataValueService( AggregatedDataValueService aggregatedDataValueService )
+    {
+        this.aggregatedDataValueService = aggregatedDataValueService;
+    }
+
     private AggregationService aggregationService;
 
     public void setAggregationService( AggregationService aggregationService )
@@ -149,7 +149,7 @@ public class DefaultMappingService
 
     public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level )
     {
-        return dataMartStore.getAggregatedDataMapValues( dataElementId, periodId, level );
+        return aggregatedDataValueService.getAggregatedDataMapValues( dataElementId, periodId, level );
     }
 
     public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId, int parentOrganisationUnitId )
@@ -197,12 +197,12 @@ public class DefaultMappingService
 
         if ( periodIds.size() < 2 )
         {
-            mapValues = dataMartStore.getAggregatedIndicatorMapValues( indicatorId, periodIds.iterator().next(), level,
+            mapValues = aggregatedDataValueService.getAggregatedIndicatorMapValues( indicatorId, periodIds.iterator().next(), level,
                 organisationUnitId );
         }
         else
         {
-            mapValues = dataMartStore.getAggregatedIndicatorMapValues( indicatorId, periodIds, level,
+            mapValues = aggregatedDataValueService.getAggregatedIndicatorMapValues( indicatorId, periodIds, level,
                 organisationUnitId );
         }
 
@@ -219,7 +219,7 @@ public class DefaultMappingService
 
     public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level )
     {
-        return dataMartStore.getAggregatedIndicatorMapValues( indicatorId, periodId, level );
+        return aggregatedDataValueService.getAggregatedIndicatorMapValues( indicatorId, periodId, level );
     }
 
     public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId )

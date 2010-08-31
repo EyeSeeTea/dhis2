@@ -30,6 +30,7 @@ package org.hisp.dhis.importexport.dhis14.file.rowhandler;
 import java.util.Map;
 
 import org.amplecode.quick.BatchHandler;
+import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datamart.DataMartService;
@@ -73,7 +74,7 @@ public class RoutineDataValueRowHandler
 
     public RoutineDataValueRowHandler( BatchHandler<DataValue> batchHandler,
         BatchHandler<ImportDataValue> importDataValueBatchHandler,
-        DataMartService dataMartService,
+        AggregatedDataValueService aggregatedDataValueService,
         Map<Object, Integer> dataElementMapping,
         Map<Object, Integer> periodMapping, 
         Map<Object, Integer> organisationUnitMapping,
@@ -82,7 +83,7 @@ public class RoutineDataValueRowHandler
     {
         this.batchHandler = batchHandler;
         this.importDataValueBatchHandler = importDataValueBatchHandler;
-        this.dataMartService = dataMartService;
+        this.aggregatedDataValueService = aggregatedDataValueService;
         this.dataElementMapping = dataElementMapping;
         this.periodMapping = periodMapping;
         this.organisationUnitMapping = organisationUnitMapping;

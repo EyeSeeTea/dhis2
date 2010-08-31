@@ -170,6 +170,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="org.hisp.dhis.translation.TranslationStore"
 		class="org.hisp.dhis.translation.hibernate.HibernateTranslationStore" />
 
+	<bean id="org.hisp.dhis.aggregation.AggregatedDataValueStore"
+		class="org.hisp.dhis.aggregation.jdbc.JdbcAggregatedDataValueStore"/>
+
 	<!-- Service definitions -->
 
 	<bean id="org.hisp.dhis.dataelement.DataElementOperandService"
@@ -406,6 +409,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 	</bean>
 
+	<bean id="org.hisp.dhis.aggregation.AggregatedDataValueService"
+		class="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService">
+		<property name="aggregatedDataValueStore"
+			ref="org.hisp.dhis.aggregation.AggregatedDataValueStore"/>
+	</bean>
+	
 	<!-- I18nService -->
 
 	<bean id="org.hisp.dhis.i18n.I18nService" class="org.hisp.dhis.i18n.DefaultI18nService">
