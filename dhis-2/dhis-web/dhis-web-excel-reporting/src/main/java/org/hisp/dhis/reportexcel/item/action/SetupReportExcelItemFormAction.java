@@ -26,6 +26,7 @@ package org.hisp.dhis.reportexcel.item.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,97 +40,118 @@ import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
 import org.hisp.dhis.reportexcel.ReportExcelService;
-import org.hisp.dhis.reportexcel.comparator.ReportExcelItemNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
- * @version $Id$
+ * @version $Id 2010-08-27
  */
-
-public class ListReportExcelItemAction
+public class SetupReportExcelItemFormAction
     implements Action
 {
+
     // -------------------------------------------
     // Dependency
     // -------------------------------------------
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+
+    private IndicatorService indicatorService;
+
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
+    }
 
     private ReportExcelService reportService;
-
-    // -------------------------------------------
-    // Input & Output
-    // -------------------------------------------
-
-    private Integer reportId;
-
-    private List<ReportExcelItem> reportItems;
-
-    private ReportExcel reportExcel;
-
-    private List<Integer> sheets;
-
-    private Integer sheetNo;
-
-    // -------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------
-
-    public List<ReportExcelItem> getReportItems()
-    {
-        return reportItems;
-    }
-
-    public List<Integer> getSheets()
-    {
-        return sheets;
-    }
-
-    public Integer getSheetNo()
-    {
-        return sheetNo;
-    }
-
-    public void setSheetNo( Integer sheetNo )
-    {
-        this.sheetNo = sheetNo;
-    }
-
-    public ReportExcel getReportExcel()
-    {
-        return reportExcel;
-    }
-
-    public void setReportId( Integer reportId )
-    {
-        this.reportId = reportId;
-    }
 
     public void setReportService( ReportExcelService reportService )
     {
         this.reportService = reportService;
     }
 
+    // -------------------------------------------
+    // Input
+    // -------------------------------------------
+
+    private Integer reportId;
+
+    public void setReportId( Integer reportId )
+    {
+        this.reportId = reportId;
+    }
+
+    private Integer reportExcelItemId;
+
+    public void setReportExcelItemId( Integer reportExcelItemId )
+    {
+        this.reportExcelItemId = reportExcelItemId;
+    }
+
+    // -------------------------------------------
+    // Output
+    // -------------------------------------------
+
+    private ReportExcelItem reportExcelItem;
+
+    public ReportExcelItem getReportExcelItem()
+    {
+        return reportExcelItem;
+    }
+
+    private ReportExcel reportExcel;
+
+    public ReportExcel getReportExcel()
+    {
+        return reportExcel;
+    }
+
+    private List<String> periodTypes;
+
+    public List<String> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
+    private List<DataElementGroup> dataElementGroups;
+
+    public List<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
+    }
+
+    private List<IndicatorGroup> indicatorGroups;
+
+    public List<IndicatorGroup> getIndicatorGroups()
+    {
+        return indicatorGroups;
+    }
+
+    @Override
     public String execute()
         throws Exception
     {
-        reportExcel = reportService.getReportExcel( reportId );
+        reportExcel = this.reportService.getReportExcel( this.reportId );
 
-        if ( sheetNo == null )
+        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
+
+        Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
+
+        indicatorGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
+
+        Collections.sort( indicatorGroups, new IndicatorGroupNameComparator() );
+
+        periodTypes = ReportExcelItem.PERIODTYPE.getPeriodTypes();
+
+        if ( reportExcelItemId != null )
         {
-
-            reportItems = new ArrayList<ReportExcelItem>( reportExcel.getReportExcelItems() );
-
+            reportExcelItem = reportService.getReportExcelItem( this.reportExcelItemId );
         }
-        else
-        {
-
-            reportItems = new ArrayList<ReportExcelItem>( reportService.getReportExcelItem( sheetNo, reportId ) );
-
-        }
-        sheets = new ArrayList<Integer>( reportService.getSheets( reportId ) );
-
-        Collections.sort( reportItems, new ReportExcelItemNameComparator() );
 
         return SUCCESS;
     }

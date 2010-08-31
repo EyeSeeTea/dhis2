@@ -350,7 +350,7 @@ function install(el, opts) {
 	}
 
 	// bind key and mouse events
-	bind(1, el, opts);
+	//bind(1, el, opts);
 
 	if (full) {
 		pageBlock = lyr3[0];

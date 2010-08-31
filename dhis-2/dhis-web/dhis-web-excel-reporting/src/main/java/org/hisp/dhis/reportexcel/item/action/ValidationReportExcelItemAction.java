@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportexcel.item.action;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,17 +26,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.item.action;
 
 import org.hisp.dhis.reportexcel.ReportExcel;
+import org.hisp.dhis.reportexcel.ReportExcelItem;
 import org.hisp.dhis.reportexcel.ReportExcelService;
 import org.hisp.dhis.reportexcel.action.ActionSupport;
 
 /**
  * @author Tran Thanh Tri
- * @version $Id$
+ * @version $Id 2010-08-27
  */
-public class ValidateAddReportExcelItemAction
+public class ValidationReportExcelItemAction
     extends ActionSupport
 {
 
@@ -44,98 +46,61 @@ public class ValidateAddReportExcelItemAction
 
     private ReportExcelService reportService;
 
+    public void setReportService( ReportExcelService reportService )
+    {
+        this.reportService = reportService;
+    }
+
     // -------------------------------------------
-    // Input & Output
+    // Input
     // -------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
 
     private Integer reportId;
-
-    private String name;
-
-    private String expression;
-
-    private Integer row;
-
-    private Integer column;
-
-    private Integer sheetNo;
-
-    // -------------------------------------------
-    // Getter & Getter
-    // -------------------------------------------
 
     public void setReportId( Integer reportId )
     {
         this.reportId = reportId;
     }
 
-    public void setSheetNo( Integer sheetNo )
-    {
-        this.sheetNo = sheetNo;
-    }
-
-    public void setReportService( ReportExcelService reportService )
-    {
-        this.reportService = reportService;
-    }
+    private String name;
 
     public void setName( String name )
     {
         this.name = name;
     }
 
-    public void setExpression( String expression )
-    {
-        this.expression = expression;
-    }
+    private Integer row;
 
     public void setRow( Integer row )
     {
         this.row = row;
-    }
+    };
+
+    private Integer column;
 
     public void setColumn( Integer column )
     {
         this.column = column;
+    };
+
+    private Integer sheetNo;
+
+    public void setSheetNo( Integer sheetNo )
+    {
+        this.sheetNo = sheetNo;
     }
 
     public String execute()
         throws Exception
+
     {
-        if ( name == null )
-        {
-            message = i18n.getString( "name_is_null" );
-
-            return ERROR;
-        }
-        if ( name.trim().length() == 0 )
-        {
-            message = i18n.getString( "name_is_null" );
-
-            return ERROR;
-        }
-
-        ReportExcel reportExcel = reportService.getReportExcel( reportId );
-
-        if ( reportExcel.reportExcelItemIsExist( name, sheetNo ) )
-        {
-            message = i18n.getString( "name_ready_exist" );
-
-            return ERROR;
-        }
-
-        if ( expression == null )
-        {
-            message = i18n.getString( "expression_is_null" );
-
-            return ERROR;
-        }
-        if ( expression.trim().length() == 0 )
-        {
-            message = i18n.getString( "expression_is_null" );
-
-            return ERROR;
-        }
         if ( sheetNo == null )
         {
             message = i18n.getString( "please_enter_sheet_no" );
@@ -143,20 +108,27 @@ public class ValidateAddReportExcelItemAction
             return ERROR;
         }
 
-        if ( row == null )
+        ReportExcel reportExcel = reportService.getReportExcel( reportId );
+
+        ReportExcelItem match = reportExcel.getReportExcelItemByName( name, sheetNo );
+
+        if ( match != null && (id == null || match.getId() != id) )
         {
-            message = i18n.getString( "row_is_null" );
+            message = i18n.getString( "name_ready_exist_in_sheet" );
 
             return ERROR;
         }
-        if ( column == null )
+
+        if ( row == null || column == null )
         {
-            message = i18n.getString( "column_is_null" );
+            message = i18n.getString( "please_enter_row_and_column_first" );
 
             return ERROR;
         }
+        
+        match  = reportExcel.getReportExcelItemBySheetRowColumn( sheetNo, row, column );
 
-        if ( reportExcel.rowAndColumnIsExist( sheetNo, row, column ) )
+        if ( match != null && (id == null || match.getId() != id) )
         {
             message = i18n.getString( "cell_exist" );
 
@@ -164,6 +136,6 @@ public class ValidateAddReportExcelItemAction
         }
 
         return SUCCESS;
-    }
 
+    }
 }

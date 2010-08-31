@@ -1,4 +1,5 @@
-package org.hisp.dhis.reportexcel.action;
+package org.hisp.dhis.commons.action;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,64 +27,57 @@ package org.hisp.dhis.reportexcel.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportexcel.ReportExcel;
-import org.hisp.dhis.reportexcel.ReportExcelService;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
- * @version $Id$
+ * @version $Id: GetDataElementGroupsAction 2010-8-28$
  */
-public class ValidateUpdateReportExcelAction
-    extends ActionSupport
+public class GetDataElementGroupsAction
+    implements Action
 {
-    // -------------------------------------------
-    // Dependency
-    // -------------------------------------------
+    
 
-    private ReportExcelService reportService;
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    // -------------------------------------------
-    // Input & Output
-    // -------------------------------------------
+    private DataElementService dataElementService;
 
-    private Integer id;
-
-    private String name;
-
-    // -------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------
-
-    public void setReportService( ReportExcelService reportService )
+    public void setDataElementService( DataElementService dataElementService )
     {
-        this.reportService = reportService;
+        this.dataElementService = dataElementService;
     }
 
-    public void setId( Integer id )
+    // -------------------------------------------------------------------------
+    // Input & output
+    // -------------------------------------------------------------------------
+
+    private List<DataElementGroup> dataElementGroups;
+
+    public List<DataElementGroup> getDataElementGroups()
     {
-        this.id = id;
+        return dataElementGroups;
     }
 
-    public void setName( String name )
-    {
-        this.name = name;
-    }
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
+        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
 
-       
-        ReportExcel temp = reportService.getReportExcel( id );
-
-        ReportExcel reportExcel = reportService.getReportExcel( name );
-
-        if ( reportExcel != null && !temp.equals( reportExcel ) )
-        {
-            message = i18n.getString( "name_ready_exist" );
-            
-            return ERROR;
-        }
+        Collections.sort( this.dataElementGroups, new DataElementGroupNameComparator() );
 
         return SUCCESS;
     }

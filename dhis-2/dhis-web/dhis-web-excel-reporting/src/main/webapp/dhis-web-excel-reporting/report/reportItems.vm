@@ -1,0 +1,80 @@
+<script>
+	jQuery(document).ready(function(){	
+		tableSorter( 'listTable', [[1,0]] );	
+	});
+	
+	function reportItemSelect( checked )
+	{
+		if( checked ) checkALL( "input[type=checkbox][name=reportItemCheck]" );
+		else unCheckALL( "input[type=checkbox][name=reportItemCheck]" );
+	}
+	
+</script>
+
+<h3>$!encoder.htmlEncode($!reportExcel.name)</h3>
+
+<table width="100%">
+	<tr style="vertical-align:bottom;">
+		<td>
+			$i18n.getString( "filter_by_name" ): <input type="text" onkeyup="filterValues( this.value , 2)" style="width:300px"/>
+			$i18n.getString('filter_by_sheet')
+			<select id="sheetNoFilter" onchange="filterValues( this.value, 8);">
+				<option value="" >--- ALL ---</option>
+				#foreach($sheet in $sheets)
+				<option value="$sheet" #if($sheetNo==$sheet) selected #end >$sheet</option>
+				#end
+			</select>
+		</td>
+		<td align="right">		
+			<input type="button" onclick="window.location='addReportExcelItemForm.action?reportId=$reportExcel.id'" value="$i18n.getString('add')" style="width:150px"/><br>
+			<input type="button" onclick="window.location='listReportExcel.action'" value="$i18n.getString('cancel')" style="width:150px"/><br>
+			<input type="button" onclick="copySelectedReportItemToReport()" value="$i18n.getString('copy_selected_item_to')" style="width:150px"/><br>
+			<input type="button" onclick="copySelectedReportItemToExcelItemGroup()" value="$i18n.getString('copy_selected_item_to_excel_item')" style="width:150px"/><br>
+			<input type="button" onclick="deleteMultiReportItem( '$i18n.getString( 'confirm_delete' )')" value="$i18n.getString('remove')" style="width:150px"/>
+		</td>
+	</tr>
+</table>
+
+<table width="100%" class="listTable" id="listTable">
+	<col width="30px"/>
+	<col/>
+	<col width="100px"/>
+	<col width="100px"/>
+	<col width="50px"/>
+	<col width="70px"/>
+	<col/>
+	<col width="80px"/>
+	<col width="100px" />
+	<thead>
+		<tr>
+			<th class="{sorter: false}"><input type="checkbox" onclick="reportItemSelect(this.checked)"/></th>
+			<th>$i18n.getString('name')</th>
+			<th>$i18n.getString('item_type')</th>
+			<th>$i18n.getString('period_type')</th>
+			<th>$i18n.getString('row')</th>		
+			<th>$i18n.getString('column')</th>		
+			<th class="{sorter: false}">$i18n.getString('expression')</th>		
+			<th>$i18n.getString('sheet_no')</th>	
+			<th class="{sorter: false}">$i18n.getString('operations')</th>		
+		</tr>
+	</thead>
+	<tbody id="list">	
+	#foreach($reportItem in $reportItems)
+		<tr id="tr${reportItem.id}">
+			<td align=center><input type="checkbox" reportItemID="$reportItem.id" reportItemName="$reportItem.name" name="reportItemCheck" id="reportItemCheck"/></td>
+			<td>$encoder.htmlEncode( $reportItem.name )</td>
+			<td>$i18n.getString( $reportItem.itemType )</td>
+			<td>$i18n.getString( $reportItem.periodType )</td>
+			<td>$reportItem.row</td>
+			<td>$reportItem.column</td>
+			<td>$reportItem.expression</td>
+			<td>$reportItem.sheetNo </td>
+			<td align="center">				
+				<a href="updateReportExcelItemForm.action?reportExcelItemId=$reportItem.id&reportId=$reportExcel.id" title="$i18n.getString( 'edit' )"><img src="../images/edit.png" alt="$i18n.getString( 'edit' )"></a>
+				<a href="javascript:translate( 'ReportExcelItem', '$reportItem.id' )" title="$i18n.getString( "translation_translate" )"><img src="../images/i18n.png" alt="$i18n.getString( "translation_translate" )"></a>
+				<a href="javascript:removeItem($reportItem.id, '$reportItem.name','$i18n.getString( 'confirm_delete' )', 'deleteReportExcelItem.action');" title="$i18n.getString( 'remove' )"><img src="../images/delete.png" alt="$i18n.getString( 'remove' )"></a>
+			</td>
+		</tr>		
+	#end
+	</tbody>
+</table>

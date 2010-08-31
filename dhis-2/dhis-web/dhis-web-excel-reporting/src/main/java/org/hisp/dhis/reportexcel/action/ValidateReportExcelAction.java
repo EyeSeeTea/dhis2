@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportexcel.action;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -25,8 +27,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.reportexcel.action;
-
 import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelService;
 
@@ -34,7 +34,7 @@ import org.hisp.dhis.reportexcel.ReportExcelService;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class ValidateAddReportExcelAction
+public class ValidateReportExcelAction
     extends ActionSupport
 {
     // -------------------------------------------
@@ -52,6 +52,13 @@ public class ValidateAddReportExcelAction
     // Input & Output
     // -------------------------------------------
 
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
     private String name;
 
     public void setName( String name )
@@ -62,9 +69,10 @@ public class ValidateAddReportExcelAction
     public String execute()
         throws Exception
     {
+
         ReportExcel reportExcel = reportService.getReportExcel( name );
 
-        if ( reportExcel != null )
+        if ( reportExcel != null && (this.id == null || reportExcel.getId() != this.id) )
         {
             message = i18n.getString( "name_ready_exist" );
 
@@ -73,5 +81,4 @@ public class ValidateAddReportExcelAction
 
         return SUCCESS;
     }
-
 }

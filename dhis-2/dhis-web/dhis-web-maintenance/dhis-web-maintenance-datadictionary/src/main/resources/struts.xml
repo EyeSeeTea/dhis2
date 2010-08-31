@@ -103,12 +103,10 @@
 
 		<action name="validateDataElement"
 			class="org.hisp.dhis.dd.action.dataelement.ValidateDataElementAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseInput.vm</result>
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm
+			</result>
+			<result name="error" type="velocity-json">../dhis-web-commons/ajax/jsonResponseError.vm
+			</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 

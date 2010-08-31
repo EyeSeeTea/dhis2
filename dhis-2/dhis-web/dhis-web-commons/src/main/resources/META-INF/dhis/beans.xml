@@ -591,9 +591,14 @@
     </bean>
     
 	<!-- Common actions -->
-
-    <bean id="org.hisp.dhis.commons.action.GetDataElementAction"
+	
+	<bean id="org.hisp.dhis.commons.action.GetDataElementAction"
         class="org.hisp.dhis.commons.action.GetDataElementAction" scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.commons.action.GetDataElementGroupsAction"
+        class="org.hisp.dhis.commons.action.GetDataElementGroupsAction" scope="prototype">
         <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     </bean>
         
@@ -619,9 +624,15 @@
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
 		<property name="userStore" ref="org.hisp.dhis.user.UserStore" />
 	</bean>
-
-    <bean id="org.hisp.dhis.commons.action.GetIndicatorAction" 
+	
+	<bean id="org.hisp.dhis.commons.action.GetIndicatorAction" 
         class="org.hisp.dhis.commons.action.GetIndicatorAction"
+        scope="prototype">
+        <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.commons.action.GetIndicatorGroupsAction" 
+        class="org.hisp.dhis.commons.action.GetIndicatorGroupsAction"
         scope="prototype">
         <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
     </bean>

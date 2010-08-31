@@ -500,7 +500,7 @@ public abstract class GenerateReportSupport
             value = MathUtils.calculateExpression( generateIndicatorExpression( reportItem, firstDayOfYear,
                 endDateOfYear, organisationUnit ) );
         }
-        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUATERLY ) )
+        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUARTERLY ) )
         {
             value = MathUtils.calculateExpression( generateIndicatorExpression( reportItem, startQuaterly, endQuaterly,
                 organisationUnit ) );
@@ -594,7 +594,7 @@ public abstract class GenerateReportSupport
             value = MathUtils.calculateExpression( generateExpression( reportItem, firstDayOfYear, endDateOfYear,
                 organisationUnit ) );
         }
-        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUATERLY ) )
+        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUARTERLY ) )
         {
             value = MathUtils.calculateExpression( generateExpression( reportItem, startQuaterly, endQuaterly,
                 organisationUnit ) );

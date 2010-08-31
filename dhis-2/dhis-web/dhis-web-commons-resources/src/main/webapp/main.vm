@@ -18,6 +18,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         
     <script type="text/javascript" src="../dhis-web-commons/util/jquery.js"></script>
+    <script type="text/javascript" src="../dhis-web-commons/util/jquery.ext.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/util/jquery.metadata.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/util/ui.datepicker.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/util/jquery.tablesorter.js"></script>	
@@ -26,6 +27,7 @@
 	<script type="text/javascript" src="../dhis-web-commons/util/jquery.validate.ext.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/i18nJavaScriptSupport.action"></script>
     <script type="text/javascript" src="../dhis-web-commons/util/commons.js"></script>
+    <script type="text/javascript" src="../dhis-web-commons/util/commons.ajax.js"></script>
     <script type="text/javascript" src="../dhis-web-commons/util/lists.js"></script>
 	
     <script type="text/javascript" src="../dhis-web-commons/css/${stylesheetDirectory}/dom.js"></script>
