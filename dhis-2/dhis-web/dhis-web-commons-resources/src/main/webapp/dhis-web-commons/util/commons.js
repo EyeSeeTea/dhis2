@@ -308,7 +308,7 @@ function htmlEncode( str )
  * @param parentElement the DOM object.
  * @param childElementName the name of the element.
  */
-function getElementValue( parentElement, childElementName )
+function getElementaValue( parentElement, childElementName )
 {
     var textNode = parentElement.getElementsByTagName( childElementName )[0].firstChild;
     
@@ -1018,8 +1018,64 @@ function showPopupWindowById( id, width, height )
 	container.show(  jQuery.blockUI({message:null}));
 	
 }
+/**
+* load All Data Element Groups into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
 
 function loadDataElementGroups( selectorJQueryString )
 {
 	DataDictionary.loadDataElementGroups( jQuery( selectorJQueryString ) );
 }
+/**
+* load data elements by data element group
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+* @param id is data element group id
+*/
+function loadDataElementsByGroup( id, selectorJQueryString )
+{
+	DataDictionary.loadDataElementsByGroup( id, jQuery( selectorJQueryString ) );
+}
+/**
+* load All Data Elements into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
+function loadAllDataElements( selectorJQueryString )
+{
+	DataDictionary.loadAllDataElements( jQuery( selectorJQueryString ) );
+}
+/**
+* load Category Option Combo of data element
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+* @param id is data element id
+*/
+function loadCategoryOptionComboByDE( id, selectorJQueryString)
+{
+	DataDictionary.loadCategoryOptionComboByDE( id, jQuery( selectorJQueryString ) );
+}
+/**
+* load all indicator groups into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
+function loadIndicatorGroups( selectorJQueryString )
+{
+	DataDictionary.loadIndicatorGroups( jQuery( selectorJQueryString ) );
+}
+/**
+* load indicators by group
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+* @param id is indicator group id
+*/
+function loadIndicatorsByGroup( id, selectorJQueryString )
+{
+	DataDictionary.loadIndicatorsByGroup( id, jQuery( selectorJQueryString ));
+}
+/**
+* load all indicator into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
+function loadAllIndicators( selectorJQueryString )
+{
+	DataDictionary.loadAllIndicators( jQuery( selectorJQueryString ) );
+}
+

@@ -30,14 +30,14 @@
 	
 	function inExpressionBuilderForm()
 	{
-		jQuery.loadIndicatorGroups( "#indicator select[id=groupSelect]");		
+		loadIndicatorGroups( "#indicator select[id=groupSelect]");		
 		
 		showPopupWindowById( 'indicator', 510, 340 );
 	}
 		
 	function getIndicators( id, target)
 	{
-		jQuery.loadIndicatorByGroup( id, target );
+		loadIndicatorsByGroup( id, target );
 	}
 	
 </script>

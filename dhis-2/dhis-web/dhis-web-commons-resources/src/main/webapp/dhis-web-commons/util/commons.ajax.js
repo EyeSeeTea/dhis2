@@ -4,13 +4,17 @@
 
 function DataDictionary()
 {
+	var ALL_KEY = 'all';
+	
 	var dataElementsGroups = new Array();
 	
-	var dataElements = new Array();
+	var dataElementGroupList = new Array();	
 	
 	var indicatorGroups = new Array();
 	
-	var indicators = new Array();
+	var indicatorGroupList = new Array();	
+	
+	var categoryOptionComboList = new Array();
 	
 	this.loadDataElementGroups = function( target )
 	{
@@ -20,8 +24,8 @@ function DataDictionary()
 		{
 			jQuery.getJSON('../dhis-web-commons-ajax-json/getDataElementGroups.action'
 				, function( json ){
-					target.append('<option value="100">ALL</option>');
-					dataElementsGroups.push( new DataElementGroup(100, 'ALL') );
+					target.append('<option value="' + ALL_KEY + '">ALL</option>');
+					dataElementsGroups.push( new DataElementGroup(ALL_KEY, 'ALL') );
 					jQuery.each( json.dataElementGroups, function(i, item){
 						dataElementsGroups.push( new DataElementGroup(item.id, item.name) );
 						target.append('<option value="' + item.id + '">' + item.name + '</option>');
@@ -34,6 +38,38 @@ function DataDictionary()
 		}
 	}
 	
+	this.loadAllDataElements = function( target )
+	{
+		this.loadDataElementsByGroup( ALL_KEY, target);
+	}
+	
+	this.loadDataElementsByGroup = function( id,target )
+	{
+		target.children().remove();
+		
+		var des = dataElementGroupList[id];
+		
+		if( des == null )
+		{	
+			des = new Array();
+			
+			jQuery.getJSON('../dhis-web-commons-ajax-json/getDataElements.action'	
+				,{id:id}
+				, function( json ){
+					jQuery.each( json.dataElements, function(i, item){
+						des.push( new DataElement(item.id, item.name) );
+						target.append('<option value="' + item.id + '">' + item.name + '</option>');
+					});
+					dataElementGroupList[id] = des;
+			});
+		}else{
+			jQuery.each( des, function(i, item){
+				target.append('<option value="' + item.id + '">' + item.name + '</option>');
+			});		
+		}
+	}
+	
+	
 	this.loadIndicatorGroups = function( target )
 	{
 		target.children().remove();
@@ -42,6 +78,8 @@ function DataDictionary()
 		{
 			jQuery.getJSON('../dhis-web-commons-ajax-json/getIndicatorGroups.action'
 				, function( json ){
+					target.append('<option value="' + ALL_KEY + '">ALL</option>');
+					indicatorGroups.push( new IndicatorGroup( ALL_KEY, 'ALL') );
 					jQuery.each( json.indicatorGroups, function(i, item){
 						indicatorGroups.push( new IndicatorGroup(item.id, item.name) );
 						target.append('<option value="' + item.id + '">' + item.name + '</option>');
@@ -54,163 +92,78 @@ function DataDictionary()
 		}	
 	}
 	
-	this.loadDataElements = function( target )
+	this.loadAllIndicators = function( target )
+	{
+		this.loadIndicatorsByGroup( ALL_KEY, target);
+	}
+	
+	this.loadIndicatorsByGroup = function( id,target )
 	{
 		target.children().remove();
 		
-		if( dataElements.length == 0 )
-		{
-			if(this.id == 100) this.id = '';
-			jQuery.getJSON('../dhis-web-commons-ajax-json/getDataElements.action'								
+		var ins = indicatorGroupList[id];
+		
+		if( ins == null )
+		{	
+			ins = new Array();
+			
+			jQuery.getJSON('../dhis-web-commons-ajax-json/getIndicators.action'	
+				,{id:id}
 				, function( json ){
-					jQuery.each( json.dataElements, function(i, item){
-						dataElements.push( new DataElement(item.id, item.name) );
+					jQuery.each( json.indicators, function(i, item){
+						ins.push( new Indicator(item.id, item.name) );
 						target.append('<option value="' + item.id + '">' + item.name + '</option>');
-					});					
+					});
+					indicatorGroupList[id] = ins;
 			});
 		}else{
-			jQuery.each( dataElements, function(i, item){
+			jQuery.each( ins, function(i, item){
 				target.append('<option value="' + item.id + '">' + item.name + '</option>');
 			});		
 		}
-	}
+	}	
 	
-	this.loadIndicators = function( target )
+	this.loadCategoryOptionComboByDE = function( id, target )
 	{
 		target.children().remove();
 		
-		if( indicators.length == 0 )
-		{
-			jQuery.getJSON('../dhis-web-commons-ajax-json/getIndicators.action'
-				, {id: this.id }					
+		var options = categoryOptionComboList[id];
+		
+		if( options == null )
+		{	
+			options = new Array();
+			
+			jQuery.getJSON('../dhis-web-commons-ajax-json/getCategoryOptionCombos.action'	
+				,{id:id}
 				, function( json ){
-					jQuery.each( json.indicators, function(i, item){
-						indicators.push( new Indicator(item.id, item.name) );
+					jQuery.each( json.categoryOptionCombos, function(i, item){
+						options.push( new OptionCombo(item.id, item.name) );
 						target.append('<option value="' + item.id + '">' + item.name + '</option>');
-					});					
+					});
+					categoryOptionComboList[id] = options;
 			});
 		}else{
-			jQuery.each( indicators, function(i, item){
+			jQuery.each( options, function(i, item){
 				target.append('<option value="' + item.id + '">' + item.name + '</option>');
 			});		
-		}	
+		}
+		
 	}
 	
 }
 
 var DataDictionary = new DataDictionary();
 
-
-
-
-function DataElementGroups()
-{
-	var groups = new Array();
-	
-	this.load = function( target )
-	{
-		target.children().remove();
-		
-		if( groups.length == 0 )
-		{
-			jQuery.getJSON('../dhis-web-commons-ajax-json/getDataElementGroups.action'
-				, function( json ){
-					target.append('<option value="100">ALL</option>');
-					groups.push( new DataElementGroup(100, 'ALL') );
-					jQuery.each( json.dataElementGroups, function(i, item){
-						groups.push( new DataElementGroup(item.id, item.name) );
-						target.append('<option value="' + item.id + '">' + item.name + '</option>');
-					});					
-			});
-		}else{
-			jQuery.each( groups, function(i, item){
-				target.append('<option value="' + item.id + '">' + item.name + '</option>');
-			});		
-		}			
-	}		
-	
-	this.members = function()
-	{
-		return groups;
-	}
-	
-	this.getDataElementGroup = function( id )
-	{
-		var result = null;
-		jQuery.each( groups, function(i, item){
-			if( id == item.id ) result = item;
-		});		
-		return result;
-	}
-	
-}
-
 function DataElementGroup( id_, name_ )
 {
 	this.id = id_;
-	this.name = name_;	
-	var elements = new Array();
-	
-	this.members = function( target )
-	{
-		target.children().remove();
-		
-		if( elements.length == 0 )
-		{
-			if(this.id == 100) this.id = '';
-			jQuery.getJSON('../dhis-web-commons-ajax-json/getDataElements.action'
-				, {id: this.id }					
-				, function( json ){
-					jQuery.each( json.dataElements, function(i, item){
-						elements.push( new DataElement(item.id, item.name) );
-						target.append('<option value="' + item.id + '">' + item.name + '</option>');
-					});					
-			});
-		}else{
-			jQuery.each( elements, function(i, item){
-				target.append('<option value="' + item.id + '">' + item.name + '</option>');
-			});		
-		}		
-	}
-	
-	this.getDataElement = function( id )
-	{
-		var result = null;
-		jQuery.each( elements, function(i, item){
-			if( id == item.id ) result = item;
-		});
-		
-		return result;
-	}		
+	this.name = name_;		
 }	
 
 function DataElement( id_, name_ )
 {
 	this.id = id_;
 	this.name = name_;
-	
-	var optionCombos = new Array();
-	
-	this.getCategoryOptionCombos = function( target )
-	{
-		target.children().remove();
-		
-		if( optionCombos.length == 0 )
-		{
-			jQuery.getJSON('../dhis-web-commons-ajax-json/getCategoryOptionCombos.action'
-				, {id: this.id }					
-				, function( json ){
-					jQuery.each( json.categoryOptionCombos, function(i, item){
-						optionCombos.push( new OptionCombo(item.id, item.name) );
-						target.append('<option value="' + item.id + '">' + item.name + '</option>');
-					});					
-			});
-		}else{
-			jQuery.each( optionCombos, function(i, item){
-				target.append('<option value="' + item.id + '">' + item.name + '</option>');
-			});		
-		}
-	}
 }
 
 function OptionCombo( id_, name_ )
@@ -219,89 +172,10 @@ function OptionCombo( id_, name_ )
 	this.name = name_;
 }
 
-var DATA_ELEMENT_GROUPS = new DataElementGroups();
-
-//====================================================================================
-// DATAELEMENT & DATA ELEMENT GROUP & CATEGORY OPTION COMBO
-//====================================================================================
-
-function IndicatorGroups()
-{
-	var groups = new Array();
-	
-	this.load = function( target )
-	{
-		target.children().remove();
-		
-		if( groups.length == 0 )
-		{
-			jQuery.getJSON('../dhis-web-commons-ajax-json/getIndicatorGroups.action'
-				, function( json ){
-					jQuery.each( json.indicatorGroups, function(i, item){
-						groups.push( new IndicatorGroup(item.id, item.name) );
-						target.append('<option value="' + item.id + '">' + item.name + '</option>');
-					});					
-			});
-		}else{
-			jQuery.each( groups, function(i, item){
-				target.append('<option value="' + item.id + '">' + item.name + '</option>');
-			});		
-		}			
-	}		
-	
-	this.members = function()
-	{
-		return groups;
-	}
-	
-	this.getIndicatorGroup = function( id )
-	{
-		var result = null;
-		jQuery.each( groups, function(i, item){
-			if( id == item.id ) result = item;
-		});
-		
-		return result;
-	}
-	
-}
-
 function IndicatorGroup( id_, name_ )
 {
 	this.id = id_;
-	this.name = name_;	
-	var elements = new Array();
-	
-	this.members = function( target )
-	{
-		target.children().remove();
-		
-		if( elements.length == 0 )
-		{
-			jQuery.getJSON('../dhis-web-commons-ajax-json/getIndicators.action'
-				, {id: this.id }					
-				, function( json ){
-					jQuery.each( json.indicators, function(i, item){
-						elements.push( new Indicator(item.id, item.name) );
-						target.append('<option value="' + item.id + '">' + item.name + '</option>');
-					});					
-			});
-		}else{
-			jQuery.each( elements, function(i, item){
-				target.append('<option value="' + item.id + '">' + item.name + '</option>');
-			});		
-		}		
-	}
-	
-	this.getIndicator = function( id )
-	{
-		var result = null;
-		jQuery.each( elements, function(i, item){
-			if( id == item.id ) result = item;
-		});
-		
-		return result;
-	}		
+	this.name = name_;		
 }	
 
 function Indicator( id_, name_ )
@@ -309,8 +183,5 @@ function Indicator( id_, name_ )
 	this.id = id_;
 	this.name = name_;	
 }
-
-var INDICATOR_GROUPS = new IndicatorGroups();
-
 
 
