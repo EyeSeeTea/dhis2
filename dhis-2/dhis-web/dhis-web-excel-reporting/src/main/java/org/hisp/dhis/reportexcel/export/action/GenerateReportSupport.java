@@ -59,7 +59,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.datamart.DataMartStore;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -120,8 +119,6 @@ public abstract class GenerateReportSupport
     AggregationService aggregationService;
 
     CurrentUserService currentUserService;
-
-    DataMartStore dataMartStore;
 
     IndicatorService indicatorService;
 
@@ -503,7 +500,7 @@ public abstract class GenerateReportSupport
             value = MathUtils.calculateExpression( generateIndicatorExpression( reportItem, firstDayOfYear,
                 endDateOfYear, organisationUnit ) );
         }
-        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUATERLY ) )
+        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUARTERLY ) )
         {
             value = MathUtils.calculateExpression( generateIndicatorExpression( reportItem, startQuaterly, endQuaterly,
                 organisationUnit ) );
@@ -597,7 +594,7 @@ public abstract class GenerateReportSupport
             value = MathUtils.calculateExpression( generateExpression( reportItem, firstDayOfYear, endDateOfYear,
                 organisationUnit ) );
         }
-        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUATERLY ) )
+        else if ( reportItem.getPeriodType().equalsIgnoreCase( ReportExcelItem.PERIODTYPE.QUARTERLY ) )
         {
             value = MathUtils.calculateExpression( generateExpression( reportItem, startQuaterly, endQuaterly,
                 organisationUnit ) );

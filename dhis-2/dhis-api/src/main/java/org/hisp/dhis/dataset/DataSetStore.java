@@ -115,6 +115,8 @@ public interface DataSetStore
 
     Collection<DataSet> getDataSetsBySource( Source source );
     
+    Collection<DataSet> getDataSetsBySources( Collection<? extends Source> sources );
+    
     // -------------------------------------------------------------------------
     // FrequencyOverrideAssociation
     // -------------------------------------------------------------------------

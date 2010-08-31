@@ -102,12 +102,13 @@
 
 
 
-		<!-- REPORT EXCEL CORE ACTION -->
+		<!-- REPORT EXCEL CORE ACTION -->	
+		
 		
 		<action name="addReportExcelForm"
 			class="org.hisp.dhis.reportexcel.filemanager.action.ExcelTemplateListAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/addReportExcelForm.vm</param>			
+			<param name="page">/dhis-web-excel-reporting/report/addReportExcelForm.vm</param>			
 			<param name="javascripts">javascript/reports.js,javascript/jquery.autocomplete.js</param>
 			<param name="stylesheets">style/jquery.autocomplete.css</param>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
@@ -119,12 +120,6 @@
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
-		<action name="getListExcelTemplateFile"
-			class="org.hisp.dhis.reportexcel.filemanager.action.ExcelTemplateListAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseFiles.vm</result>
-		</action>
-
 		<action name="deleteReportExcel"
 			class="org.hisp.dhis.reportexcel.action.DeleteReportExcelAction">
 			<result name="success" type="velocity-json">
@@ -134,25 +129,19 @@
 			<param name="onExceptionReturn">plainTextError</param>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
-
-		<action name="getReportExcel"
-			class="org.hisp.dhis.reportexcel.action.GetReportExcelAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseReport.vm</result>
-		</action>
-
+		
 		<action name="getReportExcelGroups"
 			class="org.hisp.dhis.reportexcel.action.GetReportExcelGroupsAction">
 			<result name="success" type="velocity">
-				/dhis-web-excel-reporting/responseReportGroups.vm</result>
+				/dhis-web-excel-reporting/report/ajax/responseReportGroups.vm</result>
 		</action>
 
 		<action name="listReportExcel"
 			class="org.hisp.dhis.reportexcel.action.ListReportExcelAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/reports.vm</param>
+			<param name="page">/dhis-web-excel-reporting/report/reports.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
-			<param name="javascripts">javascript/reports.js,javascript/jquery.autocomplete.js,javascript/commons.js</param>
+			<param name="javascripts">javascript/reports.js</param>
 			<param name="stylesheets">style/jquery.autocomplete.css</param>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
@@ -166,7 +155,7 @@
 		<action name="updateReportExcelFormChain"
 			class="org.hisp.dhis.reportexcel.filemanager.action.ExcelTemplateListAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/updateReportExcelForm.vm</param>			
+			<param name="page">/dhis-web-excel-reporting/report/updateReportExcelForm.vm</param>			
 			<param name="javascripts">javascript/reports.js,javascript/jquery.autocomplete.js</param>
 			<param name="stylesheets">style/jquery.autocomplete.css</param>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
@@ -178,21 +167,12 @@
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
-		<action name="validateAddReportExcel"
-			class="org.hisp.dhis.reportexcel.action.ValidateAddReportExcelAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-excel-reporting/responseError.vm</result>
-		</action>
-
-		<action name="validateUpdateReportExcel"
-			class="org.hisp.dhis.reportexcel.action.ValidateUpdateReportExcelAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-excel-reporting/responseError.vm</result>
-		</action>
+		<action name="validateReportExcelAction"
+			class="org.hisp.dhis.reportexcel.action.ValidateReportExcelAction">
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      		<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+      		<param name="onExceptionReturn">plainTextError</param>
+		</action>		
 
 		<!-- REPORT EXCEL CATEGORY ACTION -->
 
@@ -370,59 +350,50 @@
 		<action name="listReportExcelItemAction"
 			class="org.hisp.dhis.reportexcel.item.action.ListReportExcelItemAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/reportItems.vm</param>
+			<param name="page">/dhis-web-excel-reporting/report/reportItems.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
-			<param name="javascripts">
-				javascript/reportItem.js,
-				javascript/dataelement.js,
-				javascript/jquery.autocomplete.js,
-				javascript/commons.js
-			</param>
-			<param name="stylesheets">style/jquery.autocomplete.css,
-				style/style.css</param>
+			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>		
 		</action>
 
-		<action name="getReportExcelItems"
-			class="org.hisp.dhis.reportexcel.item.action.ListReportExcelItemAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseReportItems.vm</result>
-		</action>
-
-		<action name="getReportExcelItem"
-			class="org.hisp.dhis.reportexcel.item.action.GetReportExcelItemAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseReportItem.vm</result>
-		</action>
-
-		<action name="validateAddReportExcelItem"
-			class="org.hisp.dhis.reportexcel.item.action.ValidateAddReportExcelItemAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-excel-reporting/responseError.vm</result>
-		</action>
-
-		<action name="validateUpdateReportExcelItem"
-			class="org.hisp.dhis.reportexcel.item.action.ValidateUpdateReportExcelItemAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-excel-reporting/responseError.vm</result>
-		</action>
+		<action name="validationReportExcelItem"
+			class="org.hisp.dhis.reportexcel.item.action.ValidationReportExcelItemAction">
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      		<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+      		<param name="onExceptionReturn">plainTextError</param>
+		</action>		
+		
+		<action name="addReportExcelItemForm"
+			class="org.hisp.dhis.reportexcel.item.action.SetupReportExcelItemFormAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-excel-reporting/report/addReportExcelItemForm.vm</param>			
+			<param name="javascripts">javascript/reportItem.js</param>
+			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>		
+		</action>		
 
 		<action name="addReportExcelItem"
 			class="org.hisp.dhis.reportexcel.item.action.AddReportExcelItemAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseReportItem.vm</result>
+			<result name="success" type="redirect">
+				listReportExcelItemAction.action?reportId=${reportId}
+			</result>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
+		<action name="updateReportExcelItemForm"
+			class="org.hisp.dhis.reportexcel.item.action.SetupReportExcelItemFormAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-excel-reporting/report/updateReportExcelItemForm.vm</param>			
+			<param name="javascripts">javascript/reportItem.js</param>
+			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>		
+		</action>	
+		
 		<action name="updateReportExcelItem"
 			class="org.hisp.dhis.reportexcel.item.action.UpdateReportExcelItemAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseReportItem.vm</result>
+			<result name="success" type="redirect">
+				listReportExcelItemAction.action?reportId=${reportId}
+			</result>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
+		
 
 		<action name="deleteReportExcelItem"
 			class="org.hisp.dhis.reportexcel.item.action.DeleteReportExcelItemAction">
@@ -447,8 +418,9 @@
 
 		<action name="getOptionCombos"
 			class="org.hisp.dhis.reportexcel.item.action.GetOptionCombosAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseOptionCombo.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-excel-reporting/report/jsonOptionCombos.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
 		<action name="getAllReportExcels"

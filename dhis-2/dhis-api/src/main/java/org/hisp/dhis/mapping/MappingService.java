@@ -28,6 +28,7 @@ package org.hisp.dhis.mapping;
  */
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 
 import org.hisp.dhis.aggregation.AggregatedMapValue;
@@ -72,21 +73,19 @@ public interface MappingService
 
     Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, String mapLayerPath );
 
-    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level );
-
-    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId,
-        int parentOrganisationUnitId );
-
+    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, Date startDate, Date endDate, int parentOrganisationUnitId );
+    
+    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId, int parentOrganisationUnitId );
+    
     // -------------------------------------------------------------------------
     // IndicatorMapValue
     // -------------------------------------------------------------------------
 
-    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, Collection<Integer> periodIds,
-        String mapLayerPath, String featureId );
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, Collection<Integer> periodIds, String mapLayerPath, String featureId );
 
+    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, Date startDate, Date endDate, int parentOrganisationUnitId );
+    
     Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, String mapLayerPath );
-
-    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level );
 
     Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId );
 

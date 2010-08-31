@@ -38,6 +38,7 @@ import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
@@ -129,7 +130,14 @@ public class DefaultReportTableService
     {
         this.dataMartService = dataMartService;
     }
-        
+
+    private AggregatedDataValueService aggregatedDataValueService;
+    
+    public void setAggregatedDataValueService( AggregatedDataValueService aggregatedDataValueService )
+    {
+        this.aggregatedDataValueService = aggregatedDataValueService;
+    }
+
     private DataSetCompletenessService completenessService;
 
     public void setCompletenessService( DataSetCompletenessService completenessService )
@@ -493,11 +501,11 @@ public class DefaultReportTableService
                         {
                             for ( DimensionOption dimensionOption : reportTable.getDimensionOptions() )
                             {
-                                grid.addValue( String.valueOf( dataMartService.
+                                grid.addValue( String.valueOf( aggregatedDataValueService.
                                     getAggregatedValue( (DataElement) metaObject, dimensionOption, period, unit ) ) );
                             }
                             
-                            grid.addValue( String.valueOf( dataMartService.getAggregatedValue( (DataElement) metaObject, period, unit ) ) );
+                            grid.addValue( String.valueOf( aggregatedDataValueService.getAggregatedValue( (DataElement) metaObject, period, unit ) ) );
                         }
                     }
                 }

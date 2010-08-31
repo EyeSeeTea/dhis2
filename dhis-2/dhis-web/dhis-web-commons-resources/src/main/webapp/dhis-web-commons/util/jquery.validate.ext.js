@@ -40,6 +40,64 @@ methods_vi_VN = function() {
     });
 };
 
+ jQuery.validator.addMethod("conditionRemote", function(value, element) {
+	var rule = this.settings.rules[element.name].conditionRemote;
+	if (rule.condition && jQuery.isFunction(rule.condition) && !
+	rule.condition.call(this,element)) return "dependency-mismatch";
+	return jQuery.validator.methods.remote.apply(this, arguments);
+}, jQuery.validator.messages.remote);
+
+jQuery.validator.addMethod("submitRemote", function(value, element, param) {
+	if ( this.optional(element) )
+		return "dependency-mismatch";
+
+	var previous = this.previousValue(element);
+
+	if (!this.settings.messages[element.name] )
+		this.settings.messages[element.name] = {};
+	previous.originalMessage = this.settings.messages[element.name].submitRemote;
+	this.settings.messages[element.name].submitRemote = previous.message;
+
+	param = typeof param == "string" && {url:param} || param; 
+
+
+		var validator = this;
+		this.startRequest(element);
+		var data = {};
+		data[element.name] = value;
+		$.ajax($.extend(true, {
+			url: param,
+			mode: "abort",
+			port: "validate" + element.name,
+			dataType: "json",
+			data: data,
+			success: function(response) {
+				validator.settings.messages[element.name].remote = previous.originalMessage;
+				var valid = response.response === 'success';
+				if ( valid ) {
+					var submitted = validator.formSubmitted;
+					validator.prepareElement(element);
+					validator.formSubmitted = submitted;
+					validator.successList.push(element);
+					validator.showErrors();
+				} else {
+					var errors = {};
+					var message = (previous.message = response.message || validator.defaultMessage( element, "remote" ));
+					errors[element.name] = $.isFunction(message) ? message(value) : message;
+					validator.showErrors(errors);
+				}
+				previous.valid = valid;
+				validator.stopRequest(element, valid);
+			}
+		}, param));
+				
+			
+			return previous.valid;
+});
+
+// http://docs.jquery.com/Plugins/Validation/Methods/remote
+		
+
 (function() {
 
     function stripHtml(value) {
@@ -460,4 +518,8 @@ function validatorFormat( text )
 // --------------------------------------------------------------------------
 jQuery(document).ready( function(){
 	jQuery.validator.setMessages( validationMessage );
+	jQuery.validator.setDefaults({
+		debug: false,
+		success: "valid"
+	});
 });

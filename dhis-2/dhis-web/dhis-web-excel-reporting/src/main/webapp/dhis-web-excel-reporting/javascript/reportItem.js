@@ -1,3 +1,68 @@
+function changeItemType()
+{
+	value = getFieldValue( 'itemType' );
+	enable( 'expression-button' );
+	
+	if( value == 'dataelement' ){
+		byId('expression-button' ).onclick = deExpressionBuilderForm;
+	}else if( value == 'indicator' ){
+		byId('expression-button' ).onclick =  inExpressionBuilderForm ;
+	}else if( value == 'formulaexcel' ){
+		byId('expression-button' ).onclick =  excelFormulaExpressionBuilderForm ;
+	}else if( value == 'organisation' || value == 'serial'){
+		disable( 'expression-button' );
+		setFieldValue( 'expression', value );
+	}	
+}
+
+function cleanFormula()
+{
+	setFieldValue( 'formula','');
+}
+
+function insertOperation( value ) {
+	byId('formula').value += value;	
+} 
+
+function validateAddReportExcelItem( form )
+{
+	jQuery.postJSON('validationReportExcelItem.action',
+	{
+		reportId: getFieldValue( 'reportId' ),
+		sheetNo: getFieldValue( 'sheetNo' ),
+		row: getFieldValue( 'row' ),
+		column: getFieldValue( 'column' ),
+		name: getFieldValue( 'name' ),
+	},function( json ){
+		if(json.response == 'success'){					
+			form.submit();
+		}else{
+			showErrorMessage( json.message );
+		}
+	});
+}
+
+function validateUpdateReportExcelItem( form )
+{
+	jQuery.postJSON('validationReportExcelItem.action',
+	{
+		id: getFieldValue( 'id' ),
+		reportId: getFieldValue( 'reportId' ),
+		sheetNo: getFieldValue( 'sheetNo' ),
+		row: getFieldValue( 'row' ),
+		column: getFieldValue( 'column' ),
+		name: getFieldValue( 'name' ),
+	},function( json ){
+		if(json.response == 'success'){					
+			form.submit();
+		}else{
+			showErrorMessage( json.message );
+		}
+	});
+}
+
+
+
 /*
 *	Delete multi report item
 */
@@ -48,208 +113,6 @@ function deleteMultiReportItem( confirm )
 	}
 }
 
-function Completed ( xmlObject ) {
-
-	window.location.reload();
-}
-
-/*
-* 	Get Report Excel Item by Sheet
-*/
-function getReportItemBySheet() {
-
-	window.location = "listReportExcelItemAction.action?reportId=" +  getFieldValue("reportId") + "&sheetNo=" + getFieldValue("sheetNoFilter");
-}
-
-/*
-* 	Open add report item
-*/
-function openAddReportItemForm() {
-
-	byId( "reportItemButton" ).onclick = function(e) {
-	
-		validateAddReportExcelItem();
-	}
-	
-	byId( "sheetNo" ).value = byId( "sheetNoFilter" ).value;		
-	$( "#report" ).showAtCenter( true );
-}	
-
-/*
-* 	Open update report item
-*/
-
-function openUpdateReportItem( id ) {
-		
-	var request = new Request();
-	request.setResponseTypeXML( 'xmlObject' );
-	request.setCallbackSuccess( openUpdateReportItemReceived );
-	request.send( "getReportExcelItem.action?id=" + id );
-	
-}	
-
-function openUpdateReportItemReceived( xmlObject ) {
-	
-	byId( "id" ).value = getElementValue( xmlObject, 'id' );
-	byId( "name" ).value = getElementValue( xmlObject, 'name' );
-	byId( "itemType" ).value = getElementValue( xmlObject, 'itemType' );
-	byId( "periodType" ).value = getElementValue( xmlObject, 'periodType' );
-	byId( "row" ).value = getElementValue( xmlObject, 'row' );
-	byId( "column" ).value = getElementValue( xmlObject, 'column' );
-	byId( "expression" ).value = getElementValue( xmlObject, 'expression' );
-	byId( "sheetNo" ).value = getElementValue( xmlObject, 'sheetNo' );
-	
-	var formulaName = getElementValue( xmlObject, 'textualFormula' );
-	byId( "formulaDiv").innerHTML = formulaName;
-	byId( "categoryFormulaDiv").innerHTML = formulaName;
-	
-	byId( "reportItemButton" ).onclick = function(e) {
-	
-		validateUpdateReportExcelItem();
-	};
-	
-	$("#report").showAtCenter( true );	
-}
-
-/*
-* 	Validate Add Report Excel Item
-*/
-
-function validateAddReportExcelItem() {
-	
-	var request = new Request();
-	request.setResponseTypeXML( 'xmlObject' );
-	request.setCallbackSuccess( validateAddReportExcelItemReceived );
-	
-	var params = "name=" + byId("name").value;
-	params += "&expression=" + byId("expression").value;
-	params += "&row=" + byId("row").value;
-	params += "&column=" + byId("column").value;
-	params += "&sheetNo=" + byId("sheetNo").value;
-	params += "&reportId=" + byId("reportId").value;
-	
-	request.sendAsPost(params);
-	request.send( "validateAddReportExcelItem.action");
-	
-}
-
-function validateAddReportExcelItemReceived( xmlObject ) {
-
-	var type = xmlObject.getAttribute( 'type' );
-	
-	if ( type =='error' )
-	{
-		setMessage( xmlObject.firstChild.nodeValue );
-	}
-	
-	if ( type=='success' )
-	{
-		addReportExcelItem();    
-	}
-}
-
-/*
-* 	Add Report Excel Item
-*/
-	
-function addReportExcelItem() {
-	
-	$.post("addReportExcelItem.action",{
-		name:$("#name").val(),		
-		expression:$("#expression").val(),
-		row:$("#row").val(),
-		column:$("#column").val(),		
-		reportId:reportId,
-		itemType:$("#itemType").val(),
-		periodType:$("#periodType").val(),
-		sheetNo:$("#sheetNo").val()
-	}, function (data){
-		window.location.reload();
-	},'xml');
-}
-
-/*
-* 	Validate Update Report Excel Item
-*/
-
-function validateUpdateReportExcelItem() {
-
-	var request = new Request();
-	request.setResponseTypeXML( 'xmlObject' );
-	request.setCallbackSuccess( validateUpdateReportExcelItemReceived );
-	
-	var params = "name=" + byId("name").value;
-	params += "&reportItemId=" + byId("id").value;
-	params += "&expression=" + byId("expression").value;
-	params += "&row=" + byId("row").value;
-	params += "&column=" + byId("column").value;
-	params += "&sheetNo=" + byId("sheetNo").value;
-	params += "&reportId=" + reportId;
-	
-	request.sendAsPost(params);
-	request.send( "validateUpdateReportExcelItem.action" );
-	
-}
-
-function validateUpdateReportExcelItemReceived( xmlObject ) {
-	
-	var type = xmlObject.getAttribute( 'type' );
-	
-	if ( type =='error' )
-	{
-		setMessage( xmlObject.firstChild.nodeValue );
-	}
-	
-	if ( type =='success' )
-	{
-		updateReportExcelItem();    
-	}
-}
-
-/*
-* 	Update Report Excel Item
-*/
-
-function updateReportExcelItem() {
-	
-	$.post("updateReportExcelItem.action",{
-		id:$("#id").val(),
-		name:$("#name").val(),		
-		expression:$("#expression").val(),
-		row:$("#row").val(),
-		column:$("#column").val(),		
-		reportId:reportId,
-		itemType:$("#itemType").val(),
-		periodType:$("#periodType").val(),
-		sheetNo:$("#sheetNo").val()
-	}, function (data){
-		window.location.reload();
-	},'xml');	
-	
-}
-
-function insertFormulaText( sourceId, targetId ) {
-
-	var source = byId(sourceId);
-	//byId(targetId).value += source.value;
-	byId(targetId).value = source.value;
-	byId(targetId + "Div").innerHTML = source[source.selectedIndex].text;
-}
-
- function insertOperation( target, value ) {
-	byId(target).value += value;
-	byId(target + "Div").innerHTML += value;
-} 
-
-function selectALL( checked ) {
-
-	var listRadio = document.getElementsByName('reportItemCheck');
-	
-	for (var i = 0 ; i < listRadio.length ; i++) {
-	
-		listRadio.item(i).checked = checked;
-	}
-}
 
 /**
 *	COPY REPORT ITEM(s) TO ANOTHER REPORTEXCEL
@@ -681,41 +544,9 @@ function getDataElementsByGroupCompleted( xmlObject ){
 	}
 }
 
-function getOptionCombos() {
-	
-	var request = new Request();
-    request.setResponseTypeXML( 'xmlObject' );
-    request.setCallbackSuccess( getOptionCombosReceived );
-	request.send( "getOptionCombos.action?dataElementId=" + byId("availableDataElements").value);
 
-}
 
-function getOptionCombosReceived( xmlObject ) {
 
-	xmlObject = xmlObject.getElementsByTagName('categoryOptions')[0];
-	
-	var optionComboList = byId( "optionCombos" );			
-	optionComboList.options.length = 0;		
-	var optionCombos = xmlObject.getElementsByTagName( "categoryOption" );
-	
-	for ( var i = 0; i < optionCombos.length; i++)
-	{
-		var id = optionCombos[ i ].getAttribute('id');
-		var name = optionCombos[ i ].firstChild.nodeValue;			
-		var option = document.createElement( "option" );
-		
-		option.value = id ;
-		option.text = name;
-		optionComboList.add( option, null );	
-	}
-}
-
-function insertDataElementId() {
-
-	var dataElementComboId = "[" + byId("availableDataElements").value + "." + byId("optionCombos").value + "]";
-	byId("formula").value += dataElementComboId;
-	updateFormulaText("formula");
-}
 
 /**
 * Indicator Report item type

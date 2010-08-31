@@ -51,7 +51,7 @@ function hideHelpContent()
  */
 function filterValues( filter, columnIndex )
 {
-	if( columnIndex==undefined ) columnIndex = 0;
+	if( columnIndex==undefined ) columnIndex = 1;
 	
     var list = document.getElementById( 'list' );
     
@@ -145,6 +145,15 @@ function isChecked( checkboxId )
 }
 
 /**
+ * Checks the checkbox with the given jQuery Selector String if the checkbox exists.
+ */
+function checkALL( jQuerySelectorString )
+{
+    jQuery.each( jQuery( jQuerySelectorString ), function(i, item ){
+		item.checked = true;
+	});
+}
+/**
  * Checks the checkbox with the given identifier if the checkbox exists.
  */
 function check( checkBoxId )
@@ -152,14 +161,22 @@ function check( checkBoxId )
     jQuery( "#" + checkBoxId ).attr("checked", true );
 }
 
-
-
 /**
  * Unchecks the checkbox with the given identifier if the checkbox exists.
  */
 function uncheck( checkBoxId )
 {
     jQuery( "#" + checkBoxId ).attr("checked", false );
+}
+
+/**
+ * unChecks the checkbox with the given jQuery Selector String if the checkbox exists.
+ */
+function unCheckALL( jQuerySelectorString )
+{
+    jQuery.each( jQuery( jQuerySelectorString ), function(i, item ){
+		item.checked = false;
+	});
 }
 
 /**
@@ -291,7 +308,7 @@ function htmlEncode( str )
  * @param parentElement the DOM object.
  * @param childElementName the name of the element.
  */
-function getElementValue( parentElement, childElementName )
+function getElementaValue( parentElement, childElementName )
 {
     var textNode = parentElement.getElementsByTagName( childElementName )[0].firstChild;
     
@@ -342,7 +359,7 @@ function getRootElementAttribute( rootElement, attributeName )
  */
 function setFieldValue( fieldId, value )
 {
-    document.getElementById( fieldId ).innerHTML = value;
+    jQuery("#" + fieldId).val( value );
 }
 
 /**
@@ -553,22 +570,6 @@ function toggleById( id )
 }
 
 /**
- * Show div at center of screen.
- */
-function setPositionCenter( id )
-{
-	var div = document.getElementById(id);
-	
-	var width = div.style.width;
-	var height = div.style.height;
-	
-	var x = (document.documentElement.clientHeight / 2) - new Number(height.replace('px',''))/2;
-	var y = (document.documentElement.clientWidth / 2) - new Number(width.replace('px',''))/2;	
-	div.style.top = x +"px";
-	div.style.left  = y +"px";		
-}
-
-/**
  * Toggles visibility of document element.
  */
 function showHideDiv( elementId )
@@ -581,41 +582,6 @@ function showHideDiv( elementId )
 	{
 		document.getElementById( elementId ).style.display = "none";
 	}	
-}
-
-/**
- * Adds a div with 50 % opacity on the document.
- */
-function showDivEffect()
-{
-	var width = document.documentElement.clientWidth;
-	var height = document.documentElement.clientHeight;	
-	var divEffect = document.createElement( 'div' );
-	
-	divEffect.id = "divEffect";
-	divEffect.style.position = "fixed";
-	divEffect.style.top = 0;
-	divEffect.style.width = width + "px";
-	divEffect.style.height = height + "px";
-	divEffect.style.background = "#000000";
-	divEffect.style.opacity = 0.5;
-	divEffect.style.zIndex = 10;
-	//divEffect.innerHTML = "<div style='background-color:#EFEFEF;position:absolute;top:300px;width:100%;text-align:center'><img src=\"../images/ajax-loader.gif\"/></div>";	
-	document.body.appendChild( divEffect );	
-}
-
-/**
- * Removes the opacity div from the document.
-function deleteDivEffect()
- */
-function deleteDivEffect()
-{
-	var divEffect = document.getElementById( 'divEffect' );
-	
-	if( divEffect!=null )
-	{	
-		document.body.removeChild(divEffect);
-	}
 }
 
 /**
@@ -891,52 +857,16 @@ function insertTextCommon( inputAreaName, inputText )
 
 	setCaretToPos( inputArea, inputArea.value.length );
 }
-
-/**
- * Clock screen by mask  * 
- */
-function lockScreen()
-{
-	jQuery.blockUI({ message: 'Please wait ... ', css: { 
-		border: 'none', 
-		padding: '15px', 
-		backgroundColor: '#000', 
-		'-webkit-border-radius': '10px', 
-		'-moz-border-radius': '10px', 
-		opacity: .5, 
-		color: '#fff'			
-	} }); 
-}
-/**
- * unClock screen   * 
- */
-function unLockScreen()
-{
-	jQuery.unblockUI();
-}
-
-function showErrorMessage( message, time )
-{
-	jQuery.growlUI( i18n_error, message, 'error', time ); 	
-}
-
-function showSuccessMessage( message, time )
-{
-	jQuery.growlUI( i18n_success, message, 'success', time ); 	
-}
-
-function showWarningMessage( message, time )
-{
-	jQuery.growlUI( i18n_warning, message, 'warning', time ); 	
-}
-
+//=================================================================================
+//	FORM VALIDATION
+//=================================================================================
 /**
  * Create validator for fileds in form  * 
  */
  
 function validation( formId, submitHandler, beforeValidateHandler )
 {
-	var nameField = jQuery('#' + formId + ' input[type=text]')[0];
+	var nameField = jQuery('#' + formId + ' :input')[0];
 
 	var validator = jQuery("#" + formId ).validate({
 		 meta:"validate"
@@ -968,3 +898,184 @@ function checkValueIsExist( inputId, url, params )
 		}
 	});
 }
+/**
+* Add any validator Rules for input
+* @param inputId is id for input field
+* @param rules is array of rule
+* @note: input field must have name same with id
+*/
+function addValidatorRulesById( inputId, rules )
+{
+	addValidatorRules(jQuery("#" + inputId), rules);
+}
+
+function addValidatorRules( input, rules )
+{
+	jQuery(input).rules("add",rules );
+}
+/**
+* Remove validator Rules for input
+* @param inputId is id for input field
+* @param rules is array of rule you want to remove
+* @note: input field must have name same with id
+*/
+function removeValidatorRulesById( inputId, rules )
+{
+	removeValidatorRules( jQuery("#" + inputId) );
+}
+
+function removeValidatorRules( input, rules )
+{
+	jQuery(input).rules("remove", rules );
+}
+
+//=================================================================================
+//	MESSAGE
+//=================================================================================
+/**
+* Show message at the top-right of screen, this message will hide automatic after 3 second if you don't set time
+* @param message is message
+* @param time is time the message will hide after showed. Default is 3 second, set time is 0 if you don't want to hide this message
+*/
+function showErrorMessage( message, time )
+{
+	jQuery.growlUI( i18n_error, message, 'error', time ); 	
+}
+/**
+* Show message at the top-right of screen, this message will hide automatic after 3 second if you don't set time
+* @param message is message
+* @param time is time the message will hide after showed. Default is 3 second, set time is 0 if you don't want to hide this message
+*/
+function showSuccessMessage( message, time )
+{
+	jQuery.growlUI( i18n_success, message, 'success', time ); 	
+}
+/**
+* Show message at the top-right of screen, this message will hide automatic after 3 second if you don't set time
+* @param message is message
+* @param time is time the message will hide after showed. Default is 3 second, set time is 0 if you don't want to hide this message
+*/
+function showWarningMessage( message, time )
+{
+	jQuery.growlUI( i18n_warning, message, 'warning', time ); 	
+}
+
+
+//=================================================================================
+//	GUI
+//=================================================================================
+
+/**
+ * Clock screen by mask  * 
+ */
+function lockScreen()
+{
+	jQuery.blockUI({ message: i18n_waiting , css: { 
+		border: 'none', 
+		padding: '15px', 
+		backgroundColor: '#000', 
+		'-webkit-border-radius': '10px', 
+		'-moz-border-radius': '10px', 
+		opacity: .5, 
+		color: '#fff'			
+	} }); 
+}
+/**
+ * unClock screen   * 
+ */
+function unLockScreen()
+{
+	jQuery.unblockUI();
+}
+
+function showPopupWindow( html, width, height)
+{
+	var width_ = document.documentElement.clientWidth;
+	var height_ = document.documentElement.clientHeight;	
+	
+	var top = ((height_ / 2) - (height/2)) + 'px';
+	var left =  ((width_ / 2) - (width/2)) + 'px';
+	
+	jQuery.blockUI({ message:  html, css: {cursor:'default', width: width + 'px', height: height + 'px', top: top , left: left} });
+}
+
+function showPopupWindowById( id, width, height )
+{
+	var width_ = document.documentElement.clientWidth;
+	var height_ = document.documentElement.clientHeight;	
+	
+	var top = ((height_ / 2) - (height/2)) + 'px';
+	var left =  ((width_ / 2) - (width/2)) + 'px';
+	
+	container = jQuery("#" + id);
+	container.css('width', width + 'px');
+	container.css('height', height + 'px');
+	container.css('top', top );
+	container.css('left', left );
+	container.css('z-index', 1000000 );
+	container.css('position', 'fixed' );
+	container.css('background-color', '#FFFFFF' );
+	container.show(  jQuery.blockUI({message:null}));
+	
+}
+/**
+* load All Data Element Groups into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
+
+function loadDataElementGroups( selectorJQueryString )
+{
+	DataDictionary.loadDataElementGroups( jQuery( selectorJQueryString ) );
+}
+/**
+* load data elements by data element group
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+* @param id is data element group id
+*/
+function loadDataElementsByGroup( id, selectorJQueryString )
+{
+	DataDictionary.loadDataElementsByGroup( id, jQuery( selectorJQueryString ) );
+}
+/**
+* load All Data Elements into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
+function loadAllDataElements( selectorJQueryString )
+{
+	DataDictionary.loadAllDataElements( jQuery( selectorJQueryString ) );
+}
+/**
+* load Category Option Combo of data element
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+* @param id is data element id
+*/
+function loadCategoryOptionComboByDE( id, selectorJQueryString)
+{
+	DataDictionary.loadCategoryOptionComboByDE( id, jQuery( selectorJQueryString ) );
+}
+/**
+* load all indicator groups into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
+function loadIndicatorGroups( selectorJQueryString )
+{
+	DataDictionary.loadIndicatorGroups( jQuery( selectorJQueryString ) );
+}
+/**
+* load indicators by group
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+* @param id is indicator group id
+*/
+function loadIndicatorsByGroup( id, selectorJQueryString )
+{
+	DataDictionary.loadIndicatorsByGroup( id, jQuery( selectorJQueryString ));
+}
+/**
+* load all indicator into select combo box
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+*/
+function loadAllIndicators( selectorJQueryString )
+{
+	DataDictionary.loadAllIndicators( jQuery( selectorJQueryString ) );
+}
+

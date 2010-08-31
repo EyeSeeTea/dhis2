@@ -1,20 +1,8 @@
 <script>
 	jQuery(document).ready(	function(){
-		validation( 'updateReportExcelForm', function( form ){ 
-			var request = new Request();
-			request.setResponseTypeXML( 'datalement' );
-			request.setCallbackSuccess( function( xmlObject ){
-				var type = xmlObject.getAttribute( 'type' );	
-				if ( type == 'error' )
-					showErrorMessage( xmlObject.firstChild.nodeValue );
-				else 
-					form.submit();			
-				} );	
-			var params = "name=" + getFieldValue( 'name' );	
-			request.sendAsPost(params);
-			request.send( "validateUpdateReportExcel.action?id=" + getFieldValue( 'id' ) );
-		} );	
+		validation( 'updateReportExcelForm', function( form ){ form.submit()} );	
 		
+		checkValueIsExist( "name", "validateReportExcelAction.action", {id: "$report.id"} );
 		
 		jQuery("#group").autocomplete("getReportExcelGroups.action", {
             width: 260,

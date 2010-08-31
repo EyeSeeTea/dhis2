@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.action;
+package org.hisp.dhis.commons.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,76 +27,58 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.hisp.dhis.aggregation.AggregatedMapValue;
-import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Tran Thanh Tri
+ * @version $Id: GetDataElementGroupsAction 2010-8-28$
  */
-public class GetIndicatorMapValuesByLevelAction
+public class GetDataElementGroupsAction
     implements Action
 {
+    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
-    private MappingService mappingService;
 
-    public void setMappingService( MappingService mappingService )
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
     {
-        this.mappingService = mappingService;
+        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input & output
     // -------------------------------------------------------------------------
 
-    private int indicatorId;
+    private List<DataElementGroup> dataElementGroups;
 
-    public void setIndicatorId( int indicatorId )
+    public List<DataElementGroup> getDataElementGroups()
     {
-        this.indicatorId = indicatorId;
-    }
-
-    private int periodId;
-
-    public void setPeriodId( int periodId )
-    {
-        this.periodId = periodId;
-    }
-
-    private int level;    
-
-    public void setLevel( int level )
-    {
-        this.level = level;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private Collection<AggregatedMapValue> object;
-
-    public Collection<AggregatedMapValue> getObject()
-    {
-        return object;
+        return dataElementGroups;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-    
+
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedIndicatorMapValues( indicatorId, periodId, level );
-        
+        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
+
+        Collections.sort( this.dataElementGroups, new DataElementGroupNameComparator() );
+
         return SUCCESS;
     }
 }

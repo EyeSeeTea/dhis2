@@ -1,0 +1,69 @@
+<div id="dataelement" style="display:none">
+	<table width="100%">
+		<tr>
+			<th>$i18n.getString( "formula" )</th>
+			<th></th>
+			<th>$i18n.getString( "dataelement" )</th>
+		<tr>
+		<tr valign="top">
+			<td height="139">
+				<textarea id="formula" cols="40" rows="5"></textarea><br>
+				<a href="#" onclick="insertOperation( '(' )"><img src="images/left_parent.png" alt="$i18n.getString( 'left_brackets' )"></a>
+				<a href="#" onclick="insertOperation( ')' )"><img src="images/right_parent.png" alt="$i18n.getString( 'right_brackets' )"></a>
+				<a href="#" onclick="insertOperation( '*' )"><img src="images/multiply.png" alt="$i18n.getString( 'multiply' )"></a>
+				<a href="#" onclick="insertOperation( '/' )"><img src="images/divide.png" alt="$i18n.getString( 'divide' )"></a>
+				<a href="#" onclick="insertOperation( '+' )"><img src="images/plus.png" alt="$i18n.getString( 'plus' )"></a>
+				<a href="#" onclick="insertOperation( '-' )"><img src="images/minus.png" alt="$i18n.getString( 'minus' )"></a></td>
+			<td rowspan="3" valign="bottom">
+				<input type="button" value="<" onclick="insertExpression()"/>
+			</td>
+			<td rowspan="3">	
+				<select id="groupSelect" style="width:500px"onchange="getDataElements(this.value, '#dataelement select[id=elementSelect]')"></select>												
+				#if( $reportExcel.isCategory() )
+				<select id="elementSelect" size="15" style="width:500px;"></select>						
+				#else
+				<select id="elementSelect" size="11" style="width:500px;" onchange="getOptionCombos( this.value, '#dataelement select[id=optionCombos]')"></select>		
+				<select id="optionCombos" size=4 style="width:500px;" ></select>	
+				#end
+			</td>			
+		</tr>	
+	</table>
+	<br>
+	<br>
+	<center>
+		<input type="button" value="$i18n.getString('ok')" onclick="updateDeExpression()" style="width:100px"/>
+		<input type="button" value="$i18n.getString('clean')" onclick="cleanFormula()" style="width:100px"/>
+		<input type="button" value="$i18n.getString('cancel')" onclick="hideById('dataelement'); unLockScreen();" style="width:100px"/>
+	</center>
+</div>
+
+<script>
+	function updateDeExpression()
+	{
+		expression = jQuery( '#dataelement textarea[id=formula]' ).val();
+		setFieldValue( 'expression', expression );
+		hideById('dataelement'); 
+		unLockScreen();
+	}
+	
+	function deExpressionBuilderForm()
+	{
+		loadDataElementGroups("#dataelement select[id=groupSelect]") ;	
+		
+		setFieldValue( 'dataelement textarea[id=formula]', getFieldValue('expression') );
+		
+		showPopupWindowById( 'dataelement', 800, 350 );				
+	}
+	
+	function getDataElements( id, target )
+	{
+		loadDataElementsByGroup( id, target );
+	}
+	
+	function getOptionCombos( id, targetId )
+	{
+		loadCategoryOptionComboByDE( id, targetId );
+	}
+	
+</script>
+

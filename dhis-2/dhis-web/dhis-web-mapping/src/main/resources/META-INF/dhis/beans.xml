@@ -64,11 +64,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
-    <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction"
-        class="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction" scope="prototype">
-        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-    </bean>
-
     <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByParentOrganisationUnitAction"
         class="org.hisp.dhis.mapping.action.GetDataMapValuesByParentOrganisationUnitAction" scope="prototype">
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
@@ -76,11 +71,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
 	<bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction"
 		class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByMapAction" scope="prototype">
-		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-	</bean>
-
-	<bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction"
-		class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction" scope="prototype">
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
 	</bean>
 	
