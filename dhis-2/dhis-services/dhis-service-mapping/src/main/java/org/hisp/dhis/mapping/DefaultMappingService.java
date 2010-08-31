@@ -31,6 +31,7 @@ import static org.hisp.dhis.system.util.MathUtils.isNumeric;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -139,39 +140,38 @@ public class DefaultMappingService
     // DataMapValues
     // -------------------------------------------------------------------------
 
-    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId,
-        String mapLayerPath )
+    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, String mapLayerPath )
     {
         int level = getMapByMapLayerPath( mapLayerPath ).getOrganisationUnitLevel().getLevel();
 
-        return getAggregatedDataMapValues( dataElementId, periodId, level );
-    }
-
-    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level )
-    {
         return aggregatedDataValueService.getAggregatedDataMapValues( dataElementId, periodId, level );
     }
 
     public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId, int parentOrganisationUnitId )
     {
+        Period period = periodService.getPeriod( periodId );
+        
+        return getDataElementMapValues( dataElementId, period.getStartDate(), period.getEndDate(), parentOrganisationUnitId );
+    }
+    
+    public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, Date startDate, Date endDate, int parentOrganisationUnitId )
+    {
         Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
         
         OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
-        Period period = periodService.getPeriod( periodId );
         
         for ( OrganisationUnit organisationUnit : parent.getChildren() )
         {
             if ( organisationUnit.hasCoordinates() )
             {
-                Double value = aggregationService.getAggregatedDataValue( dataElement, null, period.getStartDate(), period.getEndDate(), organisationUnit );
+                Double value = aggregationService.getAggregatedDataValue( dataElement, null, startDate, endDate, organisationUnit );
                 
                 value = value != null ? value : 0; // TODO improve
                 
                 AggregatedMapValue mapValue = new AggregatedMapValue();
                 mapValue.setOrganisationUnitId( organisationUnit.getId() );
                 mapValue.setOrganisationUnitName( organisationUnit.getName() );
-                mapValue.setPeriodId( period.getId() );
                 mapValue.setValue( MathUtils.getRounded( value, 2 ) );
                     
                 values.add( mapValue );
@@ -214,34 +214,34 @@ public class DefaultMappingService
     {
         int level = getMapByMapLayerPath( mapLayerPath ).getOrganisationUnitLevel().getLevel();
 
-        return getAggregatedIndicatorMapValues( indicatorId, periodId, level );
-    }
-
-    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level )
-    {
         return aggregatedDataValueService.getAggregatedIndicatorMapValues( indicatorId, periodId, level );
     }
 
-    public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId )
+    public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId )    
+    {
+        Period period = periodService.getPeriod( periodId );
+        
+        return getIndicatorMapValues( indicatorId, period.getStartDate(), period.getEndDate(), parentOrganisationUnitId );
+    }
+    
+    public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, Date startDate, Date endDate, int parentOrganisationUnitId )
     {
         Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
         
         OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
         Indicator indicator = indicatorService.getIndicator( indicatorId );
-        Period period = periodService.getPeriod( periodId );
 
         for ( OrganisationUnit organisationUnit : parent.getChildren() )
         {
             if ( organisationUnit.hasCoordinates() )
             {    
-                Double value = aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), organisationUnit );
+                Double value = aggregationService.getAggregatedIndicatorValue( indicator, startDate, endDate, organisationUnit );
                 
                 value = value != null ? value : 0; // TODO improve
                 
                 AggregatedMapValue mapValue = new AggregatedMapValue();
                 mapValue.setOrganisationUnitId( organisationUnit.getId() );
                 mapValue.setOrganisationUnitName( organisationUnit.getName() );
-                mapValue.setPeriodId( period.getId() );
                 mapValue.setValue( MathUtils.getRounded( value, 2 ) );
                     
                 values.add( mapValue );
