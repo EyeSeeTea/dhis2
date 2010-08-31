@@ -20,6 +20,16 @@ public interface AggregatedDataValueService
     // ----------------------------------------------------------------------
     // AggregatedDataValue
     // ----------------------------------------------------------------------
+
+    /**
+     * Gets the total aggregated value from the datamart table for the given parameters.
+     * 
+     * @param dataElement The DataElement identifier.
+     * @param period The Period identifier.
+     * @param organisationUnit The OrganisationUnit identifier.
+     * @return the aggregated value.
+     */
+    Double getAggregatedDataValue( int dataElement, int period, int organisationUnit );
     
     /**
      * Gets the total aggregated value from the datamart table for the given parameters.
@@ -31,6 +41,17 @@ public interface AggregatedDataValueService
      */
     Double getAggregatedValue( DataElement dataElement, Period period, OrganisationUnit organisationUnit );
 
+    /**
+     * Gets the total aggregated value from the datamart table for the given parameters.
+     * 
+     * @param dataElement The DataElement identifier.
+     * @param dimensionOptionElement the DimensionOptionElement identifier.
+     * @param period The Period identifier.
+     * @param organisationUnit The OrganisationUnit identifier.
+     * @return the aggregated value.
+     */
+    Double getAggregatedDataValue( int dataElement, int categoryOptionCombo, int period, int organisationUnit );
+    
     /**
      * Gets the total aggregated value from the datamart table for the given parameters.
      * 

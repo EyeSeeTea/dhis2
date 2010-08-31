@@ -210,8 +210,8 @@ public class DefaultValidationRuleService
 
         for ( final ValidationRule validationRule : validationRules )
         {
-            leftSide = expressionService.getExpressionValue( validationRule.getLeftSide(), period, source, true );
-            rightSide = expressionService.getExpressionValue( validationRule.getRightSide(), period, source, true );
+            leftSide = expressionService.getExpressionValue( validationRule.getLeftSide(), period, source, true, false );
+            rightSide = expressionService.getExpressionValue( validationRule.getRightSide(), period, source, true, false );
 
             if ( leftSide != null && rightSide != null )
             {
