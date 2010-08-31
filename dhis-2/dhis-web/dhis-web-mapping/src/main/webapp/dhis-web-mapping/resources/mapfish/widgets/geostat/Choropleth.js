@@ -171,7 +171,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		});
 	},
     
-    isFormComplete: function() {
+    validateForm: function() {
         if (!Ext.getCmp('indicator_cb').getValue() && !Ext.getCmp('dataelement_cb').getValue()) {
             return false;
         }
@@ -195,7 +195,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         }
         
         return true;
-    },
+    },    
     
     initComponent: function() {
     
@@ -864,11 +864,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             width: combo_width,
             listeners: {
                 'select': {
-                    fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue()) {
-                            Ext.getCmp('mapview_cb').clearValue();
-                        }                        
-                        choropleth.classify(false, true);
+                    fn: function(df, date) {
+                        if (validateDates(date, new Date(Ext.getCmp('todate_df').getValue()))) {
+                            if (Ext.getCmp('mapview_cb').getValue()) {
+                                Ext.getCmp('mapview_cb').clearValue();
+                            }                        
+                            choropleth.classify(false, true);
+                        }
+                        else {
+                            df.reset();
+                            Ext.message.msg(false, 'Please select a valid date.');
+                        }
                     }
                 }
             }
@@ -885,11 +891,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             width: combo_width,
             listeners: {
                 'select': {
-                    fn: function() {
-                        if (Ext.getCmp('mapview_cb').getValue()) {
-                            Ext.getCmp('mapview_cb').clearValue();
-                        }                        
-                        choropleth.classify(false, true);
+                    fn: function(df, date) {
+                        if (validateDates(new Date(Ext.getCmp('fromdate_df').getValue()), date)) {
+                            if (Ext.getCmp('mapview_cb').getValue()) {
+                                Ext.getCmp('mapview_cb').clearValue();
+                            }                        
+                            choropleth.classify(false, true);
+                        }
+                        else {
+                            df.reset();
+                            Ext.message.msg(false, 'Please select a valid date.');
+                        }
                     }
                 }
             }
@@ -1417,13 +1429,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 MAPVIEW = false;
             }
             
-            var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
-            FEATURE[thematicMap] = polygonLayer.features;
+            FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
             
-            // if (LABELS[thematicMap]) {
-                // toggleFeatureLabelsPolygons(false, polygonLayer);
-            // }
-
             var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
             var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?

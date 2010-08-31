@@ -56,6 +56,8 @@ var TOPLEVELUNIT = new Object();
 function getUrlParam(strParamName){var output='';var strHref=window.location.href;if(strHref.indexOf('?')>-1){var strQueryString=strHref.substr(strHref.indexOf('?')).toLowerCase();var aQueryString=strQueryString.split('&');for(var iParam=0;iParam<aQueryString.length;iParam++){if(aQueryString[iParam].indexOf(strParamName.toLowerCase()+'=')>-1){var aParam=aQueryString[iParam].split('=');output=aParam[1];break;}}}return unescape(output);}
 /* Input validation */
 function validateInput(name){return (name.length<=25);}
+/* Date validation */
+function validateDates(startDate,endDate){if(!startDate || !endDate){return true;}return startDate >= endDate ? false : true;}
 /* Decide multiselect height based on screen resolution */
 function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else if(h<=1050){return 310;}else if(h<=1200){return 470;}else{return 900;}}
 /* Make map view numbers numeric */
