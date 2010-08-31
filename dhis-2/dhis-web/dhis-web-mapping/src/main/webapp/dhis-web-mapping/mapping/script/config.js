@@ -62,7 +62,7 @@
 	map_value_type_indicator = 'indicator';
 	map_value_type_dataelement = 'dataelement';
     map_date_type_fixed = 'fixed';
-    map_date_type_from_to = 'from-to';
+    map_date_type_start_end = 'start-end';
     
 //  MapFish
 

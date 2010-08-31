@@ -65,7 +65,7 @@ public interface MappingService
 
     final String MAP_DATE_TYPE_FIXED = "fixed";
 
-    final String MAP_DATE_TYPE_FROM_TO = "from-to";
+    final String MAP_DATE_TYPE_START_END = "start-end";
     
     // -------------------------------------------------------------------------
     // DataMapValue

@@ -2836,7 +2836,7 @@ Ext.onReady( function() {
 						minListWidth: combo_width_fieldset,
                         store: new Ext.data.SimpleStore({
                             fields: ['value', 'text'],
-                            data: [[map_date_type_fixed, 'Fixed periods'], [map_date_type_from_to, 'From-to dates']]
+                            data: [[map_date_type_fixed, 'Fixed periods'], [map_date_type_start_end, 'Start-end date']]
                         }),
                         listeners: {
                             'select': {
@@ -2858,20 +2858,20 @@ Ext.onReady( function() {
                                                     // Ext.getCmp('periodtype_cb2').showField();
                                                     Ext.getCmp('period_cb').showField();
                                                     // Ext.getCmp('period_cb2').showField();
-                                                    Ext.getCmp('fromdate_df').hideField();
-                                                    // Ext.getCmp('fromdate_df2').hideField();
-                                                    Ext.getCmp('todate_df').hideField();
-                                                    // Ext.getCmp('todate_df2').hideField();
+                                                    Ext.getCmp('startdate_df').hideField();
+                                                    // Ext.getCmp('startdate_df2').hideField();
+                                                    Ext.getCmp('enddate_df').hideField();
+                                                    // Ext.getCmp('enddate_df2').hideField();
                                                 }
-                                                else if (MAPDATETYPE == map_date_type_from_to) {
+                                                else if (MAPDATETYPE == map_date_type_start_end) {
                                                     Ext.getCmp('periodtype_cb').hideField();
                                                     // Ext.getCmp('periodtype_cb2').hideField();
                                                     Ext.getCmp('period_cb').hideField();
                                                     // Ext.getCmp('period_cb2').hideField();
-                                                    Ext.getCmp('fromdate_df').showField();
-                                                    // Ext.getCmp('fromdate_df2').showField();
-                                                    Ext.getCmp('todate_df').showField();
-                                                    // Ext.getCmp('todate_df2').showField();
+                                                    Ext.getCmp('startdate_df').showField();
+                                                    // Ext.getCmp('startdate_df2').showField();
+                                                    Ext.getCmp('enddate_df').showField();
+                                                    // Ext.getCmp('enddate_df2').showField();
                                                 }
                                             }
                                         });
@@ -3842,20 +3842,20 @@ Ext.onReady( function() {
         // Ext.getCmp('periodtype_cb2').showField();
         Ext.getCmp('period_cb').showField();
         // Ext.getCmp('period_cb2').showField();
-        Ext.getCmp('fromdate_df').hideField();
-        // Ext.getCmp('fromdate_df2').hideField();
-        Ext.getCmp('todate_df').hideField();
-        // Ext.getCmp('todate_df2').hideField();
+        Ext.getCmp('startdate_df').hideField();
+        // Ext.getCmp('startdate_df2').hideField();
+        Ext.getCmp('enddate_df').hideField();
+        // Ext.getCmp('enddate_df2').hideField();
     }
     else {
         Ext.getCmp('periodtype_cb').hideField();
         // Ext.getCmp('periodtype_cb2').hideField();
         Ext.getCmp('period_cb').hideField();
         // Ext.getCmp('period_cb2').hideField();
-        Ext.getCmp('fromdate_df').showField();
-        // Ext.getCmp('fromdate_df2').showField();
-        Ext.getCmp('todate_df').showField();
-        // Ext.getCmp('todate_df2').showField();
+        Ext.getCmp('startdate_df').showField();
+        // Ext.getCmp('startdate_df2').showField();
+        Ext.getCmp('enddate_df').showField();
+        // Ext.getCmp('enddate_df2').showField();
     }
     
     Ext.get('loading').fadeOut({remove: true});
