@@ -333,7 +333,7 @@ function updateValidationCompleted( messageElement )
     }
 }
 
-function viewDataEntryForm( associationId, associationName )
+function viewDataEntryForm( associationId )
 {
-    window.location.href = 'viewDataEntryForm.action?associationId=' + associationId +'&associationName=' + associationName;
+    window.location.href = 'viewDataEntryForm.action?associationId=' + associationId;
 }

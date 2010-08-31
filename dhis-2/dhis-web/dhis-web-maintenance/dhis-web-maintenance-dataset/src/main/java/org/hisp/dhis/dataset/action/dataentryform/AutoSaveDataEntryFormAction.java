@@ -28,7 +28,6 @@ package org.hisp.dhis.dataset.action.dataentryform;
  */
 
 import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormAssociation;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -94,13 +93,15 @@ public class AutoSaveDataEntryFormAction
     {   
         DataSet dataset = dataSetService.getDataSet( dataSetIdField );
 
-        DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryFormByDataSet( dataset );
+        DataEntryForm dataEntryForm = dataset.getDataEntryForm();
 
         if ( dataEntryForm == null )
         {
             dataEntryForm = new DataEntryForm( nameField, designTextarea );
-            dataEntryFormService.addDataEntryForm( dataEntryForm, DataEntryFormAssociation.DATAENTRY_ASSOCIATE_DATASET,
-                dataset.getId() );
+            dataEntryFormService.addDataEntryForm( dataEntryForm );
+            
+            dataset.setDataEntryForm(dataEntryForm);
+            dataSetService.updateDataSet( dataset );
         }
         else
         {
