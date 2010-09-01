@@ -308,7 +308,7 @@ function htmlEncode( str )
  * @param parentElement the DOM object.
  * @param childElementName the name of the element.
  */
-function getElementaValue( parentElement, childElementName )
+function getElementValue( parentElement, childElementName )
 {
     var textNode = parentElement.getElementsByTagName( childElementName )[0].firstChild;
     
