@@ -33,6 +33,9 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.organisationunit.OrganisationUnitStore;
 import org.junit.Test;
 
 /**
@@ -43,17 +46,28 @@ public class PatientStoreTest
     extends DhisSpringTest
 {
     private PatientStore patientStore;
+    private PatientIdentifierStore patientIdentifierStore;
+    private OrganisationUnitService organisationUnitService;
     
     private Patient patientA;
     private Patient patientB;
-    
+    private OrganisationUnit organisationUnit;
+
     @Override
     public void setUpTest()
     {
         patientStore = (PatientStore) getBean( PatientStore.ID );
+        patientIdentifierStore = (PatientIdentifierStore) getBean ( PatientIdentifierStore.ID );
+        organisationUnitService = (OrganisationUnitService) getBean ( OrganisationUnitService.ID );
+        
+        organisationUnit = createOrganisationUnit( 'A' );
+
+        organisationUnitService.addOrganisationUnit( organisationUnit );
         
         patientA = createPatient( 'A' );
-        patientB = createPatient( 'B' );        
+        patientB = createPatient( 'B' );
+
+
     }
     
     @Test
@@ -61,9 +75,20 @@ public class PatientStoreTest
     {
         int idA = patientStore.save( patientA );
         int idB = patientStore.save( patientB );
+        patientIdentifierStore.listPatientByOrganisationUnit(organisationUnit, idB, idB);
         
         assertEquals( patientA.getFirstName(), patientStore.get( idA ).getFirstName() );
         assertEquals( patientB.getFirstName(), patientStore.get( idB ).getFirstName() );        
+    }
+
+    @Test
+    public void addGetbyOu()
+    {
+        int idA = patientStore.save( patientA );
+        int idB = patientStore.save( patientB );
+      
+        assertEquals( patientA.getFirstName(), patientStore.get( idA ).getFirstName() );
+        assertEquals( patientB.getFirstName(), patientStore.get( idB ).getFirstName() );
     }
     
     @Test
