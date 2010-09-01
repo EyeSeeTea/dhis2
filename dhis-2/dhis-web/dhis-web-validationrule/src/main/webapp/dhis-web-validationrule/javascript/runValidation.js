@@ -23,7 +23,8 @@ function runValidationCompleted( messageElement )
         var url = 'runValidationAction.action?startDate=' + getFieldValue( 'startDate' ) +
         	'&endDate=' + getFieldValue( 'endDate' ) + 
         	'&validationRuleGroupId=' + $( '#validationRuleGroupId' ).val() +
-        	'&aggregate=' + getListValue( 'aggregate' );
+        	'&aggregate=' + getListValue( 'aggregate' ) +
+        	'&doDataMart=' + getListValue( 'doDataMart' );
         	
 		$.get( url, function( data ) {
 			$( "div#analysisInput" ).hide();
@@ -57,12 +58,14 @@ function aggregateChanged()
 {
 	var aggregate = getListValue( 'aggregate' );
 	
-	if ( aggregate == "true" )
+	if ( aggregate == 'true' )
 	{
-		$( "span#info" ).html( i18n_aggregate_data_info );
+		$( 'span#info' ).html( i18n_aggregate_data_info );
+		$( '#doDataMart' ).removeAttr( 'disabled' );
 	}
 	else
 	{		
-		$( "span#info" ).html( i18n_captured_data_info );
+		$( 'span#info' ).html( i18n_captured_data_info );
+		$( '#doDataMart' ).attr( 'disabled', 'disabled' );
 	}
 }

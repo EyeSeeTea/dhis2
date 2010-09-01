@@ -217,6 +217,19 @@ public class DefaultValidationRuleService
         return validateInternal( period, source, getRelevantValidationRules( dataSet.getDataElements() ), false );
     }
 
+    public Collection<DataElement> getDataElementsInValidationRules()
+    {
+        Set<DataElement> dataElements = new HashSet<DataElement>();
+        
+        for ( ValidationRule rule : getAllValidationRules() )
+        {
+            dataElements.addAll( rule.getLeftSide().getDataElementsInExpression() );
+            dataElements.addAll( rule.getRightSide().getDataElementsInExpression() );
+        }
+        
+        return dataElements;
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------

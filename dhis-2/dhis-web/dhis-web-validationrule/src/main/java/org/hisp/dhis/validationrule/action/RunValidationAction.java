@@ -30,14 +30,19 @@ package org.hisp.dhis.validationrule.action;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.util.SessionUtils;
 import org.hisp.dhis.validation.ValidationResult;
 import org.hisp.dhis.validation.ValidationRuleGroup;
@@ -45,6 +50,8 @@ import org.hisp.dhis.validation.ValidationRuleService;
 import org.hisp.dhis.validation.comparator.ValidationResultComparator;
 
 import com.opensymphony.xwork2.ActionSupport;
+
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 
 /**
  * @author Margrethe Store
@@ -88,6 +95,20 @@ public class RunValidationAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+
+    private DataMartService dataMartService;
+
+    public void setDataMartService( DataMartService dataMartService )
+    {
+        this.dataMartService = dataMartService;
+    }
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
@@ -144,6 +165,13 @@ public class RunValidationAction
         this.aggregate = aggregate;
     }
 
+    private boolean doDataMart;
+
+    public void setDoDataMart( boolean doDataMart )
+    {
+        this.doDataMart = doDataMart;
+    }
+
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
@@ -155,6 +183,18 @@ public class RunValidationAction
         if ( aggregate ) // Aggregate data source
         {
             Collection<OrganisationUnit> organisationUnits = unit.getChildren();
+
+            if ( doDataMart )
+            {
+                log.info( "Generating datamart" );
+                
+                Collection<Period> periods = periodService.getPeriodsBetweenDates( format.parseDate( startDate ), format.parseDate( endDate ) );
+                
+                Collection<DataElement> dataElements = validationRuleService.getDataElementsInValidationRules();
+                
+                dataMartService.export( getIdentifiers( DataElement.class, dataElements ), new HashSet<Integer>(), 
+                    getIdentifiers( Period.class, periods ), getIdentifiers( OrganisationUnit.class, organisationUnits ) );
+            }
             
             if ( validationRuleGroupId == -1 )
             {
