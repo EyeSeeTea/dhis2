@@ -910,7 +910,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').clearValue();
                         }
-                        
                         choropleth.classify(false, true);
                     }
                 }
@@ -1421,7 +1420,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
         else {
-            if (!Ext.getCmp('startdate_df').getValue() || (!Ext.getCmp('enddate_df').getValue())) {
+            if (!Ext.getCmp('startdate_df').getValue() && (!Ext.getCmp('enddate_df').getValue())) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
                 }
@@ -1533,6 +1532,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         for (var j = 0; j < FEATURE[thematicMap].length; j++) {
                             if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
                                 FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
+                                if (!FEATURE[thematicMap][j].attributes.labelString) {
+                                    FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes.name + ' (' + FEATURE[thematicMap][j].attributes.value.toFixed(1) + ')';
+                                }
                                 break;
                             }
                         }
@@ -1583,12 +1585,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         MAPVIEW = false;
                     }
             
-                    var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
-                    FEATURE[thematicMap] = polygonLayer.features;
-                    
-                    if (LABELS[thematicMap]) {
-                        toggleFeatureLabelsPolygons(false, polygonLayer);
-                    }
+                    FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
             
                     var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
@@ -1632,6 +1629,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                                     for (var j = 0; j < FEATURE[thematicMap].length; j++) {
                                         FEATURE[thematicMap][j].attributes.value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]] || 0;
+                                        if (!FEATURE[thematicMap][j].attributes.labelString) {
+                                            FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes[nameColumn] + ' (' + FEATURE[thematicMap][j].attributes.value.toFixed(1) + ')';
+                                        }
                                     }
                                     
                                     choropleth.applyValues();
