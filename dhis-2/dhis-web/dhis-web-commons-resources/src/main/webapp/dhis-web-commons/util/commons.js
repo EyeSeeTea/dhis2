@@ -395,7 +395,7 @@ function getInnerHTML( fieldId )
  */
 function setFieldValue( fieldId, value )
 {
-    jQuery("#" + fieldId).val( value );
+    jQuery("#" + fieldId).html( value );
 }
 
 /**
@@ -751,7 +751,7 @@ function removeItem( itemId, itemName, confirmation, action )
     	    	}
     	    	else if ( json.response == "error" )
     	    	{
-    	    		setFieldValue( 'warningArea', json.message );
+    	    		setFieldValue( 'warningField', json.message );
         
                     showWarning();
     	    	}
