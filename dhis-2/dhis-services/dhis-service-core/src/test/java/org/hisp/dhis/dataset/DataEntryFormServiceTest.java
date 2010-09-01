@@ -157,26 +157,6 @@ public class DataEntryFormServiceTest
     }
 
     @Test
-    public void testGetDataEntryFormByDataSet()
-    {
-        DataSet dataSetA = new DataSet( "DataSet-A", periodType );
-
-        dataSetService.addDataSet( dataSetA );
-
-        DataEntryForm dataEntryForm = new DataEntryForm( "DataEntryForm-A" );
-
-        int id = dataEntryFormService.addDataEntryForm( dataEntryForm );
-
-
-        DataSet dataSetB = new DataSet( "DataSet-B", periodType );
-
-        dataSetService.addDataSet( dataSetB );
-
-        assertEquals( dataSetA.getDataEntryForm().getId(), id );
-        assertNull( dataSetB.getDataEntryForm() );
-    }
-
-    @Test
     public void testGetAllDataEntryForms()
     {
         DataSet dataSetA = new DataSet( "DataSet-A", periodType );
@@ -201,20 +181,19 @@ public class DataEntryFormServiceTest
     @Test
     public void testGetAvailableDataSets()
     {
+        DataEntryForm dataEntryFormA = new DataEntryForm( "DataEntryForm-A" );
+        DataEntryForm dataEntryFormB = new DataEntryForm( "DataEntryForm-B" );
+        
         DataSet dataSetA = new DataSet( "DataSet-A", periodType );
         DataSet dataSetB = new DataSet( "DataSet-B", periodType );
         DataSet dataSetC = new DataSet( "DataSet-C", periodType );
 
+        dataSetA.setDataEntryForm( dataEntryFormA );
+        dataSetB.setDataEntryForm( dataEntryFormB );
+        
         dataSetService.addDataSet( dataSetA );
         dataSetService.addDataSet( dataSetB );
         dataSetService.addDataSet( dataSetC );
-
-        DataEntryForm dataEntryFormA = new DataEntryForm( "DataEntryForm-A" );
-        DataEntryForm dataEntryFormB = new DataEntryForm( "DataEntryForm-B" );
-        
-        dataEntryFormService.addDataEntryForm( dataEntryFormA );
-        dataEntryFormService.addDataEntryForm( dataEntryFormB );
-
 
         List<DataSet> dataSets = dataSetService.getAvailableDataSets();
 
@@ -224,20 +203,19 @@ public class DataEntryFormServiceTest
     @Test
     public void testGetAssignedDataSets()
     {
+        DataEntryForm dataEntryFormA = new DataEntryForm( "DataEntryForm-A" );
+        DataEntryForm dataEntryFormB = new DataEntryForm( "DataEntryForm-B" );
+        
         DataSet dataSetA = new DataSet( "DataSet-A", periodType );
         DataSet dataSetB = new DataSet( "DataSet-B", periodType );
         DataSet dataSetC = new DataSet( "DataSet-C", periodType );
 
+        dataSetA.setDataEntryForm( dataEntryFormA );
+        dataSetB.setDataEntryForm( dataEntryFormB );
+        
         dataSetService.addDataSet( dataSetA );
         dataSetService.addDataSet( dataSetB );
         dataSetService.addDataSet( dataSetC );
-
-        DataEntryForm dataEntryFormA = new DataEntryForm( "DataEntryForm-A" );
-        DataEntryForm dataEntryFormB = new DataEntryForm( "DataEntryForm-B" );
-        
-        dataEntryFormService.addDataEntryForm( dataEntryFormA );
-        dataEntryFormService.addDataEntryForm( dataEntryFormB );
-
 
         List<DataSet> dataSets = dataSetService.getAssignedDataSets();
 

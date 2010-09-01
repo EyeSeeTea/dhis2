@@ -143,23 +143,6 @@ public class DataEntryFormStoreTest
         assertNull( dataEntryFormStore.getDataEntryFormByName( "DataEntryForm-X" ) );
     }
 
-//    @Test
-//    public void testGetDataEntryFormByDataSet()
-//        throws Exception
-//    {
-//
-//        DataEntryForm dataEntryForm = new DataEntryForm( "DataEntryForm-A" );
-//
-//        int id = dataEntryFormStore.addDataEntryForm( dataEntryForm );
-//
-//        DataSet dataSetB = new DataSet( "DataSet-B", periodType );
-//
-//        dataSetStore.addDataSet( dataSetB );
-//
-//        assertEquals( dataEntryFormStore.getDataEntryFormByDataSet( dataSetA ).getId(), id );
-//        assertNull( dataEntryFormStore.getDataEntryFormByDataSet( dataSetB ) );
-//    }
-
     @Test
     public void testGetAllDataEntryForms()
     {
