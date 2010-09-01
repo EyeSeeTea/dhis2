@@ -187,12 +187,26 @@ function enable( elementId )
     jQuery( "#" + elementId ).attr("disabled", false );
 }
 
+function enableGroup( selectorJQueryString )
+{
+	jQuery.each( jQuery( selectorJQueryString ), function( i, item ){
+		item.disabled = false;
+	});
+}
+
 /**
  * Disables the element with the given identifier if the element exists.
  */
 function disable( elementId )
 {
     jQuery( "#" + elementId ).attr("disabled", true );
+}
+
+function disableGroup( selectorJQueryString )
+{
+	jQuery.each( jQuery( selectorJQueryString ), function( i, item ){		
+		item.disabled = true;
+	});
 }
 /**
  * Enables the element with the given identifier if the element exists in parent window of frame.
@@ -357,6 +371,28 @@ function getRootElementAttribute( rootElement, attributeName )
  * @param fieldId the identifier of the element.
  * @param value the value to set.
  */
+function setInnerHTML( fieldId, value )
+{
+    jQuery("#" + fieldId).html( value );
+}
+
+/**
+ * Gets a value from the given element and HTML encodes it.
+ * 
+ * @param fieldId the identifier of the element.
+ * @return the HTML encoded value of the element with the given identifier.
+ */
+function getInnerHTML( fieldId )
+{
+    return jQuery("#" + fieldId).html();
+}
+
+/**
+ * Sets a value on the given element.
+ * 
+ * @param fieldId the identifier of the element.
+ * @param value the value to set.
+ */
 function setFieldValue( fieldId, value )
 {
     jQuery("#" + fieldId).val( value );
@@ -371,6 +407,32 @@ function setFieldValue( fieldId, value )
 function getFieldValue( fieldId )
 {
     return jQuery("#" + fieldId).val();
+}
+/**
+ * get value of input radio with name
+ * 
+ * @param radioName name of input radio 
+ */
+function getRadioValue( radioName )
+{
+	result = null;
+	jQuery.each( jQuery( "input[type=radio][name=" + radioName + "]") , function(i, item ){
+		
+		if( item.checked ) result = item.value;
+	});
+	
+	return result;
+}
+/**
+ * set value for input radio with name 
+ * @param radioName name of input radio 
+ */
+function setRadioValue( radioName, value )
+{
+	jQuery.each( jQuery( "input[type=radio][name=" + radioName + "]") , function(i, item ){
+		
+		if( item.value == value ) item.checked = true;
+	});	
 }
 
 // -----------------------------------------------------------------------------
@@ -898,6 +960,18 @@ function checkValueIsExist( inputId, url, params )
 		}
 	});
 }
+
+function validateValueByAjax( inputId, url, params )
+{
+	jQuery("#" + inputId).rules("add",{
+		remote: {
+			url:url,
+			type:'post',
+			data:params
+		}
+	});
+}
+
 /**
 * Add any validator Rules for input
 * @param inputId is id for input field
@@ -1015,6 +1089,7 @@ function showPopupWindowById( id, width, height )
 	container.css('z-index', 1000000 );
 	container.css('position', 'fixed' );
 	container.css('background-color', '#FFFFFF' );
+	container.css('overflow', 'auto' );	
 	container.show(  jQuery.blockUI({message:null}));
 	
 }
@@ -1077,5 +1152,14 @@ function loadIndicatorsByGroup( id, selectorJQueryString )
 function loadAllIndicators( selectorJQueryString )
 {
 	DataDictionary.loadAllIndicators( jQuery( selectorJQueryString ) );
+}
+/**
+* load Operands
+* @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 
+* @param params is array of paramater {id : dataElementGroupId, aggregationOperator: sum or average} : this param is optional
+*/
+function loadOperands( selectorJQueryString, params )
+{
+	DataDictionary.loadOperands( jQuery( selectorJQueryString ), params);
 }
 

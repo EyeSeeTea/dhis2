@@ -13,13 +13,13 @@ function showDataDictionaryDetails( dataDictionaryId )
 
 function dataDictionaryReceived( dataDictionaryElement )
 {
-    setFieldValue( 'nameField', getElementValue( dataDictionaryElement, 'name' ) );
+    setInnerHTML( 'nameField', getElementValue( dataDictionaryElement, 'name' ) );
     
     var description = getElementValue( dataDictionaryElement, 'description' );
-    setFieldValue( 'descriptionField', description ? description : '[' + i18n_none + ']' );
+    setInnerHTML( 'descriptionField', description ? description : '[' + i18n_none + ']' );
     
     var region = getElementValue( dataDictionaryElement, 'region' );
-    setFieldValue( 'regionField', region ? region : '[' + i18n_none + ']' );
+    setInnerHTML( 'regionField', region ? region : '[' + i18n_none + ']' );
     
     showDetails();
 }

@@ -55,17 +55,17 @@ function showDataElementDetails( dataElementId )
 
 function dataElementReceived( dataElementElement )
 {
-    setFieldValue( 'nameField', getElementValue( dataElementElement, 'name' ) );
-    setFieldValue( 'shortNameField', getElementValue( dataElementElement, 'shortName' ) );
+    setInnerHTML( 'nameField', getElementValue( dataElementElement, 'name' ) );
+    setInnerHTML( 'shortNameField', getElementValue( dataElementElement, 'shortName' ) );
 
     var alternativeName = getElementValue( dataElementElement, 'alternativeName' );
-    setFieldValue( 'alternativeNameField', alternativeName ? alternativeName : '[' + i18n_none + ']' );
+    setInnerHTML( 'alternativeNameField', alternativeName ? alternativeName : '[' + i18n_none + ']' );
     
     var description = getElementValue( dataElementElement, 'description' );
-    setFieldValue( 'descriptionField', description ? description : '[' + i18n_none + ']' );
+    setInnerHTML( 'descriptionField', description ? description : '[' + i18n_none + ']' );
 
     var active = getElementValue( dataElementElement, 'active' );
-    setFieldValue( 'activeField', active == 'true' ? i18n_yes : i18n_no );
+    setInnerHTML( 'activeField', active == 'true' ? i18n_yes : i18n_no );
     
     var typeMap = { 
         'int':i18n_number,
@@ -73,14 +73,14 @@ function dataElementReceived( dataElementElement )
         'string':i18n_text
     };
     var type = getElementValue( dataElementElement, 'valueType' );
-    setFieldValue( 'typeField', typeMap[type] );
+    setInnerHTML( 'typeField', typeMap[type] );
     
     var domainTypeMap = {
         'aggregate':i18n_aggregate,
         'patient':i18n_patient
     };
     var domainType = getElementValue( dataElementElement, 'domainType' );
-    setFieldValue( 'domainTypeField', domainTypeMap[domainType] );
+    setInnerHTML( 'domainTypeField', domainTypeMap[domainType] );
     
     var aggregationOperator = getElementValue( dataElementElement, 'aggregationOperator' );
     var aggregationOperatorText = i18n_none;
@@ -92,15 +92,15 @@ function dataElementReceived( dataElementElement )
     {
         aggregationOperatorText = i18n_average;
     }
-    setFieldValue( 'aggregationOperatorField', aggregationOperatorText );   
+    setInnerHTML( 'aggregationOperatorField', aggregationOperatorText );   
     
-    setFieldValue( 'categoryComboField', getElementValue( dataElementElement, 'categoryCombo' ) );
+    setInnerHTML( 'categoryComboField', getElementValue( dataElementElement, 'categoryCombo' ) );
     
     var url = getElementValue( dataElementElement, 'url' );
-    setFieldValue( 'urlField', url ? '<a href="' + url + '">' + url + '</a>' : '[' + i18n_none + ']' );
+    setInnerHTML( 'urlField', url ? '<a href="' + url + '">' + url + '</a>' : '[' + i18n_none + ']' );
 	
     var lastUpdated = getElementValue( dataElementElement, 'lastUpdated' );
-    setFieldValue( 'lastUpdatedField', lastUpdated ? lastUpdated : '[' + i18n_none + ']' );
+    setInnerHTML( 'lastUpdatedField', lastUpdated ? lastUpdated : '[' + i18n_none + ']' );
 	
     showDetails();
 }
@@ -315,6 +315,8 @@ function getDataElementIdsForValidate()
 {
 	var dataElementValidators = jQuery("#selectedDEValidator");
 	var inputs = jQuery( "#selectedDataElements input[type=hidden]" );
+	
+	dataElementValidators.children().remove();
 	
 	jQuery.each(inputs, function(i, item ){				
 		dataElementValidators.append('<option value="' + item.value + '" selected="selected">' + item.value + '</option>');	

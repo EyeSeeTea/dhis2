@@ -21,24 +21,24 @@ function showOrganisationUnitDetails( unitId )
 
 function organisationUnitReceived( unitElement )
 {
-    setFieldValue( 'nameField', getElementValue( unitElement, 'name' ) );
-    setFieldValue( 'shortNameField', getElementValue( unitElement, 'shortName' ) );
-    setFieldValue( 'openingDateField', getElementValue( unitElement, 'openingDate' ) );
+    setInnerHTML( 'nameField', getElementValue( unitElement, 'name' ) );
+    setInnerHTML( 'shortNameField', getElementValue( unitElement, 'shortName' ) );
+    setInnerHTML( 'openingDateField', getElementValue( unitElement, 'openingDate' ) );
     
     var closedDate = getElementValue( unitElement, 'closedDate' );
-    setFieldValue( 'closedDateField', closedDate ? closedDate : '[' + none + ']' );
+    setInnerHTML( 'closedDateField', closedDate ? closedDate : '[' + none + ']' );
 
     var commentValue = getElementValue( unitElement, 'comment' );
-    setFieldValue( 'commentField', commentValue ? commentValue.replace( /\n/g, '<br>' ) : '[' + none + ']' );
+    setInnerHTML( 'commentField', commentValue ? commentValue.replace( /\n/g, '<br>' ) : '[' + none + ']' );
     
     var active = getElementValue( unitElement, 'active' );
-    setFieldValue( 'activeField', active == 'true' ? yes : no );
+    setInnerHTML( 'activeField', active == 'true' ? yes : no );
     
     var url = getElementValue( unitElement, 'url' );
-    setFieldValue( 'urlField', url ? '<a href="' + url + '">' + url + '</a>' : '[' + none + ']' );
+    setInnerHTML( 'urlField', url ? '<a href="' + url + '">' + url + '</a>' : '[' + none + ']' );
     
     var lastUpdated = getElementValue( unitElement, 'lastUpdated' );
-    setFieldValue( 'lastUpdatedField', lastUpdated ? lastUpdated : '[' + none + ']' );
+    setInnerHTML( 'lastUpdatedField', lastUpdated ? lastUpdated : '[' + none + ']' );
     
     showDetails();
 }

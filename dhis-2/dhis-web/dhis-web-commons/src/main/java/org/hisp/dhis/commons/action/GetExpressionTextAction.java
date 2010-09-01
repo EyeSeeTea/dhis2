@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.dataelementgroup;
+package org.hisp.dhis.commons.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,29 +27,23 @@ package org.hisp.dhis.dd.action.dataelementgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18n;
 
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Action;
 
-/**
- * @author Torgeir Lorange Ostby
- * @version $Id: ValidateDataElementGroupAction.java 2869 2007-02-20 14:26:09Z
- *          andegje $
- */
-public class ValidateDataElementGroupAction
-    extends ActionSupport
+public class GetExpressionTextAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementService dataElementService;
+    private ExpressionService expressionService;
 
-    public void setDataElementService( DataElementService dataElementService )
+    public void setExpressionService( ExpressionService expressionService )
     {
-        this.dataElementService = dataElementService;
+        this.expressionService = expressionService;
     }
 
     private I18n i18n;
@@ -63,18 +57,11 @@ public class ValidateDataElementGroupAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String expression;
 
-    public void setId( Integer id )
+    public void setExpression( String expression )
     {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
+        this.expression = expression;
     }
 
     // -------------------------------------------------------------------------
@@ -88,27 +75,25 @@ public class ValidateDataElementGroupAction
         return message;
     }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
+    @Override
     public String execute()
+        throws Exception
     {
-        if ( name != null )
+        String result = expressionService.expressionIsValid( expression );
+
+        if ( result.equals( ExpressionService.VALID ) )
         {
+            message = expressionService.getExpressionDescription( expression );
 
-            DataElementGroup match = dataElementService.getDataElementGroupByName( name );
+            return SUCCESS;
+        }
+        else
+        {
+            message = i18n.getString( result );
 
-            if ( match != null && (id == null || match.getId() != id) )
-            {
-                message = i18n.getString( "name_in_use" );
-
-                return ERROR;
-            }
+            return ERROR;
         }
 
-        message = i18n.getString( "everything_is_ok" );
-
-        return SUCCESS;
     }
+
 }

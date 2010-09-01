@@ -16,21 +16,21 @@ function showOrganisationUnitGroupSetDetails( groupSetId )
 
 function organisationUnitGroupSetReceived( unitElement )
 {
-	setFieldValue( 'nameField', getElementValue( unitElement, 'name' ) );
-    setFieldValue( 'descriptionField', getElementValue( unitElement, 'description' ) );
+	setInnerHTML( 'nameField', getElementValue( unitElement, 'name' ) );
+    setInnerHTML( 'descriptionField', getElementValue( unitElement, 'description' ) );
     
     var compulsory = getElementValue( unitElement, 'compulsory' );
         
     if ( compulsory == "true" )
     {
-    	setFieldValue( 'compulsoryField', i18n_yes );
+    	setInnerHTML( 'compulsoryField', i18n_yes );
     }
     else
     {
-    	setFieldValue( 'compulsoryField', i18n_no );
+    	setInnerHTML( 'compulsoryField', i18n_no );
     }
         
-    setFieldValue( 'memberCountField', getElementValue( unitElement, 'memberCount' ) );
+    setInnerHTML( 'memberCountField', getElementValue( unitElement, 'memberCount' ) );
     
     showDetails();
 }

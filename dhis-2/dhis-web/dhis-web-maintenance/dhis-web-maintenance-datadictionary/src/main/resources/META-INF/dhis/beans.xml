@@ -560,46 +560,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService">
 			<ref bean="org.hisp.dhis.indicator.IndicatorService" />
 		</property>
-	</bean>
-
-	<!-- Indicator denum -->
-
-	<bean
-		id="org.hisp.dhis.dd.action.indicatordenum.GetFilteredDataElementsAction"
-		class="org.hisp.dhis.dd.action.indicatordenum.GetFilteredDataElementsAction"
-		scope="prototype">
-		<property name="dataElementService">
-			<ref bean="org.hisp.dhis.dataelement.DataElementService" />
-		</property>
-		<property name="dataElementCategoryService">
-			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
-		</property>
-	</bean>
-
-	<bean id="org.hisp.dhis.dd.action.indicatordenum.GetFormulaTextAction"
-		class="org.hisp.dhis.dd.action.indicatordenum.GetFormulaTextAction"
-		scope="prototype">
-		<property name="expressionService">
-			<ref bean="org.hisp.dhis.expression.ExpressionService" />
-		</property>
-	</bean>
-
-	<bean id="org.hisp.dhis.dd.action.indicatordenum.GetDenumAction"
-		class="org.hisp.dhis.dd.action.indicatordenum.GetDenumAction">
-		<property name="dataElementService">
-			<ref bean="org.hisp.dhis.dataelement.DataElementService" />
-		</property>
-		<property name="expressionService">
-			<ref bean="org.hisp.dhis.expression.ExpressionService" />
-		</property>
-	</bean>
-
-	<bean id="org.hisp.dhis.dd.action.indicatordenum.ValidateDenumAction"
-		class="org.hisp.dhis.dd.action.indicatordenum.ValidateDenumAction">
-		<property name="expressionService">
-			<ref bean="org.hisp.dhis.expression.ExpressionService" />
-		</property>
-	</bean>
+	</bean>	
 
 	<!-- DataDictionary -->
 

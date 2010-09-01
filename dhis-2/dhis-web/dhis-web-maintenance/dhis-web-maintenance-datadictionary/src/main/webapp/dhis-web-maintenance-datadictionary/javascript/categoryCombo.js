@@ -9,8 +9,8 @@ function showDataElementCategoryComboDetails( categoryComboId )
 
 function dataElementCategoryComboReceived( dataElementCategoryComboElement )
 {
-    setFieldValue( 'nameField', getElementValue( dataElementCategoryComboElement, 'name' ) );
-	setFieldValue( 'dataElementCategoryCountField', getElementValue( dataElementCategoryComboElement, 'dataElementCategoryCount' ) );
+    setInnerHTML( 'nameField', getElementValue( dataElementCategoryComboElement, 'name' ) );
+	setInnerHTML( 'dataElementCategoryCountField', getElementValue( dataElementCategoryComboElement, 'dataElementCategoryCount' ) );
           
     showDetails();
 }

@@ -16,6 +16,8 @@ function DataDictionary()
 	
 	var categoryOptionComboList = new Array();
 	
+	var operandsByDataElementGroup = new Array();
+	
 	this.loadDataElementGroups = function( target )
 	{
 		target.children().remove();
@@ -147,6 +149,20 @@ function DataDictionary()
 				target.append('<option value="' + item.id + '">' + item.name + '</option>');
 			});		
 		}
+		
+	}	
+	
+	this.loadOperands = function (target, params )
+	{
+		target.children().remove();	
+		
+		jQuery.getJSON('../dhis-web-commons-ajax-json/getOperands.action'	
+			, params
+			, function( json ){
+				jQuery.each( json.operands, function(i, item){					
+					target.append('<option value="[' + item.operandId + ']">' + item.operandName + '</option>');
+				});				
+		});	
 		
 	}
 	

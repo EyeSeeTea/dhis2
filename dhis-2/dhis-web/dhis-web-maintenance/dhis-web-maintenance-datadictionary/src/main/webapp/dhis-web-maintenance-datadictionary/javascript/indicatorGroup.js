@@ -13,8 +13,8 @@ function showIndicatorGroupDetails( indicatorGroupId )
 
 function indicatorGroupReceived( indicatorGroupElement )
 {
-    setFieldValue( 'nameField', getElementValue( indicatorGroupElement, 'name' ) );
-    setFieldValue( 'memberCountField', getElementValue( indicatorGroupElement, 'memberCount' ) );
+    setInnerHTML( 'nameField', getElementValue( indicatorGroupElement, 'name' ) );
+    setInnerHTML( 'memberCountField', getElementValue( indicatorGroupElement, 'memberCount' ) );
 
     showDetails();
 }
