@@ -398,10 +398,10 @@ public interface MappingService
 
     void updateMapView( MapView mapView );
 
-    void addOrUpdateMapView( String name, String mapValueType, int indicatorGroupId, int indicatorId,
-        int dataElementGroupId, int dataElementId, String periodTypeName, int periodId,
-        String fromDate, String toDate, String mapSource, String mapLegendType, int method, int classes, String bounds,
-        String colorLow, String colorHigh, int mapLegendSetId, String longitude, String latitude, int zoom );
+    void addOrUpdateMapView( String name, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
+        Integer dataElementGroupId, Integer dataElementId, String periodTypeName, Integer periodId,
+        String startDate, String endDate, String mapSource, String mapLegendType, int method, int classes, String bounds,
+        String colorLow, String colorHigh, Integer mapLegendSetId, String longitude, String latitude, int zoom );
 
     void deleteMapView( MapView view );
 

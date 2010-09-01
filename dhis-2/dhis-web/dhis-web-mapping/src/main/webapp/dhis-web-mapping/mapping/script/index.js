@@ -1,6 +1,4 @@
-﻿Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
-
-/* OpenLayers map */
+﻿/* OpenLayers map */
 var MAP;
 /* Center point of the country */
 var BASECOORDINATE;
@@ -148,6 +146,7 @@ function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';js
 function getLegendsJSON(){var legends=choropleth.imageLegend;var json='{';json+='"legends":';json+='[';for(var i=0;i<choropleth.imageLegend.length;i++){json+='{';json+='"label": "'+choropleth.imageLegend[i].label+'",';json+='"color": "'+choropleth.imageLegend[i].color+'" ';json+=i<choropleth.imageLegend.length-1?'},':'}'}json+=']';json+='}';return json}
 
 Ext.onReady( function() {
+    Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
 	/* Cookie provider */
 	Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 	/* Ext 3.2.0 override */
@@ -256,12 +255,14 @@ Ext.onReady( function() {
 				handler: function() {
 					var vn = Ext.getCmp('viewname_tf').getValue();
                     var mvt = Ext.getCmp('mapvaluetype_cb').getValue();
-					var ig = mvt == map_value_type_indicator ? Ext.getCmp('indicatorgroup_cb').getValue() : 0;
-					var ii = mvt == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : 0;
-                    var deg = mvt == map_value_type_dataelement ? Ext.getCmp('dataelementgroup_cb').getValue() : 0;
-					var de = mvt == map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : 0;
-					var pt = Ext.getCmp('periodtype_cb').getValue();
-					var p = Ext.getCmp('period_cb').getValue();
+					var ig = mvt == map_value_type_indicator ? Ext.getCmp('indicatorgroup_cb').getValue() : '';
+					var ii = mvt == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : '';
+                    var deg = mvt == map_value_type_dataelement ? Ext.getCmp('dataelementgroup_cb').getValue() : '';
+					var de = mvt == map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : '';
+					var pt = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('periodtype_cb').getValue() : '';
+					var p = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : '';
+                    var sd = MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : '';
+                    var ed = MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : '';
 					var ms = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue();
 					var mlt = Ext.getCmp('maplegendtype_cb').getValue();
                     var m = Ext.getCmp('method_cb').getValue();
@@ -269,7 +270,7 @@ Ext.onReady( function() {
                     var b = Ext.getCmp('bounds_tf').getValue() || '';
 					var ca = Ext.getCmp('colorA_cf').getValue();
 					var cb = Ext.getCmp('colorB_cf').getValue();
-					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || 0;
+					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || '';
 					var lon = MAP.getCenter().lon;
 					var lat = MAP.getCenter().lat;
 					var zoom = parseInt(MAP.getZoom());
@@ -283,11 +284,39 @@ Ext.onReady( function() {
                         Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
 						return;
 					}
+                    
+                    if (MAPDATETYPE == map_date_type_fixed) {
+                        if (!p) {
+                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                            return;
+                        }
+					}
+                    else {
+                        if (!Ext.getCmp('startdate_df').getValue() || !Ext.getCmp('enddate_df').getValue()) {
+                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                            return;
+                        }
+					}
 					
-					if (!pt || !p || !ms || !c) {
+					if (!ms) {
 						Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
 						return;
 					}
+                    
+                    if (mlt == map_legend_type_automatic) {
+                        if (m == classify_with_bounds) {
+                            if (!b) {
+                                Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                                return;
+                            }
+                        }
+                    }
+                    else {
+                        if (!mlsid) {
+                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                            return;
+                        }
+                    }
 					
 					if (validateInput(vn) == false) {
 						Ext.message.msg(false, i18n_map_view_name_cannot_be_longer_than_25_characters );
@@ -310,7 +339,29 @@ Ext.onReady( function() {
 							Ext.Ajax.request({
 								url: path_mapping + 'addOrUpdateMapView' + type,
 								method: 'POST',
-								params: { name: vn, mapValueType: mvt, indicatorGroupId: ig, indicatorId: ii, dataElementGroupId: deg, dataElementId: de, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: m, classes: c, bounds: b, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
+								params: {
+                                    name: vn,
+                                    mapValueType: mvt,
+                                    indicatorGroupId: ig,
+                                    indicatorId: ii,
+                                    dataElementGroupId: deg,
+                                    dataElementId: de,
+                                    periodTypeId: pt,
+                                    periodId: p,
+                                    startDate: sd,
+                                    endDate: ed,
+                                    mapSource: ms,
+                                    mapLegendType: mlt,
+                                    method: m,
+                                    classes: c,
+                                    bounds: b,
+                                    colorLow: ca,
+                                    colorHigh: cb,
+                                    mapLegendSetId: mlsid,
+                                    longitude: lon,
+                                    latitude: lat,
+                                    zoom: zoom
+                                },
 								success: function(r) {
 									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().load();
@@ -4096,7 +4147,7 @@ function onClickSelectPolygon(feature) {
 // function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
 // var l = MAP.getLayersByName('Polygon layer')[0];
 // l.drawFeature(feature,{'fillColor':'blue'});
-    
+
     FEATURE[thematicMap] = feature;
 
 	var east_panel = Ext.getCmp('east');

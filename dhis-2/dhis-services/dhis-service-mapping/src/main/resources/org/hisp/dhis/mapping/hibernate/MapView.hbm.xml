@@ -35,9 +35,9 @@
 		<many-to-one name="period" class="org.hisp.dhis.period.Period" 
 			column="periodid" foreign-key="fk_mapview_periodid"/>
         
-        <property name="fromDate"/>
+        <property name="startDate"/>
         
-        <property name="toDate"/>
+        <property name="endDate"/>
 		
 		<property name="mapSourceType"/>
 		

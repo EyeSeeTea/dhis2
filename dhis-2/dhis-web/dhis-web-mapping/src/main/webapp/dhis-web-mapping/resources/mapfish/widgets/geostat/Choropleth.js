@@ -342,15 +342,46 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                         if (MAPVIEW) {
                             Ext.getCmp('indicator_cb').setValue(MAPVIEW.indicatorId);
-                            
+
                             if (MAPVIEW.mapDateType == map_date_type_fixed) {
+                                Ext.getCmp('periodtype_cb').showField();
+                                Ext.getCmp('period_cb').showField();
+                                Ext.getCmp('startdate_df').hideField();
+                                Ext.getCmp('enddate_df').hideField();
+                                
                                 Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
                                 periodStore.setBaseParam('name', MAPVIEW.periodTypeId);
                                 periodStore.load();
                             }
                             else if (MAPVIEW.mapDateType == map_date_type_start_end) {
-                                Ext.getCmp('startdate_df').setValue(new Date(MAPVIEW.fromDate));
-                                Ext.getCmp('enddate_df').setValue(new Date(MAPVIEW.toDate));
+                                Ext.getCmp('periodtype_cb').hideField();
+                                Ext.getCmp('period_cb').hideField();
+                                Ext.getCmp('startdate_df').showField();
+                                Ext.getCmp('enddate_df').showField();
+
+                                Ext.getCmp('startdate_df').setValue(new Date(MAPVIEW.startDate));
+                                Ext.getCmp('enddate_df').setValue(new Date(MAPVIEW.endDate));
+                                
+                                if (MAPSOURCE == map_source_type_database) {
+                                    Ext.Ajax.request({
+                                        url: path_commons + 'getOrganisationUnit' + type,
+                                        method: 'POST',
+                                        params: {id:MAPVIEW.mapSource},
+                                        success: function(r) {
+                                            var name = Ext.util.JSON.decode(r.responseText).organisationUnit.name;
+                                            Ext.getCmp('map_tf').setValue(name);
+                                            Ext.getCmp('map_tf').value = MAPVIEW.mapSource;
+                                            choropleth.loadFromDatabase(MAPVIEW.mapSource);
+                                        },
+                                        failure: function() {
+                                            alert('Error: getOrganisationUnit');
+                                        }
+                                    });
+                                }
+                                else {
+                                    Ext.getCmp('map_cb').setValue(MAPVIEW.mapSource);
+                                    choropleth.loadFromFile(MAPVIEW.mapSource);
+                                }
                             }
                         }
                     }
@@ -389,13 +420,44 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('dataelement_cb').setValue(MAPVIEW.dataElementId);
                             
                             if (MAPVIEW.mapDateType == map_date_type_fixed) {
+                                Ext.getCmp('periodtype_cb').showField();
+                                Ext.getCmp('period_cb').showField();
+                                Ext.getCmp('startdate_df').hideField();
+                                Ext.getCmp('enddate_df').hideField();
+                                
                                 Ext.getCmp('periodtype_cb').setValue(MAPVIEW.periodTypeId);
                                 periodStore.setBaseParam('name', MAPVIEW.periodTypeId);
                                 periodStore.load();
                             }
                             else if (MAPVIEW.mapDateType == map_date_type_start_end) {
-                                Ext.getCmp('startdate_df').setValue(new Date(MAPVIEW.fromDate));
-                                Ext.getCmp('enddate_df').setValue(new Date(MAPVIEW.toDate));
+                                Ext.getCmp('periodtype_cb').hideField();
+                                Ext.getCmp('period_cb').hideField();
+                                Ext.getCmp('startdate_df').showField();
+                                Ext.getCmp('enddate_df').showField();
+                                
+                                Ext.getCmp('startdate_df').setValue(new Date(MAPVIEW.startDate));
+                                Ext.getCmp('enddate_df').setValue(new Date(MAPVIEW.endDate));
+                                
+                                if (MAPSOURCE == map_source_type_database) {
+                                    Ext.Ajax.request({
+                                        url: path_commons + 'getOrganisationUnit' + type,
+                                        method: 'POST',
+                                        params: {id:MAPVIEW.mapSource},
+                                        success: function(r) {
+                                            var name = Ext.util.JSON.decode(r.responseText).organisationUnit.name;
+                                            Ext.getCmp('map_tf').setValue(name);
+                                            Ext.getCmp('map_tf').value = MAPVIEW.mapSource;
+                                            choropleth.loadFromDatabase(MAPVIEW.mapSource);
+                                        },
+                                        failure: function() {
+                                            alert('Error: getOrganisationUnit');
+                                        }
+                                    });
+                                }
+                                else {
+                                    Ext.getCmp('map_cb').setValue(MAPVIEW.mapSource);
+                                    choropleth.loadFromFile(MAPVIEW.mapSource);
+                                }
                             }
                         }
                     },
@@ -537,6 +599,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             success: function(r) {
                                 MAPVIEW = getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
 								MAPSOURCE = MAPVIEW.mapSourceType;
+                                MAPDATETYPE = MAPVIEW.mapDateType;
+                                Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
                                 
                                 Ext.getCmp('mapvaluetype_cb').setValue(MAPVIEW.mapValueType);
 								VALUETYPE.polygon = MAPVIEW.mapValueType;
@@ -1254,8 +1318,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             labelSeparator: '',
             text: i18n_refresh,
             handler: function() {
-                this.layer.setVisibility(true);
-                this.classify(true, true);
+                if (choropleth.validateForm()) {
+                    this.layer.setVisibility(true);
+                    this.classify(true, true);
+                }
+                else {
+                    Ext.message.msg(false, i18n_form_is_not_complete);
+                }
             },
             scope: this
         }

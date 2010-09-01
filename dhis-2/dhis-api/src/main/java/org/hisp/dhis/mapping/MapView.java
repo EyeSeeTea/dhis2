@@ -39,7 +39,7 @@ import org.hisp.dhis.period.PeriodType;
  * @version $Id$
  */
 public class MapView
-{ 
+{
     private int id;
 
     private String name;
@@ -60,9 +60,9 @@ public class MapView
 
     private Period period;
 
-    private String fromDate;
+    private String startDate;
 
-    private String toDate;
+    private String endDate;
 
     private String mapSourceType;
 
@@ -94,7 +94,7 @@ public class MapView
 
     public MapView( String name, String mapValueType, IndicatorGroup indicatorGroup, Indicator indicator,
         DataElementGroup dataElementGroup, DataElement dataElement, String mapDateType, PeriodType periodType,
-        Period period, String fromDate, String toDate, String mapSourceType, String mapSource, String mapLegendType,
+        Period period, String startDate, String endDate, String mapSourceType, String mapSource, String mapLegendType,
         int method, int classes, String bounds, String colorLow, String colorHigh, MapLegendSet mapLegendSet,
         String longitude, String latitude, int zoom )
     {
@@ -107,8 +107,8 @@ public class MapView
         this.mapDateType = mapDateType;
         this.periodType = periodType;
         this.period = period;
-        this.fromDate = fromDate;
-        this.toDate = toDate;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.mapSourceType = mapSourceType;
         this.mapSource = mapSource;
         this.mapLegendType = mapLegendType;
@@ -121,7 +121,6 @@ public class MapView
         this.longitude = longitude;
         this.latitude = latitude;
         this.zoom = zoom;
-
     }
 
     // -------------------------------------------------------------------------
@@ -155,6 +154,15 @@ public class MapView
         final MapView other = (MapView) object;
 
         return name.equals( other.name );
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public String getMapDateTypeNullSafe()
+    {
+        return mapDateType != null ? mapDateType : MappingService.MAP_DATE_TYPE_FIXED;
     }
 
     // -------------------------------------------------------------------------
@@ -261,24 +269,24 @@ public class MapView
         this.period = period;
     }
 
-    public String getFromDate()
+    public String getStartDate()
     {
-        return fromDate;
+        return startDate;
     }
 
-    public void setFromDate( String fromDate )
+    public void setStartDate( String startDate )
     {
-        this.fromDate = fromDate;
+        this.startDate = startDate;
     }
 
-    public String getToDate()
+    public String getEndDate()
     {
-        return toDate;
+        return endDate;
     }
 
-    public void setToDate( String toDate )
+    public void setEndDate( String endDate )
     {
-        this.toDate = toDate;
+        this.endDate = endDate;
     }
 
     public String getMapSourceType()
