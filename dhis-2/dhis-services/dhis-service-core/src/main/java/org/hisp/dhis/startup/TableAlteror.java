@@ -28,6 +28,8 @@ package org.hisp.dhis.startup;
  */
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,7 +137,8 @@ public class TableAlteror
         // dataelementcategoryoption
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT fk_dataelement_categoryid" );
         // executeSql(
-        // "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_name_key"
+        // "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT
+        // dataelementcategoryoption_name_key"
         // ); will be maintained in transition period
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_shortname_key" );
 
@@ -174,6 +177,22 @@ public class TableAlteror
             // delete table dataentryformassociation
             executeSql( "DROP TABLE dataentryformassociation" );
         }
+
+        // Working on Section table
+        if ( isColumnExist( "section", "title" ) )
+        {
+            executeSql( "ALTER TABLE section DROP COLUMN title;" );
+
+            log.info( "Successfully, removed column 'title' from table 'section'" );
+        }
+
+        // Working on ConceptName
+        /*if ( isColumnExist( "dataelementcategory", "conceptname" ) )
+        {
+            executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptname;" );
+
+            log.info( "Successfully, removed column 'conceptname' from table 'dataelementcategory'" );
+        }*/
 
         log.info( "Tables updated" );
     }
@@ -305,9 +324,9 @@ public class TableAlteror
                 }
                 return true;
             }
-            
+
             return false;
-          
+
         }
         catch ( Exception ex )
         {
@@ -349,5 +368,36 @@ public class TableAlteror
             holder.close();
         }
 
+    }
+
+    /*
+     * Ex: table "dataelementcategory", columnName is "conceptname"
+     */
+    private boolean isColumnExist( String table, String columnName )
+    {
+        final StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            ResultSet rs = holder.getStatement().executeQuery( "SELECT * FROM " + table + " LIMIT 1;" );
+            ResultSetMetaData rsmd = rs.getMetaData();
+
+            int columnNo = rsmd.getColumnCount();
+
+            if ( columnNo > 0 )
+            {
+                return rsmd.getColumnName( columnNo - 1 ).equalsIgnoreCase( columnName );
+            }
+        }
+        catch ( SQLException e )
+        {
+            log.debug( e );
+        }
+        finally
+        {
+            holder.close();
+        }
+
+        return false;
     }
 }
