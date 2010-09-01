@@ -45,7 +45,7 @@
     	</td>
     </tr>
     <tr>
-    	<td colspan="2"><span id="info">$i18n.getString( "aggregate_data_info" )</span></td>
+    	<td colspan="2"><span id="info">$i18n.getString( "captured_data_info" )</span></td>
     </tr>
     <tr>
         <td colspan="2">

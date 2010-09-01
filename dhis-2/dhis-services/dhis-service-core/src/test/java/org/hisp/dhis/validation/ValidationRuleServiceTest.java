@@ -50,6 +50,7 @@ import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.mock.MockSource;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -149,7 +150,7 @@ public class ValidationRuleServiceTest
 
         periodService = (PeriodService) getBean( PeriodService.ID );
 
-        periodType = PeriodType.getAvailablePeriodTypes().iterator().next();
+        periodType = new MonthlyPeriodType();
 
         dataElementA = createDataElement( 'A' );
         dataElementB = createDataElement( 'B' );
@@ -209,8 +210,18 @@ public class ValidationRuleServiceTest
         dataSet.getSources().add( sourceA );
         dataSet.getSources().add( sourceB );
 
+        dataElementA.getDataSets().add( dataSet );
+        dataElementB.getDataSets().add( dataSet );
+        dataElementC.getDataSets().add( dataSet );
+        dataElementD.getDataSets().add( dataSet );
+        
         dataSetService.addDataSet( dataSet );
-
+        
+        dataElementService.updateDataElement( dataElementA );
+        dataElementService.updateDataElement( dataElementB );
+        dataElementService.updateDataElement( dataElementC );
+        dataElementService.updateDataElement( dataElementD );
+        
         validationRuleA = createValidationRule( 'A', ValidationRule.OPERATOR_EQUAL, expressionA, expressionB,
             periodType );
         validationRuleB = createValidationRule( 'B', ValidationRule.OPERATOR_GREATER, expressionB, expressionC,
@@ -233,6 +244,10 @@ public class ValidationRuleServiceTest
     // Business logic tests
     // ----------------------------------------------------------------------
 
+    public void testValidateAggregatedDateDateSources()
+    {   
+    }
+    
     @Test
     public void testValidateDateDateSources()
     {

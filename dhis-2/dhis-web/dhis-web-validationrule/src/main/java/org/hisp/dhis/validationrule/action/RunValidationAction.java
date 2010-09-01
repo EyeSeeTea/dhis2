@@ -134,6 +134,11 @@ public class RunValidationAction
     
     private boolean aggregate;
 
+    public boolean isAggregate()
+    {
+        return aggregate;
+    }
+
     public void setAggregate( boolean aggregate )
     {
         this.aggregate = aggregate;
