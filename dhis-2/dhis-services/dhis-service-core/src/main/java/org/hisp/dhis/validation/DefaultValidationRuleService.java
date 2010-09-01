@@ -113,12 +113,12 @@ public class DefaultValidationRuleService
         Collection<ValidationRule> validationRules = getAllValidationRules();
 
         Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
-        
+
         for ( Source source : sources  )
         {
             for ( Period period : periods )
             {
-                validationViolations.addAll( validate( period, source, validationRules, true ) );
+                validationViolations.addAll( validateInternal( period, source, validationRules, true ) );
             }
         }
         
@@ -143,7 +143,7 @@ public class DefaultValidationRuleService
         {
             for ( Period period : periods )
             {
-                validationViolations.addAll( validate( period, source, validationRules, true ) );
+                validationViolations.addAll( validateInternal( period, source, validationRules, true ) );
             }
         }
         
@@ -164,7 +164,7 @@ public class DefaultValidationRuleService
             {                    
                 for ( Period period : relevantPeriods )
                 {
-                    validationViolations.addAll( validate( period, source, relevantRules, false ) );
+                    validationViolations.addAll( validateInternal( period, source, relevantRules, false ) );
                 }
             }
         }
@@ -188,7 +188,7 @@ public class DefaultValidationRuleService
             {
                 for ( Period period : relevantPeriods )
                 {
-                    validationViolations.addAll( validate( period, source, relevantRules, false ) );
+                    validationViolations.addAll( validateInternal( period, source, relevantRules, false ) );
                 }
             }
         }
@@ -206,7 +206,7 @@ public class DefaultValidationRuleService
 
         for ( Period period : relevantPeriods )
         {
-            validationViolations.addAll( validate( period, source, relevantRules, false ) );
+            validationViolations.addAll( validateInternal( period, source, relevantRules, false ) );
         }
         
         return validationViolations;
@@ -214,7 +214,7 @@ public class DefaultValidationRuleService
 
     public Collection<ValidationResult> validate( DataSet dataSet, Period period, Source source )
     {
-        return validate( period, source, getRelevantValidationRules( dataSet.getDataElements() ), false );
+        return validateInternal( period, source, getRelevantValidationRules( dataSet.getDataElements() ), false );
     }
 
     // -------------------------------------------------------------------------
@@ -229,7 +229,7 @@ public class DefaultValidationRuleService
      * @param validationRules the rules to validate.
      * @returns a collection of rules that did not pass validation.
      */
-    private Collection<ValidationResult> validate( final Period period, final Source source,
+    private Collection<ValidationResult> validateInternal( final Period period, final Source source,
         final Collection<ValidationRule> validationRules, boolean aggregate )
     {
         final Collection<ValidationResult> validationResults = new HashSet<ValidationResult>();
