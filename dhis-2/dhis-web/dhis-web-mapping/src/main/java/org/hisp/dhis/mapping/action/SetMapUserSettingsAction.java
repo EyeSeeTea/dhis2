@@ -28,6 +28,7 @@ package org.hisp.dhis.mapping.action;
  */
 
 import static org.hisp.dhis.mapping.MappingService.KEY_MAP_SOURCE_TYPE;
+import static org.hisp.dhis.mapping.MappingService.KEY_MAP_DATE_TYPE;
 
 import org.hisp.dhis.user.UserSettingService;
 
@@ -37,7 +38,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class SetMapSourceTypeUserSettingAction
+public class SetMapUserSettingsAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -61,6 +62,13 @@ public class SetMapSourceTypeUserSettingAction
     {
         this.mapSourceType = mapSourceType;
     }
+    
+    private String mapDateType;
+
+    public void setMapDateType( String mapDateType )
+    {
+        this.mapDateType = mapDateType;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -70,6 +78,8 @@ public class SetMapSourceTypeUserSettingAction
         throws Exception
     {
         userSettingService.saveUserSetting( KEY_MAP_SOURCE_TYPE, mapSourceType );
+        
+        userSettingService.saveUserSetting( KEY_MAP_DATE_TYPE, mapDateType );
         
         return SUCCESS;
     }

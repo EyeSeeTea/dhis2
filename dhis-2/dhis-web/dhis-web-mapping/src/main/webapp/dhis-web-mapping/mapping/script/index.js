@@ -1,11 +1,11 @@
-﻿Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
-
-/* OpenLayers map */
+﻿/* OpenLayers map */
 var MAP;
 /* Center point of the country */
 var BASECOORDINATE;
 /* Geojson, shapefile or database */
 var MAPSOURCE;
+/* Fixed periods or from-to dates */
+var MAPDATETYPE;
 /* A map object */
 var MAPDATA = new Object();
 MAPDATA[thematicMap] = new Object();
@@ -54,13 +54,15 @@ var TOPLEVELUNIT = new Object();
 function getUrlParam(strParamName){var output='';var strHref=window.location.href;if(strHref.indexOf('?')>-1){var strQueryString=strHref.substr(strHref.indexOf('?')).toLowerCase();var aQueryString=strQueryString.split('&');for(var iParam=0;iParam<aQueryString.length;iParam++){if(aQueryString[iParam].indexOf(strParamName.toLowerCase()+'=')>-1){var aParam=aQueryString[iParam].split('=');output=aParam[1];break;}}}return unescape(output);}
 /* Input validation */
 function validateInput(name){return (name.length<=25);}
+/* Date validation */
+function validateDates(startDate,endDate){if(!startDate || !endDate){return true;}return startDate >= endDate ? false : true;}
 /* Decide multiselect height based on screen resolution */
 function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else if(h<=1050){return 310;}else if(h<=1200){return 470;}else{return 900;}}
 /* Make map view numbers numeric */
 function getNumericMapView(mapView){mapView.id=parseFloat(mapView.id);mapView.indicatorGroupId=parseFloat(mapView.indicatorGroupId);mapView.indicatorId=parseFloat(mapView.indicatorId);mapView.periodId=parseFloat(mapView.periodId);mapView.method=parseFloat(mapView.method);mapView.classes=parseFloat(mapView.classes);mapView.mapLegendSetId=parseFloat(mapView.mapLegendSetId);mapView.longitude=parseFloat(mapView.longitude);mapView.latitude=parseFloat(mapView.latitude);mapView.zoom=parseFloat(mapView.zoom);return mapView;}
 /* Toggle feature labels */
 function getActivatedOpenLayersStyleMap(nameColumn) {
-    return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${' + nameColumn + '}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])), 'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
+    return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${labelString}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])), 'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
 }
 function getDeactivatedOpenLayersStyleMap() {
     return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
@@ -144,6 +146,7 @@ function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';js
 function getLegendsJSON(){var legends=choropleth.imageLegend;var json='{';json+='"legends":';json+='[';for(var i=0;i<choropleth.imageLegend.length;i++){json+='{';json+='"label": "'+choropleth.imageLegend[i].label+'",';json+='"color": "'+choropleth.imageLegend[i].color+'" ';json+=i<choropleth.imageLegend.length-1?'},':'}'}json+=']';json+='}';return json}
 
 Ext.onReady( function() {
+    Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
 	/* Cookie provider */
 	Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 	/* Ext 3.2.0 override */
@@ -211,18 +214,21 @@ Ext.onReady( function() {
 				params: { id: mapViewParam },
 				success: function(r) {
 					var mst = Ext.util.JSON.decode(r.responseText).mapView[0].mapSourceType;
+                    var mdt = Ext.util.JSON.decode(r.responseText).mapView[0].mapDateType;
 					
 					Ext.Ajax.request({
-						url: path_mapping + 'getMapSourceTypeUserSetting' + type,
+						url: path_mapping + 'getMapUserSettings' + type,
 						method: 'GET',
 						success: function(r) {
-							var ms = Ext.util.JSON.decode(r.responseText).mapSource;
-							MAPSOURCE = PARAMETER ? mst : ms;
-							
+							var mst_ss = Ext.util.JSON.decode(r.responseText).mapSource;
+                            var mdt_ss = Ext.util.JSON.decode(r.responseText).mapDateType;
+							MAPSOURCE = PARAMETER ? mst : mst_ss;
+                            MAPDATETYPE = PARAMETER ? mdt : mdt_ss;
+                            
 							Ext.Ajax.request({
-								url: path_mapping + 'setMapSourceTypeUserSetting' + type,
+								url: path_mapping + 'setMapUserSettings' + type,
 								method: 'POST',
-								params: { mapSourceType: MAPSOURCE },
+								params: { mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE },
 								success: function() {
 			
 	/* Section: mapview */
@@ -249,12 +255,14 @@ Ext.onReady( function() {
 				handler: function() {
 					var vn = Ext.getCmp('viewname_tf').getValue();
                     var mvt = Ext.getCmp('mapvaluetype_cb').getValue();
-					var ig = mvt == map_value_type_indicator ? Ext.getCmp('indicatorgroup_cb').getValue() : 0;
-					var ii = mvt == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : 0;
-                    var deg = mvt == map_value_type_dataelement ? Ext.getCmp('dataelementgroup_cb').getValue() : 0;
-					var de = mvt == map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : 0;
-					var pt = Ext.getCmp('periodtype_cb').getValue();
-					var p = Ext.getCmp('period_cb').getValue();
+					var ig = mvt == map_value_type_indicator ? Ext.getCmp('indicatorgroup_cb').getValue() : '';
+					var ii = mvt == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : '';
+                    var deg = mvt == map_value_type_dataelement ? Ext.getCmp('dataelementgroup_cb').getValue() : '';
+					var de = mvt == map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : '';
+					var pt = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('periodtype_cb').getValue() : '';
+					var p = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : '';
+                    var sd = MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : '';
+                    var ed = MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : '';
 					var ms = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue();
 					var mlt = Ext.getCmp('maplegendtype_cb').getValue();
                     var m = Ext.getCmp('method_cb').getValue();
@@ -262,7 +270,7 @@ Ext.onReady( function() {
                     var b = Ext.getCmp('bounds_tf').getValue() || '';
 					var ca = Ext.getCmp('colorA_cf').getValue();
 					var cb = Ext.getCmp('colorB_cf').getValue();
-					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || 0;
+					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || '';
 					var lon = MAP.getCenter().lon;
 					var lat = MAP.getCenter().lat;
 					var zoom = parseInt(MAP.getZoom());
@@ -276,11 +284,39 @@ Ext.onReady( function() {
                         Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
 						return;
 					}
+                    
+                    if (MAPDATETYPE == map_date_type_fixed) {
+                        if (!p) {
+                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                            return;
+                        }
+					}
+                    else {
+                        if (!Ext.getCmp('startdate_df').getValue() || !Ext.getCmp('enddate_df').getValue()) {
+                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                            return;
+                        }
+					}
 					
-					if (!pt || !p || !ms || !c) {
+					if (!ms) {
 						Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
 						return;
 					}
+                    
+                    if (mlt == map_legend_type_automatic) {
+                        if (m == classify_with_bounds) {
+                            if (!b) {
+                                Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                                return;
+                            }
+                        }
+                    }
+                    else {
+                        if (!mlsid) {
+                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                            return;
+                        }
+                    }
 					
 					if (validateInput(vn) == false) {
 						Ext.message.msg(false, i18n_map_view_name_cannot_be_longer_than_25_characters );
@@ -303,7 +339,29 @@ Ext.onReady( function() {
 							Ext.Ajax.request({
 								url: path_mapping + 'addOrUpdateMapView' + type,
 								method: 'POST',
-								params: { name: vn, mapValueType: mvt, indicatorGroupId: ig, indicatorId: ii, dataElementGroupId: deg, dataElementId: de, periodTypeId: pt, periodId: p, mapSource: ms, mapLegendType: mlt, method: m, classes: c, bounds: b, colorLow: ca, colorHigh: cb, mapLegendSetId: mlsid, longitude: lon, latitude: lat, zoom: zoom },
+								params: {
+                                    name: vn,
+                                    mapValueType: mvt,
+                                    indicatorGroupId: ig,
+                                    indicatorId: ii,
+                                    dataElementGroupId: deg,
+                                    dataElementId: de,
+                                    periodTypeId: pt,
+                                    periodId: p,
+                                    startDate: sd,
+                                    endDate: ed,
+                                    mapSource: ms,
+                                    mapLegendType: mlt,
+                                    method: m,
+                                    classes: c,
+                                    bounds: b,
+                                    colorLow: ca,
+                                    colorHigh: cb,
+                                    mapLegendSetId: mlsid,
+                                    longitude: lon,
+                                    latitude: lat,
+                                    zoom: zoom
+                                },
 								success: function(r) {
 									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().load();
@@ -2605,7 +2663,7 @@ Ext.onReady( function() {
 						displayField: 'text',
 						isFormField: true,
 						width: combo_width_fieldset,
-						minListWidth: combo_list_width_fieldset,
+						minListWidth: combo_width_fieldset,
 						mode: 'local',
 						triggerAction: 'all',
 						value: MAPSOURCE,
@@ -2620,13 +2678,13 @@ Ext.onReady( function() {
 									var msrw = Ext.getCmp('mapsource_cb').getRawValue();
 
 									if (MAPSOURCE != msv) {
-                                        MAPSOURCE = msv;
-
                                         Ext.Ajax.request({
-                                            url: path_mapping + 'setMapSourceTypeUserSetting' + type,
+                                            url: path_mapping + 'setMapUserSettings' + type,
 											method: 'POST',
-											params: { mapSourceType: msv },
+											params: {mapSourceType: msv, mapDateType: MAPDATETYPE },
 											success: function(r) {
+                                                MAPSOURCE = msv;
+                                                
 												Ext.getCmp('map_cb').getStore().load();
 												Ext.getCmp('maps_cb').getStore().load();
 												Ext.getCmp('mapview_cb').getStore().load();
@@ -2804,7 +2862,77 @@ Ext.onReady( function() {
 						}
 					}
 				]
-			}
+			},
+            
+			{
+				xtype:'fieldset',
+				columnWidth: 0.5,
+				title: '&nbsp;<span class="panel-tab-title">'+i18n_date_type+'</span>&nbsp;',
+				collapsible: true,
+				animCollapse: true,
+				autoHeight:true,
+				items: [
+                    {
+                        xtype: 'combo',
+                        id: 'mapdatetype_cb',
+                        fieldLabel: i18n_date_type,
+                        labelSeparator: labelseparator,
+                        editable: false,
+                        valueField: 'value',
+                        displayField: 'text',
+                        mode: 'local',
+                        value: map_date_type_fixed,
+                        triggerAction: 'all',
+						width: combo_width_fieldset,
+						minListWidth: combo_width_fieldset,
+                        store: new Ext.data.SimpleStore({
+                            fields: ['value', 'text'],
+                            data: [[map_date_type_fixed, 'Fixed periods'], [map_date_type_start_end, 'Start-end date']]
+                        }),
+                        listeners: {
+                            'select': {
+                                fn: function() {
+                                    var mdtv = Ext.getCmp('mapdatetype_cb').getValue();
+                                    var mdtrv = Ext.getCmp('mapdatetype_cb').getRawValue();
+                                    
+                                    if (mdtv != MAPDATETYPE) {
+                                        Ext.Ajax.request({
+                                            url: path_mapping + 'setMapUserSettings' + type,
+                                            method: 'POST',
+                                            params: {mapSourceType: MAPSOURCE, mapDateType: mdtv},
+                                            success: function() {
+                                                MAPDATETYPE = mdtv;
+                                                Ext.message.msg(true, '<span class="x-msg-hl">' + mdtrv + '</span> '+i18n_saved_as_date_type);
+                                                
+                                                if (MAPDATETYPE == map_date_type_fixed) {
+                                                    Ext.getCmp('periodtype_cb').showField();
+                                                    Ext.getCmp('periodtype_cb2').showField();
+                                                    Ext.getCmp('period_cb').showField();
+                                                    Ext.getCmp('period_cb2').showField();
+                                                    Ext.getCmp('startdate_df').hideField();
+                                                    Ext.getCmp('startdate_df2').hideField();
+                                                    Ext.getCmp('enddate_df').hideField();
+                                                    Ext.getCmp('enddate_df2').hideField();
+                                                }
+                                                else if (MAPDATETYPE == map_date_type_start_end) {
+                                                    Ext.getCmp('periodtype_cb').hideField();
+                                                    Ext.getCmp('periodtype_cb2').hideField();
+                                                    Ext.getCmp('period_cb').hideField();
+                                                    Ext.getCmp('period_cb2').hideField();
+                                                    Ext.getCmp('startdate_df').showField();
+                                                    Ext.getCmp('startdate_df2').showField();
+                                                    Ext.getCmp('enddate_df').showField();
+                                                    Ext.getCmp('enddate_df2').showField();
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
         ],
         listeners: {
             expand: {
@@ -3752,12 +3880,35 @@ Ext.onReady( function() {
         Ext.getCmp('map_tf2').showField();
     }
     else {
-        Ext.getCmp('map_cb').showField();
+        Ext.getCmp('map_cb').showField()
         Ext.getCmp('map_cb2').showField();
         Ext.getCmp('map_tf').hideField();
         Ext.getCmp('map_tf2').hideField();
     }
-	
+    
+    Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
+    
+    if (MAPDATETYPE == map_date_type_fixed) {
+        Ext.getCmp('periodtype_cb').showField();
+        Ext.getCmp('periodtype_cb2').showField();
+        Ext.getCmp('period_cb').showField();
+        Ext.getCmp('period_cb2').showField();
+        Ext.getCmp('startdate_df').hideField();
+        Ext.getCmp('startdate_df2').hideField();
+        Ext.getCmp('enddate_df').hideField();
+        Ext.getCmp('enddate_df2').hideField();
+    }
+    else {
+        Ext.getCmp('periodtype_cb').hideField();
+        Ext.getCmp('periodtype_cb2').hideField();
+        Ext.getCmp('period_cb').hideField();
+        Ext.getCmp('period_cb2').hideField();
+        Ext.getCmp('startdate_df').showField();
+        Ext.getCmp('startdate_df2').showField();
+        Ext.getCmp('enddate_df').showField();
+        Ext.getCmp('enddate_df2').showField();
+    }
+    
     Ext.get('loading').fadeOut({remove: true});
 	
 	}});
@@ -3767,214 +3918,214 @@ Ext.onReady( function() {
 });
 
 /* Section: select features */
-var popup;
+// var popup;
 
-var featureWindow = new Ext.Window({
-    closeAction: 'hide',
-    items: [
-        {
-            xtype: 'menu',
-            id: 'feature_m',
-            floating: false,
-            items: [
-                {
-                    html: 'Centre orgunit in the map',
-                    iconCls: 'no-icon',
-                    listeners: {
-                        'click': {
-                            fn: function() {
-                                MAP.setCenter(FEATURE.geometry.getBounds().getCenterLonLat());
-                            }
-                        }
-                    }
-                },
-                {
-                    html: 'Indicator value timeseries',
-                    iconCls: 'no-icon',
-                    listeners: {
-                        'click': {
-                            fn: function() {
-                                periodWindow.setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 135);
-                                periodWindow.show();
-                            }
-                        }
-                    }
-                }
-            ]
-        }
-    ]
-});
+// var featureWindow = new Ext.Window({
+    // closeAction: 'hide',
+    // items: [
+        // {
+            // xtype: 'menu',
+            // id: 'feature_m',
+            // floating: false,
+            // items: [
+                // {
+                    // html: 'Centre orgunit in the map',
+                    // iconCls: 'no-icon',
+                    // listeners: {
+                        // 'click': {
+                            // fn: function() {
+                                // MAP.setCenter(FEATURE.geometry.getBounds().getCenterLonLat());
+                            // }
+                        // }
+                    // }
+                // },
+                // {
+                    // html: 'Indicator value timeseries',
+                    // iconCls: 'no-icon',
+                    // listeners: {
+                        // 'click': {
+                            // fn: function() {
+                                // periodWindow.setPagePosition(Ext.getCmp('east').x - 262, Ext.getCmp('center').y + 135);
+                                // periodWindow.show();
+                            // }
+                        // }
+                    // }
+                // }
+            // ]
+        // }
+    // ]
+// });
 
-var periodTypeTimeseriesStore = new Ext.data.JsonStore({
-    url: path_mapping + 'getAllPeriodTypes' + type,
-    root: 'periodTypes',
-    fields: ['name'],
-    autoLoad: true
-});
+// var periodTypeTimeseriesStore = new Ext.data.JsonStore({
+    // url: path_mapping + 'getAllPeriodTypes' + type,
+    // root: 'periodTypes',
+    // fields: ['name'],
+    // autoLoad: true
+// });
 
-var periodTimeseriesStore = new Ext.data.JsonStore({
-    url: path_mapping + 'getPeriodsByPeriodType' + type,
-    baseParams: { name: 0 },
-    root: 'periods',
-    fields: ['id', 'name', 'value'],
-    autoLoad: false                
-});
+// var periodTimeseriesStore = new Ext.data.JsonStore({
+    // url: path_mapping + 'getPeriodsByPeriodType' + type,
+    // baseParams: { name: 0 },
+    // root: 'periods',
+    // fields: ['id', 'name', 'value'],
+    // autoLoad: false                
+// });
 
-var periodWindow = new Ext.Window({
-    title: 'Select periods',
-    closeAction: 'hide',
-    defaults: { bodyStyle: 'padding:8px; border:0px' },
-    width: 250,
-    items: [
-        {
-            xtype: 'panel',
-            items: [
-                { html: '<div class="window-field-label-first">Period type</div>' },
-                {
-                    xtype: 'combo',
-                    id: 'periodtypetimeseries_cb',
-                    fieldLabel: 'Period type',
-                    typeAhead: true,
-                    editable: false,
-                    valueField: 'name',
-                    displayField: 'name',
-                    mode: 'remote',
-                    forceSelection: true,
-                    triggerAction: 'all',
-                    emptyText: emptytext,
-                    labelSeparator: labelseparator,
-                    selectOnFocus: true,
-                    width: combo_width,
-                    store: periodTypeTimeseriesStore,
-                    listeners: {
-                        'select': {
-                            fn: function() {
-                                var pt = Ext.getCmp('periodtypetimeseries_cb').getValue();
-                                periodTimeseriesStore.baseParams = { name: pt };
-                                periodTimeseriesStore.load();
-                            },
-                            scope: this
-                        }
-                    }
-                },
-                { html: '<div class="window-field-label">Periods</div>' },
-                {
-                    xtype: 'multiselect',
-                    id: 'periodstimeseries_ms',
-                    dataFields: ['id', 'name'],
-                    valueField: 'id',
-                    displayField: 'name',
-                    width: multiselect_width,
-                    height: getMultiSelectHeight(),
-                    store: periodTimeseriesStore
-                },
-                { html: '<div class="window-field-label">Window width</div>' },
-                {
-                    xtype: 'textfield',
-                    id: 'timeserieswindowwidth_tf',
-                    value: 800,
-                    width: combo_number_width
-                },
-                { html: '<div class="window-field-label">Window height</div>' },
-                {
-                    xtype: 'textfield',
-                    id: 'timeserieswindowheight_tf',
-                    value: 400,
-                    width: combo_number_width
-                },
-                {
-                    xtype: 'button',
-                    id: 'timeseries_b',
-                    isFormField: true,
-                    hideLabel: true,
-                    cls: 'window-button',
-                    text: 'Create graph',
-                    handler: function() {
-                        var iid = Ext.getCmp('indicator_cb').getValue();
-                        var pids = Ext.getCmp('periodstimeseries_ms').getValue();
+// var periodWindow = new Ext.Window({
+    // title: 'Select periods',
+    // closeAction: 'hide',
+    // defaults: { bodyStyle: 'padding:8px; border:0px' },
+    // width: 250,
+    // items: [
+        // {
+            // xtype: 'panel',
+            // items: [
+                // { html: '<div class="window-field-label-first">Period type</div>' },
+                // {
+                    // xtype: 'combo',
+                    // id: 'periodtypetimeseries_cb',
+                    // fieldLabel: 'Period type',
+                    // typeAhead: true,
+                    // editable: false,
+                    // valueField: 'name',
+                    // displayField: 'name',
+                    // mode: 'remote',
+                    // forceSelection: true,
+                    // triggerAction: 'all',
+                    // emptyText: emptytext,
+                    // labelSeparator: labelseparator,
+                    // selectOnFocus: true,
+                    // width: combo_width,
+                    // store: periodTypeTimeseriesStore,
+                    // listeners: {
+                        // 'select': {
+                            // fn: function() {
+                                // var pt = Ext.getCmp('periodtypetimeseries_cb').getValue();
+                                // periodTimeseriesStore.baseParams = { name: pt };
+                                // periodTimeseriesStore.load();
+                            // },
+                            // scope: this
+                        // }
+                    // }
+                // },
+                // { html: '<div class="window-field-label">Periods</div>' },
+                // {
+                    // xtype: 'multiselect',
+                    // id: 'periodstimeseries_ms',
+                    // dataFields: ['id', 'name'],
+                    // valueField: 'id',
+                    // displayField: 'name',
+                    // width: multiselect_width,
+                    // height: getMultiSelectHeight(),
+                    // store: periodTimeseriesStore
+                // },
+                // { html: '<div class="window-field-label">Window width</div>' },
+                // {
+                    // xtype: 'textfield',
+                    // id: 'timeserieswindowwidth_tf',
+                    // value: 800,
+                    // width: combo_number_width
+                // },
+                // { html: '<div class="window-field-label">Window height</div>' },
+                // {
+                    // xtype: 'textfield',
+                    // id: 'timeserieswindowheight_tf',
+                    // value: 400,
+                    // width: combo_number_width
+                // },
+                // {
+                    // xtype: 'button',
+                    // id: 'timeseries_b',
+                    // isFormField: true,
+                    // hideLabel: true,
+                    // cls: 'window-button',
+                    // text: 'Create graph',
+                    // handler: function() {
+                        // var iid = Ext.getCmp('indicator_cb').getValue();
+                        // var pids = Ext.getCmp('periodstimeseries_ms').getValue();
                         
-                        var pidArray = new Array();
-                        pidArray = pids.split(',');
+                        // var pidArray = new Array();
+                        // pidArray = pids.split(',');
                         
-                        var pnameArray = new Array();
-                        for (var i = 0; i < pidArray.length; i++) {
-                            pnameArray[i] = [i, periodTimeseriesStore.getById(pidArray[i]).data.name];
-                        }
+                        // var pnameArray = new Array();
+                        // for (var i = 0; i < pidArray.length; i++) {
+                            // pnameArray[i] = [i, periodTimeseriesStore.getById(pidArray[i]).data.name];
+                        // }
                         
-                        setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL);
-                        mapValueTimeseriesStore.load();
-                    }
-                }
-            ]
-        }
-    ]
-});
+                        // setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL);
+                        // mapValueTimeseriesStore.load();
+                    // }
+                // }
+            // ]
+        // }
+    // ]
+// });
 
-var mapValueTimeseriesStore;
+// var mapValueTimeseriesStore;
 
-function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
-    var params = pidArray[0];
-    if (pidArray.length > 1) {
-        for (var i = 1; i < pidArray.length; i++) {
-            params += '&periodIds=' + pidArray[i];
-        }
-    }
+// function setMapValueTimeseriesStore(iid, pidArray, pnameArray, URL) {
+    // var params = pidArray[0];
+    // if (pidArray.length > 1) {
+        // for (var i = 1; i < pidArray.length; i++) {
+            // params += '&periodIds=' + pidArray[i];
+        // }
+    // }
     
-    mapValueTimeseriesStore = new Ext.data.JsonStore({
-        url: path_mapping + 'getIndicatorMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
-        root: 'mapvalues',
-        fields:['orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
-        autoLoad: false,
-        listeners: {
-            'load': {
-                fn: function() {
-                    var title = FEATURE.attributes[MAPDATA.nameColumn];
-                    var indicator = Ext.getCmp('indicator_cb').getRawValue();
+    // mapValueTimeseriesStore = new Ext.data.JsonStore({
+        // url: path_mapping + 'getIndicatorMapValuesByMapAndFeatureId' + type + '?indicatorId=' + iid + '&mapLayerPath=' + URL + '&featureId=' + FEATURE.attributes[MAPDATA.nameColumn] + '&periodIds=' + params,
+        // root: 'mapvalues',
+        // fields:['orgUnitId', 'orgUnitName', 'featureId', 'periodId', 'value'],
+        // autoLoad: false,
+        // listeners: {
+            // 'load': {
+                // fn: function() {
+                    // var title = FEATURE.attributes[MAPDATA.nameColumn];
+                    // var indicator = Ext.getCmp('indicator_cb').getRawValue();
                     
-                    var valueArray = new Array();
-                    for (var i = 0; i < pidArray.length; i++) {
-                        for (var j = 0; j < mapValueTimeseriesStore.getCount(); j++) {
-                            if (mapValueTimeseriesStore.getAt(j).data.periodId == pidArray[i]) {
-                                valueArray[i] = [i, parseFloat(mapValueTimeseriesStore.getAt(j).data.value)];
-                            }
-                        }
-                    }
+                    // var valueArray = new Array();
+                    // for (var i = 0; i < pidArray.length; i++) {
+                        // for (var j = 0; j < mapValueTimeseriesStore.getCount(); j++) {
+                            // if (mapValueTimeseriesStore.getAt(j).data.periodId == pidArray[i]) {
+                                // valueArray[i] = [i, parseFloat(mapValueTimeseriesStore.getAt(j).data.value)];
+                            // }
+                        // }
+                    // }
 
-                    CHART = getChart(title + ', ' + indicator, pnameArray, FEATURE.attributes[MAPDATA.nameColumn], valueArray);
-                    CHART.show();
-                }
-            }
-        }
-    });
-}
+                    // CHART = getChart(title + ', ' + indicator, pnameArray, FEATURE.attributes[MAPDATA.nameColumn], valueArray);
+                    // CHART.show();
+                // }
+            // }
+        // }
+    // });
+// }
 
-function getChart(title, pnameArray, name, valueArray) {
-    var width = Ext.getCmp('timeserieswindowwidth_tf').getValue() || 800;
-    var height = Ext.getCmp('timeserieswindowheight_tf').getValue() || 400;
+// function getChart(title, pnameArray, name, valueArray) {
+    // var width = Ext.getCmp('timeserieswindowwidth_tf').getValue() || 800;
+    // var height = Ext.getCmp('timeserieswindowheight_tf').getValue() || 400;
     
-    return new Ext.Window({
-        title: title,
-        defaults: { bodyStyle: 'padding:10px 32px 12px 22px; border:0px' },
-        items: [{
-            xtype: 'panel',
-            items: [{
-                xtype: 'flot',
-                width: 1000,
-                height: 300,
-                series: [valueArray],
-                xaxis: {
-                    ticks: pnameArray
-                }
-            }]
-        }]
-    });
-}
+    // return new Ext.Window({
+        // title: title,
+        // defaults: { bodyStyle: 'padding:10px 32px 12px 22px; border:0px' },
+        // items: [{
+            // xtype: 'panel',
+            // items: [{
+                // xtype: 'flot',
+                // width: 1000,
+                // height: 300,
+                // series: [valueArray],
+                // xaxis: {
+                    // ticks: pnameArray
+                // }
+            // }]
+        // }]
+    // });
+// }
 
-var chartWindow = new Ext.Window({
-    closeAction: 'hide',
-    defaults: { bodyStyle: 'padding:8px; border:0px' },
-    items: CHART
-});
+// var chartWindow = new Ext.Window({
+    // closeAction: 'hide',
+    // defaults: { bodyStyle: 'padding:8px; border:0px' },
+    // items: CHART
+// });
 
 /* Section: select features */
 function onHoverSelectPolygon(feature) {
@@ -3993,11 +4144,10 @@ function onHoverUnselectPolygon(feature) {
 }
 
 function onClickSelectPolygon(feature) {
-
 // function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
 // var l = MAP.getLayersByName('Polygon layer')[0];
 // l.drawFeature(feature,{'fillColor':'blue'});
-    
+
     FEATURE[thematicMap] = feature;
 
 	var east_panel = Ext.getCmp('east');

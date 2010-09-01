@@ -103,16 +103,16 @@
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>
 
-		<action name="setMapSourceTypeUserSetting"
-			class="org.hisp.dhis.mapping.action.SetMapSourceTypeUserSettingAction">
+        <action name="getMapUserSettings"
+            class="org.hisp.dhis.mapping.action.GetMapUserSettingsAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonUserSettings.vm</result>
+        </action>
+
+		<action name="setMapUserSettings"
+			class="org.hisp.dhis.mapping.action.SetMapUserSettingsAction">
 			<result name="success" type="velocity-json">/dhis-web-mapping/void.vm
 			</result>
-		</action>
-
-		<action name="getMapSourceTypeUserSetting"
-			class="org.hisp.dhis.mapping.action.GetMapSourceTypeUserSettingAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-mapping/jsonUserSetting.vm</result>
 		</action>
 
 		<action name="getBaseCoordinate"
