@@ -363,7 +363,7 @@ Ext.onReady( function() {
                                     zoom: zoom
                                 },
 								success: function(r) {
-									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
+									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered + '.');
 									Ext.getCmp('view_cb').getStore().load();
 									Ext.getCmp('mapview_cb').getStore().load();
 									Ext.getCmp('viewname_tf').reset();
@@ -932,7 +932,7 @@ Ext.onReady( function() {
                         params: { id: ls },
 
                         success: function(r) {
-                            Ext.message.msg(true, i18n_legend_set+'<span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
+                            Ext.message.msg(true, i18n_legend_set+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             Ext.getCmp('automaticmaplegendset_cb').getStore().load();
                         },
                         failure: function() {
@@ -2887,7 +2887,7 @@ Ext.onReady( function() {
 						minListWidth: combo_width_fieldset,
                         store: new Ext.data.SimpleStore({
                             fields: ['value', 'text'],
-                            data: [[map_date_type_fixed, 'Fixed periods'], [map_date_type_start_end, 'Start-end date']]
+                            data: [[map_date_type_fixed, i18n_fixed_periods], [map_date_type_start_end, i18n_start_end_dates]]
                         }),
                         listeners: {
                             'select': {
