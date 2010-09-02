@@ -4164,7 +4164,19 @@ function onClickSelectPolygon(feature) {
             }
         }
         
-        choropleth.loadFromDatabase(Ext.getCmp('map_tf').value);        
+        choropleth.loadFromDatabase(Ext.getCmp('map_tf').value);
+    }
+    else if (ACTIVEPANEL == thematicMap2 && MAPSOURCE == map_source_type_database) {
+        Ext.getCmp('map_tf2').setValue(feature.data.name);
+        
+        for (var i = 0; i < feature.layer.features.length; i++) {
+            if (feature.data.name == feature.layer.features[i].attributes.name) {
+                Ext.getCmp('map_tf2').value = feature.layer.features[i].attributes.id;
+                break;
+            }
+        }
+        
+        proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
     }
     else if (ACTIVEPANEL == organisationUnitAssignment) {
 		if (popup) {

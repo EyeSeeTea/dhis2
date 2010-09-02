@@ -370,6 +370,7 @@
 			<result name="Point" type="velocity-json">/dhis-web-mapping/pointShapefile.vm</result>
 			<result name="Polygon" type="velocity-json">/dhis-web-mapping/polygonShapefile.vm</result>
 			<result name="MultiPolygon" type="velocity-json">/dhis-web-mapping/polygonShapefile.vm</result>
+			<result name="None" type="velocity-json">/dhis-web-mapping/polygonShapefile.vm</result>
 		</action>
 
 		<action name="getGeoJsonFromFile"
