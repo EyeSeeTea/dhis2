@@ -363,7 +363,7 @@ Ext.onReady( function() {
                                     zoom: zoom
                                 },
 								success: function(r) {
-									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
+									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered + '.');
 									Ext.getCmp('view_cb').getStore().load();
 									Ext.getCmp('mapview_cb').getStore().load();
 									Ext.getCmp('viewname_tf').reset();
@@ -932,7 +932,7 @@ Ext.onReady( function() {
                         params: { id: ls },
 
                         success: function(r) {
-                            Ext.message.msg(true, i18n_legend_set+'<span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
+                            Ext.message.msg(true, i18n_legend_set+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             Ext.getCmp('automaticmaplegendset_cb').getStore().load();
                         },
                         failure: function() {
@@ -2887,7 +2887,7 @@ Ext.onReady( function() {
 						minListWidth: combo_width_fieldset,
                         store: new Ext.data.SimpleStore({
                             fields: ['value', 'text'],
-                            data: [[map_date_type_fixed, 'Fixed periods'], [map_date_type_start_end, 'Start-end date']]
+                            data: [[map_date_type_fixed, i18n_fixed_periods], [map_date_type_start_end, i18n_start_end_dates]]
                         }),
                         listeners: {
                             'select': {
@@ -4153,8 +4153,32 @@ function onClickSelectPolygon(feature) {
 	var east_panel = Ext.getCmp('east');
 	var x = east_panel.x - 210;
 	var y = east_panel.y + 41;
-	
-    if (ACTIVEPANEL == organisationUnitAssignment) {
+    
+    if (ACTIVEPANEL == thematicMap && MAPSOURCE == map_source_type_database) {
+        Ext.getCmp('map_tf').setValue(feature.data.name);
+        
+        for (var i = 0; i < feature.layer.features.length; i++) {
+            if (feature.data.name == feature.layer.features[i].attributes.name) {
+                Ext.getCmp('map_tf').value = feature.layer.features[i].attributes.id;
+                break;
+            }
+        }
+        
+        choropleth.loadFromDatabase(Ext.getCmp('map_tf').value);
+    }
+    else if (ACTIVEPANEL == thematicMap2 && MAPSOURCE == map_source_type_database) {
+        Ext.getCmp('map_tf2').setValue(feature.data.name);
+        
+        for (var i = 0; i < feature.layer.features.length; i++) {
+            if (feature.data.name == feature.layer.features[i].attributes.name) {
+                Ext.getCmp('map_tf2').value = feature.layer.features[i].attributes.id;
+                break;
+            }
+        }
+        
+        proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
+    }
+    else if (ACTIVEPANEL == organisationUnitAssignment) {
 		if (popup) {
 			popup.destroy();
 		}

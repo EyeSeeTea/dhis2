@@ -919,7 +919,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'datefield',
             id: 'startdate_df',
-            fieldLabel: 'Start date',
+            fieldLabel: i18n_start_date,
             format: 'Y-m-d',
             hidden: true,
             emptyText: emptytext,
@@ -938,7 +938,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'datefield',
             id: 'enddate_df',
-            fieldLabel: 'End date',
+            fieldLabel: i18n_end_date,
             format: 'Y-m-d',
             hidden: true,
             emptyText: emptytext,
