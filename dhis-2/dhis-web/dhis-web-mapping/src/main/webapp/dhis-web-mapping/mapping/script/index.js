@@ -4153,8 +4153,20 @@ function onClickSelectPolygon(feature) {
 	var east_panel = Ext.getCmp('east');
 	var x = east_panel.x - 210;
 	var y = east_panel.y + 41;
-	
-    if (ACTIVEPANEL == organisationUnitAssignment) {
+    
+    if (ACTIVEPANEL == thematicMap && MAPSOURCE == map_source_type_database) {
+        Ext.getCmp('map_tf').setValue(feature.data.name);
+        
+        for (var i = 0; i < feature.layer.features.length; i++) {
+            if (feature.data.name == feature.layer.features[i].attributes.name) {
+                Ext.getCmp('map_tf').value = feature.layer.features[i].attributes.id;
+                break;
+            }
+        }
+        
+        choropleth.loadFromDatabase(Ext.getCmp('map_tf').value);        
+    }
+    else if (ACTIVEPANEL == organisationUnitAssignment) {
 		if (popup) {
 			popup.destroy();
 		}
