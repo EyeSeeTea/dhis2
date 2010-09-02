@@ -28,8 +28,6 @@ package org.hisp.dhis.startup;
  */
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -179,20 +177,11 @@ public class TableAlteror
         }
 
         // Working on Section table
-        if ( isColumnExist( "section", "title" ) )
-        {
-            executeSql( "ALTER TABLE section DROP COLUMN title;" );
-
-            log.info( "Successfully, removed column 'title' from table 'section'" );
-        }
+        executeSql( "ALTER TABLE section DROP COLUMN title;" );
 
         // Working on ConceptName
-        /*if ( isColumnExist( "dataelementcategory", "conceptname" ) )
-        {
-            executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptname;" );
-
-            log.info( "Successfully, removed column 'conceptname' from table 'dataelementcategory'" );
-        }*/
+        // executeSql( "ALTER TABLE dataelementcategory DROP COLUMN
+        // conceptname;" );
 
         log.info( "Tables updated" );
     }
@@ -368,36 +357,5 @@ public class TableAlteror
             holder.close();
         }
 
-    }
-
-    /*
-     * Ex: table "dataelementcategory", columnName is "conceptname"
-     */
-    private boolean isColumnExist( String table, String columnName )
-    {
-        final StatementHolder holder = statementManager.getHolder();
-
-        try
-        {
-            ResultSet rs = holder.getStatement().executeQuery( "SELECT * FROM " + table + " LIMIT 1;" );
-            ResultSetMetaData rsmd = rs.getMetaData();
-
-            int columnNo = rsmd.getColumnCount();
-
-            if ( columnNo > 0 )
-            {
-                return rsmd.getColumnName( columnNo - 1 ).equalsIgnoreCase( columnName );
-            }
-        }
-        catch ( SQLException e )
-        {
-            log.debug( e );
-        }
-        finally
-        {
-            holder.close();
-        }
-
-        return false;
     }
 }
