@@ -551,25 +551,6 @@ Ext.onReady( function() {
 			},
 			{
 				xtype: 'combo',
-				id: 'exportimageformat_cb',
-				fieldLabel: i18n_image_format,
-				labelSeparator: labelseparator,
-				editable: false,
-				valueField: 'id',
-				displayField: 'text',
-				isFormField: true,
-				width: combo_width_fieldset,
-				minListWidth: combo_list_width_fieldset,
-				mode: 'local',
-				triggerAction: 'all',
-				value: 'image/jpeg',
-				store: new Ext.data.SimpleStore({
-					fields: ['id', 'text'],
-					data: [['image/png', 'PNG'], ['image/jpeg', 'JPEG']]
-				})					
-			},
-			{
-				xtype: 'combo',
 				id: 'exportimagequality_cb',
 				fieldLabel: i18n_image_quality,
 				labelSeparator: labelseparator,
@@ -604,52 +585,59 @@ Ext.onReady( function() {
 				cls: 'window-button',
 				text: i18n_export_image,
 				handler: function() {
-                    var cb = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+                    var vcb, dcb, mcb, lcb, period;
+                    if (ACTIVEPANEL == thematicMap) {
+                        vcb = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+                        dcb = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : Ext.getCmp('startdate_df').getValue() && Ext.getCmp('startdate_df').getValue() ? true : false;
+                        period = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : Ext.getCmp('startdate_df').getValue() + ' - ' + Ext.getCmp('enddate_df').getValue();
+                        mcb = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf').getValue() : Ext.getCmp('map_cb').getValue();
+                        lcb = Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegend_cb').getValue() ? true : false;
+                    }
+                    else if (ACTIVEPANEL == thematicMap2) {
+                        vcb = Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
+                        dcb = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb2').getValue() : Ext.getCmp('startdate_df2').getValue() && Ext.getCmp('startdate_df2').getValue() ? true : false;
+                        period = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb2').getValue() : Ext.getCmp('startdate_df2').getValue() + ' - ' + Ext.getCmp('enddate_df2').getValue();
+                        mcb = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf2').getValue() : Ext.getCmp('map_cb2').getValue();
+                        lcb = Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegend_cb2').getValue() ? true : false;
+                    }
 
-                    if (ACTIVEPANEL == thematicMap
-                        && cb
-						&& Ext.getCmp('period_cb').getValue() 
-						&& Ext.getCmp('map_cb').getValue()) {
+                    if (vcb && dcb && mcb && lcb) {
+                        var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
+                        var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
+                        var viewBox = objectSVGDocument.getAttribute('viewBox');
+                        var title = Ext.getCmp('exportimagetitle_tf').getValue();
+                    
+                        if (!title) {
+                            Ext.message.msg(false, i18n_please_enter_map_title );
+                        }
+                        else {
+                            var q = Ext.getCmp('exportimagequality_cb').getValue();
+                            var w = objectSVGDocument.getAttribute('width') * q;
+                            var h = objectSVGDocument.getAttribute('height') * q;
+                            var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
+                            
+                            Ext.getCmp('exportimagetitle_tf').reset();
+                            
+                            var exportForm = document.getElementById('exportForm');
+                            exportForm.action = '../exportImage.action';
+                            exportForm.target = '_blank';
+                            
+                            document.getElementById('titleField').value = title;   
+                            document.getElementById('viewBoxField').value = viewBox;  
+                            document.getElementById('svgField').value = svg;  
+                            document.getElementById('widthField').value = w;  
+                            document.getElementById('heightField').value = h;  
+                            document.getElementById('includeLegendsField').value = includeLegend;  
+                            document.getElementById('periodField').value = period;  
+                            document.getElementById('indicatorField').value = vcb; 
+                            document.getElementById('legendsField').value = getLegendsJSON();
 
-						var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
-						var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
-						var viewBox = objectSVGDocument.getAttribute('viewBox');
-						var title = Ext.getCmp('exportimagetitle_tf').getValue();
-						
-						if (!title) {
-							Ext.message.msg(false, i18n_please_enter_map_title );
-						}
-                        else {						
-							var q = Ext.getCmp('exportimagequality_cb').getValue();
-							var w = objectSVGDocument.getAttribute('width') * q;
-							var h = objectSVGDocument.getAttribute('height') * q;
-							var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
-							var period = Ext.getCmp('period_cb').getValue();
-							var imageFormat = Ext.getCmp('exportimageformat_cb').getValue();
-							
-							Ext.getCmp('exportimagetitle_tf').reset();
-							
-							var exportForm = document.getElementById('exportForm');
-							exportForm.action = '../exportImage.action';
-							exportForm.target = '_blank';
-							
-							document.getElementById('titleField').value = title;   
-							document.getElementById('viewBoxField').value = viewBox;  
-							document.getElementById('svgField').value = svg;  
-							document.getElementById('widthField').value = w;  
-							document.getElementById('heightField').value = h;  
-							document.getElementById('includeLegendsField').value = includeLegend;  
-							document.getElementById('periodField').value = period;  
-							document.getElementById('indicatorField').value = cb;   
-							document.getElementById('legendsField').value = getLegendsJSON();
-							document.getElementById('imageFormat').value = imageFormat;
-
-							exportForm.submit();
-						}
-					}
-					else {
-						Ext.message.msg(false, i18n_please_render_map_fist );
-					}
+                            exportForm.submit();
+                        }
+                    }
+                    else {
+                        Ext.message.msg(false, i18n_please_render_map_fist );
+                    }
 				}
 			}	
 		]
@@ -748,7 +736,7 @@ Ext.onReady( function() {
 		]
 	});
 	
-	var exportImageWindow=new Ext.Window({id:'exportimage_w',title:'<span id="window-image-title">'+ i18n_export_map_as_image +'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:250,height:190,items:[{xtype:'panel',items:[exportImagePanel]}]});
+	var exportImageWindow=new Ext.Window({id:'exportimage_w',title:'<span id="window-image-title">'+ i18n_export_map_as_image +'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:250,height:158,items:[{xtype:'panel',items:[exportImagePanel]}]});
 	var exportExcelWindow=new Ext.Window({id:'exportexcel_w',title:'<span id="window-excel-title">'+i18n_export_excel+'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:260,height:157,items:[{xtype:'panel',items:[exportExcelPanel]}]});
 	
     /* Section: automatic legend set */
@@ -3626,7 +3614,7 @@ Ext.onReady( function() {
 			zoomOutButton,
 			zoomMaxExtentButton,
 			// '-',
-			// exportImageButton,
+			exportImageButton,
 			// exportExcelButton,
 			'-',
 			favoritesButton,
