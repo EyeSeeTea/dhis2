@@ -621,7 +621,7 @@ Ext.onReady( function() {
 						var svgDivId = null;
 
 						for ( i=0; i<svgChildren.length; i++ ) { // Search for div containing SVG
-							var svgDivId = svgChildren[i].getAttribute('id');
+							svgDivId = svgChildren[i].getAttribute('id');
 							if ( svgDivId && svgDivId.indexOf( 'OpenLayers.Layer.Vector_' ) != -1 ) {
 								break;
 							}
