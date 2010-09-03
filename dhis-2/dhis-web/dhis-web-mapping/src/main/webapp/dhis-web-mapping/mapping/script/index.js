@@ -141,7 +141,22 @@ function toggleFeatureLabelsAssignment(classify, layer) {
 function sortByValue(a,b){return b.value-a.value;}
 /* Create JSON for map export */
 function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';json+='[';mapvalues.sort(sortByValue);for(var i=0;i<mapvalues.length;i++){json+='{';json+='"organisation": "'+mapvalues[i].orgUnitId+'",';json+='"value": "'+mapvalues[i].value+'" ';json+=i<mapvalues.length-1?'},':'}'}json+=']';json+='}';return json}
-function getLegendsJSON(){var legends=choropleth.imageLegend;var json='{';json+='"legends":';json+='[';for(var i=0;i<choropleth.imageLegend.length;i++){json+='{';json+='"label": "'+choropleth.imageLegend[i].label+'",';json+='"color": "'+choropleth.imageLegend[i].color+'" ';json+=i<choropleth.imageLegend.length-1?'},':'}'}json+=']';json+='}';return json}
+
+function getLegendsJSON(){
+	var legends=choropleth.imageLegend;
+	var json='{';
+	json+='"legends":';
+	json+='[';
+	for(var i=0;i<choropleth.imageLegend.length;i++){
+		json+='{';
+		json+='"label": "'+choropleth.imageLegend[i].label+'",';
+		json+='"color": "'+choropleth.imageLegend[i].color+'" ';
+		json+=i<choropleth.imageLegend.length-1?'},':'}';
+	}
+	json+=']';
+	json+='}';
+	return json;
+}
 
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
@@ -600,8 +615,19 @@ Ext.onReady( function() {
                     }
 
                     if (vcb && dcb && mcb && lcb) {
-                        var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;
-                        var objectSVGDocument = document.getElementById('OpenLayers.Layer.Vector_17').childNodes[0];
+                    	var svgChildren = document.getElementById('_OpenLayers_Container').childNodes;
+						var svgDivId = null;
+
+						for ( i=0; i<svgChildren.length; i++ ) { // Search for div containing SVG
+							svgDivId = svgChildren[i].getAttribute('id');
+							if ( svgDivId && svgDivId.indexOf( 'OpenLayers.Layer.Vector_' ) != -1 ) {
+								break;
+							}
+						}
+
+						var svg = document.getElementById(svgDivId).innerHTML;
+						var objectSVGDocument = document.getElementById(svgDivId).childNodes[0];
+						
                         var viewBox = objectSVGDocument.getAttribute('viewBox');
                         var title = Ext.getCmp('exportimagetitle_tf').getValue();
                     
@@ -3611,7 +3637,7 @@ Ext.onReady( function() {
 			zoomInButton,
 			zoomOutButton,
 			zoomMaxExtentButton,
-			// '-',
+			'-',
 			exportImageButton,
 			// exportExcelButton,
 			'-',
