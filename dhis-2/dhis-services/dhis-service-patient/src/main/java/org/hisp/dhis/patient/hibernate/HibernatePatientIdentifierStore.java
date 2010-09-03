@@ -28,6 +28,7 @@
 package org.hisp.dhis.patient.hibernate;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
@@ -35,6 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierStore;
 import org.hisp.dhis.patient.PatientIdentifierType;
@@ -104,9 +106,15 @@ public class HibernatePatientIdentifierStore
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> listPatientByOrganisationUnit( OrganisationUnit organisationUnit, int min, int max )
     {
+
+        String hql = "select distinct p from Patient p join p.identifiers i where i.organisationUnit = :organisationUnit order by p.id";
+        return getQuery( hql ).setEntity( "organisationUnit", organisationUnit ).setFirstResult( min ).setMaxResults( max ).list();
+
+        /*
     	return (Collection<Patient>) getCriteria( Restrictions.eq( "organisationUnit", organisationUnit ) )
-            .setProjection( Projections.distinct( Projections.property( "patient" ) ) ).setFirstResult( min ).setMaxResults( max ).list();
+            .setProjection( Projections.distinct( Projections.property( "patient" ) ) ).setFirstResult( min ).setMaxResults( max ).list();*/
     }
+    
 
     public Patient getPatient( PatientIdentifierType idenType, String value )
     {

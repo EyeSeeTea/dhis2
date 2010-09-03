@@ -70,8 +70,8 @@ function showIndicatorGroupSetDetails( id ){
 
 function showDetailsCompleted( indicatorGroupSet ){
 
-	setFieldValue( 'nameField', getElementValue( indicatorGroupSet, 'name' ) );
-    setFieldValue( 'memberCountField', getElementValue( indicatorGroupSet, 'memberCount' ) );
+	setInnerHTML( 'nameField', getElementValue( indicatorGroupSet, 'name' ) );
+    setInnerHTML( 'memberCountField', getElementValue( indicatorGroupSet, 'memberCount' ) );
 
     showDetails();
 }

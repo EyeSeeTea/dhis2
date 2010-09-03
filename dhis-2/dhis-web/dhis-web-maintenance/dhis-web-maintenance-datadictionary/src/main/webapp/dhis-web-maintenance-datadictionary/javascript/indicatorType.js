@@ -13,8 +13,8 @@ function showIndicatorTypeDetails( indicatorTypeId )
 
 function indicatorTypeReceived( indicatorTypeElement )
 {
-    setFieldValue( 'nameField', getElementValue( indicatorTypeElement, 'name' ) );
-    setFieldValue( 'factorField', getElementValue( indicatorTypeElement, 'factor' ) );
+    setInnerHTML( 'nameField', getElementValue( indicatorTypeElement, 'name' ) );
+    setInnerHTML( 'factorField', getElementValue( indicatorTypeElement, 'factor' ) );
 
     showDetails();
 }

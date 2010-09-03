@@ -34,6 +34,7 @@ import java.util.Set;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
+import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.source.Source;
 
@@ -73,12 +74,20 @@ public class DataSet
     */
     private Boolean locked = false;
         
+    /**
+     * The Sections associated with the DataSet.
+     */
     private Set<Section> sections = new HashSet<Section>();
 
     /**
      * Indicating position in the custom sort order.
      */
     private Integer sortOrder;
+    
+    /**
+     * Indicating custom data entry form.
+     */
+    private DataEntryForm dataEntryForm;
     
     // -------------------------------------------------------------------------
     // Contructors
@@ -160,6 +169,16 @@ public class DataSet
     public PeriodType getPeriodType()
     {
         return periodType;
+    }
+
+    public DataEntryForm getDataEntryForm()
+    {
+        return dataEntryForm;
+    }
+
+    public void setDataEntryForm( DataEntryForm dataEntryForm )
+    {
+        this.dataEntryForm = dataEntryForm;
     }
 
     public void setPeriodType( PeriodType periodType )

@@ -96,10 +96,10 @@ public class TableAlteror
         // ---------------------------------------------------------------------
         // Update tables for dimensional model
         // ---------------------------------------------------------------------
-        
+
         // categories_categoryoptions
         // set to 0 temporarily
-        int c1 = executeSql( "UPDATE categories_categoryoptions SET sort_order=0 WHERE sort_order is NULL OR sort_order=0" ); 
+        int c1 = executeSql( "UPDATE categories_categoryoptions SET sort_order=0 WHERE sort_order is NULL OR sort_order=0" );
         if ( c1 > 0 )
         {
             updateSortOrder( "categories_categoryoptions", "categoryid", "categoryoptionid" );
@@ -109,7 +109,7 @@ public class TableAlteror
 
         // categorycombos_categories
         // set to 0 temporarily
-        int c2 = executeSql( "update categorycombos_categories SET sort_order=0 where sort_order is NULL OR sort_order=0" ); 
+        int c2 = executeSql( "update categorycombos_categories SET sort_order=0 where sort_order is NULL OR sort_order=0" );
         if ( c2 > 0 )
         {
             updateSortOrder( "categorycombos_categories", "categorycomboid", "categoryid" );
@@ -124,7 +124,7 @@ public class TableAlteror
 
         // categoryoptioncombos_categoryoptions
         // set to 0 temporarily
-        int c3 = executeSql( "update categoryoptioncombos_categoryoptions SET sort_order=0 where sort_order is NULL OR sort_order=0" ); 
+        int c3 = executeSql( "update categoryoptioncombos_categoryoptions SET sort_order=0 where sort_order is NULL OR sort_order=0" );
         if ( c3 > 0 )
         {
             updateSortOrder( "categoryoptioncombos_categoryoptions", "categoryoptioncomboid", "categoryoptionid" );
@@ -134,7 +134,10 @@ public class TableAlteror
 
         // dataelementcategoryoption
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT fk_dataelement_categoryid" );
-        // executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_name_key" ); will be maintained in transition period
+        // executeSql(
+        // "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT
+        // dataelementcategoryoption_name_key"
+        // ); will be maintained in transition period
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_shortname_key" );
 
         // minmaxdataelement query index
@@ -150,10 +153,10 @@ public class TableAlteror
         {
             executeSql( "UPDATE patientattribute SET mandatory=false" );
         }
-        
+
         // update periodType field to ValidationRule
         executeSql( "UPDATE validationrule SET periodtypeid = (SELECT periodtypeid FROM periodtype WHERE name='Monthly')" );
-                
+
         // set varchar to text
         executeSql( "ALTER TABLE dataelement ALTER description TYPE text" );
         executeSql( "ALTER TABLE indicator ALTER description TYPE text" );
@@ -161,10 +164,25 @@ public class TableAlteror
         executeSql( "ALTER TABLE validationrule ALTER description TYPE text" );
         executeSql( "ALTER TABLE expression ALTER expression TYPE text" );
         executeSql( "ALTER TABLE translation ALTER value TYPE text" );
-        
-        //orgunit shortname uniqueness
+
+        // orgunit shortname uniqueness
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );
-        
+
+        // update dataset-dataentryform association and programstage -
+        // dataentryform association
+        if ( updateDataSetAssociation() && updateProgramStageAssociation() )
+        {
+            // delete table dataentryformassociation
+            executeSql( "DROP TABLE dataentryformassociation" );
+        }
+
+        // Working on Section table
+        executeSql( "ALTER TABLE section DROP COLUMN title;" );
+
+        // Working on ConceptName
+        // executeSql( "ALTER TABLE dataelementcategory DROP COLUMN
+        // conceptname;" );
+
         log.info( "Tables updated" );
     }
 
@@ -272,5 +290,72 @@ public class TableAlteror
 
             return -1;
         }
+    }
+
+    private boolean updateDataSetAssociation()
+    {
+        StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            Statement statement = holder.getStatement();
+
+            ResultSet _resultSet = statement.executeQuery( "SELECT * FROM dataentryformassociation" );
+            if ( _resultSet.next() )
+            {
+                ResultSet resultSet = statement
+                    .executeQuery( "SELECT associationid, dataentryformid FROM dataentryformassociation WHERE associationtablename = 'dataset'" );
+
+                while ( resultSet.next() )
+                {
+                    executeSql( "UPDATE dataset SET dataentryform=" + resultSet.getInt( 2 ) + " WHERE datasetid="
+                        + resultSet.getInt( 1 ) );
+                }
+                return true;
+            }
+
+            return false;
+
+        }
+        catch ( Exception ex )
+        {
+            log.error( ex );
+            return false;
+        }
+        finally
+        {
+            holder.close();
+        }
+
+    }
+
+    private boolean updateProgramStageAssociation()
+    {
+        StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            Statement statement = holder.getStatement();
+
+            ResultSet resultSet = statement
+                .executeQuery( "SELECT associationid, dataentryformid FROM dataentryformassociation WHERE associationtablename = 'programstage'" );
+
+            while ( resultSet.next() )
+            {
+                executeSql( "UPDATE programstage SET dataentryform=" + resultSet.getInt( 2 ) + " WHERE programstageid="
+                    + resultSet.getInt( 1 ) );
+            }
+            return true;
+        }
+        catch ( Exception ex )
+        {
+            log.error( ex );
+            return false;
+        }
+        finally
+        {
+            holder.close();
+        }
+
     }
 }

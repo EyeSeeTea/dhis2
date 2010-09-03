@@ -256,12 +256,11 @@
 
 		<action name="validateDataElementGroup"
 			class="org.hisp.dhis.dd.action.dataelementgroup.ValidateDataElementGroupAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseInput.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
 		<!-- Data Element Group Set -->
@@ -308,10 +307,11 @@
 
 		<action name="validateDataElementGroupSet"
 			class="org.hisp.dhis.dd.action.dataelementgroupset.ValidateDataElementGroupSetAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseError.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
 		<action name="deleteDataElementGroupSet"
@@ -703,47 +703,12 @@
 
 		<action name="validateIndicator"
 			class="org.hisp.dhis.dd.action.indicator.ValidateIndicatorAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseInput.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
-		</action>
-
-		<!-- Indicator denum -->
-
-		<action name="editDenum"
-			class="org.hisp.dhis.dd.action.indicatordenum.GetDenumAction">
-			<result name="success" type="velocity">/popup.vm</result>
-			<param name="page">/dhis-web-maintenance-datadictionary/editDenumForm.vm</param>
-			<param name="javascripts">javascript/denum.js</param>
-			<param name="requiredAuthorities">F_INDICATOR_UPDATE</param>
-		</action>
-
-		<action name="getFilteredDataElements"
-			class="org.hisp.dhis.dd.action.indicatordenum.GetFilteredDataElementsAction">
 			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonOperands.vm</result>
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
-		</action>
-
-		<action name="getFormulaText"
-			class="org.hisp.dhis.dd.action.indicatordenum.GetFormulaTextAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseFormulaText.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
-		</action>
-
-		<action name="validateDenum"
-			class="org.hisp.dhis.dd.action.indicatordenum.ValidateDenumAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-datadictionary/responseError.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
-		</action>
+		</action>		
 
 		<!-- DataDictionary -->
 

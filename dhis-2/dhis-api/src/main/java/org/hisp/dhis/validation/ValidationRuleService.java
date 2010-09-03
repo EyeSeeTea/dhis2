@@ -48,6 +48,27 @@ public interface ValidationRuleService
     // -------------------------------------------------------------------------
 
     /**
+     * Validates AggregatedDataValues.
+     * 
+     * @param startDate the start date.
+     * @param endDate the end date.
+     * @param sources a collection of Sources.
+     * @return a collection of ValidationResults for each validation violation. 
+     */
+    Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources );
+
+    /**
+     * Validate AggregatedDataValues.
+     * 
+     * @param startDate the start date.
+     * @param endDate the end date.
+     * @param sources a collection of Sources.
+     * @param group a group of ValidationRules.
+     * @return a collection of ValidationResults for each validation violation. 
+     */
+    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources, ValidationRuleGroup group );
+    
+    /**
      * Validate DataValues.
      * 
      * @param startDate the start date.
@@ -124,9 +145,10 @@ public interface ValidationRuleService
     ValidationRule getValidationRule( int id );
 
     /**
+     * Get the ValidationRules with the corresponding identifiers.
      * 
-     * @param identifiers
-     * @return
+     * @param identifiers the collection of identifiers.
+     * @return a collection of validation rules.
      */
     Collection<ValidationRule> getValidationRules( Collection<Integer> identifiers );
     
@@ -144,7 +166,20 @@ public interface ValidationRuleService
      */
     ValidationRule getValidationRuleByName( String name );
     
+    /**
+     * Get the validation rules which are associated with the given data elements.
+     * 
+     * @param dataElements the collection of data elements.
+     * @return a collection of validation rules.
+     */
     Collection<ValidationRule> getValidationRulesByDataElements( Collection<DataElement> dataElements );
+    
+    /**
+     * Get all data elements associated with any validation rule.
+     * 
+     * @return a collection of data elements.
+     */
+    Collection<DataElement> getDataElementsInValidationRules();
     
     // -------------------------------------------------------------------------
     // ValidationRuleGroup

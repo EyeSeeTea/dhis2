@@ -153,4 +153,35 @@ public class MySQLStatementBuilder
             + sourceId + " ) ) " + "WHERE d1.sourceid=" + destId + " "
             + "AND d1.dataelementid in ( SELECT dataelementid FROM dataelement WHERE valuetype='int' );";
     }
+
+    @Override
+    public String getUpdateDateDestination( int destDataElementId, int destCategoryOptionComboId,
+        int sourceDataElementId, int sourceCategoryOptionComboId )
+    {
+        return "UPDATE datavalue AS d1 SET dataelementid=" + destDataElementId + ", categoryoptioncomboid="
+            + destCategoryOptionComboId + " " + "WHERE dataelementid=" + sourceDataElementId
+            + " and categoryoptioncomboid=" + sourceCategoryOptionComboId + " " + "AND NOT EXISTS ( "
+            + "SELECT * FROM (SELECT * FROM datavalue) AS d2 " + "WHERE d2.dataelementid=" + destDataElementId + " "
+            + "AND d2.categoryoptioncomboid=" + destCategoryOptionComboId + " " + "AND d1.periodid=d2.periodid "
+            + "AND d1.sourceid=d2.sourceid );";
+
+    }
+
+    @Override
+    public String getMoveFromSourceToDestination( int destDataElementId, int destCategoryOptionComboId,
+        int sourceDataElementId, int sourceCategoryOptionComboId )
+    {
+        return "UPDATE datavalue d1, datavalue d2 SET d1.value=d2.value,d1.storedby=d2.storedby,d1.lastupdated=d2.lastupdated,d1.comment=d2.comment,d1.followup=d2.followup "
+            + "WHERE d1.periodid=d2.periodid "
+            + "AND d1.sourceid=d2.sourceid "
+            + "AND d1.lastupdated<d2.lastupdated "
+            + "AND d1.dataelementid="
+            + destDataElementId
+            + " AND d1.categoryoptioncomboid="
+            + destCategoryOptionComboId
+            + " "
+            + "AND d2.dataelementid="
+            + sourceDataElementId
+            + " AND d2.categoryoptioncomboid=" + sourceCategoryOptionComboId + ";";
+    }
 }

@@ -13,8 +13,8 @@ function showOrganisationUnitGroupDetails( unitId )
 
 function organisationUnitGroupReceived( unitGroupElement )
 {
-    setFieldValue( 'nameField', getElementValue( unitGroupElement, 'name' ) );
-    setFieldValue( 'memberCountField', getElementValue( unitGroupElement, 'memberCount' ) );
+    setInnerHTML( 'nameField', getElementValue( unitGroupElement, 'name' ) );
+    setInnerHTML( 'memberCountField', getElementValue( unitGroupElement, 'memberCount' ) );
     
     showDetails();
 }

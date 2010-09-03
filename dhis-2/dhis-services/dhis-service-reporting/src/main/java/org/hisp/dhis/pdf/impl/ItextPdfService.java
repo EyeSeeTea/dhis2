@@ -48,6 +48,7 @@ import org.hisp.dhis.completeness.DataSetCompletenessResult;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
@@ -111,6 +112,13 @@ public class ItextPdfService
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+
+    private ExpressionService expressionService;
+
+    public void setExpressionService( ExpressionService expressionService )
+    {
+        this.expressionService = expressionService;
     }
 
     // -------------------------------------------------------------------------
@@ -195,7 +203,7 @@ public class ItextPdfService
             table.addCell( getTextCell( indicator.getNumeratorAggregationOperator(), TEXT ) );
 
             table.addCell( getItalicCell( i18n.getString( "numerator_formula" ), 1, ITALIC ) );
-            table.addCell( getTextCell( indicator.getNumerator(), TEXT ) );
+            table.addCell( getTextCell( expressionService.getExpressionDescription( indicator.getNumerator() ), TEXT ) );
 
             table.addCell( getItalicCell( i18n.getString( "denominator_description" ), 1, ITALIC ) );
             table.addCell( getTextCell( indicator.getDenominatorDescription(), TEXT ) );
@@ -204,7 +212,8 @@ public class ItextPdfService
             table.addCell( getTextCell( indicator.getDenominatorAggregationOperator(), TEXT ) );
 
             table.addCell( getItalicCell( i18n.getString( "denominator_formula" ), 1, ITALIC ) );
-            table.addCell( getTextCell( indicator.getDenominator(), TEXT ) );
+            table
+                .addCell( getTextCell( expressionService.getExpressionDescription( indicator.getDenominator() ), TEXT ) );
 
             table.addCell( getCell( 2, 30 ) );
 

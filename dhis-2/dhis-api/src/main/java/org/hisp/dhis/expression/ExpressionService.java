@@ -198,4 +198,5 @@ public interface ExpressionService
      * @return A numerical expression.
      */    
     String generateExpression( String expression, Period period, Source source, boolean nullIfNoValues, boolean aggregated );
+
 }

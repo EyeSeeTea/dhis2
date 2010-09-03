@@ -41,7 +41,6 @@ function Selection()
 
     this.select = function( unitId )
     {
-
         var unitTag = document.getElementById( getTagId( unitId ));
         var linkTags = unitTag.getElementsByTagName( 'a' );
 
@@ -342,4 +341,16 @@ function Subtree()
         imgTag.height = '9';
         return imgTag;
     }
+}
+
+function getOrgunitByCode(code)
+{	
+	$.post(organisationUnitTreePath + "setOrgunitByCode.action",{
+			orgunitcode:code
+		}, function (data){
+			data = data.getElementsByTagName( "message" );;
+			if ( data.length == 0 ){
+				window.location.reload();
+			}
+	},'xml');	
 }
