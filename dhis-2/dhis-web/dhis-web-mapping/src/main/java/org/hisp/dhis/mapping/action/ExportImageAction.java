@@ -151,13 +151,13 @@ public class ExportImageAction
         
         if ( svg == null || title == null || indicator == null || period == null || width == null || height == null )
         {
-            log.info( "Export map form session" );
+            log.info( "Export map from session" );
 
             svgDocument = (SVGDocument) SessionUtils.getSessionVar( SVGDOCUMENT );
         }
         else
         {
-            log.info( "Export map form request" );
+            log.info( "Export map from request" );
 
             Period _period = periodService.getPeriod( period );
 
@@ -194,5 +194,11 @@ public class ExportImageAction
     protected String getFilename()
     {
         return "dhis2_gis.png";
+    }
+    
+    @Override
+    protected boolean disallowCache()
+    {
+        return true;
     }
 }
