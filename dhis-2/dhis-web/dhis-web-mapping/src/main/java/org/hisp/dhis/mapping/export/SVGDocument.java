@@ -51,7 +51,7 @@ public class SVGDocument
 
     private String legends;
 
-    private Period period;
+    private String period;
 
     private Indicator indicator;
 
@@ -74,7 +74,7 @@ public class SVGDocument
             + this.indicator.getName() + "</tspan></text></g>";
 
         String period_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"45\" font-size=\"12\"><tspan>"
-            + this.period.getName() + "</tspan></text></g>";
+            + this.period + "</tspan></text></g>";
 
         String svg_ = doctype + this.svg;
 
@@ -233,12 +233,12 @@ public class SVGDocument
         this.legends = legends;
     }
 
-    public Period getPeriod()
+    public String getPeriod()
     {
         return period;
     }
 
-    public void setPeriod( Period period )
+    public void setPeriod( String period )
     {
         this.period = period;
     }

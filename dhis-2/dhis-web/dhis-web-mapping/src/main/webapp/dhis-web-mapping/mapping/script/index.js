@@ -90,12 +90,10 @@ function toggleFeatureLabelsPolygons(layer) {
 function toggleFeatureLabelsPoints(layer) {
     function activateLabels() {
         layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[thematicMap2].nameColumn);
-        layer.refresh();
         LABELS[thematicMap2] = true;
     }
     function deactivateLabels() {
         layer.styleMap = getDeactivatedOpenLayersStyleMap();
-        layer.refresh();
         LABELS[thematicMap2] = false;
     }
     
@@ -112,12 +110,10 @@ function toggleFeatureLabelsPoints(layer) {
 function toggleFeatureLabelsAssignment(classify, layer) {
     function activateLabels() {
         layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[organisationUnitAssignment].nameColumn);
-        layer.refresh();
         LABELS[organisationUnitAssignment] = true;
     }
     function deactivateLabels() {
         layer.styleMap = getDeactivatedOpenLayersStyleMap();
-        layer.refresh();
         LABELS[organisationUnitAssignment] = false;
     }
     
@@ -143,18 +139,17 @@ function sortByValue(a,b){return b.value-a.value;}
 function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';json+='[';mapvalues.sort(sortByValue);for(var i=0;i<mapvalues.length;i++){json+='{';json+='"organisation": "'+mapvalues[i].orgUnitId+'",';json+='"value": "'+mapvalues[i].value+'" ';json+=i<mapvalues.length-1?'},':'}'}json+=']';json+='}';return json}
 
 function getLegendsJSON(){
-	var legends=choropleth.imageLegend;
-	var json='{';
-	json+='"legends":';
-	json+='[';
-	for(var i=0;i<choropleth.imageLegend.length;i++){
-		json+='{';
-		json+='"label": "'+choropleth.imageLegend[i].label+'",';
-		json+='"color": "'+choropleth.imageLegend[i].color+'" ';
-		json+=i<choropleth.imageLegend.length-1?'},':'}';
+    var json = '{';
+	json += '"legends":';
+	json += '[';
+	for(var i = 0; i < choropleth.imageLegend.length; i++) {
+		json += '{';
+		json += '"label": "' + choropleth.imageLegend[i].label + '",';
+		json += '"color": "' + choropleth.imageLegend[i].color + '" ';
+		json += i < choropleth.imageLegend.length-1 ? '},' : '}';
 	}
-	json+=']';
-	json+='}';
+	json += ']';
+	json += '}';
 	return json;
 }
 
@@ -560,7 +555,7 @@ Ext.onReady( function() {
 				width: combo_width_fieldset,
 				minListWidth: combo_list_width_fieldset,
 				mode: 'local',
-				triggerAction: 'all'						
+				triggerAction: 'all'
 			},
 			{
 				xtype: 'combo',
@@ -602,25 +597,25 @@ Ext.onReady( function() {
                     if (ACTIVEPANEL == thematicMap) {
                         vcb = Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
                         dcb = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : Ext.getCmp('startdate_df').getValue() && Ext.getCmp('startdate_df').getValue() ? true : false;
-                        period = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : Ext.getCmp('startdate_df').getValue() + ' - ' + Ext.getCmp('enddate_df').getValue();
+                        period = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getRawValue() : new Date(Ext.getCmp('startdate_df').getRawValue()).format('Y M j') + ' - ' + new Date(Ext.getCmp('enddate_df').getRawValue()).format('Y M j');
                         mcb = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf').getValue() : Ext.getCmp('map_cb').getValue();
-                        lcb = Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegend_cb').getValue() ? true : false;
+                        lcb = Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb').getValue() ? true : false;
                     }
                     else if (ACTIVEPANEL == thematicMap2) {
                         vcb = Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
                         dcb = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb2').getValue() : Ext.getCmp('startdate_df2').getValue() && Ext.getCmp('startdate_df2').getValue() ? true : false;
-                        period = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb2').getValue() : Ext.getCmp('startdate_df2').getValue() + ' - ' + Ext.getCmp('enddate_df2').getValue();
+                        period = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb2').getRawValue() : new Date(Ext.getCmp('startdate_df2').getRawValue()).format('Y M j') + ' - ' + new Date(Ext.getCmp('enddate_df2').getRawValue()).format('Y M j');
                         mcb = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf2').getValue() : Ext.getCmp('map_cb2').getValue();
-                        lcb = Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegend_cb2').getValue() ? true : false;
+                        lcb = Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb2').getValue() ? true : false;
                     }
 
                     if (vcb && dcb && mcb && lcb) {
                     	var svgChildren = document.getElementById('_OpenLayers_Container').childNodes;
 						var svgDivId = null;
 
-						for ( i=0; i<svgChildren.length; i++ ) { // Search for div containing SVG
+						for (i = 0; i < svgChildren.length; i++) { // Search for div containing SVG
 							svgDivId = svgChildren[i].getAttribute('id');
-							if ( svgDivId && svgDivId.indexOf( 'OpenLayers.Layer.Vector_' ) != -1 ) {
+							if (svgDivId && svgDivId.indexOf('OpenLayers.Layer.Vector_') != -1) {
 								break;
 							}
 						}

@@ -72,13 +72,6 @@ public class ExportImageAction
         this.indicatorService = indicatorService;
     }
 
-    protected I18nFormat format;
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
     // -------------------------------------------------------------------------
     // Output & input
     // -------------------------------------------------------------------------
@@ -104,9 +97,9 @@ public class ExportImageAction
         this.indicator = indicator;
     }
 
-    private Integer period;
+    private String period;
 
-    public void setPeriod( Integer period )
+    public void setPeriod( String period )
     {
         this.period = period;
     }
@@ -159,10 +152,6 @@ public class ExportImageAction
         {
             log.info( "Export map from request" );
 
-            Period _period = periodService.getPeriod( period );
-
-            _period.setName( format.formatPeriod( _period ) );
-
             Indicator _indicator = indicatorService.getIndicator( indicator );
 
             svgDocument = new SVGDocument();
@@ -170,7 +159,7 @@ public class ExportImageAction
             svgDocument.setTitle( title );
             svgDocument.setSvg( svg );
             svgDocument.setIndicator( _indicator );
-            svgDocument.setPeriod( _period );
+            svgDocument.setPeriod( period );
             svgDocument.setLegends( legends );
             svgDocument.setIncludeLegends( includeLegends );
             svgDocument.setWidth( width );
