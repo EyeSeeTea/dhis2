@@ -355,6 +355,6 @@ public class ExportExcelAction
     @Override
     protected String getFilename()
     {
-        return "dhis2-gis-workbook.xls";
+        return "dhis2_gis.xls";
     }
 }
