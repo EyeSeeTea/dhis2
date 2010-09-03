@@ -171,7 +171,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		});
 	},
     
-    validateForm: function() {
+    validateForm2: function() {
         if (!Ext.getCmp('indicator_cb').getValue() && !Ext.getCmp('dataelement_cb').getValue()) {
             return false;
         }
