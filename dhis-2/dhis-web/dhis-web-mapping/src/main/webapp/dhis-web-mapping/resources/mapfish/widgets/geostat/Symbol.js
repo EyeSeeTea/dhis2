@@ -1533,7 +1533,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             if (mapvalues[i].orgUnitName == FEATURE[thematicMap2][j].attributes.name) {
                                 FEATURE[thematicMap2][j].attributes.value = parseFloat(mapvalues[i].value);
                                 if (!FEATURE[thematicMap2][j].attributes.labelString) {
-                                    FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes.name + ' (' + FEATURE[thematicMap2][j].attributes.value.toFixed(1) + ')';
+                                    FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes.name;
+                                    if (Ext.isNumber(FEATURE[thematicMap2][j].attributes.value)) {
+                                        FEATURE[thematicMap2][j].attributes.labelString += ' (' + FEATURE[thematicMap2][j].attributes.value.toFixed(1) + ')';
+                                    }
                                 }
                                 break;
                             }
@@ -1628,9 +1631,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     }
 
                                     for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
-                                        FEATURE[thematicMap2][j].attributes.value = mv[mour[FEATURE[thematicMap2][j].attributes[nameColumn]]] || 0;
+                                        var value = mv[mour[FEATURE[thematicMap2][j].attributes[nameColumn]]];
+                                        FEATURE[thematicMap2][j].attributes.value = value ? parseFloat(value) : '';
                                         if (!FEATURE[thematicMap2][j].attributes.labelString) {
-                                            FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes[nameColumn] + ' (' + FEATURE[thematicMap2][j].attributes.value.toFixed(1) + ')';
+                                            FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes[nameColumn];
+                                            if (Ext.isNumber(FEATURE[thematicMap2][j].attributes.value)) {
+                                                FEATURE[thematicMap2][j].attributes.labelString += ' (' + FEATURE[thematicMap2][j].attributes.value.toFixed(1) + ')';
+                                            }
                                         }
                                     }
                                     

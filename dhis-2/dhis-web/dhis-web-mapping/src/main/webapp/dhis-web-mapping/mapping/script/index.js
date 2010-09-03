@@ -70,12 +70,10 @@ function getDeactivatedOpenLayersStyleMap() {
 function toggleFeatureLabelsPolygons(layer) {
     function activateLabels() {
         layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[thematicMap].nameColumn);
-        layer.refresh();
         LABELS[thematicMap] = true;
     }
     function deactivateLabels() {
         layer.styleMap = getDeactivatedOpenLayersStyleMap();
-        layer.refresh();
         LABELS[thematicMap] = false;
     }
     
