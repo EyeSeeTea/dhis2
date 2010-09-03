@@ -33,12 +33,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math.stat.regression.SimpleRegression;
+import org.hisp.dhis.common.Grid;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class Grid
+public class ListGrid
+    implements Grid
 {
     /**
      * A two dimensional List which simulates a grid where the first list
@@ -54,7 +56,7 @@ public class Grid
     /**
      * Default constructor.
      */
-    public Grid()
+    public ListGrid()
     {
         grid = new ArrayList<List<String>>();
     }
@@ -63,17 +65,11 @@ public class Grid
     // Public methods
     // ---------------------------------------------------------------------
 
-    /**
-     * Returns the current height / number of rows in the grid.
-     */
     public int getHeight()
     {        
         return ( grid != null && grid.size() > 0 ) ? grid.size() : 0;
     }
     
-    /**
-     * Returns the current width / number of columns in the grid.
-     */
     public int getWidth()
     {
         verifyGridState();
@@ -81,9 +77,6 @@ public class Grid
         return ( grid != null && grid.size() > 0 ) ? grid.get( 0 ).size() : 0;
     }
     
-    /**
-     * Adds a new row the the grid and moves the cursor accordingly.
-     */
     public void nextRow()
     {
         grid.add( new ArrayList<String>() );
@@ -91,39 +84,21 @@ public class Grid
         currentRowIndex++;
     }
     
-    /**
-     * Adds the value to the end of the current row.
-     * 
-     * @param value the value to add.
-     */
     public void addValue( String value )
     {
         grid.get( currentRowIndex ).add( value );
     }
     
-    /**
-     * Returns the row with the given index.
-     * 
-     * @param rowIndex the index of the row.
-     */
     public List<String> getRow( int rowIndex )
     {
         return grid.get( rowIndex );
     }
     
-    /**
-     * Returns all rows.
-     */
     public List<List<String>> getRows()
     {
         return grid;
     }
     
-    /**
-     * Returns the column with the given index.
-     * 
-     * @param columnIndex the index of the column.
-     */
     public List<String> getColumn( int columnIndex )
     {
         List<String> column = new ArrayList<String>();
@@ -136,13 +111,6 @@ public class Grid
         return column;
     }
     
-    /**
-     * Adds a new column at the end of the grid.
-     * 
-     * @param columnValues the column values to add.
-     * @throws IllegalStateException if the columnValues has different length
-     *         than the rows in grid, or if the grid rows are not of the same length.
-     */
     public void addColumn( List<String> columnValues )
     {
         verifyGridState();
@@ -161,11 +129,6 @@ public class Grid
         }
     }
     
-    /**
-     * Column must hold numeric data.
-     * 
-     * @param columnIndex the index of the base column.
-     */
     public void addRegressionColumn( int columnIndex )
     {
         verifyGridState();
