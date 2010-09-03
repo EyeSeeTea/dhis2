@@ -1057,7 +1057,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<property name="propertyNames">
 			<list>
 				<value>name</value>
-				<value>title</value>
 			</list>
 		</property>
 

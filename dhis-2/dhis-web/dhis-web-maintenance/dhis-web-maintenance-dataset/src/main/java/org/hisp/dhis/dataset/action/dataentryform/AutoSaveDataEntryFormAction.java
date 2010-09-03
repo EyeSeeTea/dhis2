@@ -90,14 +90,14 @@ public class AutoSaveDataEntryFormAction
 
     public String execute()
         throws Exception
-    {   
+    {
         DataSet dataset = dataSetService.getDataSet( dataSetIdField );
 
         DataEntryForm dataEntryForm = dataset.getDataEntryForm();
 
         if ( dataEntryForm == null )
         {
-            dataEntryForm = new DataEntryForm( nameField, designTextarea );
+            dataEntryForm = new DataEntryForm( nameField, dataEntryFormService.prepareDataEntryFormCode( designTextarea ) );
             dataEntryFormService.addDataEntryForm( dataEntryForm );
             
             dataset.setDataEntryForm(dataEntryForm);
@@ -106,11 +106,11 @@ public class AutoSaveDataEntryFormAction
         else
         {
             dataEntryForm.setName( nameField );
-            dataEntryForm.setHtmlCode( dataEntryFormService.prepareDataEntryFormCode(designTextarea ));
+            dataEntryForm.setHtmlCode( dataEntryFormService.prepareDataEntryFormCode( designTextarea ) );
             dataEntryFormService.updateDataEntryForm( dataEntryForm );
         }
 
         return SUCCESS;
     }
-    
+
 }

@@ -187,7 +187,17 @@
 			<ref local="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 		</property>
 	</bean>
-
+	
+	<bean id="org.hisp.dhis.ouwt.action.GetOrganisationUnitByCodeAction"
+		class="org.hisp.dhis.ouwt.action.GetOrganisationUnitByCodeAction" scope="prototype">
+		<property name="orguitService">
+			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+		</property>
+		<property name="orgunitSelectionManager">
+			<ref bean="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
+		</property>  
+	</bean>
+	
 	<!-- Organisation Unit Selection Tree -->
 
 	<bean id="org.hisp.dhis.oust.manager.SelectionTreeManager" class="org.hisp.dhis.oust.manager.DefaultSelectionTreeManager">

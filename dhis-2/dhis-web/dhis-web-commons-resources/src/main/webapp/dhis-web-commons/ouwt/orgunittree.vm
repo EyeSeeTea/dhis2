@@ -1,3 +1,16 @@
+<script>
+	
+$(document).ready(function(){
+	$("#searchDiv").click(function(){
+		$("#key").slideToggle("fast");
+		$("#key").focus();
+	});
+});
+
+</script>
+
+<span><img id='searchDiv' src='../images/search.png' style='cursor: pointer'>&nbsp;
+<input type='text' id='key' name='key' onchange='getOrgunitByCode(this.value);' class='searchOrgunit'></span>
 
 #macro( parseNode $node )
 	#if( $node.hasChildren )
