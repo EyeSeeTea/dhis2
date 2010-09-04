@@ -36,46 +36,52 @@ import com.opensymphony.xwork2.Action;
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class GetExcelItemGroupByIdAction implements Action {
+public class GetExcelItemGroupByIdAction
+    implements Action
+{
 
-	// -------------------------------------------------------------------------
-	// Dependency
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Dependency
+    // -------------------------------------------------------------------------
 
-	private ExcelItemService excelItemService;
+    private ExcelItemService excelItemService;
 
-	// -------------------------------------------------------------------------
-	// Input
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
-	private int id;
+    private int id;
 
-	private ExcelItemGroup excelItemGroup;
-	
-	// -------------------------------------------------------------------------
-	// Setters
-	// -------------------------------------------------------------------------
+    private ExcelItemGroup excelItemGroup;
 
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	public ExcelItemGroup getExcelItemGroup() {
-		return excelItemGroup;
-	}
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
 
-	public void setExcelItemService(ExcelItemService excelItemService) {
-		this.excelItemService = excelItemService;
-	}
+    public void setId( int id )
+    {
+        this.id = id;
+    }
 
-	// -------------------------------------------------------------------------
-	// Action implementation
-	// -------------------------------------------------------------------------
+    public ExcelItemGroup getExcelItemGroup()
+    {
+        return excelItemGroup;
+    }
 
-	public String execute() throws Exception {
-		
-		excelItemGroup = excelItemService.getExcelItemGroup(id);
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
 
-		return SUCCESS;
-	}
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        excelItemGroup = excelItemService.getExcelItemGroup( id );
+
+        return SUCCESS;
+    }
 }

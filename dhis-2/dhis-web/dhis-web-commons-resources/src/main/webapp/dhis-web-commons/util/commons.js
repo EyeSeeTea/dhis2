@@ -395,7 +395,7 @@ function getInnerHTML( fieldId )
  */
 function setFieldValue( fieldId, value )
 {
-    jQuery("#" + fieldId).html( value );
+    jQuery("#" + fieldId).val( value );
 }
 
 /**

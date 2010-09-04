@@ -1,0 +1,109 @@
+<script>
+	jQuery(document).ready(function(){	
+		validation( 'addExcelItem', function( form ){ 			
+			form.submit();			
+		});	
+	checkValueIsExist( "name", "validateExcelItem.action" );		
+	});
+</script>
+
+<h3>$i18n.getString('excel_item') : $i18n.getString('add')</h3>
+
+<form name="addExcelItem" method="POST" action="addExcelItem.action">
+	<input type="hidden" id="excelItemGroupId" name="excelItemGroupId" value="$!excelItemGroup.id"/>
+	<table>
+		<tr>
+			<th colspan='2'>$i18n.getString('excelitem_group')</th>
+		</tr>
+		<tr>
+			<td>$i18n.getString('name'): </td>
+			<td>$excelItemGroup.name</td>
+		</tr>
+		<tr>
+			<td>$i18n.getString('import_type'): </td>
+			<td>$excelItemGroup.type</td>
+		</tr>
+		<tr>
+			<td colspan="2" height="20px"></td>
+		</tr>
+		<tr>
+			<th colspan='2'>$i18n.getString('excel_item')</th>
+		</tr>
+		<tr>
+			<td><label>$i18n.getString('name')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="name" name="name" style="width:20em" class="{validate:{required:true}}"/></td>
+		</tr>		
+		<tr>
+			<td><label>$i18n.getString('expression')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td>
+				<input type="text" id="expression" name="expression" style="width:20em"/>
+				<input type="button" id="expression-button" value=".." onclick="openExpressionBuild();"/>											
+			</td>
+		</tr>	
+		<tr>
+			<td><label>$i18n.getString('sheet_no')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="sheetNo" name="sheetNo"  style="width:20em" class="{validate:{required:true,number:true}}"/></td>
+		</tr>
+		<tr>
+			<td><label>$i18n.getString('row')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="row" name="row"  style="width:20em" class="{validate:{required:true,number:true}}"/></td>
+		</tr>
+		<tr>
+			<td><label>$i18n.getString('column')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="column" name="column" style="width:20em" class="{validate:{required:true,number:true}}"/></td>
+		</tr>	
+	<tr>
+		<td></td>
+		<td><input type="submit" value="$i18n.getString('ok')" id="okButton"/>
+			<input type="button" value="$i18n.getString('cancel')" onclick="hideById('divExcelitem'); deleteDivEffect();"/>
+		</td>
+	</tr>		
+</table>
+
+</form>
+
+<!-- Expression -->
+
+<div id="divExpression" style="display:none;">
+	<table width="100%">
+		<tr>
+			<th>$i18n.getString( "formula" )</th>
+			<th></th>
+			<th>$i18n.getString( "dataelement" )</th>
+		<tr>
+		<tr valign="top">
+			<td>
+				<textarea id="formula" cols="15" rows="11" style="width:250px; height:180px" wrap="virtual">$encoder.htmlEncode( $formula )</textarea><br>
+				<a href="#" onclick="insertOperation( 'formula','(' )"><img src="images/left_parent.png" alt="$i18n.getString( 'left_brackets' )"></a>
+				<a href="#" onclick="insertOperation( 'formula',')' )"><img src="images/right_parent.png" alt="$i18n.getString( 'right_brackets' )"></a>
+				<a href="#" onclick="insertOperation( 'formula','*' )"><img src="images/multiply.png" alt="$i18n.getString( 'multiply' )"></a>
+				<a href="#" onclick="insertOperation( 'formula','/' )"><img src="images/divide.png" alt="$i18n.getString( 'divide' )"></a>
+				<a href="#" onclick="insertOperation( 'formula','+' )"><img src="images/plus.png" alt="$i18n.getString( 'plus' )"></a>
+				<a href="#" onclick="insertOperation( 'formula','-' )"><img src="images/minus.png" alt="$i18n.getString( 'minus' )"></a>
+			</td>
+			<td valign="bottom">
+				<input type="button" value="<" onclick="insertDataElementId()"/>
+			</td>
+			<td>	
+				<select id="dataElementGroup" style="width:280px" onchange="getDataElementsByGroup()"></select>				
+                <select name="select" size="11" id="availableDataElements" style="width:280px">
+                </select>				
+              <select id="optionCombos" size=4 style="width:280px"></select>	
+			</td>
+		</tr>	
+	</table>	
+	<p>
+		<input type="button" value="$i18n.getString('ok')" onclick="updateDeExpression();"/>
+		<input type="button" value="$i18n.getString('clean')" onclick="byId('formula').value = ''"/>
+		<input type="button" value="$i18n.getString('cancel')" onclick="hideById('divExpression'); unLockScreen();" style="width:100px"/>
+	</p>
+</div>
+
+<script>
+	var dataElementGroups = new Object();
+	#foreach( $dataElementGroup in $dataElementGroups )
+		dataElementGroups['$dataElementGroup.id'] = '$encoder.jsEscape( $dataElementGroup.name, "'" )';
+	#end
+
+	var no_item = '$encoder.jsEscape( $i18n.getString("no_item"), "'" )';
+</script>

@@ -143,8 +143,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
 	</bean>
 
-	<bean
-		id="org.hisp.dhis.reportexcel.action.ValidateReportExcelAction"
+	<bean id="org.hisp.dhis.reportexcel.action.ValidateReportExcelAction"
 		class="org.hisp.dhis.reportexcel.action.ValidateReportExcelAction"
 		scope="prototype">
 		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
@@ -317,10 +316,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<bean id="org.hisp.dhis.reportexcel.item.action.ListReportExcelItemAction"
 		class="org.hisp.dhis.reportexcel.item.action.ListReportExcelItemAction"
 		scope="prototype">
-		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />		
+		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
 	</bean>
 
-	<bean id="org.hisp.dhis.reportexcel.item.action.SetupReportExcelItemFormAction"
+	<bean
+		id="org.hisp.dhis.reportexcel.item.action.SetupReportExcelItemFormAction"
 		class="org.hisp.dhis.reportexcel.item.action.SetupReportExcelItemFormAction"
 		scope="prototype">
 		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
@@ -355,7 +355,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reportexcel.item.action.ValidationReportExcelItemAction"
 		scope="prototype">
 		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
-	</bean>	
+	</bean>
 
 	<bean
 		id="org.hisp.dhis.reportexcel.item.action.DeleteReportExcelItemAction"
@@ -370,7 +370,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="reportService" ref="org.hisp.dhis.reportexcel.ReportExcelService" />
 	</bean>
-	
+
 	<bean id="org.hisp.dhis.reportexcel.item.action.CopyReportExcelItemAction"
 		class="org.hisp.dhis.reportexcel.item.action.CopyReportExcelItemAction"
 		scope="prototype">
@@ -890,6 +890,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		id="org.hisp.dhis.reportexcel.excelitemgroup.action.ValidateExcelItemGroupAction"
 		class="org.hisp.dhis.reportexcel.excelitemgroup.action.ValidateExcelItemGroupAction"
 		scope="prototype">
+		<property name="excelItemService"
+			ref="org.hisp.dhis.reportexcel.excelitem.ExcelItemService" />
 	</bean>
 
 	<bean
@@ -1037,7 +1039,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="excelItemService"
 			ref="org.hisp.dhis.reportexcel.excelitem.ExcelItemService" />
+	</bean>
+	<bean id="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction"
+		class="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction"
+		scope="prototype">
 		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+		<property name="excelItemService"
+			ref="org.hisp.dhis.reportexcel.excelitem.ExcelItemService" />
 	</bean>
 
 	<bean
