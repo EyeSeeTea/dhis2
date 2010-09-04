@@ -139,14 +139,15 @@ function sortByValue(a,b){return b.value-a.value;}
 function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';json+='[';mapvalues.sort(sortByValue);for(var i=0;i<mapvalues.length;i++){json+='{';json+='"organisation": "'+mapvalues[i].orgUnitId+'",';json+='"value": "'+mapvalues[i].value+'" ';json+=i<mapvalues.length-1?'},':'}'}json+=']';json+='}';return json}
 
 function getLegendsJSON(){
+    var widget = ACTIVEPANEL == thematicMap ? choropleth : proportionalSymbol;
     var json = '{';
 	json += '"legends":';
 	json += '[';
-	for(var i = 0; i < choropleth.imageLegend.length; i++) {
+	for(var i = 0; i < widget.imageLegend.length; i++) {
 		json += '{';
-		json += '"label": "' + choropleth.imageLegend[i].label + '",';
-		json += '"color": "' + choropleth.imageLegend[i].color + '" ';
-		json += i < choropleth.imageLegend.length-1 ? '},' : '}';
+		json += '"label": "' + widget.imageLegend[i].label + '",';
+		json += '"color": "' + widget.imageLegend[i].color + '" ';
+		json += i < widget.imageLegend.length-1 ? '},' : '}';
 	}
 	json += ']';
 	json += '}';

@@ -60,7 +60,8 @@ import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableData;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.reporttable.jdbc.ReportTableManager;
-import org.hisp.dhis.system.grid.Grid;
+import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -395,7 +396,7 @@ public class DefaultReportTableService
     
     private Grid getGrid( ReportTable reportTable )
     {
-        final Grid grid = new Grid();
+        final Grid grid = new ListGrid();
         
         for ( final IdentifiableObject metaObject : reportTable.getReportIndicators() )
         {

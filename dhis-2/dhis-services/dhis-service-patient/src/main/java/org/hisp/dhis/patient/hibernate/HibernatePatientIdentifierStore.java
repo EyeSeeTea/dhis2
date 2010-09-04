@@ -28,7 +28,6 @@
 package org.hisp.dhis.patient.hibernate;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
@@ -36,7 +35,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierStore;
 import org.hisp.dhis.patient.PatientIdentifierType;
