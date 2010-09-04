@@ -1,4 +1,4 @@
-package org.hisp.dhis.jdbc.batchhandler;
+package org.hisp.dhis.concept;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,74 +27,34 @@ package org.hisp.dhis.jdbc.batchhandler;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.amplecode.quick.JdbcConfiguration;
-import org.amplecode.quick.batchhandler.AbstractBatchHandler;
-import org.hisp.dhis.dataelement.DataElementCategory;
+import java.util.Collection;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Dang Duy Hieu
+ * @version $Id ConceptService.java Aug 25, 2010$
  */
-public class DataElementCategoryBatchHandler
-    extends AbstractBatchHandler<DataElementCategory>
+public interface ConceptService
 {
+    String ID = ConceptService.class.getName();
+
     // -------------------------------------------------------------------------
-    // Constructor
+    // Concept
     // -------------------------------------------------------------------------
 
-    public DataElementCategoryBatchHandler( JdbcConfiguration configuration )
-    {
-        super( configuration, false, false );
-    }
+    int saveConcept( Concept concept );
+
+    void deleteConcept( Concept concept );
+
+    void updateConcept( Concept concept );
+
+    Concept getConcept( int conceptId );
+
+    Concept getConceptByName( String conceptName );
+
+    Collection<Concept> getAllConcepts();
     
     // -------------------------------------------------------------------------
-    // AbstractBatchHandler implementation
+    // Concept expanding
     // -------------------------------------------------------------------------
-
-    protected void setTableName()
-    {
-        statementBuilder.setTableName( "dataelementcategory" );
-    }
-
-    @Override
-    protected void setAutoIncrementColumn()
-    {   
-        statementBuilder.setAutoIncrementColumn( "categoryid" );
-    }
-
-    @Override
-    protected void setIdentifierColumns()
-    {
-        statementBuilder.setIdentifierColumn( "categoryid" );
-    }
-
-    @Override
-    protected void setIdentifierValues( DataElementCategory category )
-    {                
-        statementBuilder.setIdentifierValue( category.getId() );
-    }
-
-    protected void setUniqueColumns()
-    {
-        statementBuilder.setUniqueColumn( "name" );
-    }
-
-    protected void setUniqueValues( DataElementCategory category )
-    {                
-        statementBuilder.setUniqueValue( category.getName() );
-    }
     
-    protected void setColumns()
-    {
-        statementBuilder.setColumn( "uuid" );
-        statementBuilder.setColumn( "name" );
-        statementBuilder.setColumn( "conceptid" );
-    }
-    
-    protected void setValues( DataElementCategory category )
-    {        
-        statementBuilder.setValue( category.getUuid() );
-        statementBuilder.setValue( category.getName() );
-        statementBuilder.setValue( category.getConcept() );
-    }
 }

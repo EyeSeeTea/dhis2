@@ -60,9 +60,9 @@ function validateAddDataElementCategory()
 
     var requestString = 'validateDataElementCategory.action?name=' + getFieldValue( 'name' );
 
-    requestString += "&conceptName=" + getFieldValue( 'conceptName' );
+    //requestString += "&conceptName=" + getFieldValue( 'conceptName' );
 
-    requestString += "&" + getParamString( 'categoryOptionNames' );
+    //requestString += "&" + getParamString( 'categoryOptionNames' );
 
     request.send( requestString );
   
@@ -94,9 +94,9 @@ function validateEditDataElementCategory()
     var requestString = 'validateDataElementCategory.action?id=' + getFieldValue( 'id' ) + 
         '&name=' + getFieldValue( 'name' );
 
-    requestString += "&conceptName=" + htmlEncode( document.getElementById( 'conceptName' ).value );
+    //requestString += "&conceptName=" + htmlEncode( document.getElementById( 'conceptName' ).value );
 
-    requestString += "&" + getParamString( 'categoryOptions' );
+    //requestString += "&" + getParamString( 'categoryOptions' );
   
     request.send( requestString );
     
@@ -164,7 +164,7 @@ function updateCategoryOptionName(){
 
 function updateCategoryOptionNameReceived(xmlObject){
 	var categoryOptions = byId('categoryOptions');
-		categoryOptions[categoryOptions.selectedIndex].text = byId('categoryOptionName').value;
+	categoryOptions[categoryOptions.selectedIndex].text = byId('categoryOptionName').value;
 	setMessage( i18n_option_rename_successfully );
 	
 }

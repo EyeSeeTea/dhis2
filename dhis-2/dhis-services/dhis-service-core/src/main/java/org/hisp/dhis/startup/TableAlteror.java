@@ -180,8 +180,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE section DROP COLUMN title;" );
 
         // Working on ConceptName
-        // executeSql( "ALTER TABLE dataelementcategory DROP COLUMN
-        // conceptname;" );
+        executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptname;" );
 
         log.info( "Tables updated" );
     }

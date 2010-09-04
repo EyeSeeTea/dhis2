@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.category;
+package org.hisp.dhis.dd.action.concept;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,38 +27,39 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hisp.dhis.concept.ConceptService;
-import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.common.DeleteNotAllowedException;
+import org.hisp.dhis.i18n.I18n;
 
-import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * @author Abyot Asalefew
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateDataElementCategoryAction
-    implements Action
+public class RemoveConceptAction
+    extends ActionSupport
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private DataElementCategoryService dataElementCategoryService;
-
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
 
     private ConceptService conceptService;
 
     public void setConceptService( ConceptService conceptService )
     {
         this.conceptService = conceptService;
+    }
+
+    // -------------------------------------------------------------------------
+    // I18n
+    // -------------------------------------------------------------------------
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -72,25 +73,15 @@ public class UpdateDataElementCategoryAction
         this.id = id;
     }
 
-    private String name;
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    public void setName( String name )
+    private String message;
+
+    public String getMessage()
     {
-        this.name = name;
-    }
-
-    private Integer conceptId;
-
-    public void setConceptId( Integer conceptId )
-    {
-        this.conceptId = conceptId;
-    }
-
-    private List<String> categoryOptions = new ArrayList<String>();
-
-    public void setCategoryOptions( List<String> categoryOptions )
-    {
-        this.categoryOptions = categoryOptions;
+        return message;
     }
 
     // -------------------------------------------------------------------------
@@ -99,23 +90,19 @@ public class UpdateDataElementCategoryAction
 
     public String execute()
     {
-        DataElementCategory dataElementCategory = dataElementCategoryService.getDataElementCategory( id );
-        dataElementCategory.setName( name );
-        dataElementCategory.setConcept( conceptService.getConcept( conceptId ) );
-
-        // ---------------------------------------------------------------------
-        // CategoryOptions can only be sorted on update
-        // ---------------------------------------------------------------------
-
-        dataElementCategory.getCategoryOptions().clear();
-
-        for ( String id : categoryOptions )
+        try
         {
-            dataElementCategory.getCategoryOptions().add(
-                dataElementCategoryService.getDataElementCategoryOption( Integer.parseInt( id ) ) );
+            conceptService.deleteConcept( conceptService.getConcept( id ) );
         }
+        catch ( DeleteNotAllowedException ex )
+        {
+            if ( ex.getErrorCode().equals( DeleteNotAllowedException.ERROR_ASSOCIATED_BY_OTHER_OBJECTS ) )
+            {
+                message = i18n.getString( "object_not_deleted_associated_by_objects" ) + " " + ex.getClassName();
 
-        dataElementCategoryService.updateDataElementCategory( dataElementCategory );
+                return ERROR;
+            }
+        }
 
         return SUCCESS;
     }

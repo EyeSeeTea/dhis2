@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.category;
+package org.hisp.dhis.dataelement;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,85 +27,73 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.comparator.ConceptNameComparator;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Abyot Asalefew
- * @version $Id GetDataElementCategoryAction.java Aug 30, 2010 ddhieu$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class GetDataElementCategoryAction
-    implements Action
+public class DataElementCategoryDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementCategoryService dataElementCategoryService;
+    private DataElementCategoryService categoryService;
 
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
-    private ConceptService conceptService;
-
-    public void setConceptService( ConceptService conceptService )
-    {
-        this.conceptService = conceptService;
+        this.categoryService = categoryService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private Integer id;
-
-    public void setId( Integer id )
+    @Override
+    public String getClassName()
     {
-        this.id = id;
+        return DataElementCategory.class.getSimpleName();
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private DataElementCategory dataElementCategory;
-
-    public DataElementCategory getDataElementCategory()
+    @Override
+    public boolean allowDeleteConcept( Concept concept )
     {
-        return dataElementCategory;
+        for ( DataElementCategory category : categoryService.getAllDataElementCategories() )
+        {
+            Concept categoryConcept = category.getConcept();
+
+            if ( categoryConcept != null )
+            {
+                if ( categoryConcept.equals( concept ) )
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
-    private List<Concept> concepts;
-
-    public List<Concept> getConcepts()
+    @Override
+    public void deleteConcept( Concept concept )
     {
-        return concepts;
-    }
+        for ( DataElementCategory category : categoryService.getAllDataElementCategories() )
+        {
+            Concept categoryConcept = category.getConcept();
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-    {
-        dataElementCategory = dataElementCategoryService.getDataElementCategory( id );
-
-        // Concept list
-        concepts = new ArrayList<Concept>( conceptService.getAllConcepts() );
-
-        Collections.sort( concepts, new ConceptNameComparator() );
-
-        return SUCCESS;
+            if ( categoryConcept != null )
+            {
+                if ( categoryConcept.equals( concept ) )
+                {
+                    category.setConcept( null );
+                    categoryService.updateDataElementCategory( category );
+                }
+            }
+        }
     }
 }

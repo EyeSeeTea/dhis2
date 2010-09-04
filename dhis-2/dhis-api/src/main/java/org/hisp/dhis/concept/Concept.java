@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement;
+package org.hisp.dhis.concept;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,63 +27,32 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.dimension.Dimension;
+import org.hisp.dhis.common.IdentifiableObject;
 
 /**
- * A Category is a dimension of a data element. DataElements can have sets of
- * dimensions (known as CategoryCombos). An Example of a Category might be
- * "Sex". The Category could have two (or more) CategoryOptions such as "Male"
- * and "Female".
+ * A Concept Name is a short name which is used as an attribute name
+ * when representing a data value in xml which does not use
+ * category-option-combo, eg. <DataElement='3' AGE='2' SEX='1' Value='23' />
  * 
- * @author Abyot Asalefew
- * @version $Id DataElementCategory.java Aug 25, 2010 duyhieu$
+ * SDMX-HD is one such case.
+ * 
+ * @author Dang Duy Hieu
+ * @version $Id Concept.java Aug 25, 2010$
  */
-public class DataElementCategory
-    extends Dimension
+public class Concept
+    extends IdentifiableObject
 {
-    public static final String DEFAULT_NAME = "default";
-
-    private Concept concept;
-
-    private List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public DataElementCategory()
+    public Concept()
     {
     }
 
-    public DataElementCategory( String name )
+    public Concept( String name )
     {
         this.name = name;
-    }
-
-    public DataElementCategory( String name, List<DataElementCategoryOption> categoryOptions )
-    {
-        this.name = name;
-        this.categoryOptions = categoryOptions;
-    }
-
-    public DataElementCategory( String name, Concept concept, List<DataElementCategoryOption> categoryOptions )
-    {
-        this.name = name;
-        this.concept = concept;
-        this.categoryOptions = categoryOptions;
-    }
-
-    // -------------------------------------------------------------------------
-    // Dimension
-    // -------------------------------------------------------------------------
-
-    public List<DataElementCategoryOption> getDimensionOptions()
-    {
-        return categoryOptions;
     }
 
     // -------------------------------------------------------------------------
@@ -97,24 +66,24 @@ public class DataElementCategory
     }
 
     @Override
-    public boolean equals( Object object )
+    public boolean equals( Object o )
     {
-        if ( this == object )
+        if ( this == o )
         {
             return true;
         }
 
-        if ( object == null )
+        if ( o == null )
         {
             return false;
         }
 
-        if ( !(object instanceof DataElementCategory) )
+        if ( !(o instanceof Concept) )
         {
             return false;
         }
 
-        final DataElementCategory other = (DataElementCategory) object;
+        final Concept other = (Concept) o;
 
         return name.equals( other.getName() );
     }
@@ -124,29 +93,4 @@ public class DataElementCategory
     {
         return "[" + name + "]";
     }
-
-    // ------------------------------------------------------------------------
-    // Getters and setters
-    // ------------------------------------------------------------------------
-
-    public List<DataElementCategoryOption> getCategoryOptions()
-    {
-        return categoryOptions;
-    }
-
-    public void setCategoryOptions( List<DataElementCategoryOption> categoryOptions )
-    {
-        this.categoryOptions = categoryOptions;
-    }
-
-    public Concept getConcept()
-    {
-        return concept;
-    }
-
-    public void setConcept( Concept concept )
-    {
-        this.concept = concept;
-    }
-
 }

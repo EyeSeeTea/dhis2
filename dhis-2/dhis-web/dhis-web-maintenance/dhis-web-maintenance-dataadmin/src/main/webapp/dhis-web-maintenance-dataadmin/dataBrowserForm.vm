@@ -69,7 +69,7 @@
 </div>
 
 <div id="drillDownCheckBoxDiv" style="display:none">
-	<input type="checkbox" id="drillDownCheckBox" name="drillDownCheckBox" /> $i18n.getString( "browse_data_at_tdis_level" )
+	<input type="checkbox" id="drillDownCheckBox" name="drillDownCheckBox" /> $i18n.getString( "browse_data_at_this_level" )
 </div>
 
 <br/>

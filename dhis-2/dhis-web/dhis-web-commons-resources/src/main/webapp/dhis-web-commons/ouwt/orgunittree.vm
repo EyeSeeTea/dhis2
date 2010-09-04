@@ -9,7 +9,7 @@ $(document).ready(function(){
 
 </script>
 
-<span><img id='searchDiv' src='../images/search.png' style='cursor: pointer'>&nbsp;
+<span><img id='searchDiv' src='../images/search.png' style='cursor: pointer' title="$i18n.getString( 'locate_organisation_unit_by_code' )">&nbsp;
 <input type='text' id='key' name='key' onchange='getOrgunitByCode(this.value);' class='searchOrgunit'></span>
 
 #macro( parseNode $node )

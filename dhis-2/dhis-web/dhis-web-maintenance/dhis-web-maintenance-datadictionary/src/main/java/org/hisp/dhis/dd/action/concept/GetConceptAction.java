@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.category;
+package org.hisp.dhis.dd.action.concept;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,32 +27,21 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hisp.dhis.concept.ConceptService;
-import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.concept.Concept;
 
-import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * @author Abyot Asalefew
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateDataElementCategoryAction
-    implements Action
+public class GetConceptAction
+    extends ActionSupport
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private DataElementCategoryService dataElementCategoryService;
-
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
 
     private ConceptService conceptService;
 
@@ -72,25 +61,15 @@ public class UpdateDataElementCategoryAction
         this.id = id;
     }
 
-    private String name;
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    public void setName( String name )
+    private Concept concept;
+
+    public Concept getConcept()
     {
-        this.name = name;
-    }
-
-    private Integer conceptId;
-
-    public void setConceptId( Integer conceptId )
-    {
-        this.conceptId = conceptId;
-    }
-
-    private List<String> categoryOptions = new ArrayList<String>();
-
-    public void setCategoryOptions( List<String> categoryOptions )
-    {
-        this.categoryOptions = categoryOptions;
+        return concept;
     }
 
     // -------------------------------------------------------------------------
@@ -99,23 +78,7 @@ public class UpdateDataElementCategoryAction
 
     public String execute()
     {
-        DataElementCategory dataElementCategory = dataElementCategoryService.getDataElementCategory( id );
-        dataElementCategory.setName( name );
-        dataElementCategory.setConcept( conceptService.getConcept( conceptId ) );
-
-        // ---------------------------------------------------------------------
-        // CategoryOptions can only be sorted on update
-        // ---------------------------------------------------------------------
-
-        dataElementCategory.getCategoryOptions().clear();
-
-        for ( String id : categoryOptions )
-        {
-            dataElementCategory.getCategoryOptions().add(
-                dataElementCategoryService.getDataElementCategoryOption( Integer.parseInt( id ) ) );
-        }
-
-        dataElementCategoryService.updateDataElementCategory( dataElementCategory );
+        concept = conceptService.getConcept( id );
 
         return SUCCESS;
     }

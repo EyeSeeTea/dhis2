@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.category;
+package org.hisp.dhis.concept;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,85 +27,70 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
 import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.comparator.ConceptNameComparator;
-import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Abyot Asalefew
- * @version $Id GetDataElementCategoryAction.java Aug 30, 2010 ddhieu$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class GetDataElementCategoryAction
-    implements Action
+@Transactional
+public class DefaultConceptService
+    implements ConceptService
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementCategoryService dataElementCategoryService;
+    GenericIdentifiableObjectStore<Concept> conceptStore;
 
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    public void setConceptStore( GenericIdentifiableObjectStore<Concept> conceptStore )
     {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
-    private ConceptService conceptService;
-
-    public void setConceptService( ConceptService conceptService )
-    {
-        this.conceptService = conceptService;
+        this.conceptStore = conceptStore;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Concept
     // -------------------------------------------------------------------------
 
-    private Integer id;
-
-    public void setId( Integer id )
+    @Override
+    public int saveConcept( Concept concept )
     {
-        this.id = id;
+        return conceptStore.save( concept );
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private DataElementCategory dataElementCategory;
-
-    public DataElementCategory getDataElementCategory()
+    @Override
+    public void updateConcept( Concept concept )
     {
-        return dataElementCategory;
+        conceptStore.update( concept );
     }
 
-    private List<Concept> concepts;
-
-    public List<Concept> getConcepts()
+    @Override
+    public void deleteConcept( Concept concept )
     {
-        return concepts;
+        conceptStore.delete( concept );
     }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    @Override
+    public Concept getConcept( int conceptId )
     {
-        dataElementCategory = dataElementCategoryService.getDataElementCategory( id );
-
-        // Concept list
-        concepts = new ArrayList<Concept>( conceptService.getAllConcepts() );
-
-        Collections.sort( concepts, new ConceptNameComparator() );
-
-        return SUCCESS;
+        return conceptStore.get( conceptId );
     }
+
+    @Override
+    public Concept getConceptByName( String conceptName )
+    {
+        return conceptStore.getByName( conceptName );
+    }
+
+    @Override
+    public Collection<Concept> getAllConcepts()
+    {
+        return conceptStore.getAll();
+    }
+
 }
