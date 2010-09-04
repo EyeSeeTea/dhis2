@@ -214,12 +214,12 @@
 		<action name="setOrgunitByCode"
 			class="org.hisp.dhis.ouwt.action.GetOrganisationUnitByCodeAction">
 			<result name="success" type="velocity-xml">
-				/dhis-web-commons/ouwt/responseSelect.vm</result>
+				/dhis-web-commons/ouwt/responseSuccess.vm</result>
 			<result name="input" type="velocity-xml">
 				/dhis-web-commons/ouwt/responseInput.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
-
+		
 	</package>
 
 	<!-- Menu -->
