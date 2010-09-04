@@ -153,6 +153,23 @@ function getLegendsJSON(){
 	return json;
 }
 
+function getSvgDivId(svgChildren) {
+	var svgNode;
+	var svgDivId;
+
+	for (i=0; i<svgChildren.length; i++) {
+		svgNode = svgChildren[i];
+		svgDivId = svgNode.getAttribute('id');		
+
+		while (svgNode.hasChildNodes()) {
+			svgNode = svgNode.firstChild;
+			if ( svgNode.nodeName && svgNode.nodeName == 'path' ) {
+				return svgDivId;
+			}
+		}
+	}
+}
+
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
 	/* Cookie provider */
@@ -611,17 +628,10 @@ Ext.onReady( function() {
 
                     if (vcb && dcb && mcb && lcb) {
                     	var svgChildren = document.getElementById('_OpenLayers_Container').childNodes;
-						var svgDivId = null;
-
-						for (i = 0; i < svgChildren.length; i++) { // Search for div containing SVG
-							svgDivId = svgChildren[i].getAttribute('id');
-							if (svgDivId && svgDivId.indexOf('OpenLayers.Layer.Vector_') != -1) {
-								break;
-							}
-						}
+						var svgDivId = getSvgDivId(svgChildren);
 
 						var svg = document.getElementById(svgDivId).innerHTML;
-						var objectSVGDocument = document.getElementById(svgDivId).childNodes[0];
+						var objectSVGDocument = document.getElementById(svgDivId).firstChild;
 						
                         var viewBox = objectSVGDocument.getAttribute('viewBox');
                         var title = Ext.getCmp('exportimagetitle_tf').getValue();
