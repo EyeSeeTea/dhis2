@@ -87,7 +87,9 @@ public class TableAlteror
         executeSql( "ALTER TABLE categoryoptioncombo DROP COLUMN displayorder" );
         executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN shortname" );
         executeSql( "ALTER TABLE section DROP COLUMN label" );
+        executeSql( "ALTER TABLE section DROP COLUMN title;" );
         executeSql( "ALTER TABLE organisationunit DROP COLUMN polygoncoordinates" );
+        executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptname" );
 
         // remove relative period type
         executeSql( "DELETE FROM period WHERE periodtypeid=(select periodtypeid from periodtype where name='Relative')" );
@@ -175,13 +177,7 @@ public class TableAlteror
             // delete table dataentryformassociation
             executeSql( "DROP TABLE dataentryformassociation" );
         }
-
-        // Working on Section table
-        executeSql( "ALTER TABLE section DROP COLUMN title;" );
-
-        // Working on ConceptName
-        executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptname;" );
-
+        
         log.info( "Tables updated" );
     }
 
