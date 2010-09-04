@@ -111,6 +111,16 @@ public class ListGrid
         return column;
     }
     
+    public String getValue( int rowIndex, int columnIndex )
+    {
+        if ( grid.size() < rowIndex || grid.get( rowIndex ) == null || grid.get( rowIndex ).size() < columnIndex )
+        {
+            throw new IllegalArgumentException( "Grid does not contain the requested row / column" );
+        }
+        
+        return grid.get( rowIndex ).get( columnIndex );
+    }
+    
     public void addColumn( List<String> columnValues )
     {
         verifyGridState();

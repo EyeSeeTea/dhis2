@@ -34,14 +34,17 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.hisp.dhis.expression.Expression.SEPARATOR;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.aggregation.AggregatedDataValue;
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -243,7 +246,41 @@ public class ValidationRuleServiceTest
     // ----------------------------------------------------------------------
     // Business logic tests
     // ----------------------------------------------------------------------
+    
+    @Test
+    public void testGetAggregatedValidationResult()
+    {
+        validationRuleService.saveValidationRule( validationRuleA );
+        validationRuleService.saveValidationRule( validationRuleB );
+        validationRuleService.saveValidationRule( validationRuleC );
+        validationRuleService.saveValidationRule( validationRuleD );
 
+        List<Period> periods = new ArrayList<Period>();
+        periods.add( periodA );
+        periods.add( periodB );
+        
+        List<Source> sources = new ArrayList<Source>();
+        sources.add( sourceA );
+        sources.add( sourceB );
+        
+        Collection<ValidationResult> results = new HashSet<ValidationResult>();
+        
+        results.add( new ValidationResult( periodA, sourceA, validationRuleA, 1, 1 ) );
+        results.add( new ValidationResult( periodA, sourceA, validationRuleB, 1, 1 ) );
+        results.add( new ValidationResult( periodA, sourceA, validationRuleC, 1, 1 ) );
+        results.add( new ValidationResult( periodB, sourceB, validationRuleA, 1, 1 ) );
+        results.add( new ValidationResult( periodB, sourceB, validationRuleB, 1, 1 ) );
+        
+        Grid grid = validationRuleService.getAggregateValidationResult( results, periods, sources );
+        
+        // First row is Periods, first column in each row is Source
+        
+        assertEquals( "75.0", grid.getValue( 1, 1 ) );
+        assertEquals( "0.0", grid.getValue( 1, 2 ) );
+        assertEquals( "0.0", grid.getValue( 2, 1 ) );
+        assertEquals( "50.0", grid.getValue( 2, 2 ) );
+    }
+    
     @Test
     public void testValidateAggregatedDateDateSources()
     {

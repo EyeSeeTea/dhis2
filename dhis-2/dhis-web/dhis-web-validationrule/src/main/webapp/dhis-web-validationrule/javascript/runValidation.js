@@ -39,8 +39,7 @@ function runValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        setMessage( message );
     }
 }
 
@@ -68,4 +67,23 @@ function aggregateChanged()
 		$( 'span#info' ).html( i18n_captured_data_info );
 		$( '#doDataMart' ).attr( 'disabled', 'disabled' );
 	}
+}
+
+function showAggregateResults()
+{
+	$( 'div#validationResults' ).hide();
+	$( 'div#aggregateResults' ).show();	
+	var button = document.getElementById( "resultTypeButton" );
+	button.onclick = function() { showValidationResults(); };
+	button.value = "See validation";
+}
+
+function showValidationResults()
+{
+	$( 'div#aggregateResults' ).hide();
+	$( 'div#validationResults' ).show();
+	
+	var button = document.getElementById( "resultTypeButton" );
+	button.onclick = function() { showAggregateResults(); };
+	button.value = "See statistics";
 }

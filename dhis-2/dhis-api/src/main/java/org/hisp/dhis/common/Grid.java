@@ -74,6 +74,16 @@ public interface Grid
      * @param columnIndex the index of the column.
      */
     List<String> getColumn( int columnIndex );
+    
+    /**
+     * Return the value at the given row index and the given column index.
+     * 
+     * @param rowIndex the row index.
+     * @param columnIndex the column index.
+     * @return the column value.
+     * @throws IllegalArgumentException if the grid does not contain the requested row / column.
+     */
+    String getValue( int rowIndex, int columnIndex );
 
     /**
      * Adds a new column at the end of the grid.

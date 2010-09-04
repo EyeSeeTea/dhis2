@@ -231,6 +231,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <aop:aspect ref="deletionInterceptor">      
       <aop:before pointcut="execution( * org.hisp.dhis.datamart.DataMartService.deleteDataMartExport(..) )" method="intercept"/>
     </aop:aspect>
+
+    <aop:aspect ref="statementInterceptor">
+      <aop:around pointcut="execution( * org.hisp.dhis.datamart.DataMartService.export(..) )" method="intercept" />
+	</aop:aspect>
       
   </aop:config>
     

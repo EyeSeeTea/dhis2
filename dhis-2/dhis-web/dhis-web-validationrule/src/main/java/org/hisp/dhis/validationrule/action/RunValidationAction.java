@@ -35,6 +35,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -110,7 +111,7 @@ public class RunValidationAction
     {
         this.periodService = periodService;
     }
-
+    
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
@@ -153,6 +154,13 @@ public class RunValidationAction
         return validationResults;
     }
     
+    private Grid aggregateResults;
+
+    public Grid getAggregateResults()
+    {
+        return aggregateResults;
+    }
+
     private boolean aggregate;
 
     public boolean isAggregate()
@@ -182,13 +190,16 @@ public class RunValidationAction
 
         if ( aggregate ) // Aggregate data source
         {
-            Collection<OrganisationUnit> organisationUnits = unit.getChildren();
+            List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( unit.getChildren() );
 
+            List<Period> periods = new ArrayList<Period>( periodService.namePeriods( 
+                periodService.getPeriodsBetweenDates( format.parseDate( startDate ), format.parseDate( endDate ) ), format ) );
+            
+            log.info( "Number of periods: " + periods.size() + ", number of organisation units: " + organisationUnits.size() );
+            
             if ( doDataMart )
             {
                 log.info( "Generating datamart" );
-                
-                Collection<Period> periods = periodService.getPeriodsBetweenDates( format.parseDate( startDate ), format.parseDate( endDate ) );
                 
                 Collection<DataElement> dataElements = validationRuleService.getDataElementsInValidationRules();
                 
@@ -212,6 +223,8 @@ public class RunValidationAction
                 validationResults = new ArrayList<ValidationResult>( validationRuleService.validateAggregate( format
                     .parseDate( startDate ), format.parseDate( endDate ), organisationUnits, group ) );
             }
+            
+            aggregateResults = validationRuleService.getAggregateValidationResult( validationResults, periods, organisationUnits );
         }
         else // Captured data source
         {

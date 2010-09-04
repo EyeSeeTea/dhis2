@@ -27,48 +27,40 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Lars Helge Overland
  */
-public class Counter<T>
+public class CompositeCounter
+    extends Counter<String>
 {
-    private Map<T, Integer> map;
+    private static final char SEPARATOR = '-';
     
-    public Counter()
+    public CompositeCounter()
     {
-        map = new HashMap<T, Integer>();
+        super();
     }
     
-    public int count( T key )
+    public int count( Object... objects )
     {
-        if ( !map.containsKey( key ) )
+        String key = getKey( objects );
+        
+        return super.count( key );
+    }
+    
+    public Integer getCount( Object... objects )
+    {
+        return super.getCount( getKey( objects ) );
+    }
+    
+    private String getKey( Object... objects )
+    {
+        String key = "";
+        
+        for ( Object o : objects )
         {
-            map.put( key, 0 );
+            key += o.hashCode() + SEPARATOR;
         }
         
-        int count = map.get( key );
-        
-        map.put( key, ++count );
-        
-        return count;
-    }
-    
-    public Map<T, Integer> getCount()
-    {
-        return map;
-    }
-    
-    public Integer getCount( T key )
-    {
-        return map != null && map.containsKey( key ) ? map.get( key ) : 0;
-    }
- 
-    @Override
-    public String toString()
-    {
-        return "[" + map.toString() + "]";
+        return key;
     }
 }
