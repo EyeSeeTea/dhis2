@@ -609,6 +609,10 @@ Ext.onReady( function() {
                         mcb = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf2').getValue() : Ext.getCmp('map_cb2').getValue();
                         lcb = Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb2').getValue() ? true : false;
                     }
+                    else {
+                        Ext.message.msg(false, i18n_please_expand_layer_panel);
+                        return;
+                    }   
 
                     if (vcb && dcb && mcb && lcb) {
                     	var svgChildren = document.getElementById('_OpenLayers_Container').childNodes;
