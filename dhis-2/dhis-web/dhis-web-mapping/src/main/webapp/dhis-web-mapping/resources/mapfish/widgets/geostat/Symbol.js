@@ -171,7 +171,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 		});
 	},
     
-    validateForm: function() {
+    validateForm2: function() {
         if (!Ext.getCmp('indicator_cb2').getValue() && !Ext.getCmp('dataelement_cb2').getValue()) {
             return false;
         }

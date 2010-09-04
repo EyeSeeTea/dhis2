@@ -117,7 +117,8 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
     createColorInterpolation: function() {
         var initialColors = this.colors;
         var numColors = this.classification.bins.length;
-		var mapLegendType = ACTIVEPANEL == organisationUnitAssignment ? map_legend_type_automatic : Ext.getCmp('maplegendtype_cb2').getValue();
+		var mapLegendType = ACTIVEPANEL == organisationUnitAssignment ?
+            map_legend_type_automatic : Ext.getCmp('maplegendtype_cb2').getValue();
 		
 		if (mapLegendType == map_legend_type_automatic) {
 			this.colorInterpolation = proportionalSymbol.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(initialColors[0], initialColors[1], numColors);

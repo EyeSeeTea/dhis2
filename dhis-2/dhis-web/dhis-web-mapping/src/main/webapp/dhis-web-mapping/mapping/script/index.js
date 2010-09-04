@@ -139,35 +139,19 @@ function sortByValue(a,b){return b.value-a.value;}
 function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';json+='[';mapvalues.sort(sortByValue);for(var i=0;i<mapvalues.length;i++){json+='{';json+='"organisation": "'+mapvalues[i].orgUnitId+'",';json+='"value": "'+mapvalues[i].value+'" ';json+=i<mapvalues.length-1?'},':'}'}json+=']';json+='}';return json}
 
 function getLegendsJSON(){
+    var widget = ACTIVEPANEL == thematicMap ? choropleth : proportionalSymbol;
     var json = '{';
 	json += '"legends":';
 	json += '[';
-	for(var i = 0; i < choropleth.imageLegend.length; i++) {
+	for(var i = 0; i < widget.imageLegend.length; i++) {
 		json += '{';
-		json += '"label": "' + choropleth.imageLegend[i].label + '",';
-		json += '"color": "' + choropleth.imageLegend[i].color + '" ';
-		json += i < choropleth.imageLegend.length-1 ? '},' : '}';
+		json += '"label": "' + widget.imageLegend[i].label + '",';
+		json += '"color": "' + widget.imageLegend[i].color + '" ';
+		json += i < widget.imageLegend.length-1 ? '},' : '}';
 	}
 	json += ']';
 	json += '}';
 	return json;
-}
-
-function getSvgDivId(svgChildren) {
-	var svgNode;
-	var svgDivId;
-
-	for (i=0; i<svgChildren.length; i++) {
-		svgNode = svgChildren[i];
-		svgDivId = svgNode.getAttribute('id');		
-
-		while (svgNode.hasChildNodes()) {
-			svgNode = svgNode.firstChild;
-			if ( svgNode.nodeName && svgNode.nodeName == 'path' ) {
-				return svgDivId;
-			}
-		}
-	}
 }
 
 Ext.onReady( function() {
@@ -628,10 +612,17 @@ Ext.onReady( function() {
 
                     if (vcb && dcb && mcb && lcb) {
                     	var svgChildren = document.getElementById('_OpenLayers_Container').childNodes;
-						var svgDivId = getSvgDivId(svgChildren);
+						var svgDivId = null;
+
+						for (i = 0; i < svgChildren.length; i++) { // Search for div containing SVG
+							svgDivId = svgChildren[i].getAttribute('id');
+							if (svgDivId && svgDivId.indexOf('OpenLayers.Layer.Vector_') != -1) {
+								break;
+							}
+						}
 
 						var svg = document.getElementById(svgDivId).innerHTML;
-						var objectSVGDocument = document.getElementById(svgDivId).firstChild;
+						var objectSVGDocument = document.getElementById(svgDivId).childNodes[0];
 						
                         var viewBox = objectSVGDocument.getAttribute('viewBox');
                         var title = Ext.getCmp('exportimagetitle_tf').getValue();
