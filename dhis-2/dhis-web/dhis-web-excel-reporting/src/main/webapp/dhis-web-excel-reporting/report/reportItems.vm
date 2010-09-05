@@ -3,12 +3,6 @@
 		tableSorter( 'listTable', [[1,0]] );	
 	});
 	
-	function reportItemSelect( checked )
-	{
-		if( checked ) checkALL( "input[type=checkbox][name=reportItemCheck]" );
-		else unCheckALL( "input[type=checkbox][name=reportItemCheck]" );
-	}
-	
 </script>
 
 <h3>$!encoder.htmlEncode($!reportExcel.name)</h3>
@@ -47,7 +41,7 @@
 	<col width="100px" />
 	<thead>
 		<tr>
-			<th class="{sorter: false}"><input type="checkbox" onclick="reportItemSelect(this.checked)"/></th>
+			<th class="{sorter: false}"><input type="checkbox" onclick="toggleChecked(this.checked, 'reportItemCheck')"/></th>
 			<th>$i18n.getString('name')</th>
 			<th>$i18n.getString('item_type')</th>
 			<th>$i18n.getString('period_type')</th>
