@@ -1,4 +1,4 @@
-<h3>$i18n.getString('excelitem_group') #openHelp( "excelReportingExcelItems" )</h3>
+<h3>$i18n.getString('excel_importing') #openHelp( "excelReportingExcelItems" )</h3>
 <table width=100%>
 	<tr>
 		<td>
@@ -17,7 +17,7 @@
 			<th>$i18n.getString('name')</th>
 			<th>$i18n.getString('type')</th>
 			<th>$i18n.getString('period_type')</th>		
-			<th width="140px" class="{sorter: false}">$i18n.getString('operations')</th>		
+			<th width="160px" class="{sorter: false}">$i18n.getString('operations')</th>		
 		</tr>
 	</thead>
 	<tbody id="list">	

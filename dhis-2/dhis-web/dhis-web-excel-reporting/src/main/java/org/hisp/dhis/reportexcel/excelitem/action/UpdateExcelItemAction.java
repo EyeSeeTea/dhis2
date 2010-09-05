@@ -36,81 +36,104 @@ import com.opensymphony.xwork2.Action;
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class UpdateExcelItemAction implements Action{
-	// -------------------------------------------------------------------------
-	// Dependency
-	// -------------------------------------------------------------------------
+public class UpdateExcelItemAction
+    implements Action
+{
+    // -------------------------------------------------------------------------
+    // Dependency
+    // -------------------------------------------------------------------------
 
-	private ExcelItemService excelItemService;
+    private ExcelItemService excelItemService;
 
-	// -------------------------------------------------------------------------
-	// Inputs
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Inputs
+    // -------------------------------------------------------------------------
 
-	private int id;
-	
-	private String name;
+    private Integer id;
 
-	private String expression;
+    private String name;
 
-	private int row;
+    private String expression;
 
-	private int column;
+    private Integer row;
 
-	private int sheetNo;
+    private Integer column;
 
-	// -------------------------------------------------------------------------
-	// Setters
-	// -------------------------------------------------------------------------
+    private Integer sheetNo;
 
-	public void setExcelItemService(ExcelItemService excelItemService) {
-		this.excelItemService = excelItemService;
-	}
+    private Integer excelItemGroupId;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    // -------------------------------------------------------------------------
+    // Setters
+    // -------------------------------------------------------------------------
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
 
-	public void setExpression(String expression) {
-		this.expression = expression;
-	}
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
 
-	public void setRow(int row) {
-		this.row = row;
-	}
+    public void setName( String name )
+    {
+        this.name = name;
+    }
 
-	public void setColumn(int column) {
-		this.column = column;
-	}
+    public void setExpression( String expression )
+    {
+        this.expression = expression;
+    }
 
-	public void setSheetNo(int sheetNo) {
-		this.sheetNo = sheetNo;
-	}
-	
-	// -------------------------------------------------------------------------
-	// Action implementation
-	// -------------------------------------------------------------------------
+    public void setRow( Integer row )
+    {
+        this.row = row;
+    }
 
-	public String execute() throws Exception {
-		
-		ExcelItem excelItem = excelItemService.getExcelItem(id);
-		
-		excelItem.setName(name);
-		
-		excelItem.setRow(row);
-		
-		excelItem.setColumn(column);
-		
-		excelItem.setExpression(expression);
-		
-		excelItem.setSheetNo(sheetNo);
-		
-		excelItemService.updateExcelItem(excelItem);
-		
-		return SUCCESS;
-	}
+    public void setColumn( Integer column )
+    {
+        this.column = column;
+    }
+
+    public void setSheetNo( Integer sheetNo )
+    {
+        this.sheetNo = sheetNo;
+    }
+
+    public Integer getExcelItemGroupId()
+    {
+        return excelItemGroupId;
+    }
+
+    public void setExcelItemGroupId( Integer excelItemGroupId )
+    {
+        this.excelItemGroupId = excelItemGroupId;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+
+        ExcelItem excelItem = excelItemService.getExcelItem( id );
+
+        excelItem.setName( name );
+
+        excelItem.setRow( row );
+
+        excelItem.setColumn( column );
+
+        excelItem.setExpression( expression );
+
+        excelItem.setSheetNo( sheetNo );
+
+        excelItemService.updateExcelItem( excelItem );
+
+        return SUCCESS;
+    }
 }

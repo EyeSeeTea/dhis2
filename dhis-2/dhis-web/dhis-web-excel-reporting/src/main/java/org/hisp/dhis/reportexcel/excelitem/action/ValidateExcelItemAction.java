@@ -53,8 +53,6 @@ public class ValidateExcelItemAction
 
     private String name;
 
-    private String expression;
-
     private Integer row;
 
     private Integer column;
@@ -84,11 +82,6 @@ public class ValidateExcelItemAction
         this.name = name;
     }
 
-    public void setExpression( String expression )
-    {
-        this.expression = expression;
-    }
-
     public void setRow( Integer row )
     {
         this.row = row;
@@ -116,83 +109,37 @@ public class ValidateExcelItemAction
     public String execute()
         throws Exception
     {
-        ExcelItemGroup excelItemGroup = excelItemService.getExcelItemGroup( excelItemGroupId );
+        if ( name != null )
+        {            
 
-        if ( name == null || name.length() == 0 )
-        {
-            message = i18n.getString( "name" ) + " " + i18n.getString( "not_null" );
+            ExcelItemGroup excelItemGroup = excelItemService.getExcelItemGroup( excelItemGroupId );
+            
+            ExcelItem match = excelItemGroup.getExcelItemByName( name );
 
-            return ERROR;
-        }
-
-        if ( expression == null || expression.length() == 0 )
-        {
-            message = i18n.getString( "expression" ) + " " + i18n.getString( "not_null" );
-
-            return ERROR;
-        }
-
-        if ( sheetNo == null )
-        {
-            message = i18n.getString( "sheetNo" ) + " " + i18n.getString( "not_null" );
-
-            return ERROR;
-        }
-
-        if ( row == null )
-        {
-            message = i18n.getString( "row" ) + " " + i18n.getString( "not_null" );
-
-            return ERROR;
-        }
-
-        if ( column == null )
-        {
-            message = i18n.getString( "column" ) + " " + i18n.getString( "not_null" );
-
-            return ERROR;
-        }
-
-        if ( id == null )
-        {
-
-            if ( excelItemGroup.excelItemIsExist( name ) )
+            if ( match != null && (id == null || match.getId() != id) )
             {
                 message = i18n.getString( "name_ready_exist" );
 
                 return ERROR;
             }
+        }
+       
 
-            if ( excelItemGroup.rowAndColumnIsExist( sheetNo, row, column ) )
+        if ( row != null && column != null && sheetNo != null )
+        {
+            ExcelItemGroup excelItemGroup = excelItemService.getExcelItemGroup( excelItemGroupId );
+            
+            ExcelItem match = excelItemGroup.getExcelItemBySheetRowColumn( sheetNo, row, column );
+
+            if ( match != null && (id == null || match.getId() != id) )
             {
                 message = i18n.getString( "cell_exist" );
 
                 return ERROR;
             }
         }
-        else
-        {
-            ExcelItem excelItem = excelItemService.getExcelItem( id );
 
-            ExcelItem temp = excelItemGroup.getExcelItemByName( name );
-
-            if ( temp != null && excelItem != temp )
-            {
-                message = i18n.getString( "name_ready_exist" );
-
-                return ERROR;
-            }
-
-            temp = excelItemGroup.getExcelItemBySheetRowColumn( sheetNo, row, column );
-
-            if ( temp != null && excelItem != temp )
-            {
-                message = i18n.getString( "cell_exist" );
-
-                return ERROR;
-            }
-
-        }
+        
 
         return SUCCESS;
     }

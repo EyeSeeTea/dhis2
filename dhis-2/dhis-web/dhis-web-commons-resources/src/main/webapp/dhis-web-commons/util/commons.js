@@ -153,6 +153,12 @@ function checkALL( jQuerySelectorString )
 		item.checked = true;
 	});
 }
+
+function toggleChecked( checked, name )
+{
+	if( checked ) checkALL( "input[type=checkbox][name=" + name + "]" );
+	else unCheckALL( "input[type=checkbox][name=" + name + "]" );
+}
 /**
  * Checks the checkbox with the given identifier if the checkbox exists.
  */

@@ -1030,10 +1030,9 @@
 		<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 		<action name="addExcelItemForm"
-			class="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction">
+			class="org.hisp.dhis.reportexcel.excelitemgroup.action.GetExcelItemGroupByIdAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/addExcelItem.vm</param>
-			<param name="javascripts">javascript/excelitems.js</param>
+			<param name="page">/dhis-web-excel-reporting/import/addExcelItem.vm</param>			
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
@@ -1080,17 +1079,16 @@
 			</param>
 			<param name="stylesheets">style/style.css</param>
 		</action>
-
+		
 		<action name="updateExcelItemForm"
-			class="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction">
-			<result name="success" type="chain">updateExcelItemChainForm</result>
-		</action>
+			class="org.hisp.dhis.reportexcel.excelitem.action.UpdateExcelItemFormAction">
+			<result name="success" type="chain">updateExcelItemFormChain</result>
+		</action>	
 
-		<action name="updateExcelItemChainForm"
+		<action name="updateExcelItemFormChain"
 			class="org.hisp.dhis.reportexcel.excelitemgroup.action.GetExcelItemGroupByIdAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/updateExcelItem.vm</param>
-			<param name="javascripts">javascript/excelitems.js</param>
+			<param name="page">/dhis-web-excel-reporting/import/updateExcelItem.vm</param>			
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 

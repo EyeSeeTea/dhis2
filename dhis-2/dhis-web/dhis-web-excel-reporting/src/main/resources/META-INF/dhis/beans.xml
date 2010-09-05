@@ -1039,14 +1039,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="excelItemService"
 			ref="org.hisp.dhis.reportexcel.excelitem.ExcelItemService" />
-	</bean>
-	<bean id="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction"
-		class="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction"
-		scope="prototype">
-		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="excelItemService"
-			ref="org.hisp.dhis.reportexcel.excelitem.ExcelItemService" />
-	</bean>
+	</bean>	
 
 	<bean
 		id="org.hisp.dhis.reportexcel.excelitem.action.UpdateExcelItemAction"
@@ -1065,11 +1058,17 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.reportexcel.excelitem.action.GetExcelItemByIdAction"
-		class="org.hisp.dhis.reportexcel.excelitem.action.GetExcelItemByIdAction"
+		id="org.hisp.dhis.reportexcel.excelitem.action.UpdateExcelItemFormAction"
+		class="org.hisp.dhis.reportexcel.excelitem.action.UpdateExcelItemFormAction"
 		scope="prototype">
 		<property name="excelItemService"
 			ref="org.hisp.dhis.reportexcel.excelitem.ExcelItemService" />
+		<property name="expressionService"
+			ref="org.hisp.dhis.expression.ExpressionService" />
+		<property name="dataElementService"
+			ref="org.hisp.dhis.dataelement.DataElementService" />
+		<property name="categoryService"
+			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.reportexcel.excelitem.action.CopyExcelItemAction"
