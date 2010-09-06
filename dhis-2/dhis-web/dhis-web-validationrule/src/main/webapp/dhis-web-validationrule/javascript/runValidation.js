@@ -64,6 +64,8 @@ function runValidationCompleted( messageElement )
 
 function drillDownValidation( orgUnitId )
 {
+	setHeaderWaitMessage( i18n_analysing_please_wait );
+	
     var url = 'runValidationAction.action?organisationUnitId=' + orgUnitId +
     	'&startDate=' + startDate  +
     	'&endDate=' + endDate + 
@@ -72,6 +74,7 @@ function drillDownValidation( orgUnitId )
     	'&doDataMart=' + doDataMart;
         	
 		$.get( url, function( data ) {
+			hideHeaderMessage();
 			$( "div#analysisResult" ).html( data );
 			pageInit();
 		} );
