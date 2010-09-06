@@ -113,7 +113,6 @@ public class AddExcelItemAction
     public String execute()
         throws Exception
     {
-
         ExcelItem excelItem = new ExcelItem();
 
         excelItem.setName( name );

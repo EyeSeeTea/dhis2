@@ -1096,6 +1096,7 @@ function showPopupWindowById( id, width, height )
 	container.css('position', 'fixed' );
 	container.css('background-color', '#FFFFFF' );
 	container.css('overflow', 'auto' );	
+	container.css('border', 'medium solid silver');
 	container.show(  jQuery.blockUI({message:null}));
 	
 }
@@ -1169,3 +1170,17 @@ function loadOperands( selectorJQueryString, params )
 	DataDictionary.loadOperands( jQuery( selectorJQueryString ), params);
 }
 
+
+/**
+ * Removes the opacity div from the document.
+function deleteDivEffect()
+ */
+function deleteDivEffect()
+{
+	var divEffect = document.getElementById( 'divEffect' );
+	
+	if( divEffect!=null )
+	{	
+		document.body.removeChild(divEffect);
+	}
+}

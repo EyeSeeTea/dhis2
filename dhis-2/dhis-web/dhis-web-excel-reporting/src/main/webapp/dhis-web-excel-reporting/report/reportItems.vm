@@ -3,7 +3,15 @@
 		tableSorter( 'listTable', [[1,0]] );	
 	});
 	
+	function reportItemSelect( checked )
+	{
+		if( checked ) checkALL( "input[type=checkbox][name=reportItemCheck]" );
+		else unCheckALL( "input[type=checkbox][name=reportItemCheck]" );
+	}
+	
 </script>
+
+<span id="message" onclick="hideMessage();"></span>
 
 <h3>$!encoder.htmlEncode($!reportExcel.name)</h3>
 
@@ -41,7 +49,7 @@
 	<col width="100px" />
 	<thead>
 		<tr>
-			<th class="{sorter: false}"><input type="checkbox" onclick="toggleChecked(this.checked, 'reportItemCheck')"/></th>
+			<th class="{sorter: false}"><input type="checkbox" onclick="reportItemSelect(this.checked)"/></th>
 			<th>$i18n.getString('name')</th>
 			<th>$i18n.getString('item_type')</th>
 			<th>$i18n.getString('period_type')</th>
@@ -72,3 +80,61 @@
 	#end
 	</tbody>
 </table>
+
+<div id="copyToReport" style="display:none;">
+<h4>$i18n.getString('copy_selected_item_to')</h4>
+<table width="100%">
+	<tr>
+		<td>$i18n.getString('reports')</td>
+		<td>
+			<select id="targetReport" name="targetReport" style="max-width:30em;min-width:30em;">
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>$i18n.getString('sheet_no')</td>
+		<td><input id="targetSheetNo" name="targetSheetNo" type="text"/></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<input type="button" value="$i18n.getString('ok')" onclick="javascript: validateCopyReportItemsToReportExcel(); " style="width:100px"/>
+			<input type="button" value="$i18n.getString('cancel')" onclick="hideById('copyToReport'); unLockScreen();" style="width:100px"/>
+		</td>
+	</tr>
+</table>
+</div>
+
+<div id="copyToExcelItem" style="display:none;">
+<h4>$i18n.getString('copy_selected_item_to_excel_item')</h4>
+<table width="100%">
+	<tr>
+		<td>$i18n.getString('excelitem_group')</td>
+		<td>
+			<select id="targetExcelItemGroup" name="targetExcelItemGroup" style="max-width:25em;min-width:25em;">
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>$i18n.getString('sheet_no')</td>
+		<td><input id="targetExcelItemGroupSheetNo" name="targetExcelItemGroupSheetNo" type="text" style="max-width:25em;min-width:25em;"/></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><input type="button" value="$i18n.getString('ok')" onclick="validateCopyReportItemsToExcelItemGroup();" style="width:100px"/>
+			<input type="button" value="$i18n.getString('cancel')" onclick="hideById('copyToExcelItem'); unLockScreen();" style="width:100px"/>
+		</td>
+	</tr>
+</table>
+</div>
+
+<script type="text/javascript">
+    var i18n_copy_successful = '$encoder.jsEscape( $i18n.getString( "copy_successful" ) , "'")';
+	var i18n_copy_items_duplicated = '$encoder.jsEscape( $i18n.getString( "copy_items_duplicated" ) , "'")';
+	var i18n_copy_items = '$encoder.jsEscape( $i18n.getString( "copy_items" ) , "'")';
+	var i18n_input_sheet_no = '$encoder.jsEscape( $i18n.getString( "input_sheet_no" ) , "'")';
+	var i18n_choose_report = '$encoder.jsEscape( $i18n.getString( "choose_report" ) , "'")';
+	var i18n_choose_excel_group = '$encoder.jsEscape( $i18n.getString( "choose_excel_group" ) , "'")';
+    var i18n_confirm_undo = '$encoder.jsEscape( $i18n.getString( "confirm_undo" ) , "'")';
+</script>
+ 

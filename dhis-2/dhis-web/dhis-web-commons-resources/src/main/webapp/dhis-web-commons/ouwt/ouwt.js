@@ -2,6 +2,7 @@
 // -----------------------------------------------------------------------------
 // Author:   Torgeir Lorange Ostby
 // Version:  $Id: ouwt.js 3457 2007-07-11 12:34:24Z torgeilo $
+// Version:  $Id: ouwt.js 3457 2007-07-11 12:34:24Z torgeilo $
 // -----------------------------------------------------------------------------
 
 /*
@@ -41,8 +42,9 @@ function Selection()
 
     this.select = function( unitId )
     {
-        var unitTag = document.getElementById( getTagId( unitId ) );
-        var linkTags = unitTag.getElementsByTagName( 'a' );
+        var unitTag = document.getElementById( getTagId( unitId ));
+		
+		var linkTags = unitTag.getElementsByTagName( 'a' );
 
         if ( linkTags[0].className == 'selected' )
         {

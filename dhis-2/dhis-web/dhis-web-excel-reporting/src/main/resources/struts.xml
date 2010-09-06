@@ -358,6 +358,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-excel-reporting/report/reportItems.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
+			<param name="javascripts">javascript/reportItem.js</param>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
@@ -429,6 +430,12 @@
 				/dhis-web-excel-reporting/responseListReport.vm</result>
 		</action>
 
+		<action name="getReportExcelItemsBySheet"
+			class="org.hisp.dhis.reportexcel.item.action.GetReporExceltItemsBySheetAction">
+			<result name="success" type="velocity-xml">
+				/dhis-web-excel-reporting/report/responseReportItems.vm</result>
+		</action>
+		
 		<action name="copyReportExcelItems"
 			class="org.hisp.dhis.reportexcel.item.action.CopyReportExcelItemAction">
 			<result name="success" type="velocity-xml">
@@ -902,7 +909,7 @@
 		<action name="getAllExcelItemGroup"
 			class="org.hisp.dhis.reportexcel.excelitemgroup.action.ListAllExcelItemGroupAction">
 			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseExcelItemGroups.vm</result>
+				/dhis-web-excel-reporting/import/responseExcelItemGroups.vm</result>
 		</action>
 
 		<action name="updateExcelItemGroupForm"
@@ -939,7 +946,7 @@
 		<action name="getExcelItemGroup"
 			class="org.hisp.dhis.reportexcel.excelitemgroup.action.GetExcelItemGroupByIdAction">
 			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseExcelItemGroup.vm</result>
+				/dhis-web-excel-reporting/import/responseExcelItemGroup.vm</result>
 		</action>
 
 		<action name="updateExcelItemGroupAssociations"
@@ -951,7 +958,7 @@
 		<action name="openUpdateOrgnisationUnitGroupForExcelItemGroup"
 			class="org.hisp.dhis.reportexcel.excelitemgroup.action.OpenUpdateOrganisationUnitGroupForCategoryAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/associateOrgUnitGroupForExcelItemGroup.vm</param>
+			<param name="page">/dhis-web-excel-reporting/import/associateOrgunitGroup.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
 			<param name="javascripts">javascript/commons.js</param>
 		</action>
@@ -970,7 +977,7 @@
 		<action name="listDataElementGroupOrderForExcelItemGroup"
 			class="org.hisp.dhis.reportexcel.excelitemgroup.action.GetExcelItemGroupByIdAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/listDataElementGroupByExcelItemGroup.vm</param>
+			<param name="page">/dhis-web-excel-reporting/import/listDataElementGroup.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
 			<param name="javascripts">javascript/ui.core.js,javascript/ui.sortable.js,
 				javascript/sortedDataElementGroup.js,javascript/commons.js</param>
@@ -1007,7 +1014,7 @@
 		<action name="openSortDataElementForCategory"
 			class="org.hisp.dhis.reportexcel.excelitemgroup.dataelementgroup.action.GetDataElementGroupOrderForCategoryAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/sortDataElementsForCategory.vm</param>
+			<param name="page">/dhis-web-excel-reporting/import/sortDataElements.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
 			<param name="javascripts">javascript/sortedDataElementGroup.js</param>
 			<param name="stylesheets">style/ui.theme.css,style/basic.css</param>
@@ -1030,15 +1037,17 @@
 		<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 		<action name="addExcelItemForm"
-			class="org.hisp.dhis.reportexcel.excelitemgroup.action.GetExcelItemGroupByIdAction">
+			class="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/addExcelItem.vm</param>			
+			<param name="page">/dhis-web-excel-reporting/import/addExcelItem.vm</param>
+			<param name="javascripts">javascript/excelitems.js</param>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
 		<action name="addExcelItem"
-			class="org.hisp.dhis.reportexcel.excelitem.action.AddExcelItemAction">
-			<result name="success" type="redirect">listExcelItems.action?excelItemGroupId=${excelItemGroupId}</result>
+			class="org.hisp.dhis.reportexcel.excelitem.action.AddExcelItemAction">			
+			<result name="success" type="redirect">
+				listExcelItems.action?excelItemGroupId=${excelItemGroupId}</result>
 		</action>
 
 		<action name="deleteExcelItem"
@@ -1079,16 +1088,18 @@
 			</param>
 			<param name="stylesheets">style/style.css</param>
 		</action>
-		
-		<action name="updateExcelItemForm"
-			class="org.hisp.dhis.reportexcel.excelitem.action.UpdateExcelItemFormAction">
-			<result name="success" type="chain">updateExcelItemFormChain</result>
-		</action>	
 
-		<action name="updateExcelItemFormChain"
-			class="org.hisp.dhis.reportexcel.excelitemgroup.action.GetExcelItemGroupByIdAction">
+		<action name="updateExcelItemForm"
+			class="org.hisp.dhis.reportexcel.excelitem.action.SetupExcelItemFormAction">
+			<result name="success" type="chain">updateExcelItemChainForm
+			</result>
+		</action>
+
+		<action name="updateExcelItemChainForm"
+			class="org.hisp.dhis.reportexcel.excelitem.action.GetExcelItemByIdAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/updateExcelItem.vm</param>			
+			<param name="page">/dhis-web-excel-reporting/import/updateExcelItem.vm</param>
+			<param name="javascripts">javascript/excelitems.js</param>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
 		</action>
 
@@ -1100,21 +1111,23 @@
 
 		<action name="validateExcelItem"
 			class="org.hisp.dhis.reportexcel.excelitem.action.ValidateExcelItemAction">
-			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-      		<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
-      		<param name="onExceptionReturn">plainTextError</param>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
 		<action name="getExcelItem"
 			class="org.hisp.dhis.reportexcel.excelitem.action.GetExcelItemByIdAction">
 			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseExcelItem.vm</result>
+				/dhis-web-excel-reporting/import/responseExcelItem.vm</result>
 		</action>
 
 		<action name="getExcelItemsByGroup"
 			class="org.hisp.dhis.reportexcel.excelitem.action.ListExcelItemAction">
 			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseExcelItems.vm
+				/dhis-web-excel-reporting/import/responseExcelItems.vm
 			</result>
 		</action>
 
@@ -1148,7 +1161,7 @@
 			class="org.hisp.dhis.reportexcel.importing.action.GetImportingParamsAction">
 			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/import/importDataParams.vm</param>
+			<param name="page">/dhis-web-excel-reporting/importDataParams.vm</param>
 			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
 			<param name="menuTreeHeight">220</param>
 			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/export.js,
@@ -1225,7 +1238,7 @@
 		<action name="previewDataNormal"
 			class="org.hisp.dhis.reportexcel.importing.action.ViewDataNormalAction">
 			<result name="success" type="velocity">
-				/dhis-web-excel-reporting/import/responseExcelItemValues.vm</result>
+				/dhis-web-excel-reporting/responseExcelItemValues.vm</result>
 			<result name="error" type="velocity-xml">
 				/dhis-web-excel-reporting/responseError.vm</result>
 		</action>
@@ -1234,7 +1247,7 @@
 		<action name="previewDataOrganizationGroup"
 			class="org.hisp.dhis.reportexcel.importing.action.ViewDataOrganizationGroupAction">
 			<result name="success" type="velocity">
-				/dhis-web-excel-reporting/import/responseExcelItemValueByOrganisations.vm
+				/dhis-web-excel-reporting/responseExcelItemValuesByOrgunits.vm
 			</result>
 			<result name="error" type="velocity-xml">
 				/dhis-web-excel-reporting/responseError.vm</result>
@@ -1244,7 +1257,7 @@
 		<action name="previewDataCategory"
 			class="org.hisp.dhis.reportexcel.importing.action.ViewDataCategoryAction">
 			<result name="success" type="velocity">
-				/dhis-web-excel-reporting/import/responseExcelItemValuesByCategory.vm
+				/dhis-web-excel-reporting/responseExcelItemValuesByCategory.vm
 			</result>
 			<result name="error" type="velocity-xml">
 				/dhis-web-excel-reporting/responseError.vm</result>

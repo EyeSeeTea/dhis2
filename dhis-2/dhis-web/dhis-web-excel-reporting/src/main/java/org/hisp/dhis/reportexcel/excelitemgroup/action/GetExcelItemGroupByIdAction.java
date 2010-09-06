@@ -46,31 +46,27 @@ public class GetExcelItemGroupByIdAction
 
     private ExcelItemService excelItemService;
 
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
+
     // -------------------------------------------------------------------------
-    // Input
+    // Input && Output
     // -------------------------------------------------------------------------
 
     private int id;
-
-    private ExcelItemGroup excelItemGroup;
-
-    // -------------------------------------------------------------------------
-    // Setters
-    // -------------------------------------------------------------------------
 
     public void setId( int id )
     {
         this.id = id;
     }
 
+    private ExcelItemGroup excelItemGroup;
+
     public ExcelItemGroup getExcelItemGroup()
     {
         return excelItemGroup;
-    }
-
-    public void setExcelItemService( ExcelItemService excelItemService )
-    {
-        this.excelItemService = excelItemService;
     }
 
     // -------------------------------------------------------------------------

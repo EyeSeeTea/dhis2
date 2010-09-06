@@ -124,7 +124,6 @@ function copySelectedReportItemToReport() {
 	request.setResponseTypeXML( 'xmlObject' );
 	request.setCallbackSuccess( copySelectedReportItemToReportReceived );
 	request.send( "getAllReportExcels.action" );
-
 }
 
 function copySelectedReportItemToReportReceived( xmlObject ) {
@@ -142,7 +141,7 @@ function copySelectedReportItemToReportReceived( xmlObject ) {
 		options.add(new Option(name,id), null);
 	}
 	
-	$("#copyTo").showAtCenter( true );
+	showPopupWindowById( 'copyToReport', 450, 170 );
 }
 
 
@@ -192,7 +191,7 @@ function validateCopyReportItemsToReportExcel() {
 		param += "&sheetNo=" + sheetId;
 	
 	request.sendAsPost( param );
-	request.send( "getReportExcelItems.action" );
+	request.send( "getReportExcelItemsBySheet.action" );
 	
 }
 
@@ -301,12 +300,11 @@ function saveCopyReportItemsToReportExcel() {
 	// If have no any ReportItem(s) will be copied
 	// and also have ReportItem(s) in Duplicating list
 	else if ( itemsDuplicated.length > 0 ) {
-
 		setMessage( warningMessage );
 	}
 		
-	$("#copyTo").hide();
-	deleteDivEffect();
+	hideById('copyToReport'); 
+	unLockScreen();
 }
 
 
@@ -338,7 +336,7 @@ function copySelectedReportItemToExcelItemGroupReceived( xmlObject ) {
 		options.add(new Option(name,id), null);
 	}
 	
-	$("#copyToExcelItem").showAtCenter( true );
+	showPopupWindowById("copyToExcelItem", 450,180 );
 }
 
 /*
@@ -448,7 +446,7 @@ function saveCopiedReportItemsToExcelItemGroup() {
 	}
 		
 	hideById("copyToExcelItem");
-	deleteDivEffect();
+	unLockScreen();
 }
 
 function saveCopyExcelItemsReceived( data ) {
@@ -651,7 +649,6 @@ function openCategoryExpressionReceived( data ) {
 	enable( "availableDataElements_" );
 	byId( "availableDataElements_" ).onchange = function(e){ getOptionCombos_() };
 	
-	//showDivEffect();
 	$( "#category" ).show();	
 }
 
@@ -721,7 +718,6 @@ function insertDataElementId_() {
 
 	var optionCombo = byId("optionCombos_");
 	var dataElementComboId = "[*." + optionCombo.value + "]";
-	//byId("categoryFormula").value += dataElementComboId;
 	byId("categoryFormula").value = dataElementComboId;
 	byId("categoryFormulaDiv").innerHTML = "*." + optionCombo[optionCombo.selectedIndex].text ;
 }
@@ -747,6 +743,4 @@ function updateFormulaText( formulaFieldName )
 function updateFormulaTextReceived( messageElement )
 {
 	byId( "formulaDiv").innerHTML = messageElement;
-	//byId( "formulaIndicatorDiv" ).innerHTML = messageElement;
-	//byId( "categoryFormulaDiv" ).innerHTML = messageElement;
 }

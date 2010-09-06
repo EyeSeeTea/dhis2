@@ -27,15 +27,17 @@ package org.hisp.dhis.reportexcel.excelitem.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportexcel.action.ActionSupport;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItem;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class DeleteExcelItemAction
-    extends ActionSupport
+public class GetExcelItemByIdAction
+    implements Action
 {
 
     // -------------------------------------------------------------------------
@@ -50,14 +52,21 @@ public class DeleteExcelItemAction
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private Integer excelItemId;
 
-    public void setId( int id )
+    public void setExcelItemId( Integer excelItemId )
     {
-        this.id = id;
+        this.excelItemId = excelItemId;
+    }
+
+    private ExcelItem excelItem;
+
+    public ExcelItem getExcelItem()
+    {
+        return excelItem;
     }
 
     // -------------------------------------------------------------------------
@@ -67,18 +76,7 @@ public class DeleteExcelItemAction
     public String execute()
         throws Exception
     {
-        try
-        {
-            excelItemService.deleteExcelItem( id );
-
-            message = i18n.getString( "success" );
-        }
-        catch ( Exception ex )
-        {
-            message = i18n.getString( "error" );
-
-            return ERROR;
-        }
+        excelItem = excelItemService.getExcelItem( excelItemId );
 
         return SUCCESS;
     }

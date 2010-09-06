@@ -36,6 +36,7 @@ import com.opensymphony.xwork2.Action;
  * @author Chau Thu Tran
  * @version $Id$
  */
+
 public class UpdateExcelItemAction
     implements Action
 {
@@ -49,6 +50,8 @@ public class UpdateExcelItemAction
     // Inputs
     // -------------------------------------------------------------------------
 
+    private Integer excelItemGroupId;
+
     private Integer id;
 
     private String name;
@@ -60,8 +63,6 @@ public class UpdateExcelItemAction
     private Integer column;
 
     private Integer sheetNo;
-
-    private Integer excelItemGroupId;
 
     // -------------------------------------------------------------------------
     // Setters
@@ -77,9 +78,19 @@ public class UpdateExcelItemAction
         this.id = id;
     }
 
+    public void setExcelItemGroupId( Integer excelItemGroupId )
+    {
+        this.excelItemGroupId = excelItemGroupId;
+    }
+
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    public Integer getExcelItemGroupId()
+    {
+        return excelItemGroupId;
     }
 
     public void setExpression( String expression )
@@ -102,16 +113,6 @@ public class UpdateExcelItemAction
         this.sheetNo = sheetNo;
     }
 
-    public Integer getExcelItemGroupId()
-    {
-        return excelItemGroupId;
-    }
-
-    public void setExcelItemGroupId( Integer excelItemGroupId )
-    {
-        this.excelItemGroupId = excelItemGroupId;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -119,7 +120,6 @@ public class UpdateExcelItemAction
     public String execute()
         throws Exception
     {
-
         ExcelItem excelItem = excelItemService.getExcelItem( id );
 
         excelItem.setName( name );

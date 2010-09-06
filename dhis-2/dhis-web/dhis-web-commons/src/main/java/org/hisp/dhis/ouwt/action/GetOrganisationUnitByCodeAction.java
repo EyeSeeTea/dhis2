@@ -70,6 +70,13 @@ public class GetOrganisationUnitByCodeAction
         this.code = code;
     }
 
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
     // --------------------------------------------------------------------------
     // Implementation Action
     // --------------------------------------------------------------------------
@@ -78,10 +85,14 @@ public class GetOrganisationUnitByCodeAction
     public String execute()
         throws Exception
     {
+        message = "";
+        
         OrganisationUnit unit = organisationUnitService.getOrganisationUnitByCode( code );
         
         if ( unit != null )
         {
+            message = unit.getId() + "";
+            
             selectionManager.setSelectedOrganisationUnit( unit );
             
             return SUCCESS;

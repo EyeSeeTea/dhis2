@@ -111,15 +111,11 @@ public class ListReportExcelItemAction
 
         if ( sheetNo == null )
         {
-
             reportItems = new ArrayList<ReportExcelItem>( reportExcel.getReportExcelItems() );
-
         }
         else
         {
-
             reportItems = new ArrayList<ReportExcelItem>( reportService.getReportExcelItem( sheetNo, reportId ) );
-
         }
         sheets = new ArrayList<Integer>( reportService.getSheets( reportId ) );
 

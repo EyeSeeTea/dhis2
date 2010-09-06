@@ -392,7 +392,6 @@ public abstract class GenerateReportSupport
 
     protected void installPeriod( Period period )
     {
-
         Calendar calendar = Calendar.getInstance();
 
         // Monthly period
@@ -465,10 +464,10 @@ public abstract class GenerateReportSupport
 
         ExcelUtils.writeValueByPOI( reportExcel.getOrganisationRow(), reportExcel.getOrganisationColumn(),
             organisationUnit.getName(), ExcelUtils.TEXT, templateWorkbook.getSheetAt( 0 ), csText );
-
+        
         ExcelUtils.writeValueByPOI( reportExcel.getPeriodRow(), reportExcel.getPeriodColumn(), format
             .formatPeriod( period ), ExcelUtils.TEXT, templateWorkbook.getSheetAt( 0 ), csText );
-
+        
     }
 
     protected double getIndicatorValue( ReportExcelItem reportItem, OrganisationUnit organisationUnit )
@@ -705,7 +704,7 @@ public abstract class GenerateReportSupport
     {
         Double aggregatedValue = aggregationService.getAggregatedDataValue( dataElement, optionCombo, startDate,
             endDate, organisationUnit );
-
+        
         if ( aggregatedValue == null )
         {
             aggregatedValue = 0.0;

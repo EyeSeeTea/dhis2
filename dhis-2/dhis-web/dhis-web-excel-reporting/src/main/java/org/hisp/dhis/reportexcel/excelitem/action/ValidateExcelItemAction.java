@@ -27,9 +27,9 @@ package org.hisp.dhis.reportexcel.excelitem.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.reportexcel.action.ActionSupport;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItem;
-import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 /**
@@ -53,16 +53,12 @@ public class ValidateExcelItemAction
 
     private String name;
 
-    private Integer row;
-
-    private Integer column;
-
-    private Integer sheetNo;
-
-    private Integer excelItemGroupId;
-
     private Integer id;
 
+    private String message;
+
+    private I18n i18n;
+    
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
@@ -70,6 +66,11 @@ public class ValidateExcelItemAction
     public void setExcelItemService( ExcelItemService excelItemService )
     {
         this.excelItemService = excelItemService;
+    }
+
+    public String getMessage()
+    {
+        return message;
     }
 
     public void setId( Integer id )
@@ -81,27 +82,7 @@ public class ValidateExcelItemAction
     {
         this.name = name;
     }
-
-    public void setRow( Integer row )
-    {
-        this.row = row;
-    }
-
-    public void setColumn( Integer column )
-    {
-        this.column = column;
-    }
-
-    public void setSheetNo( Integer sheetNo )
-    {
-        this.sheetNo = sheetNo;
-    }
-
-    public void setExcelItemGroupId( Integer excelItemGroupId )
-    {
-        this.excelItemGroupId = excelItemGroupId;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -109,37 +90,14 @@ public class ValidateExcelItemAction
     public String execute()
         throws Exception
     {
-        if ( name != null )
-        {            
+        ExcelItem excelItem = excelItemService.getExcelItem( name );
 
-            ExcelItemGroup excelItemGroup = excelItemService.getExcelItemGroup( excelItemGroupId );
-            
-            ExcelItem match = excelItemGroup.getExcelItemByName( name );
-
-            if ( match != null && (id == null || match.getId() != id) )
-            {
-                message = i18n.getString( "name_ready_exist" );
-
-                return ERROR;
-            }
-        }
-       
-
-        if ( row != null && column != null && sheetNo != null )
+        if ( excelItem != null && (this.id == null || excelItem.getId() != this.id) )
         {
-            ExcelItemGroup excelItemGroup = excelItemService.getExcelItemGroup( excelItemGroupId );
-            
-            ExcelItem match = excelItemGroup.getExcelItemBySheetRowColumn( sheetNo, row, column );
+            message = i18n.getString( "name_ready_exist" );
 
-            if ( match != null && (id == null || match.getId() != id) )
-            {
-                message = i18n.getString( "cell_exist" );
-
-                return ERROR;
-            }
+            return ERROR;
         }
-
-        
 
         return SUCCESS;
     }

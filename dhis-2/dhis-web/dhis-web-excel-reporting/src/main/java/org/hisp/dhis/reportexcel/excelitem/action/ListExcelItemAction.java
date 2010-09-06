@@ -55,7 +55,7 @@ public class ListExcelItemAction
     // Input && Output
     // -------------------------------------------------------------------------
 
-    private int excelItemGroupId;
+    private Integer excelItemGroupId;
 
     private ExcelItemGroup excelItemGroup;
 
@@ -75,7 +75,7 @@ public class ListExcelItemAction
         this.excelItemService = excelItemService;
     }
 
-    public void setExcelItemGroupId( int excelItemGroupId )
+    public void setExcelItemGroupId( Integer excelItemGroupId )
     {
         this.excelItemGroupId = excelItemGroupId;
     }

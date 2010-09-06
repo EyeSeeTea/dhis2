@@ -20,10 +20,10 @@
 			<td rowspan="3">	
 				<select id="groupSelect" style="width:500px"onchange="getDataElements(this.value, '#dataelement select[id=elementSelect]')"></select>												
 				#if( $reportExcel.isCategory() )
-				<select id="elementSelect" size="15" style="width:500px;"></select>						
-				#else
 				<select id="elementSelect" size="11" style="width:500px;" onchange="getOptionCombos( this.value, '#dataelement select[id=optionCombos]')"></select>		
 				<select id="optionCombos" size=4 style="width:500px;" ></select>	
+				#else
+				<select id="elementSelect" size="15" style="width:500px;"></select>						
 				#end
 			</td>			
 		</tr>	

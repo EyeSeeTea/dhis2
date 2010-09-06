@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.item.action;
+package org.hisp.dhis.reportexcel.excelitem.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -34,25 +34,29 @@ import java.util.List;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
-import org.hisp.dhis.reportexcel.ReportExcel;
-import org.hisp.dhis.reportexcel.ReportExcelItem;
-import org.hisp.dhis.reportexcel.ReportExcelService;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id 2010-08-27
+ * @author Chau Thu Tran
+ * @version $Id$
  */
-public class SetupReportExcelItemFormAction
+
+public class SetupExcelItemFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
+
+    private ExcelItemService excelItemService;
+
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
 
     private DataElementService dataElementService;
 
@@ -61,61 +65,22 @@ public class SetupReportExcelItemFormAction
         this.dataElementService = dataElementService;
     }
 
-    private IndicatorService indicatorService;
-
-    public void setIndicatorService( IndicatorService indicatorService )
-    {
-        this.indicatorService = indicatorService;
-    }
-
-    private ReportExcelService reportService;
-
-    public void setReportService( ReportExcelService reportService )
-    {
-        this.reportService = reportService;
-    }
-
     // -------------------------------------------------------------------------
-    // Input
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private Integer reportId;
+    private Integer excelItemGroupId;
 
-    public void setReportId( Integer reportId )
+    public void setExcelItemGroupId( Integer excelItemGroupId )
     {
-        this.reportId = reportId;
+        this.excelItemGroupId = excelItemGroupId;
     }
 
-    private Integer reportExcelItemId;
+    public ExcelItemGroup excelItemGroup;
 
-    public void setReportExcelItemId( Integer reportExcelItemId )
+    public void setExcelItemGroup( ExcelItemGroup excelItemGroup )
     {
-        this.reportExcelItemId = reportExcelItemId;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private ReportExcelItem reportExcelItem;
-
-    public ReportExcelItem getReportExcelItem()
-    {
-        return reportExcelItem;
-    }
-
-    private ReportExcel reportExcel;
-
-    public ReportExcel getReportExcel()
-    {
-        return reportExcel;
-    }
-
-    private List<String> periodTypes;
-
-    public List<String> getPeriodTypes()
-    {
-        return periodTypes;
+        this.excelItemGroup = excelItemGroup;
     }
 
     private List<DataElementGroup> dataElementGroups;
@@ -125,39 +90,20 @@ public class SetupReportExcelItemFormAction
         return dataElementGroups;
     }
 
-    private List<IndicatorGroup> indicatorGroups;
-
-    public List<IndicatorGroup> getIndicatorGroups()
-    {
-        return indicatorGroups;
-    }
-
     // -------------------------------------------------------------------------
-    // Implementation Action
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
-        reportExcel = this.reportService.getReportExcel( this.reportId );
+        excelItemGroup = excelItemService.getExcelItemGroup( excelItemGroupId );
 
         dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
 
         Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
 
-        indicatorGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
-
-        Collections.sort( indicatorGroups, new IndicatorGroupNameComparator() );
-
-        periodTypes = ReportExcelItem.PERIODTYPE.getPeriodTypes();
-
-        if ( reportExcelItemId != null )
-        {
-            reportExcelItem = reportService.getReportExcelItem( this.reportExcelItemId );
-        }
-
         return SUCCESS;
     }
-
 }

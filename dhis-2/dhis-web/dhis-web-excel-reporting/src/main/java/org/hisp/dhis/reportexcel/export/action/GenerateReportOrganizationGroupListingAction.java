@@ -223,7 +223,7 @@ public class GenerateReportOrganizationGroupListingAction
             if ( reportItem.getItemType().equalsIgnoreCase( ReportExcelItem.TYPE.DATAELEMENT ))
             {
                 totalFormula = totalFormula.substring( 0, totalFormula.length() - 1 ) + ")";
-                
+ System.out.println("\n\n\n ++++++++++++++ \n totalFormula : " + totalFormula);               
                 ExcelUtils.writeFormulaByPOI( firstRow, reportItem.getColumn(), totalFormula, sheet, this.csFormula );             
                 
             }
