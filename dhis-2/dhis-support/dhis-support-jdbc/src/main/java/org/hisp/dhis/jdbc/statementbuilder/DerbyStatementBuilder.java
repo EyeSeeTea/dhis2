@@ -156,7 +156,7 @@ public class DerbyStatementBuilder
     }
 
     @Override
-    public String getUpdateDateDestination( int destDataElementId, int destCategoryOptionComboId,
+    public String getUpdateDestination( int destDataElementId, int destCategoryOptionComboId,
         int sourceDataElementId, int sourceCategoryOptionComboId )
     {
         return "UPDATE datavalue AS d1 SET dataelementid=" + destDataElementId + ", categoryoptioncomboid="

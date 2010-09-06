@@ -110,6 +110,6 @@ public interface StatementBuilder
     String getMoveFromSourceToDestination( int destDataElementId, int destCategoryOptionComboId,
         int sourceDataElementId, int sourceCategoryOptionComboId );
 
-    String getUpdateDateDestination( int destDataElementId, int destCategoryOptionComboId,
+    String getUpdateDestination( int destDataElementId, int destCategoryOptionComboId,
         int sourceDataElementId, int sourceCategoryOptionComboId );
 }
