@@ -27,6 +27,8 @@ package org.hisp.dhis.validationrule.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +43,6 @@ import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.util.SessionUtils;
@@ -51,8 +52,6 @@ import org.hisp.dhis.validation.ValidationRuleService;
 import org.hisp.dhis.validation.comparator.ValidationResultComparator;
 
 import com.opensymphony.xwork2.ActionSupport;
-
-import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 
 /**
  * @author Margrethe Store
@@ -84,13 +83,6 @@ public class RunValidationAction
         this.format = format;
     }
 
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -115,6 +107,13 @@ public class RunValidationAction
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
+
+    private Integer organisationUnitId;
+    
+    public void setOrganisationUnitId( Integer organisationUnitId )
+    {
+        this.organisationUnitId = organisationUnitId;
+    }
 
     private String startDate;
 
@@ -186,8 +185,8 @@ public class RunValidationAction
 
     public String execute()
     {
-        OrganisationUnit unit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
-
+        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+        
         if ( aggregate ) // Aggregate data source
         {
             List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( unit.getChildren() );

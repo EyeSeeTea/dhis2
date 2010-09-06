@@ -63,7 +63,7 @@
 	<tbody>
 		#foreach( $result in $validationResults )
 		<tr id="tr${result.id}">
-		  <td>$!result.source.name</td>
+		  <td#if( $aggregate ) style="cursor:pointer" onclick="drillDownValidation( '$!result.source.id' )"#end>$!result.source.name</td>
 		  <td>$!format.formatPeriod( $result.period )</td>
 		  <td>$!result.validationRule.leftSide.description</td>
 		  <td>$!result.leftsideValue</td>

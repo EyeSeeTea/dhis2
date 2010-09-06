@@ -74,9 +74,10 @@
 <span id="message"></span>
 
 <script type="text/javascript">
-	selectionTreeSelection.setMultipleSelectionAllowed( false );
 	selectionTree.clearSelectedOrganisationUnits();
 	selectionTree.buildSelectionTree();
+	selectionTreeSelection.setMultipleSelectionAllowed( false );
+	selectionTreeSelection.setListenerFunction( organisationUnitSelected );
 	
 	 jQuery(document).ready(function(){
 		datePickerInRange( 'startDate' , 'endDate' );	
