@@ -773,19 +773,22 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         Ext.Ajax.request({
                             url: path_mapping + 'getMapLegendSetByIndicator' + type,
                             method: 'POST',
-                            params: { indicatorId: iId, format: 'json' },
+                            params: {indicatorId: iId},
+                            success: function(r) {
+                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
+                                if (mapLegendSet.id) {
+                                    LEGEND[thematicMap].type = map_legend_type_predefined;
+                                    Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
+                                    Ext.getCmp('maplegendset_cb').showField();
+                                    Ext.getCmp('maplegendset_cb').setValue(mapLegendSet.id);
+                                    Ext.getCmp('method_cb').hideField();
+                                    Ext.getCmp('numClasses_cb').hideField();
+                                    Ext.getCmp('colorA_cf').hideField();
+                                    Ext.getCmp('colorB_cf').hideField();
 
-                            success: function( responseObject ) {
-                                var data = Ext.util.JSON.decode(responseObject.responseText);
-                                
-                                if (data.mapLegendSet[0].id != '') {
-//                                    Ext.getCmp('method_cb').setValue(data.mapLegendSet[0].method);
-                                    Ext.getCmp('numClasses_cb').setValue(data.mapLegendSet[0].classes);
-
-                                    Ext.getCmp('colorA_cf').setValue(data.mapLegendSet[0].colorLow);
-                                    Ext.getCmp('colorB_cf').setValue(data.mapLegendSet[0].colorHigh);
+                                    choropleth.applyPredefinedLegend();
                                 }
-                                
+
                                 choropleth.classify(false, true);
                             },
                             failure: function()
