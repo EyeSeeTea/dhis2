@@ -1038,7 +1038,7 @@ Ext.onReady( function() {
 						]
 					},
 					{
-						title: '<span class="panel-tab-title">'+i18n_assign_to_indocator+'</span>',
+						title: '<span class="panel-tab-title">'+i18n_assign_to_indicator+'</span>',
 						id: 'automaticmaplegendset1',
 						items:
 						[
