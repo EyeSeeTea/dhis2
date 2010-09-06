@@ -36,7 +36,7 @@ function importData(){
 
 function importDataCompleted( xmlObject ){
 	
-	setMessage(xmlObject.firstChild.nodeValue);	
+	showSuccessMessage(xmlObject.firstChild.nodeValue);	
 }
 
 // -----------------------------------------------------------------------------

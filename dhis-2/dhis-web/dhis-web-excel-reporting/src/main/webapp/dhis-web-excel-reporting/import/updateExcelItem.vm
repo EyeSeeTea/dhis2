@@ -1,0 +1,110 @@
+<script>
+	jQuery(document).ready(function(){	
+		validation( 'addExcelItem', function( form ){ 			
+			form.submit();			
+		});	
+		checkValueIsExist( "name", "validateExcelItem.action", {
+			excelItemGroupId: getFieldValue( 'excelItemGroupId' ),
+			id: getFieldValue( 'excelItemId' )			
+		} );
+		
+		checkValueIsExist( "row", "validateExcelItem.action", {
+			excelItemGroupId: getFieldValue( 'excelItemGroupId' ),
+			sheetNo: function(){ return getFieldValue( 'sheetNo' )},
+			row: function(){ return getFieldValue( 'row' )},
+			column: function(){ return getFieldValue( 'column' )},
+			id: getFieldValue( 'excelItemId' )
+		} );
+
+		checkValueIsExist( "sheetNo", "validateExcelItem.action", {
+			excelItemGroupId: getFieldValue( 'excelItemGroupId' ),
+			sheetNo: function(){ return getFieldValue( 'sheetNo' )},
+			row: function(){ return getFieldValue( 'row' )},
+			column: function(){ return getFieldValue( 'column' )},
+			id: getFieldValue( 'excelItemId' )
+		} );	
+
+		checkValueIsExist( "column", "validateExcelItem.action", {
+			excelItemGroupId: getFieldValue( 'excelItemGroupId' ),
+			sheetNo: function(){ return getFieldValue( 'sheetNo' )},
+			row: function(){ return getFieldValue( 'row' )},
+			column: function(){ return getFieldValue( 'column' )},
+			id: getFieldValue( 'excelItemId' )
+		} );			
+		
+		loadDataElementGroups("select[id=groupSelect]") ;	
+	});
+</script>
+
+<h3>$i18n.getString('import_item') : $i18n.getString('add')</h3>
+
+<form name="addExcelItem" id="addExcelItem" method="POST" action="updateExcelItem.action">
+	<input type="hidden" id="excelItemGroupId" name="excelItemGroupId" value="$!excelItemGroup.id"/>
+	<input type="hidden" id="excelItemId" name="id" value="$!excelItem.id"/>
+	<table>
+		<tr>
+			<th colspan='2'>$i18n.getString('excel_importing')</th>
+		</tr>
+		<tr>
+			<td>$i18n.getString('name'): </td>
+			<td>$encoder.htmlEncode( $excelItemGroup.name )</td>
+		</tr>
+		<tr>
+			<td>$i18n.getString('import_type'): </td>
+			<td>$excelItemGroup.type</td>
+		</tr>
+		<tr>
+			<td colspan="2" height="20px"></td>
+		</tr>
+		<tr>
+			<th colspan='2'>$i18n.getString('import_item')</th>
+		</tr>
+		<tr>
+			<td><label>$i18n.getString('name')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="name" name="name" value="$encoder.htmlEncode( $excelItem.name )" style="width:20em" class="{validate:{required:true}}"/></td>
+		</tr>		
+		<tr>
+			<td rowspan=2><label>$i18n.getString('dataelement')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td>
+				<select id="groupSelect" style="width:500px"onchange="getOperandsByDataElementGroup(this.value)"></select>
+			</td>
+		</tr>	
+		<tr>
+			<td>
+				<select id="elementSelect" style="width:500px;" name="expression" class="{validate:{required:true}}">
+					<option value="[$dataElementOperand.getPersistedId()]">$encoder.htmlEncode( $dataElementOperand.getPersistedName() )</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td><label>$i18n.getString('sheet_no')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="sheetNo" name="sheetNo" value="$excelItem.sheetNo" style="width:20em" class="{validate:{required:true,number:true}}"/></td>
+		</tr>
+		<tr>
+			<td><label>$i18n.getString('row')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="row" name="row" value="$excelItem.row" style="width:20em" class="{validate:{required:true,number:true}}"/></td>
+		</tr>
+		<tr>
+			<td><label>$i18n.getString('column')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><input type="text" id="column" name="column" value="$excelItem.column" style="width:20em" class="{validate:{required:true,number:true}}"/></td>
+		</tr>	
+	<tr>
+		<td></td>
+		<td>
+			<input type="submit" value="$i18n.getString('save')" style="width:10em"/>
+			<input type="button" value="$i18n.getString('cancel')" onclick="window.location='listExcelItems.action?excelItemGroupId=$excelItemGroup.id'" style="width:10em"/>
+		</td>
+	</tr>		
+</table>
+
+</form>
+
+<script>
+	function getOperandsByDataElementGroup( value )
+	{
+		loadOperands( "#elementSelect", {id: value});
+	}
+</script>
+
+
+
