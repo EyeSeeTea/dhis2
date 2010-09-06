@@ -4,11 +4,10 @@
 
 .searchOrgunit
 {
-  display:none; 
-  position:absolute;
-  width: 15.5em;
-  margin-left:1em; 
-  margin-top:-1.5em;
+  display: none; 
+  position: absolute;
+  width: 200px;
+  margin-left: 22px;
   z-index: 9999;
 }
 
