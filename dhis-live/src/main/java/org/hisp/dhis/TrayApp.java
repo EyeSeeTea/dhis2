@@ -31,13 +31,22 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import java.io.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.config.ConfigType;
+import org.hisp.dhis.config.ConfigType.DatabaseConnections.Connection;
 import org.mortbay.component.LifeCycle;
 
 /**
@@ -51,6 +60,10 @@ public class TrayApp
 
     private static final String CONFIG_DIR = "/conf";
 
+    private static final String CONFIG_FILE_NAME = "/conf/config.xml";
+
+    private static final String CONFIG_DEFAULT = "/defaultConfig.xml";
+
     private static final String STOPPED_ICON = "/icons/stopped.png";
 
     private static final String STARTING_ICON = "/icons/starting.gif";
@@ -59,17 +72,31 @@ public class TrayApp
 
     private static final String RUNNING_ICON = "/icons/running.png";
 
-    private static final String CONFIG_FILE = "conf/dhis2live.cfg";
-
     private WebAppServer appServer;
 
     private TrayIcon trayIcon;
 
     private String installDir;
 
-    private SimpleConfigReader configReader;
+    // the configuration
+    private ConfigType config;
 
     private static ResourceBundle messages = ResourceBundle.getBundle( "messages", Locale.getDefault() );
+
+    private static TrayApp instance;
+
+// -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
+    public ConfigType getConfig()
+    {
+        return config;
+    }
+
+    public void setConfig( ConfigType config )
+    {
+        this.config = config;
+    }
 
     // -------------------------------------------------------------------------
     // Main method
@@ -93,7 +120,8 @@ public class TrayApp
         {
             try
             {
-                new TrayApp();
+                TrayApp trayApp = TrayApp.getInstance();
+                trayApp.init();
             } catch ( Exception ex )
             {
                 log.fatal( "TrayApp Initialization failure", ex );
@@ -103,10 +131,21 @@ public class TrayApp
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Constructor
-    // -------------------------------------------------------------------------
-    public TrayApp() throws AWTException, InterruptedException
+    // TrayApp is singleton - hide constructor
+    private TrayApp()
+    {
+    }
+
+    public static TrayApp getInstance()
+    {
+        if ( instance == null )
+        {
+            instance = new TrayApp();
+        }
+        return instance;
+    }
+
+    public void init() throws AWTException, InterruptedException
     {
         log.info( "Initialising DHIS 2 Live..." );
 
@@ -127,6 +166,27 @@ public class TrayApp
                 installDir = System.getenv( "DHIS2_HOME" );
             }
         }
+
+        InputStream configStream = null;
+        try
+        {
+            configStream = new java.io.FileInputStream( installDir + CONFIG_FILE_NAME );
+        } catch ( FileNotFoundException ex )
+        {
+            log.info( "Can't locate external config - falling back to default");
+            configStream = TrayApp.class.getResourceAsStream( CONFIG_DEFAULT );
+        }
+
+        readConfigFromStream(configStream);
+
+        log.info( "Locale: " + config.getLocaleLanguage() + ":" + config.getLocaleCountry());
+
+        // get the selected database
+        ConfigType.DatabaseConnections.Connection conn =
+            (ConfigType.DatabaseConnections.Connection) config.getDatabaseConnections().getSelected();
+
+        log.info( "Selected db: "+conn.getName() + "; " + conn.getUserName() + ":" +conn.getPassword() + " "+ conn.getURL());
+        
 
         System.setProperty( "dhis2.home", installDir + CONFIG_DIR );
         System.setProperty( "jetty.home", installDir );
@@ -168,11 +228,10 @@ public class TrayApp
                     if ( cmd.equals( messages.getString( "CMD_EXIT" ) ) )
                     {
                         shutdown();
-                    }
+                    } 
                 }
             }
 
-            ;
         };
 
         openItem.addActionListener( listener );
@@ -182,7 +241,7 @@ public class TrayApp
         appServer = new WebAppServer();
         try
         {
-            appServer.init( installDir, this );
+            appServer.init( );
         } catch ( Exception e )
         {
             log.fatal( "Application server could not be initialized" );
@@ -239,12 +298,9 @@ public class TrayApp
 
     private String defaultPreferredBrowserPath()
     {
-        //initialize a return variable.false denotes failure.  true success
-        configReader = new SimpleConfigReader();
-        String preferredBrowserPath = null;
+        String preferredBrowserPath = config.getPreferredBrowser();
         try
         {
-            preferredBrowserPath = configReader.preferredBrowserPath();
             log.info( "Config reports browser path to be" + preferredBrowserPath );
             boolean browserIsValid = new File( preferredBrowserPath ).exists();
             if ( !browserIsValid )
@@ -396,7 +452,7 @@ public class TrayApp
      * 
      * @return a <code>String</code> value representing the installation directory
      */
-    private static String getInstallDir()
+    public static String getInstallDir()
     {
         // find a resource
         String resourceString = TrayApp.class.getResource( "/icons/" ).toString();
@@ -413,5 +469,46 @@ public class TrayApp
         // replace encoded spaces
         result = result.replaceAll( "%20", " " );
         return result;
+    }
+
+    private void readConfigFromStream(InputStream configStream)
+    {
+        try
+        {
+            JAXBContext jc = JAXBContext.newInstance( "org.hisp.dhis.config" );
+            //Create unmarshaller
+            Unmarshaller um = jc.createUnmarshaller();
+            //Unmarshal XML contents of the file myDoc.xml into your Java object instance.
+            JAXBElement<ConfigType> configElement =
+                (JAXBElement<ConfigType>) um.unmarshal( configStream );
+
+            config = configElement.getValue();
+
+        // rather than just logging these errors they should rather bubble a message to the UI
+        } catch ( JAXBException ex )
+        {
+            log.error( "Error parsing config file", ex );
+        }
+
+    }
+
+    private void writeConfigToFile()
+    {
+        try
+        {
+            JAXBContext jc = JAXBContext.newInstance( "org.hisp.dhis.config" );
+            //Create marshaller
+            Marshaller m = jc.createMarshaller();
+            //Marshal object into file.
+            m.marshal( config, new FileOutputStream( installDir + CONFIG_FILE_NAME ) );
+
+        // rather than just logging these errors they should rather bubble a message to the UI
+        } catch ( FileNotFoundException ex )
+        {
+            log.error( "Can't find config.xml file", ex );
+        } catch ( JAXBException ex )
+        {
+            log.error( "Error serializing config to file", ex );
+        }
     }
 }

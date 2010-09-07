@@ -64,17 +64,16 @@ public class WebAppServer
 
     protected Connector connector;
 
-    private SimpleConfigReader configReader;
-
     public WebAppServer()
     {
         server = new Server();
         connector = new SelectChannelConnector();
     }
 
-    public void init( String installDir, LifeCycle.Listener serverListener )
+    public void init(  )
         throws Exception
     {
+        String installDir = TrayApp.getInstallDir();
         try
         {
             int portFromConfig = this.getPortFromConfig();
@@ -109,7 +108,7 @@ public class WebAppServer
         }
 
         server.setHandler( handlers );
-        server.addLifeCycleListener( serverListener );
+        server.addLifeCycleListener( TrayApp.getInstance() );
     }
 
     public void start()
@@ -132,17 +131,6 @@ public class WebAppServer
 
     private int getPortFromConfig()
     {
-        configReader = new SimpleConfigReader();
-        int preferredJettyPort = DEFAULT_JETTY_PORT;
-        try
-        {
-            int portFromConfig = configReader.preferredJettyPort();
-            preferredJettyPort = portFromConfig;
-        } catch ( Exception e )
-        {
-            log.error( "There was a problem reading the preferred jetty port. Using default." );
-            preferredJettyPort = DEFAULT_JETTY_PORT;
-        }
-        return preferredJettyPort;
+        return TrayApp.getInstance().getConfig().getPort();
     }
 }
