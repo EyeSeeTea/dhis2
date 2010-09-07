@@ -57,9 +57,7 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author espenjac, joakibj, briane, eivinhb
- * @version $Id$
- * @modifier Dang Duy Hieu
- * @since 2010-04-06
+ * @version $Id SearchAction.java Apr 06, 2010 ddhieu
  */
 public class SearchAction
     implements Action
