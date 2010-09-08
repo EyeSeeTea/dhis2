@@ -1,12 +1,9 @@
-<script>
-
+<script>	
 	jQuery(document).ready(	function(){
-			validation( 'addConceptForm', function()
-			{
-				validateAddUpdateConcept( 'add' );
-			});
+		validation( 'addConceptForm', function( form ){ form.submit() } );		
+		checkValueIsExist( "name", "validateAddUpdateConcept.action");				
 	});
-
+	
 </script>
 <h3>$i18n.getString( "create_new_concept" )</h3>
 
@@ -29,5 +26,3 @@
 </table>
 
 </form>
-
-<span id="message"></span>

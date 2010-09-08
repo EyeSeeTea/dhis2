@@ -5,6 +5,9 @@
 		});				
 		changeItemType();
 	});
+	
+	var category = $reportExcel.isCategory();
+	
 </script>
 
 <h3>$i18n.getString( 'add_report_excel_item' )</h3>
@@ -57,7 +60,7 @@
 			<td><label>$i18n.getString('expression')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
 			<td>				
 				<input type="button" id="expression-button" value="$i18n.getString('expression')" style="width:20em"/>											
-				<input type="hidden" id="expression" name="expression" style="width:15em"/>
+				<input type="hidden" id="expression" name="expression" style="width:15em" class="{validate:{required:true}}"/>
 			</td>
 			
 		</tr>	
@@ -87,20 +90,6 @@
 		
 	</table>
 </form>
-
-<script>
-	function insertExpression() 
-	{
-		
-		#if( $reportExcel.isCategory() )
-			var expression = "[*." + getFieldValue("optionCombos")+ "]";
-		#else 
-			var expression = "[" + getFieldValue("elementSelect") + "." + getFieldValue("optionCombos") + "]";
-		#end
-		
-		setFieldValue( 'formula', getFieldValue( 'formula') + expression );	
-	}
-</script>
 
 <!-- EXPRESSION FORM -->
 

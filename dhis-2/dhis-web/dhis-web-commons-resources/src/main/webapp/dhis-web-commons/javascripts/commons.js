@@ -740,7 +740,7 @@ function removeItem( itemId, itemName, confirmation, action )
     
     if ( result )
     {
-    	$.getJSON(
+    	$.postJSON(
     	    action,
     	    {
     	        "id": itemId   
@@ -749,17 +749,15 @@ function removeItem( itemId, itemName, confirmation, action )
     	    {
     	    	if ( json.response == "success" )
     	    	{
-    	    		$( "tr#tr" + itemId ).remove();
+    	    		jQuery( "tr#tr" + itemId ).remove();
                 
-	                $( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
-	                $( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
-	                $( "table.listTable tbody tr:even" ).addClass( "listRow" );
+	                jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
+	                jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
+	                jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
     	    	}
     	    	else if ( json.response == "error" )
     	    	{
-    	    		setFieldValue( 'warningField', json.message );
-        
-                    showWarning();
+    	    		showWarningMessage( json.message );
     	    	}
     	    }
     	);
@@ -967,9 +965,20 @@ function checkValueIsExist( inputId, url, params )
 	});
 }
 
-function validateValueByAjax( inputId, url, params )
+function remoteValidateById( inputId, url, params )
 {
 	jQuery("#" + inputId).rules("add",{
+		remote: {
+			url:url,
+			type:'post',
+			data:params
+		}
+	});
+}
+
+function remoteValidate( input , url, params )
+{
+	jQuery( input ).rules("add",{
 		remote: {
 			url:url,
 			type:'post',
@@ -1009,6 +1018,19 @@ function removeValidatorRules( input, rules )
 	jQuery(input).rules("remove", rules );
 }
 
+function listValidator( validatorId, selectedListId )
+{
+	memberValidator = jQuery( "#" + validatorId );
+	memberValidator.attr( 'multiple', 'multiple');
+	memberValidator.attr( 'name', validatorId );
+	memberValidator.children().remove();
+	
+	jQuery.each( jQuery( "#" + selectedListId ).children(), function(i, item){
+		item.selected = 'selected';
+		memberValidator.append( '<option value="' + item.value + '" selected="selected">' + item.value + '</option>');
+	});
+}
+
 //=================================================================================
 //	MESSAGE
 //=================================================================================
@@ -1038,6 +1060,29 @@ function showSuccessMessage( message, time )
 function showWarningMessage( message, time )
 {
 	jQuery.growlUI( i18n_warning, message, 'warning', time ); 	
+}
+
+function markInvalid( elementId, message )
+{	
+	var element = jQuery("#" + elementId );
+	html = '<span htmlfor="' + element.attr('name') + '" generated="true" style="font-style: italic; color: red;" class="error">' + message + '</span>';
+	element.next().remove();	
+	jQuery( html ).insertAfter( element );
+}
+
+function markValid( elementId )
+{
+	var element = jQuery("#" + elementId );
+	html = '<span htmlfor="' + element.attr('name') + '" generated="true" style="font-style: italic; color: red;" class="error valid"></span>';
+	element.next().remove();	
+	jQuery( html ).insertAfter( element );
+}
+
+function isValid( elementId )
+{		
+	var next = jQuery("#" + elementId ).next( 'span[class~=valid]' );
+	
+	return  next.length > 0 ;
 }
 
 

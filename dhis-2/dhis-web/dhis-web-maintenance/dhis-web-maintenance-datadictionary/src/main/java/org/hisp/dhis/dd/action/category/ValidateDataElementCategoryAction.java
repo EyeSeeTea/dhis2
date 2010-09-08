@@ -54,7 +54,7 @@ public class ValidateDataElementCategoryAction
     // -------------------------------------------------------------------------
     // I18n
     // -------------------------------------------------------------------------
-    
+
     private I18n i18n;
 
     public void setI18n( I18n i18n )
@@ -97,21 +97,16 @@ public class ValidateDataElementCategoryAction
 
     public String execute()
     {
-        if ( name == null || name.isEmpty() )
+        if ( name != null )
         {
-            message = i18n.getString( "specify_name" );
 
-            return INPUT;
-        }
-        else
-        {
             DataElementCategory match = dataElementCategoryService.getDataElementCategoryByName( name );
 
             if ( match != null && (id == null || match.getId() != id) )
             {
                 message = i18n.getString( "name_in_use" );
 
-                return INPUT;
+                return ERROR;
             }
         }
 

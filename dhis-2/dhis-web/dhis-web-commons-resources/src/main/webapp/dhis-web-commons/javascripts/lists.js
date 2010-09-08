@@ -95,9 +95,9 @@ function clearList( list ) {
  * @param listId the id of the list.
  * @param value the value.
  */
-function listContainsById( listId, value ) {
-    var list = document.getElementById( listId );
-    return listContains( list, value );
+function listContainsById( listId, value, text ) {
+    var list = document.getElementById( listId );	
+    return listContains( list, value, text);
 }
 
 /**
@@ -106,11 +106,19 @@ function listContainsById( listId, value ) {
  * @param list the list.
  * @param value the value.
  */
-function listContains( list, value ) {
+function listContains( list, value, text ) {
+	if( text == undefined ) text = false;
     for ( var i = 0; i < list.options.length; i++ ) {
-        if ( list.options[i].value == value ) {
-            return true;
-        }
+		if( text ){
+			if ( list.options[i].text == value ) {
+				return true;
+			}
+		}else{
+			if ( list.options[i].value == value ) {
+				return true;
+			}
+		}
+        
     }
     return false;
 }
@@ -420,4 +428,22 @@ function getAvailablePeriods( periodTypeId, availablePeriodsId, selectedPeriodsI
 				}
 			}			
 		} );
+}
+
+
+function getSelectedTextById( id )
+{
+	var list  = byId( id );
+	return list[list.selectedIndex].text;
+}
+
+function getArrayValueOfListById( id )
+{
+	var result = new Array();
+	
+	jQuery.each( jQuery( "#" + id ).children(), function( i, item ){
+		result.push( item.value );
+	});
+	
+	return result;
 }

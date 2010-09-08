@@ -26,10 +26,9 @@ package org.hisp.dhis.dd.action.concept;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.i18n.I18n;
 
@@ -42,7 +41,6 @@ import com.opensymphony.xwork2.ActionSupport;
 public class ValidateAddUpdateConceptAction
     extends ActionSupport
 {
-    private static final String ADD = "add";
 
     private static final Pattern conceptNamePattern = Pattern.compile( "^[a-zA-Z][a-zA-Z0-9_]{0,9}$" );
 
@@ -72,11 +70,11 @@ public class ValidateAddUpdateConceptAction
     // Input
     // -------------------------------------------------------------------------
 
-    private String mode;
+    private Integer id;
 
-    public void setMode( String mode )
+    public void setId( Integer id )
     {
-        this.mode = mode;
+        this.id = id;
     }
 
     private String name;
@@ -103,29 +101,18 @@ public class ValidateAddUpdateConceptAction
 
     public String execute()
     {
-        message = "";
-
-        if ( StringUtils.isEmpty( name ) || StringUtils.isBlank( name ) )
+        if ( name != null )
         {
-            message = i18n.getString( "name_is_null" );
 
-            return INPUT;
-        }
+            Concept match = conceptService.getConceptByName( name );
 
-        if ( mode.equals( ADD ) && (conceptService.getConceptByName( name ) != null) )
-        {
-            message = i18n.getString( "name_in_used" );
+            if ( match != null && (id == null || match.getId() != id) )
+            {
+                message = i18n.getString( "name_in_use" );
 
-            return INPUT;
-        }
+                return ERROR;
+            }
 
-        Matcher matcher = conceptNamePattern.matcher( name );
-
-        if ( !matcher.matches() )
-        {
-            message = i18n.getString( "illegal_concept_name" );
-
-            return INPUT;
         }
 
         return SUCCESS;

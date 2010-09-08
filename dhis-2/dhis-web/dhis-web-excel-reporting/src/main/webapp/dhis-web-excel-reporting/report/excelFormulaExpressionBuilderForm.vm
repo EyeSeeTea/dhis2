@@ -3,13 +3,13 @@
 	<br>
 	<br>
 	<center>
-		<input type="button" value="$i18n.getString('ok')" onclick="updateInExpression()" style="width:100px"/>		
+		<input type="button" value="$i18n.getString('ok')" onclick="updateExExpression()" style="width:100px"/>		
 		<input type="button" value="$i18n.getString('cancel')" onclick="hideById('excelformula'); unLockScreen();" style="width:100px"/>
 	</center>
 </div>
 
 <script>
-	function updateInExpression()
+	function updateExExpression()
 	{
 		expression = jQuery( '#excelformula textarea[id=elementSelect]' ).val();		
 		hideById('excelformula'); 

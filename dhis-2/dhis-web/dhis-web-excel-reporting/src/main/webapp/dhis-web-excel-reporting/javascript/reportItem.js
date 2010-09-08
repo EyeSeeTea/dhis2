@@ -9,7 +9,7 @@ function changeItemType()
 		byId('expression-button' ).onclick =  inExpressionBuilderForm ;
 	}else if( value == 'formulaexcel' ){
 		byId('expression-button' ).onclick =  excelFormulaExpressionBuilderForm ;
-	}else if( value == 'organisation' || value == 'serial'){
+	}else if( value == 'organisation' || value == 'serial' || value == 'dataelement_code' || value == 'dataelement_name' ){
 		disable( 'expression-button' );
 		setFieldValue( 'expression', value );
 	}	
@@ -23,6 +23,56 @@ function cleanFormula()
 function insertOperation( value ) {
 	byId('formula').value += value;	
 } 
+
+function changeItemType()
+{
+	value = getFieldValue( 'itemType' );
+	enable( 'expression-button' );
+	
+	
+	if( value == 'dataelement' ){
+		byId('expression-button' ).onclick = deExpressionBuilderForm;
+	}else if( value == 'indicator' ){
+		byId('expression-button' ).onclick =  inExpressionBuilderForm ;
+	}else if( value == 'formulaexcel' ){
+		byId('expression-button' ).onclick =  excelFormulaExpressionBuilderForm ;
+	}else if( value == 'organisation' || value == 'serial' || value == 'dataelement_code' || value == 'dataelement_name'){
+		disable( 'expression-button' );
+		setFieldValue( 'expression', value );
+	}	
+}
+
+function cleanFormula()
+{
+	setFieldValue( 'formula','');
+	setInnerHTML( 'expression-description', '');
+}
+
+function insertOperation( value ) {
+	byId('formula').value += value;	
+} 
+
+function insertExpression() 
+{
+	
+	if( category ) var expression = "[*." + getFieldValue("elementSelect")+ "]";
+	else var expression = getFieldValue("elementSelect");	
+	setFieldValue( 'formula', getFieldValue( 'formula') + expression );
+	
+	getExpression();
+	
+}
+
+function getExpression()
+{	
+	jQuery.postJSON( '../dhis-web-commons-ajax-json/getExpressionText.action', 
+	{ expression: getFieldValue('formula')}, function( json ){
+		if(json.response == 'success'){
+			setInnerHTML( 'expression-description', json.message );				
+		}	
+	});		
+}
+
 
 function validateAddReportExcelItem( form )
 {

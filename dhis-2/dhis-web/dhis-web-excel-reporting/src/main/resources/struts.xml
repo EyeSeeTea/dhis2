@@ -460,14 +460,7 @@
 			class="org.hisp.dhis.reportexcel.category.action.GetDataElementOrderAction">
 			<result name="success" type="velocity-xml">
 				/dhis-web-excel-reporting/responseDataElementOrder.vm</result>
-		</action>
-
-		<action name="getFormulaText"
-			class="org.hisp.dhis.reportexcel.expression.action.GetFormulaTextAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responseFormulaText.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
-		</action>
+		</action>	
 
 		<!-- GENERATE REPORT EXCEL ACTION -->
 
