@@ -18,6 +18,8 @@ import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStoreException;
+
+import org.hisp.dhis.mobile.connection.DataValueUploadManager;
 import org.hisp.dhis.mobile.connection.DownloadManager;
 import org.hisp.dhis.mobile.db.SettingsRectordStore;
 import org.hisp.dhis.mobile.db.Storage;
@@ -29,8 +31,8 @@ import org.hisp.dhis.mobile.model.OrgUnit;
 import org.hisp.dhis.mobile.model.ProgramStageForm;
 import org.hisp.dhis.mobile.model.User;
 import org.hisp.dhis.mobile.util.AlertUtil;
-import org.hisp.dhis.mobile.util.DefaultAlertConfirmListener;
 import org.hisp.dhis.mobile.util.DnlActivitiesConfirmAlertListener;
+import org.hisp.dhis.mobile.util.ReinitConfirmListener;
 
 public class DHISMIDlet
     extends MIDlet
@@ -120,7 +122,7 @@ public class DHISMIDlet
 
     private Command lgnFrmLgnCmd;
 
-    private Command orgUnitBackCmd;
+    // private Command orgUnitBackCmd;
 
     private Command pinFormNextCmd;
 
@@ -229,7 +231,7 @@ public class DHISMIDlet
             }
             else if ( command == saveCommand )
             {
-                saveDataValue();
+                saveDataValues();
             }
         }
         else if ( displayable == formDownloadList )
@@ -386,8 +388,8 @@ public class DHISMIDlet
             else if ( command == pinFormReinitCmd )
             {
                 this.getDisplay().setCurrent(
-                    AlertUtil.getConfirmAlert( "Confirmation", "Are you sure ?", new DefaultAlertConfirmListener(),
-                        this, getPinForm(), getLoginForm() ) );
+                    AlertUtil.getConfirmAlert( "Confirmation", "Are you sure ?", new ReinitConfirmListener(), this,
+                        getPinForm(), getLoginForm() ) );
             }
             else if ( command == pinFormExitCmd )
             {
@@ -396,7 +398,23 @@ public class DHISMIDlet
         }
     }
 
-    private void saveDataValue()
+    private void saveDataValues()
+    {
+        try
+        {
+            this.saveDataValueToRMS();
+            this.switchDisplayable( AlertUtil.getInfoAlert( "Report", "DataValues successfully saved." ),
+                this.getActivitiesList() );
+        }
+        catch ( RecordStoreException e )
+        {
+            this.switchDisplayable( AlertUtil.getInfoAlert( "Report", "Fail to save datavalues" ),
+                this.getActivitiesList() );
+        }
+    }
+
+    private void saveDataValueToRMS()
+        throws RecordStoreException
     {
         Vector des = programStageForm.getDataElements();
         for ( int i = 0; i < des.size(); i++ )
@@ -412,10 +430,10 @@ public class DHISMIDlet
             }
         }
         loadDataValues( selectedActivity );
-
     }
 
     private void storeNewDataValue( DataElement de )
+        throws RecordStoreException
     {
         if ( de.getType() == DataElement.TYPE_DATE )
         {
@@ -441,6 +459,7 @@ public class DHISMIDlet
     }
 
     private void updateDataValue( DataElement de )
+        throws RecordStoreException
     {
 
         if ( de.getType() == DataElement.TYPE_DATE )
@@ -469,7 +488,6 @@ public class DHISMIDlet
                 Storage.deleteDataValue( selectedActivity,
                     getDataValue( selectedActivity.getTask().getProgStageInstId(), de.getId(), txtField.getString() ) );
                 System.out.println( "Deleting: " + de.getName() );
-
             }
         }
 
@@ -479,7 +497,7 @@ public class DHISMIDlet
     {
         selectedActivity = (Activity) activitiesVector.elementAt( getActivitiesList().getSelectedIndex() );
         ProgramStageForm formOfActivity = Storage.fetchForm( selectedActivity.getTask().getProgStageId() );
-        this.getForm( formOfActivity );
+        this.renderForm( formOfActivity, getForm() );
     }
 
     private DataValue getDataValue( int progStageId, int dataElementID, String value )
@@ -580,7 +598,7 @@ public class DHISMIDlet
 
         ProgramStageForm form = Storage.fetchForm( downloadedProgramStage.getId() );
         System.out.println( "Name: " + form.getName() );
-        this.getForm( form );
+        this.renderForm( form, this.getForm() );
     }
 
     // the "Back" command of the downloaded forms list
@@ -954,15 +972,15 @@ public class DHISMIDlet
     {
         if ( form == null )
         {
-            form = new Form( "form" );
+            form = new Form( "Form" );
             form.addCommand( getBackCommand() );
             form.addCommand( getScreenCommand() );
             form.addCommand( getSaveCommand() );
             form.setCommandListener( this );
-
-            // This is just for test .....
-            ProgramStageForm frm = Storage.fetchForm( 1 );
-            // renderForm( frm, form );
+        }
+        else
+        {
+            form.deleteAll();
         }
         return form;
     }
@@ -1027,25 +1045,25 @@ public class DHISMIDlet
     }
 
     // Real downloaded forms select
-    public Form getForm( ProgramStageForm selectedForm )
-    {
-        if ( form == null )
-        {
-            form = new Form( "From" );
-            form.addCommand( getBackCommand() );
-            form.addCommand( getScreenCommand() );
-            form.addCommand( getSaveCommand() );
-            form.setCommandListener( this );
-            renderForm( selectedForm, form );
-        }
-        else
-        {
-            form.deleteAll();
-            renderForm( selectedForm, form );
-        }
-
-        return form;
-    }
+    // public Form getForm( ProgramStageForm selectedForm )
+    // {
+    // if ( form == null )
+    // {
+    // form = new Form( "From" );
+    // form.addCommand( getBackCommand() );
+    // form.addCommand( getScreenCommand() );
+    // form.addCommand( getSaveCommand() );
+    // form.setCommandListener( this );
+    // renderForm( selectedForm, form );
+    // }
+    // else
+    // {
+    // form.deleteAll();
+    // renderForm( selectedForm, form );
+    // }
+    //
+    // return form;
+    // }
 
     /**
      * Returns an initiliazed instance of backCommand component.
@@ -1220,9 +1238,8 @@ public class DHISMIDlet
         {
             DownloadManager downloadManager = new DownloadManager( this, getUrl().getString() + "user", user,
                 DownloadManager.DOWNLOAD_ORGUNIT );
-            downloadManager.start();
             switchDisplayable( null, getWaitForm( "Connecting", "Please wait..." ) );
-
+            downloadManager.start();
         }
         else
         {
@@ -1245,8 +1262,8 @@ public class DHISMIDlet
                 + this.orgUnit.getProgramFormsLink()
                     .substring( this.orgUnit.getProgramFormsLink().indexOf( "orgUnits" ) ) );
 
-           this.saveOrgUnit( this.orgUnit ); 
-           // settingsRecord.put( "adminPass", adminPass.getString() );
+            this.saveOrgUnit( this.orgUnit );
+            // settingsRecord.put( "adminPass", adminPass.getString() );
             settingsRecord.save();
         }
         catch ( RecordStoreException rse )
@@ -1271,12 +1288,13 @@ public class DHISMIDlet
         }
     }
 
-    private void browseForms()
-    {
-        // loadSettings();
-        downloadManager = new DownloadManager( this, serverUrl + "forms", user, DownloadManager.DOWNLOAD_FORMS );
-        downloadManager.start();
-    }
+    // private void browseForms()
+    // {
+    // // loadSettings();
+    // downloadManager = new DownloadManager( this, serverUrl + "forms", user,
+    // DownloadManager.DOWNLOAD_FORMS );
+    // downloadManager.start();
+    // }
 
     public void displayFormsForDownload( Vector forms )
     {
@@ -1420,30 +1438,22 @@ public class DHISMIDlet
 
     public void sendRecordedData()
     {
-        System.out.println( "The form is:  " + programStageForm.getName() + "  with an ID of:  "
-            + programStageForm.getId() );
+        // Need more test
+        
+        // try
+        // {
+        // this.saveDataValueToRMS();
+        // }
+        // catch ( Exception e )
+        // {
+        // System.out.println(e.getMessage());
+        // }
+        // DataValueUploadManager uploadManager = new DataValueUploadManager(
+        // dataValueTable,
+        // "http://localhost:8080/dhis-web-api/importDataValue.action", orgUnit,
+        // user );
+        // uploadManager.start();
 
-        Vector des = programStageForm.getDataElements();
-
-        for ( int i = 0; i < des.size(); i++ )
-        {
-            DataElement de = (DataElement) des.elementAt( i );
-            if ( de.getType() == DataElement.TYPE_DATE )
-            {
-                DateField dateField = (DateField) formElements.get( de );
-                System.out.println( de.getName() + " or  " + de.getId() + "   val   " + dateField.getDate() );
-            }
-            else if ( de.getType() == DataElement.TYPE_INT )
-            {
-                TextField intField = (TextField) formElements.get( de );
-                System.out.println( de.getName() + " or  " + de.getId() + "   val   " + intField.getString() );
-            }
-            else
-            {
-                TextField txtField = (TextField) formElements.get( de );
-                System.out.println( de.getName() + " or  " + de.getId() + "   val   " + txtField.getString() );
-            }
-        }
     }
 
     public void error( String error )
