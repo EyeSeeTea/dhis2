@@ -168,7 +168,8 @@ public class TableAlteror
         executeSql( "ALTER TABLE translation ALTER value TYPE text" );
 
         // orgunit shortname uniqueness
-        executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );
+        executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );  
+        
 
         // update dataset-dataentryform association and programstage -
         // dataentryform association
@@ -177,6 +178,8 @@ public class TableAlteror
             // delete table dataentryformassociation
             executeSql( "DROP TABLE dataentryformassociation" );
         }
+        
+        executeSql( "ALTER TABLE section DROP CONSTRAINT section_name_key" );
         
         log.info( "Tables updated" );
     }
