@@ -218,16 +218,15 @@ public class DataBrowserServiceTest
      * startDate, String endDate, PeriodType periodType );
      */
     @Test
-    @Ignore // Will be fixed by Hieu
     public void testGetOrgUnitsInPeriod()
     {
         // Get all children of unit B from 2005-03-01 to 2005-04-30 registered
         // on daily basis (this should be period A and B data values)
         DataBrowserTable table = dataBrowserService.getOrgUnitsInPeriod( unitB.getId(), "2005-03-01", "2005-04-30",
-            periodA.getPeriodType() );
+            periodA.getPeriodType(), 4 );
 
         assertNotNull( "DataBrowserTable not supposed to be null", table );
-        assertEquals( "No. of queries", 2, table.getQueryCount() );
+        assertEquals( "No. of queries", 3, table.getQueryCount() );
         assertNotSame( "Querytime more than 0", 0, table.getQueryTime() );
 
         assertEquals( "Metacolumns", 3, table.getColumns().size() );
@@ -259,17 +258,16 @@ public class DataBrowserServiceTest
             .intValue() );
 
         // Retrieve children of unitG - zero children
-        table = dataBrowserService.getOrgUnitsInPeriod( unitG.getId(), null, null, periodA.getPeriodType() );
+        table = dataBrowserService.getOrgUnitsInPeriod( unitG.getId(), null, null, periodA.getPeriodType(), 4 );
 
         assertNotNull( "DataBrowserTable not supposed to be null", table );
-        assertEquals( "No. of queries", 2, table.getQueryCount() );
+        assertEquals( "No. of queries", 3, table.getQueryCount() );
         assertNotSame( "Querytime more than 0", 0, table.getQueryTime() );
 
         assertEquals( "Metacolumns", 2, table.getColumns().size() );
         assertEquals( "drilldown_organisation_unit", table.getColumns().get( 0 ).getName() );
-        // Service layer adds "zero-column"
         assertEquals( "counts_of_aggregated_values", table.getColumns().get( 1 ).getName() );
-
+        // Service layer adds "zero-column"
         assertEquals( "Metarows", 0, table.getRows().size() );
     }
 
@@ -515,6 +513,7 @@ public class DataBrowserServiceTest
      * format );
      */
     @Test
+    @Ignore
     public void testConvertDate()
     {
         // To do
@@ -525,6 +524,7 @@ public class DataBrowserServiceTest
      * String toDate, I18nFormat format );
      */
     @Test
+    @Ignore
     public void getFromToDateFormat()
     {
         // To do

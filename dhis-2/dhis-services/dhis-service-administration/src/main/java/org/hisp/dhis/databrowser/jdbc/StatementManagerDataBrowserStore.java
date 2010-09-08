@@ -528,7 +528,7 @@ public class StatementManagerDataBrowserStore
     }
 
     public Integer setCountOrgUnitsBetweenPeriods( DataBrowserTable table, Integer orgUnitParent,
-        List<Integer> betweenPeriodIds )
+        List<Integer> betweenPeriodIds, Integer maxLevel )
     {
         StatementHolder holder = statementManager.getHolder();
 
@@ -538,7 +538,9 @@ public class StatementManagerDataBrowserStore
         dropView( "view_count_descentdants" );
 
         sqlsbDescentdants.append( "CREATE VIEW view_count_descentdants AS " );
-        setUpQueryForDrillDownDescendants( sqlsbDescentdants, orgUnitParent, betweenPeriodIds );
+        setUpQueryForDrillDownDescendants( sqlsbDescentdants, orgUnitParent, betweenPeriodIds, maxLevel );
+
+        table.incrementQueryCount();
 
         try
         {
@@ -667,13 +669,17 @@ public class StatementManagerDataBrowserStore
     }
 
     private void setUpQueryForDrillDownDescendants( StringBuffer sb, Integer orgUnitSelected,
-        List<Integer> betweenPeriodIds )
+        List<Integer> betweenPeriodIds, Integer maxLevel )
     {
+        if ( maxLevel == null )
+        {
+            maxLevel = new Integer( organisationUnitService.getNumberOfOrganisationalLevels() );
+        }
+
         int i = 0;
         int loopSize = betweenPeriodIds.size();
         int curLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnitSelected );
-        int maxLevel = organisationUnitService.getNumberOfOrganisationalLevels();
-        int diffLevel = maxLevel - curLevel;
+        int diffLevel = maxLevel.intValue() - curLevel;
         String orgIndex = this.getTableIndexByDiffLevel( diffLevel );
 
         for ( Integer periodid : betweenPeriodIds )

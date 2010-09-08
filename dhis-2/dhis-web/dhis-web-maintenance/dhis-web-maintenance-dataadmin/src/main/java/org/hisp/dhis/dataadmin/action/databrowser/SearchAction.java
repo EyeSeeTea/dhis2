@@ -500,7 +500,7 @@ public class SearchAction
             else if ( selectedUnit != null )
             {
                 dataBrowserTable = dataBrowserService.getOrgUnitsInPeriod( selectedUnit.getId(), fromDate, toDate,
-                    periodType );
+                    periodType, null );
             }
             else
             {
