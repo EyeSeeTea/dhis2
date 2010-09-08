@@ -76,7 +76,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-dataset/editSection.vm</param>
       <param name="menu">/dhis-web-maintenance-dataset/menu.vm</param>
-      <param name="javascripts">javascript/dataSet.js</param>
+      <param name="javascripts">javascript/section.js</param>
     </action>
     
     <action name="updateSection"

@@ -20,6 +20,7 @@
   <div style="display:inline">
   <input type="hidden" id="dataSetId" name="dataSetId" value="$dataSet.id">
   <input type="hidden" id="sectionId" name="sectionId" value="$section.id">
+  <input type="hidden" id="categoryComboId" name="categoryComboId" value="$categoryCombo.id">
   </div>
   
   <table id="detailsList">

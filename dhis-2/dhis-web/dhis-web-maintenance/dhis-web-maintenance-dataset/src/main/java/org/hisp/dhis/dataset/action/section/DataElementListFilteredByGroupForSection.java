@@ -147,7 +147,6 @@ public class DataElementListFilteredByGroupForSection
     public String execute()
         throws Exception
     {
-
         // dataSetId
         if ( dataSetId != null )
         {
@@ -179,21 +178,6 @@ public class DataElementListFilteredByGroupForSection
                 }
             }
         }
-
-        // if ( dataElementGroupId == null || dataElementGroupId.equals( ALL ) )
-        // {
-        // dataElements = new ArrayList<DataElement>(
-        // dataElementService.getAllActiveDataElements() );
-        // }
-        // else
-        // {
-        // DataElementGroup dataElementGroup =
-        // dataElementService.getDataElementGroup( Integer
-        // .parseInt( dataElementGroupId ) );
-        //
-        // dataElements = new ArrayList<DataElement>(
-        // dataElementGroup.getMembers() );
-        // }
 
         // dataElementGroupId
         if ( dataElementGroupId == null || dataElementGroupId.equals( ALL ) )

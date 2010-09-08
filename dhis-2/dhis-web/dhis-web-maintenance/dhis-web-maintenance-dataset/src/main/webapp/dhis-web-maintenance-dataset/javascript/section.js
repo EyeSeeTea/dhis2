@@ -158,22 +158,25 @@ function markValue(color) {
 
 function filterByDataElementGroupForSection( groupId )
 {
-	var request = new Request();
+	var aSelectedList = new Array();
+	var selectedList = byId( 'selectedList' );
 
-	var requestString = 'filterDataElementsByDataElementGroupForSection.action';
-
-	var params = getParamString( 'selectedList' );
-	params += 'dataElementGroupId=' + groupId;
-	params += '&dataSetId=' + getFieldValue( 'dataSetId' );
-	params += '&categoryComboId=' + getFieldValue( 'categoryComboId' );
-
-	// Clear the list
-	clearListById( 'availableList' );
-
-	request.setResponseTypeXML( 'dataElementGroup' );
-	request.setCallbackSuccess( filterByDataElementGroupForSectionCompleted );
-	request.sendAsPost( params );
-	request.send( requestString );
+	for ( var i = 0; i < selectedList.options.length; ++i)
+	{
+		aSelectedList.push( selectedList.options[i].value );
+	}
+	
+	$.post("filterDataElementsByDataElementGroupForSection.action",
+		{
+			selectedList: aSelectedList,
+			dataElementGroupId: groupId,
+			dataSetId: getFieldValue( 'dataSetId' ),
+			categoryComboId: getFieldValue( 'categoryComboId' )
+		},
+		function (data)
+		{
+			filterByDataElementGroupForSectionCompleted( data );
+		}, 'xml');
 }
 
 function filterByDataElementGroupForSectionCompleted( dataElementGroup )
@@ -182,6 +185,7 @@ function filterByDataElementGroupForSectionCompleted( dataElementGroup )
 	var dataElementList = dataElements.getElementsByTagName( 'dataElement' );
 
 	var availableList = byId( 'availableList' );
+	availableList.options.length = 0;
 
 	for ( var i = 0; i < dataElementList.length; i++ )
 	{

@@ -31,8 +31,10 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodService;
-import org.junit.Ignore;
+import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
 
 /**
@@ -513,20 +515,22 @@ public class DataBrowserServiceTest
      * format );
      */
     @Test
-    @Ignore
     public void testConvertDate()
     {
-        // To do
-    }
+        I18nFormat format = new I18nFormat();
+        PeriodType monthlyPeriodType = periodService.getPeriodTypeByName( MonthlyPeriodType.NAME );
 
-    /**
-     * String getFromToDateFormat( PeriodType periodType, String fromDate,
-     * String toDate, I18nFormat format );
-     */
-    @Test
-    @Ignore
-    public void getFromToDateFormat()
-    {
-        // To do
+        // Get all children of unit B from 2005-03-01 to 2005-04-30 registered
+        // on monthly basis (this should be period A and B data values)
+        DataBrowserTable table = dataBrowserService.getOrgUnitsInPeriod( unitB.getId(), "2005-03-01", "2005-04-30",
+            periodA.getPeriodType(), 4 );
+
+        assertNotNull( "DataBrowserTable not supposed to be null", table );
+        assertEquals( "No. of queries", 3, table.getQueryCount() );
+        assertNotSame( "Querytime more than 0", 0, table.getQueryTime() );
+
+        assertEquals( "Metacolumns", 3, table.getColumns().size() );
+        assertEquals( "drilldown_organisation_unit", dataBrowserService.convertDate( monthlyPeriodType, table
+            .getColumns().get( 0 ).getName(), format ) );
     }
 }
