@@ -854,7 +854,35 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         if (Ext.getCmp('mapview_cb').getValue()) {
                             Ext.getCmp('mapview_cb').clearValue();
                         }
-						choropleth.classify(false, true);
+                        
+                        var deId = Ext.getCmp('dataelement_cb').getValue();
+                        
+                        Ext.Ajax.request({
+                            url: path_mapping + 'getMapLegendSetByDataElement' + type,
+                            method: 'POST',
+                            params: {dataElementId: deId},
+                            success: function(r) {
+                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
+                                if (mapLegendSet.id) {
+                                    LEGEND[thematicMap].type = map_legend_type_predefined;
+                                    Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
+                                    Ext.getCmp('maplegendset_cb').showField();
+                                    Ext.getCmp('maplegendset_cb').setValue(mapLegendSet.id);
+                                    Ext.getCmp('method_cb').hideField();
+                                    Ext.getCmp('numClasses_cb').hideField();
+                                    Ext.getCmp('colorA_cf').hideField();
+                                    Ext.getCmp('colorB_cf').hideField();
+
+                                    choropleth.applyPredefinedLegend();
+                                }
+
+                                choropleth.classify(false, true);
+                            },
+                            failure: function()
+                            {
+                              alert( i18n_status , i18n_error_while_retrieving_data );
+                            } 
+                        });
                     }
                 }
             }

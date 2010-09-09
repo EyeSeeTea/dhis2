@@ -229,16 +229,16 @@
 				/dhis-web-mapping/jsonMapLegendSet.vm</result>
 		</action>
 
+        <action name="getMapLegendSetByDataElement"
+            class="org.hisp.dhis.mapping.action.GetMapLegendSetByDataElementAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonMapLegendSet.vm</result>
+        </action>
+
 		<action name="getMapLegendSetsByType"
 			class="org.hisp.dhis.mapping.action.GetMapLegendSetsByTypeAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-mapping/jsonminMapLegendSets.vm</result>
-		</action>
-
-		<action name="getMapLegendSetIndicators"
-			class="org.hisp.dhis.mapping.action.GetMapLegendSetAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-mapping/jsonMapLegendSetIndicators.vm</result>
 		</action>
 
 		<action name="assignIndicatorsToMapLegendSet"
@@ -246,6 +246,12 @@
 			<result name="success" type="velocity-json">/dhis-web-mapping/void.vm
 			</result>
 		</action>
+
+        <action name="assignDataElementsToMapLegendSet"
+            class="org.hisp.dhis.mapping.action.AssignDataElementsToMapLegendSetAction">
+            <result name="success" type="velocity-json">/dhis-web-mapping/void.vm
+            </result>
+        </action>
 
 		<!-- MapView -->
 

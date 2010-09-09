@@ -660,6 +660,8 @@ public class DefaultMappingService
         MapLegendSet mapLegendSet = getMapLegendSetByName( name );
 
         Set<Indicator> indicators = new HashSet<Indicator>();
+        
+        Set<DataElement> dataElements = new HashSet<DataElement>();
 
         if ( mapLegendSet != null )
         {
@@ -670,12 +672,13 @@ public class DefaultMappingService
             mapLegendSet.setColorHigh( colorHigh );
             mapLegendSet.setMapLegends( mapLegends );
             mapLegendSet.setIndicators( indicators );
+            mapLegendSet.setDataElements( dataElements );
 
             this.mappingStore.updateMapLegendSet( mapLegendSet );
         }
         else
         {
-            mapLegendSet = new MapLegendSet( name, type, method, classes, colorLow, colorHigh, mapLegends, indicators );
+            mapLegendSet = new MapLegendSet( name, type, method, classes, colorLow, colorHigh, mapLegends, indicators, dataElements );
 
             this.mappingStore.addMapLegendSet( mapLegendSet );
         }
@@ -710,6 +713,23 @@ public class DefaultMappingService
         for ( MapLegendSet mapLegendSet : mapLegendSets )
         {
             if ( mapLegendSet.getIndicators().contains( indicator ) )
+            {
+                return mapLegendSet;
+            }
+        }
+
+        return null;
+    }
+
+    public MapLegendSet getMapLegendSetByDataElement( int dataElementId )
+    {
+        DataElement dataElement = dataElementService.getDataElement( dataElementId );
+
+        Collection<MapLegendSet> mapLegendSets = mappingStore.getAllMapLegendSets();
+
+        for ( MapLegendSet mapLegendSet : mapLegendSets )
+        {
+            if ( mapLegendSet.getDataElements().contains( dataElement ) )
             {
                 return mapLegendSet;
             }
