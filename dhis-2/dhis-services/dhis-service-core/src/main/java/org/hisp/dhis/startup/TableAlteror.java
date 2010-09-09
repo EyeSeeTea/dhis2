@@ -87,7 +87,9 @@ public class TableAlteror
         executeSql( "ALTER TABLE categoryoptioncombo DROP COLUMN displayorder" );
         executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN shortname" );
         executeSql( "ALTER TABLE section DROP COLUMN label" );
+        executeSql( "ALTER TABLE section DROP COLUMN title;" );
         executeSql( "ALTER TABLE organisationunit DROP COLUMN polygoncoordinates" );
+        executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptName" );
 
         // remove relative period type
         executeSql( "DELETE FROM period WHERE periodtypeid=(select periodtypeid from periodtype where name='Relative')" );
@@ -166,7 +168,8 @@ public class TableAlteror
         executeSql( "ALTER TABLE translation ALTER value TYPE text" );
 
         // orgunit shortname uniqueness
-        executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );
+        executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );  
+        
 
         // update dataset-dataentryform association and programstage -
         // dataentryform association
@@ -175,14 +178,9 @@ public class TableAlteror
             // delete table dataentryformassociation
             executeSql( "DROP TABLE dataentryformassociation" );
         }
-
-        // Working on Section table
-        executeSql( "ALTER TABLE section DROP COLUMN title;" );
-
-        // Working on ConceptName
-        // executeSql( "ALTER TABLE dataelementcategory DROP COLUMN
-        // conceptname;" );
-
+        
+        executeSql( "ALTER TABLE section DROP CONSTRAINT section_name_key" );
+        
         log.info( "Tables updated" );
     }
 

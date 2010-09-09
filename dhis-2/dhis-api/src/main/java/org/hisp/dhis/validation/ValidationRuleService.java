@@ -29,7 +29,9 @@ package org.hisp.dhis.validation;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.Period;
@@ -47,6 +49,12 @@ public interface ValidationRuleService
     // ValidationRule business logic
     // -------------------------------------------------------------------------
 
+    /**
+     * Returns a Grid containing the percentage of aggregated violations. Periods
+     * are listed as columns and Sources are listed as rows.
+     */
+    Grid getAggregateValidationResult( Collection<ValidationResult> results, List<Period> periods, List<? extends Source> sources );
+    
     /**
      * Validates AggregatedDataValues.
      * 

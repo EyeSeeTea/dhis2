@@ -46,7 +46,7 @@ function addSectionSubmit() {
 
 	if (dataSetId == "null" || dataSetId == "" || categoryComboId == "null"
 			|| categoryComboId == "") {
-		showWarningMessage("Please select a dataset/categorycombo");
+		showWarningMessage( i18n_please_select_dataset_categorycombo );
 	} else {
 		window.location.href = "addSectionAction.action?dataSetId=" + dataSetId
 				+ "&categoryComboId=" + categoryComboId;
@@ -150,4 +150,49 @@ function handleHttpError(errorCode) {
 }
 
 function markValue(color) {
+}
+
+// ----------------------------------------------------------------------
+// Filter by DataElementGroup
+// ----------------------------------------------------------------------
+
+function filterByDataElementGroupForSection( groupId )
+{
+	var aSelectedList = new Array();
+	var selectedList = byId( 'selectedList' );
+
+	for ( var i = 0; i < selectedList.options.length; ++i)
+	{
+		aSelectedList.push( selectedList.options[i].value );
+	}
+	
+	$.post("filterDataElementsByDataElementGroupForSection.action",
+		{
+			selectedList: aSelectedList,
+			dataElementGroupId: groupId,
+			dataSetId: getFieldValue( 'dataSetId' ),
+			categoryComboId: getFieldValue( 'categoryComboId' )
+		},
+		function (data)
+		{
+			filterByDataElementGroupForSectionCompleted( data );
+		}, 'xml');
+}
+
+function filterByDataElementGroupForSectionCompleted( dataElementGroup )
+{
+	var dataElements = dataElementGroup.getElementsByTagName( 'dataElements' )[0];
+	var dataElementList = dataElements.getElementsByTagName( 'dataElement' );
+
+	var availableList = byId( 'availableList' );
+	availableList.options.length = 0;
+
+	for ( var i = 0; i < dataElementList.length; i++ )
+	{
+		var dataElement = dataElementList[i];
+		var name = dataElement.firstChild.nodeValue;
+		var id = dataElement.getAttribute( 'id' );
+
+		availableList.add( new Option( name, id ), null );
+	}
 }

@@ -14,7 +14,7 @@
 	<br>
 	<center>
 		<input type="button" value="$i18n.getString('ok')" onclick="updateInExpression()" style="width:100px"/>		
-		<input type="button" value="$i18n.getString('cancel')" onclick="hideById('indicator'); unLockScreen();" style="width:100px"/>
+		<input type="button" value="$i18n.getString('cancel')" onclick="closeInExpression()" style="width:100px"/>
 	</center>
 </div>
 
@@ -23,8 +23,7 @@
 	{
 		expression = jQuery( '#indicator select[id=elementSelect]' ).val();
 		setFieldValue( 'expression', '[' + expression + ']');
-		hideById('indicator'); 
-		unLockScreen();
+		closeInExpression();
 	}
 	
 	
@@ -38,6 +37,12 @@
 	function getIndicators( id, target)
 	{
 		loadIndicatorsByGroup( id, target );
+	}
+	
+	function closeInExpression()
+	{
+		hideById('indicator');
+		unLockScreen();
 	}
 	
 </script>

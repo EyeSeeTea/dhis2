@@ -155,15 +155,16 @@ public class MySQLStatementBuilder
     }
 
     @Override
-    public String getUpdateDateDestination( int destDataElementId, int destCategoryOptionComboId,
+    public String getUpdateDestination( int destDataElementId, int destCategoryOptionComboId,
         int sourceDataElementId, int sourceCategoryOptionComboId )
     {
-        return "UPDATE datavalue AS d1 SET dataelementid=" + destDataElementId + ", categoryoptioncomboid="
-            + destCategoryOptionComboId + " " + "WHERE dataelementid=" + sourceDataElementId
-            + " and categoryoptioncomboid=" + sourceCategoryOptionComboId + " " + "AND NOT EXISTS ( "
-            + "SELECT * FROM (SELECT * FROM datavalue) AS d2 " + "WHERE d2.dataelementid=" + destDataElementId + " "
-            + "AND d2.categoryoptioncomboid=" + destCategoryOptionComboId + " " + "AND d1.periodid=d2.periodid "
-            + "AND d1.sourceid=d2.sourceid );";
+        
+        return "UPDATE datavalue d1 LEFT JOIN datavalue d2 ON d2.dataelementid = " + destDataElementId
+            + " AND d2.categoryoptioncomboid = " + destCategoryOptionComboId
+            + " AND d1.periodid = d2.periodid AND d1.sourceid = d2.sourceid SET d1.dataelementid = "
+            + destDataElementId + ", d1.categoryoptioncomboid = " + destCategoryOptionComboId
+            + " WHERE d1.dataelementid = " + sourceDataElementId + " AND d1.categoryoptioncomboid = "
+            + sourceCategoryOptionComboId + " AND d2.dataelementid IS NULL";
 
     }
 

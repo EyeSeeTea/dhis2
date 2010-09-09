@@ -75,7 +75,7 @@ public class JdbcDataMergeStore
         
         // Update destination with source where source is last update
         
-        sql = statementBuilder.getUpdateDateDestination( destDataElementId, destCategoryOptionComboId, sourceDataElementId, sourceCategoryOptionComboId );
+        sql = statementBuilder.getUpdateDestination( destDataElementId, destCategoryOptionComboId, sourceDataElementId, sourceCategoryOptionComboId );
         log.info( sql );        
         jdbcTemplate.execute( sql );
 

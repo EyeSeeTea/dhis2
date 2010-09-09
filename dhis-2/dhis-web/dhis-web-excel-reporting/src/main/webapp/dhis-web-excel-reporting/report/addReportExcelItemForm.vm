@@ -5,6 +5,9 @@
 		});				
 		changeItemType();
 	});
+	
+	var category = $reportExcel.isCategory();
+	
 </script>
 
 <h3>$i18n.getString( 'add_report_excel_item' )</h3>
@@ -87,20 +90,6 @@
 		
 	</table>
 </form>
-
-<script>
-	function insertExpression() 
-	{
-		
-		#if( $reportExcel.isCategory() )
-			var expression = "[" + getFieldValue("elementSelect") + ".*]";
-		#else 
-			var expression = "[" + getFieldValue("elementSelect") + "." + getFieldValue("optionCombos") + "]";
-		#end
-		
-		setFieldValue( 'formula', getFieldValue( 'formula') + expression );	
-	}
-</script>
 
 <!-- EXPRESSION FORM -->
 

@@ -9,7 +9,7 @@ function changeItemType()
 		byId('expression-button' ).onclick =  inExpressionBuilderForm ;
 	}else if( value == 'formulaexcel' ){
 		byId('expression-button' ).onclick =  excelFormulaExpressionBuilderForm ;
-	}else if( value == 'organisation' || value == 'serial'){
+	}else if( value == 'organisation' || value == 'serial' || value == 'dataelement_code' || value == 'dataelement_name' ){
 		disable( 'expression-button' );
 		setFieldValue( 'expression', value );
 	}	
@@ -23,6 +23,56 @@ function cleanFormula()
 function insertOperation( value ) {
 	byId('formula').value += value;	
 } 
+
+function changeItemType()
+{
+	value = getFieldValue( 'itemType' );
+	enable( 'expression-button' );
+	
+	
+	if( value == 'dataelement' ){
+		byId('expression-button' ).onclick = deExpressionBuilderForm;
+	}else if( value == 'indicator' ){
+		byId('expression-button' ).onclick =  inExpressionBuilderForm ;
+	}else if( value == 'formulaexcel' ){
+		byId('expression-button' ).onclick =  excelFormulaExpressionBuilderForm ;
+	}else if( value == 'organisation' || value == 'serial' || value == 'dataelement_code' || value == 'dataelement_name'){
+		disable( 'expression-button' );
+		setFieldValue( 'expression', value );
+	}	
+}
+
+function cleanFormula()
+{
+	setFieldValue( 'formula','');
+	setInnerHTML( 'expression-description', '');
+}
+
+function insertOperation( value ) {
+	byId('formula').value += value;	
+} 
+
+function insertExpression() 
+{
+	
+	if( category ) var expression = "[*." + getFieldValue("elementSelect")+ "]";
+	else var expression = getFieldValue("elementSelect");	
+	setFieldValue( 'formula', getFieldValue( 'formula') + expression );
+	
+	getExpression();
+	
+}
+
+function getExpression()
+{	
+	jQuery.postJSON( '../dhis-web-commons-ajax-json/getExpressionText.action', 
+	{ expression: getFieldValue('formula')}, function( json ){
+		if(json.response == 'success'){
+			setInnerHTML( 'expression-description', json.message );				
+		}	
+	});		
+}
+
 
 function validateAddReportExcelItem( form )
 {
@@ -124,7 +174,6 @@ function copySelectedReportItemToReport() {
 	request.setResponseTypeXML( 'xmlObject' );
 	request.setCallbackSuccess( copySelectedReportItemToReportReceived );
 	request.send( "getAllReportExcels.action" );
-
 }
 
 function copySelectedReportItemToReportReceived( xmlObject ) {
@@ -142,7 +191,7 @@ function copySelectedReportItemToReportReceived( xmlObject ) {
 		options.add(new Option(name,id), null);
 	}
 	
-	$("#copyTo").showAtCenter( true );
+	showPopupWindowById( 'copyToReport', 450, 170 );
 }
 
 
@@ -192,7 +241,7 @@ function validateCopyReportItemsToReportExcel() {
 		param += "&sheetNo=" + sheetId;
 	
 	request.sendAsPost( param );
-	request.send( "getReportExcelItems.action" );
+	request.send( "getReportExcelItemsBySheet.action" );
 	
 }
 
@@ -301,12 +350,11 @@ function saveCopyReportItemsToReportExcel() {
 	// If have no any ReportItem(s) will be copied
 	// and also have ReportItem(s) in Duplicating list
 	else if ( itemsDuplicated.length > 0 ) {
-
 		setMessage( warningMessage );
 	}
 		
-	$("#copyTo").hide();
-	deleteDivEffect();
+	hideById('copyToReport'); 
+	unLockScreen();
 }
 
 
@@ -338,7 +386,7 @@ function copySelectedReportItemToExcelItemGroupReceived( xmlObject ) {
 		options.add(new Option(name,id), null);
 	}
 	
-	$("#copyToExcelItem").showAtCenter( true );
+	showPopupWindowById("copyToExcelItem", 450,180 );
 }
 
 /*
@@ -448,7 +496,7 @@ function saveCopiedReportItemsToExcelItemGroup() {
 	}
 		
 	hideById("copyToExcelItem");
-	deleteDivEffect();
+	unLockScreen();
 }
 
 function saveCopyExcelItemsReceived( data ) {
@@ -651,7 +699,6 @@ function openCategoryExpressionReceived( data ) {
 	enable( "availableDataElements_" );
 	byId( "availableDataElements_" ).onchange = function(e){ getOptionCombos_() };
 	
-	//showDivEffect();
 	$( "#category" ).show();	
 }
 
@@ -721,7 +768,6 @@ function insertDataElementId_() {
 
 	var optionCombo = byId("optionCombos_");
 	var dataElementComboId = "[*." + optionCombo.value + "]";
-	//byId("categoryFormula").value += dataElementComboId;
 	byId("categoryFormula").value = dataElementComboId;
 	byId("categoryFormulaDiv").innerHTML = "*." + optionCombo[optionCombo.selectedIndex].text ;
 }
@@ -747,6 +793,4 @@ function updateFormulaText( formulaFieldName )
 function updateFormulaTextReceived( messageElement )
 {
 	byId( "formulaDiv").innerHTML = messageElement;
-	//byId( "formulaIndicatorDiv" ).innerHTML = messageElement;
-	//byId( "categoryFormulaDiv" ).innerHTML = messageElement;
 }

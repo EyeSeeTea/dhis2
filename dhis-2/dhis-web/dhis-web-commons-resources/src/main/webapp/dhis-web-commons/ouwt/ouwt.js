@@ -2,6 +2,7 @@
 // -----------------------------------------------------------------------------
 // Author:   Torgeir Lorange Ostby
 // Version:  $Id: ouwt.js 3457 2007-07-11 12:34:24Z torgeilo $
+// Version:  $Id: ouwt.js 3457 2007-07-11 12:34:24Z torgeilo $
 // -----------------------------------------------------------------------------
 
 /*
@@ -42,7 +43,8 @@ function Selection()
     this.select = function( unitId )
     {
         var unitTag = document.getElementById( getTagId( unitId ));
-        var linkTags = unitTag.getElementsByTagName( 'a' );
+		
+		var linkTags = unitTag.getElementsByTagName( 'a' );
 
         if ( linkTags[0].className == 'selected' )
         {
@@ -344,13 +346,12 @@ function Subtree()
 }
 
 function getOrgunitByCode(code)
-{	
-	$.post(organisationUnitTreePath + "setOrgunitByCode.action",{
-			orgunitcode:code
-		}, function (data){
-			data = data.getElementsByTagName( "message" );;
-			if ( data.length == 0 ){
-				window.location.reload();
-			}
-	},'xml');	
+{
+	$.getJSON(organisationUnitTreePath + 'getOrganisationUnitByCode.action?code=' + $( '#searchField' ).val(), function (data){	
+		if ( data.response == "success" ) {
+			window.location.reload();
+		} else {
+			$( '#searchField' ).css( "background-color", "#ffc5c5" );
+		}
+	} );
 }

@@ -50,10 +50,10 @@ import com.opensymphony.xwork2.Action;
 public class SetupReportExcelItemFormAction
     implements Action
 {
-
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
+
     private DataElementService dataElementService;
 
     public void setDataElementService( DataElementService dataElementService )
@@ -75,9 +75,9 @@ public class SetupReportExcelItemFormAction
         this.reportService = reportService;
     }
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Input
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private Integer reportId;
 
@@ -93,9 +93,9 @@ public class SetupReportExcelItemFormAction
         this.reportExcelItemId = reportExcelItemId;
     }
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Output
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private ReportExcelItem reportExcelItem;
 
@@ -131,6 +131,10 @@ public class SetupReportExcelItemFormAction
     {
         return indicatorGroups;
     }
+
+    // -------------------------------------------------------------------------
+    // Implementation Action
+    // -------------------------------------------------------------------------
 
     @Override
     public String execute()

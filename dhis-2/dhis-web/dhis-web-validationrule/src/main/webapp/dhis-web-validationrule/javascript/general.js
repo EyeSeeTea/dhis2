@@ -55,6 +55,7 @@ function i18nalizeOperator( operator )
     
     return null;
 }
+
 function getElementValue( parentElement, childElementName )
 {
     var textNode = parentElement.getElementsByTagName( childElementName )[0].firstChild;

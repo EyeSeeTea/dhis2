@@ -194,7 +194,7 @@ public class DataEntryFormServiceTest
         dataSetService.addDataSet( dataSetA );
         dataSetService.addDataSet( dataSetB );
         dataSetService.addDataSet( dataSetC );
-
+        
         List<DataSet> dataSets = dataSetService.getAvailableDataSets();
 
         assertEquals( dataSets.size(), 1 );
@@ -216,7 +216,7 @@ public class DataEntryFormServiceTest
         dataSetService.addDataSet( dataSetA );
         dataSetService.addDataSet( dataSetB );
         dataSetService.addDataSet( dataSetC );
-
+        
         List<DataSet> dataSets = dataSetService.getAssignedDataSets();
 
         assertEquals( dataSets.size(), 2 );

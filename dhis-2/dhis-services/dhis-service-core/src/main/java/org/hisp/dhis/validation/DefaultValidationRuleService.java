@@ -32,9 +32,13 @@ import static org.hisp.dhis.system.util.MathUtils.expressionIsTrue;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
@@ -43,8 +47,11 @@ import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.source.Source;
+import org.hisp.dhis.system.grid.ListGrid;
+import org.hisp.dhis.system.util.CompositeCounter;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
+import org.hisp.dhis.system.util.MathUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -56,6 +63,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultValidationRuleService
     implements ValidationRuleService
 {
+    private static final Log log = LogFactory.getLog( DefaultValidationRuleService.class );
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -105,6 +114,43 @@ public class DefaultValidationRuleService
     // -------------------------------------------------------------------------
     // ValidationRule business logic
     // -------------------------------------------------------------------------
+
+    public Grid getAggregateValidationResult( Collection<ValidationResult> results, List<Period> periods, List<? extends Source> sources )
+    {
+        int number = validationRuleStore.getNumberOfValidationRules();
+        
+        Grid grid = new ListGrid();
+        
+        CompositeCounter counter = new CompositeCounter();
+        
+        for ( ValidationResult result : results )
+        {
+            counter.count( result.getPeriod(), result.getSource() );
+        }
+
+        grid.nextRow();
+        grid.addValue( "" );
+        
+        for ( Period period : periods )
+        {
+            grid.addValue( period.getName() );
+        }
+        
+        for ( Source source : sources )
+        {
+            grid.nextRow();
+            grid.addValue( source.getName() );
+            
+            for ( Period period : periods )
+            {
+                double percentage = (double) ( 100 * counter.getCount( period, source ) ) / number;
+                
+                grid.addValue( String.valueOf( MathUtils.getRounded( percentage, 1 ) ) );
+            }
+        }
+        
+        return grid;
+    }
     
     public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources )
     {
@@ -120,6 +166,8 @@ public class DefaultValidationRuleService
             {
                 validationViolations.addAll( validateInternal( period, source, validationRules, true ) );
             }
+            
+            log.info( "Validated " + source );
         }
         
         return validationViolations;
@@ -145,6 +193,8 @@ public class DefaultValidationRuleService
             {
                 validationViolations.addAll( validateInternal( period, source, validationRules, true ) );
             }
+            
+            log.info( "Validated " + source );
         }
         
         return validationViolations;
@@ -167,6 +217,8 @@ public class DefaultValidationRuleService
                     validationViolations.addAll( validateInternal( period, source, relevantRules, false ) );
                 }
             }
+            
+            log.info( "Validated " + source );
         }
 
         return validationViolations;
@@ -191,6 +243,8 @@ public class DefaultValidationRuleService
                     validationViolations.addAll( validateInternal( period, source, relevantRules, false ) );
                 }
             }
+            
+            log.info( "Validated " + source );
         }
 
         return validationViolations;

@@ -45,29 +45,36 @@ public class GetOrganisationUnitByCodeAction
     // Dependencies
     // --------------------------------------------------------------------------
 
-    private OrganisationUnitService orguitService;
+    private OrganisationUnitService organisationUnitService;
 
-    public void setOrguitService( OrganisationUnitService orguitService )
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
-        this.orguitService = orguitService;
+        this.organisationUnitService = organisationUnitService;
     }
 
-    private OrganisationUnitSelectionManager orgunitSelectionManager;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setOrgunitSelectionManager( OrganisationUnitSelectionManager orgunitSelectionManager )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.orgunitSelectionManager = orgunitSelectionManager;
+        this.selectionManager = selectionManager;
     }
 
     // --------------------------------------------------------------------------
-    // Setter
+    // Input
     // --------------------------------------------------------------------------
 
-    private String orgunitcode;
+    private String code;
 
-    public void setOrgunitcode( String orgunitcode )
+    public void setCode( String code )
     {
-        this.orgunitcode = orgunitcode;
+        this.code = code;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
     }
 
     // --------------------------------------------------------------------------
@@ -78,16 +85,19 @@ public class GetOrganisationUnitByCodeAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit orgunit = orguitService.getOrganisationUnitByCode( orgunitcode );
-
-        if ( orgunit != null )
+        message = "";
+        
+        OrganisationUnit unit = organisationUnitService.getOrganisationUnitByCode( code );
+        
+        if ( unit != null )
         {
-            orgunitSelectionManager.setSelectedOrganisationUnit( orgunit );
+            message = unit.getId() + "";
+            
+            selectionManager.setSelectedOrganisationUnit( unit );
             
             return SUCCESS;
         }
-        
+
         return INPUT;
     }
-
 }

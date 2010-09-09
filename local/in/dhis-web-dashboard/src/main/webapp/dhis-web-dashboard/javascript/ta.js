@@ -1,3 +1,37 @@
+function getOrgUnitGroups()
+{
+	var ouLevelId = document.getElementById( "orgUnitLevelCB" );
+
+	clearList( ouLevelId );
+  
+	for(var i=0; i < orgUnitGroupIds.length; i++)
+	{
+            
+            var option = document.createElement("option");
+            option.value = orgUnitGroupIds[i];
+            option.text = orgUnitGroupNames[i];
+            option.title = orgUnitGroupNames[i];
+            ouLevelId.add(option, null);
+	}
+}
+
+function ouradioSelection( evt )
+{
+	var ouSelCBId = document.getElementById( "ouSelCB" );
+	if( ouSelCBId.checked )
+	{
+		return;
+	}
+
+	
+	var excelItems = byId('ouRadio');
+	if(excelItems.checked && excelItems.getAttribute('value') == "orgUnitGroupRadio"){
+		getOrgUnitGroups();
+	}else
+	{
+		ouSelCBChange();
+	}
+}
 
 function ouSelCBChange()
 {
@@ -7,20 +41,18 @@ function ouSelCBChange()
 	
     if( ouSelCBId.checked )
     {
-        //alert("ouSelCBId.checked = "+ouSelCBId.checked);
-        ouListCDId.disabled = false;
+        $('#orgUnitListCB').removeAttr('disabled');
 		
         clearList( ouLevelId );
-        ouLevelId.disabled = true;
-        document.getElementById("ViewReport").disabled = false;
+         $("#orgUnitLevelCB").attr("disabled", "disabled");
+        $('#ViewReport').removeAttr('disabled');
     }
     else
     {
-        //alert("ouSelCBId.checked = "+ouSelCBId.checked);
-        ouLevelId.disabled = false;
-		
+	$('#orgUnitLevelCB').removeAttr('disabled');
         clearList( ouListCDId );
-        ouListCDId.disabled = true;
+        $("#orgUnitListCB").attr("disabled", "disabled");
+        
     }
 	
     if( selOrgUnitId != null && selOrgUnitId != "NONE" && selOrgUnitId != "")
@@ -181,7 +213,7 @@ function getDataElements()
     
     if ( dataElementGroupId != null )
     {
-        //var url = "getDataElementsForTA.action?id=" + dataElementGroupId + "&deOptionValue=" + deOptionValue;
+        /* //var url = "getDataElementsForTA.action?id=" + dataElementGroupId + "&deOptionValue=" + deOptionValue;
         var request = new Request();
         request.setResponseTypeXML('dataElement');
         request.setCallbackSuccess(getDataElementsReceived);
@@ -190,7 +222,17 @@ function getDataElements()
         var requestString = "getDataElementsForTA.action";
         var params = "id=" + dataElementGroupId + "&deOptionValue=" + deOptionValue;
         request.sendAsPost( params );
-        request.send( requestString );
+        request.send( requestString ); */
+		
+		$.post("getDataElementsForTA.action",
+		{
+			id:dataElementGroupId,
+			deOptionValue:deOptionValue
+		},
+		function (data)
+		{
+			getDataElementsReceived(data);
+		},'xml');
     }
 }// getDataElements end           
 
@@ -226,7 +268,7 @@ function getIndicators()
 	
     if ( indicatorGroupId != null )
     {
-        //var url = "getIndicators.action?id=" + indicatorGroupId;
+        /* //var url = "getIndicators.action?id=" + indicatorGroupId;
 		
         var request = new Request();
         request.setResponseTypeXML( 'indicator' );
@@ -236,7 +278,16 @@ function getIndicators()
         var requestString = "getIndicators.action";
         var params = "id=" + indicatorGroupId;
         request.sendAsPost( params );
-        request.send( requestString );
+        request.send( requestString ); */
+		
+		$.post("getIndicators.action",
+		{
+			id:indicatorGroupId
+		},
+		function (data)
+		{
+			getIndicatorsReceived(data);
+		},'xml');
     }
 }
 
@@ -362,7 +413,7 @@ function getPeriodsReceived( xmlObject )
 
 function getOUDeatilsForTA( orgUnitIds )
 {
-    //var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds+"&type=ta";
+    /* //var url = "getOrgUnitDetails.action?orgUnitId=" + orgUnitIds+"&type=ta";
 	
     var request = new Request();
     request.setResponseTypeXML( 'orgunit' );
@@ -372,7 +423,17 @@ function getOUDeatilsForTA( orgUnitIds )
     var requestString = "getOrgUnitDetails.action";
     var params = "orgUnitId=" + orgUnitIds+"&type=ta";
     request.sendAsPost( params );
-    request.send( requestString );
+    request.send( requestString ); */
+	
+	$.post("getOrgUnitDetails.action",
+		{
+			orgUnitId:orgUnitIds,
+			type:"ta"
+		},
+		function (data)
+		{
+			getOUDetailsForTARecevied(data);
+		},'xml');
 }
 
 function getOUDetailsForTARecevied(xmlObject)
@@ -411,8 +472,16 @@ function getOUDetailsForTARecevied(xmlObject)
             clearList( ouListCDId );
     		
             ouListCDId.options[ouListCDId.options.length] = new Option(orgUnitName,id,false,false);
-    		
-            getorgUnitLevels( ouLevel, maxOULevel );
+            var selouRadioButton = $( "input[name='ouRadio']:checked" ).val();
+            if( selouRadioButton == "orgUnitGroupRadio" )
+            {
+		getOrgUnitGroups();
+            }
+            else
+            {
+                getorgUnitLevels( ouLevel, maxOULevel );
+            }
+            
         }
     }    		
 }
@@ -474,33 +543,33 @@ function formValidations()
     var periodTypeId = periodTypeList.options[ periodTypeList.selectedIndex ].value;
 	
     if( selectedServices.options.length <= 0 ) {
-        alert("Please select DataElement/Indicator(s)"); return false;
+        alert("Please select DataElement/Indicator(s)");return false;
     }
 	
     if( periodTypeId == yearlyPeriodTypeName )
     {
         if( yearLB.selectedIndex < 0 ) {
-            alert("Please select Year(s)"); return false;
+            alert("Please select Year(s)");return false;
         }
     }
     else
     {
         if( yearLB.selectedIndex < 0 ) {
-            alert("Please select Year(s)"); return false;
+            alert("Please select Year(s)");return false;
         }
         if( periodLB.selectedIndex < 0 ) {
-            alert("Please select Period(s)"); return false;
+            alert("Please select Period(s)");return false;
         }
     }
 	
     if( ouSelCB.checked)
     {
         if(orgUnitListCB.options.length <=0 ) {
-            alert( "Please select OrgUnit(s)" ); return false;
+            alert( "Please select OrgUnit(s)" );return false;
         }
     }
     else if( orgUnitLevelCB.selectedIndex < 0 ) {
-        alert( "Please select OrgUnitLevel" ); return false;
+        alert( "Please select OrgUnitLevel" );return false;
     }
 		
     orgUnitListCB.disabled = false;

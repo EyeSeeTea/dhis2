@@ -1,4 +1,16 @@
 
+var startDate;
+var endDate;
+var validationRuleGroupId;
+var aggregate;
+var doDataMart;
+var organisationUnitId;
+
+function organisationUnitSelected( ids )
+{
+	organisationUnitId = ids[0];
+}
+
 function validateRunValidation()
 {
 	var request = new Request();
@@ -20,11 +32,18 @@ function runValidationCompleted( messageElement )
     {
     	setWaitMessage( "Analysing data, please wait..." );
     	
-        var url = 'runValidationAction.action?startDate=' + getFieldValue( 'startDate' ) +
-        	'&endDate=' + getFieldValue( 'endDate' ) + 
-        	'&validationRuleGroupId=' + $( '#validationRuleGroupId' ).val() +
-        	'&aggregate=' + getListValue( 'aggregate' ) +
-        	'&doDataMart=' + getListValue( 'doDataMart' );
+    	startDate = getFieldValue( 'startDate' );
+    	endDate = getFieldValue( 'endDate' );
+    	validationRuleGroupId = $( '#validationRuleGroupId' ).val();
+    	aggregate = $( '#aggregate' ).val();
+    	doDataMart = $( '#doDataMart' ).val();
+    	
+        var url = 'runValidationAction.action?organisationUnitId=' + organisationUnitId +
+        	'&startDate=' + startDate  +
+        	'&endDate=' + endDate + 
+        	'&validationRuleGroupId=' + validationRuleGroupId +
+        	'&aggregate=' + aggregate +
+        	'&doDataMart=' + doDataMart;
         	
 		$.get( url, function( data ) {
 			$( "div#analysisInput" ).hide();
@@ -39,9 +58,26 @@ function runValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        setMessage( message );
     }
+}
+
+function drillDownValidation( orgUnitId )
+{
+	setHeaderWaitMessage( i18n_analysing_please_wait );
+	
+    var url = 'runValidationAction.action?organisationUnitId=' + orgUnitId +
+    	'&startDate=' + startDate  +
+    	'&endDate=' + endDate + 
+    	'&validationRuleGroupId=' + validationRuleGroupId +
+    	'&aggregate=' + aggregate +
+    	'&doDataMart=' + doDataMart;
+        	
+		$.get( url, function( data ) {
+			hideHeaderMessage();
+			$( "div#analysisResult" ).html( data );
+			pageInit();
+		} );
 }
 
 function viewValidationResultDetails( validationRuleId, sourceId, periodId )
@@ -68,4 +104,23 @@ function aggregateChanged()
 		$( 'span#info' ).html( i18n_captured_data_info );
 		$( '#doDataMart' ).attr( 'disabled', 'disabled' );
 	}
+}
+
+function showAggregateResults()
+{
+	$( 'div#validationResults' ).hide();
+	$( 'div#aggregateResults' ).show();	
+	var button = document.getElementById( "resultTypeButton" );
+	button.onclick = function() { showValidationResults(); };
+	button.value = "See validation";
+}
+
+function showValidationResults()
+{
+	$( 'div#aggregateResults' ).hide();
+	$( 'div#validationResults' ).show();
+	
+	var button = document.getElementById( "resultTypeButton" );
+	button.onclick = function() { showAggregateResults(); };
+	button.value = "See statistics";
 }

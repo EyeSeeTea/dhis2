@@ -63,6 +63,12 @@ public class Counter<T>
     
     public Integer getCount( T key )
     {
-        return map != null ? map.get( key ) : null;
+        return map != null && map.containsKey( key ) ? map.get( key ) : 0;
+    }
+ 
+    @Override
+    public String toString()
+    {
+        return "[" + map.toString() + "]";
     }
 }

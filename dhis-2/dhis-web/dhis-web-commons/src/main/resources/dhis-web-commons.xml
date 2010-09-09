@@ -211,15 +211,14 @@
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		
-		<action name="setOrgunitByCode"
+		<action name="getOrganisationUnitByCode"
 			class="org.hisp.dhis.ouwt.action.GetOrganisationUnitByCodeAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-commons/ouwt/responseSelect.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-commons/ouwt/responseInput.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="input" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseInput.vm</result>
 		</action>
-
+		
 	</package>
 
 	<!-- Menu -->
@@ -514,6 +513,21 @@
 				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
+		
+		<action name="getOrganisationUnitLevels"
+			class="org.hisp.dhis.commons.action.GetOrganisationUnitLevelsAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonOrganisationUnitLevels.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+		
+		<action name="getOrganisationUnitGroups"
+			class="org.hisp.dhis.commons.action.GetOrganisationUnitGroupsAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonOrganisationUnitGroups.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+				
 
 	</package>
 

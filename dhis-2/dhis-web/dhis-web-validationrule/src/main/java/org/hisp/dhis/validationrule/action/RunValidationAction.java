@@ -27,6 +27,8 @@ package org.hisp.dhis.validationrule.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,12 +37,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.util.SessionUtils;
@@ -50,8 +52,6 @@ import org.hisp.dhis.validation.ValidationRuleService;
 import org.hisp.dhis.validation.comparator.ValidationResultComparator;
 
 import com.opensymphony.xwork2.ActionSupport;
-
-import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 
 /**
  * @author Margrethe Store
@@ -83,13 +83,6 @@ public class RunValidationAction
         this.format = format;
     }
 
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -110,10 +103,17 @@ public class RunValidationAction
     {
         this.periodService = periodService;
     }
-
+    
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
+
+    private Integer organisationUnitId;
+    
+    public void setOrganisationUnitId( Integer organisationUnitId )
+    {
+        this.organisationUnitId = organisationUnitId;
+    }
 
     private String startDate;
 
@@ -153,6 +153,13 @@ public class RunValidationAction
         return validationResults;
     }
     
+    private Grid aggregateResults;
+
+    public Grid getAggregateResults()
+    {
+        return aggregateResults;
+    }
+
     private boolean aggregate;
 
     public boolean isAggregate()
@@ -178,17 +185,20 @@ public class RunValidationAction
 
     public String execute()
     {
-        OrganisationUnit unit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
-
+        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+        
         if ( aggregate ) // Aggregate data source
         {
-            Collection<OrganisationUnit> organisationUnits = unit.getChildren();
+            List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( unit.getChildren() );
 
+            List<Period> periods = new ArrayList<Period>( periodService.namePeriods( 
+                periodService.getPeriodsBetweenDates( format.parseDate( startDate ), format.parseDate( endDate ) ), format ) );
+            
+            log.info( "Number of periods: " + periods.size() + ", number of organisation units: " + organisationUnits.size() );
+            
             if ( doDataMart )
             {
                 log.info( "Generating datamart" );
-                
-                Collection<Period> periods = periodService.getPeriodsBetweenDates( format.parseDate( startDate ), format.parseDate( endDate ) );
                 
                 Collection<DataElement> dataElements = validationRuleService.getDataElementsInValidationRules();
                 
@@ -212,6 +222,8 @@ public class RunValidationAction
                 validationResults = new ArrayList<ValidationResult>( validationRuleService.validateAggregate( format
                     .parseDate( startDate ), format.parseDate( endDate ), organisationUnits, group ) );
             }
+            
+            aggregateResults = validationRuleService.getAggregateValidationResult( validationResults, periods, organisationUnits );
         }
         else // Captured data source
         {
