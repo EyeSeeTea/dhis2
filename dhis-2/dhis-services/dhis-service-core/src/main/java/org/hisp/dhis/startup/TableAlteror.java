@@ -89,7 +89,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE section DROP COLUMN label" );
         executeSql( "ALTER TABLE section DROP COLUMN title;" );
         executeSql( "ALTER TABLE organisationunit DROP COLUMN polygoncoordinates" );
-        executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptname" );
+        executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptName" );
 
         // remove relative period type
         executeSql( "DELETE FROM period WHERE periodtypeid=(select periodtypeid from periodtype where name='Relative')" );
