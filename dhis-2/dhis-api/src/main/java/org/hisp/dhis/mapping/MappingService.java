@@ -380,6 +380,8 @@ public interface MappingService
     Collection<MapLegendSet> getMapLegendSetsByType( String type );
 
     MapLegendSet getMapLegendSetByIndicator( int indicatorId );
+    
+    MapLegendSet getMapLegendSetByDataElement( int dataElementId );
 
     Collection<MapLegendSet> getAllMapLegendSets();
 
