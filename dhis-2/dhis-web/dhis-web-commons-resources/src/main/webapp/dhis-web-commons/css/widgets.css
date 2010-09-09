@@ -217,11 +217,10 @@ div#selectionTree
 {
   font-size: 9pt; /* <-- Size to change */
   background-color: white;
-  height: 200px;
-  width:30em;
-  height:30em;
+  height: 300px;
+  width:595px;  
   overflow:auto;
-  border:1px solid #cccccc;
+  border:1px solid #cccccc;   
 }
 
 div#selectionTree ul 
@@ -766,7 +765,7 @@ span.valid {
 	background-position: left bottom;
 	background-repeat: repeat-x;
 	
-	font-size: 18px;
+	
 	font-weight: bold;
 	color: #3f4855;
 	text-shadow: 0 1px 1px #fff;
@@ -811,6 +810,8 @@ span.valid {
 	-webkit-box-shadow: #f6f7f9 0 1px 1px;
 	-moz-box-shadow: #f6f7f9 0 1px 1px;
 	box-shadow: #f6f7f9 0 1px 1px;		
+	margin-right:5px;
+	margin-bottom: 2px;
 }
 	
 	

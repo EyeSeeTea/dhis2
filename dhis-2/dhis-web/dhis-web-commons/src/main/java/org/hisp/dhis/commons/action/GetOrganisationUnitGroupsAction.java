@@ -1,4 +1,14 @@
-package org.hisp.dhis.oum.action.organisationunitgroup.select;
+package org.hisp.dhis.commons.action;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupNameComparator;
+
+import com.opensymphony.xwork2.Action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,38 +36,44 @@ package org.hisp.dhis.oum.action.organisationunitgroup.select;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
-
-import com.opensymphony.xwork2.Action;
-
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Tran Thanh Tri
  */
-public class UnselectAllAction
-implements Action
+public class GetOrganisationUnitGroupsAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SelectionTreeManager selectionTreeManager;
+    private OrganisationUnitGroupService organisationUnitGroupService;
 
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
-        this.selectionTreeManager = selectionTreeManager;
+        this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
     // -------------------------------------------------------------------------
-    // Action
+    // Output
     // -------------------------------------------------------------------------
 
+    private List<OrganisationUnitGroup> organisationUnitGroups;
+
+    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
+    {
+        return organisationUnitGroups;
+    }
+
+    @Override
     public String execute()
         throws Exception
     {
-        selectionTreeManager.clearSelectedOrganisationUnits();
-        
+        organisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService
+            .getAllOrganisationUnitGroups() );
+
+        Collections.sort( organisationUnitGroups, new OrganisationUnitGroupNameComparator() );
+
         return SUCCESS;
-    }   
+    }
+
 }

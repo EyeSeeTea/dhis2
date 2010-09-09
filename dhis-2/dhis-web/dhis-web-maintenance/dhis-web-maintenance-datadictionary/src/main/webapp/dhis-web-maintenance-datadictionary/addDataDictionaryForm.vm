@@ -1,5 +1,4 @@
 <script>
-
 	jQuery(document).ready(	function(){
 		validation( 'addDataDictionaryForm', function( form ){ form.submit()}, function(){
 			listValidator( 'memberValidator', 'selectedDataElements' );
@@ -9,7 +8,6 @@
 		checkValueIsExist( "name", "validateDataDictionary.action");
 			
 	});
-
 </script>
 
 

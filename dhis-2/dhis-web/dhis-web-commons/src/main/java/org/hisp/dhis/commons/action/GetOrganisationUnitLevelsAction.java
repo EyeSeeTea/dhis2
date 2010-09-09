@@ -1,4 +1,4 @@
-package org.hisp.dhis.oum.action.organisationunitgroup.select;
+package org.hisp.dhis.commons.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,68 +27,51 @@ package org.hisp.dhis.oum.action.organisationunitgroup.select;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Tran Thanh Tri
  */
-public class UnselectOrganisationUnitGroupAction
+public class GetOrganisationUnitLevelsAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SelectionTreeManager selectionTreeManager;
+    private OrganisationUnitService organisationUnitService;
 
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
-        this.selectionTreeManager = selectionTreeManager;
+        this.organisationUnitService = organisationUnitService;
     }
 
-    private OrganisationUnitGroupService organisationUnitGroupService;
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
+    private List<OrganisationUnitLevel> organisationUnitLevels;
+
+    public List<OrganisationUnitLevel> getOrganisationUnitLevels()
     {
-        this.organisationUnitGroupService = organisationUnitGroupService;
+        return organisationUnitLevels;
     }
-    
-    // -------------------------------------------------------------------------
-    // Input & output
-    // -------------------------------------------------------------------------
 
-    private Integer organisationUnitGroupId;
-
-    public void setOrganisationUnitGroupId( Integer organisationUnitGroupId )
-    {
-        this.organisationUnitGroupId = organisationUnitGroupId;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Action
-    // -------------------------------------------------------------------------
-
+    @Override
     public String execute()
+        throws Exception
     {
-        OrganisationUnitGroup group = organisationUnitGroupService.getOrganisationUnitGroup( organisationUnitGroupId );
-        
-        if ( group != null )
-        {
-            Collection<OrganisationUnit> units = selectionTreeManager.getSelectedOrganisationUnits();
-            
-            units.removeAll( group.getMembers() );
-            
-            selectionTreeManager.setSelectedOrganisationUnits( units );
-        }
-        
+        organisationUnitLevels = new ArrayList<OrganisationUnitLevel>( organisationUnitService
+            .getOrganisationUnitLevels() );
+
         return SUCCESS;
     }
+
 }

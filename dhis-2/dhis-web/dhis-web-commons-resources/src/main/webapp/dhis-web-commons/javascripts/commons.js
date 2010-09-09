@@ -779,11 +779,11 @@ function datePicker( id )
 		dayNamesMin: dayNamesMin,
 		showOn: 'both',
 		buttonImage: '../images/calendar.png',
-		buttonImageOnly: true		
+		buttonImageOnly: true,
+		constrainInput: true		
 	});
 	s = jQuery("#" + id );		
-	if( s.val()=='' ) s.val( getCurrentDate() );	
-	s.keypress(function(event) {return;});
+	if( s.val()=='' ) s.val( getCurrentDate() );		
 }
 
 /**
@@ -802,12 +802,12 @@ function datePickerValid( id )
 		showOn: 'both',
 		buttonImage: '../images/calendar.png',
 		buttonImageOnly: true,
-		maxDate: '+0d +0w'
+		maxDate: '+0d +0w',
+		constrainInput: true
 	});
 	
 	s = jQuery("#" + id );		
-	if( s.val()=='' ) s.val( getCurrentDate() );	
-	s.keypress(function(event) {return;});
+	if( s.val()=='' ) s.val( getCurrentDate() );		
 }
 
 
@@ -817,8 +817,16 @@ function datePickerValid( id )
  * @param enddate the id of input filed which you want enter end date *
  */
 
-function datePickerInRange ( startdate, enddate )
+function datePickerInRange ( startdate, enddate, setCurrentStartDate, setCurrentEndDate )
 {
+	if( setCurrentStartDate == undefined ) setCurrentStartDate = true;
+	if( setCurrentEndDate == undefined ) setCurrentEndDate = true;
+	
+	s = jQuery("#" + startdate );
+	e = jQuery("#" + enddate );
+	if( setCurrentStartDate && s.val()=='') s.val( getCurrentDate() );	
+	if( setCurrentEndDate && e.val()=='' ) e.val( getCurrentDate() );
+
 	var dates = $('#'+startdate+', #' + enddate).datepicker(
 	{
 		dateFormat:dateFormat,
@@ -838,16 +846,12 @@ function datePickerInRange ( startdate, enddate )
 			var instance = $(this).data("datepicker");
 			var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
 			dates.not(this).datepicker("option", option, date);
-		}
+		},
+		constrainInput: true
+		
 	});
-	s = jQuery("#" + startdate );
-	e = jQuery("#" + enddate );
 	
-	if( s.val()=='' ) s.val( getCurrentDate() );
-	if( e.val()=='' ) e.val( getCurrentDate() );	
 	
-	e.keypress(function(event) {return;});
-	s.keypress(function(event) {return;});
 
 }
 

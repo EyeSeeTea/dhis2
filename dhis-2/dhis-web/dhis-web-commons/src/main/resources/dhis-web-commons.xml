@@ -513,6 +513,21 @@
 				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
+		
+		<action name="getOrganisationUnitLevels"
+			class="org.hisp.dhis.commons.action.GetOrganisationUnitLevelsAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonOrganisationUnitLevels.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+		
+		<action name="getOrganisationUnitGroups"
+			class="org.hisp.dhis.commons.action.GetOrganisationUnitGroupsAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonOrganisationUnitGroups.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
+		</action>
+				
 
 	</package>
 
