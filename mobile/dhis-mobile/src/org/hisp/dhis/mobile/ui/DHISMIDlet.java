@@ -1392,7 +1392,8 @@ public class DHISMIDlet
                     if ( dataValueTable.get( String.valueOf( de.getId() ) ) != null )
                     {
                         Date date = new Date();
-                        date.setTime( Long.parseLong( (String) dataValueTable.get( String.valueOf( de.getId() ) ) ) );
+                        date.setTime( Long.parseLong( ((DataValue) dataValueTable.get( String.valueOf( de.getId() ) ))
+                            .getValue() ) );
                         dateField.setDate( date );
                         System.out.println( "Date in db is: " + date.toString() );
                     }
@@ -1404,7 +1405,8 @@ public class DHISMIDlet
                     TextField intField = new TextField( de.getName(), "", 32, TextField.NUMERIC );
                     if ( dataValueTable.get( String.valueOf( de.getId() ) ) != null )
                     {
-                        intField.setString( (String) dataValueTable.get( String.valueOf( de.getId() ) ) );
+                        intField
+                            .setString( ((DataValue) dataValueTable.get( String.valueOf( de.getId() ) )).getValue() );
                     }
                     form.append( intField );
                     formElements.put( de, intField );
@@ -1414,7 +1416,8 @@ public class DHISMIDlet
                     TextField txtField = new TextField( de.getName(), "", 32, TextField.ANY );
                     if ( dataValueTable.get( String.valueOf( de.getId() ) ) != null )
                     {
-                        txtField.setString( (String) dataValueTable.get( String.valueOf( de.getId() ) ) );
+                        txtField
+                            .setString( ((DataValue) dataValueTable.get( String.valueOf( de.getId() ) )).getValue() );
                     }
                     form.append( txtField );
                     formElements.put( de, txtField );
@@ -1439,20 +1442,21 @@ public class DHISMIDlet
     public void sendRecordedData()
     {
         // Need more test
-        
-        // try
-        // {
-        // this.saveDataValueToRMS();
-        // }
-        // catch ( Exception e )
-        // {
-        // System.out.println(e.getMessage());
-        // }
-        // DataValueUploadManager uploadManager = new DataValueUploadManager(
-        // dataValueTable,
-        // "http://localhost:8080/dhis-web-api/importDataValue.action", orgUnit,
-        // user );
-        // uploadManager.start();
+        try
+        {
+            this.saveDataValueToRMS();
+        }
+        catch ( Exception e )
+        {
+            System.out.println( e.getMessage() );
+        }
+        // If you are running Apache Tomcat, use the URL
+        // http://localhost:8080/dhis-web-api/dhis-web-api/importDataValue.action
+        // Otherwise, use http://localhost:8080/dhis-web-api/importDataValue.action for Jetty
+        DataValueUploadManager uploadManager = new DataValueUploadManager( this, dataValueTable,
+            "http://localhost:8080/dhis-web-api/importDataValue.action", orgUnit, user );
+        this.switchDisplayable( null, this.getWaitForm( "Please wait", "Uploading..." ) );
+        uploadManager.start();
 
     }
 

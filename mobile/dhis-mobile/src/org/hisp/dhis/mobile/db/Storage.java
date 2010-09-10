@@ -192,7 +192,7 @@ public class Storage
                 DataValue dataValue = DataValue.recordToDataValue( re.nextRecord() );
                 if ( dataValue.getProgramInstanceId() == activity.getTask().getProgStageInstId() )
                 {
-                    dataValuesTable.put( String.valueOf( dataValue.getDataElementId() ), dataValue.getValue() );
+                    dataValuesTable.put( String.valueOf( dataValue.getDataElementId() ), dataValue );
                 }
             }
             re = null;
