@@ -6,7 +6,7 @@
         <xs:complexType name="ConfigType">
             <xs:sequence>
                 <xs:element name="LocaleLanguage" type="xs:string" default="en" />
-                <xs:element name="LocaleCountry" type="xs:string" default="GB" />
+                <xs:element name="LocaleCountry" type="xs:string" default="" />
                 <xs:element name="Port" type="xs:int" default="8080" />
                 <xs:element name="Host" type="xs:string" default="localhost" />
                 <xs:element name="PreferredBrowser" type="xs:string" default="" />

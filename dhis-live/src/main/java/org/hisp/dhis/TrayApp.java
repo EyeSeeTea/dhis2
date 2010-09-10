@@ -31,12 +31,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import java.io.*;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -81,7 +77,7 @@ public class TrayApp
     // the configuration
     private ConfigType config;
 
-    private static ResourceBundle messages = ResourceBundle.getBundle( "messages", Locale.getDefault() );
+    private static LiveMessagingService messageService = new LiveMessagingService();
 
     private static TrayApp instance;
 
@@ -103,18 +99,13 @@ public class TrayApp
     // -------------------------------------------------------------------------
     public static void main( String[] args )
     {
-        Locale[] supportedLocales =
-        {
-            Locale.FRENCH,
-            Locale.GERMAN,
-            Locale.ENGLISH
-        };
+
 
 
         log.info( "Environment variable DHIS2_HOME: " + System.getenv( "DHIS2_HOME" ) );
         if ( !SystemTray.isSupported() )
         {
-            JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.unsupportedPlatform" ) );
+            JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.unsupportedPlatform" ) );
             System.exit( 0 );
         } else
         {
@@ -125,7 +116,7 @@ public class TrayApp
             } catch ( Exception ex )
             {
                 log.fatal( "TrayApp Initialization failure", ex );
-                JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.initFailure" ) );
+                JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.initFailure" ) );
                 System.exit( 0 );
             }
         }
@@ -157,7 +148,7 @@ public class TrayApp
             if ( installDir == null )
             {
                 log.fatal( "Neither DHIS Live Jar nor DHIS2_HOME could be found." );
-                JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.initFailure" ) );
+                JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.initFailure" ) );
                 System.exit( 0 );
             } else
             {
@@ -199,10 +190,14 @@ public class TrayApp
         Image image = createImage( STOPPED_ICON, "tray icon" );
 
         PopupMenu popup = new PopupMenu();
-        MenuItem openItem = new MenuItem( messages.getString( "CMD_OPEN" ) );
-        MenuItem databaseItem = new MenuItem( messages.getString( "CMD_DATABASE" ) );
-        MenuItem settingsItem = new MenuItem( messages.getString( "CMD_SETTINGS" ) );
-        MenuItem exitItem = new MenuItem( messages.getString( "CMD_EXIT" ) );
+        MenuItem openItem = new MenuItem( messageService.getString( "CMD_OPEN" ) );
+        openItem.setActionCommand("open");
+        MenuItem databaseItem = new MenuItem( messageService.getString( "CMD_DATABASE" ) );
+        databaseItem.setActionCommand("db");
+        MenuItem settingsItem = new MenuItem( messageService.getString( "CMD_SETTINGS" ) );
+        settingsItem.setActionCommand("settings");
+        MenuItem exitItem = new MenuItem( messageService.getString( "CMD_EXIT" ) );
+        exitItem.setActionCommand("exit");
 
         popup.add( openItem );
         popup.add( databaseItem );
@@ -219,13 +214,13 @@ public class TrayApp
             {
                 String cmd = e.getActionCommand();
 
-                if ( cmd.equals( messages.getString( "CMD_OPEN" ) ) )
+                if ( cmd.equals( "open" ) )
                 {
                     launchBrowser();
 
                 } else
                 {
-                    if ( cmd.equals( messages.getString( "CMD_EXIT" ) ) )
+                    if ( cmd.equals( "exit" )  )
                     {
                         shutdown();
                     } 
@@ -262,16 +257,16 @@ public class TrayApp
     {
         log.warn( "Lifecycle: server failed" );
         trayIcon.setImage( createImage( FAILED_ICON, "Running icon" ) );
-        JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.webserverFailure" ) );
+        JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.webserverFailure" ) );
         shutdown();
     }
 
     public void lifeCycleStarted( LifeCycle arg0 )
     {
         log.info( "Lifecycle: server started" );
-        trayIcon.displayMessage( messages.getString( "notification.started" ), messages.getString( "notification.startedDetails" ) + " " + getUrl() + ".",
+        trayIcon.displayMessage( messageService.getString( "notification.started" ), messageService.getString( "notification.startedDetails" ) + " " + getUrl() + ".",
             TrayIcon.MessageType.INFO );
-        trayIcon.setToolTip( messages.getString( "tooltip.running" ) );
+        trayIcon.setToolTip( messageService.getString( "tooltip.running" ) );
         trayIcon.setImage( createImage( RUNNING_ICON, "Running icon" ) );
         launchBrowser();
 
@@ -280,14 +275,14 @@ public class TrayApp
     public void lifeCycleStarting( LifeCycle arg0 )
     {
         log.info( "Lifecycle: server starting" );
-        trayIcon.displayMessage( messages.getString( "notification.starting" ), messages.getString( "notification.startingDetails" ), TrayIcon.MessageType.INFO );
+        trayIcon.displayMessage( messageService.getString( "notification.starting" ), messageService.getString( "notification.startingDetails" ), TrayIcon.MessageType.INFO );
         trayIcon.setImage( createImage( STARTING_ICON, "Starting icon" ) );
     }
 
     public void lifeCycleStopped( LifeCycle arg0 )
     {
         log.info( "Lifecycle: server stopped" );
-        trayIcon.displayMessage( messages.getString( "notification.stopped" ), messages.getString( "notification.stoppedDetails" ), TrayIcon.MessageType.INFO );
+        trayIcon.displayMessage( messageService.getString( "notification.stopped" ), messageService.getString( "notification.stoppedDetails" ), TrayIcon.MessageType.INFO );
         trayIcon.setImage( createImage( STOPPED_ICON, "Running icon" ) );
     }
 
@@ -511,4 +506,15 @@ public class TrayApp
             log.error( "Error serializing config to file", ex );
         }
     }
+  /*      private static ResourceBundle messageService
+    {
+        ResourceBundle rb;
+
+        String currentCountry = TrayApp.getInstance().getConfig().getLocaleCountry();
+        String currentLanguage= TrayApp.getInstance().getConfig().getLocaleLanguage();
+        Locale currentLocale = new Locale (currentCountry,currentLanguage);
+        rb = ResourceBundle.getBundle("messages",currentLocale);
+        return rb;
+    }
+   */
 }
