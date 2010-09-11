@@ -13,20 +13,20 @@
     <DatabaseConnections selected="conn1">
         <Connection ID="conn1">
             <Name>DHIS2 demo database</Name>
-            <Type>H2</Type>
+            <Type>h2</Type>
             <URL>jdbc:h2:./database/demo;AUTO_SERVER=TRUE</URL>
             <UserName>sa</UserName>
         </Connection>
         <Connection ID="conn2">
             <Name>Postgresql example</Name>
-            <Type>Postgresql</Type>
+            <Type>postgres</Type>
             <URL>jdbc:postgresql://localhost/demo</URL>
             <UserName>dhis</UserName>
             <Password>dhis</Password>
         </Connection>
         <Connection ID="conn3">
             <Name>Mysql example</Name>
-            <Type>Postgresql</Type>
+            <Type>mysql</Type>
             <URL>jdbc:mysql://localhost/demo</URL>
             <UserName>dhis</UserName>
             <Password>dhis</Password>

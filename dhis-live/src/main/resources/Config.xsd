@@ -20,9 +20,9 @@
                                         <xs:element name="Type"> 
                                             <xs:simpleType>
                                                 <xs:restriction base="xs:string">
-                                                    <xs:enumeration value="H2"/>
-                                                    <xs:enumeration value="Postgresql"/>
-                                                    <xs:enumeration value="Mysql"/>
+                                                    <xs:enumeration value="h2"/>
+                                                    <xs:enumeration value="postgres"/>
+                                                    <xs:enumeration value="mysql"/>
                                                 </xs:restriction>
                                             </xs:simpleType>
                                         </xs:element>

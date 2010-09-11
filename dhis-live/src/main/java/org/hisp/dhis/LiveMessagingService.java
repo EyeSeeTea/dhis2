@@ -1,5 +1,5 @@
 /*
-*
+ *
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
@@ -25,82 +25,76 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.hisp.dhis;
+
+
 import java.util.Locale;
 import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-
 
 /**
  *
  * @author Jason P. Pickering
  */
 public class LiveMessagingService
-
 {
-    
-    private static final Log log = LogFactory.getLog(TrayApp.class);
+
+    private static final Log log = LogFactory.getLog( TrayApp.class );
 
     private static final String defaultLanguage = "en";
-    private static final String defaultCountry =  "GB";
 
+    private static final String defaultCountry = "GB";
 
-
-     private ResourceBundle getMessageBundle()
+    private ResourceBundle getMessageBundle()
     {
         ResourceBundle messages;
-        String currentLanguage= TrayApp.getInstance().getConfig().getLocaleLanguage();
+        String currentLanguage = TrayApp.getInstance().getConfig().getLocaleLanguage();
         String currentCountry = TrayApp.getInstance().getConfig().getLocaleCountry();
-        Locale currentLocale = new Locale (currentLanguage,currentCountry);
-        log.debug("Current locale set to " + currentLocale.toString());
+        Locale currentLocale = new Locale( currentLanguage, currentCountry );
+        log.debug( "Current locale set to " + currentLocale.toString() );
         try
         {
-            messages = ResourceBundle.getBundle("messages",currentLocale);
-        }
-        catch (Exception e)
-            {
+            messages = ResourceBundle.getBundle( "messages", currentLocale );
+        } catch ( Exception e )
+        {
             //problem loading the desired resource bundle
             //fall back to default
-            log.error("The desired resource bundle could not be loaded.Usig default");
-            currentLocale = new Locale(defaultLanguage, defaultCountry);
-            messages = ResourceBundle.getBundle("messages",currentLocale);
-            }
+            log.error( "The desired resource bundle could not be loaded.Usig default" );
+            currentLocale = new Locale( defaultLanguage, defaultCountry );
+            messages = ResourceBundle.getBundle( "messages", currentLocale );
+        }
 
         return messages;
     }
 
-    public String getString (String messageName) {
+    public String getString( String messageName )
+    {
 
         ResourceBundle messages = getMessageBundle();
 
-        String returnMessage = null ;
+        String returnMessage = null;
         if ( messageName.isEmpty() )
         {
             returnMessage = "messageName not valid";
             return returnMessage;
-        }
-        else
+        } else
         {
 
-        if ( messages.containsKey( messageName) )
-        {
-            returnMessage = messages.getString( messageName );
-
-        if (returnMessage == null)
+            if ( messages.containsKey( messageName ) )
             {
-                returnMessage = "Message not found";
-            }
+                returnMessage = messages.getString( messageName );
 
-            }
-            else
+                if ( returnMessage == null )
+                {
+                    returnMessage = "Message not found";
+                }
+
+            } else
             {
                 returnMessage = "Message key " + messageName + " not found.";
             }
-        return returnMessage;
+            return returnMessage;
+        }
     }
-   }
-
 }
