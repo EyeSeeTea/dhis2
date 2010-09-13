@@ -1663,7 +1663,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                                     for (var j = 0; j < FEATURE[thematicMap].length; j++) {
                                         var value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]];
+                                        var name = FEATURE[thematicMap][j].attributes[nameColumn];
                                         FEATURE[thematicMap][j].attributes.value = value ? parseFloat(value) : '';
+                                        FEATURE[thematicMap][j].data.id = FEATURE[thematicMap][j].attributes[nameColumn];
+                                        FEATURE[thematicMap][j].data.name = FEATURE[thematicMap][j].attributes[nameColumn];
                                         if (!FEATURE[thematicMap][j].attributes.labelString) {
                                             FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes[nameColumn];
                                             if (Ext.isNumber(FEATURE[thematicMap][j].attributes.value)) {
