@@ -3091,7 +3091,7 @@ Ext.onReady( function() {
         
         var data = [];        
         for (var i = 0; i < layer.features.length; i++) {
-            data.push([layer.features[i].data.id, layer.features[i].data.name]);
+            data.push([layer.features[i].data.id || i, layer.features[i].data.name]);
         }
         
         var featureStore = new Ext.data.ArrayStore({

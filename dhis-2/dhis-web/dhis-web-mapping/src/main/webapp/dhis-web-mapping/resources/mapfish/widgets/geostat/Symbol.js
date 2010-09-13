@@ -1661,6 +1661,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
                                         var value = mv[mour[FEATURE[thematicMap2][j].attributes[nameColumn]]];
                                         FEATURE[thematicMap2][j].attributes.value = value ? parseFloat(value) : '';
+                                        FEATURE[thematicMap2][j].data.id = FEATURE[thematicMap2][j].attributes[nameColumn];
+                                        FEATURE[thematicMap2][j].data.name = FEATURE[thematicMap2][j].attributes[nameColumn];
                                         if (!FEATURE[thematicMap2][j].attributes.labelString) {
                                             FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes[nameColumn];
                                             if (Ext.isNumber(FEATURE[thematicMap2][j].attributes.value)) {
