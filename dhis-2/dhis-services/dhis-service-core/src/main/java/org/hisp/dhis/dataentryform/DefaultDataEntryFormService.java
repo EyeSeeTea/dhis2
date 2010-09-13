@@ -168,9 +168,9 @@ public class DefaultDataEntryFormService
         return sb.toString();
     }
     
-    public void convertDataEntryForm( DataEntryForm form, Map<Object, Integer> dataElementMap, Map<Object, Integer> categoryOptionComboMap )
+    public String convertDataEntryForm( String htmlCode, Map<Object, Integer> dataElementMap, Map<Object, Integer> categoryOptionComboMap )
     {
-        Matcher inputMatcher = INPUT_PATTERN.matcher( form.getHtmlCode() );        
+        Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );        
         StringBuffer buffer = new StringBuffer();
         
         while ( inputMatcher.find() )
@@ -195,7 +195,7 @@ public class DefaultDataEntryFormService
         
         inputMatcher.appendTail( buffer );
         
-        form.setHtmlCode( buffer.toString() );
+        return buffer.toString();
     }
 
     public Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds )

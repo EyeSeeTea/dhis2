@@ -106,11 +106,9 @@ public class DataEntryFormServiceTest
         categoryOptionComboMap.put( 3, 13 );
         categoryOptionComboMap.put( 4, 14 );
         
-        DataEntryForm form = new DataEntryForm( "FormA", htmlCodeA );
+        String code = dataEntryFormService.convertDataEntryForm( htmlCodeA, dataElementMap, categoryOptionComboMap );
         
-        dataEntryFormService.convertDataEntryForm( form, dataElementMap, categoryOptionComboMap );
-        
-        assertEquals( htmlCodeB, form.getHtmlCode() );
+        assertEquals( htmlCodeB, code );
     }
     
     @Test(expected=RuntimeException.class)
@@ -119,9 +117,7 @@ public class DataEntryFormServiceTest
         Map<Object, Integer> dataElementMap = new HashMap<Object, Integer>();
         Map<Object, Integer> categoryOptionComboMap = new HashMap<Object, Integer>();
         
-        DataEntryForm form = new DataEntryForm( "FormA", htmlCodeA );
-        
-        dataEntryFormService.convertDataEntryForm( form, dataElementMap, categoryOptionComboMap );
+        dataEntryFormService.convertDataEntryForm( htmlCodeA, dataElementMap, categoryOptionComboMap );
         
         fail();
     }

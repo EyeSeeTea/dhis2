@@ -91,7 +91,18 @@ public interface DataEntryFormService
      */
     String prepareDataEntryFormCode( String preparedCode );
     
-    void convertDataEntryForm( DataEntryForm form, Map<Object, Integer> dataElementMap, Map<Object, Integer> categoryOptionComboMap );
+    /**
+     * Map the identifiers inside the HTML code according to the provided data 
+     * element identifier and category option combo identifier mappings.
+     * 
+     * @param htmlCode the HTML code.
+     * @param dataElementMap the mapping between data element identifiers to be 
+     *        converted.
+     * @param categoryOptionComboMap the mapping between category option combo
+     *        identifiers to be converted.
+     * @return the converted HTML code.
+     */
+    String convertDataEntryForm( String htmlCode, Map<Object, Integer> dataElementMap, Map<Object, Integer> categoryOptionComboMap );
     
     Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds );
     

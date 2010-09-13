@@ -92,7 +92,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DXFImportServiceTest
     extends DhisTest
 {
-
     private final int dataASize = 3;
 
     private final int dataBSize = 5;
