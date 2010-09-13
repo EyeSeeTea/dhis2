@@ -3117,7 +3117,7 @@ Ext.onReady( function() {
                         {
                             xtype: 'panel',
                             items: [
-                                { html: '<div class="window-field-label-first">Highlight color</div>' },
+                                { html: '<div class="window-field-label-first">' + i18n_highlight_color + '</div>' },
                                 {
                                     xtype: 'colorfield',
                                     labelSeparator: labelseparator,
@@ -3127,7 +3127,7 @@ Ext.onReady( function() {
                                     width: combo_width,
                                     value: "#0000FF"
                                 },
-                                { html: '<div class="window-field-label">Feature name</div>' },
+                                { html: '<div class="window-field-label">' + i18n_feature_filter + '</div>' },
                                 {
                                     xtype: 'textfield',
                                     id: 'locatefeature_tf',
@@ -3181,7 +3181,14 @@ Ext.onReady( function() {
                         }
                     ]
                 }
-            ]
+            ],
+            listeners: {
+                'close': {
+                    fn: function() {
+                        layer.redraw();
+                    }
+                }
+            }
         });                    
         
         var vectorLayerOptionsWindow = new Ext.Window({
