@@ -3498,7 +3498,7 @@ Ext.onReady( function() {
 	
 	var predefinedMapLegendSetButton = new Ext.Button({
 		iconCls: 'icon-predefinedlegendset',
-		tooltip: i18n_create_legend_sets_for_legend_type + ' "' + i18n_predefined + '"',
+		tooltip: i18n_create_predefined_legend_sets,
 		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;    
