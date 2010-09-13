@@ -92,6 +92,7 @@
                             <customProcName>false</customProcName>
                             <initialHeapSize>256MB</initialHeapSize>
                             <maxHeapSize>512MB</maxHeapSize>
+                            <maxPermSize>128MB</maxPermSize>
                             <stayAlive>false</stayAlive>
                             <manifest></manifest>
                             <icon>${basedir}/util/launch4j/favicon.ico</icon>
@@ -101,7 +102,6 @@
                             </singleInstance>
                             <jre>
                                 <minVersion>1.6.0_14</minVersion>
-                                <opt>-XX:MaxPermSize=128M</opt>
                             </jre>
                             <splash>
                                 <file>${basedir}/util/launch4j/dhis2-splash.bmp</file>
@@ -137,7 +137,6 @@
                             <jre>
                                 <path>jre6</path>
                                 <minVersion>1.6.0_14</minVersion>
-                                <opt>-XX:MaxPermSize=128M</opt>
                             </jre>
                             <splash>
                                 <file>${basedir}/util/launch4j/dhis2-splash.bmp</file>
