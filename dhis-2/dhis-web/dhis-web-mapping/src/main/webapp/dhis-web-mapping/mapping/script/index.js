@@ -3278,7 +3278,7 @@ Ext.onReady( function() {
                                             vectorLayerOptionsWindow.hide();
                                         }
                                         else {
-                                            Ext.message.msg(false, i18n_no_orgunits_loaded);
+                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>' + i18n_has_no_orgunits);
                                         }
                                     }
                                 }
