@@ -29,8 +29,10 @@ package org.hisp.dhis.dataentryform;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * @author Bharath Kumar
+ */
 public interface DataEntryFormService
 {
     String ID = DataEntryFormService.class.getName();
@@ -91,21 +93,7 @@ public interface DataEntryFormService
      */
     String prepareDataEntryFormCode( String preparedCode );
     
-    /**
-     * Map the identifiers inside the HTML code according to the provided data 
-     * element identifier and category option combo identifier mappings.
-     * 
-     * @param htmlCode the HTML code.
-     * @param dataElementMap the mapping between data element identifiers to be 
-     *        converted.
-     * @param categoryOptionComboMap the mapping between category option combo
-     *        identifiers to be converted.
-     * @return the converted HTML code.
-     */
-    String convertDataEntryForm( String htmlCode, Map<Object, Integer> dataElementMap, Map<Object, Integer> categoryOptionComboMap );
-    
     Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds );
     
-    Collection<DataEntryForm> listDisctinctDataEntryFormByDataSetIds( List<Integer> dataSetIds );
-    
+    Collection<DataEntryForm> listDisctinctDataEntryFormByDataSetIds( List<Integer> dataSetIds );    
 }
