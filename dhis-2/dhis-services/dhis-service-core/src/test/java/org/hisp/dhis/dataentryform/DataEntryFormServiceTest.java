@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataset;
+package org.hisp.dhis.dataentryform;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -31,13 +31,18 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
@@ -49,6 +54,18 @@ import org.junit.Test;
 public class DataEntryFormServiceTest
     extends DhisSpringTest
 {
+    private String htmlCodeA = 
+        "<p><table><tr valign=\"top\">" +
+        "<td align=\"center\" width=\"8%\"><p><input title=\"\" view=\"@@deshortname@@\" value=\"\" name=\"entryfield\" id=\"value[1000].value:value[3].value\" style=\"width: 4em; text-align: center;\" /></p></td>" +
+        "<td align=\"center\" width=\"4%\"><p><input title=\"\" view=\"@@deshortname@@\" value=\"\" name=\"entryfield\" id=\"value[2000].value:value[4].value\" style=\"width: 4em; text-align: center;\" /></p></td>" +
+        "</tr></table></p>";
+
+    private String htmlCodeB = 
+        "<p><table><tr valign=\"top\">" +
+        "<td align=\"center\" width=\"8%\"><p><input title=\"\" view=\"@@deshortname@@\" value=\"\" name=\"entryfield\" id=\"value[1100].value:value[13].value\" style=\"width: 4em; text-align: center;\" /></p></td>" +
+        "<td align=\"center\" width=\"4%\"><p><input title=\"\" view=\"@@deshortname@@\" value=\"\" name=\"entryfield\" id=\"value[2100].value:value[14].value\" style=\"width: 4em; text-align: center;\" /></p></td>" +
+        "</tr></table></p>";
+    
     private PeriodStore periodStore;
 
     private DataSetService dataSetService;
@@ -78,6 +95,37 @@ public class DataEntryFormServiceTest
     // DataEntryForm
     // -------------------------------------------------------------------------
 
+    @Test
+    public void testConvertDataEntryForm()
+    {
+        Map<Object, Integer> dataElementMap = new HashMap<Object, Integer>();
+        Map<Object, Integer> categoryOptionComboMap = new HashMap<Object, Integer>();
+        
+        dataElementMap.put( 1000, 1100 );
+        dataElementMap.put( 2000, 2100 );
+        categoryOptionComboMap.put( 3, 13 );
+        categoryOptionComboMap.put( 4, 14 );
+        
+        DataEntryForm form = new DataEntryForm( "FormA", htmlCodeA );
+        
+        dataEntryFormService.convertDataEntryForm( form, dataElementMap, categoryOptionComboMap );
+        
+        assertEquals( htmlCodeB, form.getHtmlCode() );
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testConvertDataEntryFormInvalid()
+    {
+        Map<Object, Integer> dataElementMap = new HashMap<Object, Integer>();
+        Map<Object, Integer> categoryOptionComboMap = new HashMap<Object, Integer>();
+        
+        DataEntryForm form = new DataEntryForm( "FormA", htmlCodeA );
+        
+        dataEntryFormService.convertDataEntryForm( form, dataElementMap, categoryOptionComboMap );
+        
+        fail();
+    }
+    
     @Test
     public void testAddDataEntryForm()
     {

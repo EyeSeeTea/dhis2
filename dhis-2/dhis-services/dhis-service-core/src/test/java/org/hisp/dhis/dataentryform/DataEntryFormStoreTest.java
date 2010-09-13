@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataset;
+package org.hisp.dhis.dataentryform;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -37,6 +37,8 @@ import java.util.Collection;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormStore;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
@@ -50,7 +52,7 @@ public class DataEntryFormStoreTest
 {
     private PeriodStore periodStore;
 
-    private DataSetStore dataSetStore;
+    private DataSetService dataSetService;
 
     private DataEntryFormStore dataEntryFormStore;
 
@@ -60,7 +62,7 @@ public class DataEntryFormStoreTest
     public void setUpTest()
         throws Exception
     {
-        dataSetStore = (DataSetStore) getBean( DataSetStore.ID );
+        dataSetService = (DataSetService) getBean( DataSetService.ID );
 
         periodStore = (PeriodStore) getBean( PeriodStore.ID );
 
@@ -78,7 +80,7 @@ public class DataEntryFormStoreTest
     {
         DataSet dataSetA = new DataSet( "DataSet-A", periodType );
 
-        dataSetStore.addDataSet( dataSetA );
+        dataSetService.addDataSet( dataSetA );
 
         DataEntryForm dataEntryFormA = new DataEntryForm( "DataEntryForm-A" );
 

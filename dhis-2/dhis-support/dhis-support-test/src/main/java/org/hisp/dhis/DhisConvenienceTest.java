@@ -50,6 +50,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -147,6 +148,8 @@ public abstract class DhisConvenienceTest
     protected MappingService mappingService;
 
     protected ProgramStageService programStageService;
+    
+    protected DataEntryFormService dataEntryFormService;
 
     static
     {

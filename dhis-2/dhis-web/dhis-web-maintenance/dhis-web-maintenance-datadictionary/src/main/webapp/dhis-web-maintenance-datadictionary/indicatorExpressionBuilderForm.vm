@@ -62,34 +62,25 @@
 		<td colspan="3"></td>
 	</tr>
 	<tr>
-		<td>
+		<td colspan="3">
 			<input type="submit" value="$i18n.getString( 'save' )" style="width:125px"/>
 			<input type="button" value="$i18n.getString( 'cancel' )" style="width:125px" onclick="closeExpressionBuilder()">
 		</td>
-	</tr>
-	
-	
+	</tr>	
 </table>
 </form>
 </div>
 
 <script>
-	
+
+	var numerator = false;	
+	var validator = null;
 
 	function indicatorNumeratorForm()
 	{
-		loadDataElementGroups( "#indicator-expression-container select[id=dataElementGroupId]" );
-		var validator = validation( 'indicator-expression-form', function(){
-			var expression = getFieldValue( 'indicator-expression-container textarea[id=expression]' );
-			var description = getFieldValue( 'indicator-expression-container input[id=description]' );
-			var aggregationOperator = getRadioValue( 'aggregationOperator' );
-			setFieldValue( 'numerator', expression );
-			setFieldValue( 'numeratorDescription', description );
-			setFieldValue( 'numeratorAggregationOperator', aggregationOperator );
-			closeExpressionBuilder();
-		} );
+		numerator = true;
 		
-		validateValueByAjax('expression', '../dhis-web-commons-ajax-json/getExpressionText.action');
+		loadDataElementGroups( "#indicator-expression-container select[id=dataElementGroupId]" );	
 		
 		validator.resetForm();
 		
@@ -108,18 +99,9 @@
 	
 	function indicatorDenominatorForm()
 	{
-		loadDataElementGroups( "#indicator-expression-container select[id=dataElementGroupId]" );
-		var validator = validation( 'indicator-expression-form', function(){
-			var expression = getFieldValue( 'indicator-expression-container textarea[id=expression]' );
-			var description = getFieldValue( 'indicator-expression-container input[id=description]' );
-			var aggregationOperator = getRadioValue( 'aggregationOperator' );
-			setFieldValue( 'denominator', expression );
-			setFieldValue( 'denominatorDescription', description );
-			setFieldValue( 'denominatorAggregationOperator', aggregationOperator );
-			closeExpressionBuilder();
-		} );
+		numerator = false;
 		
-		validateValueByAjax('expression', '../dhis-web-commons-ajax-json/getExpressionText.action');
+		loadDataElementGroups( "#indicator-expression-container select[id=dataElementGroupId]" );	
 		
 		validator.resetForm();
 		
@@ -192,6 +174,39 @@
 		hideById( 'indicator-expression-container' );
 		unLockScreen();
 	}
+	
+	function inserExpression()
+	{
+		var expression = getFieldValue( 'indicator-expression-container textarea[id=expression]' );
+		var description = getFieldValue( 'indicator-expression-container input[id=description]' );
+		var aggregationOperator = getRadioValue( 'aggregationOperator' );
+		
+		jQuery.postJSON( '../dhis-web-commons-ajax-json/getExpressionText.action', 
+			{expression: expression},
+			function( json ){
+				if( json.response == 'error') markInvalid( 'indicator-expression-container textarea[id=expression]' , json.message );
+				else {								
+					if( numerator ){								
+						setFieldValue( 'numerator', expression );
+						setFieldValue( 'numeratorDescription', description );
+						setFieldValue( 'numeratorAggregationOperator', aggregationOperator );			
+					}else{
+						setFieldValue( 'denominator', expression );
+						setFieldValue( 'denominatorDescription', description );
+						setFieldValue( 'denominatorAggregationOperator', aggregationOperator );									
+					}
+					
+					closeExpressionBuilder();
+				}
+				
+				
+			});		
+		
+	}
+	
+	jQuery( document ).ready( function(){
+		validator = validation( 'indicator-expression-form', inserExpression );
+	});
 
 	
 </script>

@@ -35,7 +35,6 @@ package org.hisp.dhis;
 import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -70,10 +69,10 @@ public class WebAppServer
         connector = new SelectChannelConnector();
     }
 
-    public void init(  )
+    public void init()
         throws Exception
     {
-        String installDir = TrayApp.getInstallDir();
+        String installDir = TrayApp.installDir;
         try
         {
             int portFromConfig = this.getPortFromConfig();

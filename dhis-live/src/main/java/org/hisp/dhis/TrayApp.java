@@ -27,21 +27,36 @@
 package org.hisp.dhis;
 
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.AWTException;
+import java.awt.Desktop;
+import java.awt.Image;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.*;
-import java.io.*;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.List;
+import java.util.Properties;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +70,8 @@ import org.mortbay.component.LifeCycle;
 public class TrayApp
     implements LifeCycle.Listener
 {
+
+    public static String installDir;
 
     private static final Log log = LogFactory.getLog( TrayApp.class );
 
@@ -76,16 +93,13 @@ public class TrayApp
 
     private TrayIcon trayIcon;
 
-    private String installDir;
-
-    // the configuration
     private ConfigType config;
 
-    private static ResourceBundle messages = ResourceBundle.getBundle( "messages", Locale.getDefault() );
+    private static LiveMessagingService messageService = new LiveMessagingService();
 
     private static TrayApp instance;
 
-// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
     public ConfigType getConfig()
@@ -103,18 +117,10 @@ public class TrayApp
     // -------------------------------------------------------------------------
     public static void main( String[] args )
     {
-        Locale[] supportedLocales =
-        {
-            Locale.FRENCH,
-            Locale.GERMAN,
-            Locale.ENGLISH
-        };
-
-
         log.info( "Environment variable DHIS2_HOME: " + System.getenv( "DHIS2_HOME" ) );
         if ( !SystemTray.isSupported() )
         {
-            JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.unsupportedPlatform" ) );
+            JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.unsupportedPlatform" ) );
             System.exit( 0 );
         } else
         {
@@ -125,7 +131,7 @@ public class TrayApp
             } catch ( Exception ex )
             {
                 log.fatal( "TrayApp Initialization failure", ex );
-                JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.initFailure" ) );
+                JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.initFailure" ) );
                 System.exit( 0 );
             }
         }
@@ -157,7 +163,7 @@ public class TrayApp
             if ( installDir == null )
             {
                 log.fatal( "Neither DHIS Live Jar nor DHIS2_HOME could be found." );
-                JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.initFailure" ) );
+                JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.initFailure" ) );
                 System.exit( 0 );
             } else
             {
@@ -173,20 +179,19 @@ public class TrayApp
             configStream = new java.io.FileInputStream( installDir + CONFIG_FILE_NAME );
         } catch ( FileNotFoundException ex )
         {
-            log.info( "Can't locate external config - falling back to default");
+            log.info( "Can't locate external config - falling back to default" );
             configStream = TrayApp.class.getResourceAsStream( CONFIG_DEFAULT );
         }
 
-        readConfigFromStream(configStream);
+        readConfigFromStream( configStream );
 
-        log.info( "Locale: " + config.getLocaleLanguage() + ":" + config.getLocaleCountry());
+        log.info( "Locale: " + config.getLocaleLanguage() + ":" + config.getLocaleCountry() );
 
         // get the selected database
         ConfigType.DatabaseConnections.Connection conn =
             (ConfigType.DatabaseConnections.Connection) config.getDatabaseConnections().getSelected();
 
-        log.info( "Selected db: "+conn.getName() + "; " + conn.getUserName() + ":" +conn.getPassword() + " "+ conn.getURL());
-        
+        log.info( "Selected db: " + conn.getName() + "; " + conn.getUserName() + ":" + conn.getPassword() + " " + conn.getURL() );
 
         System.setProperty( "dhis2.home", installDir + CONFIG_DIR );
         System.setProperty( "jetty.home", installDir );
@@ -194,18 +199,48 @@ public class TrayApp
         System.setProperty( "birt.home", installDir + WebAppServer.BIRT_DIR );
         System.setProperty( "birt.context.path", WebAppServer.BIRT_CONTEXT_PATH );
 
+        writeHibernateProperties();
+
         SystemTray tray = SystemTray.getSystemTray();
 
         Image image = createImage( STOPPED_ICON, "tray icon" );
 
         PopupMenu popup = new PopupMenu();
-        MenuItem openItem = new MenuItem( messages.getString( "CMD_OPEN" ) );
-        MenuItem databaseItem = new MenuItem( messages.getString( "CMD_DATABASE" ) );
-        MenuItem settingsItem = new MenuItem( messages.getString( "CMD_SETTINGS" ) );
-        MenuItem exitItem = new MenuItem( messages.getString( "CMD_EXIT" ) );
+        MenuItem openItem = new MenuItem( messageService.getString( "CMD_OPEN" ) );
+        openItem.setActionCommand( "open" );
+        Menu databaseMenu = new Menu( messageService.getString( "CMD_DATABASE" ) );
+        List<Connection> dbConns = (List) config.getDatabaseConnections().getConnection();
+        for ( final Connection dbConn : dbConns )
+        {
+            MenuItem connItem = new MenuItem( dbConn.getName() );
+            connItem.addActionListener( new ActionListener()
+            {
+
+                @Override
+                public void actionPerformed( ActionEvent evt )
+                {
+                    config.getDatabaseConnections().setSelected( dbConn );
+                    writeConfigToFile();
+                    writeHibernateProperties();
+                    try
+                    {
+                        appServer.stop();
+                        appServer.start();
+                    } catch ( Exception ex )
+                    {
+                        ex.printStackTrace();
+                    }
+                }
+            } );
+            databaseMenu.add( connItem );
+        }
+        MenuItem settingsItem = new MenuItem( messageService.getString( "CMD_SETTINGS" ) );
+        settingsItem.setActionCommand( "settings" );
+        MenuItem exitItem = new MenuItem( messageService.getString( "CMD_EXIT" ) );
+        exitItem.setActionCommand( "exit" );
 
         popup.add( openItem );
-        popup.add( databaseItem );
+        popup.add( databaseMenu );
         popup.add( settingsItem );
         popup.add( exitItem );
 
@@ -215,23 +250,23 @@ public class TrayApp
         ActionListener listener = new ActionListener()
         {
 
+            @Override
             public void actionPerformed( ActionEvent e )
             {
                 String cmd = e.getActionCommand();
 
-                if ( cmd.equals( messages.getString( "CMD_OPEN" ) ) )
+                if ( cmd.equals( "open" ) )
                 {
                     launchBrowser();
 
                 } else
                 {
-                    if ( cmd.equals( messages.getString( "CMD_EXIT" ) ) )
+                    if ( cmd.equals( "exit" ) )
                     {
                         shutdown();
-                    } 
+                    }
                 }
             }
-
         };
 
         openItem.addActionListener( listener );
@@ -241,7 +276,7 @@ public class TrayApp
         appServer = new WebAppServer();
         try
         {
-            appServer.init( );
+            appServer.init();
         } catch ( Exception e )
         {
             log.fatal( "Application server could not be initialized" );
@@ -258,39 +293,44 @@ public class TrayApp
     // -------------------------------------------------------------------------
     // Listener implementation
     // -------------------------------------------------------------------------
+    @Override
     public void lifeCycleFailure( LifeCycle arg0, Throwable arg1 )
     {
         log.warn( "Lifecycle: server failed" );
         trayIcon.setImage( createImage( FAILED_ICON, "Running icon" ) );
-        JOptionPane.showMessageDialog( (JFrame) null, messages.getString( "dialogbox.webserverFailure" ) );
+        JOptionPane.showMessageDialog( (JFrame) null, messageService.getString( "dialogbox.webserverFailure" ) );
         shutdown();
     }
 
+    @Override
     public void lifeCycleStarted( LifeCycle arg0 )
     {
         log.info( "Lifecycle: server started" );
-        trayIcon.displayMessage( messages.getString( "notification.started" ), messages.getString( "notification.startedDetails" ) + " " + getUrl() + ".",
+        trayIcon.displayMessage( messageService.getString( "notification.started" ), messageService.getString( "notification.startedDetails" ) + " " + getUrl() + ".",
             TrayIcon.MessageType.INFO );
-        trayIcon.setToolTip( messages.getString( "tooltip.running" ) );
+        trayIcon.setToolTip( messageService.getString( "tooltip.running" ) );
         trayIcon.setImage( createImage( RUNNING_ICON, "Running icon" ) );
         launchBrowser();
 
     }
 
+    @Override
     public void lifeCycleStarting( LifeCycle arg0 )
     {
         log.info( "Lifecycle: server starting" );
-        trayIcon.displayMessage( messages.getString( "notification.starting" ), messages.getString( "notification.startingDetails" ), TrayIcon.MessageType.INFO );
+        trayIcon.displayMessage( messageService.getString( "notification.starting" ), messageService.getString( "notification.startingDetails" ), TrayIcon.MessageType.INFO );
         trayIcon.setImage( createImage( STARTING_ICON, "Starting icon" ) );
     }
 
+    @Override
     public void lifeCycleStopped( LifeCycle arg0 )
     {
         log.info( "Lifecycle: server stopped" );
-        trayIcon.displayMessage( messages.getString( "notification.stopped" ), messages.getString( "notification.stoppedDetails" ), TrayIcon.MessageType.INFO );
+        trayIcon.displayMessage( messageService.getString( "notification.stopped" ), messageService.getString( "notification.stoppedDetails" ), TrayIcon.MessageType.INFO );
         trayIcon.setImage( createImage( STOPPED_ICON, "Running icon" ) );
     }
 
+    @Override
     public void lifeCycleStopping( LifeCycle arg0 )
     {
         log.info( "Lifecycle: server stopping" );
@@ -471,20 +511,18 @@ public class TrayApp
         return result;
     }
 
-    private void readConfigFromStream(InputStream configStream)
+    private void readConfigFromStream( InputStream configStream )
     {
         try
         {
             JAXBContext jc = JAXBContext.newInstance( "org.hisp.dhis.config" );
             //Create unmarshaller
             Unmarshaller um = jc.createUnmarshaller();
-            //Unmarshal XML contents of the file myDoc.xml into your Java object instance.
-            JAXBElement<ConfigType> configElement =
-                (JAXBElement<ConfigType>) um.unmarshal( configStream );
-
+            //Unmarshal XML contents of the file config.xml into your Java object instance.
+            JAXBElement<ConfigType> configElement = (JAXBElement<ConfigType>) um.unmarshal( configStream );
             config = configElement.getValue();
 
-        // rather than just logging these errors they should rather bubble a message to the UI
+            // rather than just logging these errors they should rather bubble a message to the UI
         } catch ( JAXBException ex )
         {
             log.error( "Error parsing config file", ex );
@@ -500,15 +538,57 @@ public class TrayApp
             //Create marshaller
             Marshaller m = jc.createMarshaller();
             //Marshal object into file.
-            m.marshal( config, new FileOutputStream( installDir + CONFIG_FILE_NAME ) );
+            if ( new File( installDir + CONFIG_FILE_NAME ).exists() )
+            {
+                m.marshal( new JAXBElement( new QName( "uri", "local" ), ConfigType.class, config ), new FileOutputStream( installDir + CONFIG_FILE_NAME ) );
+                log.info( "Config Saved at: " + installDir + CONFIG_FILE_NAME );
+            } else
+            {
+                m.marshal( new JAXBElement( new QName( "uri", "local" ), ConfigType.class, config ), new FileOutputStream( CONFIG_DEFAULT ) );
+                log.info( "Config Saved at: " + CONFIG_FILE_NAME );
+            }
 
-        // rather than just logging these errors they should rather bubble a message to the UI
+            // rather than just logging these errors they should rather bubble a message to the UI
         } catch ( FileNotFoundException ex )
         {
             log.error( "Can't find config.xml file", ex );
         } catch ( JAXBException ex )
         {
             log.error( "Error serializing config to file", ex );
+        }
+    }
+
+    private void writeHibernateProperties()
+    {
+        String type = ( (Connection) config.getDatabaseConnections().getSelected() ).getType();
+        String url = ( (Connection) config.getDatabaseConnections().getSelected() ).getURL();
+        String userName = ( (Connection) config.getDatabaseConnections().getSelected() ).getUserName();
+        String password = ( (Connection) config.getDatabaseConnections().getSelected() ).getPassword();
+        Properties props = new Properties();
+        try
+        {
+            props.load( new FileReader( System.getProperty( "dhis2.home" )
+                + "/" + type
+                + ".properties" ) );
+            props.setProperty( "hibernate.connection.url", url );
+            props.setProperty( "hibernate.connection.username", userName );
+            if ( password != null )
+            {
+                props.setProperty( "hibernate.connection.password", password );
+            } else
+            {
+                props.setProperty( "hibernate.connection.password", "" );
+            }
+            props.store( new FileWriter( System.getProperty( "dhis2.home" ) + "/hibernate.properties" ), "DHIS2 Live Created" );
+            log.info( "Hibernate properties written at: " + System.getProperty( "dhis2.home" ) + "/hibernate.properties" );
+        } catch ( FileNotFoundException fnex )
+        {
+            log.error( "Hibernate templates missing: " + fnex.getMessage() );
+            JOptionPane.showMessageDialog( null, "Hibernate Template Files Missing" );
+        } catch ( IOException ioex )
+        {
+            log.error( "Error with Hibernate Properties: " + ioex.getMessage() );
+            JOptionPane.showMessageDialog( null, "Error with Hibernate Properties" );
         }
     }
 }

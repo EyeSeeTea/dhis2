@@ -6,7 +6,7 @@
         <xs:complexType name="ConfigType">
             <xs:sequence>
                 <xs:element name="LocaleLanguage" type="xs:string" default="en" />
-                <xs:element name="LocaleCountry" type="xs:string" default="GB" />
+                <xs:element name="LocaleCountry" type="xs:string" default="" />
                 <xs:element name="Port" type="xs:int" default="8080" />
                 <xs:element name="Host" type="xs:string" default="localhost" />
                 <xs:element name="PreferredBrowser" type="xs:string" default="" />
@@ -20,9 +20,9 @@
                                         <xs:element name="Type"> 
                                             <xs:simpleType>
                                                 <xs:restriction base="xs:string">
-                                                    <xs:enumeration value="H2"/>
-                                                    <xs:enumeration value="Postgresql"/>
-                                                    <xs:enumeration value="Mysql"/>
+                                                    <xs:enumeration value="h2"/>
+                                                    <xs:enumeration value="postgres"/>
+                                                    <xs:enumeration value="mysql"/>
                                                 </xs:restriction>
                                             </xs:simpleType>
                                         </xs:element>

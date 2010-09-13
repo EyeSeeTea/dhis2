@@ -29,6 +29,7 @@ package org.hisp.dhis.dataentryform;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface DataEntryFormService
 {
@@ -89,6 +90,8 @@ public interface DataEntryFormService
      * @return htmlCode.
      */
     String prepareDataEntryFormCode( String preparedCode );
+    
+    void convertDataEntryForm( DataEntryForm form, Map<Object, Integer> dataElementMap, Map<Object, Integer> categoryOptionComboMap );
     
     Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds );
     
