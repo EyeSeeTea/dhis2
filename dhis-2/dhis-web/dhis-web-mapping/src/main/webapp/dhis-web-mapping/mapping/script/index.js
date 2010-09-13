@@ -3089,11 +3089,7 @@ Ext.onReady( function() {
             Ext.getCmp('vectorlayeroptions_w').destroy();
         }
         
-        // function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
-        
-        var data = [];
-        // var layer = MAP.getLayersByName(layer.name)[0];
-        
+        var data = [];        
         for (var i = 0; i < layer.features.length; i++) {
             data.push([layer.features[i].data.id, layer.features[i].data.name]);
         }
@@ -3113,7 +3109,7 @@ Ext.onReady( function() {
             layout: 'fit',
             defaults: {layout: 'fit', bodyStyle:'padding:8px; border:0px'},
             width: 250,
-            height: 500,
+            height: getMultiSelectHeight() + 145,
             items: [
                 {
                     xtype: 'panel',
@@ -3121,7 +3117,17 @@ Ext.onReady( function() {
                         {
                             xtype: 'panel',
                             items: [
-                                { html: '<div class="window-field-label-first">Feature name</div>' },
+                                { html: '<div class="window-field-label-first">Highlight color</div>' },
+                                {
+                                    xtype: 'colorfield',
+                                    labelSeparator: labelseparator,
+                                    id: 'highlightcolor_cf',
+                                    allowBlank: false,
+                                    isFormField: true,
+                                    width: combo_width,
+                                    value: "#0000FF"
+                                },
+                                { html: '<div class="window-field-label">Feature name</div>' },
                                 {
                                     xtype: 'textfield',
                                     id: 'locatefeature_tf',
@@ -3135,11 +3141,11 @@ Ext.onReady( function() {
                                         }
                                     }
                                 },
-                                { html: '<div class="window-field-label"></div>' },
+                                { html: '<div class="window-field-nolabel"></div>' },
                                 {
                                     xtype: 'grid',
                                     id: 'featuregrid_gp',
-                                    autoHeight: true,
+                                    height: getMultiSelectHeight(),
                                     store: featureStore,
                                     cm: new Ext.grid.ColumnModel({
                                         columns: [{id: 'name', header: 'Features', dataIndex: 'name', width: 250}]
@@ -3151,6 +3157,8 @@ Ext.onReady( function() {
                                     listeners: {
                                         'cellclick': {
                                             fn: function(g, ri, ci) {
+                                                layer.redraw();
+                                                
                                                 var id, feature;
                                                 id = g.getStore().getAt(ri).data.id;
                                                 
@@ -3161,7 +3169,10 @@ Ext.onReady( function() {
                                                     }
                                                 }
                                                 
-                                                layer.drawFeature(feature,{'fillColor':'blue'});
+                                                if (feature) {
+                                                    var color = Ext.getCmp('highlightcolor_cf').getValue();
+                                                    layer.drawFeature(feature,{'fillColor':color});
+                                                }
                                             }
                                         }
                                     }
@@ -3254,9 +3265,14 @@ Ext.onReady( function() {
                             listeners: {
                                 'click': {
                                     fn: function() {
-                                        locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 272, Ext.getCmp('center').y + 50);
-                                        locateFeatureWindow.show();
-                                        vectorLayerOptionsWindow.hide();
+                                        if (layer.features.length > 0) {
+                                            locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 272, Ext.getCmp('center').y + 50);
+                                            locateFeatureWindow.show();
+                                            vectorLayerOptionsWindow.hide();
+                                        }
+                                        else {
+                                            Ext.message.msg(false, i18n_no_orgunits_loaded);
+                                        }
                                     }
                                 }
                             }
@@ -4094,6 +4110,8 @@ function onClickSelectPolygon(feature) {
 	var y = east_panel.y + 41;
     
     if (ACTIVEPANEL == thematicMap && MAPSOURCE == map_source_type_database) {
+        Ext.getCmp('locatefeature_w').destroy();
+        
         Ext.getCmp('map_tf').setValue(feature.data.name);
         
         for (var i = 0; i < feature.layer.features.length; i++) {
