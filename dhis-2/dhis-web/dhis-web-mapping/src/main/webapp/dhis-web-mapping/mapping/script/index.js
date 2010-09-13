@@ -3089,28 +3089,31 @@ Ext.onReady( function() {
             Ext.getCmp('vectorlayeroptions_w').destroy();
         }
         
+        // function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
+        
         var data = [];
-        var layer = MAP.getLayersByName(layer.name)[0];
+        // var layer = MAP.getLayersByName(layer.name)[0];
         
         for (var i = 0; i < layer.features.length; i++) {
-            data.push([i, layer.features[i].data.name]);
+            data.push([layer.features[i].data.id, layer.features[i].data.name]);
         }
         
         var featureStore = new Ext.data.ArrayStore({
             mode: 'local',
             autoDestroy: true,
-            idProperty: 'i',
-            fields: ['i', 'name'],
-            data: [data]
+            idProperty: 'id',
+            fields: ['id','name'],
+            sortInfo: {field: 'name', direction: 'ASC'},
+            data: data
         });
         
         var locateFeatureWindow = new Ext.Window({
             id: 'locatefeature_w',
             title: 'Locate features',
             layout: 'fit',
-            closeAction: 'hide',
             defaults: {layout: 'fit', bodyStyle:'padding:8px; border:0px'},
-            width: 200,
+            width: 250,
+            height: 500,
             items: [
                 {
                     xtype: 'panel',
@@ -3121,7 +3124,16 @@ Ext.onReady( function() {
                                 { html: '<div class="window-field-label-first">Feature name</div>' },
                                 {
                                     xtype: 'textfield',
-                                    id: 'locatefeature_tf'
+                                    id: 'locatefeature_tf',
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        'keyup': {
+                                            fn: function() {
+                                                var p = Ext.getCmp('locatefeature_tf').getValue();
+                                                featureStore.filter('name', p, true, false);
+                                            }
+                                        }
+                                    }
                                 },
                                 { html: '<div class="window-field-label"></div>' },
                                 {
@@ -3130,19 +3142,29 @@ Ext.onReady( function() {
                                     autoHeight: true,
                                     store: featureStore,
                                     cm: new Ext.grid.ColumnModel({
-                                        columns: [
-                                            {   
-                                                id: 'name',
-                                                header: 'Features',
-                                                dataIndex: 'name',
-                                                width: 200
-                                            }
-                                        ]
+                                        columns: [{id: 'name', header: 'Features', dataIndex: 'name', width: 250}]
                                     }),
                                     sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
                                     viewConfig: {forceFit: true},
                                     sortable: true,
-                                    // autoExpandColumn: 'name'
+                                    autoExpandColumn: 'name',
+                                    listeners: {
+                                        'cellclick': {
+                                            fn: function(g, ri, ci) {
+                                                var id, feature;
+                                                id = g.getStore().getAt(ri).data.id;
+                                                
+                                                for (var i = 0; i < layer.features.length; i++) {
+                                                    if (layer.features[i].data.id == id) {
+                                                        feature = layer.features[i];
+                                                        break;
+                                                    }
+                                                }
+                                                
+                                                layer.drawFeature(feature,{'fillColor':'blue'});
+                                            }
+                                        }
+                                    }
                                 }
                             ]
                         }
@@ -3226,20 +3248,19 @@ Ext.onReady( function() {
                                     }
                                 }
                             }
-                        }
-                        // ,
-                        // {
-                            // html: 'Locate feature',
-                            // listeners: {
-                                // 'click': {
-                                    // fn: function() {
-                                        // locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 173, Ext.getCmp('center').y + 50);
-                                        // locateFeatureWindow.show();
-                                        // vectorLayerOptionsWindow.hide();
-                                    // }
-                                // }
-                            // }
-                        // }                                        
+                        },
+                        {
+                            html: 'Locate feature',
+                            listeners: {
+                                'click': {
+                                    fn: function() {
+                                        locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 272, Ext.getCmp('center').y + 50);
+                                        locateFeatureWindow.show();
+                                        vectorLayerOptionsWindow.hide();
+                                    }
+                                }
+                            }
+                        }                                        
                     ]
                 }
             ]
