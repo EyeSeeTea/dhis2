@@ -2989,6 +2989,7 @@ Ext.onReady( function() {
         var baseLayerOptionsWindow = new Ext.Window({
             id: 'baselayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            width: 180,
             items: [
                 {
                     xtype: 'menu',
@@ -2996,8 +2997,8 @@ Ext.onReady( function() {
                     floating: false,
                     items: [
                         {
-                            html: 'Show WMS legend',
-                            iconCls: 'no-icon',
+                            text: 'Show WMS legend',
+                            iconCls: 'menu-layeroptions-wmslegend',
                             listeners: {
                                 'click': {
                                     fn: function() {
@@ -3030,47 +3031,59 @@ Ext.onReady( function() {
                             }
                         },
                         {
-                            html: 'Opacity',
-                            menu: {
+                            text: 'Opacity',
+                            iconCls: 'menu-layeroptions-opacity',
+                            menu: { 
+                                iconCls: 'no-icon-menu',
                                 items: [
                                     {
-                                        html: '0.1',
+                                        text: '0.1',
+                                        iconCls: 'menu-layeroptions-opacity-10',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.1); } } }
                                     },
                                     {
-                                        html: '0.2',
+                                        text: '0.2',
+                                        iconCls: 'menu-layeroptions-opacity-20',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.2); } } }
                                     },
                                     {
-                                        html: '0.3',
+                                        text: '0.3',
+                                        iconCls: 'menu-layeroptions-opacity-30',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.3); } } }
                                     },
                                     {
-                                        html: '0.4',
+                                        text: '0.4',
+                                        iconCls: 'menu-layeroptions-opacity-40',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.4); } } }
                                     },
                                     {
-                                        html: '0.5',
+                                        text: '0.5',
+                                        iconCls: 'menu-layeroptions-opacity-50',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.5); } } }
                                     },
                                     {
-                                        html: '0.6',
+                                        text: '0.6',
+                                        iconCls: 'menu-layeroptions-opacity-60',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.6); } } }
                                     },
                                     {
-                                        html: '0.7',
+                                        text: '0.7',
+                                        iconCls: 'menu-layeroptions-opacity-70',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.7); } } }
                                     },
                                     {
-                                        html: '0.8',
+                                        text: '0.8',
+                                        iconCls: 'menu-layeroptions-opacity-80',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.8); } } }
                                     },
                                     {
-                                        html: '0.9',
+                                        text: '0.9',
+                                        iconCls: 'menu-layeroptions-opacity-90',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.9); } } }
                                     },
                                     {
-                                        html: '1.0',
+                                        text: '1.0',
+                                        iconCls: 'menu-layeroptions-opacity-100',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(1.0); } } }
                                     }
                                 ]
@@ -3080,7 +3093,7 @@ Ext.onReady( function() {
                 }
             ]
         });
-        baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 190, Ext.getCmp('center').y + 50);
+        baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 206, Ext.getCmp('center').y + 50);
         baseLayerOptionsWindow.show();
     }
     
@@ -3194,6 +3207,7 @@ Ext.onReady( function() {
         var vectorLayerOptionsWindow = new Ext.Window({
             id: 'vectorlayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            width: 180,
             items: [
                 {
                     xtype: 'menu',
@@ -3201,74 +3215,93 @@ Ext.onReady( function() {
                     floating: false,
                     items: [
                         {
-                            html: 'Opacity',
-                            menu: {
+                            text: 'Opacity',
+                            iconCls: 'menu-layeroptions-opacity',
+                            menu: { 
+                                iconCls: 'no-icon-menu',
                                 items: [
                                     {
-                                        html: '0.1',
+                                        text: '0.1',
+                                        iconCls: 'menu-layeroptions-opacity-10',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.1); } } }
                                     },
                                     {
-                                        html: '0.2',
+                                        text: '0.2',
+                                        iconCls: 'menu-layeroptions-opacity-20',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.2); } } }
                                     },
                                     {
-                                        html: '0.3',
+                                        text: '0.3',
+                                        iconCls: 'menu-layeroptions-opacity-30',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.3); } } }
                                     },
                                     {
-                                        html: '0.4',
+                                        text: '0.4',
+                                        iconCls: 'menu-layeroptions-opacity-40',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.4); } } }
                                     },
                                     {
-                                        html: '0.5',
+                                        text: '0.5',
+                                        iconCls: 'menu-layeroptions-opacity-50',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.5); } } }
                                     },
                                     {
-                                        html: '0.6',
+                                        text: '0.6',
+                                        iconCls: 'menu-layeroptions-opacity-60',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.6); } } }
                                     },
                                     {
-                                        html: '0.7',
+                                        text: '0.7',
+                                        iconCls: 'menu-layeroptions-opacity-70',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.7); } } }
                                     },
                                     {
-                                        html: '0.8',
+                                        text: '0.8',
+                                        iconCls: 'menu-layeroptions-opacity-80',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.8); } } }
                                     },
                                     {
-                                        html: '0.9',
+                                        text: '0.9',
+                                        iconCls: 'menu-layeroptions-opacity-90',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(0.9); } } }
                                     },
                                     {
-                                        html: '1.0',
+                                        text: '1.0',
+                                        iconCls: 'menu-layeroptions-opacity-100',
                                         listeners: { 'click': { fn: function() { layer.setOpacity(1.0); } } }
                                     }
                                 ]
                             }
                         },
                         {
-                            html: 'Show/hide labels',
+                            text: 'Show/hide labels',
+                            iconCls: 'menu-layeroptions-labels',
                             listeners: {
                                 'click': {
                                     fn: function() {
-                                        if (layer.name == 'Polygon layer') {
-                                            if (ACTIVEPANEL == thematicMap) {
-                                                toggleFeatureLabelsPolygons(layer);
+                                        if (layer.features.length > 0) {
+                                            if (layer.name == 'Polygon layer') {
+                                                if (ACTIVEPANEL == thematicMap) {
+                                                    toggleFeatureLabelsPolygons(layer);
+                                                }
+                                                else {
+                                                    toggleFeatureLabelsAssignment(true, layer);
+                                                }
                                             }
-                                            else {
-                                                toggleFeatureLabelsAssignment(true, layer);
+                                            else if (layer.name == 'Point layer') {
+                                                toggleFeatureLabelsPoints(layer);
                                             }
                                         }
-                                        else if (layer.name == 'Point layer') {
-                                            toggleFeatureLabelsPoints(layer);
+                                        else {
+                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + ' </span>' + i18n_has_no_orgunits);
                                         }
                                     }
                                 }
                             }
                         },
                         {
-                            html: 'Locate feature',
+                            text: 'Locate feature',
+                            iconCls: 'menu-layeroptions-locate',
                             listeners: {
                                 'click': {
                                     fn: function() {
@@ -3278,7 +3311,7 @@ Ext.onReady( function() {
                                             vectorLayerOptionsWindow.hide();
                                         }
                                         else {
-                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>' + i18n_has_no_orgunits);
+                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + ' </span>' + i18n_has_no_orgunits);
                                         }
                                     }
                                 }
@@ -3288,7 +3321,7 @@ Ext.onReady( function() {
                 }
             ]
         });
-        vectorLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 173, Ext.getCmp('center').y + 50);
+        vectorLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 206, Ext.getCmp('center').y + 50);
         vectorLayerOptionsWindow.show();
     }
 	
