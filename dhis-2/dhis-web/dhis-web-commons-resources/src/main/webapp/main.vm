@@ -47,7 +47,7 @@
 				jQuery( item ).addClass( 'button' );
 			});
 			
-			jQuery.each(jQuery(":text, textarea"), function(i, item){
+			jQuery.each(jQuery(":text, textarea, :password"), function(i, item){
 				jQuery( item ).addClass( 'text' );
 			});
 			

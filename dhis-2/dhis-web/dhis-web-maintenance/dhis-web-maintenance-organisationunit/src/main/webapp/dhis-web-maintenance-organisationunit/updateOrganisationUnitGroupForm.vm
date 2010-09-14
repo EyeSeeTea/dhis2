@@ -1,13 +1,6 @@
 <script>
 	jQuery(document).ready(	function(){
-		validation( 'updateOrganisationUnitGroupForm', function( form ){ form.submit() }, function(){
-			ous = jQuery( "#organisationValidator" );
-			ous.attr( 'multiple', 'multiple');
-			ous.empty();
-			jQuery.each(selectionTreeSelection.getSelected(), function(i, item ){
-				ous.append( '<option value="' + item + '" selected="true">' + item + '</option>' );				
-			});
-		} );	
+		validation( 'updateOrganisationUnitGroupForm', function( form ){ form.submit() } );	
 		
 		checkValueIsExist( "name", "validateOrganisationUnitGroup.action", {id:$!organisationUnitGroup.id} );	
 	
@@ -23,8 +16,7 @@
 <table>
 	<tr>
 		<td>
-			#parse( "/dhis-web-commons/oust/selectionTreeExtend.vm" )
-			<select id="organisationValidator" name="organisationValidator" class="{validate:{required:true}}" style="display:none"/>
+			#organisationUnitSelectionTree( false, true, true )
 		</td>
 	</tr>
 </table>
