@@ -2989,6 +2989,7 @@ Ext.onReady( function() {
         var baseLayerOptionsWindow = new Ext.Window({
             id: 'baselayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            width: 180,
             items: [
                 {
                     xtype: 'menu',
@@ -3092,7 +3093,7 @@ Ext.onReady( function() {
                 }
             ]
         });
-        baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 190, Ext.getCmp('center').y + 50);
+        baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 206, Ext.getCmp('center').y + 50);
         baseLayerOptionsWindow.show();
     }
     
@@ -3206,6 +3207,7 @@ Ext.onReady( function() {
         var vectorLayerOptionsWindow = new Ext.Window({
             id: 'vectorlayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            width: 180,
             items: [
                 {
                     xtype: 'menu',
@@ -3319,7 +3321,7 @@ Ext.onReady( function() {
                 }
             ]
         });
-        vectorLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 173, Ext.getCmp('center').y + 50);
+        vectorLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 206, Ext.getCmp('center').y + 50);
         vectorLayerOptionsWindow.show();
     }
 	
