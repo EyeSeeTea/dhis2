@@ -3034,7 +3034,6 @@ Ext.onReady( function() {
                             text: 'Opacity',
                             iconCls: 'menu-layeroptions-opacity',
                             menu: { 
-                                iconCls: 'no-icon-menu',
                                 items: [
                                     {
                                         text: '0.1',
@@ -3215,10 +3214,55 @@ Ext.onReady( function() {
                     floating: false,
                     items: [
                         {
+                            text: 'Locate feature',
+                            iconCls: 'menu-layeroptions-locate',
+                            listeners: {
+                                'click': {
+                                    fn: function() {
+                                        if (layer.features.length > 0) {
+                                            locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 272, Ext.getCmp('center').y + 50);
+                                            locateFeatureWindow.show();
+                                            vectorLayerOptionsWindow.hide();
+                                        }
+                                        else {
+                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + ' </span>' + i18n_has_no_orgunits);
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        
+                        {
+                            text: 'Show/hide labels',
+                            iconCls: 'menu-layeroptions-labels',
+                            listeners: {
+                                'click': {
+                                    fn: function() {
+                                        if (layer.features.length > 0) {
+                                            if (layer.name == 'Polygon layer') {
+                                                if (ACTIVEPANEL == thematicMap) {
+                                                    toggleFeatureLabelsPolygons(layer);
+                                                }
+                                                else {
+                                                    toggleFeatureLabelsAssignment(true, layer);
+                                                }
+                                            }
+                                            else if (layer.name == 'Point layer') {
+                                                toggleFeatureLabelsPoints(layer);
+                                            }
+                                        }
+                                        else {
+                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + ' </span>' + i18n_has_no_orgunits);
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        
+                        {
                             text: 'Opacity',
                             iconCls: 'menu-layeroptions-opacity',
                             menu: { 
-                                iconCls: 'no-icon-menu',
                                 items: [
                                     {
                                         text: '0.1',
@@ -3272,51 +3316,7 @@ Ext.onReady( function() {
                                     }
                                 ]
                             }
-                        },
-                        {
-                            text: 'Show/hide labels',
-                            iconCls: 'menu-layeroptions-labels',
-                            listeners: {
-                                'click': {
-                                    fn: function() {
-                                        if (layer.features.length > 0) {
-                                            if (layer.name == 'Polygon layer') {
-                                                if (ACTIVEPANEL == thematicMap) {
-                                                    toggleFeatureLabelsPolygons(layer);
-                                                }
-                                                else {
-                                                    toggleFeatureLabelsAssignment(true, layer);
-                                                }
-                                            }
-                                            else if (layer.name == 'Point layer') {
-                                                toggleFeatureLabelsPoints(layer);
-                                            }
-                                        }
-                                        else {
-                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + ' </span>' + i18n_has_no_orgunits);
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            text: 'Locate feature',
-                            iconCls: 'menu-layeroptions-locate',
-                            listeners: {
-                                'click': {
-                                    fn: function() {
-                                        if (layer.features.length > 0) {
-                                            locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - 272, Ext.getCmp('center').y + 50);
-                                            locateFeatureWindow.show();
-                                            vectorLayerOptionsWindow.hide();
-                                        }
-                                        else {
-                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + ' </span>' + i18n_has_no_orgunits);
-                                        }
-                                    }
-                                }
-                            }
-                        }                                        
+                        }
                     ]
                 }
             ]
