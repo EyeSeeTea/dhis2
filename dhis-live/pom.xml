@@ -84,15 +84,14 @@
                             <dontWrapJar>true</dontWrapJar>
                             <headerType>gui</headerType>
                             <outfile>${project.build.directory}/dhis2-live.exe</outfile>
-                            <jar>dhis2-live.jar</jar>
+                            <jar>dhis2-live-jar-with-dependencies.jar</jar>
                             <errTitle>dhis2</errTitle>
                             <priority>normal</priority>
                             <downloadUrl>http://java.com/download</downloadUrl>
                             <supportUrl>http://dhis2.org</supportUrl>
                             <customProcName>false</customProcName>
-                            <initialHeapSize>256MB</initialHeapSize>
-                            <maxHeapSize>512MB</maxHeapSize>
-                            <maxPermSize>128MB</maxPermSize>
+                            <initialHeapSize>512MB</initialHeapSize>
+                            <maxHeapSize>1024MB</maxHeapSize>
                             <stayAlive>false</stayAlive>
                             <manifest></manifest>
                             <icon>${basedir}/util/launch4j/favicon.ico</icon>
@@ -102,6 +101,9 @@
                             </singleInstance>
                             <jre>
                                 <minVersion>1.6.0_14</minVersion>
+                                <opts>
+                                    <opt>-XX:MaxPermSize=256M</opt>
+                                </opts>
                             </jre>
                             <splash>
                                 <file>${basedir}/util/launch4j/dhis2-splash.bmp</file>
@@ -111,42 +113,6 @@
                             </splash>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>emedded</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <dontWrapJar>true</dontWrapJar>
-                            <headerType>gui</headerType>
-                            <outfile>${project.build.directory}/dhis2-live-embedded.exe</outfile>
-                            <jar>dhis2-live.jar</jar>
-                            <errTitle>dhis2</errTitle>
-                            <priority>normal</priority>
-                            <downloadUrl>http://java.com/download</downloadUrl>
-                            <supportUrl>http://dhis2.org</supportUrl>
-                            <customProcName>false</customProcName>
-                            <stayAlive>false</stayAlive>
-                            <manifest></manifest>
-                            <icon>${basedir}/util/launch4j/favicon.ico</icon>
-                            <singleInstance>
-                                <mutexName>dhis-live.mutex</mutexName>
-                                <windowTitle></windowTitle>
-                            </singleInstance>
-                            <jre>
-                                <path>jre6</path>
-                                <minVersion>1.6.0_14</minVersion>
-                            </jre>
-                            <splash>
-                                <file>${basedir}/util/launch4j/dhis2-splash.bmp</file>
-                                <waitForWindow>false</waitForWindow>
-                                <timeout>12</timeout>
-                                <timeoutErr>false</timeoutErr>
-                            </splash>
-                        </configuration>
-                    </execution>
-
                 </executions>
             </plugin>
             <plugin>
@@ -159,7 +125,14 @@
             </plugin>
         </plugins>
     </build>
-
+    <repositories>
+        <repository>
+            <url>http://download.java.net/maven/2/</url>
+            <id>beans-binding</id>
+            <layout>default</layout>
+            <name>Repository for library Library[beans-binding]</name>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
@@ -205,7 +178,11 @@
             <artifactId>jaxb-impl</artifactId>
             <version>2.1.13</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.jdesktop</groupId>
+            <artifactId>beansbinding</artifactId>
+            <version>1.2.1</version>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
