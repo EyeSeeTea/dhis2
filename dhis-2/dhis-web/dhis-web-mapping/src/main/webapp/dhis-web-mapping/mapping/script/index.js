@@ -3171,7 +3171,7 @@ Ext.onReady( function() {
                                             fn: function(g, ri, ci) {
                                                 layer.redraw();
                                                 
-                                                var id, feature;
+                                                var id, feature, backupF, backupS;
                                                 id = g.getStore().getAt(ri).data.id;
                                                 
                                                 for (var i = 0; i < layer.features.length; i++) {
@@ -3183,7 +3183,7 @@ Ext.onReady( function() {
                                                 
                                                 if (feature) {
                                                     var color = Ext.getCmp('highlightcolor_cf').getValue();
-                                                    layer.drawFeature(feature,{'fillColor':color});
+                                                    layer.drawFeature(feature,{'fillColor':color, 'strokeColor':color});
                                                 }
                                             }
                                         }
