@@ -3615,7 +3615,7 @@ Ext.onReady( function() {
 	var mapToolbar = new Ext.Toolbar({
 		id: 'map_tb',
 		items: [
-			' ',' ',' ',
+			' ',' ',' ',' ',
 			mapLabel,
 			' ',' ',' ',' ',' ',
 			zoomInButton,

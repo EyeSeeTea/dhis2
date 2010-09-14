@@ -228,14 +228,9 @@ div.olMapViewport {
 .x-btn .icon-help {
 	background-image:url(../../../images/help.png);
 }
-.aa_dark button  {
-	color:#111;
-}
-.aa_med button  {
+.aa_med button {
 	color:#333;
-}
-.aa_light button  {
-	color:#888;
+    padding-bottom:2px;
 }
 
 /* Ext Loading Mask */
