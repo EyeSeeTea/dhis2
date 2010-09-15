@@ -37,11 +37,11 @@
 }
 .ext-gecko .x-btn button, .ext-webkit .x-btn button {
 	padding-left:7px;
-	padding-right:7px;
+	padding-right:4px;
 }
 .x-toolbar .xtb-sep {
     background-image:url(../../resources/ext-ux/theme/gray-extend-ux/grid-split.png);
-    height:27px;
+    height:25px;
 }
 #map_tb .x-panel-bbar .x-toolbar, .x-panel-tbar .x-toolbar {
     border:1px solid #bbbbbb;

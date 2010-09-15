@@ -178,8 +178,7 @@
 		
 		<action name="error" class="org.hisp.dhis.dataadmin.action.NoAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">
-				/dhis-web-maintenance-dataadmin/dataBrowserError.vm</param>
+			<param name="page">/dhis-web-commons/oust/selectedOrgunitError.vm</param>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
 		</action>
 		

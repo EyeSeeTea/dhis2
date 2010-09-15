@@ -27,11 +27,8 @@ package org.hisp.dhis.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.ExceptionUtils.throwException;
-
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,9 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultDataEntryFormService
     implements DataEntryFormService
 {
-    private static final Pattern INPUT_PATTERN = Pattern.compile( "value\\[\\d+\\]\\.value:value\\[\\d+\\]\\.value" );
-    private static final Pattern OPERAND_PATTERN = Pattern.compile( "\\d+" );
-    
     // ------------------------------------------------------------------------
     // Dependencies
     // ------------------------------------------------------------------------
@@ -168,36 +162,6 @@ public class DefaultDataEntryFormService
         return sb.toString();
     }
     
-    public void convertDataEntryForm( DataEntryForm form, Map<Object, Integer> dataElementMap, Map<Object, Integer> categoryOptionComboMap )
-    {
-        Matcher inputMatcher = INPUT_PATTERN.matcher( form.getHtmlCode() );        
-        StringBuffer buffer = new StringBuffer();
-        
-        while ( inputMatcher.find() )
-        {
-            String input = inputMatcher.group();
-            Matcher operandMatcher = OPERAND_PATTERN.matcher( input );
-            
-            operandMatcher.find();            
-            String d = operandMatcher.group();
-            throwException( d == null, "Could not find data element identifier in form" );
-            Integer dataElement = dataElementMap.get( Integer.parseInt( d ) );
-            throwException( dataElement == null, "Data element identifier does not exist: " + d );
-            
-            operandMatcher.find();
-            String c = operandMatcher.group();
-            throwException( c == null, "Could not find category option combo identifier in form" );
-            Integer categoryOptionCombo = categoryOptionComboMap.get( Integer.parseInt( c ) );
-            throwException( categoryOptionCombo == null, "Category option combo identifier does not exist: " + c );
-            
-            inputMatcher.appendReplacement( buffer, "value[" + dataElement + "].value:value[" + categoryOptionCombo + "].value" );
-        }
-        
-        inputMatcher.appendTail( buffer );
-        
-        form.setHtmlCode( buffer.toString() );
-    }
-
     public Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds )
     {
         if ( programStageIds == null || programStageIds.size() == 0 )

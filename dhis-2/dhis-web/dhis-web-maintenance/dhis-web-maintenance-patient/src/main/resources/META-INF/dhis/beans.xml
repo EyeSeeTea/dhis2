@@ -1191,6 +1191,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="programStageDataElementService">
 			<ref bean="org.hisp.dhis.program.ProgramStageDataElementService" /> 
 		</property>
+		<property name="expressionService">
+			<ref bean="org.hisp.dhis.expression.ExpressionService" /> 
+		</property>
 	</bean>
 	
 	<bean

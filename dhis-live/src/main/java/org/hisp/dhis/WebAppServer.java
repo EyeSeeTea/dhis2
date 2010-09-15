@@ -130,6 +130,6 @@ public class WebAppServer
 
     private int getPortFromConfig()
     {
-        return TrayApp.getInstance().getConfig().getPort();
+        return TrayApp.appConfig.getPort();
     }
 }

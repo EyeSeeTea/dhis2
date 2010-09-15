@@ -10,7 +10,7 @@
 					<td colspan="3" style="text-align:right"><input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddValidationRuleForm.action'"></td>
 				</tr>	
 			</table>
-			<table class="listTable" id="listTable"> 
+			<table class="listTable" id="validationRulesList"> 
 				<col>
 				<col width="20">
 				<col width="20">

@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
@@ -49,8 +48,8 @@ public class LiveMessagingService
     private ResourceBundle getMessageBundle()
     {
         ResourceBundle messages;
-        String currentLanguage = TrayApp.getInstance().getConfig().getLocaleLanguage();
-        String currentCountry = TrayApp.getInstance().getConfig().getLocaleCountry();
+        String currentLanguage = TrayApp.appConfig.getLocaleLanguage();
+        String currentCountry = TrayApp.appConfig.getLocaleCountry();
         Locale currentLocale = new Locale( currentLanguage, currentCountry );
         log.debug( "Current locale set to " + currentLocale.toString() );
         try
@@ -58,19 +57,16 @@ public class LiveMessagingService
             messages = ResourceBundle.getBundle( "messages", currentLocale );
         } catch ( Exception e )
         {
-            //problem loading the desired resource bundle
-            //fall back to default
-            log.error( "The desired resource bundle could not be loaded.Usig default" );
+            //problem loading the desired resource bundle fall back to default
+            log.error( "The desired resource bundle could not be loaded. Using default" );
             currentLocale = new Locale( defaultLanguage, defaultCountry );
             messages = ResourceBundle.getBundle( "messages", currentLocale );
         }
-
         return messages;
     }
 
     public String getString( String messageName )
     {
-
         ResourceBundle messages = getMessageBundle();
 
         String returnMessage = null;
@@ -80,7 +76,6 @@ public class LiveMessagingService
             return returnMessage;
         } else
         {
-
             if ( messages.containsKey( messageName ) )
             {
                 returnMessage = messages.getString( messageName );
@@ -89,7 +84,6 @@ public class LiveMessagingService
                 {
                     returnMessage = "Message not found";
                 }
-
             } else
             {
                 returnMessage = "Message key " + messageName + " not found.";

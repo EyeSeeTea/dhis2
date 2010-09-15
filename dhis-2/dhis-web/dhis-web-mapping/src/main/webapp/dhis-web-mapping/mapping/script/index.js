@@ -3631,7 +3631,8 @@ Ext.onReady( function() {
 			'-',
 			helpButton,
 			'->',
-			exitButton
+			exitButton,
+            ' '
 		]
 	});
     
