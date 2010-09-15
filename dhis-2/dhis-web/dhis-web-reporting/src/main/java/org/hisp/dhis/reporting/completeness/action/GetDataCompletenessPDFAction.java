@@ -82,7 +82,7 @@ public class GetDataCompletenessPDFAction
     // Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit unit;
+    private OrganisationUnit selectedUnit;
     
     private InputStream inputStream;
 
@@ -104,16 +104,16 @@ public class GetDataCompletenessPDFAction
 
         DataSet dataSet = (DataSet) SessionUtils.getSessionVar( KEY_DATA_COMPLETENESS_DATASET );
 
-        unit = selectionTreeManager.getSelectedOrganisationUnit();
+        selectedUnit = selectionTreeManager.getSelectedOrganisationUnit();
 
-        if ( unit == null )
+        if ( selectedUnit == null )
         {
             return ERROR;
         }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        pdfService.writeDataSetCompletenessResult( results, out, i18n, unit, dataSet );
+        pdfService.writeDataSetCompletenessResult( results, out, i18n, selectedUnit, dataSet );
 
         inputStream = new ByteArrayInputStream( out.toByteArray() );
 

@@ -338,10 +338,9 @@
     
 	<action name="dataCompletenessPDFError" class="org.hisp.dhis.reporting.action.NoAction">
 		<result name="success" type="velocity">/main.vm</result>
-		<param name="page">/dhis-web-reporting/dataCompletenessPDFError.vm</param>
+		<param name="page">/dhis-web-commons/oust/selectedOrgunitError.vm</param>
 		<param name="menu">/dhis-web-reporting/menu.vm</param>
 	</action>
-
 	
     <action name="getDataCompletenessWorkbook" class="org.hisp.dhis.reporting.completeness.action.GetDataCompletenessWorkbookAction">
       <result name="success" type="stream">
