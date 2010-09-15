@@ -229,6 +229,10 @@
     padding-bottom:2px;
     padding-left:20px;
 }
+.ext-gecko .x-btn button, .ext-webkit .x-btn button {
+    padding-left:7px;
+    padding-right:7px;
+}
 #ext-gen105 {
     background-position:0 center;
     background-repeat:no-repeat;
