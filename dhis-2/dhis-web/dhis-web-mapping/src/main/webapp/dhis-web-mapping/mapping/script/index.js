@@ -615,29 +615,22 @@ Ext.onReady( function() {
                     }   
 
                     if (vcb && dcb && mcb && lcb) {
-                    	var svgChildren = document.getElementById('_OpenLayers_Container').childNodes;
-						var svgDivId = null;
-
-						for (i = 0; i < svgChildren.length; i++) { // Search for div containing SVG
-							svgDivId = svgChildren[i].getAttribute('id');
-							if (svgDivId && svgDivId.indexOf('OpenLayers.Layer.Vector_') != -1) {
-								break;
-							}
-						}
-
-						var svg = document.getElementById(svgDivId).innerHTML;
-						var objectSVGDocument = document.getElementById(svgDivId).childNodes[0];
+                    	
+						var svgElement = document.getElementsByTagName('svg')[0];
+						var parentSvgElement = svgElement.parentNode;
 						
-                        var viewBox = objectSVGDocument.getAttribute('viewBox');
+						var svg = parentSvgElement.innerHTML;
+						
+                        var viewBox = svgElement.getAttribute('viewBox');
                         var title = Ext.getCmp('exportimagetitle_tf').getValue();
-                    
+                    	
                         if (!title) {
                             Ext.message.msg(false, i18n_please_enter_map_title );
                         }
                         else {
                             var q = Ext.getCmp('exportimagequality_cb').getValue();
-                            var w = objectSVGDocument.getAttribute('width') * q;
-                            var h = objectSVGDocument.getAttribute('height') * q;
+                            var w = svgElement.getAttribute('width') * q;
+                            var h = svgElement.getAttribute('height') * q;
                             var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
                             
                             Ext.getCmp('exportimagetitle_tf').reset();
