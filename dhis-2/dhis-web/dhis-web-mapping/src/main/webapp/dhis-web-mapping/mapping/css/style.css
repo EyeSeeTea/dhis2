@@ -44,9 +44,8 @@
     height:27px;
 }
 #map_tb .x-panel-bbar .x-toolbar, .x-panel-tbar .x-toolbar {
-    border-top:1px solid #bebebe;
-    border-left:1px solid #bebebe;
-    border-right:1px solid #bebebe;
+    border:1px solid #bbbbbb;
+    border-bottom:1px solid #cccccc;
 }
 .x-panel-tbar .x-toolbar {
     padding:0;
