@@ -12,6 +12,7 @@
                         <xs:element name="Port" type="xs:int" default="8080"/>
                         <xs:element name="Host" type="xs:string" default="localhost"/>
                         <xs:element name="PreferredBrowser" type="xs:string" default=""/>
+                        <xs:element name="MaxFormContentSize" type="xs:int" default="400000"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>

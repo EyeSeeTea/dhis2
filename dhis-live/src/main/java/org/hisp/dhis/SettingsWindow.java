@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2004-2010, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.hisp.dhis;
 
 
@@ -39,6 +66,10 @@ public class SettingsWindow extends javax.swing.JFrame
         countryLabel = new javax.swing.JLabel();
         langField = new javax.swing.JTextField();
         countryField = new javax.swing.JTextField();
+        maxSizeLabel = new javax.swing.JLabel();
+        maxSizeField = new javax.swing.JTextField();
+        maxSizeDefaultLabel = new javax.swing.JLabel();
+        unitLabel = new javax.swing.JLabel();
         databaseConfigPanel = new javax.swing.JPanel();
         saveButton = new javax.swing.JButton();
 
@@ -81,6 +112,15 @@ public class SettingsWindow extends javax.swing.JFrame
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.localeCountry}"), countryField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "countryBinding");
         bindingGroup.addBinding(binding);
 
+        maxSizeLabel.setText("Max Form Content Size:");
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.maxFormContentSize}"), maxSizeField, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        maxSizeDefaultLabel.setText("(* requires restart of DHIS 2 Live - default: 200000)");
+
+        unitLabel.setText("(bytes)");
+
         javax.swing.GroupLayout appConfigPanelLayout = new javax.swing.GroupLayout(appConfigPanel);
         appConfigPanel.setLayout(appConfigPanelLayout);
         appConfigPanelLayout.setHorizontalGroup(
@@ -89,28 +129,41 @@ public class SettingsWindow extends javax.swing.JFrame
                 .addContainerGap()
                 .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(appConfigPanelLayout.createSequentialGroup()
-                        .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(hostLabel)
-                            .addComponent(langLabel))
+                        .addGap(25, 25, 25)
+                        .addComponent(hostLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(langField)
-                            .addComponent(hostField, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE))
+                        .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29)
+                        .addComponent(portLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(maxSizeDefaultLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)
+                            .addGroup(appConfigPanelLayout.createSequentialGroup()
+                                .addComponent(maxSizeLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(maxSizeField, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(unitLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)))
+                        .addContainerGap())
+                    .addGroup(appConfigPanelLayout.createSequentialGroup()
+                        .addComponent(langLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(langField, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE)
                         .addGap(10, 10, 10)
-                        .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(countryLabel)
-                            .addComponent(portLabel))
+                        .addComponent(countryLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(countryField)
-                            .addComponent(portField, javax.swing.GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)))
+                        .addComponent(countryField, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
+                        .addGap(280, 280, 280))
                     .addGroup(appConfigPanelLayout.createSequentialGroup()
                         .addComponent(browserPathLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(browserPathField, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(browserPathButton)))
-                .addContainerGap(64, Short.MAX_VALUE))
+                        .addComponent(browserPathField, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(browserPathButton)
+                        .addGap(8, 8, 8))))
         );
         appConfigPanelLayout.setVerticalGroup(
             appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -119,13 +172,21 @@ public class SettingsWindow extends javax.swing.JFrame
                     .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(portLabel)
-                    .addComponent(hostLabel))
-                .addGap(18, 18, 18)
-                .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(langLabel)
-                    .addComponent(countryLabel)
-                    .addComponent(langField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(countryField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(hostLabel)
+                    .addComponent(maxSizeLabel)
+                    .addComponent(maxSizeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(unitLabel))
+                .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(appConfigPanelLayout.createSequentialGroup()
+                        .addGap(1, 1, 1)
+                        .addComponent(maxSizeDefaultLabel))
+                    .addGroup(appConfigPanelLayout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(langLabel)
+                            .addComponent(countryLabel)
+                            .addComponent(langField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(countryField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(18, 18, 18)
                 .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(browserPathLabel)
@@ -140,7 +201,7 @@ public class SettingsWindow extends javax.swing.JFrame
         databaseConfigPanel.setLayout(databaseConfigPanelLayout);
         databaseConfigPanelLayout.setHorizontalGroup(
             databaseConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 540, Short.MAX_VALUE)
+            .addGap(0, 571, Short.MAX_VALUE)
         );
         databaseConfigPanelLayout.setVerticalGroup(
             databaseConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -186,6 +247,7 @@ public class SettingsWindow extends javax.swing.JFrame
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_saveButtonActionPerformed
     {//GEN-HEADEREND:event_saveButtonActionPerformed
+        TrayApp.getInstance().writeConfigToFile();
         this.dispose();
     }//GEN-LAST:event_saveButtonActionPerformed
 
@@ -214,9 +276,13 @@ public class SettingsWindow extends javax.swing.JFrame
     private javax.swing.JLabel hostLabel;
     private javax.swing.JTextField langField;
     private javax.swing.JLabel langLabel;
+    private javax.swing.JLabel maxSizeDefaultLabel;
+    private javax.swing.JTextField maxSizeField;
+    private javax.swing.JLabel maxSizeLabel;
     private javax.swing.JTextField portField;
     private javax.swing.JLabel portLabel;
     private javax.swing.JButton saveButton;
+    private javax.swing.JLabel unitLabel;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 }

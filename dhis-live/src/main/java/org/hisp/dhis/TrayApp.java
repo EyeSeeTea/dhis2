@@ -613,7 +613,7 @@ public class TrayApp
      * Reads the config.xml and creates the Config Object
      * Uses JAXBElement to config back unmarshal the config.xml
      */
-    private void readConfigFromStream( InputStream configStream )
+    public void readConfigFromStream( InputStream configStream )
     {
         try
         {
@@ -635,7 +635,7 @@ public class TrayApp
      * Writes the config.xml based on the changed config by marshalling the config object
      * Uses JAXBElement to write the config back to xml
      */
-    private void writeConfigToFile()
+    public void writeConfigToFile()
     {
         try
         {
