@@ -113,6 +113,46 @@
                             </splash>
                         </configuration>
                     </execution>
+			<execution>
+                        <id>embedded</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <dontWrapJar>true</dontWrapJar>
+                            <headerType>gui</headerType>
+                            <outfile>${project.build.directory}/dhis2-live-embedded.exe</outfile>
+                            <jar>dhis2-live-jar-with-dependencies.jar</jar>
+                            <errTitle>dhis2</errTitle>
+                            <priority>normal</priority>
+                            <downloadUrl>http://java.com/download</downloadUrl>
+                            <supportUrl>http://dhis2.org</supportUrl>
+                            <customProcName>false</customProcName>
+                            <initialHeapSize>512MB</initialHeapSize>
+                            <maxHeapSize>1024MB</maxHeapSize>
+                            <stayAlive>false</stayAlive>
+                            <manifest></manifest>
+                            <icon>${basedir}/util/launch4j/favicon.ico</icon>
+                            <singleInstance>
+                                <mutexName>dhis-live.mutex</mutexName>
+                                <windowTitle></windowTitle>
+                            </singleInstance>
+                            <jre>
+				<path>jre6</path>
+                                <minVersion>1.6.0_14</minVersion>
+                                <opts>
+                                    <opt>-XX:MaxPermSize=256M</opt>
+                                </opts>
+                            </jre>
+                            <splash>
+                                <file>${basedir}/util/launch4j/dhis2-splash.bmp</file>
+                                <waitForWindow>false</waitForWindow>
+                                <timeout>12</timeout>
+                                <timeoutErr>false</timeoutErr>
+                            </splash>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
