@@ -60,8 +60,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
 	<!-- Maintenance -->
 
-	<bean
-		id="org.hisp.dhis.dataadmin.action.maintenance.PerformMaintenanceAction"
+	<bean id="org.hisp.dhis.dataadmin.action.maintenance.PerformMaintenanceAction"
 		class="org.hisp.dhis.dataadmin.action.maintenance.PerformMaintenanceAction"
 		scope="prototype">
 		<property name="maintenanceService" ref="org.hisp.dhis.maintenance.MaintenanceService" />
@@ -73,12 +72,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
 	<!-- Resource table -->
 
-	<bean
-		id="org.hisp.dhis.dataadmin.action.resourcetable.GenerateResourceTableAction"
+	<bean id="org.hisp.dhis.dataadmin.action.resourcetable.GenerateResourceTableAction"
 		class="org.hisp.dhis.dataadmin.action.resourcetable.GenerateResourceTableAction"
 		scope="prototype">
-		<property name="resourceTableService"
-			ref="org.hisp.dhis.resourcetable.ResourceTableService" />
+		<property name="resourceTableService" ref="org.hisp.dhis.resourcetable.ResourceTableService" />
+		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>
 
 	<!-- Cache -->
@@ -91,8 +89,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
 	<!-- Data integrity -->
 
-	<bean
-		id="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityAction"
+	<bean id="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityAction"
 		class="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityAction"
 		scope="prototype">
 		<property name="dataIntegrityService"
@@ -366,18 +363,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	
 	<bean id="org.hisp.dhis.dataadmin.action.sqlview.ExecuteSqlViewQueryAction"
 		class="org.hisp.dhis.dataadmin.action.sqlview.ExecuteSqlViewQueryAction"
-		scope="prototype">
-		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
-	</bean>
-	
-	<bean id="org.hisp.dhis.dataadmin.action.sqlview.DropAllSqlViewTablesAction"
-		class="org.hisp.dhis.dataadmin.action.sqlview.DropAllSqlViewTablesAction"
-		scope="prototype">
-		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
-	</bean>
-	
-	<bean id="org.hisp.dhis.dataadmin.action.sqlview.RegenerateAllSqlViewTablesAction"
-		class="org.hisp.dhis.dataadmin.action.sqlview.RegenerateAllSqlViewTablesAction"
 		scope="prototype">
 		<property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
 	</bean>

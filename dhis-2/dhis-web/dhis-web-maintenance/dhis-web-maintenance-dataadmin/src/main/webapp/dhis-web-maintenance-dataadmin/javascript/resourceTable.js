@@ -1,4 +1,6 @@
 
+var selected = false;
+
 function generateResourceTable()
 {
     var organisationUnit = document.getElementById( "organisationUnit" ).checked;
@@ -36,4 +38,16 @@ function generateResourceTable()
 function generateResourceTableReceived( messageElement )
 {
     setMessage( i18n_resource_tables_generated );
+}
+
+function toggleAll()
+{	
+	selected = !selected;
+	
+	document.getElementById( "organisationUnit" ).checked = selected;
+	document.getElementById( "dataElementGroupSetStructure" ).checked = selected;
+	document.getElementById( "indicatorGroupSetStructure" ).checked = selected;
+	document.getElementById( "organisationUnitGroupSetStructure" ).checked = selected;
+	document.getElementById( "categoryStructure" ).checked = selected;
+	document.getElementById( "categoryOptionComboName" ).checked = selected;
 }

@@ -27,8 +27,6 @@ package org.hisp.dhis.sqlview.jdbc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.ReflectionUtils.isCollection;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -192,22 +190,6 @@ public class JdbcSqlViewExpandStore
         return true;
     }
 
-    @SuppressWarnings( "unchecked" )
-    public void dropView( Object object )
-    {
-        if ( isCollection( object ) )
-        {
-            for ( String viewName : (Collection<String>) object )
-            {
-                dropViewTable( viewName );
-            }
-        }
-        else if ( object != null )
-        {
-            dropViewTable( (String) object );
-        }
-    }
-
     @Override
     public void setUpDataSqlViewTable( SqlViewTable sqlViewTable, String viewTableName )
     {
@@ -262,6 +244,25 @@ public class JdbcSqlViewExpandStore
         return errorMessage;
     }
 
+    @Override
+    public void dropViewTable( String viewName )
+    {
+        final StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            holder.getStatement().executeUpdate( PREFIX_DROPVIEW_QUERY + viewName );
+        }
+        catch ( SQLException ex )
+        {
+            throw new RuntimeException( "Failed to drop view: " + viewName, ex );
+        }
+        finally
+        {
+            holder.close();
+        }
+    }
+    
     @Override
     public String setUpJoinQuery( Collection<String> tableList )
     {
@@ -1092,23 +1093,4 @@ public class JdbcSqlViewExpandStore
 
         return input;
     }
-
-    private void dropViewTable( String viewName )
-    {
-        final StatementHolder holder = statementManager.getHolder();
-
-        try
-        {
-            holder.getStatement().executeUpdate( PREFIX_DROPVIEW_QUERY + viewName );
-        }
-        catch ( SQLException ex )
-        {
-            throw new RuntimeException( "Failed to drop view: " + viewName, ex );
-        }
-        finally
-        {
-            holder.close();
-        }
-    }
-
 }
