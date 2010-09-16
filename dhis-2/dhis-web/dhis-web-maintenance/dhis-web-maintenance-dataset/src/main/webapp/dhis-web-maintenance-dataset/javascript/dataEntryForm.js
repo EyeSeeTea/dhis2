@@ -66,7 +66,7 @@ function validateDataEntryForm()
   }        
 
   params += '&dataSetId=' + document.getElementById( 'dataSetIdField' ).value;
-    
+  
   request.sendAsPost( params );
   request.send( requestString );
 
@@ -189,7 +189,8 @@ function autoSaveDataEntryForm(){
 		function (xmlObject)
 			{
 				setMessage(i18n_save_success); 
-				stat == "ADD";
+				stat = "EDIT";
+				dataEntryFormId = xmlObject.firstChild.nodeValue;
 			} );
 	  
 	var params = 'nameField=' + getFieldValue('nameField');
