@@ -58,7 +58,7 @@
         <th>$i18n.getString( "dataentryform_design" )</th>
       </tr>
       <tr>
-        <td><textarea id="designTextarea" name="designTextarea" >#if($status == "EDIT") $dataEntryForm.htmlCode #end</textarea></td>
+        <td><textarea id="designTextarea" name="designTextarea" >#if($status == "EDIT")${htmlCode}#end</textarea></td>
       </tr>
       <tr>
       <td>
