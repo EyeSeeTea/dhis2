@@ -111,7 +111,7 @@ function validateRegenerateResourceView()
     var categoryStructure = byId( "categoryStructure" ).checked;
     var categoryOptionComboName = byId( "categoryOptionComboName" ).checked;
 
-    if ( organisationUnit || groupSet || dataElementGroupSetStructure || indicatorGroupSetStructure || 
+    if ( organisationUnit || dataElementGroupSetStructure || indicatorGroupSetStructure || 
         organisationUnitGroupSetStructure || categoryStructure || categoryOptionComboName )
     {
         setWaitMessage( i18n_regenerating_resource_tables_and_views );

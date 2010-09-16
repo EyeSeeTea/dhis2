@@ -8,7 +8,7 @@ function generateResourceTable()
     var categoryStructure = document.getElementById( "categoryStructure" ).checked;
     var categoryOptionComboName = document.getElementById( "categoryOptionComboName" ).checked;
     
-    if ( organisationUnit || groupSet || dataElementGroupSetStructure || indicatorGroupSetStructure || 
+    if ( organisationUnit || dataElementGroupSetStructure || indicatorGroupSetStructure || 
         organisationUnitGroupSetStructure || categoryStructure || categoryOptionComboName )
     {
         setWaitMessage( i18n_generating_resource_tables );
