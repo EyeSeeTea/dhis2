@@ -222,7 +222,7 @@ public class TrayApp
         // <editor-fold defaultstate="collapsed" desc="Databases Menu on Popup">
         final Menu databaseMenu = new Menu( messageService.getString( "menuitem.database" ) );
         MenuItem blankItem = new MenuItem( messageService.getString( "menuitem.blank" ) );
-        MenuItem newItem = null;
+        
         blankItem.addActionListener( new ActionListener()
         {
 
