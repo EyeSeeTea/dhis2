@@ -354,8 +354,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<bean id="org.hisp.dhis.dataset.action.dataentryform.DelDataEntryFormAction"
 		class="org.hisp.dhis.dataset.action.dataentryform.DelDataEntryFormAction"
 		scope="prototype">
-		<property name="dataEntryFormService">
-			<ref bean="org.hisp.dhis.dataentryform.DataEntryFormService"/>
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 	</bean>
 	

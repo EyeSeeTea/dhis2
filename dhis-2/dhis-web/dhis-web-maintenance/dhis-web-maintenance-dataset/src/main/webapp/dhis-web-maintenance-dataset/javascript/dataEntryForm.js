@@ -3,13 +3,13 @@
 // Delete DataEntryForm
 // -----------------------------------------------------------------------------
 
-function removeDataEntryForm( dataEntryFormId, dataEntryFormName )
+function removeDataEntryForm( dataSetIdField, dataEntryFormName )
 {
   var request = new Request();
   request.setResponseTypeXML( 'message' );
   request.setCallbackSuccess( removeDataEntryFormCompleted );
  
-  var requestString = 'delDataEntryForm.action?dataEntryFormId=' + dataEntryFormId;
+  var requestString = 'delDataEntryForm.action?dataSetId=' + dataSetIdField;
   var result = window.confirm( i18n_confirm_delete + '\n\n' + dataEntryFormName );
 
   if ( result )

@@ -27,8 +27,8 @@ package org.hisp.dhis.dataset.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18n;
 
 import com.opensymphony.xwork2.Action;
@@ -44,11 +44,11 @@ public class DelDataEntryFormAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataEntryFormService dataEntryFormService;
+    private DataSetService dataSetService;
 
-    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.dataEntryFormService = dataEntryFormService;
+        this.dataSetService = dataSetService;
     }
 
     // -------------------------------------------------------------------------
@@ -66,11 +66,11 @@ public class DelDataEntryFormAction
     // Getters & setters
     // -------------------------------------------------------------------------
 
-    private int dataEntryFormId;
+    private int dataSetId;
 
-    public void setDataEntryFormId( int dataEntryFormId )
+    public void setDataSetId( int dataSetId )
     {
-        this.dataEntryFormId = dataEntryFormId;
+        this.dataSetId = dataSetId;
     }
 
     private String message;
@@ -87,16 +87,18 @@ public class DelDataEntryFormAction
     public String execute()
         throws Exception
     {
-        DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryForm( dataEntryFormId );
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
         
-        if ( dataEntryForm == null )
+        if ( dataSet == null )
         {
             message = i18n.getString( "unable_delete" );
-            
+
             return INPUT;
         }
-
-        dataEntryFormService.deleteDataEntryForm( dataEntryForm );
+        
+        dataSet.setDataEntryForm( null );
+        
+        dataSetService.updateDataSet( dataSet );
 
         return SUCCESS;
     }
