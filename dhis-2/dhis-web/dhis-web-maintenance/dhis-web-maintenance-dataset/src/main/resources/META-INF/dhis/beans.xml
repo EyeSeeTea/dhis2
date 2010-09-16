@@ -357,6 +357,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataSetService">
 			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
+		<property name="dataEntryFormService">
+			<ref bean="org.hisp.dhis.dataentryform.DataEntryFormService"/>
+		</property>
 	</bean>
 	
 	<bean id="org.hisp.dhis.dataset.action.dataentryform.SelectDataElementAction"

@@ -27,6 +27,8 @@ package org.hisp.dhis.dataset.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18n;
@@ -43,6 +45,13 @@ public class DelDataEntryFormAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    private DataEntryFormService dataEntryFormService;
+
+    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
+    {
+        this.dataEntryFormService = dataEntryFormService;
+    }
 
     private DataSetService dataSetService;
 
@@ -73,6 +82,13 @@ public class DelDataEntryFormAction
         this.dataSetId = dataSetId;
     }
 
+    private int dataEntryFormId;
+
+    public void setDataEntryFormId( int dataEntryFormId )
+    {
+        this.dataEntryFormId = dataEntryFormId;
+    }
+
     private String message;
 
     public String getMessage()
@@ -88,17 +104,21 @@ public class DelDataEntryFormAction
         throws Exception
     {
         DataSet dataSet = dataSetService.getDataSet( dataSetId );
+
+        DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryForm( dataEntryFormId );
         
-        if ( dataSet == null )
+        if ( dataSet == null || dataEntryForm == null )
         {
             message = i18n.getString( "unable_delete" );
 
             return INPUT;
         }
-        
+
         dataSet.setDataEntryForm( null );
         
         dataSetService.updateDataSet( dataSet );
+        
+        dataEntryFormService.deleteDataEntryForm( dataEntryForm );
 
         return SUCCESS;
     }
