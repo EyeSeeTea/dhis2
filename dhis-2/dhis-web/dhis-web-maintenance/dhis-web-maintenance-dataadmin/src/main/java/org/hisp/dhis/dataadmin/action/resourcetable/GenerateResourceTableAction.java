@@ -60,13 +60,6 @@ public class GenerateResourceTableAction
         this.organisationUnit = organisationUnit;
     }
 
-    private boolean groupSet;
-
-    public void setGroupSet( boolean groupSet )
-    {
-        this.groupSet = groupSet;
-    }
-
     private boolean dataElementGroupSetStructure;
 
     public void setDataElementGroupSetStructure( boolean dataElementGroupSetStructure )
@@ -114,11 +107,6 @@ public class GenerateResourceTableAction
             resourceTableService.generateOrganisationUnitStructures();
         }
         
-        if ( groupSet )
-        {
-            resourceTableService.generateGroupSetStructures();
-        }
-
         if ( dataElementGroupSetStructure )
         {
             resourceTableService.generateDataElementGroupSetTable();

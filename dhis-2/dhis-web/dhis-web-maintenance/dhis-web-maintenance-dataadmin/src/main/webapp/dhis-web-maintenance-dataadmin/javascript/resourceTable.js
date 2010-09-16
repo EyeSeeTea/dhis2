@@ -2,7 +2,6 @@
 function generateResourceTable()
 {
     var organisationUnit = document.getElementById( "organisationUnit" ).checked;
-    var groupSet = document.getElementById( "groupSet" ).checked;
     var dataElementGroupSetStructure = document.getElementById( "dataElementGroupSetStructure" ).checked;
     var indicatorGroupSetStructure = document.getElementById( "indicatorGroupSetStructure" ).checked;
     var organisationUnitGroupSetStructure = document.getElementById( "organisationUnitGroupSetStructure" ).checked;
@@ -15,7 +14,6 @@ function generateResourceTable()
         setWaitMessage( i18n_generating_resource_tables );
             
         var params = "organisationUnit=" + organisationUnit + 
-            "&groupSet=" + groupSet + 
             "&dataElementGroupSetStructure=" + dataElementGroupSetStructure +
             "&indicatorGroupSetStructure=" + indicatorGroupSetStructure +
             "&organisationUnitGroupSetStructure=" + organisationUnitGroupSetStructure +

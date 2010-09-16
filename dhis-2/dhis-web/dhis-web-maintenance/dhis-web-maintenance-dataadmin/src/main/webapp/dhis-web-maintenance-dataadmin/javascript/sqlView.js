@@ -105,7 +105,6 @@ function validateRegenerateResourceView()
 {
 	var params = "";
 	var organisationUnit = byId( "organisationUnit" ).checked;
-    var groupSet = byId( "groupSet" ).checked;
     var dataElementGroupSetStructure = byId( "dataElementGroupSetStructure" ).checked;
     var indicatorGroupSetStructure = byId( "indicatorGroupSetStructure" ).checked;
     var organisationUnitGroupSetStructure = byId( "organisationUnitGroupSetStructure" ).checked;
@@ -120,7 +119,6 @@ function validateRegenerateResourceView()
 		var submitForm = byId("regenerateResourceViewForm")
 		
 		params += (organisationUnit == true ? "organisationUnit=true&" : "");
-		params += (groupSet == true ? "groupSet=true&" : "");
 		params += (dataElementGroupSetStructure == true ? "dataElementGroupSetStructure=true&" : "");
 		params += (indicatorGroupSetStructure == true ? "indicatorGroupSetStructure=true&" : "");
 		params += (organisationUnitGroupSetStructure == true ? "organisationUnitGroupSetStructure=true&" : "");
