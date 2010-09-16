@@ -397,8 +397,8 @@
 			class="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewObjectAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="page">
-				/dhis-web-maintenance-dataadmin/updateSqlViewForm.vm</param>
+			<param name="page">/dhis-web-maintenance-dataadmin/updateSqlViewForm.vm</param>
+			<param name="stylesheets">style/jquery.autocomplete.css</param>
 			<param name="javascripts">
 				javascript/sqlViewData.js
 				,javascript/sqlView.js

@@ -262,7 +262,7 @@ public class JdbcSqlViewExpandStore
             holder.close();
         }
     }
-    
+
     @Override
     public String setUpJoinQuery( Collection<String> tableList )
     {
@@ -292,12 +292,6 @@ public class JdbcSqlViewExpandStore
                     // "COCN and OUS"
                     joinQuery += SqlViewJoinLib.COCN_JOIN_OUS;
                 }
-                else if ( tableList.contains( "_ougss" ) )
-                {
-                    // "COCN and OUGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_OUGSS;
-
-                }
                 else if ( tableList.contains( "_oustgss" ) )
                 {
                     // "COCN and OUSTGSS"
@@ -312,12 +306,7 @@ public class JdbcSqlViewExpandStore
             {
                 joinQuery += "_orgunitstructure AS _ous \n";
 
-                if ( tableList.contains( "_ougss" ) )
-                {
-                    // "OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS;
-                }
-                else if ( tableList.contains( "_oustgss" ) )
+                if ( tableList.contains( "_oustgss" ) )
                 {
                     // "OUS and OUSTGSS"
                     joinQuery += SqlViewJoinLib.OUS_JOIN_OUSTGSS;
@@ -343,43 +332,6 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // ORGUNITGROUPSETSTRUCTURE
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_ougss" ) )
-            {
-                joinQuery += "_orgunitgroupsetstructure AS _ougss \n";
-
-                if ( tableList.contains( "_cocn" ) )
-                {
-                    // "OUGSS and COCN"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_COCN;
-                }
-                else if ( tableList.contains( "_ous" ) )
-                {
-                    // "OUGSS and OUS"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_OUS;
-                }
-                else if ( tableList.contains( "_cs" ) )
-                {
-                    // "OUGSS and COCN"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_COCN;
-
-                    // "COCN and CS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_CS;
-                }
-                else if ( tableList.contains( "_degss" ) )
-                {
-                    // "OUGSS and DEGSS"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_DEGSS;
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    // "OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-                }
-            }
-
-            // -----------------------------------------------------------------
             // _CATEGORYSTRUCTURE
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_cs" ) )
@@ -396,11 +348,6 @@ public class JdbcSqlViewExpandStore
                 {
                     // "COCN and OUS"
                     joinQuery += SqlViewJoinLib.COCN_JOIN_OUS;
-                }
-                else if ( tableList.contains( "_ougss" ) )
-                {
-                    // "COCN and OUGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_OUGSS;
                 }
                 else if ( tableList.contains( "_degss" ) )
                 {
@@ -430,11 +377,6 @@ public class JdbcSqlViewExpandStore
                 {
                     // "DEGSS and OUS"
                     joinQuery += SqlViewJoinLib.DEGSS_JOIN_OUS;
-                }
-                else if ( tableList.contains( "_ougss" ) )
-                {
-                    // "DEGSS and OUGSS"
-                    joinQuery += SqlViewJoinLib.DEGSS_JOIN_OUGSS;
                 }
                 else if ( tableList.contains( "_cs" ) )
                 {
@@ -476,11 +418,6 @@ public class JdbcSqlViewExpandStore
                     // "OUSTGSS and OUS"
                     joinQuery += SqlViewJoinLib.OUSTGSS_JOIN_OUS;
                 }
-                else if ( tableList.contains( "_ougss" ) )
-                {
-                    // "OUSTGSS and OUGSS"
-                    joinQuery += SqlViewJoinLib.OUSTGSS_JOIN_OUGSS;
-                }
             }
         }
         else if ( tableList.size() == 3 )
@@ -495,18 +432,10 @@ public class JdbcSqlViewExpandStore
                 // "COCN and OUS"
                 joinQuery += SqlViewJoinLib.COCN_JOIN_OUS;
 
-                // "DV and OUS"
-                joinQuery += SqlViewJoinLib.DV_JOIN_OUS;
-
                 if ( tableList.contains( "_degss" ) )
                 {
                     // "DV and DEGSS"
                     joinQuery += SqlViewJoinLib.DV_JOIN_DEGSS;
-                }
-                else if ( tableList.contains( "_ougss" ) )
-                {
-                    // "OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS;
                 }
                 else if ( tableList.contains( "_oustgss" ) )
                 {
@@ -521,34 +450,7 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // CategoryOptionComboname OrgUnitGroupSetStructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_cocn" ) && tableList.contains( "_ougss" ) )
-            {
-                joinQuery += "_categoryoptioncomboname AS _cocn \n";
-
-                // "COCN and OUGSS"
-                joinQuery += SqlViewJoinLib.COCN_JOIN_OUGSS;
-
-                if ( tableList.contains( "_cs" ) )
-                {
-                    // "COCN and CS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_CS;
-                }
-                else if ( tableList.contains( "_degss" ) )
-                {
-                    // "DV and DEGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_DEGSS;
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    // "OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // CategoryOptionComboname _categorystructure
+            // CategoryOptionComboname _CategoryStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_cocn" ) && tableList.contains( "_cs" ) )
             {
@@ -570,7 +472,7 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // CategoryOptionComboname _organisationunitgroupsetstructure
+            // CategoryOptionComboname _OrganisationUnitGroupSetStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_cocn" ) && tableList.contains( "_oustgss" )
                 && tableList.contains( "_degss" ) )
@@ -585,45 +487,7 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // OrgUnitStructure OrgUnitGroupSetStructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_ous" ) && tableList.contains( "_ougss" ) )
-            {
-                if ( tableList.contains( "_cs" ) )
-                {
-                    joinQuery += "_categorystructure AS _cs \n";
-
-                    // "CS and COCN"
-                    joinQuery += SqlViewJoinLib.CS_JOIN_COCN;
-
-                    // "COCN and OUS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_OUS;
-
-                    // "OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS;
-
-                }
-                else if ( tableList.contains( "_degss" ) )
-                {
-                    joinQuery += "_dataelementgroupsetstructure AS _degss \n";
-
-                    // "DEGSS and OUS"
-                    joinQuery += SqlViewJoinLib.DEGSS_JOIN_OUS;
-
-                    // "OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS;
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    joinQuery += "_orgunitstructure AS _ous \n";
-
-                    // "OUS and OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // OrgUnitStructure _categorystructure
+            // OrgUnitStructure _CategoryStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_ous" ) && tableList.contains( "_cs" ) )
             {
@@ -648,7 +512,7 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // OrgUnitStructure _dataelementgroupsetstructure
+            // OrgUnitStructure _DataelementGroupSetStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_ous" ) && tableList.contains( "_degss" ) && tableList.contains( "_oustgss" ) )
             {
@@ -663,48 +527,7 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // OrgUnitGroupSetStructure _categorystructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_ougss" ) && tableList.contains( "_cs" ) )
-            {
-                joinQuery += "_categorystructure AS _cs \n";
-
-                // "CS and COCN"
-                joinQuery += SqlViewJoinLib.CS_JOIN_COCN;
-
-                // "COCN and OUGSS"
-                joinQuery += SqlViewJoinLib.COCN_JOIN_OUGSS;
-
-                if ( tableList.contains( "_degss" ) )
-                {
-                    // "DV and DEGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_DEGSS;
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    // "OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // OrgUnitGroupSetStructure _dataelementgroupsetstructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_ougss" ) && tableList.contains( "_degss" )
-                && tableList.contains( "_oustgss" ) )
-            {
-                joinQuery += "_dataelementgroupsetstructure AS _degss \n";
-
-                // "DEGSS and OUGSS"
-                joinQuery += SqlViewJoinLib.DEGSS_JOIN_OUGSS;
-
-                // "OUGSS and OUSTGSS"
-                joinQuery += SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-
-            }
-
-            // -----------------------------------------------------------------
-            // _categorystructure _dataelementgroupsetstructure
+            // _CategoryStructure _DataelementGroupSetStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_cs" ) && tableList.contains( "_degss" ) && tableList.contains( "_oustgss" ) )
             {
@@ -721,51 +544,9 @@ public class JdbcSqlViewExpandStore
         else if ( tableList.size() == 4 )
         {
             // -----------------------------------------------------------------
-            // CategoryOptionComboname OrgUnitStructure OrgUnitGroupSetStructure
+            // _CategoryOptionComboname _OrgUnitStructure _CategoryStructure
             // -----------------------------------------------------------------
-            if ( tableList.contains( "_cocn" ) && tableList.contains( "_ous" ) && tableList.contains( "_ougss" ) )
-            {
-                if ( tableList.contains( "_cs" ) )
-                {
-                    joinQuery += "_categorystructure AS _cs \n";
-
-                    // "CS and COCN"
-                    joinQuery += SqlViewJoinLib.CS_JOIN_COCN;
-
-                    // "COCN and OUS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_OUS;
-
-                    // "OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS;
-
-                }
-                else if ( tableList.contains( "_degss" ) )
-                {
-                    joinQuery += "_categoryoptioncomboname AS _cocn \n";
-
-                    // "COCN and DEGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                    // "DV and OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_OUS + SqlViewJoinLib.OUS_JOIN_OUGSS;
-
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    joinQuery += "_categoryoptioncomboname AS _cocn \n";
-
-                    // "COCN and OUS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_OUS;
-
-                    // "OUS and OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-
-                }
-            }
-            // -----------------------------------------------------------------
-            // CategoryOptionComboname OrgUnitStructure _categorystructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_cocn" ) && tableList.contains( "_ous" ) && tableList.contains( "_cs" ) )
+            if ( tableList.contains( "_cocn" ) && tableList.contains( "_ous" ) && tableList.contains( "_cs" ) )
             {
                 if ( tableList.contains( "_degss" ) )
                 {
@@ -794,8 +575,8 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // CategoryOptionComboname OrgUnitStructure
-            // _dataelementgroupsetstructure
+            // _CategoryOptionComboname _OrgUnitStructure
+            // _DataelementGroupSetStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_cocn" ) && tableList.contains( "_ous" ) && tableList.contains( "_degss" )
                 && tableList.contains( "_oustgss" ) )
@@ -814,38 +595,8 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // CategoryOptionComboname OrgUnitGroupSetStructure
-            // _categorystructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_cocn" ) && tableList.contains( "_ougss" ) && tableList.contains( "_cs" ) )
-            {
-                joinQuery += "_categorystructure AS _cs \n";
-
-                // "CS and COCN"
-                joinQuery += SqlViewJoinLib.CS_JOIN_COCN;
-
-                if ( tableList.contains( "_degss" ) )
-                {
-                    // "COCN and DEGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                    // "DV and OUGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_OUGSS;
-
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    // "COCN and OUGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_OUGSS;
-
-                    // "OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // _categoryoptioncomboname _categorystructure
-            // _dataelementgroupsetstructure
+            // _CategoryOptionComboname _CategoryStructure
+            // _DataelementGroupSetStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_cocn" ) && tableList.contains( "_cs" ) && tableList.contains( "_degss" )
                 && tableList.contains( "_oustgss" ) )
@@ -864,52 +615,14 @@ public class JdbcSqlViewExpandStore
             }
 
             // -----------------------------------------------------------------
-            // _orgunitstructure _orgunitgroupsetstructure _categorystructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_ous" ) && tableList.contains( "_ougss" ) && tableList.contains( "_cs" ) )
-            {
-                joinQuery += "_categorystructure AS _cs \n";
-
-                // "CS and COCN"
-                joinQuery += SqlViewJoinLib.CS_JOIN_COCN;
-
-                if ( tableList.contains( "_degss" ) )
-                {
-                    // "COCN and DEGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                    // "DV and OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_OUS + SqlViewJoinLib.OUS_JOIN_OUGSS;
-
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    // "DV and OUS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_OUS;
-
-                    // "OUS and OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // _orgunitstructure _dataelementgroupsetstructure
-            // _organisationunitgroupsetstructure
+            // _OrgunitStructure _DataelementGroupSetStructure
+            // _OrganisationunitGroupSetStructure
             // -----------------------------------------------------------------
             else if ( tableList.contains( "_ous" ) && tableList.contains( "_degss" ) && tableList.contains( "_oustgss" ) )
             {
                 joinQuery += "_organisationunitgroupsetstructure AS _oustgss \n";
 
-                if ( tableList.contains( "_ougss" ) )
-                {
-                    // "OUSTGSS and OUGSS and OUS"
-                    joinQuery += SqlViewJoinLib.OUSTGSS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUS;
-
-                    // "OUS and DEGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_DEGSS;
-
-                }
-                else if ( tableList.contains( "_cs" ) )
+                if ( tableList.contains( "_cs" ) )
                 {
                     // "OUSTGSS and OUS and COCN"
                     joinQuery += SqlViewJoinLib.OUSTGSS_JOIN_OUS + SqlViewJoinLib.OUS_JOIN_COCN;
@@ -918,147 +631,25 @@ public class JdbcSqlViewExpandStore
                     joinQuery += SqlViewJoinLib.COCN_JOIN_CS;
                 }
             }
-
-            // -----------------------------------------------------------------
-            // OrgUnitGroupSetStructure _categorystructure
-            // _dataelementgroupsetstructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_ougss" ) && tableList.contains( "_cs" ) && tableList.contains( "_degss" )
-                && tableList.contains( "_oustgss" ) )
-            {
-                joinQuery += "_categorystructure AS _cs \n";
-
-                // "CS and COCN and DEGSS"
-                joinQuery += SqlViewJoinLib.CS_JOIN_COCN + SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                // "DV and OUGSS and OUSTGSS"
-                joinQuery += SqlViewJoinLib.DV_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-
-            }
         }
         else if ( tableList.size() == 5 )
         {
             // -----------------------------------------------------------------
-            // _categoryoptioncomboname _orgunitstructure
-            // _orgunitgroupsetstructure _categorystructure
-            // -----------------------------------------------------------------
-            if ( tableList.contains( "_cocn" ) && tableList.contains( "_ous" ) && tableList.contains( "_ougss" )
-                && tableList.contains( "_cs" ) )
-            {
-                joinQuery += "_categorystructure AS _cs \n";
-
-                // "CS and COCN"
-                joinQuery += SqlViewJoinLib.CS_JOIN_COCN;
-
-                if ( tableList.contains( "_degss" ) )
-                {
-                    // "COCN and DEGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                    // "DV and OUS and OUGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_OUS + SqlViewJoinLib.OUS_JOIN_OUGSS;
-
-                }
-                else if ( tableList.contains( "_oustgss" ) )
-                {
-                    // "COCN and OUS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_OUS;
-
-                    // "OUS and OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // _categoryoptioncomboname _orgunitstructure
-            // _dataelementgroupsetstructure _organisationunitgroupsetstructure
+            // _CategoryOptionComboname _OrgUnitStructure
+            // _DataelementGroupSetStructure _OrganisationunitGroupSetStructure
             // -----------------------------------------------------------------
             if ( tableList.contains( "_cocn" ) && tableList.contains( "_ous" ) && tableList.contains( "_degss" )
-                && tableList.contains( "_oustgss" ) )
+                && tableList.contains( "_oustgss" ) && tableList.contains( "_cs" ) )
             {
-                if ( tableList.contains( "_cs" ) )
-                {
-                    joinQuery += "_categorystructure AS _cs \n";
 
-                    // "CS and COCN and DEGSS"
-                    joinQuery += SqlViewJoinLib.CS_JOIN_COCN + SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                    // "DV and OUS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_OUS + SqlViewJoinLib.OUS_JOIN_OUSTGSS;
-
-                }
-                else if ( tableList.contains( "_ougss" ) )
-                {
-                    joinQuery += "_categoryoptioncomboname AS _cocn \n";
-
-                    // "COCN and DEGSS"
-                    joinQuery += SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                    // "DV and OUGSS"
-                    joinQuery += SqlViewJoinLib.DV_JOIN_OUS;
-
-                    // "DEGSS and OUS and OUGSS and OUSTGSS"
-                    joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // _categoryoptioncomboname _orgunitgroupsetstructure
-            // _categorystructure _dataelementgroupsetstructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_cocn" ) && tableList.contains( "_ougss" ) && tableList.contains( "_cs" )
-                && tableList.contains( "_degss" ) && tableList.contains( "_oustgss" ) )
-            {
                 joinQuery += "_categorystructure AS _cs \n";
 
                 // "CS and COCN and DEGSS"
                 joinQuery += SqlViewJoinLib.CS_JOIN_COCN + SqlViewJoinLib.COCN_JOIN_DEGSS;
 
-                // "DV and OUGSS and OUSTGSS"
-                joinQuery += SqlViewJoinLib.DV_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
-            }
+                // "DV and OUS and OUSTGSS"
+                joinQuery += SqlViewJoinLib.DV_JOIN_OUS + SqlViewJoinLib.OUS_JOIN_OUSTGSS;
 
-            // -----------------------------------------------------------------
-            // _orgunitstructure _orgunitgroupsetstructure
-            // _categorystructure _dataelementgroupsetstructure
-            // _organisationunitgroupsetstructure
-            // -----------------------------------------------------------------
-            else if ( tableList.contains( "_ous" ) && tableList.contains( "_ougss" ) && tableList.contains( "_cs" )
-                && tableList.contains( "_degss" ) && tableList.contains( "_oustgss" ) )
-            {
-                joinQuery += "_organisationunitgroupsetstructure AS _oustgss \n";
-
-                // "OUSTGSS and OUGSS and OUS"
-                joinQuery += SqlViewJoinLib.OUSTGSS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUS;
-
-                // "OUS and DEGSS"
-                joinQuery += SqlViewJoinLib.OUS_JOIN_DEGSS;
-
-                // "DV and COCN and CS"
-                joinQuery += SqlViewJoinLib.DV_JOIN_COCN + SqlViewJoinLib.COCN_JOIN_CS;
-            }
-        }
-        else if ( tableList.size() == 6 )
-        {
-            // -----------------------------------------------------------------
-            // CategoryOptionComboname OrgUnitStructure OrgUnitGroupSetStructure
-            // _categorystructure _dataelementgroupsetstructure
-            // _organisationunitgroupsetstructure
-            // -----------------------------------------------------------------
-            if ( tableList.contains( "_cocn" ) && tableList.contains( "_ous" ) && tableList.contains( "_ougss" )
-                && tableList.contains( "_cs" ) && tableList.contains( "_degss" ) && tableList.contains( "_oustgss" ) )
-            {
-                joinQuery += "_categorystructure AS _cs \n";
-
-                // "CS and COCN and DEGSS"
-                joinQuery += SqlViewJoinLib.CS_JOIN_COCN + SqlViewJoinLib.COCN_JOIN_DEGSS;
-
-                // "DV and OUS"
-                joinQuery += SqlViewJoinLib.DV_JOIN_OUS;
-
-                // "OUS and OUGSS and OUSTGSS"
-                joinQuery += SqlViewJoinLib.OUS_JOIN_OUGSS + SqlViewJoinLib.OUGSS_JOIN_OUSTGSS;
             }
         }
 
