@@ -1,7 +1,6 @@
 
 <h3>$i18n.getString( "resource_table" ) #openHelp( "resourceTables" )</h3>
 
-<form id="regenerateResourceViewForm" action="dropAllSqlViewTables.action" method="post">
 <p>
     <input type="checkbox" name="resourceTableCheckBox" id="organisationUnit">
     <label for="organisationUnit">$i18n.getString( "organisation_unit_structure" ) <span style="color:#606060">(_orgunitstructure)</span></label>
@@ -42,8 +41,6 @@
 	</tr>
 
 </table>
-</form>
-
 
 <span id="message"></span>
 
