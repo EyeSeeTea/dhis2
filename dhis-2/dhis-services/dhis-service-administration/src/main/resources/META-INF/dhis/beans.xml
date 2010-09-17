@@ -84,6 +84,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     class="org.hisp.dhis.databrowser.jdbc.StatementManagerDataBrowserStore">
 	<property name="organisationUnitService" 
       ref="org.hisp.dhis.organisationunit.OrganisationUnitService"/>
+	<property name="sqlViewService" 
+      ref="org.hisp.dhis.sqlview.SqlViewService"/>
   </bean>
   
   <bean id="org.hisp.dhis.databrowser.DataBrowserService"
