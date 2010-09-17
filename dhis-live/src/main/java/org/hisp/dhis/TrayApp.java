@@ -97,6 +97,8 @@ public class TrayApp
 
     private TrayIcon trayIcon;
 
+    private SettingsWindow settingsWindow;
+
     private JAXBElement<ConfigType> configElement;
 
     public static ConfigType config;
@@ -167,13 +169,23 @@ public class TrayApp
         try
         {
             configStream = new java.io.FileInputStream( installDir + CONFIG_FILE_NAME );
+            readConfigFromStream( configStream );
         } catch ( FileNotFoundException ex )
         {
             log.info( "Can't locate external config - falling back to default" );
             configStream = TrayApp.class.getResourceAsStream( CONFIG_DEFAULT );
+            readConfigFromStream( configStream );
+            writeConfigToFile();
+            try
+            {
+                configStream = new java.io.FileInputStream( installDir + CONFIG_FILE_NAME );
+            } catch ( FileNotFoundException fnfex )
+            {
+                log.info( "Can't locate external config - falling back to default", fnfex );
+                JOptionPane.showMessageDialog( null, "Unexpected Error", "File Error", JOptionPane.ERROR_MESSAGE );
+                System.exit( 1 );
+            }
         }
-
-        readConfigFromStream( configStream );
         databaseConfig = config.getDatabaseConfiguration();
         appConfig = config.getAppConfiguration();
         log.info( "Locale: " + appConfig.getLocaleLanguage() + ":" + appConfig.getLocaleCountry() );
@@ -222,7 +234,7 @@ public class TrayApp
         // <editor-fold defaultstate="collapsed" desc="Databases Menu on Popup">
         final Menu databaseMenu = new Menu( messageService.getString( "menuitem.database" ) );
         MenuItem blankItem = new MenuItem( messageService.getString( "menuitem.blank" ) );
-        MenuItem newItem = null;
+        
         blankItem.addActionListener( new ActionListener()
         {
 
@@ -333,7 +345,7 @@ public class TrayApp
             @Override
             public void actionPerformed( ActionEvent e )
             {
-                new SettingsWindow().setVisible( true );
+                getSettingsWindow().setVisible( true );
             }
         } );
         popup.add( settingsItem );
@@ -635,7 +647,7 @@ public class TrayApp
      * Writes the config.xml based on the changed config by marshalling the config object
      * Uses JAXBElement to write the config back to xml
      */
-    private void writeConfigToFile()
+    public void writeConfigToFile()
     {
         try
         {
@@ -644,15 +656,8 @@ public class TrayApp
             Marshaller m = jc.createMarshaller();
             m.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
             //Marshal object into file.
-            if ( new File( installDir + CONFIG_FILE_NAME ).exists() )
-            {
-                m.marshal( configElement, new FileOutputStream( installDir + CONFIG_FILE_NAME ) );
-                log.info( "Config Saved at: " + installDir + CONFIG_FILE_NAME );
-            } else
-            {
-                m.marshal( configElement, new FileOutputStream( CONFIG_DEFAULT ) );
-                log.info( "Config Saved at: " + CONFIG_FILE_NAME );
-            }
+            m.marshal( configElement, new FileOutputStream( installDir + CONFIG_FILE_NAME ) );
+            log.info( "Config Saved at: " + installDir + CONFIG_FILE_NAME );
         } catch ( FileNotFoundException ex )
         {
             log.error( "Can't find configuration xml", ex );
@@ -702,5 +707,20 @@ public class TrayApp
             JOptionPane.showMessageDialog( null, "Error with Hibernate Properties", "Database Error", JOptionPane.ERROR_MESSAGE );
             System.exit( 1 );
         }
+    }
+
+    /**
+     * Writes the hibernate.properties file to the /conf folder based on the selected
+     * connection from the config.xml or the defaultConfig.xml
+     *
+     * @return  Returns whether successful in writing hibernate.properties
+     */
+    private SettingsWindow getSettingsWindow()
+    {
+        if ( settingsWindow == null )
+        {
+            settingsWindow = new SettingsWindow();
+        }
+        return settingsWindow;
     }
 }

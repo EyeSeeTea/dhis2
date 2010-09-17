@@ -43,8 +43,9 @@
     </action>
     
     <action name="validateDocument" class="org.hisp.dhis.reporting.document.action.ValidateDocumentAction">
-      <result name="success" type="velocity-xml">/dhis-web-reporting/responseSuccess.vm</result>
-      <result name="input" type="velocity-xml">/dhis-web-reporting/responseInput.vm</result>
+      <result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
     

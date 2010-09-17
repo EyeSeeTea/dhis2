@@ -99,7 +99,7 @@ function generateReportExcel() {
 	request.setCallbackSuccess( generateReportExcelReceived );
 	
 	var params = "reportId=" + byId('report').value;
-	params += "&periodId=" + byId('period').value;
+	params += "&periodIndex=" + byId('period').value;
 	request.sendAsPost(params);
 	request.send( 'generateReportExcel.action');
 	

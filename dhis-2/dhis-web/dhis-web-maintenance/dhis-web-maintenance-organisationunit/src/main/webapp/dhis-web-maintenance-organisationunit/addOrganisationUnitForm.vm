@@ -27,7 +27,7 @@
 	</tr>
 	<tr>
 		<td><label for="code">$i18n.getString( "code" )</label></td>
-		<td><input type="text" id="code" name="code" style="width:25em" class="{validate:{maxlength:25}}"></td>
+		<td><input type="text" id="code" name="code" style="width:20em" class="{validate:{maxlength:25}}"></td>
 	</tr>
 	<tr>
 		<td><label for="openingDate">$i18n.getString( "opening_date" ) ($i18n.getString( "format.date.label" )) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>

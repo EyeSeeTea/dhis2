@@ -93,6 +93,7 @@ public class WebAppServer
         ContextHandlerCollection handlers = new ContextHandlerCollection();
 
         WebAppContext dhisWebApp = new WebAppContext();
+        dhisWebApp.setMaxFormContentSize( TrayApp.appConfig.getMaxFormContentSize() );
         dhisWebApp.setWar( installDir + DHIS_DIR );
         handlers.addHandler( dhisWebApp );
         log.info( "Setting DHIS 2 web app context to: " + installDir + DHIS_DIR );

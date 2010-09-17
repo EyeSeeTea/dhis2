@@ -39,6 +39,7 @@ import org.hisp.dhis.period.CalendarPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
+import org.hisp.dhis.period.comparator.PeriodComparator;
 
 import com.opensymphony.xwork2.ActionContext;
 
@@ -118,9 +119,16 @@ public class DefaultPeriodGenericManager
             }
         }
 
-        Collections.sort( periods, new AscendingPeriodComparator() );
+        Collections.sort( periods, new PeriodComparator() );
 
         return periods;
+    }
+    
+
+    @Override
+    public Period getSelectedPeriod( Integer index )
+    {        
+        return getPeriodList().get( index );
     }
 
     public void nextPeriodSpan()
@@ -211,4 +219,5 @@ public class DefaultPeriodGenericManager
     {
         getSession().put( SESSION_KEY_BASE_PERIOD_TYPE_GENERIC, periodTypeNam );
     }
+
 }
