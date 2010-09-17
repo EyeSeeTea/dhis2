@@ -101,6 +101,8 @@ public class TrayApp
 
     private JAXBElement<ConfigType> configElement;
 
+    private Menu databaseMenu;
+
     public static ConfigType config;
 
     public static DatabaseConfiguration databaseConfig;
@@ -232,9 +234,77 @@ public class TrayApp
         // </editor-fold>
 
         // <editor-fold defaultstate="collapsed" desc="Databases Menu on Popup">
-        final Menu databaseMenu = new Menu( messageService.getString( "menuitem.database" ) );
+        databaseMenu = new Menu( messageService.getString( "menuitem.database" ) );
+        updateDatabaseMenus();
+        popup.add( databaseMenu );
+        // </editor-fold>
+
+        // <editor-fold defaultstate="collapsed" desc="Settings Item on Popup">
+        MenuItem settingsItem = new MenuItem( messageService.getString( "menuitem.settings" ) );
+        settingsItem.addActionListener( new ActionListener()
+        {
+
+            @Override
+            public void actionPerformed( ActionEvent e )
+            {
+                if(settingsWindow!= null && settingsWindow.isVisible()){
+                    settingsWindow.dispose();
+                }
+                settingsWindow = new SettingsWindow();
+                settingsWindow.setVisible( true );
+            }
+        } );
+        popup.add( settingsItem );
+        //</editor-fold>
+
+        // <editor-fold defaultstate="collapsed" desc="Exit Item on Popup">
+        MenuItem exitItem = new MenuItem( messageService.getString( "menuitem.exit" ) );
+        exitItem.addActionListener( new ActionListener()
+        {
+
+            @Override
+            public void actionPerformed( ActionEvent e )
+            {
+                shutdown();
+            }
+        } );
+        popup.add( exitItem );
+        //</editor-fold>
+
+        trayIcon = new TrayIcon( image, "DHIS 2 Live", popup );
+        trayIcon.setImageAutoSize( true );
+        tray.add( trayIcon );
+
+        new Thread( new Runnable()
+        {
+
+            @Override
+            public void run()
+            {
+                appServer = new WebAppServer();
+                try
+                {
+                    appServer.init();
+                } catch ( Exception e )
+                {
+                    log.fatal( "Application server could not be initialized" );
+                }
+                try
+                {
+                    appServer.start();
+                } catch ( Exception e )
+                {
+                    log.fatal( "Application server could not be started" );
+                }
+            }
+        } ).start();
+    }
+
+    public void updateDatabaseMenus()
+    {
+        databaseMenu.removeAll();
+
         MenuItem blankItem = new MenuItem( messageService.getString( "menuitem.blank" ) );
-        
         blankItem.addActionListener( new ActionListener()
         {
 
@@ -334,64 +404,6 @@ public class TrayApp
             } );
             databaseMenu.add( connItem );
         }
-        popup.add( databaseMenu );
-        // </editor-fold>
-
-        // <editor-fold defaultstate="collapsed" desc="Settings Item on Popup">
-        MenuItem settingsItem = new MenuItem( messageService.getString( "menuitem.settings" ) );
-        settingsItem.addActionListener( new ActionListener()
-        {
-
-            @Override
-            public void actionPerformed( ActionEvent e )
-            {
-                getSettingsWindow().setVisible( true );
-            }
-        } );
-        popup.add( settingsItem );
-        //</editor-fold>
-
-        // <editor-fold defaultstate="collapsed" desc="Exit Item on Popup">
-        MenuItem exitItem = new MenuItem( messageService.getString( "menuitem.exit" ) );
-        exitItem.addActionListener( new ActionListener()
-        {
-
-            @Override
-            public void actionPerformed( ActionEvent e )
-            {
-                shutdown();
-            }
-        } );
-        popup.add( exitItem );
-        //</editor-fold>
-
-        trayIcon = new TrayIcon( image, "DHIS 2 Live", popup );
-        trayIcon.setImageAutoSize( true );
-        tray.add( trayIcon );
-
-        new Thread( new Runnable()
-        {
-
-            @Override
-            public void run()
-            {
-                appServer = new WebAppServer();
-                try
-                {
-                    appServer.init();
-                } catch ( Exception e )
-                {
-                    log.fatal( "Application server could not be initialized" );
-                }
-                try
-                {
-                    appServer.start();
-                } catch ( Exception e )
-                {
-                    log.fatal( "Application server could not be started" );
-                }
-            }
-        } ).start();
     }
 
     // -------------------------------------------------------------------------
@@ -707,20 +719,5 @@ public class TrayApp
             JOptionPane.showMessageDialog( null, "Error with Hibernate Properties", "Database Error", JOptionPane.ERROR_MESSAGE );
             System.exit( 1 );
         }
-    }
-
-    /**
-     * Writes the hibernate.properties file to the /conf folder based on the selected
-     * connection from the config.xml or the defaultConfig.xml
-     *
-     * @return  Returns whether successful in writing hibernate.properties
-     */
-    private SettingsWindow getSettingsWindow()
-    {
-        if ( settingsWindow == null )
-        {
-            settingsWindow = new SettingsWindow();
-        }
-        return settingsWindow;
     }
 }

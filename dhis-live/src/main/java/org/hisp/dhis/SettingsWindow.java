@@ -78,10 +78,12 @@ public class SettingsWindow extends JFrame
         connTypePane = new javax.swing.JScrollPane();
         connTypeTable = new javax.swing.JTable();
         connTypeAddButton = new javax.swing.JButton();
+        connTypeDelButton = new javax.swing.JButton();
         connPanel = new javax.swing.JPanel();
         connPane = new javax.swing.JScrollPane();
         connTable = new javax.swing.JTable();
         connAddButton = new javax.swing.JButton();
+        connDelButton = new javax.swing.JButton();
         saveButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -233,10 +235,17 @@ public class SettingsWindow extends JFrame
         connTypePane.setViewportView(connTypeTable);
         connTypeTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
-        connTypeAddButton.setText("Add New Connection Type");
+        connTypeAddButton.setText("Add");
         connTypeAddButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connTypeAddButtonActionPerformed(evt);
+            }
+        });
+
+        connTypeDelButton.setText("Remove");
+        connTypeDelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                connTypeDelButtonActionPerformed(evt);
             }
         });
 
@@ -244,20 +253,25 @@ public class SettingsWindow extends JFrame
         connTypePanel.setLayout(connTypePanelLayout);
         connTypePanelLayout.setHorizontalGroup(
             connTypePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connTypePanelLayout.createSequentialGroup()
+            .addGroup(connTypePanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(connTypePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(connTypePane, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
-                    .addComponent(connTypeAddButton))
+                .addGroup(connTypePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(connTypePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connTypePanelLayout.createSequentialGroup()
+                        .addComponent(connTypeAddButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(connTypeDelButton)))
                 .addContainerGap())
         );
         connTypePanelLayout.setVerticalGroup(
             connTypePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connTypePanelLayout.createSequentialGroup()
+            .addGroup(connTypePanelLayout.createSequentialGroup()
                 .addComponent(connTypePane, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(connTypeAddButton)
-                .addGap(6, 6, 6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(connTypePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(connTypeAddButton)
+                    .addComponent(connTypeDelButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         connPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Connections"));
@@ -272,6 +286,7 @@ public class SettingsWindow extends JFrame
         columnBinding.setColumnClass(String.class);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${type.id}"));
         columnBinding.setColumnName("Type");
+        columnBinding.setColumnClass(String.class);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
         columnBinding.setColumnName("Name");
         columnBinding.setColumnClass(String.class);
@@ -285,17 +300,24 @@ public class SettingsWindow extends JFrame
         columnBinding.setColumnName("Password");
         columnBinding.setColumnClass(String.class);
         bindingGroup.addBinding(jTableBinding);
-        jTableBinding.bind();binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${databaseConfiguration.databaseConnections.selected}"), connTable, org.jdesktop.beansbinding.BeanProperty.create("selectedElement"));
-        bindingGroup.addBinding(binding);
-
+        jTableBinding.bind();
         connPane.setViewportView(connTable);
         connTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        connTable.getColumnModel().getColumn(1).setCellEditor(null);
+        connTable.getColumnModel().getColumn(1).setCellRenderer(null);
         connTable.getColumnModel().getColumn(3).setPreferredWidth(60);
 
-        connAddButton.setText("Add New Connection");
+        connAddButton.setText("Add");
         connAddButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connAddButtonActionPerformed(evt);
+            }
+        });
+
+        connDelButton.setText("Remove");
+        connDelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                connDelButtonActionPerformed(evt);
             }
         });
 
@@ -304,8 +326,10 @@ public class SettingsWindow extends JFrame
         connPanelLayout.setHorizontalGroup(
             connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connPanelLayout.createSequentialGroup()
-                .addContainerGap(450, Short.MAX_VALUE)
+                .addContainerGap(455, Short.MAX_VALUE)
                 .addComponent(connAddButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(connDelButton)
                 .addContainerGap())
             .addGroup(connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(connPanelLayout.createSequentialGroup()
@@ -316,13 +340,15 @@ public class SettingsWindow extends JFrame
         connPanelLayout.setVerticalGroup(
             connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connPanelLayout.createSequentialGroup()
-                .addContainerGap(101, Short.MAX_VALUE)
-                .addComponent(connAddButton)
+                .addContainerGap(99, Short.MAX_VALUE)
+                .addGroup(connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(connDelButton)
+                    .addComponent(connAddButton))
                 .addContainerGap())
             .addGroup(connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(connPanelLayout.createSequentialGroup()
                     .addComponent(connPane, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(41, Short.MAX_VALUE)))
+                    .addContainerGap(39, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout databaseConfigPanelLayout = new javax.swing.GroupLayout(databaseConfigPanel);
@@ -385,6 +411,7 @@ public class SettingsWindow extends JFrame
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_saveButtonActionPerformed
     {//GEN-HEADEREND:event_saveButtonActionPerformed
         TrayApp.getInstance().writeConfigToFile();
+        TrayApp.getInstance().updateDatabaseMenus();
         this.dispose();
     }//GEN-LAST:event_saveButtonActionPerformed
 
@@ -414,6 +441,26 @@ public class SettingsWindow extends JFrame
         bindingGroup.bind();
     }//GEN-LAST:event_connAddButtonActionPerformed
 
+    private void connTypeDelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_connTypeDelButtonActionPerformed
+    {//GEN-HEADEREND:event_connTypeDelButtonActionPerformed
+        if ( connTypeTable.getSelectedRow() != -1 )
+        {
+            TrayApp.databaseConfig.getConnectionTypes().getConnectionType().remove( connTypeTable.getSelectedRow() );
+        }
+        bindingGroup.unbind();
+        bindingGroup.bind();
+    }//GEN-LAST:event_connTypeDelButtonActionPerformed
+
+    private void connDelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_connDelButtonActionPerformed
+    {//GEN-HEADEREND:event_connDelButtonActionPerformed
+        if ( connTable.getSelectedRow() != -1 )
+        {
+            TrayApp.databaseConfig.getDatabaseConnections().getConnection().remove( connTable.getSelectedRow() );
+        }
+        bindingGroup.unbind();
+        bindingGroup.bind();
+    }//GEN-LAST:event_connDelButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel appConfigPanel;
     private javax.swing.JButton browserPathButton;
@@ -421,10 +468,12 @@ public class SettingsWindow extends JFrame
     private javax.swing.JLabel browserPathLabel;
     private org.hisp.dhis.config.ConfigType config;
     private javax.swing.JButton connAddButton;
+    private javax.swing.JButton connDelButton;
     private javax.swing.JScrollPane connPane;
     private javax.swing.JPanel connPanel;
     private javax.swing.JTable connTable;
     private javax.swing.JButton connTypeAddButton;
+    private javax.swing.JButton connTypeDelButton;
     private javax.swing.JScrollPane connTypePane;
     private javax.swing.JPanel connTypePanel;
     private javax.swing.JTable connTypeTable;
