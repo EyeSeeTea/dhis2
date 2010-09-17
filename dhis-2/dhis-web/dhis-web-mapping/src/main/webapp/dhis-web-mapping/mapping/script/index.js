@@ -342,7 +342,7 @@ Ext.onReady( function() {
 							
 							for (var i = 0; i < mapViews.length; i++) {
 								if (mapViews[i].name == vn) {
-									Ext.message.msg(false, i18n_there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>.');
+									Ext.message.msg(false, i18n_there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>');
 									return;
 								}
 							}
@@ -374,7 +374,7 @@ Ext.onReady( function() {
                                     zoom: zoom
                                 },
 								success: function(r) {
-									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered + '.');
+									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().load();
 									Ext.getCmp('mapview_cb').getStore().load();
 									Ext.getCmp('viewname_tf').reset();
@@ -807,7 +807,7 @@ Ext.onReady( function() {
                             var mapLegends = Ext.util.JSON.decode(r.responseText).mapLegends;
                             for (var i = 0; i < mapLegends.length; i++) {
                                 if (mln == mapLegends[i].name) {
-                                    Ext.message.msg(false, i18n_legend + '<span class="x-msg-hl">' + ln + '</span> ' + i18n_already_exists);
+                                    Ext.message.msg(false, i18n_legend + '<span class="x-msg-hl">' + mln + '</span> ' + i18n_already_exists);
                                     return;
                                 }
                             }
@@ -822,7 +822,7 @@ Ext.onReady( function() {
                                     Ext.getCmp('predefinedmaplegendname_tf').reset();
                                     Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
                                     Ext.getCmp('predefinedmaplegendendvalue_tf').reset();
-                                    Ext.getCmp('predefinedmaplegendcolor_cp').clearValue();
+                                    Ext.getCmp('predefinedmaplegendcolor_cp').reset();
                                 },
                                 failure: function() {
                                     alert( 'Error: addOrUpdateMapLegend' );
@@ -946,7 +946,7 @@ Ext.onReady( function() {
                             Ext.getCmp('predefinedmaplegendsetindicator2_cb').getStore().load();
 							Ext.getCmp('maplegendset_cb').getStore().load();
 							Ext.getCmp('predefinedmaplegendsetname_tf').reset();
-							Ext.getCmp('predefinednewmaplegend_ms').clearValue();							
+							Ext.getCmp('predefinednewmaplegend_ms').reset();							
                         },
                         failure: function() {
                             alert( 'Error: addOrUpdateMapLegendSet' );
