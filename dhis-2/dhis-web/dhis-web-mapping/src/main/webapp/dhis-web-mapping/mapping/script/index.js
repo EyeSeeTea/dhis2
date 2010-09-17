@@ -49,6 +49,8 @@ VALUETYPE.polygon = map_value_type_indicator;
 VALUETYPE.point = map_value_type_indicator;
 /* Top level organisation unit */
 var TOPLEVELUNIT = new Object();
+/* Locate feature window */
+var lfw;
 
 /* Detect mapview parameter in URL */
 function getUrlParam(strParamName){var output='';var strHref=window.location.href;if(strHref.indexOf('?')>-1){var strQueryString=strHref.substr(strHref.indexOf('?')).toLowerCase();var aQueryString=strQueryString.split('&');for(var iParam=0;iParam<aQueryString.length;iParam++){if(aQueryString[iParam].indexOf(strParamName.toLowerCase()+'=')>-1){var aParam=aQueryString[iParam].split('=');output=aParam[1];break;}}}return unescape(output);}
@@ -3089,6 +3091,7 @@ Ext.onReady( function() {
         baseLayerOptionsWindow.show();
     }
     
+    
     function showVectorLayerOptions(layer) {
         if (Ext.getCmp('vectorlayeroptions_w')) {
             Ext.getCmp('vectorlayeroptions_w').destroy();
@@ -3190,15 +3193,19 @@ Ext.onReady( function() {
             listeners: {
                 'close': {
                     fn: function() {
+                        lfw = false;
                         layer.redraw();
                     }
                 }
             }
-        });                    
+        });
+        
+        lfw = locateFeatureWindow;
         
         var vectorLayerOptionsWindow = new Ext.Window({
             id: 'vectorlayeroptions_w',
             title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            closeAction: 'hide',
             width: 180,
             items: [
                 {
@@ -3314,7 +3321,7 @@ Ext.onReady( function() {
                 }
             ]
         });
-        vectorLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 206, Ext.getCmp('center').y + 50);
+        vectorLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 50);
         vectorLayerOptionsWindow.show();
     }
 	
@@ -4116,7 +4123,7 @@ Ext.onReady( function() {
     // items: CHART
 // });
 
-/* Section: select features */
+/* Section: select features polygon */
 function onHoverSelectPolygon(feature) {
     FEATURE[thematicMap] = feature;
 
@@ -4133,43 +4140,27 @@ function onHoverUnselectPolygon(feature) {
 }
 
 function onClickSelectPolygon(feature) {
-// function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
-// var l = MAP.getLayersByName('Polygon layer')[0];
-// l.drawFeature(feature,{'fillColor':'blue'});
-
     FEATURE[thematicMap] = feature;
-
 	var east_panel = Ext.getCmp('east');
 	var x = east_panel.x - 210;
 	var y = east_panel.y + 41;
     
-    if (ACTIVEPANEL == thematicMap && MAPSOURCE == map_source_type_database) {
-        Ext.getCmp('locatefeature_w').destroy();
-        
-        Ext.getCmp('map_tf').setValue(feature.data.name);
-        
-        for (var i = 0; i < feature.layer.features.length; i++) {
-            if (feature.data.name == feature.layer.features[i].attributes.name) {
-                Ext.getCmp('map_tf').value = feature.layer.features[i].attributes.id;
-                break;
+    if (MAPSOURCE == map_source_type_database) {
+        if (feature.attributes.hasChildrenWithCoordinates) {
+            if (lfw) {
+                lfw.destroy();
             }
+            
+            Ext.getCmp('map_tf').setValue(feature.data.name);
+            Ext.getCmp('map_tf').value = feature.attributes.id;
+            choropleth.loadFromDatabase(feature.attributes.id, true);
         }
-        
-        choropleth.loadFromDatabase(Ext.getCmp('map_tf').value);
-    }
-    else if (ACTIVEPANEL == thematicMap2 && MAPSOURCE == map_source_type_database) {
-        Ext.getCmp('map_tf2').setValue(feature.data.name);
-        
-        for (var i = 0; i < feature.layer.features.length; i++) {
-            if (feature.data.name == feature.layer.features[i].attributes.name) {
-                Ext.getCmp('map_tf2').value = feature.layer.features[i].attributes.id;
-                break;
-            }
+        else {
+            Ext.message.msg(false, i18n_no_coordinates_found);
         }
-        
-        proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
     }
-    else if (ACTIVEPANEL == organisationUnitAssignment) {
+    
+    if (ACTIVEPANEL == organisationUnitAssignment) {
 		if (popup) {
 			popup.destroy();
 		}
@@ -4196,22 +4187,47 @@ function onClickSelectPolygon(feature) {
 		feature_popup.show();
 		mapping.relation = FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn];
     }
-	else {
+	//else {
         // featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
         // featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
         // featureWindow.show();
         // periodWindow.hide();
-	}
+	//}
 }
 
 function onClickUnselectPolygon(feature) {}
 
-function onClickSelectPoint(feature) {}
-function onClickUnselectPoint(feature) {}
+/* Section: select features point */
 function onHoverSelectPoint(feature) {
     FEATURE[thematicMap2] = feature;
     Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap2].attributes[MAPDATA[thematicMap2].nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap2].attributes.value + '</div>', false);
 }
+
 function onHoverUnselectPoint(feature) {
     Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
 }
+
+function onClickSelectPoint(feature) {
+    FEATURE[thematicMap2] = feature;
+
+	var east_panel = Ext.getCmp('east');
+	var x = east_panel.x - 210;
+	var y = east_panel.y + 41;
+	
+    if (MAPSOURCE == map_source_type_database) {
+        if (feature.attributes.hasChildrenWithCoordinates) {
+            if (lfw) {
+                lfw.destroy();
+            }
+            
+            Ext.getCmp('map_tf2').setValue(feature.data.name);
+            Ext.getCmp('map_tf2').value = feature.attributes.id;
+            proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
+        }
+        else {
+            Ext.message.msg(false, i18n_no_coordinates_found);
+        }
+    }
+}
+
+function onClickUnselectPoint(feature) {}
