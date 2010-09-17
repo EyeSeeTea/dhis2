@@ -30,7 +30,6 @@ package org.hisp.dhis.user.action;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
@@ -95,8 +94,7 @@ public class GetUserAction
         userAuthorityGroups = new ArrayList<UserAuthorityGroup>( userStore.getAllUserAuthorityGroups() );
 
         userAuthorityGroups.removeAll( userCredentials.getUserAuthorityGroups() );        
-
-
+        
         return SUCCESS;
     }
 }
