@@ -1059,6 +1059,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         root: {
                                             id: TOPLEVELUNIT.id,
                                             text: TOPLEVELUNIT.name,
+                                            hasChildrenWithCoordinates: TOPLEVELUNIT.hasChildrenWithCoordinates,
                                             nodeType: 'async',
                                             draggable: false,
                                             expanded: true
@@ -1131,6 +1132,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     var rootNode = Ext.util.JSON.decode(r.responseText).organisationUnits[0];
                                     TOPLEVELUNIT.id = rootNode.id;
                                     TOPLEVELUNIT.name = rootNode.name;
+                                    TOPLEVELUNIT.hasChildrenWithCoordinates = rootNode.hasChildrenWithCoordinates;
                                     
                                     showTree();          
                                 },
@@ -1389,8 +1391,24 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         return [colorA, colorB];
     },
     
-    loadFromDatabase: function(id) {
-        if (id != choropleth.parentId || MAPVIEW) {
+    loadFromDatabase: function(id, isDrillDown) {
+        if (isDrillDown) {
+            load();
+        }
+        else if (id != choropleth.parentId || MAPVIEW) {
+            if (!MAPVIEW) {
+                if (!Ext.getCmp('map_tf').node.attributes.hasChildrenWithCoordinates) {
+                    Ext.message.msg(false, i18n_no_coordinates_found);
+                    Ext.getCmp('map_tf').setValue(Ext.getCmp('orgunit_tp').getNodeById(choropleth.parentId).attributes.text);                    
+                    Ext.getCmp('map_tf').value = choropleth.parentId;
+                    Ext.getCmp('map_tf').node = Ext.getCmp('orgunit_tp').getNodeById(choropleth.parentId);
+                    return;
+                }
+            }
+            load();
+        }
+            
+        function load() {
             MASK.msg = i18n_loading_geojson;
             MASK.show();
             

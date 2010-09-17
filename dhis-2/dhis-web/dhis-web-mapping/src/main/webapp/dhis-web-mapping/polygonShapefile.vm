@@ -15,7 +15,8 @@
       "properties":
         {
           "id":"$!{unit.id}",
-          "name":"$!encoder.jsEncode( ${unit.name} )"
+          "name":"$!encoder.jsEncode( ${unit.name} )",
+          "hasChildrenWithCoordinates":$!{unit.hasChildrenWithCoordinates()}
         }
     }#if( $velocityCount < $size ),#end
   #end

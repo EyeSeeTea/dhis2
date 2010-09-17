@@ -4141,22 +4141,26 @@ function onHoverUnselectPolygon(feature) {
 
 function onClickSelectPolygon(feature) {
     FEATURE[thematicMap] = feature;
-
 	var east_panel = Ext.getCmp('east');
 	var x = east_panel.x - 210;
 	var y = east_panel.y + 41;
     
-    if (ACTIVEPANEL == thematicMap && MAPSOURCE == map_source_type_database) {
-        if (lfw) {
-            lfw.destroy();
+    if (MAPSOURCE == map_source_type_database) {
+        if (feature.attributes.hasChildrenWithCoordinates) {
+            if (lfw) {
+                lfw.destroy();
+            }
+            
+            Ext.getCmp('map_tf').setValue(feature.data.name);
+            Ext.getCmp('map_tf').value = feature.attributes.id;
+            choropleth.loadFromDatabase(feature.attributes.id, true);
         }
-        
-        Ext.getCmp('map_tf').setValue(feature.data.name);
-        Ext.getCmp('map_tf').value = feature.attributes.id;
-
-        choropleth.loadFromDatabase(Ext.getCmp('map_tf').value);
+        else {
+            Ext.message.msg(false, i18n_no_coordinates_found);
+        }
     }
-    else if (ACTIVEPANEL == organisationUnitAssignment) {
+    
+    if (ACTIVEPANEL == organisationUnitAssignment) {
 		if (popup) {
 			popup.destroy();
 		}
@@ -4183,12 +4187,12 @@ function onClickSelectPolygon(feature) {
 		feature_popup.show();
 		mapping.relation = FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn];
     }
-	else {
+	//else {
         // featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
         // featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
         // featureWindow.show();
         // periodWindow.hide();
-	}
+	//}
 }
 
 function onClickUnselectPolygon(feature) {}
@@ -4210,15 +4214,19 @@ function onClickSelectPoint(feature) {
 	var x = east_panel.x - 210;
 	var y = east_panel.y + 41;
 	
-    if (ACTIVEPANEL == thematicMap2 && MAPSOURCE == map_source_type_database) {
-        if (lfw) {
-            lfw.destroy();
+    if (MAPSOURCE == map_source_type_database) {
+        if (feature.attributes.hasChildrenWithCoordinates) {
+            if (lfw) {
+                lfw.destroy();
+            }
+            
+            Ext.getCmp('map_tf2').setValue(feature.data.name);
+            Ext.getCmp('map_tf2').value = feature.attributes.id;
+            proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
         }
-        
-        Ext.getCmp('map_tf2').setValue(feature.data.name);
-        Ext.getCmp('map_tf2').value = feature.attributes.id;
-        
-        proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
+        else {
+            Ext.message.msg(false, i18n_no_coordinates_found);
+        }
     }
 }
 

@@ -773,19 +773,22 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         Ext.Ajax.request({
                             url: path_mapping + 'getMapLegendSetByIndicator' + type,
                             method: 'POST',
-                            params: { indicatorId: iId, format: 'json' },
+                            params: {indicatorId: iId},
+                            success: function(r) {
+                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
+                                if (mapLegendSet.id) {
+                                    LEGEND[thematicMap2].type = map_legend_type_predefined;
+                                    Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
+                                    Ext.getCmp('maplegendset_cb2').showField();
+                                    Ext.getCmp('maplegendset_cb2').setValue(mapLegendSet.id);
+                                    Ext.getCmp('method_cb2').hideField();
+                                    Ext.getCmp('numClasses_cb2').hideField();
+                                    Ext.getCmp('colorA_cf2').hideField();
+                                    Ext.getCmp('colorB_cf2').hideField();
 
-                            success: function( responseObject ) {
-                                var data = Ext.util.JSON.decode(responseObject.responseText);
-                                
-                                if (data.mapLegendSet[0].id != '') {
-//                                    Ext.getCmp('method_cb2').setValue(data.mapLegendSet[0].method);
-                                    Ext.getCmp('numClasses_cb2').setValue(data.mapLegendSet[0].classes);
-
-                                    Ext.getCmp('colorA_cf2').setValue(data.mapLegendSet[0].colorLow);
-                                    Ext.getCmp('colorB_cf2').setValue(data.mapLegendSet[0].colorHigh);
+                                    proportionalSymbol.applyPredefinedLegend();
                                 }
-                                
+
                                 proportionalSymbol.classify(false, true);
                             },
                             failure: function()
@@ -1056,6 +1059,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         root: {
                                             id: TOPLEVELUNIT.id,
                                             text: TOPLEVELUNIT.name,
+                                            hasChildrenWithCoordinates: TOPLEVELUNIT.hasChildrenWithCoordinates,
                                             nodeType: 'async',
                                             draggable: false,
                                             expanded: true
@@ -1128,6 +1132,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     var rootNode = Ext.util.JSON.decode(r.responseText).organisationUnits[0];
                                     TOPLEVELUNIT.id = rootNode.id;
                                     TOPLEVELUNIT.name = rootNode.name;
+                                    TOPLEVELUNIT.hasChildrenWithCoordinates = rootNode.hasChildrenWithCoordinates;
                                     
                                     showTree();          
                                 },
@@ -1386,11 +1391,27 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         return [colorA, colorB];
     },
     
-    loadFromDatabase: function(id) {
-        if (id != proportionalSymbol.parentId || MAPVIEW) {
+    loadFromDatabase: function(id, isDrillDown) {
+        if (isDrillDown) {
+            load();
+        }
+        else if (id != proportionalSymbol.parentId || MAPVIEW) {
+            if (!MAPVIEW) {
+                if (!Ext.getCmp('map_tf2').node.attributes.hasChildrenWithCoordinates) {
+                    Ext.message.msg(false, i18n_no_coordinates_found);
+                    Ext.getCmp('map_tf2').setValue(Ext.getCmp('orgunit_tp2').getNodeById(proportionalSymbol.parentId).attributes.text);                    
+                    Ext.getCmp('map_tf2').value = proportionalSymbol.parentId;
+                    Ext.getCmp('map_tf2').node = Ext.getCmp('orgunit_tp2').getNodeById(proportionalSymbol.parentId);
+                    return;
+                }
+            }
+            load();
+        }
+            
+        function load() {
             MASK.msg = i18n_loading_geojson;
             MASK.show();
-
+            
             proportionalSymbol.parentId = id;
             proportionalSymbol.setUrl(path_mapping + 'getGeoJson.action?parentId=' + proportionalSymbol.parentId);
         }
