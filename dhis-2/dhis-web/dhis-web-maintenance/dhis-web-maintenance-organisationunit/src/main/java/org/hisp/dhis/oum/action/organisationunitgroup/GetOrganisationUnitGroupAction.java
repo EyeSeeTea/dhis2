@@ -30,7 +30,6 @@ package org.hisp.dhis.oum.action.organisationunitgroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
-import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.ActionSupport;
 
