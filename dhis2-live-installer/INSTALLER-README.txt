@@ -67,6 +67,8 @@ This version of the installer is appropriate for Microsoft Windows with a pre-ex
 This version of the installer will include a pre-packed JRE (Java Runtime Edition) with the installer. 
 This version therefore will not require a user to have Java pre-installed on their machine, but will 
 increase the size of the installer by about 30 MB. Place a copy of the JRE in the /resources/jre/jre6 folder.
+Note that the JRE is referring to the extracted collection of files, not the Windows executable installer.
+One way to obtain this is to install JRE on Windows and copy the extracted JRE directory into this project.
 
 
 You will now enter into a rather lengthy

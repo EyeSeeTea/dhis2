@@ -85,7 +85,7 @@
                             <dontWrapJar>true</dontWrapJar>
                             <headerType>gui</headerType>
                             <outfile>${project.build.directory}/dhis2-live.exe</outfile>
-                            <jar>dhis2-live-jar-with-dependencies.jar</jar>
+                            <jar>dhis2-live.jar</jar>
                             <errTitle>dhis2</errTitle>
                             <priority>normal</priority>
                             <downloadUrl>http://java.com/download</downloadUrl>
@@ -124,7 +124,7 @@
                             <dontWrapJar>true</dontWrapJar>
                             <headerType>gui</headerType>
                             <outfile>${project.build.directory}/dhis2-live-embedded.exe</outfile>
-                            <jar>dhis2-live-jar-with-dependencies.jar</jar>
+                            <jar>dhis2-live.jar</jar>
                             <errTitle>dhis2</errTitle>
                             <priority>normal</priority>
                             <downloadUrl>http://java.com/download</downloadUrl>
