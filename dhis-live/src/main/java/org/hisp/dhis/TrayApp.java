@@ -223,7 +223,6 @@ public class TrayApp
         MenuItem openItem = new MenuItem( messageService.getString( "menuitem.open" ) );
         openItem.addActionListener( new ActionListener()
         {
-
             @Override
             public void actionPerformed( ActionEvent e )
             {
@@ -243,11 +242,11 @@ public class TrayApp
         MenuItem settingsItem = new MenuItem( messageService.getString( "menuitem.settings" ) );
         settingsItem.addActionListener( new ActionListener()
         {
-
             @Override
             public void actionPerformed( ActionEvent e )
             {
-                if(settingsWindow!= null && settingsWindow.isVisible()){
+                if ( settingsWindow!= null && settingsWindow.isVisible() )
+                {
                     settingsWindow.dispose();
                 }
                 settingsWindow = new SettingsWindow();
@@ -261,7 +260,6 @@ public class TrayApp
         MenuItem exitItem = new MenuItem( messageService.getString( "menuitem.exit" ) );
         exitItem.addActionListener( new ActionListener()
         {
-
             @Override
             public void actionPerformed( ActionEvent e )
             {
@@ -277,7 +275,6 @@ public class TrayApp
 
         new Thread( new Runnable()
         {
-
             @Override
             public void run()
             {
@@ -307,7 +304,6 @@ public class TrayApp
         MenuItem blankItem = new MenuItem( messageService.getString( "menuitem.blank" ) );
         blankItem.addActionListener( new ActionListener()
         {
-
             @Override
             public void actionPerformed( ActionEvent e )
             {
@@ -325,7 +321,6 @@ public class TrayApp
                 writeHibernateProperties();
                 new Thread( new Runnable()
                 {
-
                     @Override
                     public void run()
                     {
@@ -376,7 +371,6 @@ public class TrayApp
             MenuItem connItem = new MenuItem( dbConn.getName() );
             connItem.addActionListener( new ActionListener()
             {
-
                 @Override
                 public void actionPerformed( ActionEvent evt )
                 {
@@ -385,7 +379,6 @@ public class TrayApp
                     writeHibernateProperties();
                     new Thread( new Runnable()
                     {
-
                         @Override
                         public void run()
                         {
@@ -399,7 +392,6 @@ public class TrayApp
                             }
                         }
                     } ).start();
-
                 }
             } );
             databaseMenu.add( connItem );
@@ -474,24 +466,24 @@ public class TrayApp
     {
         String preferredBrowserPath = appConfig.getPreferredBrowser();
 
-        if (preferredBrowserPath.length() > 0  )
+        if ( preferredBrowserPath.length() > 0 )
         {
-        try
-        {
-            log.debug( "Config reports browser path to be" + preferredBrowserPath );
-            boolean browserIsValid = new File( preferredBrowserPath ).exists();
-            if ( !browserIsValid )
+            try
             {
-                preferredBrowserPath = "";
-                log.info( "No preferred browser detected.Using default." );
+                log.debug( "Preferred browser path read from config: " + preferredBrowserPath );
+                
+                boolean browserExists = new File( preferredBrowserPath ).exists();
+                if ( !browserExists )
+                {
+                    preferredBrowserPath = "";
+                    log.warn( "Preferred browser could not be found." );
+                }    
+            } catch ( Exception e )
+            {
+                log.warn( "There was a problem loading the preferred browser from the config file." );
             }
-
-        } catch ( Exception e )
-        {
-            log.warn( "There was a problem reading the preferred browser from the config file." );
-        }
-        log.info( "Preferred browser path reported to be " + preferredBrowserPath );
-
+            
+            log.info( "Preferred browser path: " + preferredBrowserPath );
         }
         
         return preferredBrowserPath;
@@ -511,7 +503,7 @@ public class TrayApp
                 launchPreferredBrowser();
             } catch ( Exception ex )
             {
-                log.warn( "Couldn't open preferred browser. Will attempt to revert to default. " + ex );
+                log.warn( "Couldn't open preferred browser. Will attempt to use default browser. " + ex );
             }
         } else
         {
@@ -536,24 +528,23 @@ public class TrayApp
        
         if ( preferredBrowserPath != null )
         {
-
-                    String thisurl = getUrl();
-                    log.debug( "About to open " + thisurl + " with " + preferredBrowserPath );
-                    String openPrefBrowser = ( preferredBrowserPath + " " + thisurl );
-                //try and launch the prefered browser
-                try
-                {
-                    Runtime rt = Runtime.getRuntime();
-                    rt.exec( openPrefBrowser );
-                } catch ( IOException e )
-                {
-                    log.error( "There was a problem opening the preferred browser. " + e );
-                }
-            }
-        else
+            String thisurl = getUrl();
+            log.debug( "About to open " + thisurl + " with " + preferredBrowserPath );
+            String openPrefBrowser = ( preferredBrowserPath + " " + thisurl );
+            //try and launch the prefered browser
+            try
             {
-                launchDefaultBrowser();
+                Runtime rt = Runtime.getRuntime();
+                rt.exec( openPrefBrowser );
+            } catch ( IOException e )
+            {
+                log.error( "There was a problem opening the preferred browser. " + e );
             }
+        }
+        else
+        {
+            launchDefaultBrowser();
+        }
     }
 
     /**
@@ -716,31 +707,30 @@ public class TrayApp
             boolean confDirExists = createConfigDirectory();
             props.store( new FileWriter( System.getProperty( "dhis2.home" ) + "/hibernate.properties" ), "DHIS2 Live Created" );
             log.info( "Hibernate properties written at: " + System.getProperty( "dhis2.home" ) + "/hibernate.properties" );
-        } catch ( IOException ioex )
+        } catch ( IOException ex )
         {
-            log.error( "Error with Hibernate Properties: " + ioex.getMessage() );
-            JOptionPane.showMessageDialog( null, "Error with Hibernate Properties", "Database Error", JOptionPane.ERROR_MESSAGE );
+            log.error( "Error with Hibernate Properties: " + ex.getMessage() );
+            JOptionPane.showMessageDialog( null, "Error with Hibernate Properties", ex.getMessage(), JOptionPane.ERROR_MESSAGE );
             System.exit( 1 );
         }
     }
+    
     private boolean createConfigDirectory()
     {
-
         File   fileDirectory = new File(getInstallDir() + "/conf");
         boolean success = fileDirectory.exists();
         if ( !success )
-                 {
-                    try
-                    {
-                        success = fileDirectory.mkdir();
-
-                     }
-                    catch (Exception e)
-                    {
-                        log.error ("Could not create config directory");
-                    }
-                }
-         return success;
+        {
+            try
+            {
+                success = fileDirectory.mkdir();
+        
+             }
+            catch (Exception e)
+            {
+                log.error ("Could not create config directory");
+            }
         }
-    
+         return success;
+    }
 }

@@ -27,12 +27,13 @@
 package org.hisp.dhis;
 
 
-import java.util.ResourceBundle;
+import java.io.File;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.JFileChooser;
-import java.io.File;
-import javax.swing.JFrame;
+
 import org.hisp.dhis.config.ConfigType.DatabaseConfiguration.ConnectionTypes.ConnectionType;
 import org.hisp.dhis.config.ConfigType.DatabaseConfiguration.DatabaseConnections.Connection;
 
