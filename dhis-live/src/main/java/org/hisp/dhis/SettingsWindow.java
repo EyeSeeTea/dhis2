@@ -27,6 +27,7 @@
 package org.hisp.dhis;
 
 
+import java.util.ResourceBundle;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.JFileChooser;
@@ -37,6 +38,7 @@ import org.hisp.dhis.config.ConfigType.DatabaseConfiguration.DatabaseConnections
 
 public class SettingsWindow extends JFrame
 {
+    private static final LiveMessagingService messageService = new LiveMessagingService();
 
     public SettingsWindow()
     {
@@ -87,37 +89,37 @@ public class SettingsWindow extends JFrame
         saveButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("DHIS 2 Live - Settings");
+        setTitle(messageService.getString("settings.windowtitle"));
         setAlwaysOnTop(true);
         setResizable(false);
 
-        appConfigPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Application Configuration"));
+        appConfigPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(messageService.getString("settings.appconfig")));
 
-        portLabel.setText("Port:");
+        portLabel.setText(messageService.getString("settings.port"));
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.port}"), portField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "portBinding");
         bindingGroup.addBinding(binding);
 
-        hostLabel.setText("Host:");
+        hostLabel.setText(messageService.getString("settings.host"));
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.host}"), hostField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "hostBinding");
         bindingGroup.addBinding(binding);
 
-        browserPathLabel.setText("Preferred Browser Path:");
+        browserPathLabel.setText(messageService.getString("settings.browserpath"));
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.preferredBrowser}"), browserPathField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "browserPathBinding");
         bindingGroup.addBinding(binding);
 
-        browserPathButton.setText("Browse");
+        browserPathButton.setText(messageService.getString("settings.browse"));
         browserPathButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 browserPathButtonActionPerformed(evt);
             }
         });
 
-        langLabel.setText("Language:");
+        langLabel.setText(messageService.getString("settings.language"));
 
-        countryLabel.setText("Country:");
+        countryLabel.setText(messageService.getString("settings.country"));
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.localeLanguage}"), langField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "langBinding");
         bindingGroup.addBinding(binding);
@@ -125,14 +127,14 @@ public class SettingsWindow extends JFrame
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.localeCountry}"), countryField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "countryBinding");
         bindingGroup.addBinding(binding);
 
-        maxSizeLabel.setText("Max Form Content Size:");
+        maxSizeLabel.setText(messageService.getString("settings.maxformsize"));
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.maxFormContentSize}"), maxSizeField, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
-        maxSizeDefaultLabel.setText("(* requires restart of DHIS 2 Live - default: 200000)");
+        maxSizeDefaultLabel.setText(messageService.getString("settings.restartinfo"));
 
-        unitLabel.setText("(bytes)");
+        unitLabel.setText(messageService.getString("settings.bytes"));
 
         javax.swing.GroupLayout appConfigPanelLayout = new javax.swing.GroupLayout(appConfigPanel);
         appConfigPanel.setLayout(appConfigPanelLayout);
@@ -212,9 +214,9 @@ public class SettingsWindow extends JFrame
                 .addContainerGap())
         );
 
-        databaseConfigPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Database Configuration"));
+        databaseConfigPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(messageService.getString("settings.dbconfig")));
 
-        connTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Connection Types"));
+        connTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(messageService.getString("settings.conntypes")));
 
         connTypeTable.setColumnSelectionAllowed(true);
         connTypeTable.getTableHeader().setReorderingAllowed(false);
@@ -222,7 +224,7 @@ public class SettingsWindow extends JFrame
         org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${databaseConfiguration.connectionTypes.connectionType}");
         org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, eLProperty, connTypeTable);
         org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${id}"));
-        columnBinding.setColumnName("ID");
+        columnBinding.setColumnName(messageService.getString("ID"));
         columnBinding.setColumnClass(String.class);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${dialect}"));
         columnBinding.setColumnName("Dialect");
@@ -235,14 +237,14 @@ public class SettingsWindow extends JFrame
         connTypePane.setViewportView(connTypeTable);
         connTypeTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
-        connTypeAddButton.setText("Add");
+        connTypeAddButton.setText(messageService.getString("settings.add"));
         connTypeAddButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connTypeAddButtonActionPerformed(evt);
             }
         });
 
-        connTypeDelButton.setText("Remove");
+        connTypeDelButton.setText(messageService.getString("settings.remove"));
         connTypeDelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connTypeDelButtonActionPerformed(evt);
@@ -274,7 +276,7 @@ public class SettingsWindow extends JFrame
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        connPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Connections"));
+        connPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(messageService.getString("settings.connections")));
 
         connTable.setColumnSelectionAllowed(true);
         connTable.getTableHeader().setReorderingAllowed(false);
@@ -307,14 +309,14 @@ public class SettingsWindow extends JFrame
         connTable.getColumnModel().getColumn(1).setCellRenderer(null);
         connTable.getColumnModel().getColumn(3).setPreferredWidth(60);
 
-        connAddButton.setText("Add");
+        connAddButton.setText(messageService.getString("settings.add"));
         connAddButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connAddButtonActionPerformed(evt);
             }
         });
 
-        connDelButton.setText("Remove");
+        connDelButton.setText(messageService.getString("settings.remove"));
         connDelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connDelButtonActionPerformed(evt);
@@ -371,8 +373,8 @@ public class SettingsWindow extends JFrame
                 .addContainerGap())
         );
 
-        saveButton.setText("Save and Close");
-        saveButton.setToolTipText("Save and Close");
+        saveButton.setText(messageService.getString("settings.saveclose"));
+        saveButton.setToolTipText(messageService.getString("settings.saveclose"));
         saveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveButtonActionPerformed(evt);

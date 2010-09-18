@@ -2,19 +2,21 @@
     <shortName>DHIS2</shortName>
     <fullName>DHIS2</fullName>
     <version>2.0.4</version>
-    <installerFilename>${product_shortname}-${product_version}-${platform_name}-lite-JRE.${platform_exec_suffix}</installerFilename>
+    <installerFilename>${product_shortname}-${product_version}-${platform_name}-JRE-fr.${platform_exec_suffix}</installerFilename>
     <readmeFile>../../resources/files/Readme.txt</readmeFile>
     <licenseFile>../../resources/files/Licence.txt</licenseFile>
     <leftImage>../../resources/images/dhis2-logo-rotated.png</leftImage>
     <logoImage>../../resources/images/dhis2-logo.png</logoImage>
     <splashImage>../../resources/images/dhis2-logo.png</splashImage>
+    <defaultLanguage>fr</defaultLanguage>
+    <allowLanguageSelection>1</allowLanguageSelection>
     <preBuildActionList>
         <copyFile>
             <destination>${build_project_directory}/temp/</destination>
             <origin>${env(DHIS2_SRC)}/dhis-2/dhis-web/dhis-web-portal/target/dhis.war</origin>
         </copyFile>
         <copyFile>
-            <destination>${build_project_directory}/temp/dhis2-live.jar</destination>
+            <destination>${build_project_directory}/temp/dhis2-live-jar-with-dependencies.jar</destination>
             <origin>${env(DHIS2_SRC)}/dhis-live/target/dhis2-live-jar-with-dependencies.jar</origin>
         </copyFile>
         <copyFile>
@@ -72,7 +74,7 @@
                             <origin>../../resources/conf</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>temp/dhis2-live.jar</origin>
+                            <origin>temp/dhis2-live-jar-with-dependencies.jar</origin>
                         </distributionFile>
                     </distributionFileList>
                     <shortcutList>
