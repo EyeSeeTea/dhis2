@@ -82,16 +82,8 @@ function updateTextualExpression( expressionFieldName )
 	jQuery.postJSON( '../dhis-web-commons-ajax-json/getExpressionText.action', 
 			{expression: expression},
 			function( json ){
-				if( json.response == 'error') markInvalid( 'indicator-expression-container textarea[id=expression]' , json.message );
-				else {								
-					byId( "textualExpression" ).innerHTML = json.message;					
-				}
+				byId( "textualExpression" ).innerHTML = json.message;
 			});		
-}
-
-function updateTextualExpressionReceived( messageElement )
-{
-	document.getElementById( "textualExpression" ).innerHTML = messageElement;
 }
 
 function checkNotEmpty( field, message ){
@@ -121,19 +113,14 @@ function validateExpression()
 	jQuery.postJSON( '../dhis-web-commons-ajax-json/getExpressionText.action', 
 			{expression: expression},
 			function( json ){
-				if( json.response == 'error') {
-					markInvalid( 'indicator-expression-container textarea[id=expression]' , json.message );
-					return false;
-				}
-				else {								
-					var description = byId( "expDescription" ).value;
-					var expression = byId( "expression" ).value;
-					var textualDescription = byId( "textualExpression" ).innerHTML;
-					var side = byId( "side" ).value;
-					saveExpression( side, description, expression, textualDescription);
-					disable('periodTypeName');
-					return true;					
-				}
+				byId( "textualExpression" ).innerHTML = json.message;
+				var description = byId( "expDescription" ).value;
+				var expression = byId( "expression" ).value;
+				var textualDescription = byId( "textualExpression" ).innerHTML;
+				var side = byId( "side" ).value;
+				saveExpression( side, description, expression, textualDescription);
+				disable('periodTypeName');
+				return true;					
 			});		
 }
 
