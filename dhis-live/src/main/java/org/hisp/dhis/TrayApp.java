@@ -710,7 +710,7 @@ public class TrayApp
         } catch ( IOException ex )
         {
             log.error( "Error with Hibernate Properties: " + ex.getMessage() );
-            JOptionPane.showMessageDialog( null, "Error with Hibernate Properties", ex.getMessage(), JOptionPane.ERROR_MESSAGE );
+            JOptionPane.showMessageDialog( null, "Error with Hibernate Properties: \n" + ex.getMessage(), "Configuration error", JOptionPane.ERROR_MESSAGE );
             System.exit( 1 );
         }
     }

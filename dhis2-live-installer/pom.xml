@@ -19,7 +19,7 @@
              <phase>package</phase>
                <configuration>
                 <executable>${env.BITROCK_HOME}/bin/builder</executable>
-          	<arguments>
+				<arguments>
                 <argument>build</argument>
                 <argument>${basedir}/src/bitrock/DHIS2_lite.xml</argument>
                 <argument>windows</argument>
@@ -43,8 +43,8 @@
              <goals>
               <goal>exec</goal>
             </goals>
-          </execution> 
-	   <execution>
+          </execution>
+		  <execution>
              <id>DHIS2 Windows Embedded JRE French Version</id>
              <phase>package</phase>
                <configuration>

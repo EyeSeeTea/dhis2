@@ -26,17 +26,22 @@ Here are some examples, modify them in the script to suit your local system.
 
 1) This variable should point to your local copy of the JDK. 
  JAVA_HOME=/usr/local/java/jdk1.6.0_10/
+ 
 2) Be sure that maven is accessible in your path. 
  PATH=$PATH:/home/wheel/apache-maven-2.2.1/bin/
+ 
 3) This variable is necessary during  the installer build process and should point to your local copy of the
 BitRock install builder directory. You can get a copy of BitRock install builder from here
 http://installbuilder.bitrock.com/download-step-2.html. Install it somewhere on your system and
 point the environment variable to the correct directory.
  BITROCK_HOME=/home/wheel/installbuilder-6.2.7/
+ 
 4) This variable should point to the directory where the birt.war file resides. If not set BIRT will be omitted.
  BIRT_WAR="/usr/local/apache-tomcat-6.0.18/webapps/"
+ 
 5) This variable should point to the root directory of the source of the documentation branch.  
  DHIS2_DOCS="/home/wheel/workspace/dhis2-docbook-docs/"
+ 
 6) This variable should point to your copy of the dhis2 main source branch. 
  DHIS2_SRC="/home/wheel/workspace/dhis2"
 
@@ -62,13 +67,23 @@ There are several options you will need to pass to the build script.
 There are a number of different installers that will be generated for different purposes. 
 
 1)DHIS2 Windows Live
-This version of the installer is appropriate for Microsoft Windows with a pre-existing JRE. 
+
+This version of the installer is appropriate for Microsoft Windows with a pre-existing JRE.
+
 2) DHIS2 Windows Embedded JRE
-This version of the installer will include a pre-packed JRE (Java Runtime Edition) with the installer. 
-This version therefore will not require a user to have Java pre-installed on their machine, but will 
-increase the size of the installer by about 30 MB. Place a copy of the JRE in the /resources/jre/jre6 folder.
-Note that the JRE is referring to the extracted collection of files, not the Windows executable installer.
+
+This version of the installer will include a pre-packed:
+
+o JRE (Java Runtime Edition). This version therefore will not require a user to have Java pre-installed on their machine, but will 
+increase the size of the installer by about 30 MB. Place a copy of the JRE in /resources/jre/jre6.
+Note that JRE is referring to the extracted collection of files, not the Windows executable installer.
 One way to obtain this is to install JRE on Windows and copy the extracted JRE directory into this project.
+
+o Firefix browser. Place a copy of Firefox Portable in /resources/browser/FirefoxPortable. Note that Firefox portable is referring
+to the extracted collection of files, not the Windows executable installer. One way to obtain this is to install Firefox portable
+on Windows and copy the extracted FirefoxPortable directory into this project.
+
+o Demo database. Place a copy of the H2 demo database (called "demo.h2.db") into resources/demodb.
 
 
 You will now enter into a rather lengthy

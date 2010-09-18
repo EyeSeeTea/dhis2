@@ -244,6 +244,26 @@
                 </folder>
             </folderList>
         </component>
+		<component>
+            <name>demodb</name>
+            <description>Demo database</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>1</selected>
+            <show>1</show>
+            <folderList>
+                <folder>
+                    <description>demodb</description>
+                    <destination>${installdir}/database</destination>
+                    <name>demodb</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../resources/demodb/demo.h2.db</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+            </folderList>
+        </component>
     </componentList>
     <finalPageActionList>
         <runProgram>
