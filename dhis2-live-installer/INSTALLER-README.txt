@@ -33,7 +33,7 @@ BitRock install builder directory. You can get a copy of BitRock install builder
 http://installbuilder.bitrock.com/download-step-2.html. Install it somewhere on your system and
 point the environment variable to the correct directory.
  BITROCK_HOME=/home/wheel/installbuilder-6.2.7/
-4) This variable should point to the directory where the birt.war file resides. 
+4) This variable should point to the directory where the birt.war file resides. If not set BIRT will be omitted.
  BIRT_WAR="/usr/local/apache-tomcat-6.0.18/webapps/"
 5) This variable should point to the root directory of the source of the documentation branch.  
  DHIS2_DOCS="/home/wheel/workspace/dhis2-docbook-docs/"
