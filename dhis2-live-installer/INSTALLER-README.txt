@@ -9,22 +9,22 @@ installer that will ship with the H2 database.
 
 There are two installers here. The first and most up to date is the BitRock installer. 
 Along with the build script included with this package, it will build a Windows 
-exectutable. The second installer is based on IZPack and may be more appropriate
+executable. The second installer is based on IZPack and may be more appropriate
 for those that need a relatively simply build process, without having Maven installed.
-It is reccomended to use the BitRock installer, but I have included both here. 
+It is recommended to use the BitRock installer, but I have included both here. 
 
 
 BitRock installer notes
 
 You should be able to execute the build script from essentially anywhere on your system. 
-It is critical that you set all of the enviornment variables to the correct paths in your system. 
-Modify the enviornment variables in the build.sh script to suit your needs. 
+It is critical that you set all of the environment variables to the correct paths in your system. 
+Modify the environment variables in the build.sh script to suit your needs. 
 
 
 There are several variables that you will need to set.
 Here are some examples, modify them in the script to suit your local system. 
 
-1) This varible should point to your local copy of the JDK. 
+1) This variable should point to your local copy of the JDK. 
  JAVA_HOME=/usr/local/java/jdk1.6.0_10/
 2) Be sure that maven is accessible in your path. 
  PATH=$PATH:/home/wheel/apache-maven-2.2.1/bin/
@@ -62,11 +62,11 @@ There are several options you will need to pass to the build script.
 There are a number of different installers that will be generated for different purposes. 
 
 1)DHIS2 Windows Live
-This version of the installer is appropriate for Microsoft Windows with a preexisting JRE. 
+This version of the installer is appropriate for Microsoft Windows with a pre-existing JRE. 
 2) DHIS2 Windows Embedded JRE
-This version of the installer will include a prepacked JRE (Java Runtime Edition) with the installer. 
-This version therefore will not require a user to have Java preinstalled on their machine, but will 
-incease the size of the installer by about 30 MB. Place a copy of the JRE in the /resources/jre/jre6 folder.
+This version of the installer will include a pre-packed JRE (Java Runtime Edition) with the installer. 
+This version therefore will not require a user to have Java pre-installed on their machine, but will 
+increase the size of the installer by about 30 MB. Place a copy of the JRE in the /resources/jre/jre6 folder.
 
 
 You will now enter into a rather lengthy
@@ -80,7 +80,7 @@ IZPack Installer
 
 Basically, you will need to populate some different directories with prerequisites. 
 
-1) Put everything you need for postgres in the postgres directory.This usually involves unzipping that installer on the Postgres website. 
+1) Put everything you need for PostgreSQL in the postgres directory.This usually involves unzipping that installer on the PostgreSQL website. 
 2) Put an offline version of Java (to be sure you have a recent version) in the /java directory. Be sure that the file name matches that in the install.xml file
 3) Put the dhis2_user_manual_en.pdf from the documentation branch into the /docs directory
 4) Change the hibernate.properties file to set your needs. 
