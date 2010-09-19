@@ -26,6 +26,8 @@
  */
 package org.hisp.dhis;
 
+
+import java.awt.Component;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -37,8 +39,13 @@ import java.io.FilenameFilter;
 import java.net.URL;
 import java.util.Vector;
 import java.util.jar.JarFile;
+import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import javax.swing.table.DefaultTableCellRenderer;
 import org.hisp.dhis.config.ConfigType.DatabaseConfiguration.ConnectionTypes.ConnectionType;
 import org.hisp.dhis.config.ConfigType.DatabaseConfiguration.DatabaseConnections.Connection;
 
@@ -51,6 +58,8 @@ public class SettingsWindow extends JFrame
 
     private Vector countryVect = new Vector();
 
+    private JComboBox connTypesCombo;
+
     public SettingsWindow()
     {
         try
@@ -60,10 +69,44 @@ public class SettingsWindow extends JFrame
         {
             JOptionPane.showMessageDialog( null, ex.getMessage() );
         }
+        Vector connTypesVect = new Vector( TrayApp.databaseConfig.getConnectionTypes().getConnectionType() );
+        connTypesCombo = new JComboBox( connTypesVect );
+        connTypesCombo.setRenderer( new ConnTypesComboRenderer() );
         initComponents();
         langCombo.setModel( new DefaultComboBoxModel( getSupportedLanguages() ) );
         langCombo.setSelectedIndex( selectedLang );
         setLocationRelativeTo( null );
+    }
+
+    class ConnTypesComboRenderer extends BasicComboBoxRenderer
+    {
+
+        @Override
+        public Component getListCellRendererComponent( JList list, Object value, int index, boolean isSelected, boolean cellHasFocus )
+        {
+            super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+            if ( value != null )
+            {
+                ConnectionType item = (ConnectionType) value;
+                setText( item.getId() );
+            }
+            if ( index == -1 )
+            {
+                ConnectionType item = (ConnectionType) value;
+                setText((value == null) ? "" : item.getId());
+            }
+            return this;
+        }
+    }
+
+    class ConnTypesCellRenderer extends DefaultTableCellRenderer
+    {
+        @Override
+        public void setValue( Object value )
+        {
+            ConnectionType item = (ConnectionType) value;
+            setText((value == null) ? "" : item.getId());
+        }
     }
 
     private String getJarfileName()
@@ -294,8 +337,7 @@ public class SettingsWindow extends JFrame
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, appConfigPanelLayout.createSequentialGroup()
                                 .addComponent(hostLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                                .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(10, 10, 10)
                         .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(countryLabel)
@@ -349,7 +391,8 @@ public class SettingsWindow extends JFrame
 
         connTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(messageService.getString("settings.conntypes")));
 
-        connTypeTable.setColumnSelectionAllowed(true);
+        connTypeTable.setBackground(new java.awt.Color(212, 208, 200));
+        connTypeTable.setEnabled(false);
         connTypeTable.getTableHeader().setReorderingAllowed(false);
 
         org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${databaseConfiguration.connectionTypes.connectionType}");
@@ -370,6 +413,7 @@ public class SettingsWindow extends JFrame
         connTypeTable.getColumnModel().getColumn(0).setHeaderValue(messageService.getString("ID"));
 
         connTypeAddButton.setText(messageService.getString("settings.add"));
+        connTypeAddButton.setEnabled(false);
         connTypeAddButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connTypeAddButtonActionPerformed(evt);
@@ -377,6 +421,7 @@ public class SettingsWindow extends JFrame
         });
 
         connTypeDelButton.setText(messageService.getString("settings.remove"));
+        connTypeDelButton.setEnabled(false);
         connTypeDelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connTypeDelButtonActionPerformed(evt);
@@ -410,7 +455,6 @@ public class SettingsWindow extends JFrame
 
         connPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(messageService.getString("settings.connections")));
 
-        connTable.setColumnSelectionAllowed(true);
         connTable.getTableHeader().setReorderingAllowed(false);
 
         eLProperty = org.jdesktop.beansbinding.ELProperty.create("${databaseConfiguration.databaseConnections.connection}");
@@ -418,9 +462,8 @@ public class SettingsWindow extends JFrame
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${id}"));
         columnBinding.setColumnName("ID");
         columnBinding.setColumnClass(String.class);
-        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${type.id}"));
+        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${type}"));
         columnBinding.setColumnName("Type");
-        columnBinding.setColumnClass(String.class);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
         columnBinding.setColumnName("Name");
         columnBinding.setColumnClass(String.class);
@@ -437,6 +480,8 @@ public class SettingsWindow extends JFrame
         jTableBinding.bind();
         connPane.setViewportView(connTable);
         connTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        connTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(connTypesCombo));
+        connTable.getColumnModel().getColumn(1).setCellRenderer(new ConnTypesCellRenderer());
         connTable.getColumnModel().getColumn(3).setPreferredWidth(60);
 
         connAddButton.setText(messageService.getString("settings.add"));

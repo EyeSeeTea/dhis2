@@ -96,7 +96,6 @@
                                   <Component id="hostLabel" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="hostField" min="-2" pref="140" max="-2" attributes="1"/>
-                                  <EmptySpace max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
@@ -370,6 +369,9 @@
               <SubComponents>
                 <Component class="javax.swing.JTable" name="connTypeTable">
                   <Properties>
+                    <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="c8" green="d0" red="d4" type="rgb"/>
+                    </Property>
                     <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
                       <TableColumnModel selectionModel="1">
                         <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
@@ -391,7 +393,7 @@
                         </Column>
                       </TableColumnModel>
                     </Property>
-                    <Property name="columnSelectionAllowed" type="boolean" value="true"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                     <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
                       <TableHeader reorderingAllowed="false" resizingAllowed="true"/>
                     </Property>
@@ -419,6 +421,7 @@
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="messageService.getString(&quot;settings.add&quot;)" type="code"/>
                 </Property>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="connTypeAddButtonActionPerformed"/>
@@ -429,6 +432,7 @@
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="messageService.getString(&quot;settings.remove&quot;)" type="code"/>
                 </Property>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="connTypeDelButtonActionPerformed"/>
@@ -504,8 +508,12 @@
                         </Column>
                         <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                           <Title/>
-                          <Editor/>
-                          <Renderer/>
+                          <Editor editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                            <Connection code="new DefaultCellEditor(connTypesCombo)" type="code"/>
+                          </Editor>
+                          <Renderer editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                            <Connection code="new ConnTypesCellRenderer()" type="code"/>
+                          </Renderer>
                         </Column>
                         <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                           <Title/>
@@ -529,7 +537,6 @@
                         </Column>
                       </TableColumnModel>
                     </Property>
-                    <Property name="columnSelectionAllowed" type="boolean" value="true"/>
                     <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
                       <TableHeader reorderingAllowed="false" resizingAllowed="true"/>
                     </Property>
@@ -540,9 +547,8 @@
                         <BindingParameter name="NAME" value="ID"/>
                         <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="String.class"/>
                       </Subbinding>
-                      <Subbinding sourcePath="${type.id}">
+                      <Subbinding sourcePath="${type}">
                         <BindingParameter name="NAME" value="Type"/>
-                        <BindingParameter name="javax.swing.binding.ParameterKeys.COLUMN_CLASS" value="String.class"/>
                       </Subbinding>
                       <Subbinding sourcePath="${name}">
                         <BindingParameter name="NAME" value="Name"/>

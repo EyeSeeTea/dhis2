@@ -19,22 +19,20 @@
                 <Dialect>org.hisp.dhis.dialect.H2Dialect</Dialect>
                 <DriverClass>org.h2.Driver</DriverClass>
             </ConnectionType>
+            <ConnectionType id="mysql">
+                <Dialect>org.hibernate.dialect.MySQLDialect</Dialect>
+                <DriverClass>com.mysql.jdbc.Driver</DriverClass>
+            </ConnectionType>
+            <ConnectionType id="postgres">
+                <Dialect>org.hibernate.dialect.PostgreSQLDialect</Dialect>
+                <DriverClass>org.postgresql.Driver</DriverClass>
+            </ConnectionType>
         </ConnectionTypes>
         <DatabaseConnections selected="conn1">
             <Connection id="conn1" type="h2">
                 <Name>DHIS2 Demo</Name>
                 <URL>jdbc:h2:./database/demo;AUTO_SERVER=TRUE</URL>
                 <UserName>sa</UserName>
-            </Connection>
-            <Connection id="conn2" type="h2">
-                <Name>DHIS2 India</Name>
-                <URL>jdbc:h2:./database/india;AUTO_SERVER=TRUE</URL>
-                <UserName>india</UserName>
-            </Connection>
-            <Connection id="conn3" type="h2">
-                <Name>DHIS2 Sierra Leone</Name>
-                <URL>jdbc:h2:./database/sl;AUTO_SERVER=TRUE</URL>
-                <UserName>sl</UserName>
             </Connection>
         </DatabaseConnections>
     </DatabaseConfiguration>
