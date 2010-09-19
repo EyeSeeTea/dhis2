@@ -11,7 +11,7 @@
         <Port>8080</Port>
         <Host>localhost</Host>
         <PreferredBrowser/>
-        <MaxFormContentSize>400000</MaxFormContentSize>
+        <MaxFormContentSize>200000</MaxFormContentSize>
     </AppConfiguration>
     <DatabaseConfiguration>
         <ConnectionTypes>

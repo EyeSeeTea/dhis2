@@ -26,20 +26,30 @@
  */
 package org.hisp.dhis;
 
-
-import java.io.File;
-
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-
+import javax.swing.JFileChooser;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.net.URL;
+import java.util.Vector;
+import java.util.jar.JarFile;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFrame;
 import org.hisp.dhis.config.ConfigType.DatabaseConfiguration.ConnectionTypes.ConnectionType;
 import org.hisp.dhis.config.ConfigType.DatabaseConfiguration.DatabaseConnections.Connection;
 
 public class SettingsWindow extends JFrame
 {
+
     private static final LiveMessagingService messageService = new LiveMessagingService();
+
+    private int selectedLang;
+
+    private Vector countryVect = new Vector();
 
     public SettingsWindow()
     {
@@ -51,7 +61,125 @@ public class SettingsWindow extends JFrame
             JOptionPane.showMessageDialog( null, ex.getMessage() );
         }
         initComponents();
+        langCombo.setModel( new DefaultComboBoxModel( getSupportedLanguages() ) );
+        langCombo.setSelectedIndex( selectedLang );
         setLocationRelativeTo( null );
+    }
+
+    private String getJarfileName()
+    {
+        // Get the location of the jar file and the jar file name
+        URL outputURL = this.getClass().getProtectionDomain().getCodeSource().getLocation();
+        String[] loc = outputURL.toString().split( "\\/" );
+        String jarFilename;
+        if ( outputURL.toString().contains( ".jar" ) )
+        {
+            jarFilename = TrayApp.getInstallDir() + "/" + loc[loc.length - 1];
+        } else
+        {
+            String outputString = outputURL.toString();
+            String[] parseString;
+            int index1 = outputString.indexOf( ":" );
+            int index2 = outputString.lastIndexOf( ":" );
+            if ( index1 != index2 ) // Windows/DOS uses C: naming convention
+            {
+                parseString = outputString.split( "file:/" );
+            } else
+            {
+                parseString = outputString.split( "file:" );
+            }
+            jarFilename = parseString[1];
+        }
+        return jarFilename;
+    }
+
+    private Vector getSupportedLanguages()
+    {
+        Vector supportedLanguages = new Vector();
+        try
+        {
+            File file = new File( getJarfileName() );
+            if ( file.exists() )
+            {
+                if ( file.getName().contains( ".jar" ) )
+                {
+                    JarFile jarFile = new JarFile( file );
+                    Enumeration<JarEntry> entries = jarFile.entries();
+                    int i = 0;
+                    while ( entries.hasMoreElements() )
+                    {
+                        JarEntry entry = (JarEntry) entries.nextElement();
+                        if ( entry.getName().startsWith( "messages" ) && entry.getName().endsWith( ".properties" ) )
+                        {
+                            String entryName = entry.getName();
+                            String lang = entryName.substring( 18, entryName.length() - 11 );
+                            String arr[] = lang.split( "\\_" );
+                            if ( arr.length > 1 )
+                            {
+                                countryVect.add( lang );
+                                if ( TrayApp.appConfig.getLocaleLanguage().equals( arr[0] ) )
+                                {
+                                    selectedLang = i;
+                                }
+                                supportedLanguages.add( arr[0] );
+                            } else
+                            {
+                                if ( TrayApp.appConfig.getLocaleLanguage().equals( lang ) )
+                                {
+                                    selectedLang = i;
+                                }
+                                supportedLanguages.add( lang );
+                            }
+                            i++;
+                        }
+                    }
+                } else
+                {
+                    File dir = new File( file, "messages" );
+                    String[] list = dir.list( new FilenameFilter()
+                    {
+
+                        @Override
+                        public boolean accept( File dir, String name )
+                        {
+                            String lowercase = name.toLowerCase();
+                            if ( lowercase.startsWith( "messages" ) && lowercase.endsWith( ".properties" ) )
+                            {
+                                return true;
+                            } else
+                            {
+                                return false;
+                            }
+                        }
+                    } );
+                    for ( int i = 0; i < list.length; i++ )
+                    {
+                        String lang = list[i].substring( 9, list[i].length() - 11 );
+                        String arr[] = lang.split( "\\_" );
+                        if ( arr.length > 1 )
+                        {
+                            countryVect.add( lang );
+                            if ( TrayApp.appConfig.getLocaleLanguage().equals( arr[0] ) )
+                            {
+                                selectedLang = i;
+                            }
+                            supportedLanguages.add( arr[0] );
+                        } else
+                        {
+                            if ( TrayApp.appConfig.getLocaleLanguage().equals( lang ) )
+                            {
+                                selectedLang = i;
+                            }
+                            supportedLanguages.add( lang );
+                        }
+                    }
+                }
+            }
+        } catch ( IOException ex )
+        {
+            ex.printStackTrace();
+        }
+        return supportedLanguages;
     }
 
     @SuppressWarnings("unchecked")
@@ -70,12 +198,12 @@ public class SettingsWindow extends JFrame
         browserPathButton = new javax.swing.JButton();
         langLabel = new javax.swing.JLabel();
         countryLabel = new javax.swing.JLabel();
-        langField = new javax.swing.JTextField();
-        countryField = new javax.swing.JTextField();
         maxSizeLabel = new javax.swing.JLabel();
         maxSizeField = new javax.swing.JTextField();
         maxSizeDefaultLabel = new javax.swing.JLabel();
         unitLabel = new javax.swing.JLabel();
+        langCombo = new javax.swing.JComboBox();
+        countryCombo = new javax.swing.JComboBox();
         databaseConfigPanel = new javax.swing.JPanel();
         connTypePanel = new javax.swing.JPanel();
         connTypePane = new javax.swing.JScrollPane();
@@ -122,12 +250,6 @@ public class SettingsWindow extends JFrame
 
         countryLabel.setText(messageService.getString("settings.country"));
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.localeLanguage}"), langField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "langBinding");
-        bindingGroup.addBinding(binding);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.localeCountry}"), countryField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"), "countryBinding");
-        bindingGroup.addBinding(binding);
-
         maxSizeLabel.setText(messageService.getString("settings.maxformsize"));
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.maxFormContentSize}"), maxSizeField, org.jdesktop.beansbinding.BeanProperty.create("text"));
@@ -136,6 +258,18 @@ public class SettingsWindow extends JFrame
         maxSizeDefaultLabel.setText(messageService.getString("settings.restartinfo"));
 
         unitLabel.setText(messageService.getString("settings.bytes"));
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.localeLanguage}"), langCombo, org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
+        bindingGroup.addBinding(binding);
+
+        langCombo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                langComboActionPerformed(evt);
+            }
+        });
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, org.jdesktop.beansbinding.ELProperty.create("${appConfiguration.localeCountry}"), countryCombo, org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
+        bindingGroup.addBinding(binding);
 
         javax.swing.GroupLayout appConfigPanelLayout = new javax.swing.GroupLayout(appConfigPanel);
         appConfigPanel.setLayout(appConfigPanelLayout);
@@ -147,7 +281,7 @@ public class SettingsWindow extends JFrame
                     .addGroup(appConfigPanelLayout.createSequentialGroup()
                         .addComponent(browserPathLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(browserPathField, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE)
+                        .addComponent(browserPathField, javax.swing.GroupLayout.DEFAULT_SIZE, 452, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(browserPathButton)
                         .addGap(8, 8, 8))
@@ -156,33 +290,29 @@ public class SettingsWindow extends JFrame
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, appConfigPanelLayout.createSequentialGroup()
                                 .addComponent(langLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(langField))
+                                .addComponent(langCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, appConfigPanelLayout.createSequentialGroup()
-                                .addGap(25, 25, 25)
                                 .addComponent(hostLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addGap(10, 10, 10)
+                        .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(countryLabel)
+                            .addComponent(portLabel))
+                        .addGap(23, 23, 23)
                         .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(appConfigPanelLayout.createSequentialGroup()
-                                .addGap(29, 29, 29)
-                                .addComponent(portLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(appConfigPanelLayout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addComponent(countryLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(countryField)))
+                            .addComponent(countryCombo, 0, 0, Short.MAX_VALUE)
+                            .addComponent(portField, javax.swing.GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
                         .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(maxSizeDefaultLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 316, Short.MAX_VALUE)
+                            .addComponent(maxSizeDefaultLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
                             .addGroup(appConfigPanelLayout.createSequentialGroup()
                                 .addComponent(maxSizeLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(maxSizeField, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(unitLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 92, Short.MAX_VALUE)))
+                                .addComponent(unitLabel)))
                         .addContainerGap())))
         );
         appConfigPanelLayout.setVerticalGroup(
@@ -191,11 +321,11 @@ public class SettingsWindow extends JFrame
                 .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(portLabel)
-                    .addComponent(hostLabel)
                     .addComponent(maxSizeLabel)
-                    .addComponent(maxSizeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(unitLabel))
+                    .addComponent(hostLabel)
+                    .addComponent(portLabel)
+                    .addComponent(unitLabel)
+                    .addComponent(maxSizeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(appConfigPanelLayout.createSequentialGroup()
                         .addGap(1, 1, 1)
@@ -204,9 +334,9 @@ public class SettingsWindow extends JFrame
                         .addGap(18, 18, 18)
                         .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(langLabel)
-                            .addComponent(langField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(countryField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(countryLabel))))
+                            .addComponent(countryLabel)
+                            .addComponent(langCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(countryCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(18, 18, 18)
                 .addGroup(appConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(browserPathLabel)
@@ -225,7 +355,7 @@ public class SettingsWindow extends JFrame
         org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${databaseConfiguration.connectionTypes.connectionType}");
         org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, config, eLProperty, connTypeTable);
         org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${id}"));
-        columnBinding.setColumnName(messageService.getString("ID"));
+        columnBinding.setColumnName("Id");
         columnBinding.setColumnClass(String.class);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${dialect}"));
         columnBinding.setColumnName("Dialect");
@@ -237,6 +367,7 @@ public class SettingsWindow extends JFrame
         jTableBinding.bind();
         connTypePane.setViewportView(connTypeTable);
         connTypeTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        connTypeTable.getColumnModel().getColumn(0).setHeaderValue(messageService.getString("ID"));
 
         connTypeAddButton.setText(messageService.getString("settings.add"));
         connTypeAddButton.addActionListener(new java.awt.event.ActionListener() {
@@ -259,7 +390,7 @@ public class SettingsWindow extends JFrame
             .addGroup(connTypePanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(connTypePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(connTypePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
+                    .addComponent(connTypePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 599, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connTypePanelLayout.createSequentialGroup()
                         .addComponent(connTypeAddButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -306,8 +437,6 @@ public class SettingsWindow extends JFrame
         jTableBinding.bind();
         connPane.setViewportView(connTable);
         connTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        connTable.getColumnModel().getColumn(1).setCellEditor(null);
-        connTable.getColumnModel().getColumn(1).setCellRenderer(null);
         connTable.getColumnModel().getColumn(3).setPreferredWidth(60);
 
         connAddButton.setText(messageService.getString("settings.add"));
@@ -329,7 +458,7 @@ public class SettingsWindow extends JFrame
         connPanelLayout.setHorizontalGroup(
             connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connPanelLayout.createSequentialGroup()
-                .addContainerGap(455, Short.MAX_VALUE)
+                .addContainerGap(401, Short.MAX_VALUE)
                 .addComponent(connAddButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(connDelButton)
@@ -337,13 +466,13 @@ public class SettingsWindow extends JFrame
             .addGroup(connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(connPanelLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(connPane, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
+                    .addComponent(connPane, javax.swing.GroupLayout.DEFAULT_SIZE, 599, Short.MAX_VALUE)
                     .addContainerGap()))
         );
         connPanelLayout.setVerticalGroup(
             connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, connPanelLayout.createSequentialGroup()
-                .addContainerGap(99, Short.MAX_VALUE)
+                .addContainerGap(97, Short.MAX_VALUE)
                 .addGroup(connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(connDelButton)
                     .addComponent(connAddButton))
@@ -351,7 +480,7 @@ public class SettingsWindow extends JFrame
             .addGroup(connPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(connPanelLayout.createSequentialGroup()
                     .addComponent(connPane, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(39, Short.MAX_VALUE)))
+                    .addContainerGap(37, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout databaseConfigPanelLayout = new javax.swing.GroupLayout(databaseConfigPanel);
@@ -464,6 +593,24 @@ public class SettingsWindow extends JFrame
         bindingGroup.bind();
     }//GEN-LAST:event_connDelButtonActionPerformed
 
+    private void langComboActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_langComboActionPerformed
+    {//GEN-HEADEREND:event_langComboActionPerformed
+        Vector vect = new Vector();
+        for ( int i = 0; i < countryVect.size(); i++ )
+        {
+            String item = countryVect.get( i ).toString();
+            if ( item.split( "\\_" )[0].equals( langCombo.getSelectedItem().toString() ) )
+            {
+                vect.add( item.split( "\\_" )[1] );
+            }
+        }
+        if ( vect.isEmpty() )
+        {
+            vect.add( "" );
+        }
+        countryCombo.setModel( new DefaultComboBoxModel( vect ) );
+    }//GEN-LAST:event_langComboActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel appConfigPanel;
     private javax.swing.JButton browserPathButton;
@@ -480,12 +627,12 @@ public class SettingsWindow extends JFrame
     private javax.swing.JScrollPane connTypePane;
     private javax.swing.JPanel connTypePanel;
     private javax.swing.JTable connTypeTable;
-    private javax.swing.JTextField countryField;
+    private javax.swing.JComboBox countryCombo;
     private javax.swing.JLabel countryLabel;
     private javax.swing.JPanel databaseConfigPanel;
     private javax.swing.JTextField hostField;
     private javax.swing.JLabel hostLabel;
-    private javax.swing.JTextField langField;
+    private javax.swing.JComboBox langCombo;
     private javax.swing.JLabel langLabel;
     private javax.swing.JLabel maxSizeDefaultLabel;
     private javax.swing.JTextField maxSizeField;
