@@ -8,6 +8,7 @@
     <leftImage>../../resources/images/dhis2-logo-rotated.png</leftImage>
     <logoImage>../../resources/images/dhis2-logo.png</logoImage>
     <splashImage>../../resources/images/dhis2-logo.png</splashImage>
+    <allowLanguageSelection>1</allowLanguageSelection>
     <preBuildActionList>
         <copyFile>
             <destination>${build_project_directory}/temp/</destination>
@@ -242,11 +243,12 @@
                 </folder>
             </folderList>
         </component>
-		<component>
+        <component>
             <name>demodb</name>
             <description>Demo database</description>
             <canBeEdited>1</canBeEdited>
             <selected>1</selected>
+            <shouldPackRuleEvaluationLogic>or</shouldPackRuleEvaluationLogic>
             <show>1</show>
             <folderList>
                 <folder>
@@ -261,6 +263,11 @@
                     </distributionFileList>
                 </folder>
             </folderList>
+            <shouldPackRuleList>
+                <fileExists>
+                    <path>../../resources/demodb/demo.h2.db</path>
+                </fileExists>
+            </shouldPackRuleList>
         </component>
     </componentList>
     <finalPageActionList>
