@@ -110,7 +110,8 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
         var initialColors = this.colors;
         var numColors = this.classification.bins.length;
 		var mapLegendType = ACTIVEPANEL == organisationUnitAssignment ?
-            map_legend_type_automatic : Ext.getCmp('maplegendtype_cb').getValue();
+            map_legend_type_automatic : ACTIVEPANEL == thematicMap ?
+                Ext.getCmp('maplegendtype_cb').getValue() : Ext.getCmp('maplegendtype_cb2').getValue();
 		
 		if (mapLegendType == map_legend_type_automatic) {
 			this.colorInterpolation = choropleth.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(initialColors[0], initialColors[1], numColors);
@@ -120,7 +121,7 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
 		}
 		else if (mapLegendType == map_legend_type_predefined) {
 			this.colorInterpolation = choropleth.colorInterpolation;
-            for (var i = 0; i < choropleth.colorInterpolation.length && i < choropleth.colorInterpolation.length; i++) {
+            for (var i = 0; i < choropleth.imageLegend.length && i < choropleth.colorInterpolation.length; i++) {
                 choropleth.imageLegend[i].color = choropleth.colorInterpolation[i].toHexString();
             }
 		}

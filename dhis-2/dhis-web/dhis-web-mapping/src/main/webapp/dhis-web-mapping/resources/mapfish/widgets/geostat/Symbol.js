@@ -170,32 +170,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			}
 		});
 	},
-    
-    validateForm2: function() {
-        if (!Ext.getCmp('indicator_cb2').getValue() && !Ext.getCmp('dataelement_cb2').getValue()) {
-            return false;
-        }
-        if (!Ext.getCmp('period_cb2').getValue()) {
-            return false;
-        }
-        if (!Ext.getCmp('map_cb2').getValue() && !Ext.getCmp('map_tf2').getValue()) {
-            return false;
-        }
-        if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_predefined) {
-            if (!Ext.getCmp('maplegendset_cb2').getValue()) {
-                return false;
-            }
-        }
-        else {
-            if (Ext.getCmp('method_cb2').getValue() == classify_with_bounds) {
-                if (!Ext.getCmp('bounds_tf2').getValue()) {
-                    return false;
-                }
-            }
-        }
-        
-        return true;
-    },
 	
     initComponent : function() {
     
@@ -1182,7 +1156,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('maplegendset_cb2').showField();
 							
 							if (Ext.getCmp('maplegendset_cb2').getValue()) {
-								this.classify(false, true);
+								proportionalSymbol.applyPredefinedLegend();
 							}
                         }
                         else if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb2').getValue() != LEGEND[thematicMap2].type) {
@@ -1200,7 +1174,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('colorB_cf2').showField();
 							Ext.getCmp('maplegendset_cb2').hideField();
                             
-                            this.classify(false, true);
+                            proportionalSymbol.classify(false, true);
                         }
                     },
                     scope: this

@@ -62,6 +62,8 @@ function validateDates(startDate,endDate){if(!startDate || !endDate){return true
 function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else if(h<=1050){return 310;}else if(h<=1200){return 470;}else{return 900;}}
 /* Make map view numbers numeric */
 function getNumericMapView(mapView){mapView.id=parseFloat(mapView.id);mapView.indicatorGroupId=parseFloat(mapView.indicatorGroupId);mapView.indicatorId=parseFloat(mapView.indicatorId);mapView.periodId=parseFloat(mapView.periodId);mapView.method=parseFloat(mapView.method);mapView.classes=parseFloat(mapView.classes);mapView.mapLegendSetId=parseFloat(mapView.mapLegendSetId);mapView.longitude=parseFloat(mapView.longitude);mapView.latitude=parseFloat(mapView.latitude);mapView.zoom=parseFloat(mapView.zoom);return mapView;}
+/* Get number of decimals */
+function getNumberOfDecimals(x,dec_sep){var tmp=new String();tmp=x;if(tmp.indexOf(dec_sep)>-1){return tmp.length-tmp.indexOf(dec_sep)-1;}else{return 0;}}
 /* Toggle feature labels */
 function getActivatedOpenLayersStyleMap(nameColumn) {
     return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${labelString}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])), 'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
@@ -556,21 +558,21 @@ Ext.onReady( function() {
 				displayField: 'text',
 				isFormField: true,
 				width: combo_width_fieldset,
-				minListWidth: combo_list_width_fieldset,
 				mode: 'local',
 				triggerAction: 'all'
 			},
 			{
 				xtype: 'combo',
 				id: 'exportimagequality_cb',
-				fieldLabel: i18n_image_quality,
+				// fieldLabel: i18n_image_resolution,
+                fieldLabel: 'Image resolution',
 				labelSeparator: labelseparator,
 				editable: false,
 				valueField: 'id',
 				displayField: 'text',
 				isFormField: true,
 				width: combo_width_fieldset,
-				minListWidth: combo_list_width_fieldset,
+				minListWidth: combo_width_fieldset,
 				mode: 'local',
 				triggerAction: 'all',
 				value: 1,
@@ -3730,37 +3732,37 @@ Ext.onReady( function() {
                     proportionalSymbol,
                     shapefilePanel,
                     mapping,
-					adminPanel,
-					{
-						xtype: 'print-multi',
-						id: 'printMultiPage_p',
-						title: '<span class="panel-title">Print multi page PDF</span>',
-						formConfig: {
-							labelWidth: 65,
-							bodyStyle: 'padding: 7px;',
-							defaults: {
-								width: 140,
-								listWidth: 140
-							}
-						},
-						columns: [
-							{
-								header: 'Map title',
-								width: 80,
-								dataIndex: 'mapTitle',
-								editor: new Ext.form.TextField()
-							},
-							{
-								header: 'Comment',
-								dataIndex: 'comment',
-								editor: new Ext.form.TextField()
-							}
-						],
-						border: false,
-						map: MAP,
-						configUrl: printConfigUrl,
-						overrides: layerOverrides
-					}
+					adminPanel //,
+					// {
+						// xtype: 'print-multi',
+						// id: 'printMultiPage_p',
+						// title: '<span class="panel-title">Print multi page PDF</span>',
+						// formConfig: {
+							// labelWidth: 65,
+							// bodyStyle: 'padding: 7px;',
+							// defaults: {
+								// width: 140,
+								// listWidth: 140
+							// }
+						// },
+						// columns: [
+							// {
+								// header: 'Map title',
+								// width: 80,
+								// dataIndex: 'mapTitle',
+								// editor: new Ext.form.TextField()
+							// },
+							// {
+								// header: 'Comment',
+								// dataIndex: 'comment',
+								// editor: new Ext.form.TextField()
+							// }
+						// ],
+						// border: false,
+						// map: MAP,
+						// configUrl: printConfigUrl,
+						// overrides: layerOverrides
+					// }
                 ]
             },
             {
@@ -3779,7 +3781,7 @@ Ext.onReady( function() {
 	
     shapefilePanel.hide();
 	mapping.hide();
-	Ext.getCmp('printMultiPage_p').hide();
+	// Ext.getCmp('printMultiPage_p').hide();
 	ACTIVEPANEL = thematicMap;
     
 	/* Section: map controls */
