@@ -49,21 +49,15 @@
     </action>
       
     <action name="validateValidationRule" class="org.hisp.dhis.validationrule.action.ValidateValidationRuleAction">
-      <result name="success" type="velocity-xml">/dhis-web-validationrule/responseSuccess.vm</result>
-      <result name="error" type="velocity-xml">/dhis-web-validationrule/responseError.vm</result>
-      <result name="input" type="velocity-xml">/dhis-web-validationrule/responseInput.vm</result>
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	  <result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+      <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
     </action>
     
     <action name="getTextualExpression"	class="org.hisp.dhis.validationrule.action.GetTextualExpressionAction">
       <result name="success" type="velocity-xml">/dhis-web-validationrule/responseTextualExpression.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
-    
-    <action name="validateExpression" class="org.hisp.dhis.validationrule.action.ValidateExpressionAction">
-      <result name="success" type="velocity-xml">/dhis-web-validationrule/responseSuccess.vm</result>
-      <result name="input" type="velocity-xml">/dhis-web-validationrule/responseError.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>
-    </action>  
     
     <action name="showUpdateValidationRuleForm" class="org.hisp.dhis.validationrule.action.GetPeriodTypesAction">
       <result name="success" type="chain">showUpdateValidationRuleFormChain</result>
@@ -83,11 +77,9 @@
     </action>
     
     <action name="showEditExpressionForm" class="org.hisp.dhis.validationrule.action.GetExpressionAction">
-      <result name="success" type="velocity">/popup.vm</result>
-      <param name="page">/dhis-web-validationrule/editExpressionForm.vm</param>
-      <param name="javascripts">javascript/general.js,javascript/expression.js</param>
+      <result name="success" type="velocity">/dhis-web-validationrule/editExpressionForm.vm</result>
       <param name="requiredAuthorities">F_VALIDATIONRULE_UPDATE</param>
-    </action>    
+    </action>
     
     <action name="getFilteredDataElements" class="org.hisp.dhis.validationrule.action.GetFilteredDataElementsAction">
       <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonOperands.vm</result>			

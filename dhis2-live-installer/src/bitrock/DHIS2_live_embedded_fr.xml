@@ -1,20 +1,22 @@
 <project>
     <shortName>DHIS2</shortName>
     <fullName>DHIS2</fullName>
-    <version>2.0.4</version>
-    <installerFilename>${product_shortname}-${product_version}-${platform_name}-lite-JRE.${platform_exec_suffix}</installerFilename>
+    <version>2.0.5</version>
+    <installerFilename>${product_shortname}-${product_version}-${platform_name}-live-JRE-fr.${platform_exec_suffix}</installerFilename>
     <readmeFile>../../resources/files/Readme.txt</readmeFile>
     <licenseFile>../../resources/files/Licence.txt</licenseFile>
     <leftImage>../../resources/images/dhis2-logo-rotated.png</leftImage>
     <logoImage>../../resources/images/dhis2-logo.png</logoImage>
     <splashImage>../../resources/images/dhis2-logo.png</splashImage>
+    <defaultLanguage>fr</defaultLanguage>
+    <allowLanguageSelection>1</allowLanguageSelection>
     <preBuildActionList>
         <copyFile>
             <destination>${build_project_directory}/temp/</destination>
             <origin>${env(DHIS2_SRC)}/dhis-2/dhis-web/dhis-web-portal/target/dhis.war</origin>
         </copyFile>
         <copyFile>
-            <destination>${build_project_directory}/temp/dhis2-live.jar</destination>
+            <destination>${build_project_directory}/temp/dhis2-live-jar-with-dependencies.jar</destination>
             <origin>${env(DHIS2_SRC)}/dhis-live/target/dhis2-live-jar-with-dependencies.jar</origin>
         </copyFile>
         <copyFile>
@@ -72,7 +74,7 @@
                             <origin>../../resources/conf</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>temp/dhis2-live.jar</origin>
+                            <origin>temp/dhis2-live-jar-with-dependencies.jar</origin>
                         </distributionFile>
                     </distributionFileList>
                     <shortcutList>
@@ -238,6 +240,26 @@
                         <distributionDirectory>
                             <origin>../../resources/browser/FirefoxPortable</origin>
                         </distributionDirectory>
+                    </distributionFileList>
+                </folder>
+            </folderList>
+        </component>
+		<component>
+            <name>demodb</name>
+            <description>Demo database</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>1</selected>
+            <show>1</show>
+            <folderList>
+                <folder>
+                    <description>demodb</description>
+                    <destination>${installdir}/database</destination>
+                    <name>demodb</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../resources/demodb/demo.h2.db</origin>
+                        </distributionFile>
                     </distributionFileList>
                 </folder>
             </folderList>

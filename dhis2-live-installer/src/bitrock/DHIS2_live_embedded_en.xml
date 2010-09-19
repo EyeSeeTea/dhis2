@@ -1,13 +1,14 @@
 <project>
     <shortName>DHIS2</shortName>
     <fullName>DHIS2</fullName>
-    <version>2.0.4</version>
-    <installerFilename>${product_shortname}-${product_version}-${platform_name}-lite-JRE.${platform_exec_suffix}</installerFilename>
+    <version>2.0.5</version>
+    <installerFilename>${product_shortname}-${product_version}-${platform_name}-live-JRE-en.${platform_exec_suffix}</installerFilename>
     <readmeFile>../../resources/files/Readme.txt</readmeFile>
     <licenseFile>../../resources/files/Licence.txt</licenseFile>
     <leftImage>../../resources/images/dhis2-logo-rotated.png</leftImage>
     <logoImage>../../resources/images/dhis2-logo.png</logoImage>
     <splashImage>../../resources/images/dhis2-logo.png</splashImage>
+    <allowLanguageSelection>1</allowLanguageSelection>
     <preBuildActionList>
         <copyFile>
             <destination>${build_project_directory}/temp/</destination>
@@ -241,6 +242,32 @@
                     </distributionFileList>
                 </folder>
             </folderList>
+        </component>
+        <component>
+            <name>demodb</name>
+            <description>Demo database</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>1</selected>
+            <shouldPackRuleEvaluationLogic>or</shouldPackRuleEvaluationLogic>
+            <show>1</show>
+            <folderList>
+                <folder>
+                    <description>demodb</description>
+                    <destination>${installdir}/database</destination>
+                    <name>demodb</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../resources/demodb/demo.h2.db</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+            </folderList>
+            <shouldPackRuleList>
+                <fileExists>
+                    <path>../../resources/demodb/demo.h2.db</path>
+                </fileExists>
+            </shouldPackRuleList>
         </component>
     </componentList>
     <finalPageActionList>

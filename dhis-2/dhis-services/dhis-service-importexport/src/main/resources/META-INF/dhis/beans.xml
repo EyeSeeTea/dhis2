@@ -227,6 +227,8 @@
         <property name="importObjectService"
                   ref="org.hisp.dhis.importexport.ImportObjectService" />
         <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+        <property name="conceptService"
+                  ref="org.hisp.dhis.concept.ConceptService" />
         <property name="categoryService"
                   ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
         <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
@@ -274,6 +276,8 @@
 
 	<bean id="org.hisp.dhis.importexport.DXFExportService"
 		class="org.hisp.dhis.importexport.dxf.exporter.DefaultDXFExportService">
+		<property name="conceptService"
+			ref="org.hisp.dhis.concept.ConceptService" />
 		<property name="categoryService"
 			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />

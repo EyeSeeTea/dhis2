@@ -16,7 +16,8 @@
         <defaultGoal>install</defaultGoal>
 
         <plugins>
-            <!--jaxb plugin-->
+			
+            <!--JAXB plugin-->
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
@@ -31,7 +32,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <!-- Maven Assembly -->
             <plugin>
@@ -56,8 +56,8 @@
                         </goals>
                     </execution>
                 </executions>
-
             </plugin>
+			
             <!-- Maven Compiler -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -68,6 +68,7 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+			
             <!-- Launch4J -->
             <plugin>
                 <groupId>org.bluestemsoftware.open.maven.plugin</groupId>
@@ -84,7 +85,7 @@
                             <dontWrapJar>true</dontWrapJar>
                             <headerType>gui</headerType>
                             <outfile>${project.build.directory}/dhis2-live.exe</outfile>
-                            <jar>dhis2-live-jar-with-dependencies.jar</jar>
+                            <jar>dhis2-live.jar</jar>
                             <errTitle>dhis2</errTitle>
                             <priority>normal</priority>
                             <downloadUrl>http://java.com/download</downloadUrl>
@@ -113,7 +114,7 @@
                             </splash>
                         </configuration>
                     </execution>
-			<execution>
+					<execution>
                         <id>embedded</id>
                         <phase>package</phase>
                         <goals>
@@ -123,7 +124,7 @@
                             <dontWrapJar>true</dontWrapJar>
                             <headerType>gui</headerType>
                             <outfile>${project.build.directory}/dhis2-live-embedded.exe</outfile>
-                            <jar>dhis2-live-jar-with-dependencies.jar</jar>
+                            <jar>dhis2-live.jar</jar>
                             <errTitle>dhis2</errTitle>
                             <priority>normal</priority>
                             <downloadUrl>http://java.com/download</downloadUrl>
@@ -139,7 +140,7 @@
                                 <windowTitle></windowTitle>
                             </singleInstance>
                             <jre>
-				<path>jre6</path>
+								<path>jre6</path>
                                 <minVersion>1.6.0_14</minVersion>
                                 <opts>
                                     <opt>-XX:MaxPermSize=256M</opt>
