@@ -381,22 +381,13 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
      */
     defaultLabelGenerator: function(bin, binIndex, nbBins) {
 		if (ACTIVEPANEL == organisationUnitAssignment) {
-            if (bin.upperBound < 1) {
-                return 'Available' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
-            }
-            else {
-                return 'Assigned' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
-            }
+            return bin.upperBound < 1 ?
+                'Available' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )' : 'Assigned' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
 		}
 		else {
-            var upper = parseFloat(bin.upperBound);
-            
-            if (bin.upperBound > bin.lowerBound) {
-                if (binIndex < nbBins-1) {
-                    upper -= parseFloat("0.1");
-                }
-            }
-			return parseFloat(bin.lowerBound).toFixed(1) + ' - ' + upper.toFixed(1) + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
+            lower = getNumberOfDecimals(bin.lowerBound.toString(), ".") > 2 ? Math.round(parseFloat(bin.lowerBound) * 100) / 100 : parseFloat(bin.lowerBound);
+            upper = getNumberOfDecimals(bin.upperBound.toString(), ".") > 2 ? Math.round(parseFloat(bin.upperBound) * 100) / 100 : parseFloat(bin.upperBound);            
+            return lower + ' - ' + upper + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
 		}
     },
 
@@ -501,17 +492,11 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
      * {<mapfish.GeoStat.Classification>} Classification
      */
     classify: function(method, nbBins, bounds) {
-		var mlt;
-        if (ACTIVEPANEL == thematicMap) {
-            mlt = Ext.getCmp('maplegendtype_cb').getValue();
-        }
-        else if (ACTIVEPANEL == thematicMap2) {
-            mlt = Ext.getCmp('maplegendtype_cb2').getValue();
-        }
-        else if (ACTIVEPANEL == organisationUnitAssignment) {
-            mlt = map_legend_type_automatic;
-        }
-
+        var mlt = ACTIVEPANEL == thematicMap ?
+            LEGEND[thematicMap].type : ACTIVEPANEL == thematicMap2 ?
+                LEGEND[thematicMap2].type : ACTIVEPANEL == organisationUnitAssignment ?
+                    map_legend_type_automatic : map_legend_type_automatic;
+    
 		if (mlt == map_legend_type_automatic) {
 			if (method == mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
 				var str = ACTIVEPANEL == thematicMap ? Ext.getCmp('bounds_tf').getValue() : Ext.getCmp('bounds_tf2').getValue();
@@ -559,10 +544,8 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 		}
 		else if (mlt == map_legend_type_predefined) {
 			bounds = ACTIVEPANEL == thematicMap ? choropleth.bounds : proportionalSymbol.bounds;
-			if (bounds[0] <= this.minVal) {
-				bounds[0] = this.minVal;
-			}
-			else {
+
+			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);
                 if (ACTIVEPANEL == thematicMap) {
                     choropleth.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
@@ -571,11 +554,8 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                     proportionalSymbol.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
                 }
 			}
-			
-			if (bounds[bounds.length-1] >= this.maxVal) {
-				bounds[bounds.length-1] = this.maxVal;
-			}
-			else {
+
+			if (bounds[bounds.length-1] < this.maxVal) {
 				bounds.push(this.maxVal);
                 if (ACTIVEPANEL == thematicMap) {
                     choropleth.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));

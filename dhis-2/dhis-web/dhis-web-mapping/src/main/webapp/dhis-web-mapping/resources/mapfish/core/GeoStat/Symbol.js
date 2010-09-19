@@ -128,7 +128,7 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 		}
 		else if (mapLegendType == map_legend_type_predefined) {
 			this.colorInterpolation = proportionalSymbol.colorInterpolation;
-			for (var i = 0; i < proportionalSymbol.colorInterpolation.length && i < proportionalSymbol.colorInterpolation.length; i++) {
+			for (var i = 0; i < proportionalSymbol.imageLegend.length && i < proportionalSymbol.colorInterpolation.length; i++) {
 				proportionalSymbol.imageLegend[i].color = proportionalSymbol.colorInterpolation[i].toHexString();
 			}
 		}

@@ -151,7 +151,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 				var bounds = [];
 				for (var i = 0; i < mapLegends.length; i++) {
 					if (bounds[bounds.length-1] != mapLegends[i].startValue) {
-						if (bounds.length !== 0) {
+						if (bounds.length != 0) {
 							colors.push(new mapfish.ColorRgb(240,240,240));
 						}
 						bounds.push(mapLegends[i].startValue);
@@ -170,32 +170,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			}
 		});
 	},
-    
-    validateForm2: function() {
-        if (!Ext.getCmp('indicator_cb').getValue() && !Ext.getCmp('dataelement_cb').getValue()) {
-            return false;
-        }
-        if (!Ext.getCmp('period_cb').getValue()) {
-            return false;
-        }
-        if (!Ext.getCmp('map_cb').getValue() && !Ext.getCmp('map_tf').getValue()) {
-            return false;
-        }
-        if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_predefined) {
-            if (!Ext.getCmp('maplegendset_cb').getValue()) {
-                return false;
-            }
-        }
-        else {
-            if (Ext.getCmp('method_cb').getValue() == classify_with_bounds) {
-                if (!Ext.getCmp('bounds_tf').getValue()) {
-                    return false;
-                }
-            }
-        }
-        
-        return true;
-    },
     
     initComponent: function() {
     
@@ -788,6 +762,24 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                                     choropleth.applyPredefinedLegend();
                                 }
+                                else {
+                                    if (LEGEND[thematicMap].type == map_legend_type_predefined) {
+                                        LEGEND[thematicMap].type = map_legend_type_automatic;
+                                        Ext.getCmp('maplegendtype_cb').setValue(LEGEND[thematicMap].type);
+                                        Ext.getCmp('method_cb').showField();
+                                        if (Ext.getCmp('method_cb').getValue() == classify_with_bounds) {
+                                            Ext.getCmp('bounds_tf').showField();
+                                            Ext.getCmp('numClasses_cb').hideField();
+                                        }
+                                        else {
+                                            Ext.getCmp('bounds_tf').hideField();
+                                            Ext.getCmp('numClasses_cb').showField();
+                                        }
+                                        Ext.getCmp('colorA_cf').showField();
+                                        Ext.getCmp('colorB_cf').showField();
+                                        Ext.getCmp('maplegendset_cb').hideField();
+                                    }
+                                }       
 
                                 choropleth.classify(false, true);
                             },
@@ -1182,7 +1174,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('maplegendset_cb').showField();
 							
 							if (Ext.getCmp('maplegendset_cb').getValue()) {
-								this.classify(false, true);
+                                choropleth.applyPredefinedLegend();
 							}
                         }
                         else if (Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb').getValue() != LEGEND[thematicMap].type) {
@@ -1200,7 +1192,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('colorB_cf').showField();
 							Ext.getCmp('maplegendset_cb').hideField();
                             
-                            this.classify(false, true);
+                            choropleth.classify(false, true);
                         }
                     },
                     scope: this
