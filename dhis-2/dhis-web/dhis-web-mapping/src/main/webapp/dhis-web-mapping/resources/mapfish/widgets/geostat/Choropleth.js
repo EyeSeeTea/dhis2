@@ -777,11 +777,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         }
                                         Ext.getCmp('colorA_cf').showField();
                                         Ext.getCmp('colorB_cf').showField();
-                                        Ext.getCmp('maplegendset_cb').hideField();
-                                    }
-                                }       
+                                        Ext.getCmp('maplegendset_cb').hideField();       
 
-                                choropleth.classify(false, true);
+                                        choropleth.classify(false, true);
+                                    }
+                                }
                             },
                             failure: function()
                             {
@@ -1554,7 +1554,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
             params.id = indicatorOrDataElementId;
             params.parentId = choropleth.parentId;
-            
+
             Ext.Ajax.request({
                 url: path_mapping + dataUrl + type,
                 method: 'POST',
@@ -1673,7 +1673,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                                     for (var j = 0; j < FEATURE[thematicMap].length; j++) {
                                         var value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]];
-                                        var name = FEATURE[thematicMap][j].attributes[nameColumn];
                                         FEATURE[thematicMap][j].attributes.value = value ? parseFloat(value) : '';
                                         FEATURE[thematicMap][j].data.id = FEATURE[thematicMap][j].attributes[nameColumn];
                                         FEATURE[thematicMap][j].data.name = FEATURE[thematicMap][j].attributes[nameColumn];

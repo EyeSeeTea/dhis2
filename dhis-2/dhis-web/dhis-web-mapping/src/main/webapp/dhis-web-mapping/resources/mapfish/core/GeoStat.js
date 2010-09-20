@@ -350,8 +350,8 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
      * Property: labelGenerator
      *     Generator for bin labels
      */
-    labelGenerator: function(bin, binIndex, nbBins) {
-        return this.defaultLabelGenerator(bin, binIndex, nbBins)
+    labelGenerator: function(bin, binIndex, nbBins, maxDec) {
+        return this.defaultLabelGenerator(bin, binIndex, nbBins, maxDec)
     },
 
     values: null,
@@ -379,14 +379,16 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
      *   binIndex - {Integer} Current bin index
      *   nBins - {Integer} Total number of bins
      */
-    defaultLabelGenerator: function(bin, binIndex, nbBins) {
+    defaultLabelGenerator: function(bin, binIndex, nbBins, maxDec) {
 		if (ACTIVEPANEL == organisationUnitAssignment) {
             return bin.upperBound < 1 ?
                 'Available' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )' : 'Assigned' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
 		}
 		else {
-            lower = getNumberOfDecimals(bin.lowerBound.toString(), ".") > 2 ? Math.round(parseFloat(bin.lowerBound) * 100) / 100 : parseFloat(bin.lowerBound);
-            upper = getNumberOfDecimals(bin.upperBound.toString(), ".") > 2 ? Math.round(parseFloat(bin.upperBound) * 100) / 100 : parseFloat(bin.upperBound);            
+            // lower = getNumberOfDecimals(bin.lowerBound.toString(), ".") > 2 ? Math.round(parseFloat(bin.lowerBound) * 100) / 100 : parseFloat(bin.lowerBound);
+            // upper = getNumberOfDecimals(bin.upperBound.toString(), ".") > 2 ? Math.round(parseFloat(bin.upperBound) * 100) / 100 : parseFloat(bin.upperBound);
+            lower = parseFloat(bin.lowerBound).toFixed(maxDec);
+            upper = parseFloat(bin.upperBound).toFixed(maxDec);
             return lower + ' - ' + upper + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
 		}
     },
@@ -417,11 +419,19 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         binCount[nbBins - 1] = this.nbVal - mapfish.Util.sum(binCount);
 		
 		var imageLegend = new Array();
+        var maxDec = 0;
+        
+        for (var i = 0; i < bounds.length; i++) {
+            var dec = getNumberOfDecimals(bounds[i].toString(), ".");
+            maxDec = dec > maxDec ? dec : maxDec;
+        }
+        
+        maxDec = maxDec > 2 ? 2 : maxDec;
 		
         for (var i = 0; i < nbBins; i++) {
             bins[i] = new mapfish.GeoStat.Bin(binCount[i], bounds[i], bounds[i + 1], i == (nbBins - 1));
             var labelGenerator = this.labelGenerator || this.defaultLabelGenerator;
-            bins[i].label = labelGenerator(bins[i], i, nbBins);
+            bins[i].label = labelGenerator(bins[i], i, nbBins, maxDec);
 			imageLegend[i] = new Object();
 			imageLegend[i].label = bins[i].label;
         }
@@ -528,12 +538,9 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                     Ext.getCmp('bounds_tf2').setValue(newInput);
                 }
 				
-				for (var i = 0; i < bounds.length; i++)
-				{
+				for (var i = 0; i < bounds.length; i++) {
 					bounds[i] = parseFloat(bounds[i]);
-					
-					if (bounds[i] < this.minVal || bounds[i] > this.maxVal)
-					{
+					if (bounds[i] < this.minVal || bounds[i] > this.maxVal) {
 						Ext.message.msg(false, 'Class breaks must be higher than <span class="x-msg-hl">' + this.minVal + '</span> and lower than <span class="x-msg-hl">' + this.maxVal + '</span>.');
 					}
 				}
