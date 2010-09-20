@@ -3,7 +3,7 @@
 	
 	jQuery(document).ready(	function(){
 		validator = validation( 'editDataElementCategoryForm', function( form ){ form.submit()}, function(){
-			listValidator( 'memberValidator', 'categoryOptionNames' );			
+			listValidator( 'memberValidator', 'categoryOptions' );			
 		} );		
 		checkValueIsExist( "name", "validateDataElementCategory.action", {id: $dataElementCategory.id});		
 		
