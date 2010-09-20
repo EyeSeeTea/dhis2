@@ -762,8 +762,26 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 
                                     proportionalSymbol.applyPredefinedLegend();
                                 }
+                                else {
+                                    if (LEGEND[thematicMap2].type == map_legend_type_predefined) {
+                                        LEGEND[thematicMap2].type = map_legend_type_automatic;
+                                        Ext.getCmp('maplegendtype_cb2').setValue(LEGEND[thematicMap2].type);
+                                        Ext.getCmp('method_cb2').showField();
+                                        if (Ext.getCmp('method_cb2').getValue() == classify_with_bounds) {
+                                            Ext.getCmp('bounds_tf2').showField();
+                                            Ext.getCmp('numClasses_cb2').hideField();
+                                        }
+                                        else {
+                                            Ext.getCmp('bounds_tf2').hideField();
+                                            Ext.getCmp('numClasses_cb2').showField();
+                                        }
+                                        Ext.getCmp('colorA_cf2').showField();
+                                        Ext.getCmp('colorB_cf2').showField();
+                                        Ext.getCmp('maplegendset_cb2').hideField();       
 
-                                proportionalSymbol.classify(false, true);
+                                        proportionalSymbol.classify(false, true);
+                                    }
+                                }
                             },
                             failure: function()
                             {

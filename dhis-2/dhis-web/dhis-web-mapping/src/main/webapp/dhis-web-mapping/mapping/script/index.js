@@ -8,9 +8,7 @@ var MAPSOURCE;
 var MAPDATETYPE;
 /* A map object */
 var MAPDATA = new Object();
-MAPDATA[thematicMap] = new Object();
-MAPDATA[thematicMap2] = new Object();
-MAPDATA[organisationUnitAssignment] = new Object();
+MAPDATA[thematicMap] = MAPDATA[thematicMap2] = MAPDATA[organisationUnitAssignment] = new Object();
 /* Filename or level */
 var URL;
 /* Active mapview object  */
@@ -21,32 +19,27 @@ var PARAMETER;
 var ACTIVEPANEL;
 /* Mask */
 var MASK;
-/* Boolean */
+/* Labels activated (boolean) */
 var LABELS = new Object();
-LABELS[thematicMap] = false;
-LABELS[thematicMap2] = false;
-LABELS[organisationUnitAssignment] = false;
+LABELS[thematicMap] = LABELS[thematicMap2] = LABELS[organisationUnitAssignment] = false;
 /* Legend colors for export */
 var COLORINTERPOLATION;
 /* Export values */
 var EXPORTVALUES;
 /* Currently selected vector feature */
 var FEATURE = new Object();
-FEATURE[thematicMap] = new Object();
-FEATURE[thematicMap2] = new Object();
+FEATURE[thematicMap] = FEATURE[thematicMap2] = new Object();
 /* Global chart for show/hide */
 var CHART;
 /* Current legend type and method */
 var LEGEND = new Object();
-LEGEND[thematicMap] = new Object();
-LEGEND[thematicMap2] = new Object();
+LEGEND[thematicMap] = LEGEND[thematicMap2] = new Object();
 LEGEND[thematicMap].type = LEGEND[thematicMap2].type = map_legend_type_automatic;
 LEGEND[thematicMap].method = LEGEND[thematicMap2].method = 2;
 LEGEND[thematicMap].classes = LEGEND[thematicMap2].classes = 5;
 /* Current map value types */
 var VALUETYPE = new Object();
-VALUETYPE.polygon = map_value_type_indicator;
-VALUETYPE.point = map_value_type_indicator;
+VALUETYPE.polygon = VALUETYPE.point = map_value_type_indicator;
 /* Top level organisation unit */
 var TOPLEVELUNIT = new Object();
 /* Locate feature window */
