@@ -300,50 +300,13 @@
 		
 		<action name="getMinMaxValidationParamsChain"
 			class="org.hisp.dhis.dataadmin.action.minmaxvalidation.GetMinMaxValidationParamsAction">
-			<interceptor-ref name="organisationUnitTreeStack"/>
+			<!--  <interceptor-ref name="organisationUnitTreeStack"/> -->
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">
-				/dhis-web-maintenance-dataadmin/minMaxValidation.vm</param>
+			<param name="page">/dhis-web-maintenance-dataadmin/minMaxValidation.vm</param>
 			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="stylesheets">style/ui.all.css</param>
-			<param name="javascripts"> ../dhis-web-commons/oust/oust.js,
-				../dhis-web-commons/util/jquery-ui.js,
-				../dhis-web-commons/util/validate/jquery.validate.js,
-				../dhis-web-commons/util/jquery.metadata.js,
-				../dhis-web-commons/util/validate/additional-methods.js,
-				javascript/minMaxValidation.js </param>
+			<param name="javascripts">javascript/minMaxValidation.js </param>
 		</action>
-		
-		<action name="selectLevelMinMax"
-			class="org.hisp.dhis.dataadmin.action.minmaxvalidation.SelectLevelAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
-		</action>
-		
-		<action name="unselectLevelMinMax"
-			class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectLevelAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
-		</action>
-		
-		<action name="selectOrganisationUnitGroup"
-			class="org.hisp.dhis.dataadmin.action.minmaxvalidation.SelectOrganisationUnitGroupAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
-		</action>
-		
-		<action name="unselectOrganisationUnitGroup"
-			class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
-		</action>
-		
-		<action name="unselectAllMinMax"
-			class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectAllAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseSuccess.vm</result>
-		</action>
-		
+			
 		<!-- Sql View -->
 		
 		<action name="getSqlViewObject"
