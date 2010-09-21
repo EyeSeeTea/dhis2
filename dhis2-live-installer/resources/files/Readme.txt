@@ -13,8 +13,8 @@ to be sure you have a a few other packages installed before you install DHIS2.
 	(http://www.openoffice.org/) in order to utilize the Excel Report module, 
 	or analyze data in PivotTables. 
 	o  (Optional) If you want to view the PDF version of the documentation, 
-	a recent version of the Adobe Acrobat reader, or other program capable of
-	reading PDF documents. Acrobat Reader can be downloaded free of charge from (http://get.adobe.com/reader/)
+	a recent version of the Adobe Acrobat reader, or other program capable of reading PDF 
+	documents. Acrobat Reader can be downloaded free of charge from (http://get.adobe.com/reader/)
 	o  This package is installed by default with the H2 embedded database.
 	DHIS2 is capable of running with other database systems, such as Postgresql or MySQL.
 	Please consult the user documentation if you wish to run DHIS2 with another database
