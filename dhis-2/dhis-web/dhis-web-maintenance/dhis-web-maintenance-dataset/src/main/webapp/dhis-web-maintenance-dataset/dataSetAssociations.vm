@@ -4,7 +4,7 @@
 
 <form id="defineDataSetAssociationsForm" action="defineDataSetAssociations.action" method="post">
   <div style="display:inline">
-	<input type="hidden" name="dataSetId" value="$dataSetId">
+	<input type="hidden" name="dataSetId" value="$dataSetId"/>
   </div>
   <table id="selectionTable">
 	<tr>
@@ -14,8 +14,8 @@
     </tr>
     <tr>
       <td>
-        <input type="submit" id="submitButton" value="$i18n.getString( "save" )" style="width:10em">
-		<input type="button" onclick="window.location.href='dataSet.action'" value="$i18n.getString( "cancel" )" style="width:10em">
+        <input type="submit" id="submitButton" value="$i18n.getString( 'save' )" style="width:10em"/>
+		<input type="button" onclick="window.location.href='dataSet.action'" value="$i18n.getString( 'cancel' )" style="width:10em"/>
       </td>
     </tr>
   </table>

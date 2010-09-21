@@ -39,13 +39,13 @@
 				</tr>
 			</table>
 			<table class="listTable" id="listTable">				
-				<col>
-				<col>
-				<col>
-				<col width="20">
-				<col width="20">
-				<col width="20">
-				<col width="20">
+				<col/>
+				<col/>
+				<col/>
+				<col width="20"/>
+				<col width="20"/>
+				<col width="20"/>
+				<col width="20"/>
 				<thead>	
 				
 				<tr>

@@ -12,7 +12,7 @@
 
 <form name="addOrganisationUnitGroupForm" id="addOrganisationUnitGroupForm" action="addOrganisationUnitGroup.action" method="POST">
 
-<p>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em> <input type="text" name="name" id="name" style="width:300px" maxlength="160" class="{validate:{required:true,minlength:2,maxlength:160}}"/></p>
+<p>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em> <input type="text" name="name" id="name" style="width:300px" maxlength="160" class="{validate:{required:true,minlength:2}}"/></p>
 <table>
 	<tr>
 		<td>

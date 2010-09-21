@@ -2,9 +2,9 @@
 <form id="indicator-expression-form">
 <table width="750">
 	<colgroup>
-		<col width="250">
-		<col width="50">
-		<col width="450">
+		<col width="250"/>
+		<col width="50"/>
+		<col width="450"/>
 	</colgroup>
 	<tr>
 		<th colspan="2">$i18n.getString( "description" )</th>

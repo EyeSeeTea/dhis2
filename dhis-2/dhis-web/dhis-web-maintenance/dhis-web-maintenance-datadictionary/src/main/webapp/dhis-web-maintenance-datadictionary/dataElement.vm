@@ -41,15 +41,15 @@
 				</tr>
 			</table>
 			<table class="listTable" id="dataElementList">
-				<col>
-                <col>
-                <col>
-				<col width="20">
-				<col width="20">
-				<col width="20">
-                <col width="20">
+				<col/>
+                <col/>
+                <col/>
+				<col width="20"/>
+				<col width="20"/>
+				<col width="20"/>
+                <col width="20"/>
                 #if ( $forumIntegration )
-                <col width="20">
+                <col width="20"/>
                 #end
                 <thead>				
 					<tr>
