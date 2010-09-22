@@ -55,12 +55,7 @@
     </action>
     
     <action name="loadDocument" class="org.hisp.dhis.reporting.document.action.LoadDocumentFromFileSystemAction">
-      <result name="success" type="stream">
-        <param name="contentType">application/file</param>
-        <param name="inputName">inputStream</param>
-        <param name="contentDisposition">filename="${fileName}"</param>
-        <param name="bufferSize">10240</param>
-      </result>
+      <result name="success" type="outputStreamResult"/>
     </action>
     
     <!-- Chart -->

@@ -218,25 +218,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.GetMinMaxValidationParamsAction"
 		scope="prototype">
 		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		<property name="organisationUnitGroupService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
 	</bean>
-
-	<bean id="org.hisp.dhis.dataadmin.action.minmaxvalidation.SetupTreeAction"
-		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.SetupTreeAction"
-		scope="prototype">
-		<property name="selectionTreeManager">
-			<ref bean="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		</property>
-		<property name="dataSetService">
-			<ref bean="org.hisp.dhis.dataset.DataSetService" />
-		</property>
-	</bean>
-
+	
 	<bean
 		id="org.hisp.dhis.dataadmin.action.minmaxvalidation.GenerateMinMaxValuesAction"
 		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.GenerateMinMaxValuesAction">
@@ -273,56 +256,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 	</bean>
 	
-	<!-- Min/Max validation - Organisation Unit tree -->
-
-	<bean
-		id="org.hisp.dhis.dataadmin.action.minmaxvalidation.SelectLevelAction"
-		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.SelectLevelAction"
-		scope="prototype">
-		<property name="selectionTreeManager">
-			<ref bean="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		</property>
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.dataadmin.action.minmaxvalidation.SelectOrganisationUnitGroupAction"
-		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.SelectOrganisationUnitGroupAction"
-		scope="prototype">
-		<property name="selectionTreeManager">
-			<ref bean="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		</property>
-		<property name="organisationUnitGroupService">
-			<ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
-		</property>
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectAllAction"
-		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectAllAction"
-		scope="prototype">
-		<property name="selectionTreeManager">
-			<ref bean="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		</property>
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectLevelAction"
-		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectLevelAction"
-		scope="prototype">
-		<property name="selectionTreeManager">
-			<ref bean="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		</property>
-	</bean>
-
-	<bean id="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
-		class="org.hisp.dhis.dataadmin.action.minmaxvalidation.UnselectOrganisationUnitGroupAction"
-		scope="prototype">
-		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		<property name="organisationUnitGroupService" 
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
-	</bean>
-
 	<!-- Sql View -->
 	
 	<bean id="org.hisp.dhis.dataadmin.action.sqlview.GetSqlViewObjectAction"

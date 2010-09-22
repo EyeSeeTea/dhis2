@@ -311,7 +311,7 @@ public class SearchPatientAction
             //System.out.println(" searchingAttributeId != null && searchText != null ");
             patients = patientAttributeValueService.searchPatientAttributeValue(
                 patientAttribute, searchText, pagingUtil.getStartPos(), pagingUtil.getPageSize() );
-
+            
             if( patients != null && patients.size() > 0 ) 
             {
                 if(sortPatientAttributeId!=null && patientAttribute!=null)
