@@ -63,6 +63,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<bean id="org.hisp.dhis.reportexcel.period.generic.PeriodGenericManager"
 		class="org.hisp.dhis.reportexcel.period.generic.DefaultPeriodGenericManager"
 		scope="singleton">
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 	</bean>
 
 	<bean

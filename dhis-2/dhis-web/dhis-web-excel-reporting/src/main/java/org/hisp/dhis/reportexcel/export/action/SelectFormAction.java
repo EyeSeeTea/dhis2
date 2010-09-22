@@ -123,7 +123,8 @@ public class SelectFormAction
 
         groups = new ArrayList<String>( reportService.getReportExcelGroups() );
 
-        periodGenericManager.setPeriodType( MonthlyPeriodType.NAME );
+        periodGenericManager.setPeriodType( MonthlyPeriodType.NAME );       
+        
 
         periods = periodGenericManager.getPeriodList();
 

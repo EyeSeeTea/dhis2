@@ -66,38 +66,38 @@
 
 		<action name="getPeriodsByPeriodTypeDB"
 			class="org.hisp.dhis.reportexcel.period.db.action.GetPeriodsByPeriodTypeAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responsePeriods.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonPeriods.vm</result>
 		</action>
 
 		<action name="nextPeriodsDB"
 			class="org.hisp.dhis.reportexcel.period.db.action.NextPeriodsAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responsePeriods.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonPeriods.vm</result>
 		</action>
 
 		<action name="previousPeriodsDB"
 			class="org.hisp.dhis.reportexcel.period.db.action.PreviousPeriodsAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responsePeriods.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonPeriods.vm</result>
 		</action>
 
 		<action name="getPeriodsByPeriodTypeGeneric"
 			class="org.hisp.dhis.reportexcel.period.generic.action.GetPeriodsByPeriodTypeAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responsePeriods.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonPeriods.vm</result>
 		</action>
 
 		<action name="nextPeriodsGeneric"
 			class="org.hisp.dhis.reportexcel.period.generic.action.NextPeriodsAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responsePeriods.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonPeriods.vm</result>
 		</action>
 
 		<action name="previousPeriodsGeneric"
 			class="org.hisp.dhis.reportexcel.period.generic.action.PreviousPeriodsAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-excel-reporting/responsePeriods.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonPeriods.vm</result>
 		</action>
 
 
