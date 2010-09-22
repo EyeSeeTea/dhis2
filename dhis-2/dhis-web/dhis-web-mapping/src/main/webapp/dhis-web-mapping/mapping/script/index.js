@@ -34,16 +34,6 @@ FEATURE[thematicMap] = new Object();
 FEATURE[thematicMap2] = new Object();
 /* Global chart for show/hide */
 var CHART;
-/* Current legend type and method */
-// var LEGEND = new Object();
-// LEGEND[thematicMap] = new Object();
-// LEGEND[thematicMap2] = new Object();
-// LEGEND[thematicMap].type = map_legend_type_automatic;
-// LEGEND[thematicMap2].type = map_legend_type_automatic;
-// LEGEND[thematicMap].method = 2;
-// LEGEND[thematicMap2].method = 2;
-// LEGEND[thematicMap].classes = 5;
-// LEGEND[thematicMap2].classes = 5;
 /* Current map value types */
 var VALUETYPE = new Object();
 VALUETYPE.polygon = map_value_type_indicator;
