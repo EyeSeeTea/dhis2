@@ -308,8 +308,8 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 	
     classify: function(method, nbBins, bounds) {
         var mlt = ACTIVEPANEL == thematicMap ?
-            LEGEND[thematicMap].type : ACTIVEPANEL == thematicMap2 ?
-                LEGEND[thematicMap2].type : ACTIVEPANEL == organisationUnitAssignment ?
+            choropleth.legend.type : ACTIVEPANEL == thematicMap2 ?
+                proportionalSymbol.legend.type : ACTIVEPANEL == organisationUnitAssignment ?
                     map_legend_type_automatic : map_legend_type_automatic;
     
 		if (mlt == map_legend_type_automatic) {
