@@ -8,11 +8,11 @@ var MAPSOURCE;
 var MAPDATETYPE;
 /* A map object */
 var MAPDATA = new Object();
-MAPDATA[thematicMap] = MAPDATA[thematicMap2] = MAPDATA[organisationUnitAssignment] = new Object();
+MAPDATA[thematicMap] = new Object();
+MAPDATA[thematicMap2] = new Object();
+MAPDATA[organisationUnitAssignment] = new Object();
 /* Filename or level */
 var URL;
-/* Active mapview object  */
-var MAPVIEW;
 /* Active mapview id parameter from URL */
 var PARAMETER;
 /* Current expanded accordion panel */
@@ -21,25 +21,23 @@ var ACTIVEPANEL;
 var MASK;
 /* Labels activated (boolean) */
 var LABELS = new Object();
-LABELS[thematicMap] = LABELS[thematicMap2] = LABELS[organisationUnitAssignment] = false;
+LABELS[thematicMap] = false;
+LABELS[thematicMap2] = false;
+LABELS[organisationUnitAssignment] = false;
 /* Legend colors for export */
 var COLORINTERPOLATION;
 /* Export values */
 var EXPORTVALUES;
 /* Currently selected vector feature */
 var FEATURE = new Object();
-FEATURE[thematicMap] = FEATURE[thematicMap2] = new Object();
+FEATURE[thematicMap] = new Object();
+FEATURE[thematicMap2] = new Object();
 /* Global chart for show/hide */
 var CHART;
-/* Current legend type and method */
-var LEGEND = new Object();
-LEGEND[thematicMap] = LEGEND[thematicMap2] = new Object();
-LEGEND[thematicMap].type = LEGEND[thematicMap2].type = map_legend_type_automatic;
-LEGEND[thematicMap].method = LEGEND[thematicMap2].method = 2;
-LEGEND[thematicMap].classes = LEGEND[thematicMap2].classes = 5;
 /* Current map value types */
 var VALUETYPE = new Object();
-VALUETYPE.polygon = VALUETYPE.point = map_value_type_indicator;
+VALUETYPE.polygon = map_value_type_indicator;
+VALUETYPE.point = map_value_type_indicator;
 /* Top level organisation unit */
 var TOPLEVELUNIT = new Object();
 /* Locate feature window */
@@ -153,8 +151,6 @@ function getLegendsJSON(){
 
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
-	/* Cookie provider */
-	Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 	/* Ext 3.2.0 override */
 	Ext.override(Ext.form.Field,{showField:function(){this.show();this.container.up('div.x-form-item').setDisplayed( true );},hideField:function(){this.hide();this.container.up('div.x-form-item').setDisplayed( false );}});
     /* Disallow right clicks */
@@ -204,8 +200,9 @@ Ext.onReady( function() {
     addBaseLayersToMap();
     
     /* Get map view parameter and apply to global variable */
-    if (getUrlParam('view')){PARAMETER=getUrlParam('view');}
-	var mapViewParam = PARAMETER || 0;
+    if (getUrlParam('view')) {
+        PARAMETER = getUrlParam('view');
+    }
 	
 	Ext.Ajax.request({
 		url: path_mapping + 'getBaseCoordinate' + type,
@@ -217,7 +214,7 @@ Ext.onReady( function() {
 			Ext.Ajax.request({
 				url: path_mapping + 'getMapView' + type,
 				method: 'GET',
-				params: { id: mapViewParam },
+				params: { id: PARAMETER || 0 },
 				success: function(r) {
 					var mst = Ext.util.JSON.decode(r.responseText).mapView[0].mapSourceType;
                     var mdt = Ext.util.JSON.decode(r.responseText).mapView[0].mapDateType;
@@ -3854,8 +3851,8 @@ Ext.onReady( function() {
             }
         }
     });
-	
-	Ext.getCmp('maplegendset_cb').hideField();
+    
+    Ext.getCmp('maplegendset_cb').hideField();
     Ext.getCmp('maplegendset_cb2').hideField();
 	Ext.getCmp('bounds_tf').hideField();
     Ext.getCmp('bounds_tf2').hideField();
