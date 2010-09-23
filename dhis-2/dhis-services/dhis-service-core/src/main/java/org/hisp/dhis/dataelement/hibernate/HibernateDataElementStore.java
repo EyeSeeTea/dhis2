@@ -39,6 +39,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
@@ -124,6 +126,18 @@ public class HibernateDataElementStore
         return (DataElement) criteria.uniqueResult();
     }
 
+    @SuppressWarnings( "unchecked" )
+    public Collection<DataElement> searchDataElementByName( String key )
+    {
+
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( DataElement.class );
+        criteria.add( Restrictions.ilike( "name", "%" + key + "%" ) );
+
+        return criteria.list();
+    }
+    
     public DataElement getDataElementByAlternativeName( String alternativeName )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -161,7 +175,8 @@ public class HibernateDataElementStore
 
         Criteria criteria = session.createCriteria( DataElement.class );
         criteria.setCacheable( true );
-
+        criteria.addOrder( Order.asc( "name" ) );
+        
         return criteria.list();
     }
 
@@ -468,5 +483,55 @@ public class HibernateDataElementStore
         {
             throw new RuntimeException( "Failed to get all operands", ex );
         }   
+    }
+
+    public Collection<DataElement> getAllDataElements( int from, int to )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( DataElement.class );
+        criteria.addOrder( Order.asc( "name" ) );
+        criteria.setFirstResult( from );
+        criteria.setMaxResults( to );
+        criteria.setCacheable( true );
+
+        return criteria.list();
+    }
+
+    public int getNumberOfDataElements()
+    {
+//        Session session = sessionFactory.getCurrentSession();
+//
+//        Criteria criteria = session.createCriteria( DataElement.class );
+//        criteria.setCacheable( true );
+//        criteria.setProjection( Projections.rowCount() ).uniqueResult();
+//
+//        return ((Number) criteria).intValue();
+        
+        String sql = "select count(*) from DataElement";
+        Query query = sessionFactory.getCurrentSession().createQuery( sql );
+        Number countResult = (Number) query.uniqueResult();
+        
+        return countResult.intValue();
+    }
+
+    @Override
+    public int countNumberOfSearchDataElementByName( String key )
+    {
+        return searchDataElementByName( key ).size();
+    }
+
+    @Override
+    public Collection<DataElement> searchDataElementByName( String key, int from, int to )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( DataElement.class );
+        criteria.add( Restrictions.ilike( "name", "%" + key + "%" ) );
+        criteria.addOrder( Order.asc( "name" ) );
+        criteria.setFirstResult( from );
+        criteria.setMaxResults( to );
+
+        return criteria.list();
     }
 }
