@@ -235,4 +235,6 @@ public interface UserStore
      * @param userSetting the UserSetting to delete.
      */
     void deleteUserSetting( UserSetting userSetting );
+    
+    Collection<User> getAllUsers( int from, int to );
 }

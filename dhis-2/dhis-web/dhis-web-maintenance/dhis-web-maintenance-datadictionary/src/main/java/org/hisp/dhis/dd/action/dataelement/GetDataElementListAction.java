@@ -313,20 +313,4 @@ public class GetDataElementListAction
         return result;
     }
     
-    private List<DataElement> getBlockElement( List<DataElement> elementList, int startPos, int pageSize )
-    {
-        List<DataElement> returnList;
-
-        try
-        {
-            returnList = elementList.subList( startPos, startPos + pageSize );
-        }
-        catch ( IndexOutOfBoundsException ex )
-        {
-            returnList = elementList.subList( startPos, elementList.size() );
-        }
-
-        return returnList;
-    }
-
 }

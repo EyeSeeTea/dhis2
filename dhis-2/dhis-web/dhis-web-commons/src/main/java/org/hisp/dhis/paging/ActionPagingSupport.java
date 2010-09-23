@@ -3,6 +3,7 @@ package org.hisp.dhis.paging;
 import java.util.List;
 
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.system.paging.Paging;
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -50,5 +51,21 @@ public abstract class ActionPagingSupport extends ActionSupport
         resultPaging.setTotal( totalRecord );
         
         return resultPaging;
+    }
+    
+    protected List getBlockElement( List elementList, int startPos, int pageSize )
+    {
+        List returnList;
+
+        try
+        {
+            returnList = elementList.subList( startPos, startPos + pageSize );
+        }
+        catch ( IndexOutOfBoundsException ex )
+        {
+            returnList = elementList.subList( startPos, elementList.size() );
+        }
+
+        return returnList;
     }
 }
