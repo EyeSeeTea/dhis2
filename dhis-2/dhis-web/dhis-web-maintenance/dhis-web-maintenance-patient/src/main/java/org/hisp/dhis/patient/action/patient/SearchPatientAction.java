@@ -238,9 +238,7 @@ public class SearchPatientAction
         // ---------------------------------------------------------------------
         if(sortPatientAttributeId!=null)
         {
-            
             patientAttribute = patientAttributeService.getPatientAttribute(sortPatientAttributeId);
-            
         }
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
 

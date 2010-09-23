@@ -131,6 +131,6 @@ public class HibernatePatientAttributeValueStore
         String searchText, int min, int max )
     {
         return getCriteria( Restrictions.eq( "patientAttribute", patientAttribute ),
-            Restrictions.ilike( "value", "%" + searchText + "%" ) ).setProjection( Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
+            Restrictions.ilike( "value", "'%" + searchText + "%'" ) ).setProjection( Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
     }
 }

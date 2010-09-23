@@ -27,7 +27,6 @@ package org.hisp.dhis.dashboard.ga.action.charts;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,12 +43,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.amplecode.quick.StatementManager;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregationService;
+import org.hisp.dhis.caseaggregation.CaseAggregationMapping;
+import org.hisp.dhis.caseaggregation.CaseAggregationMappingService;
 import org.hisp.dhis.dashboard.util.DashBoardService;
 import org.hisp.dhis.dashboard.util.SurveyData;
 import org.hisp.dhis.dataelement.DataElement;
@@ -72,11 +71,6 @@ import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
@@ -159,6 +153,13 @@ public class GenerateChartDataAction
         this.dataValueService = dataValueService;
     }
 
+    private CaseAggregationMappingService caseAggregationMappingService;
+    
+    public void setCaseAggregationMappingService( CaseAggregationMappingService caseAggregationMappingService )
+    {
+        this.caseAggregationMappingService = caseAggregationMappingService;
+    }
+    
     // -------------------------------------------------------------------------
     // Comparator
     // -------------------------------------------------------------------------
@@ -356,8 +357,16 @@ public class GenerateChartDataAction
     
     private List<String> selectedValues;
 
-    public List<String> getSelectedValues() {
+    public List<String> getSelectedValues() 
+    {
         return selectedValues;
+    }
+
+    private List<String> selectedStatus;
+    
+    public List<String> getSelectedStatus()
+    {
+        return selectedStatus;
     }
 
     private String deSelection;
@@ -473,6 +482,7 @@ public class GenerateChartDataAction
         denList = new ArrayList<List<String>>();
         targetList = new ArrayList<Double>();
         selectedValues = new ArrayList<String>();
+        selectedStatus = new ArrayList<String>();
         selectedOptionComboList = new ArrayList<DataElementCategoryOptionCombo>();
 
         // OrgUnit Related Info
@@ -890,6 +900,17 @@ public class GenerateChartDataAction
                         {
                             String values = selectedOrgUnit.getId() + ":"+ dElement.getId() + ":"+ decoc.getId() + ":" + p.getId();
                             selectedValues.add(values);
+                            
+                            CaseAggregationMapping caseAggMapping = caseAggregationMappingService.getCaseAggregationMappingByOptionCombo( dElement, decoc );
+                            
+                            if( caseAggMapping == null )
+                            {
+                                selectedStatus.add( "no" );
+                            }
+                            else
+                            {
+                                selectedStatus.add( "yes" );
+                            }
 
                             if( aggDataCB == null )
                             {
@@ -964,6 +985,17 @@ public class GenerateChartDataAction
                             {
                                 String values = selectedOrgUnit.getId() + ":"+ dElement.getId() + ":"+ decoc1.getId() + ":" + p.getId();
                                 selectedValues.add(values);
+
+                                CaseAggregationMapping caseAggMapping = caseAggregationMappingService.getCaseAggregationMappingByOptionCombo( dElement, decoc1 );
+                                
+                                if( caseAggMapping == null )
+                                {
+                                    selectedStatus.add( "no" );
+                                }
+                                else
+                                {
+                                    selectedStatus.add( "yes" );
+                                }
 
                                 if ( aggDataCB == null )
                                 {
@@ -1306,6 +1338,23 @@ public class GenerateChartDataAction
                      */
                     if ( ougSetCB == null || facilityLB.equals( "children" ) )
                     {
+                       
+                       /*
+                        if ( childOrgUnit == null || startPeriod == null || endPeriod == null )
+                        {
+                            System.out.println("childOrgUnit/startPeriod/ endPeriod is null");
+                        }
+                        else
+                        {
+                            System.out.println("childOrgUnit:" +childOrgUnit.getName()+ "startPeriod: " +startPeriod.getStartDate()+ "endPeriod:" + endPeriod.getEndDate() );
+                        }
+                        */
+                        Double tempVal = aggregationService
+                        .getAggregatedIndicatorValue( ind, startPeriod.getStartDate(), endPeriod.getEndDate(),
+                            childOrgUnit );
+                        
+                        if( tempVal != null)
+                        {  
                         serviceValues[countForServiceList][countForChildOrgUnitList] = aggregationService
                             .getAggregatedIndicatorValue( ind, startPeriod.getStartDate(), endPeriod.getEndDate(),
                                 childOrgUnit )
@@ -1316,7 +1365,14 @@ public class GenerateChartDataAction
                         denVal = aggregationService.getAggregatedDenominatorValue( ind, startPeriod.getStartDate(),
                             endPeriod.getEndDate(), childOrgUnit )
                             / noOfPeriods;
-
+                        }
+                        else
+                        {  
+                        serviceValues[countForServiceList][countForChildOrgUnitList] = 0.0;
+                        numVal = 0.0;
+                        denVal = 0.0;
+                        }
+                       
                     }
                     else
                     {
@@ -1512,6 +1568,7 @@ public class GenerateChartDataAction
                         }
                     }
                 }
+
                 serviceValues[countForServiceList][countForChildOrgUnitList] /= noOfChildren;
                 serviceValues[countForServiceList][countForChildOrgUnitList] = Math
                     .round( serviceValues[countForServiceList][countForChildOrgUnitList] * Math.pow( 10, 1 ) )

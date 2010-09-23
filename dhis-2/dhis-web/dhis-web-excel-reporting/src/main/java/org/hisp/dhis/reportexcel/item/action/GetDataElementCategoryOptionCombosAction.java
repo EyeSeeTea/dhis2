@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.zerovaluestorage;
+package org.hisp.dhis.reportexcel.item.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,15 +26,14 @@ package org.hisp.dhis.dataadmin.action.zerovaluestorage;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dataelement.comparator.DataElementNameComparator;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.reportexcel.DataElementGroupOrder;
+import org.hisp.dhis.reportexcel.ReportExcelCategory;
+import org.hisp.dhis.reportexcel.ReportExcelService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -42,68 +41,50 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-
-public class GetDataElementsByZeroIsSignificantAndGroupAction
+public class GetDataElementCategoryOptionCombosAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementService dataElementService;
+    private ReportExcelService reportService;
 
-    public void setDataElementService( DataElementService dataElementService )
+    public void setReportService( ReportExcelService reportService )
     {
-        this.dataElementService = dataElementService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private boolean saveZeroValue;
-
-    public void setSaveZeroValue( boolean saveZeroValue )
-    {
-        this.saveZeroValue = saveZeroValue;
-    }
-
-    private Integer dataElementGroupId;
-
-    public void setDataElementGroupId( Integer dataElementGroupId )
-    {
-        this.dataElementGroupId = dataElementGroupId;
+        this.reportService = reportService;
     }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private List<DataElement> dataElements;
+    private Integer id;
 
-    public List<DataElement> getDataElements()
+    public void setId( Integer id )
     {
-        return dataElements;
+        this.id = id;
+    }
+
+    public List<DataElementCategoryOptionCombo> dataElementCategoryOptionCombos;
+
+    public List<DataElementCategoryOptionCombo> getDataElementCategoryOptionCombos()
+    {
+        return dataElementCategoryOptionCombos;
     }
 
     @Override
     public String execute()
         throws Exception
     {
-        if ( dataElementGroupId == null )
-        {
-            dataElements = new ArrayList<DataElement>( dataElementService
-                .getDataElementsByZeroIsSignificant( saveZeroValue ) );
-        }
-        else
-        {
-            DataElementGroup dataElementGroup = dataElementService.getDataElementGroup( dataElementGroupId );
+        ReportExcelCategory report = (ReportExcelCategory) reportService.getReportExcel( id );
+        
+        DataElementGroupOrder dataElementGroupOrder = report.getDataElementOrders().iterator().next();
 
-            dataElements = new ArrayList<DataElement>( dataElementService.getDataElementsByZeroIsSignificantAndGroup(
-                saveZeroValue, dataElementGroup ) );
-        }
+        DataElement de = dataElementGroupOrder.getDataElements().iterator().next();
 
-        Collections.sort( dataElements, new DataElementNameComparator() );
+        dataElementCategoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( de.getCategoryCombo()
+            .getOptionCombos() );
 
         return SUCCESS;
     }

@@ -241,16 +241,8 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">
 				/dhis-web-maintenance-dataadmin/zeroValueStorageManagement.vm</param>
-			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
-			<param name="javascripts">
-				javascript/zeroValueStorageManagement.js</param>
-		</action>
-		
-		<action name="getDataElementsByZeroIsSignificantAndGroup"
-			class="org.hisp.dhis.dataadmin.action.zerovaluestorage.GetDataElementsByZeroIsSignificantAndGroupAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-dataadmin/responseDataElements.vm</result>
-		</action>
+			<param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>		
+		</action>		
 		
 		<action name="updateZeroIsSignificantForDataElements"
 			class="org.hisp.dhis.dataadmin.action.zerovaluestorage.UpdateZeroIsSignificantForDataElementsAction">

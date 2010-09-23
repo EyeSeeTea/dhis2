@@ -62,29 +62,22 @@ public class JdbcDataAnalysisStore
     @Autowired
     private StatementBuilder statementBuilder;
     
+    
     // -------------------------------------------------------------------------
     // OutlierAnalysisStore implementation
     // -------------------------------------------------------------------------
 
     public Double getStandardDeviation( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, OrganisationUnit organisationUnit )
     {
-        final String sql = 
-            "SELECT STDDEV( CAST( value AS " + statementBuilder.getDoubleColumnType() + " ) ) FROM datavalue " +
-            "WHERE dataelementid='" + dataElement.getId() + "' " +
-            "AND categoryoptioncomboid='" + categoryOptionCombo.getId() + "' " +
-            "AND sourceid='" + organisationUnit.getId() + "'";
+         final String sql = statementBuilder.getStandardDeviation(dataElement.getId(), categoryOptionCombo.getId(), organisationUnit.getId() );
         
         return statementManager.getHolder().queryForDouble( sql );
     }
     
     public Double getAverage( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, OrganisationUnit organisationUnit )
     {
-        final String sql = 
-            "SELECT AVG( CAST( value AS " + statementBuilder.getDoubleColumnType() + " ) ) FROM datavalue " +
-            "WHERE dataelementid='" + dataElement.getId() + "' " +
-            "AND categoryoptioncomboid='" + categoryOptionCombo.getId() + "' " +
-            "AND sourceid='" + organisationUnit.getId() + "'";
-        
+        final String sql =  statementBuilder.getStandardDeviation(dataElement.getId(), categoryOptionCombo.getId(), organisationUnit.getId() );
+           
         return statementManager.getHolder().queryForDouble( sql );
     }
     
@@ -97,21 +90,8 @@ public class JdbcDataAnalysisStore
         
         final String periodIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( Period.class, periods ) );
         
-        final String sql =
-            "SELECT dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, dv.storedby, dv.lastupdated, " +
-            "dv.comment, dv.followup, '" + lowerBound + "' AS minvalue, '" + upperBound + "' AS maxvalue, " +
-            statementBuilder.encode( dataElement.getName() ) + " AS dataelementname, pt.name AS periodtypename, pe.startdate, pe.enddate, " + 
-            statementBuilder.encode( organisationUnit.getName() ) + " AS sourcename, cc.categoryoptioncomboname " +
-            "FROM datavalue AS dv " +
-            "JOIN period AS pe USING (periodid) " +
-            "JOIN periodtype AS pt USING (periodtypeid) " +
-            "LEFT JOIN _categoryoptioncomboname AS cc USING (categoryoptioncomboid) " +
-            "WHERE dv.dataelementid='" + dataElement.getId() + "' " +
-            "AND dv.categoryoptioncomboid='" + categoryOptionCombo.getId() + "' " +
-            "AND dv.periodid IN (" + periodIds + ") " +
-            "AND dv.sourceid='" + organisationUnit.getId() + "' " +
-            "AND ( CAST( dv.value AS " + statementBuilder.getDoubleColumnType() + " ) < '" + lowerBound + "' " +
-            "OR CAST( dv.value AS " + statementBuilder.getDoubleColumnType() + " ) > '" + upperBound + "' )";
+        final String sql = statementBuilder.getDeflatedDataValues( dataElement.getId(), dataElement.getName(), categoryOptionCombo.getId(),
+    		periodIds, organisationUnit.getId(), organisationUnit.getName(), lowerBound, upperBound );
         
         try
         {            
@@ -150,7 +130,7 @@ public class JdbcDataAnalysisStore
             "AND dataelementid='" + dataElement.getId() + "' " +
             "AND categoryoptioncomboid='" + categoryOptionCombo.getId() + "'";
         
-        final String sql =
+        final String sql = 
             "SELECT '" + dataElement.getId() + "' AS dataelementid, pe.periodid, " +
             "'" + organisationUnit.getId() + "' AS sourceid, '" + categoryOptionCombo.getId() + "' AS categoryoptioncomboid, " +
             "'' AS value, '' AS storedby, '1900-01-01' AS lastupdated, '' AS comment, false AS followup, " +
