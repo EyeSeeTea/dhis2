@@ -365,7 +365,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 url: path_mapping + 'setMapUserSettings' + type,
                                 method: 'POST',
                                 params: {mapSourceType: this.mapView.mapSourceType, mapDateType: MAPDATETYPE},
-                                scope: this,
                                 success: function() {
                                     Ext.getCmp('map_cb').getStore().load();
                                     Ext.getCmp('maps_cb').getStore().load();
@@ -1663,7 +1662,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             });
         }
     },
-            
+    
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Choropleth.superclass.onRender.apply(this, arguments);
         if (this.loadMask) {

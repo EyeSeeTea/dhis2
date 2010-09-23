@@ -7,10 +7,10 @@ var MAPSOURCE;
 /* Fixed periods or from-to dates */
 var MAPDATETYPE;
 /* A map object */
-var MAPDATA = new Object();
-MAPDATA[thematicMap] = new Object();
-MAPDATA[thematicMap2] = new Object();
-MAPDATA[organisationUnitAssignment] = new Object();
+var MAPDATA = {};
+MAPDATA[thematicMap] = {};
+MAPDATA[thematicMap2] = {};
+MAPDATA[organisationUnitAssignment] = {};
 /* Filename or level */
 var URL;
 /* Active mapview id parameter from URL */
@@ -20,7 +20,7 @@ var ACTIVEPANEL;
 /* Mask */
 var MASK;
 /* Labels activated (boolean) */
-var LABELS = new Object();
+var LABELS = {};
 LABELS[thematicMap] = false;
 LABELS[thematicMap2] = false;
 LABELS[organisationUnitAssignment] = false;
@@ -29,17 +29,17 @@ var COLORINTERPOLATION;
 /* Export values */
 var EXPORTVALUES;
 /* Currently selected vector feature */
-var FEATURE = new Object();
-FEATURE[thematicMap] = new Object();
-FEATURE[thematicMap2] = new Object();
+var FEATURE = {};
+FEATURE[thematicMap] = {};
+FEATURE[thematicMap2] = {};
 /* Global chart for show/hide */
 var CHART;
 /* Current map value types */
-var VALUETYPE = new Object();
+var VALUETYPE = {};
 VALUETYPE.polygon = map_value_type_indicator;
 VALUETYPE.point = map_value_type_indicator;
 /* Top level organisation unit */
-var TOPLEVELUNIT = new Object();
+var TOPLEVELUNIT = {};
 /* Locate feature window */
 var lfw;
 
@@ -55,7 +55,7 @@ function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else 
 function getNumericMapView(mapView){mapView.id=parseFloat(mapView.id);mapView.indicatorGroupId=parseFloat(mapView.indicatorGroupId);mapView.indicatorId=parseFloat(mapView.indicatorId);mapView.periodId=parseFloat(mapView.periodId);mapView.method=parseFloat(mapView.method);mapView.classes=parseFloat(mapView.classes);mapView.mapLegendSetId=parseFloat(mapView.mapLegendSetId);mapView.longitude=parseFloat(mapView.longitude);mapView.latitude=parseFloat(mapView.latitude);mapView.zoom=parseFloat(mapView.zoom);return mapView;}
 /* Get number of decimals */
 function getNumberOfDecimals(x,dec_sep){var tmp=new String();tmp=x;if(tmp.indexOf(dec_sep)>-1){return tmp.length-tmp.indexOf(dec_sep)-1;}else{return 0;}}
-/* Debug */
+/* Get property names in an object */
 function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
 /* Toggle feature labels */
 function getActivatedOpenLayersStyleMap(nameColumn) {
@@ -1435,15 +1435,6 @@ Ext.onReady( function() {
 							var file = Ext.util.JSON.decode(r.responseText);
 							var keys = [];
 							var data = [];
-							
-							function getKeys(object) {
-								for (var key in object) {
-									if (object.hasOwnProperty(key)) {
-										keys.push(key);
-									}
-								}
-								return keys;
-							}
 
 							var nameList = getKeys(file.features[0].properties);
 							for (var i = 0; i < nameList.length; i++) {
@@ -1592,16 +1583,6 @@ Ext.onReady( function() {
 							success: function(r) {
 								var file = Ext.util.JSON.decode(r.responseText);
 								var keys = [];
-								var data = [];
-								
-								function getKeys(object) {
-									for (var key in object) {
-										if (object.hasOwnProperty(key)) {
-											keys.push(key);
-										}
-									}
-									return keys;
-								}
 
 								var nameList = getKeys(file.features[0].properties);
 								for (var i = 0; i < nameList.length; i++) {
@@ -1879,15 +1860,6 @@ Ext.onReady( function() {
 								var file = Ext.util.JSON.decode(r.responseText);
 								var keys = [];
 								var data = [];
-								
-								function getKeys(object) {
-									for (var key in object) {
-										if (object.hasOwnProperty(key)) {
-											keys.push(key);
-										}
-									}
-									return keys;
-								}
 
 								var nameList = getKeys(file.features[0].properties);
 								for (var i = 0; i < nameList.length; i++) {
@@ -1907,15 +1879,6 @@ Ext.onReady( function() {
 								var file = Ext.util.JSON.decode(r.responseText);
 								var keys = [];
 								var data = [];
-								
-								function getKeys(object) {
-									for (var key in object) {
-										if (object.hasOwnProperty(key)) {
-											keys.push(key);
-										}
-									}
-									return keys;
-								}
 
 								var nameList = getKeys(file.features[0].properties);
 								for (var i = 0; i < nameList.length; i++) {
@@ -3403,12 +3366,12 @@ Ext.onReady( function() {
         legendDiv: 'polygonlegend',
         defaults: {width: 130},
         listeners: {
-            expand: {
+            'expand': {
                 fn: function() {
                     if (ACTIVEPANEL != thematicMap) {
                         ACTIVEPANEL = thematicMap;
-                        choroplethLayer.setVisibility(false);
-                        choropleth.classify(false, true);
+                        this.layer.setVisibility(false);
+                        this.classify(false, true);
                     }
                 }
             }
@@ -3425,12 +3388,12 @@ Ext.onReady( function() {
         legendDiv: 'pointlegend',
         defaults: {width: 130},
         listeners: {
-            expand: {
+            'expand': {
                 fn: function() {
                     if (ACTIVEPANEL != thematicMap2) {
                         ACTIVEPANEL = thematicMap2;
-                        proportionalSymbolLayer.setVisibility(false);
-                        proportionalSymbol.classify(false, true);
+                        this.layer.setVisibility(false);
+                        this.classify(false, true);
                     }
                 }
             }
