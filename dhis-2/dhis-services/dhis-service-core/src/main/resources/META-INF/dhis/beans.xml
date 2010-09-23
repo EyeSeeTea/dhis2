@@ -151,7 +151,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
 	<bean id="org.hisp.dhis.dataanalysis.jdbc.DataAnalysisStore"
 		class="org.hisp.dhis.dataanalysis.jdbc.JdbcDataAnalysisStore" >
-		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
 	<bean id="org.hisp.dhis.datavalue.DataValueAuditStore"

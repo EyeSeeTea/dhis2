@@ -112,4 +112,13 @@ public interface StatementBuilder
 
     String getUpdateDestination( int destDataElementId, int destCategoryOptionComboId,
         int sourceDataElementId, int sourceCategoryOptionComboId );
+    
+    String getStandardDeviation( int dataElementId, int categoryOptionComboId, int organisationUnitId );
+    
+    String getAverage( int dataElementId, int categoryOptionComboId, int organisationUnitId );
+    
+    String getDeflatedDataValues( int dataElementId, String dataElementName, int categoryOptionComboId,
+    	String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound );
+    	
+    
 }

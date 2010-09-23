@@ -185,4 +185,39 @@ public class DerbyStatementBuilder
             + "AND d2.dataelementid="
             + sourceDataElementId + " AND d2.categoryoptioncomboid=" + sourceCategoryOptionComboId + ";";
     }
+    
+    public String getStandardDeviation( int dataElementId, int categoryOptionComboId, int organisationUnitId ){
+    	
+		 return "SELECT STDDEV( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
+	         "WHERE dataelementid='" + dataElementId + "' " +
+	         "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
+	         "AND sourceid='" + organisationUnitId + "'";
+       
+   }
+    
+    public String getAverage( int dataElementId, int categoryOptionComboId, int organisationUnitId ){
+      	 return   "SELECT AVG( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
+              "WHERE dataelementid='" + dataElementId + "' " +
+              "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
+              "AND sourceid='" + organisationUnitId + "'";
+    }
+    
+    public String getDeflatedDataValues( int dataElementId, String dataElementName, int categoryOptionComboId,
+    		String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound ){
+    	
+    	return  "SELECT dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, dv.storedby, dv.lastupdated, " +
+            "dv.comment, dv.followup, '" + lowerBound + "' AS minvalue, '" + upperBound + "' AS maxvalue, " +
+            encode( dataElementName ) + " AS dataelementname, pt.name AS periodtypename, pe.startdate, pe.enddate, " + 
+            encode( organisationUnitName ) + " AS sourcename, cc.categoryoptioncomboname " +
+            "FROM datavalue AS dv " +
+            "JOIN period AS pe USING (periodid) " +
+            "JOIN periodtype AS pt USING (periodtypeid) " +
+            "LEFT JOIN _categoryoptioncomboname AS cc USING (categoryoptioncomboid) " +
+            "WHERE dv.dataelementid='" + dataElementId + "' " +
+            "AND dv.categoryoptioncomboid='" + categoryOptionComboId + "' " +
+            "AND dv.periodid IN (" + periodIds + ") " +
+            "AND dv.sourceid='" + organisationUnitId + "' " +
+            "AND ( CAST( dv.value AS " + getDoubleColumnType() + " ) < '" + lowerBound + "' " +
+            "OR CAST( dv.value AS " + getDoubleColumnType() + " ) > '" + upperBound + "' )";
+   }
 }
