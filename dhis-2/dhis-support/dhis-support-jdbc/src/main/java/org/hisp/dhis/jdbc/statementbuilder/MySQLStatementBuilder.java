@@ -217,7 +217,7 @@ public class MySQLStatementBuilder
             "AND dv.categoryoptioncomboid='" + categoryOptionComboId + "' " +
             "AND dv.periodid IN (" + periodIds + ") " +
             "AND dv.sourceid='" + organisationUnitId + "' " +
-            "AND dv.value < '" + lowerBound + "' " +
+            "AND ( dv.value < '" + lowerBound + "' " +
             "OR  dv.value > '" + upperBound + "' )";
    }
 
