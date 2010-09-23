@@ -249,11 +249,11 @@ public class HibernateDataElementStore
     
     public void setZeroIsSignificantForDataElements( Collection<Integer> dataElementIds )
     {
-        String sql = "update dataelement d set d.zeroissignificant=false";
+        String sql = "update dataelement set zeroissignificant=false";
         
         statementManager.getHolder().executeUpdate( sql );
         
-        sql = "update dataelement d set d.zeroissignificant=true where d.dataelementid in (" + TextUtils.getCommaDelimitedString( dataElementIds ) + ")";
+        sql = "update dataelement set zeroissignificant=true where dataelementid in (" + TextUtils.getCommaDelimitedString( dataElementIds ) + ")";
         
         statementManager.getHolder().executeUpdate( sql );
     }
