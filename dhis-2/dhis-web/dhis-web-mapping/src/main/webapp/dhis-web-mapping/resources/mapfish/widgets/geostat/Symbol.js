@@ -1434,12 +1434,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
                             if (mapvalues[i].orgUnitName == FEATURE[thematicMap2][j].attributes.name) {
                                 FEATURE[thematicMap2][j].attributes.value = parseFloat(mapvalues[i].value);
-                                if (!FEATURE[thematicMap2][j].attributes.labelString) {
-                                    FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes.name;
-                                    if (Ext.isNumber(FEATURE[thematicMap2][j].attributes.value)) {
-                                        FEATURE[thematicMap2][j].attributes.labelString += ' (' + FEATURE[thematicMap2][j].attributes.value.toFixed(1) + ')';
-                                    }
-                                }
+                                FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes.name + ' (' + FEATURE[thematicMap2][j].attributes.value + ')';
                                 break;
                             }
                         }
@@ -1527,6 +1522,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
                                 method: 'POST',
                                 params: { mapLayerPath: mapLayerPath },
+                                scope: this,
                                 success: function(r) {
                                     var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
                                    
@@ -1539,12 +1535,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         FEATURE[thematicMap2][j].attributes.value = value ? parseFloat(value) : '';
                                         FEATURE[thematicMap2][j].data.id = FEATURE[thematicMap2][j].attributes[nameColumn];
                                         FEATURE[thematicMap2][j].data.name = FEATURE[thematicMap2][j].attributes[nameColumn];
-                                        if (!FEATURE[thematicMap2][j].attributes.labelString) {
-                                            FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes[nameColumn];
-                                            if (Ext.isNumber(FEATURE[thematicMap2][j].attributes.value)) {
-                                                FEATURE[thematicMap2][j].attributes.labelString += ' (' + FEATURE[thematicMap2][j].attributes.value.toFixed(1) + ')';
-                                            }
-                                        }
+                                        FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes[nameColumn] + ' (' + FEATURE[thematicMap2][j].attributes.value + ')';
                                     }
                                     
                                     this.applyValues();

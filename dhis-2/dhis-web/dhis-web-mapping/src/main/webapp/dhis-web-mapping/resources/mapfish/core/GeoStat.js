@@ -248,7 +248,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
             maxDec = dec > maxDec ? dec : maxDec;
         }
         
-        maxDec = maxDec > 2 ? 2 : maxDec;
+        maxDec = maxDec > 3 ? 3 : maxDec;
 		
         for (var i = 0; i < nbBins; i++) {
             bins[i] = new mapfish.GeoStat.Bin(binCount[i], bounds[i], bounds[i + 1], i == (nbBins - 1));
