@@ -74,7 +74,7 @@ span#popupHeaderText {left:0}
 			<select name="relationshipTypeId" id="relationshipTypeId">
 				<option value="">[$i18n.getString( "please_select" )]</option>        
 				#foreach ($relationship in $relationshipTypes)
-					<option value="$relationship.id">$relationship.aIsToB</option>
+					<option value="$relationship.id">$!relationship.aIsToB</option>
 				#end
 			</select>
 		</td>
