@@ -1539,12 +1539,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         for (var j = 0; j < FEATURE[thematicMap].length; j++) {
                             if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
                                 FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
-                                if (!FEATURE[thematicMap][j].attributes.labelString) {
-                                    FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes.name;
-                                    if (Ext.isNumber(FEATURE[thematicMap][j].attributes.value)) {
-                                        FEATURE[thematicMap][j].attributes.labelString += ' (' + FEATURE[thematicMap][j].attributes.value.toFixed(1) + ')';
-                                    }
-                                }
+                                FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes.name + ' (' + FEATURE[thematicMap][j].attributes.value + ')';
                                 break;
                             }
                         }
@@ -1645,12 +1640,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         FEATURE[thematicMap][j].attributes.value = value ? parseFloat(value) : '';
                                         FEATURE[thematicMap][j].data.id = FEATURE[thematicMap][j].attributes[nameColumn];
                                         FEATURE[thematicMap][j].data.name = FEATURE[thematicMap][j].attributes[nameColumn];
-                                        if (!FEATURE[thematicMap][j].attributes.labelString) {
-                                            FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes[nameColumn];
-                                            if (Ext.isNumber(FEATURE[thematicMap][j].attributes.value)) {
-                                                FEATURE[thematicMap][j].attributes.labelString += ' (' + FEATURE[thematicMap][j].attributes.value.toFixed(1) + ')';
-                                            }
-                                        }
+                                        FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes[nameColumn] + ' (' + FEATURE[thematicMap][j].attributes.value + ')';
                                     }
                                     
                                     this.applyValues();

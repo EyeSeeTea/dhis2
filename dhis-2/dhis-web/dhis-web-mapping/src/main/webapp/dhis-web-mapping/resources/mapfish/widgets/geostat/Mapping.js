@@ -577,16 +577,6 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                         }
                         MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
                     }
-                    
-                    if (MAPVIEW) {
-                        if (MAPVIEW.longitude && MAPVIEW.latitude && MAPVIEW.zoom) {
-                            MAP.setCenter(new OpenLayers.LonLat(MAPVIEW.longitude, MAPVIEW.latitude), MAPVIEW.zoom);
-                        }
-                        else {
-                            MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
-                        }
-                        MAPVIEW = false;
-                    }
             
                     var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
                     FEATURE[thematicMap] = polygonLayer.features;
