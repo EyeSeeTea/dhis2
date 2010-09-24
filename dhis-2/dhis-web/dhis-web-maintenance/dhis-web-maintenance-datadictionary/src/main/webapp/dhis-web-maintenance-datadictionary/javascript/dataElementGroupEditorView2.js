@@ -26,29 +26,48 @@ function showToolTip( e, value){
 function hideToolTip(){
 	byId('tooltip').style.display = 'none';
 }
-// ========================================================================
-function initAllList()
+
+function addOptionToListWithToolTip( list, optionValue, optionText )
 {
-    var id;
-
-    for ( id in availableGroups )
-    {
-		var option = new Option( availableGroups[id], id );
-		option.onmousemove  = function(e){
-			showToolTip( e, this.text);
-		}
-        $("#availableGroups").append(option);
-    }
-
-    for ( id in availableDataElements )
-    {
-		var option = new Option( availableDataElements[id], id );
-		option.onmousemove  = function(e){
-			showToolTip( e, this.text);
-		}		
-        $("#availableDataElements").append(option);
-    }    
+    var option = document.createElement( "option" );
+    option.value = optionValue;
+    option.text = optionText;
+	option.onmousemove = function(e) {
+		showToolTip(e, optionText);
+	}
+    list.add( option, null );
 }
+
+function refreshListById( listId )
+{
+	var list = byId( listId );
+	list.options.length = 0;
+	
+	if ( listId == 'availableGroups' )
+	{
+		for (var id in availableGroups)
+		{		
+			addOptionToListWithToolTip( list, id, availableGroups[id] );
+		}
+	}
+	else if ( listId == 'availableDataElements' )
+	{
+		for (var id in availableDataElements)
+		{		
+			addOptionToListWithToolTip( list, id, availableDataElements[id] );
+		}
+	}
+}
+
+function initAllList() 
+{
+	refreshListById( 'availableGroups' );
+	refreshListById( 'availableDataElements' );
+}
+
+/*==============================================================================
+ * Get DataElement Groups contain dataelement
+ *==============================================================================*/
 
 function getAssignedDataElementGroups( id )
 {	
@@ -61,122 +80,44 @@ function getAssignedDataElementGroups( id )
 function getAssignedGroupsCompleted( xmlObject )
 {
 	assignedGroups = new Object();
+	var name = getElementValue( xmlObject, 'name' );
 	var dataElementGroups = xmlObject.getElementsByTagName( 'dataElementGroup' );
+	var list = byId('assignedGroups');
+	list.options.length = 0;
 	
 	for( var i=0;i<dataElementGroups.length;i++)
 	{
 		var id = dataElementGroups.item(i).getElementsByTagName( 'id' )[0].firstChild.nodeValue;
-		var name = dataElementGroups.item(i).getElementsByTagName( 'name' )[0].firstChild.nodeValue;
-		assignedGroups[id] = name;		
+		var value = dataElementGroups.item(i).getElementsByTagName( 'name' )[0].firstChild.nodeValue;
+		addOptionToListWithToolTip( list, id, value );
+		assignedGroups[id] = value;		
 	}
+	refreshListById( 'availableGroups' );
+	visableAvailableDataElements();
+    disable('availableGroups');
+	$( '#groupNameView' ).html( name );
+}
+
+function visableAvailableDataElements()
+{
+	var selectedList = byId( 'assignedGroups' );
+	var availableList = byId( 'availableGroups' );
+	var selectedOptions = selectedList.options;
+	var availableOptions = availableList.options;
 	
-	var list = byId('availableDataElements');
-	byId( 'groupNameView' ).innerHTML = list[list.selectedIndex].text;
-	
-	filterAssignedGroups();
-}
-
-
-function addSelectedGroups()
-{
-    var list = byId( 'availableGroups' );
-
-    while ( list.selectedIndex != -1 )
-    {
-        var id = list.options[list.selectedIndex].value;
-
-        list.options[list.selectedIndex].selected = false;
-
-        assignedGroups[id] = availableGroups[id];
-    }
-
-    filterAssignedGroups();   
-}
-
-function removeSelectedGroups()
-{
-    var list = byId( 'assignedGroups' );
-
-    while ( list.selectedIndex != -1 )
-    {
-        var id = list.options[list.selectedIndex].value;
-
-        list.options[list.selectedIndex].selected = false;      
-
-		availableGroups[id] = assignedGroups[id];		
-
-        delete assignedGroups[id];
-    }
-
-    filterAssignedGroups();    
-}
-
-function filterAvailableDataElements()
-{
-    var filter = byId( 'availableDataElementsFilter' ).value;
-    var list = byId( 'availableDataElements' );
-
-    list.options.length = 0;
-
-    for ( var id in availableDataElements )
-    {
-        var value = availableDataElements[id];
-
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-            var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, this.text);
+	for(var i=0;i<availableOptions.length;i++){
+		availableList.options[i].style.display='block';
+		for(var j=0;j<selectedOptions.length;j++){			
+			if(availableOptions[i].value==selectedOptions[j].value){				
+				availableList.options[i].style.display='none';
 			}
-	        list.add( option, null );
-	    }
-    }
+		}
+	}
 }
 
-function filterAssignedGroups()
-{
-    var filter = byId( 'assignedGroupsFilter' ).value;
-    var list = byId( 'assignedGroups' );
-
-    list.options.length = 0;
-
-    for ( var id in assignedGroups )
-    {
-        var value = assignedGroups[id];
-
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-			var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, value);				
-			}
-            list.add( option, null );			
-
-        }
-    }
-}
-
-function filterAvailableGroups()
-{
-    var filter = byId( 'availableGroupsFilter' ).value;
-    var list = byId( 'availableGroups' );
-
-    list.options.length = 0;
-
-    for ( var id in availableGroups )
-    {
-        var value = availableGroups[id];
-
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-			var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, value);				
-			}
-            list.add( option, null );
-        }
-    }
-}
+/*==============================================================================
+ *  New  DataElement Group
+ *==============================================================================*/
 
 function deleteDataElementGroup()
 {
@@ -275,9 +216,16 @@ function renameDataElementGroup()
 
 function renameDataElementGroupReceived( xmlObject )
 {
-    var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;
+	var id = getElementValue( xmlObject, 'id' );
+	var name = getElementValue( xmlObject, 'name' );
     var list = byId( 'availableGroups' );
-    list.options[ list.selectedIndex ].text = name;
+    var option = list.options[ list.selectedIndex ];
+	option.text = name;
+	option.onmousemove = function(e) {
+		showToolTip(e, name);
+	}
+	availableGroups[id] = name;
+    $( '#groupNameView' ).html( name );
     hideById( 'addDataElementGroupForm' );
 	unLockScreen();
 }
@@ -322,9 +270,8 @@ function createNewGroup()
 
 function createNewGroupReceived( xmlObject )
 {
-    var id = xmlObject.getElementsByTagName( "id" )[0].firstChild.nodeValue;
-    var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;    
-	availableGroups[id] = name;
+	var id = getElementValue( xmlObject, 'id' );
+	var name = getElementValue( xmlObject, 'name' );
 	var list = byId( 'availableGroups' );
 	var option = new Option( name, id );
 	option.selected = true;
@@ -332,10 +279,15 @@ function createNewGroupReceived( xmlObject )
 		showToolTip( e, name);				
 	}
     list.add( option, null );
-	byId( 'groupNameView' ).innerHTML = name;
+	availableGroups[id] = name;
+	$( '#groupNameView' ).html( name );
     hideById( 'addDataElementGroupForm' );
     unLockScreen();
 }
+
+/*==============================================================================
+ *  New  Assign DataElement Groups for dataelement
+ *==============================================================================*/
 
 function assignGroupsForDataElement()
 {

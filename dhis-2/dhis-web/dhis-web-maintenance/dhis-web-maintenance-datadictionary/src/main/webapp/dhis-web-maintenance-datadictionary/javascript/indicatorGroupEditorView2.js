@@ -27,69 +27,42 @@ function hideToolTip(){
 	byId('tooltip').style.display = 'none';
 }
 
+function addOptionToListWithToolTip( list, optionValue, optionText )
+{
+    var option = document.createElement( "option" );
+    option.value = optionValue;
+    option.text = optionText;
+	option.onmousemove = function(e) {
+		showToolTip(e, optionText);
+	}
+    list.add( option, null );
+}
+
+function refreshListById( listId )
+{
+	var list = byId( listId );
+	list.options.length = 0;
+	
+	if ( listId == 'availableGroups' )
+	{
+		for (var id in availableGroups)
+		{		
+			addOptionToListWithToolTip( list, id, availableGroups[id] );
+		}
+	}
+	else if ( listId == 'availableIndicators' )
+	{
+		for (var id in availableIndicators)
+		{		
+			addOptionToListWithToolTip( list, id, availableIndicators[id] );
+		}
+	}
+}
+
 function initList() 
 {
-	var list = byId('availableGroups');
-	var id;
-
-	for (id in availableGroups) {		
-		var option = new Option( availableGroups[id], id );
-		option.onmousemove  = function(e){
-			showToolTip( e, this.text);
-		}
-        list.add( option, null );  
-		
-	}
-
-	list = byId('availableIndicators');
-
-	for (id in availableIndicators) {		
-		var option = new Option( availableIndicators[id], id );
-		option.onmousemove  = function(e){
-			showToolTip( e, this.text);
-		}
-        list.add( option, null );  
-	}
-	
-}
-
-/*==============================================================================
- *Move selected indicator 
- *==============================================================================*/
-
-function addSelectedGroups()
-{
-    var list = byId( 'availableGroups' );
-
-    while ( list.selectedIndex != -1 )
-    {
-        var id = list.options[list.selectedIndex].value;
-
-        list.options[list.selectedIndex].selected = false;
-
-        assignedGroups[id] = availableGroups[id];
-
-    }
-
-    filterAssignedGroups();   
-}
-
-function removeSelectedGroups()
-{
-    var list = byId( 'assignedGroups' );
-
-    while ( list.selectedIndex != -1 )
-    {
-        var id = list.options[list.selectedIndex].value;
-
-        list.options[list.selectedIndex].selected = false;      
-
-		availableGroups[id] = assignedGroups[id];		
-
-        delete assignedGroups[id];
-    }
-
-    filterAssignedGroups();    
+	refreshListById( 'availableGroups' );
+	refreshListById( 'availableIndicators' );
 }
 
 /*==============================================================================
@@ -107,89 +80,41 @@ function getAssignedIndicatorGroups( indicatorId )
 function getAssignedIndicatorGroupsCompleted( indicatorGroups )
 {
 	assignedGroups = new Object();
-	
+	var list = byId('assignedGroups');
+	list.options.length = 0;
+	var groupName = list.options[ list.selectedIndex ].text;
 	var availableIndicatorGroups = indicatorGroups.getElementsByTagName( 'indicatorGroup' );
 	
 	for( var i=0;i<availableIndicatorGroups.length;i++)
 	{
-		var id = availableIndicatorGroups.item(i).getElementsByTagName( 'id' )[0].firstChild.nodeValue;
-		var name = availableIndicatorGroups.item(i).getElementsByTagName( 'name' )[0].firstChild.nodeValue;
-		assignedGroups[id] = name;		
+		var id = getElementValue( availableIndicatorGroups.item(i), 'id' );
+		var name = getElementValue( availableIndicatorGroups.item(i), 'name' );
+		addOptionToListWithToolTip( list, id, name );
+		assignedGroups[id] = name;
 	}
-	var list = byId('availableIndicators');
-	byId( 'groupNameView' ).innerHTML = list[list.selectedIndex].text;
 	
-	filterAssignedGroups();
+	refreshListById( 'availableGroups' );
+	visableAvailableIndicators();
+	disable('availableGroups');
+	$( '#groupNameView' ).html( groupName );
+
 }
 
-/*==============================================================================
- *	Filter Select List
- *==============================================================================*/
-
-function filterAssignedGroups()
+function visableAvailableIndicators()
 {
-    var filter = byId( 'assignedGroupsFilter' ).value;
-    var list = byId( 'assignedGroups' );
-
-    list.options.length = 0;
-
-    for ( var id in assignedGroups )
-    {
-        var value = assignedGroups[id];
-
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-			var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, value);				
+	var selectedList = byId( 'assignedGroups' );
+	var availableList = byId( 'availableGroups' );
+	var selectedOptions = selectedList.options;
+	var availableOptions = availableList.options;
+	
+	for(var i=0;i<availableOptions.length;i++){
+		availableList.options[i].style.display='block';
+		for(var j=0;j<selectedOptions.length;j++){			
+			if(availableOptions[i].value==selectedOptions[j].value){				
+				availableList.options[i].style.display='none';
 			}
-            list.add( option, null );			
-
-        }
-    }
-}
-function filterAvailableGroups()
-{
-    var filter = byId( 'availableGroupsFilter' ).value;
-    var list = byId( 'availableGroups' );
-    
-    list.options.length = 0;
-    
-    for ( var id in availableGroups )
-    {
-        var value = availableGroups[id];
-        
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-            var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, this.text);
-			}
-	        list.add( option, null );  
-        }
-    }
-}
-
-function filterAvailableIndicators()
-{
-    var filter = byId( 'availableIndicatorsFilter' ).value;
-    var list = byId( 'availableIndicators' );
-    
-    list.options.length = 0;
-    
-    for ( var id in availableIndicators )
-    {
-        var value = availableIndicators[id];
-        
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-            var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, this.text);
-			}
-	        list.add( option, null );  
-        }
-    }
+		}
+	}
 }
 
 /*==============================================================================
@@ -235,9 +160,9 @@ function createNewGroup()
 }
 
 function createNewGroupReceived( xmlObject )
-{       
-    var id = xmlObject.getElementsByTagName( "id" )[0].firstChild.nodeValue;
-    var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;
+{
+    var id = getElementValue( xmlObject, 'id' );
+    var name = getElementValue( xmlObject, 'name' );
     var list = byId( 'availableGroups' );
     var option = new Option( name, id );
 	option.selected = true;
@@ -245,6 +170,7 @@ function createNewGroupReceived( xmlObject )
 		showToolTip( e, this.text);
 	}
 	list.add(option , null );
+	availableGroups[id] = name;
 	byId( 'groupNameView' ).innerHTML = name;
     hideById( 'addIndicatorGroupForm' );
     unLockScreen();  
@@ -294,15 +220,30 @@ function validateRenameIndicatorGroup()
 
 function renameGroup()
 {
-	var name = byId( 'groupName' ).value;    
+	var name = getFieldValue( 'groupName' );    
     var request = new Request();
     request.setResponseTypeXML( 'xmlObject' );
-    request.setCallbackSuccess( createNewGroupReceived );
-	var params = "name=" + name +  "&mode=editor&id=" +  byId('availableGroups').value;
+    request.setCallbackSuccess( renameGroupReceived );
+	var params = "name=" + name + "&mode=editor&id=" + byId('availableGroups').value;
 	request.sendAsPost( params );
     request.send( 'renameIndicatorGroupEditor.action');	
 }
 
+function renameGroupReceived( xmlObject )
+{
+	var id = getElementValue( xmlObject, 'id' );
+	var name = getElementValue( xmlObject, 'name' );
+    var list = byId( 'availableGroups' );
+	var option = list.options[ list.selectedIndex ];
+	option.text = name;
+	option.onmousemove = function(e) {
+		showToolTip(e, name);
+	}
+	availableGroups[ id ] = name;
+    byId( 'groupNameView' ).innerHTML = name;        
+    hideById( 'addIndicatorGroupForm' );
+    unLockScreen(); 
+}
 
 /*==============================================================================
  * Update Member of Indicator Group
@@ -312,12 +253,9 @@ function assignGroupsForIndicator()
 {
 	try
 	{		
-	    var indicatorId = byId('availableIndicators').value;	
-		
+	    var indicatorId = byId('availableIndicators').value;
 	    var request = new Request();
-
 	    var requestString = 'asignGroupsForIndicator.action';
-
 	    var params = "indicatorId=" + indicatorId;
 		params += "&mode=editor";
 

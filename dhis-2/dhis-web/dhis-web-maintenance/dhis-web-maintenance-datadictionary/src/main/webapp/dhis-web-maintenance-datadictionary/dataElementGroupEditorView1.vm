@@ -21,7 +21,7 @@
 <h3>
 	$i18n.getString( "data_element_group_management" ) #openHelp( "dataElementGroupEditor" )
 </h3>
-$view
+
 <table >
 	<tr>
 		<th>$i18n.getString( "data_element_group" )</th>
@@ -33,8 +33,8 @@ $view
 
 	<tr>
 		<td><input id="dataElementGroupsFilter" type="text" style="width:300px;" onkeyup="filterList(this.value, 'dataElementGroups');"/></td>
-		<td><input id="selecteDataElementsFilter" type="text" style="width:300px;" onkeyup="filterSelectedDataElements();"/></td>
-		<td><input id="availableDataElementsFilter" type="text" style="width:300px;" onkeyup="filterAvailableDataElements();"/></td>
+		<td><input id="selecteDataElementsFilter" type="text" style="width:300px;" onkeyup="filterList(this.value, 'selectedDataElements');"/></td>
+		<td><input id="availableDataElementsFilter" type="text" style="width:300px;" onkeyup="filterList(this.value, 'availableDataElements');"/></td>
 	</tr>
 
 	<tr>
@@ -43,16 +43,16 @@ $view
 			</select>
 		</td>
 		<td>
-			<select class="select" id="selectedDataElements" multiple="multiple" size="30"  ondblclick="removeSelectedDataElements();" onMouseOut="javascript: hideToolTip();">
+			<select class="select" id="selectedDataElements" multiple="multiple" size="30"  ondblclick="moveSelectedById(this.id, 'availableDataElements');" onMouseOut="javascript: hideToolTip();">
 			</select>
 		</td>
 
 		<td>
-			<input type="button" value="&lt;" onclick="addSelectedDataElements();" style="width:42px"/><br/><br/>
-			<input type="button" value="&gt;" onclick="removeSelectedDataElements();" style="width:42px"/>
+			<input type="button" value="&lt;" onclick="moveSelectedById('availableDataElements', 'selectedDataElements');" style="width:42px"/><br/><br/>
+			<input type="button" value="&gt;" onclick="moveSelectedById('selectedDataElements', 'availableDataElements');" style="width:42px"/>
 		</td>
 		<td>
-			<select class="select" id="availableDataElements" multiple="multiple" size="30" ondblclick="addSelectedDataElements();" disabled="true" onMouseOut="javascript: hideToolTip();">
+			<select class="select" id="availableDataElements" multiple="multiple" size="30" ondblclick="moveSelectedById(this.id, 'selectedDataElements');" disabled="true" onMouseOut="javascript: hideToolTip();">
 			</select>
 		</td>
 	</tr>
@@ -111,7 +111,7 @@ $view
 
 	var dataElementGroups = new Object();
 	#foreach( $dataElementGroup in $dataElementGroups )
-            dataElementGroups['$dataElementGroup.id'] = '$encoder.jsEscape( $dataElementGroup.name, "'" )';
+        dataElementGroups['$dataElementGroup.id'] = '$encoder.jsEscape( $dataElementGroup.name, "'" )';
 	#end
 
 	var availableDataElements = new Object();

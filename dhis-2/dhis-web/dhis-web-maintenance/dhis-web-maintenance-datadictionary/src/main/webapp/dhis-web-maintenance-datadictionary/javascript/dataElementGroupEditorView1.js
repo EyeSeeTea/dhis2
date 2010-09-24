@@ -26,118 +26,47 @@ function showToolTip( e, value){
 function hideToolTip(){
 	byId('tooltip').style.display = 'none';
 }
-// ========================================================================
-function initAllList()
-{
-    var id;
 
-    for ( id in dataElementGroups )
-    {
-		var option = new Option( dataElementGroups[id], id );
-		option.onmousemove  = function(e){
-			showToolTip( e, this.text);
+function addOptionToListWithToolTip( list, optionValue, optionText )
+{
+    var option = document.createElement( "option" );
+    option.value = optionValue;
+    option.text = optionText;
+	option.onmousemove = function(e) {
+		showToolTip(e, optionText);
+	}
+    list.add( option, null );
+}
+
+function refreshListById( listId )
+{
+	var list = byId( listId );
+	list.options.length = 0;
+	
+	if ( listId == 'dataElementGroups' )
+	{
+		for (var id in dataElementGroups)
+		{		
+			addOptionToListWithToolTip( list, id, dataElementGroups[id] );
 		}
-        $("#dataElementGroups").append(option);
-    }
-
-    var list = byId( 'availableDataElements' );
-
-    for ( id in availableDataElements )
-    {
-		var option = new Option( availableDataElements[id], id );
-		option.onmousemove  = function(e){
-			showToolTip( e, this.text);
+	}
+	else if ( listId == 'availableDataElements' )
+	{
+		for (var id in availableDataElements)
+		{		
+			addOptionToListWithToolTip( list, id, availableDataElements[id] );
 		}
-        $("#availableDataElements").append(option);
-    }
-
-    if(list.selectedIndex==-1)
-    {
-        list.disabled = true;
-    }
+	}
 }
 
-function addSelectedDataElements()
+function initAllList() 
 {
-    var list = byId( 'availableDataElements' );
-
-    while ( list.selectedIndex != -1 )
-    {
-        var id = list.options[list.selectedIndex].value;
-
-        list.options[list.selectedIndex].selected = false;
-
-        selectedDataElements[id] = availableDataElements[id];
-
-    }
-
-    filterSelectedDataElements();
-    filterAvailableDataElements();
+	refreshListById( 'dataElementGroups' );
+	refreshListById( 'availableDataElements' );
+	disable( 'availableDataElements' );
 }
 
-function removeSelectedDataElements()
-{
-    var list = byId( 'selectedDataElements' );
-
-    while ( list.selectedIndex != -1 )
-    {
-        var id = list.options[list.selectedIndex].value;
-
-        list.options[list.selectedIndex].selected = false;
-
-        //availableDataElements[id] = selectedDataElements[id];
-
-        delete selectedDataElements[id];
-    }
-
-    filterSelectedDataElements();
-    filterAvailableDataElements();
-}
-
-function filterAvailableDataElements()
-{
-    var filter = byId( 'availableDataElementsFilter' ).value;
-    var list = byId( 'availableDataElements' );
-
-    list.options.length = 0;
-
-    for ( var id in availableDataElements )
-    {
-        var value = availableDataElements[id];
-
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-            var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, this.text);
-			}
-	        list.add( option, null );
-	    }
-    }
-}
-
-function filterSelectedDataElements()
-{
-    var filter = byId( 'selecteDataElementsFilter' ).value;
-    var list = byId( 'selectedDataElements' );
-
-    list.options.length = 0;
-
-    for ( var id in selectedDataElements )
-    {
-        var value = selectedDataElements[id];
-
-        if ( value.toLowerCase().indexOf( filter.toLowerCase() ) != -1 )
-        {
-			var option = new Option( value, id );
-			option.onmousemove  = function(e){
-				showToolTip( e, value);				
-			}
-            list.add( option, null );			
-
-        }
-    }
-}
+// -------------------------------------------------------------------------
 
 function getDataElementGroup( dataElementGroupList )
 {
@@ -151,23 +80,25 @@ function getDataElementGroup( dataElementGroupList )
 
 function getDataElementGroupCompleted( xmlObject )
 {
+	selectedDataElements = new Object();
+	var name = getElementValue( xmlObject, 'name' );
+    var dataElementList = xmlObject.getElementsByTagName('dataElement');
     var selectedList = byId( 'selectedDataElements' );
     selectedList.length = 0;
-    name = xmlObject.getElementsByTagName('name')[0].firstChild.nodeValue;
-    var dataElementList = xmlObject.getElementsByTagName('dataElement');
 
     for ( var i = 0; i < dataElementList.length; i++ )
     {
         dataElement = dataElementList.item(i);
         var id = dataElement.getAttribute('id');
         var value = dataElement.firstChild.nodeValue;
+		addOptionToListWithToolTip( selectedList, id, value );
         selectedDataElements[id] = value;
     }
-	byId( 'groupNameView' ).innerHTML = name;
 	
-    filterSelectedDataElements();
-    byId('availableDataElements').disabled=false;
-	visableAvailableDataElements();	
+	refreshListById( 'availableDataElements' );
+	visableAvailableDataElements();
+	disable('availableDataElements');
+	$( '#groupNameView' ).html( name );
 }
 
 function visableAvailableDataElements()
@@ -187,17 +118,15 @@ function visableAvailableDataElements()
 	}
 }
 
+// -------------------------------------------------------------------------
+
 function updateDataElementGroupMembers()
 {
     var dataElementGroupsSelect = byId( 'dataElementGroups' );
     var id = dataElementGroupsSelect.options[ dataElementGroupsSelect.selectedIndex ].value;
-
     var request = new Request();
-
     var requestString = 'updateDataElementGroupEditor.action';
-
     var params = "id=" + id;
-
     var selectedDataElementMembers = byId( 'selectedDataElements' );
 
     for ( var i = 0; i < selectedDataElementMembers.options.length; ++i)
@@ -315,10 +244,16 @@ function renameDataElementGroup()
 
 function renameDataElementGroupReceived( xmlObject )
 {
-    var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;
+	var id = getElementValue( xmlObject, 'id' );
+	var name = getElementValue( xmlObject, 'name' );
     var list = byId( 'dataElementGroups' );
-    list.options[ list.selectedIndex ].text = name;
-    byId( 'groupNameView' ).innerHTML = name;
+    var option = list.options[ list.selectedIndex ];
+	option.text = name;
+	option.onmousemove = function(e) {
+		showToolTip(e, name);
+	}
+	dataElementGroups[id] = name;
+    $( '#groupNameView' ).html( name );
     hideById( 'addDataElementGroupForm' );
     unLockScreen();
 }
@@ -363,8 +298,8 @@ function createNewGroup()
 
 function createNewGroupReceived( xmlObject )
 {
-    var id = xmlObject.getElementsByTagName( "id" )[0].firstChild.nodeValue;
-    var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;
+	var id = getElementValue( xmlObject, 'id' );
+	var name = getElementValue( xmlObject, 'name' );
     var list = byId( 'dataElementGroups' );
     var option = new Option( name, id );
 	option.selected = true;
@@ -372,7 +307,8 @@ function createNewGroupReceived( xmlObject )
 		showToolTip( e, name);				
 	}
     list.add(option , null);
-    byId( 'groupNameView' ).innerHTML = name;
+	dataElementGroups[i] = name;
+	$( '#groupNameView' ).html( name );
     hideById( 'addDataElementGroupForm' );
     unLockScreen();
 }
