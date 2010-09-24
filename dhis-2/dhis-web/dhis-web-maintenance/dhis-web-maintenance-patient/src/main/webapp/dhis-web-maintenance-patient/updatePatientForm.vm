@@ -36,15 +36,15 @@
 	</tr>
 	<tr>
 		<td><label for="firstName">$i18n.getString( "first_name" )</label></td>
-		<td><input type="text" id="firstName" name="firstName" value="$encoder.htmlEncode( $patient.firstName )" style="width:30em" class="required_group {validate:{required_group:true,rangelength:[2,30], lettersonly: true}}"></td>
+		<td><input type="text" id="firstName" name="firstName" value="$encoder.htmlEncode( $patient.firstName )" style="width:30em" class="required_group {validate:{required_group:true,rangelength:[2,30], letterswithbasicpunc: true}}"></td>
 	</tr>
 	<tr>
 		<td><label for="middleName">$i18n.getString( "middle_name" )</label></td>
-		<td><input type="text" id="middleName" name="middleName" value="$encoder.htmlEncode( $patient.middleName )" style="width:30em" class="required_group {validate:{required_group:true,rangelength:[2,30], lettersonly: true}}"></td>
+		<td><input type="text" id="middleName" name="middleName" value="$encoder.htmlEncode( $patient.middleName )" style="width:30em" class="required_group {validate:{required_group:true,rangelength:[2,30], letterswithbasicpunc: true}}"></td>
 	</tr>
 	<tr>
 		<td><label for="lastName">$i18n.getString( "last_name" )</label></td>
-		<td><input type="text" id="lastName" name="lastName" value="$encoder.htmlEncode( $patient.lastName )" style="width:30em" class="required_group {validate:{required_group:true,rangelength:[2,30], lettersonly: true}}"></td>
+		<td><input type="text" id="lastName" name="lastName" value="$encoder.htmlEncode( $patient.lastName )" style="width:30em" class="required_group {validate:{required_group:true,rangelength:[2,30], letterswithbasicpunc: true}}"></td>
 	</tr>
 	<tr><td>&nbsp;</td></tr>	
 	<tr>

@@ -1,3 +1,53 @@
+<script>
+jQuery(document).ready(function()
+{
+	jQuery("#tabs").tabs();
+	
+	jQuery("#searchForm").validate({
+		 meta:"validate"
+		,errorElement:"td"
+		,submitHandler: function(form)
+						{
+							searchPerson();
+						}
+		,rules : {
+			relationshipTypeId  :"required"
+			,searchType			:"required"
+			,searchValue		:"required"
+		}
+	});
+	
+	jQuery("#addRepresentativeForm").validate({
+		 meta:"validate"
+		,errorElement:"td"
+		,submitHandler: function(form)
+						{
+							validateAddRepresentative();
+						}
+		,rules : {
+			birthDate :{required:true,dateISO:true,datelessthanequaltoday:true}
+		}
+	});
+	
+	jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
+	
+	// Esc key for jQuery thickbox
+	// jQuery thickbox already has this event
+	// but somehow it's over written by jQuery tabs plugin
+	document.onkeydown = function(e){ 	
+		if (e == null) { // ie
+			keycode = event.keyCode;
+		} else { // mozilla
+			keycode = e.which;
+		}
+		if(keycode == 27){ // close
+			window.parent.tb_remove();
+		}
+	}
+});
+
+</script>
+
 <style>
 .ui-helper-reset{font-size: 0.8em}
 div#listPatients {font-size: 0.8em}
@@ -21,7 +71,7 @@ span#popupHeaderText {left:0}
 	<tr>
 		<td >$i18n.getString("relationship_type")</td>
 		<td >
-			<select name="relationshipTypeId" id="relationshipTypeId" >
+			<select name="relationshipTypeId" id="relationshipTypeId">
 				<option value="">[$i18n.getString( "please_select" )]</option>        
 				#foreach ($relationship in $relationshipTypes)
 					<option value="$relationship.id">$relationship.aIsToB</option>
@@ -32,7 +82,7 @@ span#popupHeaderText {left:0}
 	<tr>
 		<td>$i18n.getString("search_by")</td>
 		<td>
-			<select id="searchType" name="searchType" onclick="toggleSearchType(this)" >
+			<select id="searchType" name="searchType" onclick="toggleSearchType(this)">
 				<option value="">[$i18n.getString( "please_select" )]</option>        
 				<option value="identifier">$i18n.getString("identifier")</option>
 				<option value="attribute">$i18n.getString("attribute")</option>
@@ -66,10 +116,10 @@ span#popupHeaderText {left:0}
 	<tr><td colspan="2"></td></tr>
 	<tr>
 		<td>$i18n.getString("search_value")</td>
-		<td><input type="text" name="searchValue" id="searchValue" /></td>
+		<td><input type="text" name="searchValue" id="searchValue"/></td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="submit" value="$i18n.getString('search')" /></td>
+		<td colspan="2"><input type="button" value="$i18n.getString('search')" onclick="searchPerson();"/></td>
 	</tr>
 </table>
 </form>
@@ -173,7 +223,7 @@ span#popupHeaderText {left:0}
 	#end
 	<tr><td colspan="2">&nbsp;</td></tr>	
 	<tr>
-		<td colspan="2"><input type="submit" value="$i18n.getString( "add" )" style="width:10em"></td>
+		<td colspan="2"><input type="button" value="$i18n.getString( "add" )" style="width:10em" onclick="validateAddRepresentative()"></td>
 	</tr>
 </table>
 </form>

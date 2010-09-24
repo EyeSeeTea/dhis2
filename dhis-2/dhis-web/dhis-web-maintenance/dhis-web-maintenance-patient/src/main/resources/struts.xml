@@ -185,7 +185,7 @@
 			<param name="menuTreeHeight">285</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js
-				,../dhis-web-commons/util/date.js
+				,../dhis-web-commons/javascripts/date.js
 				,javascript/jquery/thickbox/thickbox-compressed.js
 				,javascript/relationshipPatient.js	
 			</param>
@@ -408,7 +408,7 @@
 			<param name="menuTreeHeight">285</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js
-				,../dhis-web-commons/util/date.js
+				,../dhis-web-commons/javascripts/date.js
 				,javascript/jquery/thickbox/thickbox-compressed.js
 				,javascript/patient.js				
 			</param>
@@ -426,7 +426,7 @@
 			<param name="menuTreeHeight">285</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js
-				,../dhis-web-commons/util/date.js
+				,../dhis-web-commons/javascripts/date.js
 				,javascript/jquery/thickbox/thickbox-compressed.js
 				,javascript/jquery/cluetip/jquery.cluetip.min.js
 				,javascript/patient.js						
@@ -458,11 +458,15 @@
 			<result name="success" type="velocity">/popup.vm</result>
 			<param name="page">/dhis-web-maintenance-patient/underAgeForm.vm</param>
 			<param name="javascripts">
-				../dhis-web-commons/util/jquery-ui.js				
-				,../dhis-web-commons/util/date.js
-				,javascript/underage.js
+				../dhis-web-commons/javascripts/jQuery/ui/jquery-ui.js,				
+				../dhis-web-commons/javascripts/date.js,
+				../dhis-web-commons/calendar/calendar.js,
+				../dhis-web-commons/calendar/calendar-lang.js,
+				../dhis-web-commons/calendar/calendar-setup.js,
+				../dhis-web-commons/javascripts/jQuery/jquery.metadata.js,
+				javascript/underage.js
 			</param>
-			<param name="stylesheets">../dhis-web-commons/util/css/redmond/jquery-ui.css</param>
+			<param name="stylesheets">../dhis-web-commons/javascripts/jQuery/ui/css/redmond/jquery-ui.css</param>
 		</action>
 		
 		<action name="searchPerson" class="org.hisp.dhis.patient.action.patient.SearchPersonAction">
@@ -485,7 +489,10 @@
 			<param name="menu">/dhis-web-maintenance-patient/menuWithTree.vm</param>
 			<param name="menuTreeHeight">321</param>
 			<param name="page">/dhis-web-maintenance-patient/programEnrollmentSelectForm.vm</param>			
-			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/util/date.js,javascript/patient.js</param>
+			<param name="javascripts">
+				../dhis-web-commons/ouwt/ouwt.js,
+				../dhis-web-commons/javascripts/date.js,
+				javascript/patient.js</param>
 			<param name="requiredAuthorities">F_PATIENT_UPDATE</param>
 		</action>
 
@@ -496,7 +503,10 @@
 			<param name="menu">/dhis-web-maintenance-patient/menuWithTree.vm</param>
 			<param name="menuTreeHeight">321</param>
 			<param name="page">/dhis-web-maintenance-patient/programEnrollmentForm.vm</param>
-			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/util/date.js,javascript/patient.js</param>			
+			<param name="javascripts">
+				../dhis-web-commons/ouwt/ouwt.js,
+				../dhis-web-commons/javascripts/date.js,
+				javascript/patient.js</param>			
 			<param name="requiredAuthorities">F_PATIENT_UPDATE</param>
 		</action>
 
@@ -519,7 +529,10 @@
 			<param name="menuTreeHeight">321</param>
 			<param name="page">/dhis-web-maintenance-patient/programEnrollmentForm.vm</param>
 			<!--<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>-->
-			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/util/date.js,javascript/patient.js</param>
+			<param name="javascripts">
+				../dhis-web-commons/ouwt/ouwt.js,
+				../dhis-web-commons/javascripts/date.js,
+				javascript/patient.js</param>
 		</action>
 
 		<action name="removeEnrollment"
@@ -756,7 +769,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-patient/viewDataEntryForm.vm</param>
 			<param name="javascripts">
-				../dhis-web-commons/util/jquery-ui.js
+				../dhis-web-commons/javascripts/jquery-ui.js
 				,javascript/dataEntryForm.js
 				,javascript/FCK/fckeditor.js
 				,javascript/hashtable.js
