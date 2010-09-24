@@ -83,7 +83,7 @@
 
 	function cancel(){
 		hideById("addIndicatorGroupForm");
-		deleteDivEffect();
+		unLockScreen();
 	}
 
 	var i18n_select_indicator_group = '$encoder.jsEscape( $i18n.getString( "select_indicator_group" ) , "'")';

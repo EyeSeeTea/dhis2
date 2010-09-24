@@ -21,7 +21,7 @@
 <h3>
 	$i18n.getString( "data_element_group_management" ) #openHelp( "dataElementGroupEditor" )
 </h3>
-
+$view
 <table >
 	<tr>
 		<th>$i18n.getString( "data_element_group" )</th>
@@ -32,7 +32,7 @@
 	</tr>
 
 	<tr>
-		<td><input id="dataElementGroupsFilter" type="text" style="width:300px;" onkeyup="filterDataElementGroups();"/></td>
+		<td><input id="dataElementGroupsFilter" type="text" style="width:300px;" onkeyup="filterList(this.value, 'dataElementGroups');"/></td>
 		<td><input id="selecteDataElementsFilter" type="text" style="width:300px;" onkeyup="filterSelectedDataElements();"/></td>
 		<td><input id="availableDataElementsFilter" type="text" style="width:300px;" onkeyup="filterAvailableDataElements();"/></td>
 	</tr>
@@ -87,7 +87,7 @@
     <td>$i18n.getString( "name" )</td>
 	<td><input type="text" id="groupName" style="width:20em"/></td>
 	<td><input id="addRenameGroupButton" type="button" value="$i18n.getString( 'ok' )"/>
-	<input type="button" onclick="showHideDiv( 'addDataElementGroupForm' ); deleteDivEffect();" value="$i18n.getString( 'cancel' )"/></td>
+	<input type="button" onclick="hideById( 'addDataElementGroupForm' );unLockScreen();" value="$i18n.getString( 'cancel' )"/></td>
   </tr>
 
 </table>
