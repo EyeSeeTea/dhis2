@@ -40,15 +40,15 @@ td.error {padding-left:1em}
 	</tr>
 	<tr>
 		<td><label for="firstName">$i18n.getString( "first_name" )</label></td>
-		<td class="input-column" ><input type="text" id="firstName" name="firstName"  maxlength="30"  class="required_group {validate:{required_group:true,rangelength:[2,30]}}" ></td>
+		<td class="input-column" ><input type="text" id="firstName" name="firstName"  maxlength="30"  class="required_group {validate:{required_group:true,rangelength:[2,30], lettersonly: true}}" ></td>
 	</tr>
 	<tr>
 		<td><label for="middleName">$i18n.getString( "middle_name" ) </label></td>
-		<td class="input-column"> <input type="text" id="middleName" name="middleName" maxlength="30"   class="required_group {validate:{required_group:true,rangelength:[2,30]}}"></td>
+		<td class="input-column"> <input type="text" id="middleName" name="middleName" maxlength="30"   class="required_group {validate:{required_group:true,rangelength:[2,30], lettersonly: true}}"></td>
 	</tr>
 	<tr>
 		<td><label for="lastName">$i18n.getString( "last_name" )</label></td>
-		<td class="input-column"><input type="text" id="lastName" name="lastName" maxlength="30"   class="required_group {validate:{required_group:true,rangelength:[2,30]}}"></td>
+		<td class="input-column"><input type="text" id="lastName" name="lastName" maxlength="30"   class="required_group {validate:{required_group:true,rangelength:[2,30], lettersonly: true}}"></td>
 	</tr>	
 	<tr><td>&nbsp;</td></tr>	
 	<tr>
@@ -71,7 +71,7 @@ td.error {padding-left:1em}
 			<input type="text" id="birthDate" name="birthDate" style="width:10em"  onchange="bdOnchange()" >
 			&nbsp;
 			<label for="age">$i18n.getString( "or" )  $i18n.getString( "age" ) </label>
-			<input type="text" id="age" name="age" style="width:4em"  onchange="ageOnchange()" class="{validate:{number:true}}">
+			<input type="text" id="age" name="age" style="width:4em"  onchange="ageOnchange()" class="{validate:{number:true, alphanumeric: true}}">
 			&nbsp;&nbsp;&nbsp;
 			<label for="estimated">$i18n.getString( "estimated" )</label>
                         <input type="checkbox" id="birthDateEstimated" name="birthDateEstimated" value="true">
