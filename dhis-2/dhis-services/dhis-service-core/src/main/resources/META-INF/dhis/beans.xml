@@ -1086,20 +1086,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						<entry key="message" value="" />
 					</map>
 				</entry>
-				<entry key="title">
-					<map>
-						<entry key="unique" value="true" />
-						<entry key="required" value="true" />
-						<entry key="minlength" value="2" />
-						<entry key="maxlength" value="160" />
-						<entry key="regex" value="''" />
-						<entry key="message" value="" />
-					</map>
-				</entry>
 			</map>
 		</property>
 	</bean>
-
 
 	<!-- Startup routine definitions -->
 
@@ -1358,6 +1347,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 	</bean>
 	
+	<bean id="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler"
+		class="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler">
+		<property name="dataElementService" 
+			ref="org.hisp.dhis.dataelement.DataElementService" />
+	</bean>
+	
 	<!-- Security -->
 
 	<bean id="org.hisp.dhis.security.PasswordManager"
@@ -1451,6 +1446,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						local="org.hisp.dhis.user.UserSettingDeletionHandler" />
 					<ref 
 						local="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler" />
+					<ref 
+						local="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler" />
 				</list>
 			</list>
 		</property>

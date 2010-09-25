@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.dataelementgroup;
+package org.hisp.dhis.dataelement;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,19 +27,14 @@ package org.hisp.dhis.dd.action.dataelementgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.DeleteNotAllowedException;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.i18n.I18n;
-
-import com.opensymphony.xwork2.ActionSupport;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: RemoveDataElementGroupAction.java 2869 2007-02-20 14:26:09Z
- *          andegje $
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class RemoveDataElementGroupAction
-    extends ActionSupport
+public class DataElementGroupSetDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -53,58 +48,38 @@ public class RemoveDataElementGroupAction
     }
 
     // -------------------------------------------------------------------------
-    // I18n
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
+    @Override
+    public String getClassName()
     {
-        this.i18n = i18n;
+        return DataElementGroupSet.class.getSimpleName();
     }
 
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    public void setId( Integer id )
+    @Override
+    public boolean allowDeleteDataElementGroup( DataElementGroup dataElementGroup )
     {
-        this.id = id;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-    {
-        try
+        for ( DataElementGroupSet groupSet : dataElementService.getAllDataElementGroupSets() )
         {
-            dataElementService.deleteDataElementGroup( dataElementService.getDataElementGroup( id ) );
-        }
-        catch ( DeleteNotAllowedException ex )
-        {
-            if ( ex.getErrorCode().equals( DeleteNotAllowedException.ERROR_ASSOCIATED_BY_OTHER_OBJECTS ) )
+            if ( groupSet.getMembers().contains( dataElementGroup ) )
             {
-                message = i18n.getString( "object_not_deleted_associated_by_objects" ) + " " + ex.getClassName();
-
-                return ERROR;
+                return false;
             }
         }
 
-        return SUCCESS;
+        return true;
+    }
+
+    @Override
+    public void deleteDataElementGroup( DataElementGroup dataElementGroup )
+    {
+        for ( DataElementGroupSet groupSet : dataElementService.getAllDataElementGroupSets() )
+        {
+            if ( groupSet.getMembers().remove( dataElementGroup ) )
+            {
+                dataElementService.updateDataElementGroupSet( groupSet );
+            }
+        }
     }
 }
