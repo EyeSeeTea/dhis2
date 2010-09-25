@@ -3,17 +3,8 @@
 //-----------------------------------------------------------------------------
 
 function validateAddRepresentative()
-{
-	var relationshipTypeId = getFieldValue("addRepresentativeForm select[id=relationshipTypeId]");
-	
-	if( isBlank( relationshipTypeId ))
-	{
-		alert(i18n_please_select_relationshipType);
-		return;
-	}
-	
-	var params = 
-				'&firstName=' + getFieldValue( 'firstName' ) 
+{	
+	var params ='&firstName=' + getFieldValue( 'firstName' ) 
 				+'&middleName=' + getFieldValue( 'middleName' ) 
 				+'&lastName=' + getFieldValue( 'lastName' ) 
 				+'&gender=' + getFieldValue( 'gender' ) 
@@ -93,10 +84,10 @@ function searchPerson()
 		   ,url: "searchPerson.action"
 		   ,data: jQuery("#searchForm").serialize()
 		   ,dataType : "xml"
-		   ,success: function(xml){
-				showPersons( "listPersons", xml );
+		   ,success: function(xmlObject){alert('1');
+				showPersons( "searchForm div[id=listPersons]", xmlObject );
 			}
-		   ,error: function()
+		   ,error: function(request,status,errorThrown)
 		   {
 				alert(i18n_error_connect_to_server);
 		   }
@@ -175,7 +166,6 @@ function autoChoosePerson(xmlElement)
 // Set Representative information to parent page.
 function choosePerson(this_)
 {
-	
 	var relationshipTypeId = jQuery("#relationshipTypeId").val();
 	if( isBlank( relationshipTypeId ))
 	{

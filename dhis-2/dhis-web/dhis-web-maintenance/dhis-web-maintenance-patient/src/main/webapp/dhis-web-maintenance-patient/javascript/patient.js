@@ -600,7 +600,7 @@ function toggleUnderAge(this_)
 {
 	if( jQuery(this_).is(":checked"))
 	{
-		tb_show(i18n_child_representative,"showAddRepresentative.action?TB_iframe=true&height=500&width=500",null);
+		tb_show(i18n_child_representative,"showAddRepresentative.action?TB_iframe=true&height=400&width=500",null);
 	}else
 	{
 		jQuery("input.idfield").each(function(){
