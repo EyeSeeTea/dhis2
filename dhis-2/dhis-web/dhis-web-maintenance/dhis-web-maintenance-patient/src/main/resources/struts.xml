@@ -544,10 +544,6 @@
 			<param name="menu">/dhis-web-maintenance-patient/menuWithTree.vm</param>
 			<param name="menuTreeHeight">321</param>
 			<param name="page">/dhis-web-maintenance-patient/programEnrollmentForm.vm</param>
-			<!--
-				<param
-				name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/patient.js</param>
-			-->
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,
 				../dhis-web-commons/javascripts/date.js,
@@ -586,8 +582,7 @@
 
 		<action name="removeProgram"
 			class="org.hisp.dhis.patient.action.program.RemoveProgramAction">
-			<result name="success" type="redirect">program.action
-			</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 			<param name="requiredAuthorities">F_PROGRAM_DELETE</param>
 		</action>
 
@@ -625,25 +620,15 @@
 
 		<action name="validateProgram"
 			class="org.hisp.dhis.patient.action.program.ValidateProgramAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	  		<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+      		<result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
 		<!-- Program_OrganisationUnit Association -->
-
+		
 		<action name="defineProgramAssociationsForm"
-			class="org.hisp.dhis.patient.action.program.SetupAssociationsTreeAction">
-			<result name="success" type="chain">getProgramAssociationOptions
-			</result>
-			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
-		</action>
-
-		<action name="getProgramAssociationOptions"
 			class="org.hisp.dhis.patient.action.program.GetProgramAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-patient/programAssociations.vm</param>
@@ -652,8 +637,7 @@
 
 		<action name="defineProgramAssociations"
 			class="org.hisp.dhis.patient.action.program.DefineProgramAssociationsAction">
-			<result name="success" type="redirect">program.action
-			</result>
+			<result name="success" type="redirect">program.action</result>
 			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
 		</action>
 
@@ -695,6 +679,7 @@
 				/dhis-web-maintenance-patient/responseSuccess.vm</result>
 			<param name="requiredAuthorities">F_PROGRAM_UPDATE</param>
 		</action>
+		
 		<!-- ProgramStage -->
 
 		<action name="programStage"
@@ -1000,10 +985,10 @@
 
 		<action name="removePatientIdentifierType"
 			class="org.hisp.dhis.patient.action.patientidentifiertype.RemovePatientIdentifierTypeAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseError.vm</result>
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="requiredAuthorities">F_PATIENTIDENTIFIERTYPE_DELETE</param>
 		</action>
 
@@ -1121,7 +1106,7 @@
 		<action name="removeValidationCriteria"
 			class="org.hisp.dhis.patient.action.validation.RemoveValidationCriteriaAction">
 			<result name="success" type="velocity-json">
-				../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 			<param name="requiredAuthorities">F_VALIDATIONCRITERIA_DELETE</param>
 		</action>
 
@@ -1168,7 +1153,7 @@
 		<action name="removeProgramStageDEValidation"
 			class="org.hisp.dhis.patient.action.validation.RemoveProgramStageDEValidationAction">
 			<result name="success" type="velocity-json">
-				../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+				dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 		</action>
 
 	</package>
