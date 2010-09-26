@@ -233,11 +233,10 @@
 
 		<action name="removePatientAttribute"
 			class="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeAction">
-			<result name="success" type="redirect">patientAttribute.action
-			</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 			<param name="requiredAuthorities">F_PATIENTATTRIBUTE_DELETE</param>
 		</action>
-
+		
 		<action name="addPatientAttribute"
 			class="org.hisp.dhis.patient.action.patientattribute.AddPatientAttributeAction">
 			<result name="success" type="redirect">patientAttribute.action
@@ -275,26 +274,17 @@
 
 		<action name="validatePatientAttribute"
 			class="org.hisp.dhis.patient.action.patientattribute.ValidatePatientAttributeAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm</result>
-			<result name="duplicate" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseDuplicate.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
+			 <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	         <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
+	         <param name="onExceptionReturn">plainTextError</param>
 		</action>
 
 		<action name="removePatientAttributeOption"
 			class="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeOptionAction">
-			<result name="success" type="velocity-xml">responseSuccess.vm
-			</result>
-			<result name="input" type="velocity-xml">responseInput.vm
-			</result>
-			<result name="error" type="velocity-xml">responseError.vm
-			</result>
-			<param name="requiredAuthorities">F_PATIENTATTRIBUTE_DELETE</param>
+			 <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	  		 <result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+      		 <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
+			 <param name="requiredAuthorities">F_PATIENTATTRIBUTE_DELETE</param>
 		</action>
 
 		<!-- PatientAttributeValue -->
@@ -886,8 +876,7 @@
 
 		<action name="removePatientAttributeGroup"
 			class="org.hisp.dhis.patient.action.patientattributegroup.RemovePatientAttributeGroupAction">
-			<result name="success" type="redirect">patientAttributeGroup.action
-			</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 			<param name="requiredAuthorities">F_PATIENTATTRIBUTE_DELETE</param>
 		</action>
 
@@ -926,12 +915,9 @@
 
 		<action name="validatePatientAttributeGroup"
 			class="org.hisp.dhis.patient.action.patientattributegroup.ValidatePatientAttributeGroupAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	  		<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+      		<result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 		<!-- Patient Identifier Type -->
