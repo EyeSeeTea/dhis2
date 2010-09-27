@@ -154,7 +154,7 @@ function getLegendsJSON(){
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
 	/* Ext 3.2.0 override */
-	Ext.override(Ext.form.Field,{showField:function(){this.show();this.container.up('div.x-form-item').setDisplayed( true );},hideField:function(){this.hide();this.container.up('div.x-form-item').setDisplayed( false );}});
+	Ext.override(Ext.form.Field,{showField:function(){this.show();this.container.up('div.x-form-item').setDisplayed(true);},hideField:function(){this.hide();this.container.up('div.x-form-item').setDisplayed(false);}});
     /* Disallow right clicks */
 	document.body.oncontextmenu = function(){return false;};
 	/* Activate tooltip */
@@ -599,17 +599,14 @@ Ext.onReady( function() {
                         lcb = Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb').getValue() ? true : false;
                     }
                     else if (ACTIVEPANEL == thematicMap2) {
-                        vcb = Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator ? Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
-                        dcb = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb2').getValue() : Ext.getCmp('startdate_df2').getValue() && Ext.getCmp('startdate_df2').getValue() ? true : false;
-                        period = MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb2').getRawValue() : new Date(Ext.getCmp('startdate_df2').getRawValue()).format('Y M j') + ' - ' + new Date(Ext.getCmp('enddate_df2').getRawValue()).format('Y M j');
-                        mcb = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf2').getValue() : Ext.getCmp('map_cb2').getValue();
-                        lcb = Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb2').getValue() ? true : false;
+                        Ext.message.msg(false,'Please use the <span class="x-msg-hl">polygon layer</span> for printing');
+                        return;
                     }
                     else {
                         Ext.message.msg(false, i18n_please_expand_layer_panel);
                         return;
-                    }   
-
+                    }
+                    
                     if (vcb && dcb && mcb && lcb) {
                     	
 						var svgElement = document.getElementsByTagName('svg')[0];

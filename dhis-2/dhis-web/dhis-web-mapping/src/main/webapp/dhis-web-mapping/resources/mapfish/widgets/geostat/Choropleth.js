@@ -687,10 +687,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         }
                                         Ext.getCmp('colorA_cf').showField();
                                         Ext.getCmp('colorB_cf').showField();
-                                        Ext.getCmp('maplegendset_cb').hideField();       
-
-                                        this.classify(false, true);
+                                        Ext.getCmp('maplegendset_cb').hideField();
                                     }
+
+                                    this.classify(false, true);
                                 }
                             },
                             failure: function() {
@@ -791,10 +791,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         }
                                         Ext.getCmp('colorA_cf').showField();
                                         Ext.getCmp('colorB_cf').showField();
-                                        Ext.getCmp('maplegendset_cb').hideField();       
-
-                                        this.classify(false, true);
+                                        Ext.getCmp('maplegendset_cb').hideField();
                                     }
+
+                                    this.classify(false, true);
                                 }
                             },
                             failure: function() {
