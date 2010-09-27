@@ -4,29 +4,29 @@
 
 function validateAddRepresentative()
 {	
-	var params ='&firstName=' + getFieldValue( 'firstName' ) 
-				+'&middleName=' + getFieldValue( 'middleName' ) 
-				+'&lastName=' + getFieldValue( 'lastName' ) 
-				+'&gender=' + getFieldValue( 'gender' ) 
-				+'&birthDate=' + getFieldValue( 'birthDate' ) 	        
-				+'&age=' + getFieldValue( 'age' ) 
-				+'&genre=' + getFieldValue('gender') 
-				+ getIdParams();
-	
-	var request = new Request();
-	request.setResponseTypeXML( 'message' );
-	request.setCallbackSuccess( addValidationCompleted ); 
-	request.sendAsPost( params );	
-	request.send( "validatePatient.action" );        
-	
-	return false;
+	$.post("validatePatient.action?" + getIdParams(),
+		{
+			firstName: getFieldValue( 'firstName' ),
+			middleName: getFieldValue( 'middleName' ),
+			lastName: getFieldValue( 'lastName' ),
+			gender: getFieldValue( 'gender' ) ,
+			birthDate: getFieldValue( 'birthDate' ), 	        
+			age: getFieldValue( 'age' ) ,
+			genre: getFieldValue('gender') 
+		},
+		function (data)
+		{
+			addValidationRepresentativeCompleted(data);
+		},'xml');
+		
 }
 
-function addValidationCompleted( messageElement )
+function addValidationRepresentativeCompleted( messageElement )
 {
-	 var type = messageElement.getAttribute( 'type' );
-	 var message = messageElement.firstChild.nodeValue;
-	 
+	messageElement = messageElement.getElementsByTagName( "message" )[0];
+	var type = messageElement.getAttribute( "type" );
+	var message = messageElement.firstChild.nodeValue;
+	
 	 if ( type == 'success' )
 	 {
 		 // Use jQuery Ajax submit 
@@ -35,7 +35,7 @@ function addValidationCompleted( messageElement )
 			   ,url: "addRepresentative.action"
 			   ,data: jQuery("#addRepresentativeForm").serialize()
 			   ,dataType : "xml"
-			   ,success: function(xml){
+			   ,success: function(xml){ 
 			 		autoChoosePerson( xml );
 				}
 			   ,error: function()
@@ -84,7 +84,7 @@ function searchPerson()
 		   ,url: "searchPerson.action"
 		   ,data: jQuery("#searchForm").serialize()
 		   ,dataType : "xml"
-		   ,success: function(xmlObject){alert('1');
+		   ,success: function(xmlObject){
 				showPersons( "searchForm div[id=listPersons]", xmlObject );
 			}
 		   ,error: function(request,status,errorThrown)
