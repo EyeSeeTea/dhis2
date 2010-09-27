@@ -4,18 +4,19 @@ jQuery(document).ready(function()
 	jQuery("#tabs").tabs();
 	
 	jQuery("#searchForm").validate({
-		 meta:"validate"
-		,errorElement:"td"
+		meta:"validate"
+		,errorElement:"span"
 		,submitHandler: function(form)
 						{
 							searchPerson();
 						}
 		,rules : {
-			relationshipTypeId  :"required"
-			,searchType			:"required"
-			,searchValue		:"required"
+			relationshipTypeId  : { required: true },
+			searchType			: { required: true },
+			searchValue		: { required: true }
 		}
 	});
+	
 	
 	jQuery("#addRepresentativeForm").validate({
 		 meta:"validate"
@@ -25,11 +26,14 @@ jQuery(document).ready(function()
 							validateAddRepresentative();
 						}
 		,rules : {
+			relationshipTypeId  : { required: true },
+			firstName : {required_group:true,rangelength:[2,30], letterswithbasicpunc: true},
+			middleName : {required:false, letterswithbasicpunc: true},
+			lastName : {required:false, letterswithbasicpunc: true},
+			gender : { required: true },
 			birthDate :{required:true,dateISO:true,datelessthanequaltoday:true}
 		}
 	});
-	
-	jQuery.validator.loadLocaled( jQuery("#curLocaleCode").val() );
 	
 	// Esc key for jQuery thickbox
 	// jQuery thickbox already has this event
@@ -44,19 +48,10 @@ jQuery(document).ready(function()
 			window.parent.tb_remove();
 		}
 	}
-});
+}); 
 
 </script>
 
-<style>
-.ui-helper-reset{font-size: 0.8em}
-div#listPatients {font-size: 0.8em}
-div#listPatients label { font-weight: bold;}  
-div#listPatients td {padding: 2px 5px}
-div#popupHeader {text-align: center}
-span#popupHeaderText{position: relative;}
-span#popupHeaderText {left:0}
-</style>
 <!-- TAB Header -->
 <div id="tabs">
 <ul>
@@ -69,7 +64,7 @@ span#popupHeaderText {left:0}
 <form id="searchForm" name="searchForm" action="searchPerson.action" action="post" >
 <table>
 	<tr>
-		<td >$i18n.getString("relationship_type")</td>
+		<td >$i18n.getString("relationship_type")<em title="$i18n.getString( "required" )" class="required">*</em></td>
 		<td >
 			<select name="relationshipTypeId" id="relationshipTypeId">
 				<option value="">[$i18n.getString( "please_select" )]</option>        
@@ -80,7 +75,7 @@ span#popupHeaderText {left:0}
 		</td>
 	</tr>
 	<tr>
-		<td>$i18n.getString("search_by")</td>
+		<td>$i18n.getString("search_by")<em title="$i18n.getString( "required" )" class="required">*</em></td>
 		<td>
 			<select id="searchType" name="searchType" onclick="toggleSearchType(this)">
 				<option value="">[$i18n.getString( "please_select" )]</option>        
@@ -115,16 +110,18 @@ span#popupHeaderText {left:0}
 	</tr>
 	<tr><td colspan="2"></td></tr>
 	<tr>
-		<td>$i18n.getString("search_value")</td>
+		<td>$i18n.getString("search_value")<em title="$i18n.getString( "required" )" class="required">*</em></td>
 		<td><input type="text" name="searchValue" id="searchValue"/></td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="button" value="$i18n.getString('search')" onclick="searchPerson();"/></td>
+		<td colspan="2"><input type="submit" value="$i18n.getString('search')"/></td>
 	</tr>
 </table>
-</form>
+
 <div id="listPersons">
 </div>
+
+</form>
 </div>
 
 <!-- Add Person form TAB -->
@@ -139,9 +136,8 @@ span#popupHeaderText {left:0}
 <div id="tab-2">
 <form id="addRepresentativeForm" name="addRepresentativeForm" action="addRepresentative.action" method="post">
 <table id="formContainer">
-<input type="hidden" id="curLocaleCode" value="$locale.getLanguage()_$locale.getCountry()"/>
 	<tr>
-		<td >$i18n.getString("relationship_type")</td>
+		<td >$i18n.getString("relationship_type")<em title="$i18n.getString( "required" )" class="required">*</em></td>
 		<td >
 			<select name="relationshipTypeId" id="relationshipTypeId">
 				<option value="">[$i18n.getString( "please_select" )]</option>        
@@ -152,19 +148,19 @@ span#popupHeaderText {left:0}
 		</td>
 	</tr>
 	<tr>
-		<th colspan="2">$i18n.getString( "name" )<em title="$i18n.getString( "required" )" class="required">*</em></th>
+		<th colspan="2">$i18n.getString( "name" )</th>
 	</tr>
 	<tr>
-		<td><label for="firstName">$i18n.getString( "first_name" )</label></td>
-		<td><input type="text" id="firstName" name="firstName" style="width:15em"  maxlength="30" class="required_group {validate:{required_group:true,rangelength:[2,30]}}" ></td>
+		<td><label for="firstName">$i18n.getString( "first_name" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td><input type="text" id="firstName" name="firstName" style="width:15em"  maxlength="30"></td>
 	</tr>
 	<tr>
 		<td><label for="middleName">$i18n.getString( "middle_name" ) </label></td>
-		<td><input type="text" id="middleName" name="middleName" maxlength="30" style="width:15em"   class="required_group {validate:{required_group:true,rangelength:[2,30]}}"></td>
+		<td><input type="text" id="middleName" name="middleName" maxlength="30" style="width:15em"></td>
 	</tr>
 	<tr>
 		<td><label for="lastName">$i18n.getString( "last_name" )</label></td>
-		<td><input type="text" id="lastName" name="lastName" maxlength="30" style="width:15em"  class="required_group {validate:{required_group:true,rangelength:[2,30]}}"></td>
+		<td><input type="text" id="lastName" name="lastName" maxlength="30" style="width:15em"></td>
 	</tr>	
 	<tr><td>&nbsp;</td></tr>	
 	<tr>
@@ -223,7 +219,7 @@ span#popupHeaderText {left:0}
 	#end
 	<tr><td colspan="2">&nbsp;</td></tr>	
 	<tr>
-		<td colspan="2"><input type="button" value="$i18n.getString( "add" )" style="width:10em" onclick="validateAddRepresentative()"></td>
+		<td colspan="2"><input type="submit" value="$i18n.getString( "add" )" style="width:10em"></td>
 	</tr>
 </table>
 </form>

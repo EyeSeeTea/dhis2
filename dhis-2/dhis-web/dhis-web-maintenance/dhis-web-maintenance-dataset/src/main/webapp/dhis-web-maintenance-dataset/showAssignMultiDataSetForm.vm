@@ -113,7 +113,7 @@
 	<p><span id="warningField"></span></p>
 </div>
 
-<span id="message" style="top:100px;right:5px;position:fixed;width:200px;z-index:10002" onclick="hideById(this.id);"/>
+<span id="message" style="top:100px;right:5px;position:fixed;width:200px;z-index:10002" onclick="hideById(this.id);"></span>
 
 <script type="text/javascript">
 

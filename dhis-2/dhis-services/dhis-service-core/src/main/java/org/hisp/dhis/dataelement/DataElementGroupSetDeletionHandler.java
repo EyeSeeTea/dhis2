@@ -1,5 +1,7 @@
+package org.hisp.dhis.dataelement;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,89 +27,59 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientidentifiertype;
-
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Viet
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-
-public class ValidatePatientIdentifierTypeAction
-    implements Action
+public class DataElementGroupSetDeletionHandler
+    extends DeletionHandler
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientIdentifierTypeService patientIdentifierTypeService;
+    private DataElementService dataElementService;
 
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
-
-    private String name;
-
-    private String message;
-
-    private I18n i18n;
-
-    private Integer id;
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
+    public void setDataElementService( DataElementService dataElementService )
     {
-        PatientIdentifierType match = patientIdentifierTypeService.getPatientIdentifierType( name );
+        this.dataElementService = dataElementService;
+    }
 
-        if ( match != null && (id == null || match.getId() != id.intValue()) )
+    // -------------------------------------------------------------------------
+    // DeletionHandler implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String getClassName()
+    {
+        return DataElementGroupSet.class.getSimpleName();
+    }
+
+    @Override
+    public boolean allowDeleteDataElementGroup( DataElementGroup dataElementGroup )
+    {
+        for ( DataElementGroupSet groupSet : dataElementService.getAllDataElementGroupSets() )
         {
-            message = i18n.getString( "name_in_use" );
-
-            return INPUT;
+            if ( groupSet.getMembers().contains( dataElementGroup ) )
+            {
+                return false;
+            }
         }
 
-        message = i18n.getString( "everything_is_ok" );
-
-        return SUCCESS;
+        return true;
     }
 
-    // -------------------------------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------------------------------
-
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
+    @Override
+    public void deleteDataElementGroup( DataElementGroup dataElementGroup )
     {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
+        for ( DataElementGroupSet groupSet : dataElementService.getAllDataElementGroupSets() )
+        {
+            if ( groupSet.getMembers().remove( dataElementGroup ) )
+            {
+                dataElementService.updateDataElementGroupSet( groupSet );
+            }
+        }
     }
-    
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
 }

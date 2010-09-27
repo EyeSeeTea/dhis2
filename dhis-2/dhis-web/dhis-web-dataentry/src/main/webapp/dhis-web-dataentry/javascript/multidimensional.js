@@ -401,7 +401,10 @@ function dataValuesReceived( node )
 		value = value.firstChild.nodeValue;		
 		document.getElementById( 'value[' + dataElementId + '].value' ).value = value;
 	}
+	
 	unLockScreen();
+	
+	setMessage(i18n_save_calculated_data_element_success);
 }
 
 // -----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,41 +25,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientidentifiertype;
+package org.hisp.dhis.patient.action.patientattribute;
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Viet
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version GetPatientAttributesWithdoutGroupAction.java Sep 27, 2010 4:55:01 PM
  */
-
-public class ValidatePatientIdentifierTypeAction
-    implements Action
+public class GetPatientAttributesWithdoutGroupAction implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientIdentifierTypeService patientIdentifierTypeService;
+    private PatientAttributeService patientAttributeService;
+
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    {
+        this.patientAttributeService = patientAttributeService;
+    }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Output
     // -------------------------------------------------------------------------
 
-    private String name;
+    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
 
-    private String message;
+    public Collection<PatientAttribute> getPatientAttributes()
+    {
+        return patientAttributes;
+    }
 
-    private I18n i18n;
-
-    private Integer id;
-
+   
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -67,47 +72,9 @@ public class ValidatePatientIdentifierTypeAction
     public String execute()
         throws Exception
     {
-        PatientIdentifierType match = patientIdentifierTypeService.getPatientIdentifierType( name );
-
-        if ( match != null && (id == null || match.getId() != id.intValue()) )
-        {
-            message = i18n.getString( "name_in_use" );
-
-            return INPUT;
-        }
-
-        message = i18n.getString( "everything_is_ok" );
+        patientAttributes = patientAttributeService.getPatientAttributesNotGroup();
 
         return SUCCESS;
-    }
-
-    // -------------------------------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------------------------------
-
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
-    {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
-    }
-    
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
-    public void setId( Integer id )
-    {
-        this.id = id;
     }
 
 }
