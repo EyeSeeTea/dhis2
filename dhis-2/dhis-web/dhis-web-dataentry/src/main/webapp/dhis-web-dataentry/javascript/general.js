@@ -391,6 +391,10 @@ function calculateAndSaveCDEs()
 
 function dataValuesReceived( node )
 {
+	unLockScreen();
+	
+	setHeaderMessage(i18n_save_calculated_data_element_success);
+	
 	var values = node.getElementsByTagName('dataValue');
     var dataElementId;
     var value;
@@ -401,5 +405,6 @@ function dataValuesReceived( node )
 		value = value.firstChild.nodeValue;		
 		document.getElementById( 'value[' + dataElementId + '].value' ).value = value;
 	}
-	unLockScreen();
+	
+	hideHeaderMessage();
 }

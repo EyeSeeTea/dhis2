@@ -510,7 +510,7 @@ function setHeaderDelayMessage( message )
  */
 function hideHeaderMessage()
 {
-    $( 'div#headerMessage' ).slideUp( 'fast' );
+    $( 'div#headerMessage' ).slideUp( 'slow' );
 }   
 
 /**
