@@ -33,6 +33,7 @@ function patientAttributeGroupReceived( patientAttributeGroupElement )
 // -----------------------------------------------------------------------------
 // Remove Patient Attribute
 // -----------------------------------------------------------------------------
+
 function removePatientAttributeGroup( patientAttributeGroupId, name )
 {
     removeItem( patientAttributeGroupId, name, i18n_confirm_delete, 'removePatientAttributeGroup.action' );

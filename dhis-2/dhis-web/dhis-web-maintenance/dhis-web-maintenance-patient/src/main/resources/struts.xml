@@ -34,8 +34,7 @@
 
 		<action name="removeRelationshipType"
 			class="org.hisp.dhis.patient.action.relationship.RemoveRelationshipTypeAction">
-			<result name="success" type="redirect">relationshipType.action
-			</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 			<param name="requiredAuthorities">F_RELATIONSHIPTYPE_DELETE</param>
 		</action>
 
@@ -72,12 +71,9 @@
 
 		<action name="validateRelationshipType"
 			class="org.hisp.dhis.patient.action.relationship.ValidateRelationshipTypeAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	  		<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+      		<result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
@@ -933,12 +929,9 @@
 
 		<action name="validatePatientIdentifierType"
 			class="org.hisp.dhis.patient.action.patientidentifiertype.ValidatePatientIdentifierTypeAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm</result>
+ 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	 		<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+     		<result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
@@ -971,10 +964,8 @@
 
 		<action name="removePatientIdentifierType"
 			class="org.hisp.dhis.patient.action.patientidentifiertype.RemovePatientIdentifierTypeAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-			<result name="error" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="requiredAuthorities">F_PATIENTIDENTIFIERTYPE_DELETE</param>
 		</action>
 
