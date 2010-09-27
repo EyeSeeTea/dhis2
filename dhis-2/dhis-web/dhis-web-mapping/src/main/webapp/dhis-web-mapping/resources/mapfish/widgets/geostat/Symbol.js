@@ -583,10 +583,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         }
                                         Ext.getCmp('colorA_cf2').showField();
                                         Ext.getCmp('colorB_cf2').showField();
-                                        Ext.getCmp('maplegendset_cb2').hideField();       
-
-                                        this.classify(false, true);
+                                        Ext.getCmp('maplegendset_cb2').hideField();  
                                     }
+
+                                    this.classify(false, true);
                                 }
                             },
                             failure: function() {
@@ -687,10 +687,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         }
                                         Ext.getCmp('colorA_cf2').showField();
                                         Ext.getCmp('colorB_cf2').showField();
-                                        Ext.getCmp('maplegendset_cb2').hideField();       
-
-                                        this.classify(false, true);
+                                        Ext.getCmp('maplegendset_cb2').hideField();  
                                     }
+
+                                    this.classify(false, true);
                                 }
                             },
                             failure: function() {
