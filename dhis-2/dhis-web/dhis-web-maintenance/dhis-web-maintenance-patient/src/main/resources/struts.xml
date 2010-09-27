@@ -884,7 +884,7 @@
 		</action>
 
 		<action name="showAddPatientAttributeGroupForm"
-			class="org.hisp.dhis.patient.action.patientattribute.GetOptionalPatientAttributesWithoutGroupAction">
+			class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributesWithdoutGroupAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-patient/addPatientAttributeGroupForm.vm</param>
 			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>

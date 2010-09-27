@@ -285,6 +285,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 	
 	<bean
+		id="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributesWithdoutGroupAction"
+		class="org.hisp.dhis.patient.action.patientattribute.GetPatientAttributesWithdoutGroupAction"
+		scope="prototype">
+		<property name="patientAttributeService"
+			ref="org.hisp.dhis.patient.PatientAttributeService" />
+	</bean>
+	
+	<bean
 		id="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeOptionAction"
 		class="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeOptionAction"
 		scope="prototype">
