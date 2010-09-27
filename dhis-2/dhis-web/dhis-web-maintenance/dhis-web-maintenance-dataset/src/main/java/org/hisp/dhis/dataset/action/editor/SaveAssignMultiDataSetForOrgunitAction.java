@@ -82,11 +82,8 @@ public class SaveAssignMultiDataSetForOrgunitAction
     public String execute()
         throws Exception
     {
-        Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
-
-        Set<OrganisationUnit> unitsInTheTree = new HashSet<OrganisationUnit>();
-
-        getUnitsInTheTree( rootUnits, unitsInTheTree );
+        Set<Source> selectedOrganisationUnits = convert( selectionTreeManager
+            .getReloadedSelectedOrganisationUnits() );
 
         for ( String dataSetId : selectedDataSets )
         {
@@ -94,16 +91,13 @@ public class SaveAssignMultiDataSetForOrgunitAction
 
             Set<Source> assignedSources = dataSet.getSources();
 
-            Collection<OrganisationUnit> selectedOrganisationUnits = selectionTreeManager
-                .getReloadedSelectedOrganisationUnits();
-
-            assignedSources.addAll( convert( selectedOrganisationUnits ) );
+            assignedSources.addAll( selectedOrganisationUnits );
 
             dataSet.setSources( assignedSources );
-            
+
             dataSetService.updateDataSet( dataSet );
         }
-        
+
         return SUCCESS;
     }
 
@@ -118,14 +112,5 @@ public class SaveAssignMultiDataSetForOrgunitAction
         sources.addAll( organisationUnits );
 
         return sources;
-    }
-
-    private void getUnitsInTheTree( Collection<OrganisationUnit> rootUnits, Set<OrganisationUnit> unitsInTheTree )
-    {
-        for ( OrganisationUnit root : rootUnits )
-        {
-            unitsInTheTree.add( root );
-            getUnitsInTheTree( root.getChildren(), unitsInTheTree );
-        }
     }
 }
