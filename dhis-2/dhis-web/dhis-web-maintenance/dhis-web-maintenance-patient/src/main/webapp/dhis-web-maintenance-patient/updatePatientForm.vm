@@ -29,7 +29,7 @@
 
 <table>
 	<tr><th colspan="2">$i18n.getString( "system_identifier" )</th></tr>
-	<tr><td colspan="2" style="text-align: center">$systemIdentifier</td></tr>
+	<tr><td></td><td>$systemIdentifier</td></tr>
 	<tr><td>&nbsp;</td></tr>	
 	<tr>
 		<th colspan="2">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></th>
