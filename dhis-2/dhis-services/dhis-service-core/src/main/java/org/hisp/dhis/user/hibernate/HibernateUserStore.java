@@ -161,6 +161,18 @@ public class HibernateUserStore
         return users;
     }
 
+    @SuppressWarnings("unchecked")
+    public Collection<User> getUsersByPhoneNumber( String phoneNumber )
+    {
+        String hql = "from User u where u.phoneNumber = :phoneNumber";
+        
+        Query query = sessionFactory.getCurrentSession().createQuery( hql );
+        query.setString( "phoneNumber", phoneNumber );
+        
+        return query.list();
+    }
+    
+
     public void deleteUser( User user )
     {
         Session session = sessionFactory.getCurrentSession();
