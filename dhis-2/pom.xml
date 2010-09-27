@@ -53,7 +53,7 @@
     </repository>
     <repository>
       <id>JBoss</id>
-      <url>http://repository.jboss.org/maven2</url>
+      <url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
     </repository>
   </repositories>
   
@@ -309,17 +309,17 @@
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-core</artifactId>
-        <version>${spring.version}</version>
+        <version>${spring.security.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-web</artifactId>
-        <version>${spring.version}</version>
+        <version>${spring.security.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-config</artifactId>
-        <version>${spring.version}</version>
+        <version>${spring.security.version}</version>
       </dependency>
       <!--Other -->
       <dependency>
@@ -470,12 +470,12 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
-        <version>3.5.1-Final</version>
+        <version>${hibernate.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-ehcache</artifactId>
-        <version>3.5.1-Final</version>
+        <version>${hibernate.version}</version>
         <exclusions>
           <exclusion>
             <groupId>net.sf.ehcache</groupId>
@@ -486,7 +486,7 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-entitymanager</artifactId>
-        <version>3.5.1-Final</version>
+        <version>${hibernate.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -629,6 +629,8 @@
   <properties>
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.0.2.RELEASE</spring.version>
+    <spring.version>3.0.4.RELEASE</spring.version>
+    <spring.security.version>3.0.3.RELEASE</spring.security.version>
+    <hibernate.version>3.5.6-Final</hibernate.version>
   </properties>
 </project>
