@@ -312,14 +312,14 @@ public class SearchPatientAction
             //System.out.println(" searchingAttributeId != null && searchText != null ");
             patients = patientAttributeValueService.searchPatientAttributeValue(
                 patientAttribute, searchText, pagingUtil.getStartPos(), pagingUtil.getPageSize() );
-
+            
             if( patients != null && patients.size() > 0 ) 
             {
                 if(sortPatientAttributeId!=null && patientAttribute!=null)
                 {
                     patients = patientService.sortPatientsByAttribute(patients, patientAttribute);
-                    System.out.println("\n\n\n 000 : " + patients);    
                 }
+                
                 for( Patient patient : patients )
                 {
                     mapRelationShip.put( patient.getId(), relationshipService.getRelationshipsForPatient( patient ) );
@@ -329,7 +329,7 @@ public class SearchPatientAction
                     }
                 }
             }
-        
+System.out.println("\n patientAttributeValueService.searchPatientAttributeValue : " + patients);       
             return SUCCESS;
         }
 
