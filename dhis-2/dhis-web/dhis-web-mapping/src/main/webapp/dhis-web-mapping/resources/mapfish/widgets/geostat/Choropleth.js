@@ -27,50 +27,54 @@ Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
 mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
     layer: null,
-    
+
     format: null,
-    
+
     url: null,
-    
+
     featureSelection: true,
-    
+
     nameAttribute: null,
-    
+
     indicator: null,
-    
+
     indicatorText: null,
-    
+
     coreComp: null,
-    
+
     classificationApplied: false,
-    
+
     ready: false,
-    
+
     border: false,
-    
+
     loadMask: false,
-    
+
     labelGenerator: null,
-	
+
     colorInterpolation: false,
-    
+
     newUrl: false,
-    
+
     legend: false,
-	
-    imageLegend: false,
-	
-    bounds: false,
-    
+
+	imageLegend: false,
+
+	bounds: false,
+
     parentId: false,
-    
+
     mapView: false,
+
+    mapData: false,
     
     initComponent: function() {
-        this.legend = new Object();
+        this.legend = {};
         this.legend.type = map_legend_type_automatic;
         this.legend.method = 2;
         this.legend.classes = 5;
+        
+        this.mapData = {};
         
         mapViewStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMapViews' + type,
@@ -477,7 +481,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         Ext.Ajax.request({
                             url: path_mapping + 'getMapView' + type,
                             method: 'POST',
-                            params: { id: mId },
+                            params: {id: mId},
                             scope: this,
                             success: function(r) {
                                 this.mapView = getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
@@ -546,7 +550,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 								}
                             },
                             failure: function() {
-                              alert( i18n_status , i18n_error_while_retrieving_data );
+                                alert(i18n_status, i18n_error_while_retrieving_data);
                             } 
                         });
                     }
@@ -1057,7 +1061,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     TOPLEVELUNIT.id = rootNode.id;
                                     TOPLEVELUNIT.name = rootNode.name;
                                     TOPLEVELUNIT.hasChildrenWithCoordinates = rootNode.hasChildrenWithCoordinates;
-                                    showTree(this);          
+                                    showTree(this);
                                 },
                                 failure: function(r) {
                                     alert('getOrganisationUnits');
@@ -1452,7 +1456,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     applyValues: function() {
         var options = {};
         this.indicator = 'value';
-        options.indicator = 'value';
+        options.indicator = this.indicator;
         options.method = Ext.getCmp('method_cb').getValue();
         options.numClasses = Ext.getCmp('numClasses_cb').getValue();
         options.colors = this.getColors();
@@ -1480,17 +1484,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             MASK.msg = i18n_aggregating_map_values;
             MASK.show();
 
-            MAPDATA[ACTIVEPANEL].name = Ext.getCmp('map_tf').getValue();
-            MAPDATA[ACTIVEPANEL].nameColumn = 'name';
-            MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
-            MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
-            MAPDATA[ACTIVEPANEL].zoom = 7;
+            this.mapData.name = Ext.getCmp('map_tf').getValue();
+            this.mapData.nameColumn = 'name';
+            this.mapData.longitude = BASECOORDINATE.longitude;
+            this.mapData.latitude = BASECOORDINATE.latitude;
+            this.mapData.zoom = 7;
             
             if (!position) {
-                if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
-                    MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+                if (this.mapData.zoom != MAP.getZoom()) {
+                    MAP.zoomTo(this.mapData.zoom);
                 }
-                MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+                MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude));
             }
             
             if (this.mapView) {
@@ -1498,18 +1502,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
                 }
                 else {
-                    MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+                    MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude), this.mapData.zoom);
                 }
                 this.mapView = false;
             }
-            
-            FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
+
+            FEATURE[thematicMap] = this.layer.features;
             
             var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
             var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
-            var params = new Object();
+            var params = {};
             if (MAPDATETYPE == map_date_type_fixed) {
                 params.periodId = Ext.getCmp('period_cb').getValue();
             }
@@ -1567,18 +1571,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 params: {mapLayerPath: this.newUrl},
                 scope: this,
                 success: function(r) {
-                    MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
+                    this.mapData = Ext.util.JSON.decode(r.responseText).map[0];
                     
-                    MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
-                    MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
-                    MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
-                    MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
+                    this.mapData.organisationUnitLevel = parseFloat(this.mapData.organisationUnitLevel);
+                    this.mapData.longitude = parseFloat(this.mapData.longitude);
+                    this.mapData.latitude = parseFloat(this.mapData.latitude);
+                    this.mapData.zoom = parseFloat(this.mapData.zoom);
                     
                     if (!position) {
-                        if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
-                            MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+                        if (this.mapData.zoom != MAP.getZoom()) {
+                            MAP.zoomTo(this.mapData.zoom);
                         }
-                        MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+                        MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude));
                     }
                     
                     if (this.mapView) {
@@ -1586,12 +1590,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
                         }
                         else {
-                            MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+                            MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude), this.mapData.zoom);
                         }
                         this.mapView = false;
                     }
             
-                    FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
+                    FEATURE[thematicMap] = this.layer.features;
             
                     var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
@@ -1610,7 +1614,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             EXPORTVALUES = getExportDataValueJSON(mapvalues);
                             var mv = new Array();
                             var mour = new Array();
-                            var nameColumn = MAPDATA[thematicMap].nameColumn;
+                            var nameColumn = this.mapData.nameColumn;
                             var options = {};
                             
                             if (mapvalues.length == 0) {
