@@ -27,7 +27,7 @@ jQuery(document).ready(function()
 						}
 		,rules : {
 			relationshipTypeId  : { required: true },
-			firstName : {required_group:true,rangelength:[2,30], letterswithbasicpunc: true},
+			firstName : {required:true,rangelength:[2,30], letterswithbasicpunc: true},
 			middleName : {required:false, letterswithbasicpunc: true},
 			lastName : {required:false, letterswithbasicpunc: true},
 			gender : { required: true },

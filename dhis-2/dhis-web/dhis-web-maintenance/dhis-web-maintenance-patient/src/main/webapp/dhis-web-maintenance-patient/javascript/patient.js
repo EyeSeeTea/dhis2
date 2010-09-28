@@ -475,16 +475,18 @@ function selectAll( list )
 
 function ageOnchange()
 {
-	jQuery("#birthDate").val("").removeClass("error").rules("remove","required");
-	jQuery("#age").rules("add",{required:true});
+	//jQuery("#birthDate").val("").removeClass("error").rules("remove","required");
+	//jQuery("#age").rules("add",{required:true});
+	jQuery("#birthDate").val("");
 
 }
 
 function bdOnchange()
 {
-	jQuery("#age").rules("remove","required");
-	jQuery("#age").val("")
-	jQuery("#birthDate").rules("add",{required:true});
+	//jQuery("#age").rules("remove","required");
+	//jQuery("#age").val("");
+	//jQuery("#birthDate").rules("add",{required:true});
+	jQuery("#age").val("");
 }
 
 
