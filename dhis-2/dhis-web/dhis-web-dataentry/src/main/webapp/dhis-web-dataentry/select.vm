@@ -91,4 +91,7 @@
 
 <script type="text/javascript">
 	var i18n_save_calculated_data_element_success = '$encoder.jsEscape( $i18n.getString( "save_calculated_data_element_success" ) , "'")';
+	var i18n_register_complete_dataset_success = '$encoder.jsEscape( $i18n.getString( "register_complete_dataset_success" ) , "'")';
+	var i18n_register_complete_dataset_failed = '$encoder.jsEscape( $i18n.getString( "register_complete_dataset_failed" ) , "'")';
+	var i18n_undo_register_complete_dataset_success = '$encoder.jsEscape( $i18n.getString( "undo_register_complete_dataset_success" ) , "'")';
 </script>
