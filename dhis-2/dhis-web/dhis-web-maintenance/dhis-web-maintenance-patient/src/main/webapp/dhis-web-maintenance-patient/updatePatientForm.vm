@@ -1,5 +1,5 @@
 #macro( validate $type $require )
-  #if( $type == "int" )
+  #if( $type == "NUMBER" )
   	{validate:{ number:true #if($require), required:true #end }}
   #elseif( $type == "string" )
   	{validate:{ alphanumeric:true #if($require), required:true #end }}
@@ -137,19 +137,19 @@
 		                    <option value="false" #if( !$attributeValue ) selected="selected" #end>$i18n.getString( "no" )</option>
 		                </select>                
 		            #elseif( $attribute.valueType == "DATE" )
-		                <input type="text" id="attr$attribute.id"  name="attr$attribute.id"  value="$!attributeValue" #validate( "date"  $attribute.mandatory ) style="width:30em" >
+		                <input type="text" id="attr$attribute.id"  name="attr$attribute.id"  value="$!attributeValue" class=' #validate( "default"  $attribute.mandatory )' style="width:30em" >
 		                <script type="text/javascript">
                             datePickerValid( 'attr$attribute.id' );
                         </script>                 
 					#elseif( $attribute.valueType == "COMBO" )
-						<select  id="attr$attribute.id"  name="attr$attribute.id" #validate( "default"  $attribute.mandatory ) style="width:30em"  >
+						<select  id="attr$attribute.id"  name="attr$attribute.id" style="width:30em"  class=' #validate( "default"  $attribute.mandatory )'>
 							 <option value="">[$i18n.getString( "please_select" )]</option>
 						#foreach ($option in $attribute.attributeOptions )
 							<option value="$option.id" #if($attributeValue == $option.name) selected="selected" #end>$option.name</option>
 						#end
 						</select>
 					#else 
-						<input type="text"  id="attr$attribute.id" name="attr$attribute.id" value="$!attributeValue" #validate( $attribute.valueType  $attribute.mandatory )   style="width:30em" >
+						<input type="text"  id="attr$attribute.id"  name="attr$attribute.id"   value="$!attributeValue" class=' #validate( $attribute.valueType  $attribute.mandatory )'  >
 					#end
 				</td>		
 			</tr>
@@ -174,19 +174,19 @@
 		                    <option value="false" #if( !$attributeValue ) selected="selected" #end>$i18n.getString( "no" )</option>
 		                </select>                
 		            #elseif( $attribute.valueType == "DATE" )
-		                <input type="text" id="attr$attribute.id"    style="width:30em" name="attr$attribute.id"  value="$!attributeValue" #validate( ""  $attribute.mandatory )>
+		                <input type="text" id="attr$attribute.id"    style="width:30em" name="attr$attribute.id"  value="$!attributeValue" class=' #validate( "default"  $attribute.mandatory )'>
 		                <script type="text/javascript">
                             datePickerValid( 'attr$attribute.id' );
                         </script>                    
 					#elseif( $attribute.valueType == "COMBO" )
-						<select  id="attr$attribute.id"  name="attr$attribute.id"  style="width:30em" #validate( "default"  $attribute.mandatory ) >
+						<select  id="attr$attribute.id"  name="attr$attribute.id"  style="width:30em" class=' #validate( "default"  $attribute.mandatory )' >
 							 <option value="">[$i18n.getString( "please_select" )]</option>
 						#foreach ($option in $attribute.attributeOptions )
 							<option value="$option.id" #if($attributeValue == $option.name) selected="selected" #end>$option.name</option>
 						#end
 						</select>
 					#else 
-						<input type="text"  id="attr$attribute.id" name="attr$attribute.id" value="$!attributeValue" #validate( $attribute.valueType  $attribute.mandatory )   style="width:30em" >
+						<input type="text"  id="attr$attribute.id" name="attr$attribute.id" value="$!attributeValue" style="width:30em" class=' #validate( $attribute.valueType  $attribute.mandatory )'>
 					#end
 				</td>		
 			</tr>
