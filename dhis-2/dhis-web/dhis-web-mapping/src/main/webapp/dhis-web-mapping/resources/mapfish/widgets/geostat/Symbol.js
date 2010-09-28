@@ -51,26 +51,30 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     loadMask: false,
 
     labelGenerator: null,
-	 
-	colorInterpolation: false,
-    
+
+    colorInterpolation: false,
+
     newUrl: false,
-    
+
     legend: false,
-	
+
 	imageLegend: false,
-	
+
 	bounds: false,
-    
+
     parentId: false,
-    
+
     mapView: false,
-	
+
+    mapData: false,
+
     initComponent: function() {
-        this.legend = new Object();
+        this.legend = {};
         this.legend.type = map_legend_type_automatic;
         this.legend.method = 2;
         this.legend.classes = 5;
+        
+        this.mapData = {};
     
         mapViewStore2 = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMapViews' + type,
@@ -317,7 +321,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 		
 		predefinedMapLegendSetStore2 = new Ext.data.JsonStore({
             url: path_mapping + 'getMapLegendSetsByType' + type,
-            baseParams: { type: map_legend_type_predefined },
+            baseParams: {type: map_legend_type_predefined},
             root: 'mapLegendSets',
             fields: ['id', 'name'],
             autoLoad: true,
@@ -329,7 +333,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.Ajax.request({
 								url: path_mapping + 'getMapLegendSet' + type,
 								method: 'POST',
-								params: { id: this.mapView.mapLegendSetId },
+								params: {id: this.mapView.mapLegendSetId},
                                 scope: this,
 								success: function(r) {
 									var mls = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
@@ -631,7 +635,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'dataelement_cb2',
-            fieldLabel: i18n_dataelement ,
+            fieldLabel: i18n_dataelement,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -938,7 +942,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             w.setPosition(x,y);
                             w.show();
                         }
-                        
+
                         if (TOPLEVELUNIT.id) {
                             showTree(this);
                         }
@@ -1347,7 +1351,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     
     applyValues: function() {
         var options = {};
-        this.indicator = options.indicator = 'value';
+        this.indicator = 'value';
+        options.indicator = this.indicator;
         options.method = Ext.getCmp('method_cb2').getValue();
         options.numClasses2 = Ext.getCmp('numClasses_cb2').getValue();
         options.colors = this.getColors();
@@ -1375,17 +1380,17 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             MASK.msg = i18n_aggregating_map_values;
             MASK.show();        
             
-            MAPDATA[ACTIVEPANEL].name = Ext.getCmp('map_tf2').getValue();
-            MAPDATA[ACTIVEPANEL].nameColumn = 'name';
-            MAPDATA[ACTIVEPANEL].longitude = BASECOORDINATE.longitude;
-            MAPDATA[ACTIVEPANEL].latitude = BASECOORDINATE.latitude;
-            MAPDATA[ACTIVEPANEL].zoom = 7;
+            this.mapData.name = Ext.getCmp('map_tf2').getValue();
+            this.mapData.nameColumn = 'name';
+            this.mapData.longitude = BASECOORDINATE.longitude;
+            this.mapData.latitude = BASECOORDINATE.latitude;
+            this.mapData.zoom = 7;
             
             if (!position) {
-                if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
-                    MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+                if (this.mapData.zoom != MAP.getZoom()) {
+                    MAP.zoomTo(this.mapData.zoom);
                 }
-                MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+                MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude));
             }
             
             if (this.mapView) {
@@ -1393,18 +1398,18 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
                 }
                 else {
-                    MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+                    MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude), this.mapData.zoom);
                 }
                 this.mapView = false;
             }
             
-            FEATURE[thematicMap2] = MAP.getLayersByName('Point layer')[0].features;
+            FEATURE[thematicMap2] = this.layer.features;
             
             var indicatorOrDataElementId = VALUETYPE.point == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
             var dataUrl = VALUETYPE.point == map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
-            var params = new Object();
+            var params = {};
             if (MAPDATETYPE == map_date_type_fixed) {
                 params.periodId = Ext.getCmp('period_cb2').getValue();
             }
@@ -1462,18 +1467,18 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 params: {mapLayerPath: this.newUrl},
                 scope: this,
                 success: function(r) {
-                    MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
+                    this.mapData = Ext.util.JSON.decode(r.responseText).map[0];
                     
-                    MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
-                    MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
-                    MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
-                    MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
+                    this.mapData.organisationUnitLevel = parseFloat(this.mapData.organisationUnitLevel);
+                    this.mapData.longitude = parseFloat(this.mapData.longitude);
+                    this.mapData.latitude = parseFloat(this.mapData.latitude);
+                    this.mapData.zoom = parseFloat(this.mapData.zoom);
                     
                     if (!position) {
-                        if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
-                            MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
+                        if (this.mapData.zoom != MAP.getZoom()) {
+                            MAP.zoomTo(this.mapData.zoom);
                         }
-                        MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+                        MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude));
                     }
                     
                     if (this.mapView) {
@@ -1481,12 +1486,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
                         }
                         else {
-                            MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude), MAPDATA[ACTIVEPANEL].zoom);
+                            MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude), this.mapData.zoom);
                         }
                         this.mapView = false;
                     }
             
-                    FEATURE[thematicMap2] = MAP.getLayersByName('Point layer')[0].features;
+                    FEATURE[thematicMap2] = this.layer.features;
                     
                     var indicatorOrDataElementId = VALUETYPE.point == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
@@ -1505,7 +1510,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             EXPORTVALUES = getExportDataValueJSON(mapvalues);
                             var mv = new Array();
                             var mour = new Array();
-                            var nameColumn = MAPDATA[thematicMap2].nameColumn;
+                            var nameColumn = this.mapData.nameColumn;
                             var options = {};
                             
                             if (mapvalues.length == 0) {

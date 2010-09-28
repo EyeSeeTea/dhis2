@@ -24,105 +24,32 @@
 
 Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
 
-/**
- * Class: mapfish.widgets.geostat.Choropleth
- * Use this class to create a widget allowing to display choropleths
- * on the map.
- *
- * Inherits from:
- * - {Ext.FormPanel}
- */
-
 mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 
-    /**
-     * APIProperty: layer
-     * {<OpenLayers.Layer.Vector>} The vector layer containing the features that
-     *      are styled based on statistical values. If none is provided, one will
-     *      be created.
-     */
     layer: null,
-
-    /**
-     * APIProperty: format
-     * {<OpenLayers.Format>} The OpenLayers format used to get features from
-     *      the HTTP request response. GeoJSON is used if none is provided.
-     */
+    
     format: null,
 
-    /**
-     * APIProperty: url
-     * {String} The URL to the web service. If none is provided, the features
-     *      found in the provided vector layer will be used.
-     */
     url: null,
 
-    /**
-     * APIProperty: featureSelection
-     * {Boolean} A boolean value specifying whether feature selection must
-     *      be put in place. If true a popup will be displayed when the
-     *      mouse goes over a feature.
-     */
     featureSelection: true,
 
-    /**
-     * APIProperty: nameAttribute
-     * {String} The feature attribute that will be used as the popup title.
-     *      Only applies if featureSelection is true.
-     */
     nameAttribute: null,
 
-    /**
-     * APIProperty: indicator
-     * {String} (read-only) The feature attribute currently chosen
-     *     Useful if callbacks are registered on 'featureselected'
-     *     and 'featureunselected' events
-     */
     indicator: null,
 
-    /**
-     * APIProperty: indicatorText
-     * {String} (read-only) The raw value of the currently chosen indicator
-     *     (ie. human readable)
-     *     Useful if callbacks are registered on 'featureselected'
-     *     and 'featureunselected' events
-     */
     indicatorText: null,
 
-    /**
-     * Property: coreComp
-     * {<mapfish.GeoStat.ProportionalSymbol>} The core component object.
-     */
     coreComp: null,
 
-    /**
-     * Property: classificationApplied
-     * {Boolean} true if the classify was applied
-     */
     classificationApplied: false,
 
-    /**
-     * Property: ready
-     * {Boolean} true if the widget is ready to accept user commands.
-     */
     ready: false,
 
-    /**
-     * Property: border
-     *     Styling border
-     */
     border: false,
 
-    /**
-     * APIProperty: loadMask
-     *     An Ext.LoadMask config or true to mask the widget while loading (defaults to false).
-     */
     loadMask: false,
 
-    /**
-     * APIProperty: labelGenerator
-     *     Generator for bin labels
-     */
     labelGenerator: null,
 
     getGridPanelHeight: function() {

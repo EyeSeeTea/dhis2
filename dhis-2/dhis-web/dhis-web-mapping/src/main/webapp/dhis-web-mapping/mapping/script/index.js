@@ -8,8 +8,8 @@ var MAPSOURCE;
 var MAPDATETYPE;
 /* A map object */
 var MAPDATA = {};
-MAPDATA[thematicMap] = {};
-MAPDATA[thematicMap2] = {};
+// MAPDATA[thematicMap] = {};
+// MAPDATA[thematicMap2] = {};
 MAPDATA[organisationUnitAssignment] = {};
 /* Filename or level */
 var URL;
@@ -42,114 +42,6 @@ VALUETYPE.point = map_value_type_indicator;
 var TOPLEVELUNIT = {};
 /* Locate feature window */
 var lfw;
-
-/* Detect mapview parameter in URL */
-function getUrlParam(strParamName){var output='';var strHref=window.location.href;if(strHref.indexOf('?')>-1){var strQueryString=strHref.substr(strHref.indexOf('?')).toLowerCase();var aQueryString=strQueryString.split('&');for(var iParam=0;iParam<aQueryString.length;iParam++){if(aQueryString[iParam].indexOf(strParamName.toLowerCase()+'=')>-1){var aParam=aQueryString[iParam].split('=');output=aParam[1];break;}}}return unescape(output);}
-/* Input validation */
-function validateInput(name){return (name.length<=25);}
-/* Date validation */
-function validateDates(startDate,endDate){if(!startDate || !endDate){return true;}return startDate >= endDate ? false : true;}
-/* Decide multiselect height based on screen resolution */
-function getMultiSelectHeight(){var h=screen.height;if(h<=800){return 220;}else if(h<=1050){return 310;}else if(h<=1200){return 470;}else{return 900;}}
-/* Make map view numbers numeric */
-function getNumericMapView(mapView){mapView.id=parseFloat(mapView.id);mapView.indicatorGroupId=parseFloat(mapView.indicatorGroupId);mapView.indicatorId=parseFloat(mapView.indicatorId);mapView.periodId=parseFloat(mapView.periodId);mapView.method=parseFloat(mapView.method);mapView.classes=parseFloat(mapView.classes);mapView.mapLegendSetId=parseFloat(mapView.mapLegendSetId);mapView.longitude=parseFloat(mapView.longitude);mapView.latitude=parseFloat(mapView.latitude);mapView.zoom=parseFloat(mapView.zoom);return mapView;}
-/* Get number of decimals */
-function getNumberOfDecimals(x,dec_sep){var tmp=new String();tmp=x;if(tmp.indexOf(dec_sep)>-1){return tmp.length-tmp.indexOf(dec_sep)-1;}else{return 0;}}
-/* Get property names in an object */
-function getKeys(obj){var temp=[];for(var k in obj){if(obj.hasOwnProperty(k)){temp.push(k);}}return temp;}
-/* Toggle feature labels */
-function getActivatedOpenLayersStyleMap(nameColumn) {
-    return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1,'label':'${labelString}','fontFamily':'arial,lucida sans unicode','fontWeight':'bold','fontSize':14},OpenLayers.Feature.Vector.style['default'])), 'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
-}
-function getDeactivatedOpenLayersStyleMap() {
-    return new OpenLayers.StyleMap({'default':new OpenLayers.Style(OpenLayers.Util.applyDefaults({'fillOpacity':1,'strokeColor':'#222222','strokeWidth':1},OpenLayers.Feature.Vector.style['default'])),'select':new OpenLayers.Style({'strokeColor':'#000000','strokeWidth':2,'cursor':'pointer'})});
-}
-function toggleFeatureLabelsPolygons(layer) {
-    function activateLabels() {
-        layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[thematicMap].nameColumn);
-        LABELS[thematicMap] = true;
-    }
-    function deactivateLabels() {
-        layer.styleMap = getDeactivatedOpenLayersStyleMap();
-        LABELS[thematicMap] = false;
-    }
-    
-    if (LABELS[thematicMap]) {
-        deactivateLabels();
-    }
-    else {
-        activateLabels();
-    }
-    
-    FEATURE[thematicMap] = layer.features;
-    choropleth.applyValues();
-}
-function toggleFeatureLabelsPoints(layer) {
-    function activateLabels() {
-        layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[thematicMap2].nameColumn);
-        LABELS[thematicMap2] = true;
-    }
-    function deactivateLabels() {
-        layer.styleMap = getDeactivatedOpenLayersStyleMap();
-        LABELS[thematicMap2] = false;
-    }
-    
-    if (LABELS[thematicMap2]) {
-        deactivateLabels();
-    }
-    else {
-        activateLabels();
-    }
-    
-    FEATURE[thematicMap2] = layer.features;
-    proportionalSymbol.applyValues();
-}
-function toggleFeatureLabelsAssignment(classify, layer) {
-    function activateLabels() {
-        layer.styleMap = getActivatedOpenLayersStyleMap(MAPDATA[organisationUnitAssignment].nameColumn);
-        LABELS[organisationUnitAssignment] = true;
-    }
-    function deactivateLabels() {
-        layer.styleMap = getDeactivatedOpenLayersStyleMap();
-        LABELS[organisationUnitAssignment] = false;
-    }
-    
-    if (classify) {
-        if (LABELS[organisationUnitAssignment]) {
-            deactivateLabels();
-        }
-        else {
-            activateLabels();
-        }
-        mapping.classify(false,true);
-    }
-    else {
-        if (LABELS[organisationUnitAssignment]) {
-            activateLabels();
-        }
-    }
-}    
-    
-/* Sort method */
-function sortByValue(a,b){return b.value-a.value;}
-/* Create JSON for map export */
-function getExportDataValueJSON(mapvalues){var json='{';json+='"datavalues":';json+='[';mapvalues.sort(sortByValue);for(var i=0;i<mapvalues.length;i++){json+='{';json+='"organisation": "'+mapvalues[i].orgUnitId+'",';json+='"value": "'+mapvalues[i].value+'" ';json+=i<mapvalues.length-1?'},':'}'}json+=']';json+='}';return json}
-
-function getLegendsJSON(){
-    var widget = ACTIVEPANEL == thematicMap ? choropleth : proportionalSymbol;
-    var json = '{';
-	json += '"legends":';
-	json += '[';
-	for(var i = 0; i < widget.imageLegend.length; i++) {
-		json += '{';
-		json += '"label": "' + widget.imageLegend[i].label + '",';
-		json += '"color": "' + widget.imageLegend[i].color + '" ';
-		json += i < widget.imageLegend.length-1 ? '},' : '}';
-	}
-	json += ']';
-	json += '}';
-	return json;
-}
 
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
@@ -323,7 +215,7 @@ Ext.onReady( function() {
                         }
                     }
 					
-					if (validateInput(vn) == false) {
+					if (validateInputNameLength(vn) == false) {
 						Ext.message.msg(false, i18n_map_view_name_cannot_be_longer_than_25_characters );
 						return;
 					}
@@ -786,7 +678,7 @@ Ext.onReady( function() {
                         return;
                     }
                     
-                    if (!validateInput(mln)) {
+                    if (!validateInputNameLength(mln)) {
                         Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
                         return;
                     }
@@ -1635,7 +1527,7 @@ Ext.onReady( function() {
 						return;
                     }
                     
-                    if (validateInput(nn) == false) {
+                    if (validateInputNameLength(nn) == false) {
                         Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
                         return;
                     }
@@ -1735,7 +1627,7 @@ Ext.onReady( function() {
                 return;
             }
             
-            if (validateInput(en) == false) {
+            if (validateInputNameLength(en) == false) {
                 Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
                 return;
             }
@@ -2206,7 +2098,7 @@ Ext.onReady( function() {
 						return;
 					}
 					
-					if (validateInput(mln) == false) {
+					if (validateInputNameLength(mln) == false) {
 						Ext.message.msg(false, i18n_overlay_name_cannot_be_longer_than_25_characters );
 						return;
 					}
@@ -2417,7 +2309,7 @@ Ext.onReady( function() {
 						return;
 					}
 					
-					if (validateInput(mlbn) == false) {
+					if (validateInputNameLength(mlbn) == false) {
 						Ext.message.msg(false, i18n_baselayer_name_cannot_be_longer_than_25_characters );
 						return;
 					}
@@ -4085,7 +3977,7 @@ function onHoverSelectPolygon(feature) {
         Ext.getCmp('featureinfo_l').setText('<span style="color:black">' + FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn] + '</span>', false);
     }
     else {
-        Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap].attributes[MAPDATA[thematicMap].nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap].attributes.value + '</div>', false);
+        Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap].attributes[choropleth.mapData.nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap].attributes.value + '</div>', false);
     }
 }
 
@@ -4154,7 +4046,7 @@ function onClickUnselectPolygon(feature) {}
 /* Section: select features point */
 function onHoverSelectPoint(feature) {
     FEATURE[thematicMap2] = feature;
-    Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap2].attributes[MAPDATA[thematicMap2].nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap2].attributes.value + '</div>', false);
+    Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap2].attributes[proportionalSymbol.mapData.nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap2].attributes.value + '</div>', false);
 }
 
 function onHoverUnselectPoint(feature) {
@@ -4176,7 +4068,7 @@ function onClickSelectPoint(feature) {
             
             Ext.getCmp('map_tf2').setValue(feature.data.name);
             Ext.getCmp('map_tf2').value = feature.attributes.id;
-            proportionalSymbol.loadFromDatabase(Ext.getCmp('map_tf2').value);
+            proportionalSymbol.loadFromDatabase(feature.attributes.id, true);
         }
         else {
             Ext.message.msg(false, i18n_no_coordinates_found);
