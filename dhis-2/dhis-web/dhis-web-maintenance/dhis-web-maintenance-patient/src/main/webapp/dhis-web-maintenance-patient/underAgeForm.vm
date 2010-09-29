@@ -31,8 +31,17 @@ jQuery(document).ready(function()
 			middleName : {required:false, letterswithbasicpunc: true},
 			lastName : {required:false, letterswithbasicpunc: true},
 			gender : { required: true },
-			birthDate :{required:true,dateISO:true,datelessthanequaltoday:true}
-		}
+			birthDate :{required:false,dateISO:true,datelessthanequaltoday:true}
+		},beforeValidateHandler: function(form)
+			{
+				var birthDate = $('#birthDate').val();
+				var age = $('#age').val();
+				if(age !=''){
+					$( "#memberValidator").val(age);
+				}else{
+					$( "#memberValidator").val(birthDate);
+				}
+			}
 	});
 	
 	// Esc key for jQuery thickbox
@@ -187,11 +196,15 @@ jQuery(document).ready(function()
 	</tr>
 	<tr>
 		<td><label for="age">$i18n.getString( "or" )  $i18n.getString( "age" ) </label></td>
-		<td><input type="text" id="age" name="age" style="width:4em"  onchange="ageOnchange()" class="{validate:{number:true}}">
+		<td><input type="text" id="age" name="age" style="width:4em"  onchange="ageOnchange()" class="{validate:{number:true, alphanumeric: true}}">
 				&nbsp;&nbsp;&nbsp;
 			<label for="estimated">$i18n.getString( "estimated" )</label>
             <input type="checkbox" id="birthDateEstimated" name="birthDateEstimated" value="true"> 	
         </td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><input id="memberValidator" style="display:none" class="{validate:{required:true}}"/></td>
 	</tr>
  	<tr>
 		<td><label for="bloodGroup">$i18n.getString( "blood_group" )</label></td>
