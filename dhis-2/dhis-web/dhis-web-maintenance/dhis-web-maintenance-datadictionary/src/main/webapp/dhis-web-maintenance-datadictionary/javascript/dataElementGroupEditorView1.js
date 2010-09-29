@@ -97,7 +97,8 @@ function getDataElementGroupCompleted( xmlObject )
 	
 	refreshListById( 'availableDataElements' );
 	visableAvailableDataElements();
-	disable('availableDataElements');
+	//disable('availableDataElements');
+	enable('availableDataElements');
 	$( '#groupNameView' ).html( name );
 }
 
