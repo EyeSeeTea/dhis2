@@ -307,7 +307,7 @@ function createNewGroupReceived( xmlObject )
 		showToolTip( e, name);				
 	}
     list.add(option , null);
-	dataElementGroups[i] = name;
+	dataElementGroups[id] = name;
 	$( '#groupNameView' ).html( name );
     hideById( 'addDataElementGroupForm' );
     unLockScreen();
