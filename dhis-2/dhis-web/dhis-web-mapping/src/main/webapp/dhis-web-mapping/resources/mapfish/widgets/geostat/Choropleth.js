@@ -68,6 +68,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
     mapData: false,
     
+    stores: false,
+    
     initComponent: function() {
         this.legend = {};
         this.legend.type = map_legend_type_automatic;
@@ -226,7 +228,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('period_cb').showField();
                                 Ext.getCmp('startdate_df').hideField();
                                 Ext.getCmp('enddate_df').hideField();
-                                
                                 Ext.getCmp('periodtype_cb').setValue(this.mapView.periodTypeId);
                                 periodStore.setBaseParam('name', this.mapView.periodTypeId);
                                 periodStore.load();
@@ -364,7 +365,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function() {
                         if (this.mapView) {
                             Ext.getCmp('period_cb').setValue(this.mapView.periodId);
-                                
+
                             Ext.Ajax.request({
                                 url: path_mapping + 'setMapUserSettings' + type,
                                 method: 'POST',
@@ -454,8 +455,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         });
         
+        this.stores = {
+            mapViewStore: mapViewStore,
+            indicatorGroupStore: indicatorGroupStore,
+            indicatorStore: indicatorStore,
+            dataElementGroupStore: dataElementGroupStore,
+            dataElementStore: dataElementStore,
+            periodTypeStore: periodTypeStore,
+            periodStore: periodStore,
+            mapStore: mapStore,
+            predefinedMapLegendSetStore: predefinedMapLegendSetStore
+        }
+        
         this.items = [
-         
         {
             xtype: 'combo',
             id: 'mapview_cb',

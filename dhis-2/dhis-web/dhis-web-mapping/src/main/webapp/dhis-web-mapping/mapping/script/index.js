@@ -2446,7 +2446,7 @@ Ext.onReady( function() {
 						value: MAPSOURCE,
 						store: new Ext.data.SimpleStore({
 							fields: ['id', 'text'],
-							data: [[map_source_type_geojson, 'GeoJSON files'], [map_source_type_shapefile, 'Shapefiles'], [map_source_type_database, 'DHIS database']]
+							data: [[map_source_type_database, 'DHIS database'], [map_source_type_geojson, 'GeoJSON files'], [map_source_type_shapefile, 'Shapefiles']]
 						}),
 						listeners: {
 							'select': {
@@ -3255,7 +3255,7 @@ Ext.onReady( function() {
         legendDiv: 'polygonlegend',
         defaults: {width: 130},
         listeners: {
-            'expand': {
+            expand: {
                 fn: function() {
                     if (ACTIVEPANEL != thematicMap) {
                         ACTIVEPANEL = thematicMap;
@@ -3277,7 +3277,7 @@ Ext.onReady( function() {
         legendDiv: 'pointlegend',
         defaults: {width: 130},
         listeners: {
-            'expand': {
+            expand: {
                 fn: function() {
                     if (ACTIVEPANEL != thematicMap2) {
                         ACTIVEPANEL = thematicMap2;
