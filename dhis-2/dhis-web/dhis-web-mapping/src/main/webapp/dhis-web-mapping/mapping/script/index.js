@@ -3277,7 +3277,7 @@ Ext.onReady( function() {
         legendDiv: 'pointlegend',
         defaults: {width: 130},
         listeners: {
-            'expand': {
+            expand: {
                 fn: function() {
                     if (ACTIVEPANEL != thematicMap2) {
                         ACTIVEPANEL = thematicMap2;
