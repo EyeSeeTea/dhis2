@@ -380,7 +380,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             params: {id: mId},
                             scope: this,
                             success: function(r) {
-                                this.mapView = getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
+                                this.mapView = GLOBALS.util.getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
 								MAPSOURCE = this.mapView.mapSourceType;
                                 MAPDATETYPE = this.mapView.mapDateType;
                                 Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
@@ -873,7 +873,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         xtype: 'treepanel',
                                         id: 'orgunit_tp2',
                                         bodyStyle: 'padding:7px',
-                                        height: getMultiSelectHeight(),
+                                        height: GLOBALS.util.getMultiSelectHeight(),
                                         autoScroll: true,
                                         loader: new Ext.tree.TreeLoader({
                                             dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
@@ -1427,7 +1427,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 scope: this,
                 success: function(r) {
                     var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-                    EXPORTVALUES = getExportDataValueJSON(mapvalues);
+                    EXPORTVALUES = GLOBALS.util.getExportDataValueJSON(mapvalues);
                     
                     if (mapvalues.length == 0) {
                         Ext.message.msg(false, i18n_current_selection_no_data );
@@ -1507,7 +1507,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         scope: this,
                         success: function(r) {
                             var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-                            EXPORTVALUES = getExportDataValueJSON(mapvalues);
+                            EXPORTVALUES = GLOBALS.util.getExportDataValueJSON(mapvalues);
                             var mv = new Array();
                             var mour = new Array();
                             var nameColumn = this.mapData.nameColumn;
