@@ -32,6 +32,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataarchive.DataArchiveStore;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -51,6 +52,9 @@ public class JdbcDataArchiveStore
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
+    @Autowired
+    private StatementBuilder statementBuilder;
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -72,12 +76,7 @@ public class JdbcDataArchiveStore
         
         // Delete data from datavalue
         
-        sql =
-            "DELETE FROM datavalue AS d " +
-            "USING period as p " +
-            "WHERE d.periodid=p.periodid " +
-            "AND p.startdate>='" + getMediumDateString( startDate ) + "' " +
-            "AND p.enddate<='" + getMediumDateString( endDate ) + "';";
+        sql = statementBuilder.archiveData( getMediumDateString( startDate ), getMediumDateString( endDate ) );
     
         log.info( sql );        
         jdbcTemplate.execute( sql ); 
@@ -99,12 +98,7 @@ public class JdbcDataArchiveStore
         
         // Delete data from datavalue
         
-        sql =
-            "DELETE FROM datavaluearchive AS a " +
-            "USING period AS p " +
-            "WHERE a.periodid=p.periodid " +
-            "AND p.startdate>='" + getMediumDateString( startDate ) + "' " +
-            "AND p.enddate<='" + getMediumDateString( endDate ) + "';";
+        sql = statementBuilder.unArchiveData( getMediumDateString( startDate ), getMediumDateString( endDate ) );
 
         log.info( sql );        
         jdbcTemplate.execute( sql ); 
@@ -130,13 +124,7 @@ public class JdbcDataArchiveStore
     
     public void deleteRegularOverlappingData()
     {
-        String sql = 
-            "DELETE FROM datavalue AS d " +
-            "USING datavaluearchive AS a " +
-            "WHERE d.dataelementid=a.dataelementid " +
-            "AND d.periodid=a.periodid " +
-            "AND d.sourceid=a.sourceid " +
-            "AND d.categoryoptioncomboid=a.categoryoptioncomboid;";
+        String sql = statementBuilder.deleteRegularOverlappingData();
 
         log.info( sql );        
         jdbcTemplate.execute( sql );
@@ -144,13 +132,7 @@ public class JdbcDataArchiveStore
     
     public void deleteArchivedOverlappingData()
     {
-        String sql = 
-            "DELETE FROM datavaluearchive AS a " +
-            "USING datavalue AS d " +
-            "WHERE a.dataelementid=d.dataelementid " +
-            "AND a.periodid=d.periodid " +
-            "AND a.sourceid=d.sourceid " +
-            "AND a.categoryoptioncomboid=d.categoryoptioncomboid;";
+        String sql = statementBuilder.deleteArchivedOverlappingData();
 
         log.info( sql );        
         jdbcTemplate.execute( sql );
@@ -160,28 +142,14 @@ public class JdbcDataArchiveStore
     {
         // Delete overlaps from datavalue which are older than datavaluearchive
         
-        String sql = 
-            "DELETE FROM datavalue AS d " +
-            "USING datavaluearchive AS a " +
-            "WHERE d.dataelementid=a.dataelementid " +
-            "AND d.periodid=a.periodid " +
-            "AND d.sourceid=a.sourceid " +
-            "AND d.categoryoptioncomboid=a.categoryoptioncomboid " +
-            "AND d.lastupdated<a.lastupdated;";
+        String sql = statementBuilder.deleteOldestOverlappingDataValue();
 
         log.info( sql );        
         jdbcTemplate.execute( sql );
         
         // Delete overlaps from datavaluearchive which are older than datavalue
             
-        sql =            
-            "DELETE FROM datavaluearchive AS a " +
-            "USING datavalue AS d " +
-            "WHERE a.dataelementid=d.dataelementid " +
-            "AND a.periodid=d.periodid " +
-            "AND a.sourceid=d.sourceid " +
-            "AND a.categoryoptioncomboid=d.categoryoptioncomboid " +
-            "AND a.lastupdated<=d.lastupdated;";
+        sql =  statementBuilder.deleteOldestOverlappingArchiveData();          
 
         log.info( sql );        
         jdbcTemplate.execute( sql );
