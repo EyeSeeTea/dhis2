@@ -162,16 +162,16 @@ GLOBALS.util = {
         
         if (classify) {
             if (LABELS[organisationUnitAssignment]) {
-                deactivateLabels();
+                deactivateLabels(this);
             }
             else {
-                activateLabels();
+                activateLabels(this);
             }
             mapping.classify(false,true);
         }
         else {
             if (LABELS[organisationUnitAssignment]) {
-                activateLabels();
+                activateLabels(this);
             }
         }
     },
