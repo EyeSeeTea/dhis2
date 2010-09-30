@@ -70,6 +70,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     labels: false,
     
+    valueType: false,
+    
     stores: false,
     
     initComponent: function() {
@@ -77,8 +79,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.legend.type = map_legend_type_automatic;
         this.legend.method = 2;
         this.legend.classes = 5;
-        
         this.mapData = {};
+        this.valueType = map_value_type_indicator;
         
         mapViewStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMapViews' + type,
@@ -105,7 +107,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 									Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
                                     Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
                                     Ext.getCmp('mapview_cb').setValue(this.mapView.id);
-                                    VALUETYPE.polygon = this.mapView.mapValueType;
+                                    this.valueType = this.mapView.mapValueType;
                                     
                                     if (this.mapView.mapLegendType == map_legend_type_automatic) {
                                         this.legend.type = map_legend_type_automatic;
@@ -502,7 +504,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
                                 
                                 Ext.getCmp('mapvaluetype_cb').setValue(this.mapView.mapValueType);
-								VALUETYPE.polygon = this.mapView.mapValueType;
+								this.valueType = this.mapView.mapValueType;
                                 
                                 if (this.mapView.mapValueType == map_value_type_indicator) {
                                     Ext.getCmp('indicatorgroup_cb').showField();
@@ -597,14 +599,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('indicator_cb').showField();
 							Ext.getCmp('dataelementgroup_cb').hideField();
 							Ext.getCmp('dataelement_cb').hideField();
-							VALUETYPE.polygon = map_value_type_indicator;
+							this.valueType = map_value_type_indicator;
 						}
 						else if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_dataelement) {
 							Ext.getCmp('indicatorgroup_cb').hideField();
 							Ext.getCmp('indicator_cb').hideField();
 							Ext.getCmp('dataelementgroup_cb').showField();
 							Ext.getCmp('dataelement_cb').showField();
-							VALUETYPE.polygon = map_value_type_dataelement;
+							this.valueType = map_value_type_dataelement;
 						}
                         
                         this.classify(false, true);
@@ -1461,7 +1463,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     getIndicatorOrDataElementId: function() {
-        return VALUETYPE.polygon == map_value_type_indicator ?
+        return this.valueType == map_value_type_indicator ?
             Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
     },
     
@@ -1518,9 +1520,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
             FEATURE[thematicMap] = this.layer.features;
             
-            var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
+            var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
-            var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
+            var dataUrl = this.valueType == map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
             var params = {};
             if (MAPDATETYPE == map_date_type_fixed) {
@@ -1606,9 +1608,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
                     FEATURE[thematicMap] = this.layer.features;
             
-                    var indicatorOrDataElementId = VALUETYPE.polygon == map_value_type_indicator ?
+                    var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
-                    var dataUrl = VALUETYPE.polygon == map_value_type_indicator ?
+                    var dataUrl = this.valueType == map_value_type_indicator ?
                         'getIndicatorMapValuesByMap' : 'getDataMapValuesByMap';
                     var periodId = Ext.getCmp('period_cb').getValue();
                     var mapLayerPath = this.newUrl;

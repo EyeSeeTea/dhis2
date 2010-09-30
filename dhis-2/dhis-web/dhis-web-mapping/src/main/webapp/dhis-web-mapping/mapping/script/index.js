@@ -6,8 +6,6 @@ var BASECOORDINATE;
 var MAPSOURCE;
 /* Fixed periods or from-to dates */
 var MAPDATETYPE;
-/* Filename or level */
-var URL;
 /* Active mapview id parameter from URL */
 var PARAMETER;
 /* Current expanded accordion panel */
@@ -24,10 +22,6 @@ FEATURE[thematicMap] = {};
 FEATURE[thematicMap2] = {};
 /* Global chart for show/hide */
 var CHART;
-/* Current map value types */
-var VALUETYPE = {};
-VALUETYPE.polygon = map_value_type_indicator;
-VALUETYPE.point = map_value_type_indicator;
 /* Top level organisation unit */
 var TOPLEVELUNIT = {};
 /* Locate feature window */
@@ -3075,7 +3069,7 @@ Ext.onReady( function() {
                                                     GLOBALS.util.toggleFeatureLabels(choropleth);
                                                 }
                                                 else if (ACTIVEPANEL == organisationUnitAssignment) {
-                                                    GLOBALS.util.toggleFeatureLabelsAssignment(true, mapping);
+                                                    GLOBALS.util.toggleFeatureLabelsAssignment();
                                                 }
                                                 else {
                                                     Ext.message.msg(false, 'Please use <span class="x-msg-hl">Point layer</span> options');
@@ -3286,18 +3280,18 @@ Ext.onReady( function() {
         id: 'mapping',
         map: MAP,
         layer: choroplethLayer,
-        title: '<span class="panel-title">'+i18n_assign_organisation_units_to_map+'</span>',
+        title: '<span class="panel-title">' + i18n_assign_organisation_units_to_map + '</span>',
         url: 'init',
         featureSelection: false,
-        legendDiv: 'choroplethLegend',
+        legendDiv: 'polygonlegend',
         defaults: {width: 130},
         listeners: {
             expand: {
                 fn: function() {
                     ACTIVEPANEL = organisationUnitAssignment;
-                    choroplethLayer.setVisibility(false);
-                    proportionalSymbolLayer.setVisibility(false);
-                    mapping.classify(false, true);
+                    this.layer.setVisibility(false);
+                    proportionalSymbol.layer.setVisibility(false);
+                    this.classify(false, true);
                 }
             }
         }
@@ -3314,8 +3308,7 @@ Ext.onReady( function() {
 		tooltip: i18n_zoom_in,
 		handler:function() {
 			MAP.zoomIn();
-		},
-		scope: this
+		}
 	});
 	
 	var zoomOutButton = new Ext.Button({
@@ -3323,17 +3316,30 @@ Ext.onReady( function() {
 		tooltip: i18n_zoom_out,
 		handler:function() {
 			MAP.zoomOut();
-		},
-		scope: this
+		}
 	});
 	
 	var zoomMaxExtentButton = new Ext.Button({
 		iconCls: 'icon-zoommin',
 		tooltip: i18n_zoom_to_visible_extent,
 		handler: function() {
-			MAP.zoomToMaxExtent();
-		},
-		scope: this
+            if (ACTIVEPANEL == thematicMap) {
+                if (choropleth.layer.getDataExtent()) {
+                    MAP.zoomToExtent(choropleth.layer.getDataExtent());
+                }
+                else {
+                    Ext.message.msg(false, 'Vector layer is empty');
+                }
+            }
+            else if (ACTIVEPANEL == thematicMap2) {
+                if (proportionalSymbol.layer.getDataExtent()) {
+                    MAP.zoomToExtent(proportionalSymbol.layer.getDataExtent());
+                }
+                else {
+                    Ext.message.msg(false, 'Vector layer is empty');
+                }
+            }
+        }
 	});
 	
 	var favoritesButton = new Ext.Button({

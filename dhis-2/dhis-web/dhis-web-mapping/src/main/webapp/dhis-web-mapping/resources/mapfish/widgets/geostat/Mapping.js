@@ -51,23 +51,6 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
     loadMask: false,
 
     labelGenerator: null,
-
-    getGridPanelHeight: function() {
-        var h = screen.height;
-        
-        if (h <= 800) {
-            return 180;
-        }
-        else if (h <= 1050) {
-            return 480;
-        }
-        else if (h <= 1200) {
-            return 600;
-        }
-        else {
-            return 900;
-        }
-    },
      
     newUrl: false,
 	
@@ -175,7 +158,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 				autoExpandColumn: 'organisationUnitId',
 				enableHdMenu: true,
                 width: gridpanel_width,
-                height: this.getGridPanelHeight(),
+                height: GLOBALS.util.getGridPanelHeight(),
                 view: gridView,
                 style: 'left:0px',
                 bbar: new Ext.StatusBar({
@@ -405,8 +388,9 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
     applyValues: function(color, noCls) {
         var options = {};
         
-        mapping.indicator = options.indicator = 'value';
-        options.method = 1;
+        mapping.indicator = 'value';
+        options.indicator = mapping.indicator;
+        options.method = 2;
         options.numClasses = noCls;
         
         var colorA = new mapfish.ColorRgb();
@@ -431,16 +415,17 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         Ext.Ajax.request({
             url: path_mapping + 'getOrganisationUnitsAtLevel' + type,
             method: 'POST',
-            params: { level: level },
+            params: {level: level},
+            scope: this,
             success: function(r) {
-                FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
+                FEATURE[thematicMap] = this.layer.features;
                 var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
                 var nameColumn = this.mapData.nameColumn;
                 var mlp = this.mapData.mapLayerPath;
                 var count_match = 0;
                 var relations = '';
                 
-                for ( var i = 0; i < FEATURE[thematicMap].length; i++ ) {
+                for (var i = 0; i < FEATURE[thematicMap].length; i++) {
                     FEATURE[thematicMap][i].attributes.compareName = FEATURE[thematicMap][i].attributes[nameColumn].split(' ').join('').toLowerCase();
                 }
         
@@ -487,7 +472,6 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 
     classify: function(exception, position) {
         if (mapping.validateForm(exception)) {
-        
             MASK.msg = i18n_creating_map;
             MASK.show();
             
@@ -507,12 +491,8 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                     if (!position) {
                         MAP.zoomToExtent(this.layer.getDataExtent());
                     }
-            
+
                     FEATURE[thematicMap] = this.layer.features;
-                    
-                    if (LABELS[thematicMap]) {
-                        toggleFeatureLabelsPolygons(false, this.layer);
-                    }
         
                     var mlp = this.mapData.mapLayerPath;
                     var relations =	Ext.getCmp('grid_gp').getStore();
@@ -522,11 +502,13 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         
                     for (var i = 0; i < FEATURE[thematicMap].length; i++) {
                         FEATURE[thematicMap][i].attributes.value = 0;
+                        FEATURE[thematicMap][i].attributes.labelString = '';
 
                         for (var j = 0; j < relations.getTotalCount(); j++) {
-                            if (relations.getAt(j).data.featureId == FEATURE[thematicMap][i].attributes[nameColumn]) {
+                            var name = FEATURE[thematicMap][i].attributes[nameColumn];
+                            if (relations.getAt(j).data.featureId == name) {
                                 FEATURE[thematicMap][i].attributes.value = 1;
-                                FEATURE[thematicMap][i].attributes.labelString = FEATURE[thematicMap][i].attributes[nameColumn];
+                                FEATURE[thematicMap][i].attributes.labelString = name;
                                 noAssigned++;
                                 noCls = noCls < 2 ? 2 : noCls;
                                 break;
