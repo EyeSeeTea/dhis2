@@ -68,6 +68,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
     mapData: false,
     
+    labels: false,
+    
     stores: false,
     
     initComponent: function() {

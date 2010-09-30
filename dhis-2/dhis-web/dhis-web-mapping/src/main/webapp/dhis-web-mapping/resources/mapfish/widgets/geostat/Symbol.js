@@ -67,6 +67,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     mapView: false,
 
     mapData: false,
+    
+    labels: false,
 
     initComponent: function() {
         this.legend = {};

@@ -1,5 +1,4 @@
 var GLOBALS = {};
-
 GLOBALS.util = {
     
     /* Detect mapview parameter in URL */
@@ -66,7 +65,7 @@ GLOBALS.util = {
         return tmp.indexOf(dec_sep) > -1 ? tmp.length-tmp.indexOf(dec_sep) - 1 : 0;
     },
 
-    /* Toggle feature labels */
+    /* Feature labels */
     labels: {    
         getActivatedOpenLayersStyleMap: function() {
             return new OpenLayers.StyleMap({
@@ -108,46 +107,24 @@ GLOBALS.util = {
         }
     },
 
-    toggleFeatureLabelsPolygons: function(layer) {    
+    toggleFeatureLabels: function(widget) {
         function activateLabels(scope) {
-            layer.styleMap = scope.labels.getActivatedOpenLayersStyleMap();
-            LABELS[thematicMap] = true;
+            widget.layer.styleMap = scope.labels.getActivatedOpenLayersStyleMap();
+            widget.labels = true;
         }
         function deactivateLabels(scope) {
-            layer.styleMap = scope.labels.getDeactivatedOpenLayersStyleMap();
-            LABELS[thematicMap] = false;
+            widget.layer.styleMap = scope.labels.getDeactivatedOpenLayersStyleMap();
+            widget.labels = false;
         }
         
-        if (LABELS[thematicMap]) {
+        if (widget.labels) {
             deactivateLabels(this);
         }
         else {
             activateLabels(this);
         }
         
-        FEATURE[thematicMap] = layer.features;
-        choropleth.applyValues();
-    },
-
-    toggleFeatureLabelsPoints: function(layer) {        
-        function activateLabels(scope) {
-            layer.styleMap = scope.labels.getActivatedOpenLayersStyleMap();
-            LABELS[thematicMap2] = true;
-        }
-        function deactivateLabels(scope) {
-            layer.styleMap = scope.labels.getDeactivatedOpenLayersStyleMap();
-            LABELS[thematicMap2] = false;
-        }
-        
-        if (LABELS[thematicMap2]) {
-            deactivateLabels(this);
-        }
-        else {
-            activateLabels(this);
-        }
-        
-        FEATURE[thematicMap2] = layer.features;
-        proportionalSymbol.applyValues();
+        widget.applyValues();
     },
 
     toggleFeatureLabelsAssignment: function(classify, layer) {

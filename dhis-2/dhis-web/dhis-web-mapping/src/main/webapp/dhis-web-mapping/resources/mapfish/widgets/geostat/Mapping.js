@@ -74,6 +74,8 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 	relation: false,
     
     mapData: false,
+    
+    labels: false,
 	
     initComponent : function() {
         
@@ -299,20 +301,20 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 									url: path_mapping + 'getMapOrganisationUnitRelationByFeatureId' + type,
 									method: 'POST',
 									params: {featureId:mapping.relation, mapLayerPath:mlp},
-									success: function( responseObject ) {
-										var mour = Ext.util.JSON.decode( responseObject.responseText ).mapOrganisationUnitRelation[0];
+									success: function(r) {
+										var mour = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelation[0];
 										if (mour.featureId == '') {
 											Ext.Ajax.request({
 												url: path_mapping + 'addOrUpdateMapOrganisationUnitRelation' + type,
 												method: 'POST',
-												params: { mapLayerPath:mlp, organisationUnitId:id, featureId:mapping.relation },
-												success: function( responseObject ) {
+												params: {mapLayerPath:mlp, organisationUnitId:id, featureId:mapping.relation},
+												success: function() {
 													Ext.message.msg(true, '<span class="x-msg-hl">' + mapping.relation + '</span> (' + i18n_in_the_map + ') ' + i18n_assigned_to + ' <span class="x-msg-hl">' + name + '</span> (' + i18n_database + ').');
 													Ext.getCmp('grid_gp').getStore().load();
 													popup.hide();
 													mapping.relation = false;
 													Ext.getCmp('filter_tf').setValue('');
-													mapping.classify(true);
+													mapping.classify(true, true);
 												},
 												failure: function() {
 													alert( 'Error: addOrUpdateMapOrganisationUnitRelation' );
@@ -519,7 +521,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                     var noAssigned = 0;
         
                     for (var i = 0; i < FEATURE[thematicMap].length; i++) {
-                        FEATURE[thematicMap][i].attributes['value'] = 0;
+                        FEATURE[thematicMap][i].attributes.value = 0;
 
                         for (var j = 0; j < relations.getTotalCount(); j++) {
                             if (relations.getAt(j).data.featureId == FEATURE[thematicMap][i].attributes[nameColumn]) {
