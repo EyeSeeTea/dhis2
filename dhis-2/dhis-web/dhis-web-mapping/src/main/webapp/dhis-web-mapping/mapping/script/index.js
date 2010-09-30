@@ -54,6 +54,7 @@ Ext.onReady( function() {
 
 	MAP = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
 	MASK = new Ext.LoadMask(Ext.getBody(),{msg:i18n_loading,msgCls:'x-mask-loading2'});
+    PARAMETER = GLOBALS.util.getUrlParam('view') ? GLOBALS.util.getUrlParam('view') : 0;
     
 	/* Base layers */
 	function addBaseLayersToMap() {
@@ -90,14 +91,8 @@ Ext.onReady( function() {
 			}
         });
     }
-    
     addBaseLayersToMap();
     
-    /* Get map view parameter and apply to global variable */
-    if (getUrlParam('view')) {
-        PARAMETER = getUrlParam('view');
-    }
-	
 	Ext.Ajax.request({
 		url: path_mapping + 'getBaseCoordinate' + type,
 		method: 'GET',
@@ -108,7 +103,7 @@ Ext.onReady( function() {
 			Ext.Ajax.request({
 				url: path_mapping + 'getMapView' + type,
 				method: 'GET',
-				params: { id: PARAMETER || 0 },
+				params: {id: PARAMETER},
 				success: function(r) {
 					var mst = Ext.util.JSON.decode(r.responseText).mapView[0].mapSourceType;
                     var mdt = Ext.util.JSON.decode(r.responseText).mapView[0].mapDateType;
@@ -125,7 +120,7 @@ Ext.onReady( function() {
 							Ext.Ajax.request({
 								url: path_mapping + 'setMapUserSettings' + type,
 								method: 'POST',
-								params: { mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE },
+								params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
 								success: function() {
 			
 	/* Section: mapview */
@@ -215,7 +210,7 @@ Ext.onReady( function() {
                         }
                     }
 					
-					if (validateInputNameLength(vn) == false) {
+					if (GLOBALS.util.validateInputNameLength(vn) == false) {
 						Ext.message.msg(false, i18n_map_view_name_cannot_be_longer_than_25_characters );
 						return;
 					}
@@ -491,7 +486,7 @@ Ext.onReady( function() {
                         lcb = Ext.getCmp('maplegendtype_cb').getValue() == map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb').getValue() ? true : false;
                     }
                     else if (ACTIVEPANEL == thematicMap2) {
-                        Ext.message.msg(false,'Please use the <span class="x-msg-hl">polygon layer</span> for printing');
+                        Ext.message.msg(false,'Please use <span class="x-msg-hl">polygon layer</span> for printing');
                         return;
                     }
                     else {
@@ -532,7 +527,7 @@ Ext.onReady( function() {
                             document.getElementById('includeLegendsField').value = includeLegend;  
                             document.getElementById('periodField').value = period;  
                             document.getElementById('indicatorField').value = vcb; 
-                            document.getElementById('legendsField').value = getLegendsJSON();
+                            document.getElementById('legendsField').value = GLOBALS.util.getLegendsJSON();
 
                             exportForm.submit();
                         }
@@ -625,7 +620,7 @@ Ext.onReady( function() {
                         document.getElementById('includeValuesField').value = includeValues; 
                         document.getElementById('periodField').value = period;  
                         document.getElementById('indicatorField').value = indicator;   
-                        document.getElementById('legendsField').value = getLegendsJSON();
+                        document.getElementById('legendsField').value = GLOBALS.util.getLegendsJSON();
                         document.getElementById('dataValuesField').value = EXPORTVALUES;
 
                         exportForm.submit();
@@ -678,7 +673,7 @@ Ext.onReady( function() {
                         return;
                     }
                     
-                    if (!validateInputNameLength(mln)) {
+                    if (!GLOBALS.util.validateInputNameLength(mln)) {
                         Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
                         return;
                     }
@@ -768,7 +763,7 @@ Ext.onReady( function() {
             { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
             new Ext.form.TextField({id:'predefinedmaplegendsetname_tf',isFormField:true,hideLabel:true,emptyText:emptytext,width:combo_width}),
             { html: '<div class="window-field-label">'+i18n_legends+'</div>' },
-			new Ext.ux.Multiselect({id:'predefinednewmaplegend_ms',isFormField:true,hideLabel:true,dataFields:['id','name','startValue','endValue','color','displayString'],valueField:'id',displayField:'displayString',width:multiselect_width,height:getMultiSelectHeight(),store:predefinedMapLegendStore}),
+			new Ext.ux.Multiselect({id:'predefinednewmaplegend_ms',isFormField:true,hideLabel:true,dataFields:['id','name','startValue','endValue','color','displayString'],valueField:'id',displayField:'displayString',width:multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:predefinedMapLegendStore}),
             {
                 xtype: 'button',
                 id: 'newpredefinedmaplegendset_b',
@@ -934,7 +929,7 @@ Ext.onReady( function() {
                 }					
             }),
             { html: '<div class="window-field-label">'+i18n_indicator+'</div>' },
-			new Ext.ux.Multiselect({id:'predefinedmaplegendsetindicator_ms',isFormField:true,hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:multiselect_width,height:getMultiSelectHeight(),store:predefinedMapLegendSetIndicatorStore}),
+			new Ext.ux.Multiselect({id:'predefinedmaplegendsetindicator_ms',isFormField:true,hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:predefinedMapLegendSetIndicatorStore}),
             {
                 xtype: 'button',
                 id: 'assignpredefinedmaplegendsetindicator_b',
@@ -1036,7 +1031,7 @@ Ext.onReady( function() {
                 }					
             }),
             { html: '<div class="window-field-label">'+i18n_dataelement+'</div>' },
-			new Ext.ux.Multiselect({id:'predefinedmaplegendsetdataelement_ms',isFormField:true,hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:multiselect_width,height:getMultiSelectHeight(),store:predefinedMapLegendSetDataElementStore}),
+			new Ext.ux.Multiselect({id:'predefinedmaplegendsetdataelement_ms',isFormField:true,hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:predefinedMapLegendSetDataElementStore}),
             {
                 xtype: 'button',
                 id: 'assignpredefinedmaplegendsetdataelement_b',
@@ -1112,16 +1107,16 @@ Ext.onReady( function() {
 							w.setHeight(151);
 						}
 						else if (tab.id == 'predefinedmaplegendset2') {
-							w.setHeight(getMultiSelectHeight() + 180);
+							w.setHeight(GLOBALS.util.getMultiSelectHeight() + 180);
 						}
 						else if (tab.id == 'predefinedmaplegendset3') {
 							w.setHeight(151);
 						}
                         else if (tab.id == 'predefinedmaplegendset4') {
-                            w.setHeight(getMultiSelectHeight() + 180);
+                            w.setHeight(GLOBALS.util.getMultiSelectHeight() + 180);
                         }
                         else if (tab.id == 'predefinedmaplegendset5') {
-                            w.setHeight(getMultiSelectHeight() + 180);
+                            w.setHeight(GLOBALS.util.getMultiSelectHeight() + 180);
                         }
 					}
 				},
@@ -1325,7 +1320,7 @@ Ext.onReady( function() {
 							var keys = [];
 							var data = [];
 
-							var nameList = getKeys(file.features[0].properties);
+							var nameList = GLOBALS.util.getKeys(file.features[0].properties);
 							for (var i = 0; i < nameList.length; i++) {
 								data.push(new Array(nameList[i]));
 							}
@@ -1473,7 +1468,7 @@ Ext.onReady( function() {
 								var file = Ext.util.JSON.decode(r.responseText);
 								var keys = [];
 
-								var nameList = getKeys(file.features[0].properties);
+								var nameList = GLOBALS.util.getKeys(file.features[0].properties);
 								for (var i = 0; i < nameList.length; i++) {
 									data.push(new Array(nameList[i]));
 								}
@@ -1527,7 +1522,7 @@ Ext.onReady( function() {
 						return;
                     }
                     
-                    if (validateInputNameLength(nn) == false) {
+                    if (GLOBALS.util.validateInputNameLength(nn) == false) {
                         Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
                         return;
                     }
@@ -1627,7 +1622,7 @@ Ext.onReady( function() {
                 return;
             }
             
-            if (validateInputNameLength(en) == false) {
+            if (GLOBALS.util.validateInputNameLength(en) == false) {
                 Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
                 return;
             }
@@ -1750,7 +1745,7 @@ Ext.onReady( function() {
 								var keys = [];
 								var data = [];
 
-								var nameList = getKeys(file.features[0].properties);
+								var nameList = GLOBALS.util.getKeys(file.features[0].properties);
 								for (var i = 0; i < nameList.length; i++) {
 									data.push(new Array(nameList[i]));
 								}
@@ -1769,7 +1764,7 @@ Ext.onReady( function() {
 								var keys = [];
 								var data = [];
 
-								var nameList = getKeys(file.features[0].properties);
+								var nameList = GLOBALS.util.getKeys(file.features[0].properties);
 								for (var i = 0; i < nameList.length; i++) {
 									data.push(new Array(nameList[i]));
 								}
@@ -2098,7 +2093,7 @@ Ext.onReady( function() {
 						return;
 					}
 					
-					if (validateInputNameLength(mln) == false) {
+					if (GLOBALS.util.validateInputNameLength(mln) == false) {
 						Ext.message.msg(false, i18n_overlay_name_cannot_be_longer_than_25_characters );
 						return;
 					}
@@ -2309,7 +2304,7 @@ Ext.onReady( function() {
 						return;
 					}
 					
-					if (validateInputNameLength(mlbn) == false) {
+					if (GLOBALS.util.validateInputNameLength(mlbn) == false) {
 						Ext.message.msg(false, i18n_baselayer_name_cannot_be_longer_than_25_characters );
 						return;
 					}
@@ -2963,7 +2958,7 @@ Ext.onReady( function() {
             layout: 'fit',
             defaults: {layout: 'fit', bodyStyle:'padding:8px; border:0px'},
             width: 250,
-            height: getMultiSelectHeight() + 145,
+            height: GLOBALS.util.getMultiSelectHeight() + 145,
             items: [
                 {
                     xtype: 'panel',
@@ -2999,7 +2994,7 @@ Ext.onReady( function() {
                                 {
                                     xtype: 'grid',
                                     id: 'featuregrid_gp',
-                                    height: getMultiSelectHeight(),
+                                    height: GLOBALS.util.getMultiSelectHeight(),
                                     store: featureStore,
                                     cm: new Ext.grid.ColumnModel({
                                         columns: [{id: 'name', header: 'Features', dataIndex: 'name', width: 250}]
@@ -3087,14 +3082,14 @@ Ext.onReady( function() {
                                         if (layer.features.length > 0) {
                                             if (layer.name == 'Polygon layer') {
                                                 if (ACTIVEPANEL == thematicMap) {
-                                                    toggleFeatureLabelsPolygons(layer);
+                                                    GLOBALS.util.toggleFeatureLabelsPolygons(layer);
                                                 }
                                                 else {
-                                                    toggleFeatureLabelsAssignment(true, layer);
+                                                    GLOBALS.util.toggleFeatureLabelsAssignment(true, layer);
                                                 }
                                             }
                                             else if (layer.name == 'Point layer') {
-                                                toggleFeatureLabelsPoints(layer);
+                                                GLOBALS.util.toggleFeatureLabelsPoints(layer);
                                             }
                                         }
                                         else {
@@ -3858,7 +3853,7 @@ Ext.onReady( function() {
                     // valueField: 'id',
                     // displayField: 'name',
                     // width: multiselect_width,
-                    // height: getMultiSelectHeight(),
+                    // height: GLOBALS.util.getMultiSelectHeight(),
                     // store: periodTimeseriesStore
                 // },
                 // { html: '<div class="window-field-label">Window width</div>' },

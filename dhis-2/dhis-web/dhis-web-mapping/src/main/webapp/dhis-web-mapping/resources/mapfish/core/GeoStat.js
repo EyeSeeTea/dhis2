@@ -244,7 +244,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         var maxDec = 0;
         
         for (var i = 0; i < bounds.length; i++) {
-            var dec = getNumberOfDecimals(bounds[i].toString(), ".");
+            var dec = GLOBALS.util.getNumberOfDecimals(bounds[i].toString(), ".");
             maxDec = dec > maxDec ? dec : maxDec;
         }
         
