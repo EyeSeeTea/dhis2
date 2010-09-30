@@ -6,11 +6,6 @@ var BASECOORDINATE;
 var MAPSOURCE;
 /* Fixed periods or from-to dates */
 var MAPDATETYPE;
-/* A map object */
-var MAPDATA = {};
-// MAPDATA[thematicMap] = {};
-// MAPDATA[thematicMap2] = {};
-MAPDATA[organisationUnitAssignment] = {};
 /* Filename or level */
 var URL;
 /* Active mapview id parameter from URL */
@@ -19,11 +14,6 @@ var PARAMETER;
 var ACTIVEPANEL;
 /* Mask */
 var MASK;
-/* Labels activated (boolean) */
-var LABELS = {};
-LABELS[thematicMap] = false;
-LABELS[thematicMap2] = false;
-LABELS[organisationUnitAssignment] = false;
 /* Legend colors for export */
 var COLORINTERPOLATION;
 /* Export values */
@@ -3082,14 +3072,22 @@ Ext.onReady( function() {
                                         if (layer.features.length > 0) {
                                             if (layer.name == 'Polygon layer') {
                                                 if (ACTIVEPANEL == thematicMap) {
-                                                    GLOBALS.util.toggleFeatureLabelsPolygons(layer);
+                                                    GLOBALS.util.toggleFeatureLabels(choropleth);
+                                                }
+                                                else if (ACTIVEPANEL == organisationUnitAssignment) {
+                                                    GLOBALS.util.toggleFeatureLabelsAssignment(true, mapping);
                                                 }
                                                 else {
-                                                    GLOBALS.util.toggleFeatureLabelsAssignment(true, layer);
+                                                    Ext.message.msg(false, 'Please use <span class="x-msg-hl">Point layer</span> options');
                                                 }
                                             }
                                             else if (layer.name == 'Point layer') {
-                                                GLOBALS.util.toggleFeatureLabelsPoints(layer);
+                                                if (ACTIVEPANEL == thematicMap2) {
+                                                    GLOBALS.util.toggleFeatureLabels(proportionalSymbol);
+                                                }
+                                                else {
+                                                    Ext.message.msg(false, 'Please use <span class="x-msg-hl">Polygon layer</span> options');
+                                                }
                                             }
                                         }
                                         else {
@@ -3971,7 +3969,7 @@ function onHoverSelectPolygon(feature) {
     FEATURE[thematicMap] = feature;
 
     if (ACTIVEPANEL == organisationUnitAssignment) {
-        Ext.getCmp('featureinfo_l').setText('<span style="color:black">' + FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn] + '</span>', false);
+        Ext.getCmp('featureinfo_l').setText('<span style="color:black">' + FEATURE[thematicMap].attributes[mapping.mapData.nameColumn] + '</span>', false);
     }
     else {
         Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap].attributes[choropleth.mapData.nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap].attributes.value + '</div>', false);
@@ -4014,7 +4012,7 @@ function onClickSelectPolygon(feature) {
 			height: 65,
 			layout: 'fit',
 			plain: true,
-			html: '<div class="window-orgunit-text">' + FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn] + '</div>',
+			html: '<div class="window-orgunit-text">' + FEATURE[thematicMap].attributes[mapping.mapData.nameColumn] + '</div>',
 			x: x,
 			y: y,
 			listeners: {
@@ -4028,7 +4026,7 @@ function onClickSelectPolygon(feature) {
 		
 		popup = feature_popup;		
 		feature_popup.show();
-		mapping.relation = FEATURE[thematicMap].attributes[MAPDATA[organisationUnitAssignment].nameColumn];
+		mapping.relation = FEATURE[thematicMap].attributes[mapping.mapData.nameColumn];
     }
 	//else {
         // featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
