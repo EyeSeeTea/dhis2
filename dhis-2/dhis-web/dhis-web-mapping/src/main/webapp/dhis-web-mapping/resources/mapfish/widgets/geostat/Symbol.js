@@ -69,6 +69,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     mapData: false,
     
     labels: false,
+    
+    valueType: false,
+    
+    stores: false,
 
     initComponent: function() {
         this.legend = {};
@@ -78,7 +82,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         
         this.mapData = {};
     
-        mapViewStore2 = new Ext.data.JsonStore({
+        mapViewStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMapViews' + type,
             root: 'mapViews',
             fields: ['id', 'name'],
@@ -86,7 +90,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             autoLoad: true
         });
     
-        indicatorGroupStore2 = new Ext.data.JsonStore({
+        indicatorGroupStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllIndicatorGroups' + type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
@@ -95,7 +99,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             autoLoad: true
         });
         
-        indicatorStore2 = new Ext.data.JsonStore({
+        indicatorStore = new Ext.data.JsonStore({
             url: path_mapping + 'getIndicatorsByIndicatorGroup' + type,
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
@@ -106,7 +110,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'load': {
                     scope: this,
                     fn: function() {
-                        indicatorStore2.each(
+                        indicatorStore.each(
                             function fn(record) {
                                 var name = record.get('name');
                                 name = name.replace('&lt;', '<').replace('&gt;', '>');
@@ -126,8 +130,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('enddate_df2').hideField();
                                 
                                 Ext.getCmp('periodtype_cb2').setValue(this.mapView.periodTypeId);
-                                periodStore2.setBaseParam('name', this.mapView.periodTypeId);
-                                periodStore2.load();
+                                periodStore.setBaseParam('name', this.mapView.periodTypeId);
+                                periodStore.load();
                             }
                             else if (this.mapView.mapDateType == map_date_type_start_end) {
                                 Ext.getCmp('periodtype_cb2').hideField();
@@ -166,7 +170,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         });
 		
-		dataElementGroupStore2 = new Ext.data.JsonStore({
+		dataElementGroupStore = new Ext.data.JsonStore({
 			url: path_mapping + 'getAllDataElementGroups' + type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
@@ -174,7 +178,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             autoLoad: true
         });
 		
-		dataElementStore2 = new Ext.data.JsonStore({
+		dataElementStore = new Ext.data.JsonStore({
             url: path_mapping + 'getDataElementsByDataElementGroup' + type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
@@ -184,7 +188,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'load': {
                     scope: this,
                     fn: function() {
-                        dataElementStore2.each(
+                        dataElementStore.each(
                             function fn(record) {
                                 var name = record.get('name');
                                 name = name.replace('&lt;', '<').replace('&gt;', '>');
@@ -204,8 +208,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('enddate_df2').hideField();
                                 
                                 Ext.getCmp('periodtype_cb2').setValue(this.mapView.periodTypeId);
-                                periodStore2.setBaseParam('name', this.mapView.periodTypeId);
-                                periodStore2.load();
+                                periodStore.setBaseParam('name', this.mapView.periodTypeId);
+                                periodStore.load();
                             }
                             else if (this.mapView.mapDateType == map_date_type_start_end) {
                                 Ext.getCmp('periodtype_cb2').hideField();
@@ -244,14 +248,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         });
         
-        periodTypeStore2 = new Ext.data.JsonStore({
+        periodTypeStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllPeriodTypes' + type,
             root: 'periodTypes',
             fields: ['name'],
             autoLoad: true
         });
             
-        periodStore2 = new Ext.data.JsonStore({
+        periodStore = new Ext.data.JsonStore({
             url: path_mapping + 'getPeriodsByPeriodType' + type,
             root: 'periods',
             fields: ['id', 'name'],
@@ -282,7 +286,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         });
             
-        mapStore2 = new Ext.data.JsonStore({
+        mapStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMaps' + type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
@@ -321,7 +325,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         });
 		
-		predefinedMapLegendSetStore2 = new Ext.data.JsonStore({
+		predefinedMapLegendSetStore = new Ext.data.JsonStore({
             url: path_mapping + 'getMapLegendSetsByType' + type,
             baseParams: {type: map_legend_type_predefined},
             root: 'mapLegendSets',
@@ -352,6 +356,18 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         });
         
+        this.stores = {
+            mapViewStore: mapViewStore,
+            indicatorGroupStore: indicatorGroupStore,
+            indicatorStore: indicatorStore,
+            dataElementGroupStore: dataElementGroupStore,
+            dataElementStore: dataElementStore,
+            periodTypeStore: periodTypeStore,
+            periodStore: periodStore,
+            mapStore: mapStore,
+            predefinedMapLegendSetStore: predefinedMapLegendSetStore
+        }
+        
         this.items = [
          
         {
@@ -369,7 +385,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
 			labelSeparator: labelseparator,
             width: combo_width,
-            store: mapViewStore2,
+            store: choropleth.stores.mapViewStore,
             listeners: {
                 'select': {
                     scope: this,
@@ -388,7 +404,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
                                 
                                 Ext.getCmp('mapvaluetype_cb2').setValue(this.mapView.mapValueType);
-								VALUETYPE.point = this.mapView.mapValueType;
+								this.valueType = this.mapView.mapValueType;
                                 
                                 if (this.mapView.mapValueType == map_value_type_indicator) {
                                     Ext.getCmp('indicatorgroup_cb2').showField();
@@ -397,8 +413,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     Ext.getCmp('dataelement_cb2').hideField();
                                     
                                     Ext.getCmp('indicatorgroup_cb2').setValue(this.mapView.indicatorGroupId);
-                                    indicatorStore2.setBaseParam('indicatorGroupId', this.mapView.indicatorGroupId);
-                                    indicatorStore2.load();
+                                    indicatorStore.setBaseParam('indicatorGroupId', this.mapView.indicatorGroupId);
+                                    indicatorStore.load();
                                 }
                                 else if (this.mapView.mapValueType == map_value_type_dataelement) {
                                     Ext.getCmp('indicatorgroup_cb2').hideField();
@@ -407,8 +423,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     Ext.getCmp('dataelement_cb2').showField();
                                     
                                     Ext.getCmp('dataelementgroup_cb2').setValue(this.mapView.dataElementGroupId);
-                                    dataElementStore2.setBaseParam('dataElementGroupId', this.mapView.dataElementGroupId);
-                                    dataElementStore2.load();
+                                    dataElementStore.setBaseParam('dataElementGroupId', this.mapView.dataElementGroupId);
+                                    dataElementStore.load();
                                 }                                        
 								
 								if (this.mapView.mapLegendType == map_legend_type_automatic) {
@@ -483,14 +499,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 							Ext.getCmp('indicator_cb2').showField();
 							Ext.getCmp('dataelementgroup_cb2').hideField();
 							Ext.getCmp('dataelement_cb2').hideField();
-							VALUETYPE.point = map_value_type_indicator;
+							this.valueType = map_value_type_indicator;
 						}
 						else if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_dataelement) {
 							Ext.getCmp('indicatorgroup_cb2').hideField();
 							Ext.getCmp('indicator_cb2').hideField();
 							Ext.getCmp('dataelementgroup_cb2').showField();
 							Ext.getCmp('dataelement_cb2').showField();
-							VALUETYPE.point = map_value_type_dataelement;
+							this.valueType = map_value_type_dataelement;
 						}
                         
                         this.classify(false, true);
@@ -514,7 +530,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: indicatorGroupStore2,
+            store: indicatorGroupStore,
             listeners: {
                 'select': {
                     fn: function() {
@@ -523,8 +539,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         }
 						
 						Ext.getCmp('indicator_cb2').clearValue();
-						indicatorStore2.setBaseParam('indicatorGroupId', this.getValue());
-                        indicatorStore2.load();
+						indicatorStore.setBaseParam('indicatorGroupId', this.getValue());
+                        indicatorStore.load();
                     }
                 }
             }
@@ -545,7 +561,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: indicatorStore2,
+            store: indicatorStore,
             listeners: {
                 'select': {
                     scope: this,
@@ -619,7 +635,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: dataElementGroupStore2,
+            store: dataElementGroupStore,
             listeners: {
                 'select': {
                     fn: function() {
@@ -627,8 +643,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('mapview_cb2').clearValue();
                         }
                         Ext.getCmp('dataelement_cb2').clearValue();
-						dataElementStore2.setBaseParam('dataElementGroupId', this.getValue());
-                        dataElementStore2.load();
+						dataElementStore.setBaseParam('dataElementGroupId', this.getValue());
+                        dataElementStore.load();
                     }
                 }
             }
@@ -649,7 +665,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: dataElementStore2,
+            store: dataElementStore,
             listeners: {
                 'select': {
                     scope: this,
@@ -723,7 +739,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: periodTypeStore2,
+            store: periodTypeStore,
             listeners: {
                 'select': {
                     fn: function() {
@@ -754,7 +770,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: periodStore2,
+            store: periodStore,
             listeners: {
                 'select': {
                     scope: this,
@@ -823,7 +839,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			labelSeparator: labelseparator,
             selectOnFocus: true,
             width: combo_width,
-            store: mapStore2,
+            store: mapStore,
             listeners: {
                 'select': {
                     scope: this,
@@ -1045,7 +1061,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             width: combo_width,
 			hidden: true,
-            store: predefinedMapLegendSetStore2,
+            store: predefinedMapLegendSetStore,
             listeners: {
                 'select': {
                     scope: this,
@@ -1347,7 +1363,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     getIndicatorOrDataElementId: function() {
-        return VALUETYPE.point == map_value_type_indicator ?
+        return this.valueType == map_value_type_indicator ?
             Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
     },
     
@@ -1404,9 +1420,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             
             FEATURE[thematicMap2] = this.layer.features;
             
-            var indicatorOrDataElementId = VALUETYPE.point == map_value_type_indicator ?
+            var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
-            var dataUrl = VALUETYPE.point == map_value_type_indicator ?
+            var dataUrl = this.valueType == map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
             var params = {};
             if (MAPDATETYPE == map_date_type_fixed) {
@@ -1492,9 +1508,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             
                     FEATURE[thematicMap2] = this.layer.features;
                     
-                    var indicatorOrDataElementId = VALUETYPE.point == map_value_type_indicator ?
+                    var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
-                    var dataUrl = VALUETYPE.point == map_value_type_indicator ?
+                    var dataUrl = this.valueType == map_value_type_indicator ?
                         'getIndicatorMapValuesByMap' : 'getDataMapValuesByMap';
                     var periodId = Ext.getCmp('period_cb2').getValue();
                     var mapLayerPath = this.newUrl;

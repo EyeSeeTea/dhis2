@@ -1,4 +1,5 @@
 var GLOBALS = {};
+
 GLOBALS.util = {
     
     /* Detect mapview parameter in URL */
@@ -41,6 +42,13 @@ GLOBALS.util = {
         return h <= 800 ? 220 :
             h <= 1050 ? 310 :
                 h <= 1200 ? 470 : 900;
+    },
+
+    getGridPanelHeight: function() {
+        var h = screen.height;
+        return h <= 800 ? 180 :
+            h <= 1050 ? 480 :
+                h <= 1200 ? 600 : 900;
     },
 
     /* Make map view numbers numeric */
@@ -127,30 +135,24 @@ GLOBALS.util = {
         widget.applyValues();
     },
 
-    toggleFeatureLabelsAssignment: function(classify, layer) {
+    toggleFeatureLabelsAssignment: function() {
         function activateLabels(scope) {
-            layer.styleMap = scope.labels.getActivatedOpenLayersStyleMap();
-            LABELS[organisationUnitAssignment] = true;
+            mapping.layer.styleMap = scope.labels.getActivatedOpenLayersStyleMap();
+            mapping.labels = true;
         }
         function deactivateLabels(scope) {
-            layer.styleMap = scope.labels.getDeactivatedOpenLayersStyleMap();
-            LABELS[organisationUnitAssignment] = false;
+            mapping.layer.styleMap = scope.labels.getDeactivatedOpenLayersStyleMap();
+            mapping.labels = false;
         }
         
-        if (classify) {
-            if (LABELS[organisationUnitAssignment]) {
-                deactivateLabels(this);
-            }
-            else {
-                activateLabels(this);
-            }
-            mapping.classify(false,true);
+        if (mapping.labels) {
+            deactivateLabels(this);
         }
         else {
-            if (LABELS[organisationUnitAssignment]) {
-                activateLabels(this);
-            }
+            activateLabels(this);
         }
+        
+        mapping.classify(false, true);
     },
 
     /* Sort values */
