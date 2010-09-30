@@ -103,7 +103,7 @@ Ext.onReady( function() {
 			Ext.Ajax.request({
 				url: path_mapping + 'getMapView' + type,
 				method: 'GET',
-				params: {id: PARAMETER},
+				params: {id: PARAMETER || 0},
 				success: function(r) {
 					var mst = Ext.util.JSON.decode(r.responseText).mapView[0].mapSourceType;
                     var mdt = Ext.util.JSON.decode(r.responseText).mapView[0].mapDateType;
@@ -3963,6 +3963,8 @@ Ext.onReady( function() {
     // defaults: { bodyStyle: 'padding:8px; border:0px' },
     // items: CHART
 // });
+
+var popup;
 
 /* Section: select features polygon */
 function onHoverSelectPolygon(feature) {

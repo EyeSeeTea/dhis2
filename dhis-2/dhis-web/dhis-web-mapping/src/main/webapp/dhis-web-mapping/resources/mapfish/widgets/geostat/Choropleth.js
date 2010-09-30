@@ -1501,10 +1501,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.mapData.zoom = 7;
             
             if (!position) {
-                if (this.mapData.zoom != MAP.getZoom()) {
-                    MAP.zoomTo(this.mapData.zoom);
-                }
-                MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude));
+                MAP.zoomToExtent(this.layer.getDataExtent());
             }
             
             if (this.mapView) {

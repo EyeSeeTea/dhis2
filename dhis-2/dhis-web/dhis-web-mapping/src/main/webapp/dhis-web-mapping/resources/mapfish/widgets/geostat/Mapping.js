@@ -72,8 +72,12 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
     newUrl: false,
 	
 	relation: false,
+    
+    mapData: false,
 	
     initComponent : function() {
+        
+        mapData = {};
     
         mapStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMaps' + type,
@@ -420,7 +424,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         MASK.msg = i18n_loading ;
         MASK.show();
 
-        var level = MAPDATA[organisationUnitAssignment].organisationUnitLevel;
+        var level = this.mapData.organisationUnitLevel;
 
         Ext.Ajax.request({
             url: path_mapping + 'getOrganisationUnitsAtLevel' + type,
@@ -429,8 +433,8 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
             success: function(r) {
                 FEATURE[thematicMap] = MAP.getLayersByName('Polygon layer')[0].features;
                 var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
-                var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
-                var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
+                var nameColumn = this.mapData.nameColumn;
+                var mlp = this.mapData.mapLayerPath;
                 var count_match = 0;
                 var relations = '';
                 
@@ -464,8 +468,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                         MASK.show();
                         
                         Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + ' (map <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>, db <span class="x-msg-hl">' + organisationUnits.length + '</span>).');
-                        // Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + '.<br><br>Database: <span class="x-msg-hl">' + organisationUnits.length + '</span><br>Shapefile: <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>');                        
-                        
+                       
                         Ext.getCmp('grid_gp').getStore().load();
                         mapping.classify(false, position);
                     },
@@ -489,32 +492,29 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
             Ext.Ajax.request({
                 url: path_mapping + 'getMapByMapLayerPath' + type,
                 method: 'POST',
-                params: { mapLayerPath: mapping.newUrl },
+                params: {mapLayerPath: mapping.newUrl},
+                scope: this,
                 success: function(r) {
-                    MAPDATA[ACTIVEPANEL] = Ext.util.JSON.decode(r.responseText).map[0];
+                    this.mapData = Ext.util.JSON.decode(r.responseText).map[0];
                     
-                    MAPDATA[ACTIVEPANEL].organisationUnitLevel = parseFloat(MAPDATA[ACTIVEPANEL].organisationUnitLevel);
-                    MAPDATA[ACTIVEPANEL].longitude = parseFloat(MAPDATA[ACTIVEPANEL].longitude);
-                    MAPDATA[ACTIVEPANEL].latitude = parseFloat(MAPDATA[ACTIVEPANEL].latitude);
-                    MAPDATA[ACTIVEPANEL].zoom = parseFloat(MAPDATA[ACTIVEPANEL].zoom);
-                    
+                    this.mapData.organisationUnitLevel = parseFloat(this.mapData.organisationUnitLevel);
+                    this.mapData.longitude = parseFloat(this.mapData.longitude);
+                    this.mapData.latitude = parseFloat(this.mapData.latitude);
+                    this.mapData.zoom = parseFloat(this.mapData.zoom);
+            
                     if (!position) {
-                        if (MAPDATA[ACTIVEPANEL].zoom != MAP.getZoom()) {
-                            MAP.zoomTo(MAPDATA[ACTIVEPANEL].zoom);
-                        }
-                        MAP.setCenter(new OpenLayers.LonLat(MAPDATA[ACTIVEPANEL].longitude, MAPDATA[ACTIVEPANEL].latitude));
+                        MAP.zoomToExtent(this.layer.getDataExtent());
                     }
             
-                    var polygonLayer = MAP.getLayersByName('Polygon layer')[0];
-                    FEATURE[thematicMap] = polygonLayer.features;
+                    FEATURE[thematicMap] = this.layer.features;
                     
                     if (LABELS[thematicMap]) {
-                        toggleFeatureLabelsPolygons(false, polygonLayer);
+                        toggleFeatureLabelsPolygons(false, this.layer);
                     }
         
-                    var mlp = MAPDATA[organisationUnitAssignment].mapLayerPath;
+                    var mlp = this.mapData.mapLayerPath;
                     var relations =	Ext.getCmp('grid_gp').getStore();
-                    var nameColumn = MAPDATA[organisationUnitAssignment].nameColumn;
+                    var nameColumn = this.mapData.nameColumn;
                     var noCls = 1;
                     var noAssigned = 0;
         
@@ -523,7 +523,8 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 
                         for (var j = 0; j < relations.getTotalCount(); j++) {
                             if (relations.getAt(j).data.featureId == FEATURE[thematicMap][i].attributes[nameColumn]) {
-                                FEATURE[thematicMap][i].attributes['value'] = 1;
+                                FEATURE[thematicMap][i].attributes.value = 1;
+                                FEATURE[thematicMap][i].attributes.labelString = FEATURE[thematicMap][i].attributes[nameColumn];
                                 noAssigned++;
                                 noCls = noCls < 2 ? 2 : noCls;
                                 break;
