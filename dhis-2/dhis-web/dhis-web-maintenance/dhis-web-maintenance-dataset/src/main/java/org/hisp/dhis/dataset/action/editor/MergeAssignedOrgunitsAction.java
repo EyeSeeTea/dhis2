@@ -29,14 +29,13 @@ package org.hisp.dhis.dataset.action.editor;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
-import org.hisp.dhis.source.Source;
 
 import com.opensymphony.xwork2.Action;
 
@@ -44,7 +43,7 @@ import com.opensymphony.xwork2.Action;
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class SaveAssignMultiDataSetForOrgunitAction
+public class MergeAssignedOrgunitsAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -65,13 +64,6 @@ public class SaveAssignMultiDataSetForOrgunitAction
         this.dataSetService = dataSetService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -83,11 +75,15 @@ public class SaveAssignMultiDataSetForOrgunitAction
         this.selectedDataSets = selectedDataSets;
     }
 
-    private boolean assignStatus;
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    public void setAssignStatus( boolean assignStatus )
+    private Set<OrganisationUnit> selectedUnits = new HashSet<OrganisationUnit>();
+
+    public Set<OrganisationUnit> getSelectedUnits()
     {
-        this.assignStatus = assignStatus;
+        return selectedUnits;
     }
 
     // -------------------------------------------------------------------------
@@ -97,32 +93,36 @@ public class SaveAssignMultiDataSetForOrgunitAction
     public String execute()
         throws Exception
     {
-        Collection<OrganisationUnit> rootUnits = selectionTreeManager.getRootOrganisationUnits();
+        Set<OrganisationUnit> tempUnits = new HashSet<OrganisationUnit>();
 
-        Set<OrganisationUnit> unitsInTheTree = new HashSet<OrganisationUnit>();
+        if ( selectedDataSets.size() >= 1 )
+        {
+            Iterator<String> iterator = selectedDataSets.iterator();
 
-        organisationUnitService.getUnitsInTheTree( rootUnits, unitsInTheTree );
+            if ( iterator.hasNext() )
+            {
+                DataSet dataSet = dataSetService.getDataSet( Integer.valueOf( iterator.next() ) );
+                selectedUnits.addAll( dataSet.getOrganisationUnis() );
 
-        Set<Source> selectedOrganisationUnits = organisationUnitService.convert( selectionTreeManager
-            .getReloadedSelectedOrganisationUnits() );
+                iterator.remove();
+            }
+        }
 
         for ( String dataSetId : selectedDataSets )
         {
-            DataSet dataSet = dataSetService.getDataSet( Integer.valueOf( dataSetId ) );
+            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( dataSetId ) );
+            tempUnits = dataSet.getOrganisationUnis();
 
-            Set<Source> assignedSources = dataSet.getSources();
-
-            if ( !assignStatus )
+            if ( !(tempUnits.size() == selectedUnits.size() && tempUnits.containsAll( selectedUnits )) )
             {
-                assignedSources.removeAll( organisationUnitService.convert( unitsInTheTree ) );
+                selectedUnits.clear();
+                selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
+
+                return SUCCESS;
             }
-
-            assignedSources.addAll( selectedOrganisationUnits );
-
-            dataSet.setSources( assignedSources );
-
-            dataSetService.updateDataSet( dataSet );
         }
+
+        selectionTreeManager.setSelectedOrganisationUnits( selectedUnits );
 
         return SUCCESS;
     }

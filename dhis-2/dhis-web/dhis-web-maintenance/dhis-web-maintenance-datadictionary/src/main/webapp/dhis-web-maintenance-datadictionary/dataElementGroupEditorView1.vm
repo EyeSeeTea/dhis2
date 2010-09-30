@@ -86,7 +86,7 @@
   <tr align="center">
     <td>$i18n.getString( "name" )</td>
 	<td><input type="text" id="groupName" style="width:20em"/></td>
-	<td><input id="addRenameGroupButton" type="button" value="$i18n.getString( 'ok' )"/>
+	<td><input id="addRenameGroupButton" type="submit" value="$i18n.getString( 'ok' )"/>
 	<input type="button" onclick="hideById( 'addDataElementGroupForm' );unLockScreen();" value="$i18n.getString( 'cancel' )"/></td>
   </tr>
 

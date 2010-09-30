@@ -252,7 +252,11 @@ function updateIndicatorGroupMembers()
 {
 	try
 	{
-	    var id = $("#indicatorGroups").value;
+//	    var id = $("#indicatorGroups").value;alert(id);
+	    
+	    var indicatorGroupsSelect = byId( 'indicatorGroups' );
+	    var id = indicatorGroupsSelect.options[ indicatorGroupsSelect.selectedIndex ].value;
+	    
 	    var request = new Request();
 	    var requestString = 'updateIndicatorGroupEditor.action';
 	    var params = "id=" + id;
@@ -275,10 +279,14 @@ function updateIndicatorGroupMembers()
 	}
 }
 
-function updateIndicatorGroupMembersReceived( xmlObject ){       
+function updateIndicatorGroupMembersReceived( xmlObject )
+{       
     
-	var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;
-    setHeaderDelayMessage(i18n_update_success + " : " + name);
+//	var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;
+//    setHeaderDelayMessage(i18n_update_success + " : " + name);
+    
+    var indicatorGroupsSelect = byId( 'indicatorGroups' );
+    setHeaderDelayMessage( i18n_update_success + " : " + indicatorGroupsSelect.options[ indicatorGroupsSelect.selectedIndex ].text );
 }
 
 /*==============================================================================

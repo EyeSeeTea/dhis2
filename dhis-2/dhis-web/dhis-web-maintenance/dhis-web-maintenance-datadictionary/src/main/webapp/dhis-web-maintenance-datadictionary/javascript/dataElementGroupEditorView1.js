@@ -97,7 +97,8 @@ function getDataElementGroupCompleted( xmlObject )
 	
 	refreshListById( 'availableDataElements' );
 	visableAvailableDataElements();
-	disable('availableDataElements');
+	//disable('availableDataElements');
+	enable('availableDataElements');
 	$( '#groupNameView' ).html( name );
 }
 
@@ -307,7 +308,7 @@ function createNewGroupReceived( xmlObject )
 		showToolTip( e, name);				
 	}
     list.add(option , null);
-	dataElementGroups[i] = name;
+	dataElementGroups[id] = name;
 	$( '#groupNameView' ).html( name );
     hideById( 'addDataElementGroupForm' );
     unLockScreen();

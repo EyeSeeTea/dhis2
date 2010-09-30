@@ -91,7 +91,7 @@ td.error {padding-left:1em}
 			<input type="text" id="birthDate" name="birthDate" style="width:10em" onchange="bdOnchange()" >
 			&nbsp;
 			<label for="age">$i18n.getString( "or" )  $i18n.getString( "age" ) </label>
-			<input type="text" id="age" name="age" style="width:4em"  onchange="ageOnchange()" class="{validate:{number:true, alphanumeric: true}}">
+			<input type="text" id="age" name="age" style="width:4em" onchange="ageOnchange()" class="{validate:{number:true, alphanumeric: true}}">
 			&nbsp;&nbsp;&nbsp;
 			<label for="estimated">$i18n.getString( "estimated" )</label>
             <input type="checkbox" id="birthDateEstimated" name="birthDateEstimated" value="true">
