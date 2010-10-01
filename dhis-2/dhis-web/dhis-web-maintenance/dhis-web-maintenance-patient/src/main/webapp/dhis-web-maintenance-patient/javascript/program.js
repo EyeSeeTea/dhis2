@@ -26,6 +26,11 @@ function programReceived( programElement )
 
 function removeProgram( programId, name )
 {
+	removeItem( programId, name, i18n_confirm_delete, 'removeProgram.action' );
+}
+
+/* function removeProgram( programId, name )
+{
     var result = window.confirm( i18n_confirm_delete + '\n\n' + name );
     
     if ( result )
@@ -53,6 +58,7 @@ function removeProgramCompleted( messageElement )
         showWarning();
     }
 }
+*/
 
 // -----------------------------------------------------------------------------
 // Criteria association
