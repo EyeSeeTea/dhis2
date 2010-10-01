@@ -186,24 +186,24 @@ public class H2StatementBuilder
     
     public String getStandardDeviation( int dataElementId, int categoryOptionComboId, int organisationUnitId ){
     	
-		 return "SELECT STDDEV( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
+        return "SELECT STDDEV( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
 	         "WHERE dataelementid='" + dataElementId + "' " +
 	         "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
 	         "AND sourceid='" + organisationUnitId + "'";
-       
-   }
+    }
     
-    public String getAverage( int dataElementId, int categoryOptionComboId, int organisationUnitId ){
-      	 return   "SELECT AVG( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
+    public String getAverage( int dataElementId, int categoryOptionComboId, int organisationUnitId )
+    {    
+      	 return "SELECT AVG( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
               "WHERE dataelementid='" + dataElementId + "' " +
               "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
               "AND sourceid='" + organisationUnitId + "'";
-      }
+    }
     
     public String getDeflatedDataValues( int dataElementId, String dataElementName, int categoryOptionComboId,
-    		String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound ){
-    	
-    	return  "SELECT dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, dv.storedby, dv.lastupdated, " +
+    		String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound )
+    {	
+    	return "SELECT dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, dv.storedby, dv.lastupdated, " +
             "dv.comment, dv.followup, '" + lowerBound + "' AS minvalue, '" + upperBound + "' AS maxvalue, " +
             encode( dataElementName ) + " AS dataelementname, pt.name AS periodtypename, pe.startdate, pe.enddate, " + 
             encode( organisationUnitName ) + " AS sourcename, cc.categoryoptioncomboname " +
@@ -217,66 +217,72 @@ public class H2StatementBuilder
             "AND dv.sourceid='" + organisationUnitId + "' " +
             "AND ( CAST( dv.value AS " + getDoubleColumnType() + " ) < '" + lowerBound + "' " +
             "OR CAST( dv.value AS " + getDoubleColumnType() + " ) > '" + upperBound + "' )";
-   }
+    }
     
-   public String archiveData( String startDate, String endDate ){
-        
-        return  "DELETE FROM datavaluearchive AS a " +
-                "USING period AS p " +
-                "WHERE a.periodid=p.periodid " +
-                "AND p.startdate>='" + startDate + "' " +
-                "AND p.enddate<='" + endDate + "'";
-   }
+    public String archiveData( String startDate, String endDate )
+    {
+       return "DELETE FROM datavaluearchive AS a " +
+            "WHERE EXISTS (" +
+            "SELECT 1 FROM period AS p " +
+            "WHERE a.periodid=p.periodid " +
+            "AND p.startdate>='" + startDate + "' " +
+            "AND p.enddate<='" + endDate + "')";
+    }
    
-   public String unArchiveData( String startDate, String endDate ){
-       
-       return  "DELETE FROM datavaluearchive AS a " +
-           "USING period AS p " +
+    public String unArchiveData( String startDate, String endDate )
+    {
+       return "DELETE FROM datavaluearchive AS a " +
+           "WHERE EXISTS (" +
+           "SELECT 1 FROM period AS p " +
            "WHERE a.periodid=p.periodid " +
-           "AND p.startdate>='" +  startDate + "' " +
-           "AND p.enddate<='" +  endDate + "'";
-   }
+           "AND p.startdate>='" + startDate + "' " +
+           "AND p.enddate<='" + endDate + "')";
+    }
    
-   public String deleteRegularOverlappingData(){
-       
+    public String deleteRegularOverlappingData()
+    {       
        return "DELETE FROM datavalue AS d " +
-           "USING datavaluearchive AS a " +
+           "WHERE EXISTS (" +
+           "SELECT 1 FROM datavaluearchive AS a " +
            "WHERE d.dataelementid=a.dataelementid " +
            "AND d.periodid=a.periodid " +
            "AND d.sourceid=a.sourceid " +
-           "AND d.categoryoptioncomboid=a.categoryoptioncomboid";
+           "AND d.categoryoptioncomboid=a.categoryoptioncomboid)";
 
-   }
+    }
 
-   public String deleteArchivedOverlappingData(){
-
+    public String deleteArchivedOverlappingData()
+    {
        return "DELETE FROM datavaluearchive AS a " +
-           "USING datavalue AS d " +
+           "WHERE EXISTS (" +
+           "SELECT 1 FROM datavalue AS d " +
            "WHERE a.dataelementid=d.dataelementid " +
            "AND a.periodid=d.periodid " +
            "AND a.sourceid=d.sourceid " +
-           "AND a.categoryoptioncomboid=d.categoryoptioncomboid";
-   }
+           "AND a.categoryoptioncomboid=d.categoryoptioncomboid)";
+    }
 
-   public String deleteOldestOverlappingDataValue(){
-       
+    public String deleteOldestOverlappingDataValue()
+    {       
        return "DELETE FROM datavalue AS d " +
-           "USING datavaluearchive AS a " +
+           "WHERE EXISTS (" +
+           "SELECT 1 FROM datavaluearchive AS a " +
            "WHERE d.dataelementid=a.dataelementid " +
            "AND d.periodid=a.periodid " +
            "AND d.sourceid=a.sourceid " +
            "AND d.categoryoptioncomboid=a.categoryoptioncomboid " +
-           "AND d.lastupdated<a.lastupdated";
-   }
+           "AND d.lastupdated<a.lastupdated)";
+    }
    
-   public String deleteOldestOverlappingArchiveData(){
-       
+    public String deleteOldestOverlappingArchiveData()
+    {       
        return "DELETE FROM datavaluearchive AS a " +
-           "USING datavalue AS d " +
+           "WHERE EXISTS (" +
+           "SELECT 1 FROM datavalue AS d " +
            "WHERE a.dataelementid=d.dataelementid " +
            "AND a.periodid=d.periodid " +
            "AND a.sourceid=d.sourceid " +
            "AND a.categoryoptioncomboid=d.categoryoptioncomboid " +
-           "AND a.lastupdated<=d.lastupdated";
-   }
+           "AND a.lastupdated<=d.lastupdated)";
+    }
 }

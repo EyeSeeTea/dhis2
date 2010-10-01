@@ -221,26 +221,26 @@ public class MySQLStatementBuilder
             "OR  dv.value > '" + upperBound + "' )";
    }
     
-   public String archiveData( String startDate, String endDate ){
-       
+   public String archiveData( String startDate, String endDate )
+   {
        return "DELETE d FROM datavalue AS d " +
-               "INNER JOIN period as p " +
-               "WHERE d.periodid=p.periodid " +
-               "AND p.startdate>='" + startDate + "' " +
-               "AND p.enddate<='" +  endDate + "'";
+            "INNER JOIN period as p " +
+            "WHERE d.periodid=p.periodid " +
+            "AND p.startdate>='" + startDate + "' " +
+            "AND p.enddate<='" + endDate + "'";
    }
    
-   public String unArchiveData( String startDate, String endDate ){
-       
-       return  "DELETE a FROM datavaluearchive AS a " +
+   public String unArchiveData( String startDate, String endDate )
+   {    
+       return "DELETE a FROM datavaluearchive AS a " +
            "INNER JOIN period AS p " +
            "WHERE a.periodid=p.periodid " +
-           "AND p.startdate>='" +  startDate + "' " +
-           "AND p.enddate<='" +  endDate + "'";
+           "AND p.startdate>='" + startDate + "' " +
+           "AND p.enddate<='" + endDate + "'";
    }
    
-   public String deleteRegularOverlappingData(){
-       
+   public String deleteRegularOverlappingData()
+   {    
        return "DELETE d FROM datavalue AS d " +
            "INNER JOIN datavaluearchive AS a " +
            "WHERE d.dataelementid=a.dataelementid " +
@@ -250,8 +250,8 @@ public class MySQLStatementBuilder
 
    }
    
-   public String deleteArchivedOverlappingData(){
-
+   public String deleteArchivedOverlappingData()
+   {
        return "DELETE a FROM datavaluearchive AS a " +
            "INNER JOIN datavalue AS d " +
            "WHERE a.dataelementid=d.dataelementid " +
@@ -260,8 +260,8 @@ public class MySQLStatementBuilder
            "AND a.categoryoptioncomboid=d.categoryoptioncomboid";
    }
    
-   public String deleteOldestOverlappingDataValue(){
-       
+   public String deleteOldestOverlappingDataValue()
+   {    
        return "DELETE d FROM datavalue AS d " +
            "INNER JOIN datavaluearchive AS a " +
            "WHERE d.dataelementid=a.dataelementid " +
@@ -271,8 +271,8 @@ public class MySQLStatementBuilder
            "AND d.lastupdated<a.lastupdated";
    }
    
-   public String deleteOldestOverlappingArchiveData(){
-       
+   public String deleteOldestOverlappingArchiveData()
+   {       
        return "DELETE a FROM datavaluearchive AS a " +
            "INNER JOIN datavalue AS d " +
            "WHERE a.dataelementid=d.dataelementid " +
