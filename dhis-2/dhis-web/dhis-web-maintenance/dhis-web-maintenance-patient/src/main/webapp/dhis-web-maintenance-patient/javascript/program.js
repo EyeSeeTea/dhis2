@@ -29,37 +29,6 @@ function removeProgram( programId, name )
 	removeItem( programId, name, i18n_confirm_delete, 'removeProgram.action' );
 }
 
-/* function removeProgram( programId, name )
-{
-    var result = window.confirm( i18n_confirm_delete + '\n\n' + name );
-    
-    if ( result )
-    {
-    	var request = new Request();
-        request.setResponseTypeXML( 'message' );
-        request.setCallbackSuccess( removeProgramCompleted );
-        window.location.href = 'removeProgram.action?id=' + programId;
-    }
-}
-
-function removeProgramCompleted( messageElement )
-{
-    var type = messageElement.getAttribute( 'type' );
-    var message = messageElement.firstChild.nodeValue;
-    
-    if ( type == 'success' )
-    {
-        window.location.href = 'program.action';
-    }
-    else if ( type = 'error' )
-    {
-        setInnerHTML( 'warningField', message );
-        
-        showWarning();
-    }
-}
-*/
-
 // -----------------------------------------------------------------------------
 // Criteria association
 // -----------------------------------------------------------------------------
