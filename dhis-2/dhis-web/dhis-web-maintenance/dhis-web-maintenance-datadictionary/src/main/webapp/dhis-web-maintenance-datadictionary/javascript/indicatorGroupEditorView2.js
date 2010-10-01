@@ -80,10 +80,11 @@ function getAssignedIndicatorGroups( indicatorId )
 function getAssignedIndicatorGroupsCompleted( indicatorGroups )
 {
 	assignedGroups = new Object();
+	var availableList = byId('availableIndicators');
+	var groupName = availableList.options[ availableList.selectedIndex ].text;
+	var availableIndicatorGroups = indicatorGroups.getElementsByTagName( 'indicatorGroup' );
 	var list = byId('assignedGroups');
 	list.options.length = 0;
-	var groupName = list.options[ list.selectedIndex ].text;
-	var availableIndicatorGroups = indicatorGroups.getElementsByTagName( 'indicatorGroup' );
 	
 	for( var i=0;i<availableIndicatorGroups.length;i++)
 	{
@@ -95,9 +96,8 @@ function getAssignedIndicatorGroupsCompleted( indicatorGroups )
 	
 	refreshListById( 'availableGroups' );
 	visableAvailableIndicators();
-	disable('availableGroups');
-	$( '#groupNameView' ).html( groupName );
-
+	enable('availableGroups');
+	setInnerHTML('groupNameView', groupName);
 }
 
 function visableAvailableIndicators()

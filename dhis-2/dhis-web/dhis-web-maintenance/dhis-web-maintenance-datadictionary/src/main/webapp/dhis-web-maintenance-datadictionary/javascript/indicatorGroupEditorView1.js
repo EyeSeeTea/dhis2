@@ -97,8 +97,8 @@ function getIndicatorGroupCompleted( xmlObject )
 	
 	refreshListById( 'availableIndicators' );
 	visableAvailableIndicators();
-    byId('availableIndicators').disabled=false;
-	byId( 'groupNameView' ).innerHTML = groupName;
+    enable('availableIndicators');
+	setInnerHTML('groupNameView', groupName);
 }
 
 function visableAvailableIndicators()
@@ -252,11 +252,7 @@ function updateIndicatorGroupMembers()
 {
 	try
 	{
-//	    var id = $("#indicatorGroups").value;alert(id);
-	    
-	    var indicatorGroupsSelect = byId( 'indicatorGroups' );
-	    var id = indicatorGroupsSelect.options[ indicatorGroupsSelect.selectedIndex ].value;
-	    
+	    var id = $("#indicatorGroups").val();	    
 	    var request = new Request();
 	    var requestString = 'updateIndicatorGroupEditor.action';
 	    var params = "id=" + id;
@@ -280,11 +276,7 @@ function updateIndicatorGroupMembers()
 }
 
 function updateIndicatorGroupMembersReceived( xmlObject )
-{       
-    
-//	var name = xmlObject.getElementsByTagName( "name" )[0].firstChild.nodeValue;
-//    setHeaderDelayMessage(i18n_update_success + " : " + name);
-    
+{   
     var indicatorGroupsSelect = byId( 'indicatorGroups' );
     setHeaderDelayMessage( i18n_update_success + " : " + indicatorGroupsSelect.options[ indicatorGroupsSelect.selectedIndex ].text );
 }
