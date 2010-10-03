@@ -62,7 +62,7 @@
 		
 					<!-- age -->
 					<div id="integerValueOfAgeDiv" style="display:none ">
-						<input type="text" id='integerValueOfAgeValue' name='integerValueOfAgeValue' onChange="fillValue(this.value);"  style="width: 15.5em">
+						<input type="text" id='integerValueOfAgeValue' name='integerValueOfAgeValue' onChange="fillValue(this.value);" class="{validate:{digits:true,rangelength:[1,2]}}" style="width: 15.5em">
 					</div>
 					
 					<!-- birthDate -->

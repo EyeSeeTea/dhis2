@@ -1486,6 +1486,20 @@
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>						
 		</action>
 		
+		<action name="jchartAssociation"
+			class="org.hisp.dhis.reportexcel.jchart.action.UpdateJChartUserRoleFormAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-excel-reporting/chart/jchartAssociation.vm</param>
+			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>			
+			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>
+		</action>
+		
+		<action name="updateJChartAssociation"
+			class="org.hisp.dhis.reportexcel.jchart.action.UpdateJChartUserRoleAction">
+			<result name="success" type="redirect">jcharts.action</result>
+			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>					
+		</action>
+		
 		<action name="viewJCharts"
 			class="org.hisp.dhis.reportexcel.datasetcompleted.action.GetSelectedOrganisationUnitAction">
 			<result name="success" type="chain">viewJChartsChain</result>

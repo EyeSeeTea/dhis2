@@ -1423,6 +1423,20 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="jchartService" ref="org.hisp.dhis.jchart.JChartService" />
 	</bean>
+	
+	<bean id="org.hisp.dhis.reportexcel.jchart.action.UpdateJChartUserRoleAction"
+		class="org.hisp.dhis.reportexcel.jchart.action.UpdateJChartUserRoleAction"
+		scope="prototype">
+		<property name="jchartService" ref="org.hisp.dhis.jchart.JChartService" />
+		<property name="userStore" ref="org.hisp.dhis.user.UserStore" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.reportexcel.jchart.action.UpdateJChartUserRoleFormAction"
+		class="org.hisp.dhis.reportexcel.jchart.action.UpdateJChartUserRoleFormAction"
+		scope="prototype">
+		<property name="jchartService" ref="org.hisp.dhis.jchart.JChartService" />
+		<property name="userStore" ref="org.hisp.dhis.user.UserStore" />
+	</bean>
 
 	<bean id="org.hisp.dhis.reportexcel.jchart.action.draw.DrawJChartAction"
 		class="org.hisp.dhis.reportexcel.jchart.action.draw.DrawJChartAction"

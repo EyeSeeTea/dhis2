@@ -16,7 +16,7 @@
 		<property name="loadPeriodBy" column="loadperiodby" not-null="true"/>		
 		
 		<many-to-one name="periodType" column="periodtypeid" class="org.hisp.dhis.period.PeriodType" 
-		foreign-key="fk_jchart_periodtypeid" not-null="true" lazy="false"/>			
+		foreign-key="fk_jchart_periodtypeid" not-null="true" lazy="false"/>	
 		
 		<set name="series" cascade="all" table="jchart_jchartseries">
 			<key column="jchartid"/>
@@ -27,6 +27,11 @@
 			<key column="jchartid"/>
 			<many-to-many column="periodid" class="org.hisp.dhis.period.Period" foreign-key="pk_jchart_period"/>			
 		</set>	
+		
+		<set name="userRoles" table="jchart_userroles">
+			<key column="jchartid"/>
+			<many-to-many column="userroleid" class="org.hisp.dhis.user.UserAuthorityGroup" foreign-key="pk_jchart_userroleid"/>			
+		</set>
 		
 		<property name="legend" column="legend" length="1000"/>		
 		

@@ -24,11 +24,10 @@
           </tr>
 
           <tbody id="list">
-            #set( $mark = false )
             #foreach( $program in $programs )
-              <tr>
+              <tr id="tr${program.id}">
               
-                <td#alternate( $mark )>$encoder.htmlEncode( $program.name )</td>                
+                <td>$encoder.htmlEncode( $program.name )</td>                
                 
                 <td style="text-align:center" #alternate( $mark )>
                   <a href="defineProgramAssociationsForm.action?id=$program.id" title="$i18n.getString( "define_associations" )"><img src="../images/assign.png" alt="$i18n.getString( "define_associations" )"></a>
@@ -59,11 +58,6 @@
                 </td>
                 
               </tr>
-			  #if( $mark )
-				#set( $mark = false )
-			  #else
-				#set( $mark = true )
-			  #end
             #end
 
           </tbody>

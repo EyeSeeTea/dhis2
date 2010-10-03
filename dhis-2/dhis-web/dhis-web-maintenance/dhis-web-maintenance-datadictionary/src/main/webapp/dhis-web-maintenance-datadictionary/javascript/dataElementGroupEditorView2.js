@@ -80,22 +80,24 @@ function getAssignedDataElementGroups( id )
 function getAssignedGroupsCompleted( xmlObject )
 {
 	assignedGroups = new Object();
-	var name = getElementValue( xmlObject, 'name' );
+	var availableList = byId("availableDataElements");
+	var name = availableList.options[ availableList.selectedIndex ].text;
 	var dataElementGroups = xmlObject.getElementsByTagName( 'dataElementGroup' );
 	var list = byId('assignedGroups');
 	list.options.length = 0;
 	
 	for( var i=0;i<dataElementGroups.length;i++)
 	{
-		var id = dataElementGroups.item(i).getElementsByTagName( 'id' )[0].firstChild.nodeValue;
-		var value = dataElementGroups.item(i).getElementsByTagName( 'name' )[0].firstChild.nodeValue;
+		var id = getElementValue( dataElementGroups.item(i), 'id' );
+		var value = getElementValue( dataElementGroups.item(i), 'name' );
 		addOptionToListWithToolTip( list, id, value );
 		assignedGroups[id] = value;		
 	}
+	
 	refreshListById( 'availableGroups' );
 	visableAvailableDataElements();
-    disable('availableGroups');
-	$( '#groupNameView' ).html( name );
+    enable('availableGroups');
+	setInnerHTML('groupNameView', name);
 }
 
 function visableAvailableDataElements()

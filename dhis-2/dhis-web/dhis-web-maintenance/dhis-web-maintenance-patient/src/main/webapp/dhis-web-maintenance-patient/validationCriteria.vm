@@ -8,8 +8,9 @@
 					<td>
 						$i18n.getString( "filter_by_name" ): <input type="text" onkeyup="filterValues( this.value , 1)" style="width:250px"/>
 					</td>
-					<td >			
-						<input align="right" type="button" value="$i18n.getString( "add" )" onclick="window.location.href='showAddValidationCriteriaForm.action'" style="width:10em">
+					
+					<td style="text-align:right" >			
+						<input style="text-align:right" type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddValidationCriteriaForm.action'" style="width:70px">
 					</td>
 				</tr>
 			</table>

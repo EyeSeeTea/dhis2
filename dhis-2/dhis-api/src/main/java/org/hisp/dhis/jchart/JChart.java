@@ -37,6 +37,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
 import org.hisp.dhis.period.comparator.PeriodComparator;
+import org.hisp.dhis.user.UserAuthorityGroup;
 
 /**
  * @author Tran Thanh Tri
@@ -53,7 +54,7 @@ public class JChart
     private int id;
 
     private String title;
-  
+
     private Set<JChartSeries> series = new HashSet<JChartSeries>();
 
     private Set<Period> periods = new HashSet<Period>();
@@ -61,6 +62,8 @@ public class JChart
     private PeriodType periodType;
 
     private String loadPeriodBy;
+
+    private Set<UserAuthorityGroup> userRoles = new HashSet<UserAuthorityGroup>();
 
     /*
      * This string is json format
@@ -117,7 +120,7 @@ public class JChart
 
         return ps;
     }
-    
+
     public List<Period> getdAscendingPeriodSorted()
     {
         List<Period> ps = new ArrayList<Period>( this.periods );
@@ -125,6 +128,16 @@ public class JChart
         Collections.sort( ps, new AscendingPeriodComparator() );
 
         return ps;
+    }
+
+    public void addUserAuthorityGroup( UserAuthorityGroup userAuthorityGroup )
+    {
+        this.userRoles.add( userAuthorityGroup );
+    }
+
+    public void clearAllUserRoles()
+    {
+        this.userRoles.clear();
     }
 
     // -------------------------------------------
@@ -150,7 +163,7 @@ public class JChart
     {
         this.title = title;
     }
-  
+
     public String getLegend()
     {
         return legend;
@@ -199,6 +212,16 @@ public class JChart
     public void setLoadPeriodBy( String loadPeriodBy )
     {
         this.loadPeriodBy = loadPeriodBy;
+    }
+
+    public Set<UserAuthorityGroup> getUserRoles()
+    {
+        return userRoles;
+    }
+
+    public void setUserRoles( Set<UserAuthorityGroup> userRoles )
+    {
+        this.userRoles = userRoles;
     }
 
     // -------------------------------------------
