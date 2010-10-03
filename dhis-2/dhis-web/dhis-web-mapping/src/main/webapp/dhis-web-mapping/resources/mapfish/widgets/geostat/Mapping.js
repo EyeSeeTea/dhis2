@@ -175,7 +175,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             handler: function()
                             {
                                 if (!Ext.getCmp('maps_cb').getValue()) {
-                                    Ext.message.msg(false, i18n_please_select_map );
+                                    Ext.message.msg(false, i18n_please_select_map);
                                     return;
                                 }
                                 mapping.autoAssign(true);
@@ -225,7 +225,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                             handler: function()
                             {
                                 if (!Ext.getCmp('maps_cb').getValue()) {
-                                    Ext.message.msg(false, i18n_please_select_map );
+                                    Ext.message.msg(false, i18n_please_select_map);
                                     return;
                                 }
                                 
@@ -234,7 +234,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 								var msg;
 								
                                 if (selection == '') {
-                                    Ext.message.msg(false, i18n_please_select_least_one_organisation_unit_in_the_list );
+                                    Ext.message.msg(false, i18n_please_select_least_one_organisation_unit_in_the_list);
                                     return;
                                 }
 								
@@ -264,7 +264,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 										mapping.classify(true, true);
 									},
 									failure: function() {
-										alert( i18n_error_while_deleting_relation_map_and_oranisation_unit );
+										alert(i18n_error_while_deleting_relation_map_and_oranisation_unit);
 									} 
 								});
                             },
@@ -454,7 +454,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                         MASK.msg = i18n_applying_organisation_units_relations ;
                         MASK.show();
                         
-                        Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + ' (map <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>, db <span class="x-msg-hl">' + organisationUnits.length + '</span>).');
+                        Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + ' (map <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>, db <span class="x-msg-hl">' + organisationUnits.length + '</span>)');
                        
                         Ext.getCmp('grid_gp').getStore().load();
                         mapping.classify(false, position);
