@@ -473,6 +473,78 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             predefinedMapLegendSetStore: predefinedMapLegendSetStore
         }
         
+        this.selectFeatures = {
+            onHoverSelect: function onHoverSelect(feature) {
+                var text = '<div style="color:black">' + feature.attributes[choropleth.mapData.nameColumn] + '</div>';
+                if (ACTIVEPANEL == thematicMap) {
+                    text += '<div style="color:#555">' + feature.attributes.value + '</div>';
+                }
+                Ext.getCmp('featureinfo_l').setText(text, false);
+            },
+            onHoverUnselect: function onHoverUnselect(feature) {
+                Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'</span>', false);
+            },
+            onClickSelect: function onClickSelect(feature) {
+                var east_panel = Ext.getCmp('east');
+                var x = east_panel.x - 210;
+                var y = east_panel.y + 41;
+                
+                if (MAPSOURCE == map_source_type_database) {
+                    if (feature.attributes.hasChildrenWithCoordinates) {
+                        if (lfw) {
+                            lfw.destroy();
+                        }
+                        
+                        Ext.getCmp('map_tf').setValue(feature.data.name);
+                        Ext.getCmp('map_tf').value = feature.attributes.id;
+                        choropleth.loadFromDatabase(feature.attributes.id, true);
+                    }
+                    else {
+                        Ext.message.msg(false, i18n_no_coordinates_found);
+                    }
+                }
+                
+                if (ACTIVEPANEL == organisationUnitAssignment) {
+                    if (selectFeaturePopup) {
+                        selectFeaturePopup.destroy();
+                    }
+                    
+                    var popup = new Ext.Window({
+                        title: '<span class="panel-title">Assign organisation unit</span>',
+                        width: 180,
+                        height: 65,
+                        layout: 'fit',
+                        plain: true,
+                        html: '<div class="window-orgunit-text">' + feature.attributes[mapping.mapData.nameColumn] + '</div>',
+                        x: x,
+                        y: y,
+                        listeners: {
+                            'close': {
+                                fn: function() {
+                                    mapping.relation = false;
+                                }
+                            }
+                        }
+                    });
+                    
+                    selectFeaturePopup = popup;		
+                    popup.show();
+                    mapping.relation = feature.attributes[mapping.mapData.nameColumn];
+                }
+            }
+        }
+        
+        var sf = new OpenLayers.Control.newSelectFeature(
+            this.layer, {
+                onHoverSelect: this.selectFeatures.onHoverSelect,
+                onHoverUnselect: this.selectFeatures.onHoverUnselect,
+                onClickSelect: this.selectFeatures.onClickSelect,
+            }
+        );
+        
+        MAP.addControl(sf);
+        sf.activate();
+        
         this.items = [
         {
             xtype: 'combo',

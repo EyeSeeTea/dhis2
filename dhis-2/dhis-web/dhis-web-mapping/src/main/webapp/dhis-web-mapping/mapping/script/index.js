@@ -26,6 +26,8 @@ var CHART;
 var TOPLEVELUNIT = {};
 /* Locate feature window */
 var lfw;
+/* Feature popup */
+var selectFeaturePopup;
 
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
@@ -2718,7 +2720,7 @@ Ext.onReady( function() {
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1 },
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
@@ -2734,7 +2736,7 @@ Ext.onReady( function() {
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 6 },
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
@@ -2744,7 +2746,7 @@ Ext.onReady( function() {
         })
     });
     
-    MAP.addLayers([ choroplethLayer, proportionalSymbolLayer ]);
+    MAP.addLayers([choroplethLayer, proportionalSymbolLayer]);
     
 	function addOverlaysToMap() {
 		Ext.Ajax.request({
@@ -3596,30 +3598,6 @@ Ext.onReady( function() {
 	mapping.hide();
 	// Ext.getCmp('printMultiPage_p').hide();
 	ACTIVEPANEL = thematicMap;
-    
-	/* Section: map controls */
-	var selectFeaturePolygon = new OpenLayers.Control.newSelectFeature(
-        choroplethLayer, {
-            onClickSelect: onClickSelectPolygon,
-            onClickUnselect: onClickUnselectPolygon,
-            onHoverSelect: onHoverSelectPolygon,
-            onHoverUnselect: onHoverUnselectPolygon
-        }
-    );
-    
-    var selectFeaturePoint = new OpenLayers.Control.newSelectFeature(
-        proportionalSymbolLayer, {
-            onClickSelect: onClickSelectPoint,
-            onClickUnselect: onClickUnselectPoint,
-            onHoverSelect: onHoverSelectPoint,
-            onHoverUnselect: onHoverUnselectPoint
-        }
-    );
-    
-    MAP.addControl(selectFeaturePolygon);
-    MAP.addControl(selectFeaturePoint);
-    selectFeaturePolygon.activate();
-    selectFeaturePoint.activate();
 
 	MAP.addControl(new OpenLayers.Control.MousePosition({
         displayClass: 'void', 
@@ -3727,114 +3705,3 @@ Ext.onReady( function() {
 	}});
 	}});
 });
-
-/* Section: select features polygon */
-var popup;
-
-function onHoverSelectPolygon(feature) {
-    FEATURE[thematicMap] = feature;
-
-    if (ACTIVEPANEL == organisationUnitAssignment) {
-        Ext.getCmp('featureinfo_l').setText('<span style="color:black">' + FEATURE[thematicMap].attributes[mapping.mapData.nameColumn] + '</span>', false);
-    }
-    else {
-        Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap].attributes[choropleth.mapData.nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap].attributes.value + '</div>', false);
-    }
-}
-
-function onHoverUnselectPolygon(feature) {
-    Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'</span>', false);
-}
-
-function onClickSelectPolygon(feature) {
-    FEATURE[thematicMap] = feature;
-	var east_panel = Ext.getCmp('east');
-	var x = east_panel.x - 210;
-	var y = east_panel.y + 41;
-    
-    if (MAPSOURCE == map_source_type_database) {
-        if (feature.attributes.hasChildrenWithCoordinates) {
-            if (lfw) {
-                lfw.destroy();
-            }
-            
-            Ext.getCmp('map_tf').setValue(feature.data.name);
-            Ext.getCmp('map_tf').value = feature.attributes.id;
-            choropleth.loadFromDatabase(feature.attributes.id, true);
-        }
-        else {
-            Ext.message.msg(false, i18n_no_coordinates_found);
-        }
-    }
-    
-    if (ACTIVEPANEL == organisationUnitAssignment) {
-		if (popup) {
-			popup.destroy();
-		}
-		
-		var feature_popup = new Ext.Window({
-			title: '<span class="panel-title">Assign organisation unit</span>',
-			width: 180,
-			height: 65,
-			layout: 'fit',
-			plain: true,
-			html: '<div class="window-orgunit-text">' + FEATURE[thematicMap].attributes[mapping.mapData.nameColumn] + '</div>',
-			x: x,
-			y: y,
-			listeners: {
-				'close': {
-					fn: function() {
-						mapping.relation = false;
-					}
-				}
-			}
-		});
-		
-		popup = feature_popup;		
-		feature_popup.show();
-		mapping.relation = FEATURE[thematicMap].attributes[mapping.mapData.nameColumn];
-    }
-	//else {
-        // featureWindow.setPagePosition(Ext.getCmp('east').x - 202, Ext.getCmp('center').y + 41);
-        // featureWindow.setTitle(FEATURE.attributes[MAPDATA.nameColumn]);
-        // featureWindow.show();
-        // periodWindow.hide();
-	//}
-}
-
-function onClickUnselectPolygon(feature) {}
-
-/* Section: select features point */
-function onHoverSelectPoint(feature) {
-    FEATURE[thematicMap2] = feature;
-    Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + FEATURE[thematicMap2].attributes[proportionalSymbol.mapData.nameColumn] + '</div><div style="color:#555">' + FEATURE[thematicMap2].attributes.value + '</div>', false);
-}
-
-function onHoverUnselectPoint(feature) {
-    Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
-}
-
-function onClickSelectPoint(feature) {
-    FEATURE[thematicMap2] = feature;
-
-	var east_panel = Ext.getCmp('east');
-	var x = east_panel.x - 210;
-	var y = east_panel.y + 41;
-	
-    if (MAPSOURCE == map_source_type_database) {
-        if (feature.attributes.hasChildrenWithCoordinates) {
-            if (lfw) {
-                lfw.destroy();
-            }
-            
-            Ext.getCmp('map_tf2').setValue(feature.data.name);
-            Ext.getCmp('map_tf2').value = feature.attributes.id;
-            proportionalSymbol.loadFromDatabase(feature.attributes.id, true);
-        }
-        else {
-            Ext.message.msg(false, i18n_no_coordinates_found);
-        }
-    }
-}
-
-function onClickUnselectPoint(feature) {}

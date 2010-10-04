@@ -73,6 +73,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     valueType: false,
     
     stores: false,
+    
+    selectFeatures: false,
 
     initComponent: function() {
         this.legend = {};
@@ -80,6 +82,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         this.legend.method = 2;
         this.legend.classes = 5;
         this.mapData = {};
+        this.valueType = map_value_type_indicator;
     
         var mapViewStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMapViews' + type,
@@ -366,8 +369,47 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             predefinedMapLegendSetStore: predefinedMapLegendSetStore
         }
         
+        this.selectFeatures = {
+            onHoverSelect: function onHoverSelect(feature) {
+                Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[proportionalSymbol.mapData.nameColumn] + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
+            },
+            onHoverUnselect: function onHoverUnselect(feature) {
+                Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'.</span>', false);
+            },
+            onClickSelect: function onClickSelect(feature) {
+                var east_panel = Ext.getCmp('east');
+                var x = east_panel.x - 210;
+                var y = east_panel.y + 41;
+                
+                if (MAPSOURCE == map_source_type_database) {
+                    if (feature.attributes.hasChildrenWithCoordinates) {
+                        if (lfw) {
+                            lfw.destroy();
+                        }
+                        
+                        Ext.getCmp('map_tf2').setValue(feature.data.name);
+                        Ext.getCmp('map_tf2').value = feature.attributes.id;
+                        proportionalSymbol.loadFromDatabase(feature.attributes.id, true);
+                    }
+                    else {
+                        Ext.message.msg(false, i18n_no_coordinates_found);
+                    }
+                }
+            }
+        }
+        
+        var sf = new OpenLayers.Control.newSelectFeature(
+            this.layer, {
+                onHoverSelect: this.selectFeatures.onHoverSelect,
+                onHoverUnselect: this.selectFeatures.onHoverUnselect,
+                onClickSelect: this.selectFeatures.onClickSelect
+            }
+        );
+        
+        MAP.addControl(sf);
+        sf.activate();
+        
         this.items = [
-         
         {
             xtype: 'combo',
             id: 'mapview_cb2',
