@@ -38,7 +38,7 @@ import java.util.Collection;
 import org.junit.Test;
 
 /**
- * @author Lars Helge Overland
+ * @author Dang Duy Hieu
  * @version $Id$
  */
 public class SqlViewServiceTest
