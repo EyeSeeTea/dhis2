@@ -193,35 +193,9 @@ function patientReceived( patientElement )
 // -----------------------------------------------------------------------------
 // Remove patient
 // -----------------------------------------------------------------------------
-
 function removePatient( patientId, fullName )
 {
-    var result = window.confirm( i18n_confirm_delete + '\n\n' + fullName );
-    
-    if ( result )
-    {
-    	var request = new Request();
-        request.setResponseTypeXML( 'message' );
-        request.setCallbackSuccess( removePatientCompleted );
-        window.location.href = 'removePatient.action?id=' + patientId;
-    }
-}
-
-function removePatientCompleted( messageElement )
-{
-    var type = messageElement.getAttribute( 'type' );
-    var message = messageElement.firstChild.nodeValue;
-    
-    if ( type == 'success' )
-    {
-        window.location.href = 'patientform.action';
-    }
-    else if ( type = 'error' )
-    {
-        setInnerHTML( 'warningField', message );
-        
-        showWarning();
-    }
+	removeItem( patientId, fullName, i18n_confirm_delete, 'removePatient.action' );
 }
 
 //-----------------------------------------------------------------------------
