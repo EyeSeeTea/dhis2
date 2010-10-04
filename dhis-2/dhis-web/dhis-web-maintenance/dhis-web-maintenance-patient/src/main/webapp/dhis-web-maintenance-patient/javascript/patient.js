@@ -625,6 +625,14 @@ function jumpToPage( baseLink )
 {
 	var pageSize = jQuery("#sizeOfPage").val();
 	var currentPage = jQuery("#jumpToPage").val();
+	var numberOfPages = jQuery("#numberOfPages").val();
+	
+	if( currentPage > numberOfPages )
+	{
+		//alert( "currentPage is: " +currentPage + " Greater than No of Pages: " +numberOfPages );
+		alert("Current Page should be less than No of pages" );
+		return false;
+	}
 	window.location.href = baseLink +"pageSize=" + pageSize +"&currentPage=" +currentPage;
 }
 
