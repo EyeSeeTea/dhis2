@@ -80,13 +80,19 @@ public class AddJChartAction
     {
         this.title = title;
     }
-  
 
     private String legend;
 
     public void setLegend( String legend )
     {
         this.legend = legend;
+    }
+
+    private String categoryType;
+
+    public void setCategoryType( String categoryType )
+    {
+        this.categoryType = categoryType;
     }
 
     private String loadPeriodBy;
@@ -136,10 +142,11 @@ public class AddJChartAction
         throws Exception
     {
         JChart jChart = new JChart();
-        jChart.setTitle( title );       
+        jChart.setTitle( title );
         jChart.setLegend( legend );
         jChart.setLoadPeriodBy( loadPeriodBy );
         jChart.setPeriodType( periodService.getPeriodTypeByName( periodType ) );
+        jChart.setCategoryType( categoryType );
 
         for ( int i = 0; i < indicatorIds.size(); i++ )
         {
@@ -150,7 +157,7 @@ public class AddJChartAction
             jChart.addSeries( s );
         }
 
-        if ( loadPeriodBy.equals( JChart.LOAD_PERIOD_SELECTED ) )
+        if ( categoryType.equals( JChart.PERIOD_CATEGORY ) && loadPeriodBy.equals( JChart.LOAD_PERIOD_SELECTED ) )
         {
 
             for ( Integer id : periodIds )

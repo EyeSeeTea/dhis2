@@ -13,7 +13,9 @@
 
 		<property name="title" not-null="true" />				
 		
-		<property name="loadPeriodBy" column="loadperiodby" not-null="true"/>		
+		<property name="loadPeriodBy" column="loadperiodby"/>
+		
+		<property name="categoryType" column="categorytype" not-null="true"/>	
 		
 		<many-to-one name="periodType" column="periodtypeid" class="org.hisp.dhis.period.PeriodType" 
 		foreign-key="fk_jchart_periodtypeid" not-null="true" lazy="false"/>	

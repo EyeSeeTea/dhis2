@@ -46,6 +46,8 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 
 public class JChart
 {
+    public static final String PERIOD_CATEGORY = "PERIOD_CATEGORY";
+    public static final String ORGANISATION_UNIT_CATEGORY = "ORGANISATION_UNIT_CATEGORY";
 
     public static final String LOAD_PERIOD_AUTO = "LOAD_PERIOD_AUTO";
 
@@ -54,6 +56,8 @@ public class JChart
     private int id;
 
     private String title;
+
+    private String categoryType;
 
     private Set<JChartSeries> series = new HashSet<JChartSeries>();
 
@@ -152,6 +156,16 @@ public class JChart
     public void setId( int id )
     {
         this.id = id;
+    }
+
+    public String getCategoryType()
+    {
+        return categoryType;
+    }
+
+    public void setCategoryType( String categoryType )
+    {
+        this.categoryType = categoryType;
     }
 
     public String getTitle()
