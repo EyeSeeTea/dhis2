@@ -85,6 +85,16 @@ public class JChart
     // -------------------------------------------
     // Method
     // -------------------------------------------
+    
+    public boolean isPeriodCategory()
+    {
+        return this.categoryType.equals( PERIOD_CATEGORY );
+    }
+    
+    public boolean isOrganisationUnitCategory()
+    {
+        return this.categoryType.equals( ORGANISATION_UNIT_CATEGORY );
+    }
 
     public boolean isLoadSelectedPeriods()
     {

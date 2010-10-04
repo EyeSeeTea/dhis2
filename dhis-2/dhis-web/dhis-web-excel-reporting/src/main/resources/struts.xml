@@ -1509,18 +1509,23 @@
 			class="org.hisp.dhis.reportexcel.jchart.action.GetALLJchartAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-excel-reporting/chart/viewJCharts.vm</param>
-			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
-			<param name="javascripts">
-				../dhis-web-commons/ouwt/ouwt.js,
+			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
+			<param name="javascripts">chart/js/highcharts.js</param>			
+		</action>
+		
+		<action name="drawJChartParamSelection"
+			class="org.hisp.dhis.reportexcel.jchart.action.GetJChartAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-excel-reporting/chart/drawJChartParams.vm</param>
+			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
+			<param name="javascripts">				
 				chart/js/highcharts.js,
 				chart/js/modules/exporting.js
 			</param>
 			<param name="stylesheets">				
 				chart/css/jchart.css
-			</param>		
-			<interceptor-ref name="organisationUnitTreeStack" />
-			<param name="menuTreeHeight">400</param>						
-		</action>
+			</param>
+		</action>	
 		
 		<action name="drawJChart"
 			class="org.hisp.dhis.reportexcel.jchart.action.draw.DrawJChartAction">

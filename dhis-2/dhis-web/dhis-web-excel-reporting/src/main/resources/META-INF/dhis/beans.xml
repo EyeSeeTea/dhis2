@@ -1384,12 +1384,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<bean id="org.hisp.dhis.jchart.data.JChartDataService" 
 		class="org.hisp.dhis.jchart.data.DefaultJChartDataService">
 		<property name="jchartService" ref="org.hisp.dhis.jchart.JChartService" />
-		<property name="organisationUnitSelectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
+		<property name="selectionTreeManager"
+			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 		<property name="aggregationService" ref="org.hisp.dhis.aggregation.AggregationService" />
 		<property name="i18nManager" ref="org.hisp.dhis.i18n.I18nManager" />
 		<property name="statementManager" ref="statementManager" />
 		<property name="periodDatabaseService" ref="org.hisp.dhis.reportexcel.period.db.PeriodDatabaseService" />
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.reportexcel.jchart.action.GetALLJchartAction"
