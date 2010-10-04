@@ -245,7 +245,8 @@ function SetGeneratedMinMaxValues()
 
 function generateMinMaxValues()
 {    
-    var setGeneratedMinMaxValues = new SetGeneratedMinMaxValues();
+	
+	var setGeneratedMinMaxValues = new SetGeneratedMinMaxValues();
     setGeneratedMinMaxValues.save();
 }
 

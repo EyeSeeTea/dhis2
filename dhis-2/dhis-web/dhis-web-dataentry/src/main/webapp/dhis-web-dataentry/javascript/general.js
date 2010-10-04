@@ -325,7 +325,7 @@ function CommentSaver( dataElementId_, optionComboId_, organisationUnitId_,  val
 
 function validate()
 {
-    window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
+	window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
 }
 
 // -----------------------------------------------------------------------------
@@ -382,6 +382,8 @@ function getCalculatedDataElement( dataElementId )
 function calculateAndSaveCDEs()
 {
 	lockScreen();
+	alert(document.selectForm.selectedDataSetId.value);
+	alert(document.selectForm.useDefaultForm.value);
 	
     var request = new Request();
     request.setCallbackSuccess( dataValuesReceived );
@@ -403,6 +405,6 @@ function dataValuesReceived( node )
 	}
 	
 	unLockScreen();
-	
+
 	setMessage(i18n_save_calculated_data_element_success);
 }
