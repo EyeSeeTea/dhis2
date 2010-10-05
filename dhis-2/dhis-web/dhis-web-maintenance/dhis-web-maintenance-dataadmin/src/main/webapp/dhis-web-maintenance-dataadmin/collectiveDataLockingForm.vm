@@ -10,7 +10,7 @@
 					<tr>
 						<td>
 							<select id="periodTypeId" name="periodTypeId" style="min-width:325px" onchange="getPeriods()">
-								<option value="null">[ $i18n.getString( "select_period_type_all" ) ]</option>
+								<option value="">[ $i18n.getString( "select_period_type_all" ) ]</option>
 								#foreach ( $periodType in $periodTypes )
 								  <option value="$periodType.name"#if( $currentPeriodTypeId == $type.name ) selected="selected"#end>$periodType.name</option>
 								#end
