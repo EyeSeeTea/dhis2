@@ -57,6 +57,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 	</bean>
+	
+	<bean id="org.hisp.dhis.dataadmin.action.lock.ValidateCollectiveDataLockingAction"
+		class="org.hisp.dhis.dataadmin.action.lock.ValidateCollectiveDataLockingAction"
+		scope="prototype">
+		<property name="selectionTreeManager"
+            ref="org.hisp.dhis.oust.manager.SelectionTreeManager"/>		
+	</bean>
 
 	<!-- Maintenance -->
 

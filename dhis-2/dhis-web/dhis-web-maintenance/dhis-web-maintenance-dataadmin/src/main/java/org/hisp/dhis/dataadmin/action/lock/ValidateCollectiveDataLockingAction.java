@@ -29,34 +29,20 @@ package org.hisp.dhis.dataadmin.action.lock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
-import org.hisp.dhis.datalock.DataSetLockService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.source.Source;
-import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Brajesh Murari
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class CollectiveDataLockingAction
+public class ValidateCollectiveDataLockingAction
     implements Action
 {
-    Collection<Period> periods = new ArrayList<Period>();
-
-    Collection<DataSet> dataSets = new ArrayList<DataSet>();
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -66,41 +52,6 @@ public class CollectiveDataLockingAction
     public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
         this.selectionTreeManager = selectionTreeManager;
-    }
-
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
-    }
-
-    private DataSetService dataSetService;
-
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
-    }
-
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
-    private DataSetLockService dataSetLockService;
-
-    public void setDataSetLockService( DataSetLockService dataSetLockService )
-    {
-        this.dataSetLockService = dataSetLockService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
     }
 
     // -------------------------------------------------------------------------
@@ -131,14 +82,7 @@ public class CollectiveDataLockingAction
     {
         this.selectedDataSets = selectedDataSets;
     }
-
-    private boolean selectBetweenLockUnlock;
-
-    public void setSelectBetweenLockUnlock( boolean selectBetweenLockUnlock )
-    {
-        this.selectBetweenLockUnlock = selectBetweenLockUnlock;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -156,37 +100,30 @@ public class CollectiveDataLockingAction
 
     public String execute()
     {
-        for ( Integer periodId : selectedPeriods )
+        if ( selectedPeriods == null || selectedPeriods.size() == 0 )
         {
-            periods.add( periodService.getPeriod( periodId.intValue() ) );
+            message = i18n.getString( "period_not_selected" );
+
+            return INPUT;
         }
 
-        for ( Integer dataSetId : selectedDataSets )
+        if ( selectedDataSets == null || selectedDataSets.size() == 0 )
         {
-            dataSets.add( dataSetService.getDataSet( dataSetId.intValue() ) );
+            message = i18n.getString( "dataset_not_selected" );
+
+            return INPUT;
         }
+        
+        Collection<OrganisationUnit> selectedUnits = new HashSet<OrganisationUnit>();
+        selectedUnits = selectionTreeManager.getSelectedOrganisationUnits();
 
-        String currentUserName = currentUserService.getCurrentUsername();
-        Collection<OrganisationUnit> selectedOrganisationUnits = new HashSet<OrganisationUnit>();
-        Set<Source> selectedSources = new HashSet<Source>();
-
-        selectedOrganisationUnits = selectionTreeManager.getSelectedOrganisationUnits();
-        selectedSources = organisationUnitService.convert( selectedOrganisationUnits );
-
-        if ( selectBetweenLockUnlock )
+        if ( selectedUnits == null || selectedUnits.size() == 0 )
         {
-            dataSetLockService.applyCollectiveDataLock( dataSets, periods, selectedSources, currentUserName );
+            message = i18n.getString( "organisation_not_selected" );
 
-            message = i18n.getString( "information_successfully_locked" );
-        }
-        else
-        {
-            dataSetLockService.removeCollectiveDataLock( dataSets, periods, selectedSources, currentUserName );
-
-            message = i18n.getString( "information_successfully_unlocked" );
+            return INPUT;
         }
 
         return SUCCESS;
     }
-
 }
