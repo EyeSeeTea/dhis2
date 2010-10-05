@@ -24,12 +24,7 @@ tr.relationship-row{background-color: #BFFFC2; display : none}
 		<td>$total</td>
 	</tr>
 </table>
- <table>
- <tr>
- 	<td><label>$i18n.getString('show_patient_relationships')</label></td>
- 	<td><input type="checkbox" onclick="toggleRelationshipRow(this)"/></td>
- </tr>
- </table>
+
 <table class="mainPageTable">
   	
   <tr>
