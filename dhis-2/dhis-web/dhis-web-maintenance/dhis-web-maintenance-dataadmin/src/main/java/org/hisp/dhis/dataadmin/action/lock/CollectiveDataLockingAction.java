@@ -188,13 +188,13 @@ public class CollectiveDataLockingAction
 
     private String unlock = "unlock";
 
-    private String select_all_at_level = "Select all at level";
+    private String lock_all_at_level = "Lock all at level";
 
-    private String unselect_all_at_level = "Unselect all at level";
+    private String unlock_all_at_level = "Unlock all at level";
 
-    private String select_all_in_group = "Select all in group";
+    private String lock_all_in_group = "Lock all in group";
 
-    private String unselect_all_in_group = "Unselect all in group";
+    private String unlock_all_in_group = "Unlock all in group";
 
     public String execute()
     {
@@ -229,7 +229,7 @@ public class CollectiveDataLockingAction
         Collection<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
         Set<Source> selectedOrganisationUnitsSource = new HashSet<Source>();
 
-        if ( selectBetweenLockUnlock.equalsIgnoreCase( select_all_at_level ) )
+        if ( selectBetweenLockUnlock.equalsIgnoreCase( lock_all_at_level ) )
         {
             organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( levelId.intValue() );
             selectedOrganisationUnitsSource = getCurrentUserOrgnaisationUnits();
@@ -241,7 +241,7 @@ public class CollectiveDataLockingAction
             return SUCCESS;
 
         }
-        else if ( selectBetweenLockUnlock.equalsIgnoreCase( unselect_all_at_level ) )
+        else if ( selectBetweenLockUnlock.equalsIgnoreCase( unlock_all_at_level ) )
         {
             organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( levelId.intValue() );
             selectedOrganisationUnitsSource = getCurrentUserOrgnaisationUnits();
@@ -253,7 +253,7 @@ public class CollectiveDataLockingAction
             return SUCCESS;
         }
 
-        if ( selectBetweenLockUnlock.equalsIgnoreCase( select_all_in_group ) )
+        if ( selectBetweenLockUnlock.equalsIgnoreCase( lock_all_in_group ) )
         {
             organisationUnits = organisationUnitGroupService.getOrganisationUnitGroup( orgGroup.intValue() )
                 .getMembers();
@@ -265,7 +265,7 @@ public class CollectiveDataLockingAction
 
             return SUCCESS;
         }
-        else if ( selectBetweenLockUnlock.equalsIgnoreCase( unselect_all_in_group ) )
+        else if ( selectBetweenLockUnlock.equalsIgnoreCase( unlock_all_in_group ) )
         {
             organisationUnits = organisationUnitGroupService.getOrganisationUnitGroup( orgGroup.intValue() )
                 .getMembers();
