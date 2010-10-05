@@ -6,7 +6,7 @@ function getAggDataElements( )
 {
   var degroup = document.getElementById( 'degroup' );
   var degId = degroup.options[ degroup.selectedIndex ].value;
-
+ 
   var requestString = 'getAggDataElements.action?degId=' + degId;
 
   var request = new Request();
@@ -34,7 +34,9 @@ function getAggDataElementsCompleted( dataelementElement )
         option.text = name;
         option.title = name;
         
-        de.add(option, null);       	
+        de.add(option, null);  
+        
+      
     }	    
 }
 
