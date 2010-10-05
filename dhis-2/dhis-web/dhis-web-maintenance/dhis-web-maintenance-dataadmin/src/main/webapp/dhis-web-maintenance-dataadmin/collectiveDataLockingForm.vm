@@ -47,9 +47,9 @@
                                 #end
                             </select>
 							<input type="submit" value="$i18n.getString( 'unlock_all_at_level' )" onclick="setClickedButtonElementValue(this)" style="width:12em"/>
-							 <select id="selectionValue" name="selectionValue" onlclick="" enabled="true">
-                                        <option value="selected" selected>Selected</option>
-                                        <option value="Childtree">Child Tree</option>
+							 <select id="selectionValue" name="selectionValue" onclick="" enabled="true">
+								<option value="selected" selected>Selected</option>
+								<option value="Childtree">Child Tree</option>
                              </select>   							    
 						</td>							
 					</tr>
