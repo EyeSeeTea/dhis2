@@ -9,6 +9,7 @@ import javax.microedition.rms.RecordStoreException;
 import org.hisp.dhis.mobile.reporting.connection.ConnectionManager;
 import org.hisp.dhis.mobile.reporting.db.ActivityRecordStore;
 import org.hisp.dhis.mobile.reporting.db.ModelRecordStore;
+import org.hisp.dhis.mobile.reporting.db.ProgramStageRecordStore;
 import org.hisp.dhis.mobile.reporting.db.SettingsRecordStore;
 import org.hisp.dhis.mobile.reporting.model.AbstractModel;
 import org.hisp.dhis.mobile.reporting.model.Activity;
@@ -64,6 +65,7 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	private List servicesList;
 	private List maintenanceList;
 	private List deleteList;
+	private List deleteProgList;
 	private List mainMenuList;
 	private List dsDnldList;
 	private List prDnldList;
@@ -214,7 +216,16 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 				deleteDataSet(model);
 				switchDisplayable(null, getMaintenanceList());
 			}
-		} 
+		}
+		else if(displayable == deleteProgList)
+		{
+		    if(command == List.SELECT_COMMAND){
+		        AbstractModel model = (AbstractModel) programsVector.elementAt(((List) getDeleteProgList()).getSelectedIndex());
+		        deleteProgramsAndProgramStages(model);
+		    }else if(command == deleteBakCmd){
+		        switchDisplayable( null, getMaintenanceList() );
+		    }
+		}
 		else if (displayable == dsDnldList) 
 		{
 			if (command == List.SELECT_COMMAND) 
@@ -1044,6 +1055,7 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 		
 		if( activity == null || programStage == null )
 		{
+		        form.deleteAll();
 			form.append("The requested form is not available");
 		}
 		else
@@ -1099,11 +1111,17 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 			if (rec != null){				
 				prStage = new ProgramStage();
 				prStage.deSerialize(rec);
+				getActivityDetailForm().setTitle("Details");
+	                        System.out.println(prStage);
+	                        getActivityDetailForm().append( "Service: " + prStage.getName() 
+	                                        + "\nName:  " + selectedActivity.getBeneficiary().getFullName() 
+	                                        + "\nDue date: " + Period.formatDailyPeriod(selectedActivity.getDueDate()));
 			}			
-			getActivityDetailForm().setTitle("Details");
-			getActivityDetailForm().append( "Service: " + prStage.getName() 
-					+ "\nName:  " + selectedActivity.getBeneficiary().getFullName() 
-					+ "\nDue date: " + Period.formatDailyPeriod(selectedActivity.getDueDate()));
+			else{
+			    getActivityDetailForm().deleteAll();
+			    getActivityDetailForm().append( "There is no details" );
+			    
+			}
 			
 		} catch (RecordStoreException rse) {
 			
@@ -1165,8 +1183,8 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 			}
 			else if (__selectedString.equals("Delete Program")) 
 			{
-				populatePrograms(getDeleteList());
-				switchDisplayable(null, getDeleteList());
+				populatePrograms(getDeleteProgList());
+				switchDisplayable(null, getDeleteProgList());
 			}
 			else if(__selectedString.equals("Download Activity Plan"))
 			{
@@ -1179,7 +1197,12 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 			}
 			else if (__selectedString.equals("Delete Activity Plan")) 
 			{
-				deleteActivityPlan();
+    			        getWaitForm().deleteAll();
+                                getWaitForm().setTitle("Deleting Activity Plan");
+                                getWaitForm().append("Please wait........");
+                                switchDisplayable(null, getWaitForm());
+                                
+                                deleteActivityPlan();
 			}			
 		}
 	}
@@ -1324,7 +1347,22 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 		}
 		return errorAlert;
 	}
-
+	
+	/**
+         * Returns an initiliazed instance of deleteProgList component.
+         * 
+         * @return the initialized component instance
+         */
+        public List getDeleteProgList() {
+                if (deleteProgList == null) {
+                    deleteProgList = new List("Please select", Choice.IMPLICIT);
+                    deleteProgList.addCommand(getDeleteBakCmd());                       
+                    deleteProgList.setCommandListener(this);
+                }               
+                return deleteProgList;
+        }
+	
+	
 	/**
 	 * Returns an initiliazed instance of deleteList component.
 	 * 
@@ -1352,7 +1390,7 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	 * deleteList component.
 	 */
 	public void deleteListAction() {
-
+	    
 	}
 
 	/**
@@ -1486,7 +1524,26 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	
 	private void populatePrograms(List list) 
 	{
-		System.out.println("I will try to delete programs here");
+	    programsVector.removeAllElements();
+	    ModelRecordStore modelRecordStore = null;
+	    Vector programs = null;
+            try {
+                modelRecordStore = new ModelRecordStore(ModelRecordStore.PROGRAM_DB);
+                programs = modelRecordStore.getAllRecord();
+            } catch (RecordStoreException rse) {
+                rse.printStackTrace();
+            }
+            
+            list.deleteAll();
+            if(programs!=null){
+                for (int i = 0; i < programs.size(); i++) {
+                    AbstractModel prog = (AbstractModel) programs.elementAt(i);
+                    list.insert(i, prog.getName(), null);
+                    programsVector.addElement(prog);
+                }
+            }
+            
+            switchDisplayable( null, getDeleteProgList() );
 	}
 
 	private void loadDataSets(List list) 
@@ -1557,7 +1614,19 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	
 	private void deleteActivityPlan()
 	{
-		System.out.println("should delete activity plan");
+	    new Thread(new Runnable()
+            {
+                
+	        public void run() {
+	            ActivityRecordStore activityRs = new ActivityRecordStore();
+	            activityRs.clear();
+	            switchDisplayable( null, getMaintenanceList() );
+                }
+            }
+	        
+	    ).start();    
+	    
+	        
 	}
 	
 	private void downloadActivityPlan() 
@@ -1598,6 +1667,7 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 		dataSetsVector = dataSets;
 
 		if (dataSets == null) {
+		        getDsDnldList().deleteAll();
 			getDsDnldList().append("No Datasets available", null);
 		} else {
 			getDsDnldList().deleteAll();
@@ -1689,13 +1759,12 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 					programRecordStore.AddRecord(model.serialize());
 					
 					Vector prStgs = program.getProgramStages();
-					
 					for(int i=0; i<prStgs.size(); i++)
 					{
-						ProgramStage prStg = (ProgramStage) prStgs.elementAt(i);						
-						programStageRecordStore.AddRecord( prStg.serialize() );							
+						ProgramStage prStg = (ProgramStage) prStgs.elementAt(i);
+						prStg.setProgramId( model.getId() );
+						programStageRecordStore.AddRecord( prStg.serialize() );	
 					}					
-					
 				} catch (IOException ex) {
 					// ex.printStackTrace();
 					getErrorAlert().setTitle("Download Status");
@@ -1723,7 +1792,7 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 			ActivityRecordStore activityRecordStore = new ActivityRecordStore();				
 			activityRecordStore.setActivityVector(activityPlan.getActivities());			
 			
-			activityRecordStore.save();				
+			activityRecordStore.save();
 			
 			getSuccessAlert().setTitle("Download Status");
 			getSuccessAlert().setString("SUCCESS");
@@ -1885,6 +1954,22 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 			modelRecordStore.deleteRecord(model);
 		} catch (RecordStoreException rse) {
 		}
+	}
+	
+	private void deleteProgramsAndProgramStages(AbstractModel model){
+	       ModelRecordStore progRecord = null;
+	       ProgramStageRecordStore progStageRecord = null;
+               try {
+                       progRecord = new ModelRecordStore(ModelRecordStore.PROGRAM_DB);
+                       progStageRecord = new ProgramStageRecordStore();
+                       //Delete ProgramStages have programId = model.getId();
+                       progStageRecord.deleteProgStageOfProgId( model.getId() );
+                       //Delete Program has id = model.getId();
+                       progRecord.deleteRecord(model);
+                       //should refresh deleteProgList here and show it again
+                       switchDisplayable( null, getMaintenanceList() );
+               } catch (RecordStoreException rse) {
+               }    
 	}
 
 	public DateField getDailyPeriodDateField() {

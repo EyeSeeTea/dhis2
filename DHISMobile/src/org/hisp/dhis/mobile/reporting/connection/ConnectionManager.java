@@ -1,6 +1,8 @@
 package org.hisp.dhis.mobile.reporting.connection;
 
 import com.jcraft.jzlib.ZInputStream;
+import com.sun.midp.io.Base64;
+
 import java.io.*;
 import java.util.Vector;
 import javax.microedition.io.*;
@@ -119,8 +121,10 @@ public class ConnectionManager extends Thread {
 
 		// set HTTP basic authentication
 		if (userName != null && password != null) {
-			conn.setRequestProperty("Authorization",
-					"Basic " + BasicAuth.encode(userName,password));
+//			conn.setRequestProperty("Authorization",
+//					"Basic " + BasicAuth.encode(userName,password));
+		    byte[] auth = (userName+":"+password).getBytes();
+		        conn.setRequestProperty( "Authorization", "Basic " + Base64.encode( auth, 0, auth.length ));
 		}
 	}
 
