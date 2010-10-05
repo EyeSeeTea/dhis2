@@ -85,10 +85,9 @@ public class GetDataSetsForPeriodTypeAction
 
     public String execute()
     {
-
-        if ( periodType != null )
+        if ( !periodType.equals( "" ) )
         {
-                dataSets = dataSetService.getAssignedDataSetsByPeriodType( periodService.getPeriodTypeByName( periodType ) );
+            dataSets = dataSetService.getAssignedDataSetsByPeriodType( periodService.getPeriodTypeByName( periodType ) );
         }
         return SUCCESS;
     }
