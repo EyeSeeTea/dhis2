@@ -601,34 +601,19 @@
 
 		<!-- DATA SET COMPLETED REPORT ACTION -->
 
-		<action name="selectDataSetCompletedReport"
-			class="org.hisp.dhis.reportexcel.action.SetBookmarkTypeCompleteReportAction">
-			<result name="success" type="chain">selectDataSetCompletedReportChain
-			</result>
-		</action>
-
-		<action name="selectDataSetCompletedReportChain"
-			class="org.hisp.dhis.reportexcel.datasetcompleted.action.GetSelectedOrganisationUnitAction">
-			<interceptor-ref name="organisationUnitTreeStack" />
+		<action name="dataSetCompletedReports"
+			class="org.hisp.dhis.reportexcel.datasetcompleted.action.DataSetCompletedReportFormAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-excel-reporting/dataSetCompleteReportSelect.vm</param>
-			<param name="menu">/dhis-web-excel-reporting/menuWithTree.vm</param>
-			<param name="menuTreeHeight">400</param>
-			<param name="javascripts">
-				../dhis-web-commons/ouwt/ouwt.js,
-				../dhis-web-commons/util/jquery.jqprint.0.3.js,
-				ext/adapter/ext/ext-base.js,
-				ext/ext-all.js,
-				ext/ux/MultiSelect.js,
-				ext/ux/ItemSelector.js,
-				javascript/dataSetCompleted.js				
-			</param>
-			<param name="stylesheets">
-				ext/resources/css/ext-all.css,
-				ext/ux/css/MultiSelect.css,
-				style/dataSetCompleted.css
-			</param>
+			<param name="page">/dhis-web-excel-reporting/dataSetCompleteds.vm</param>
+			<param name="menu">/dhis-web-excel-reporting/menu.vm</param>
 		</action>
+		
+		<action name="viewByPeriodForm"
+			class="org.hisp.dhis.reportexcel.datasetcompleted.action.ViewByPeriodFormAction">
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonPeriods.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>	
+		</action>
+		
 
 		<action name="viewCompleteReportByPeriod"
 			class="org.hisp.dhis.reportexcel.datasetcompleted.action.ViewCompletedReportByPeriodsAction">
@@ -1498,14 +1483,9 @@
 			class="org.hisp.dhis.reportexcel.jchart.action.UpdateJChartUserRoleAction">
 			<result name="success" type="redirect">jcharts.action</result>
 			<param name="requiredAuthorities">F_EXCEL_REPORT_ADMINISTRATION</param>					
-		</action>
-		
-		<action name="viewJCharts"
-			class="org.hisp.dhis.reportexcel.datasetcompleted.action.GetSelectedOrganisationUnitAction">
-			<result name="success" type="chain">viewJChartsChain</result>
 		</action>		
 		
-		<action name="viewJChartsChain"
+		<action name="viewJCharts"
 			class="org.hisp.dhis.reportexcel.jchart.action.GetALLJchartAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-excel-reporting/chart/viewJCharts.vm</param>

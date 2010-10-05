@@ -44,6 +44,7 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -72,11 +73,11 @@ public class ViewCompletedReportByPeriodsAction
         this.periodService = periodService;
     }
 
-    private OrganisationUnitSelectionManager organisationUnitSelectionManager;
+    private SelectionTreeManager selectionTreeManager;
 
-    public void setOrganisationUnitSelectionManager( OrganisationUnitSelectionManager organisationUnitSelectionManager )
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        this.organisationUnitSelectionManager = organisationUnitSelectionManager;
+        this.selectionTreeManager = selectionTreeManager;
     }
 
     private DataSetService dataSetService;
@@ -157,8 +158,7 @@ public class ViewCompletedReportByPeriodsAction
     {
         dataSet = dataSetService.getDataSet( id );
 
-        organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitSelectionManager
-            .getSelectedOrganisationUnit().getChildren() );
+        organisationUnits = new ArrayList<OrganisationUnit>( selectionTreeManager.getSelectedOrganisationUnits() );
 
         periods = new ArrayList<Period>();
 
