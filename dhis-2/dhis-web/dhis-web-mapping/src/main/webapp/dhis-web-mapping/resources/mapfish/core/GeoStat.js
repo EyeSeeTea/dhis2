@@ -88,11 +88,11 @@ mapfish.GeoStat = OpenLayers.Class({
         if (!doc || !doc.documentElement) {
             doc = request.responseText;
         }
-        var format = this.format || new OpenLayers.Format.GeoJSON()
+        var format = this.format || new OpenLayers.Format.GeoJSON();
         this.layer.removeFeatures(this.layer.features);
         this.layer.addFeatures(format.read(doc));
         this.requestSuccess(request);
-        
+
         if (ACTIVEPANEL == thematicMap) {
             if (!choropleth.validateForm()) {
                 MASK.hide();

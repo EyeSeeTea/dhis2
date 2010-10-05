@@ -59,12 +59,12 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
     mapData: false,
     
     labels: false,
+    
+    stores: false,
 	
     initComponent : function() {
         
-        mapData = {};
-    
-        mapStore = new Ext.data.JsonStore({
+        var mapStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMaps' + type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
@@ -72,7 +72,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
             autoLoad: true
         });
             
-        gridStore = new Ext.data.JsonStore({
+        var gridStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
             root: 'mapOrganisationUnitRelations',
             fields: ['id', 'organisationUnit', 'organisationUnitId', 'featureId'],
@@ -81,7 +81,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
             autoLoad: false
         });
 
-        gridView = new Ext.grid.GridView({ 
+        var gridView = new Ext.grid.GridView({ 
             forceFit: true,
             getRowClass: function(row,index) {
                 var cls = ''; 
@@ -95,6 +95,11 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                 return cls;
             }
         });
+        
+        this.stores = {
+            mapStore: mapStore,
+            gridStore: gridStore
+        };
     
         this.items =
         [
@@ -294,7 +299,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 												success: function() {
 													Ext.message.msg(true, '<span class="x-msg-hl">' + mapping.relation + '</span> (' + i18n_in_the_map + ') ' + i18n_assigned_to + ' <span class="x-msg-hl">' + name + '</span> (' + i18n_database + ').');
 													Ext.getCmp('grid_gp').getStore().load();
-													popup.hide();
+													selectFeaturePopup.hide();
 													mapping.relation = false;
 													Ext.getCmp('filter_tf').setValue('');
 													mapping.classify(true, true);
@@ -418,26 +423,25 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
             params: {level: level},
             scope: this,
             success: function(r) {
-                FEATURE[thematicMap] = this.layer.features;
                 var organisationUnits = Ext.util.JSON.decode(r.responseText).organisationUnits;
                 var nameColumn = this.mapData.nameColumn;
                 var mlp = this.mapData.mapLayerPath;
                 var count_match = 0;
                 var relations = '';
                 
-                for (var i = 0; i < FEATURE[thematicMap].length; i++) {
-                    FEATURE[thematicMap][i].attributes.compareName = FEATURE[thematicMap][i].attributes[nameColumn].split(' ').join('').toLowerCase();
+                for (var i = 0; i < this.layer.features.length; i++) {
+                    this.layer.features[i].attributes.compareName = this.layer.features[i].attributes[nameColumn].split(' ').join('').toLowerCase();
                 }
         
-                for ( var i = 0; i < organisationUnits.length; i++ ) {
+                for (var i = 0; i < organisationUnits.length; i++) {
                     organisationUnits[i].compareName = organisationUnits[i].name.split(' ').join('').toLowerCase();
                 }
                 
-                for ( var i = 0; i < organisationUnits.length; i++ ) {
-                    for ( var j = 0; j < FEATURE[thematicMap].length; j++ ) {
-                        if (FEATURE[thematicMap][j].attributes.compareName == organisationUnits[i].compareName) {
+                for (var i = 0; i < organisationUnits.length; i++) {
+                    for (var j = 0; j < this.layer.features.length; j++) {
+                        if (this.layer.features[j].attributes.compareName == organisationUnits[i].compareName) {
                             count_match++;
-                            relations += organisationUnits[i].id + '::' + FEATURE[thematicMap][j].attributes[nameColumn] + ';;';
+                            relations += organisationUnits[i].id + '::' + this.layer.features[j].attributes[nameColumn] + ';;';
                             break;
                         }
                     }
@@ -450,11 +454,12 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                     url: path_mapping + 'addOrUpdateMapOrganisationUnitRelations' + type,
                     method: 'POST',
                     params: {mapLayerPath:mlp, relations:relations},
+                    scope: this,
                     success: function(r) {
                         MASK.msg = i18n_applying_organisation_units_relations ;
                         MASK.show();
                         
-                        Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + ' (map <span class="x-msg-hl">' + FEATURE[thematicMap].length + '</span>, db <span class="x-msg-hl">' + organisationUnits.length + '</span>)');
+                        Ext.message.msg(true, '<span class="x-msg-hl">' + count_match + '</span> '+ i18n_organisation_units_assigned + ' (map <span class="x-msg-hl">' + this.layer.features.length + '</span>, db <span class="x-msg-hl">' + organisationUnits.length + '</span>)');
                        
                         Ext.getCmp('grid_gp').getStore().load();
                         mapping.classify(false, position);
@@ -492,23 +497,21 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                         MAP.zoomToExtent(this.layer.getDataExtent());
                     }
 
-                    FEATURE[thematicMap] = this.layer.features;
-        
                     var mlp = this.mapData.mapLayerPath;
                     var relations =	Ext.getCmp('grid_gp').getStore();
                     var nameColumn = this.mapData.nameColumn;
                     var noCls = 1;
                     var noAssigned = 0;
         
-                    for (var i = 0; i < FEATURE[thematicMap].length; i++) {
-                        FEATURE[thematicMap][i].attributes.value = 0;
-                        FEATURE[thematicMap][i].attributes.labelString = '';
+                    for (var i = 0; i < this.layer.features.length; i++) {
+                        this.layer.features[i].attributes.value = 0;
+                        this.layer.features[i].attributes.labelString = '';
 
                         for (var j = 0; j < relations.getTotalCount(); j++) {
-                            var name = FEATURE[thematicMap][i].attributes[nameColumn];
+                            var name = this.layer.features[i].attributes[nameColumn];
                             if (relations.getAt(j).data.featureId == name) {
-                                FEATURE[thematicMap][i].attributes.value = 1;
-                                FEATURE[thematicMap][i].attributes.labelString = name;
+                                this.layer.features[i].attributes.value = 1;
+                                this.layer.features[i].attributes.labelString = name;
                                 noAssigned++;
                                 noCls = noCls < 2 ? 2 : noCls;
                                 break;
@@ -516,8 +519,8 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                         }
                     }
 
-                    var color = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? assigned_row_color : unassigned_row_color;
-                    noCls = noCls > 1 && noAssigned == FEATURE[thematicMap].length ? 1 : noCls;
+                    var color = noCls > 1 && noAssigned == this.layer.features.length ? assigned_row_color : unassigned_row_color;
+                    noCls = noCls > 1 && noAssigned == this.layer.features.length ? 1 : noCls;
                     
                     mapping.applyValues(color, noCls);
                 }

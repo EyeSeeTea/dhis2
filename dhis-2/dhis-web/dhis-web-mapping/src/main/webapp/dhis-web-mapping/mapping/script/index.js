@@ -2439,7 +2439,7 @@ Ext.onReady( function() {
                                         Ext.Ajax.request({
                                             url: path_mapping + 'setMapUserSettings' + type,
 											method: 'POST',
-											params: {mapSourceType: msv, mapDateType: MAPDATETYPE },
+											params: {mapSourceType: msv, mapDateType: MAPDATETYPE},
 											success: function(r) {
                                                 MAPSOURCE = msv;
                                                 

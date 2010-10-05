@@ -77,13 +77,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     selectFeatures: false,
     
     initComponent: function() {
-        this.legend = {};
-        this.legend.type = map_legend_type_automatic;
-        this.legend.method = 2;
-        this.legend.classes = 5;
-        this.mapData = {};
+    
+        this.legend = {
+            type: map_legend_type_automatic,
+            method: 2,
+            classes: 5
+        };
+
         this.valueType = map_value_type_indicator;
-        
+    
         var mapViewStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMapViews' + type,
             root: 'mapViews',
@@ -472,78 +474,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mapStore: mapStore,
             predefinedMapLegendSetStore: predefinedMapLegendSetStore
         }
-        
-        this.selectFeatures = {
-            onHoverSelect: function onHoverSelect(feature) {
-                var text = '<div style="color:black">' + feature.attributes[choropleth.mapData.nameColumn] + '</div>';
-                if (ACTIVEPANEL == thematicMap) {
-                    text += '<div style="color:#555">' + feature.attributes.value + '</div>';
-                }
-                Ext.getCmp('featureinfo_l').setText(text, false);
-            },
-            onHoverUnselect: function onHoverUnselect(feature) {
-                Ext.getCmp('featureinfo_l').setText('<span style="color:#666">'+ i18n_no_feature_selected +'</span>', false);
-            },
-            onClickSelect: function onClickSelect(feature) {
-                var east_panel = Ext.getCmp('east');
-                var x = east_panel.x - 210;
-                var y = east_panel.y + 41;
-                
-                if (MAPSOURCE == map_source_type_database) {
-                    if (feature.attributes.hasChildrenWithCoordinates) {
-                        if (lfw) {
-                            lfw.destroy();
-                        }
-                        
-                        Ext.getCmp('map_tf').setValue(feature.data.name);
-                        Ext.getCmp('map_tf').value = feature.attributes.id;
-                        choropleth.loadFromDatabase(feature.attributes.id, true);
-                    }
-                    else {
-                        Ext.message.msg(false, i18n_no_coordinates_found);
-                    }
-                }
-                
-                if (ACTIVEPANEL == organisationUnitAssignment) {
-                    if (selectFeaturePopup) {
-                        selectFeaturePopup.destroy();
-                    }
-                    
-                    var popup = new Ext.Window({
-                        title: '<span class="panel-title">Assign organisation unit</span>',
-                        width: 180,
-                        height: 65,
-                        layout: 'fit',
-                        plain: true,
-                        html: '<div class="window-orgunit-text">' + feature.attributes[mapping.mapData.nameColumn] + '</div>',
-                        x: x,
-                        y: y,
-                        listeners: {
-                            'close': {
-                                fn: function() {
-                                    mapping.relation = false;
-                                }
-                            }
-                        }
-                    });
-                    
-                    selectFeaturePopup = popup;		
-                    popup.show();
-                    mapping.relation = feature.attributes[mapping.mapData.nameColumn];
-                }
-            }
-        }
-        
-        var sf = new OpenLayers.Control.newSelectFeature(
-            this.layer, {
-                onHoverSelect: this.selectFeatures.onHoverSelect,
-                onHoverUnselect: this.selectFeatures.onHoverUnselect,
-                onClickSelect: this.selectFeatures.onClickSelect,
-            }
-        );
-        
-        MAP.addControl(sf);
-        sf.activate();
         
         this.items = [
         {
@@ -1378,6 +1308,79 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         }
 
         ];
+        
+        this.selectFeatures = {
+            onHoverSelect: function onHoverSelect(feature) {
+                if (ACTIVEPANEL == thematicMap) {
+                    Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[choropleth.mapData.nameColumn] + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
+                }
+                else if (ACTIVEPANEL == organisationUnitAssignment) {
+                    Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[mapping.mapData.nameColumn] + '</div>', false);
+                }
+            },
+            onHoverUnselect: function onHoverUnselect(feature) {
+                Ext.getCmp('featureinfo_l').setText('<span style="color:#666">' + i18n_no_feature_selected + '</span>', false);
+            },
+            onClickSelect: function onClickSelect(feature) {
+                var east_panel = Ext.getCmp('east');
+                var x = east_panel.x - 210;
+                var y = east_panel.y + 41;
+                
+                if (ACTIVEPANEL == thematicMap && MAPSOURCE == map_source_type_database) {
+                    if (feature.attributes.hasChildrenWithCoordinates) {
+                        if (lfw) {
+                            lfw.destroy();
+                        }
+                        
+                        Ext.getCmp('map_tf').setValue(feature.data.name);
+                        Ext.getCmp('map_tf').value = feature.attributes.id;
+                        choropleth.loadFromDatabase(feature.attributes.id, true);
+                    }
+                    else {
+                        Ext.message.msg(false, i18n_no_coordinates_found);
+                    }
+                }
+                
+                if (ACTIVEPANEL == organisationUnitAssignment && MAPSOURCE != map_source_type_database) {
+                    if (selectFeaturePopup) {
+                        selectFeaturePopup.destroy();
+                    }
+                    
+                    var popup = new Ext.Window({
+                        title: '<span class="panel-title">Assign organisation unit</span>',
+                        width: 180,
+                        height: 65,
+                        layout: 'fit',
+                        plain: true,
+                        html: '<div class="window-orgunit-text">' + feature.attributes[mapping.mapData.nameColumn] + '</div>',
+                        x: x,
+                        y: y,
+                        listeners: {
+                            'close': {
+                                fn: function() {
+                                    mapping.relation = false;
+                                }
+                            }
+                        }
+                    });
+                    
+                    selectFeaturePopup = popup;		
+                    popup.show();
+                    mapping.relation = feature.attributes[mapping.mapData.nameColumn];
+                }
+            }
+        }
+        
+        var sf = new OpenLayers.Control.newSelectFeature(
+            this.layer, {
+                onHoverSelect: this.selectFeatures.onHoverSelect,
+                onHoverUnselect: this.selectFeatures.onHoverUnselect,
+                onClickSelect: this.selectFeatures.onClickSelect,
+            }
+        );
+        
+        MAP.addControl(sf);
+        sf.activate();
 	
 		mapfish.widgets.geostat.Choropleth.superclass.initComponent.apply(this);
     },
@@ -1396,7 +1399,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
 
     requestFailure: function(request) {
-        OpenLayers.Console.error( i18n_ajax_request_failed );
+        OpenLayers.Console.error(i18n_ajax_request_failed);
     },
     
     getColors: function() {
@@ -1555,7 +1558,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.coreComp.updateOptions(options);
         this.coreComp.applyClassification();
         this.classificationApplied = true;
-    
+        
         MASK.hide();
     },
 
@@ -1574,13 +1577,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
             MASK.msg = i18n_aggregating_map_values;
             MASK.show();
-
-            this.mapData.name = Ext.getCmp('map_tf').getValue();
-            this.mapData.nameColumn = 'name';
-            this.mapData.longitude = BASECOORDINATE.longitude;
-            this.mapData.latitude = BASECOORDINATE.latitude;
-            this.mapData.zoom = 7;
             
+            this.mapData = {
+                name: Ext.getCmp('map_tf').getValue(),
+                nameColumn: 'name',
+                longitude: BASECOORDINATE.longitude,
+                latitude: BASECOORDINATE.latitude,
+                zoom: 7
+            };
+
             if (!position) {
                 MAP.zoomToExtent(this.layer.getDataExtent());
             }
@@ -1595,8 +1600,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 this.mapView = false;
             }
 
-            FEATURE[thematicMap] = this.layer.features;
-            
             var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
             var dataUrl = this.valueType == map_value_type_indicator ?
@@ -1622,16 +1625,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     EXPORTVALUES = GLOBALS.util.getExportDataValueJSON(mapvalues);
                     
                     if (mapvalues.length == 0) {
-                        Ext.message.msg(false, i18n_current_selection_no_data );
+                        Ext.message.msg(false, i18n_current_selection_no_data);
                         MASK.hide();
                         return;
                     }
 
                     for (var i = 0; i < mapvalues.length; i++) {
-                        for (var j = 0; j < FEATURE[thematicMap].length; j++) {
-                            if (mapvalues[i].orgUnitName == FEATURE[thematicMap][j].attributes.name) {
-                                FEATURE[thematicMap][j].attributes.value = parseFloat(mapvalues[i].value);
-                                FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes.name + ' (' + FEATURE[thematicMap][j].attributes.value + ')';
+                        for (var j = 0; j < this.layer.features.length; j++) {
+                            if (mapvalues[i].orgUnitName == this.layer.features[j].attributes.name) {
+                                this.layer.features[j].attributes.value = parseFloat(mapvalues[i].value);
+                                this.layer.features[j].attributes.labelString = this.layer.features[j].attributes.name + ' (' + this.layer.features[j].attributes.value + ')';
                                 break;
                             }
                         }
@@ -1683,8 +1686,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         this.mapView = false;
                     }
             
-                    FEATURE[thematicMap] = this.layer.features;
-            
                     var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
                     var dataUrl = this.valueType == map_value_type_indicator ?
@@ -1727,12 +1728,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         mour[relations[i].featureId] = relations[i].organisationUnit;
                                     }
 
-                                    for (var j = 0; j < FEATURE[thematicMap].length; j++) {
-                                        var value = mv[mour[FEATURE[thematicMap][j].attributes[nameColumn]]];
-                                        FEATURE[thematicMap][j].attributes.value = value ? parseFloat(value) : '';
-                                        FEATURE[thematicMap][j].data.id = FEATURE[thematicMap][j].attributes[nameColumn];
-                                        FEATURE[thematicMap][j].data.name = FEATURE[thematicMap][j].attributes[nameColumn];
-                                        FEATURE[thematicMap][j].attributes.labelString = FEATURE[thematicMap][j].attributes[nameColumn] + ' (' + FEATURE[thematicMap][j].attributes.value + ')';
+                                    for (var j = 0; j < this.layer.features.length; j++) {
+                                        var value = mv[mour[this.layer.features[j].attributes[nameColumn]]];
+                                        this.layer.features[j].attributes.value = value ? parseFloat(value) : '';
+                                        this.layer.features[j].data.id = this.layer.features[j].attributes[nameColumn];
+                                        this.layer.features[j].data.name = this.layer.features[j].attributes[nameColumn];
+                                        this.layer.features[j].attributes.labelString = this.layer.features[j].attributes[nameColumn] + ' (' + this.layer.features[j].attributes.value + ')';
                                     }
                                     
                                     this.applyValues();

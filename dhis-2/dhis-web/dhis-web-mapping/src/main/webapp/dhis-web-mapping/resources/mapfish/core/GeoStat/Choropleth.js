@@ -73,14 +73,14 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
 	
     setClassification: function() {
         var values = [];
-        // var features = this.layer.features;
+        var features = this.layer.features;
         
-        for (var i = 0; i < FEATURE[thematicMap].length; i++) {
-            values.push(FEATURE[thematicMap][i].attributes[this.indicator]);
+        for (var i = 0; i < features.length; i++) {
+            values.push(features[i].attributes[this.indicator]);
         }
 
         var distOptions = {
-            'labelGenerator' : this.options.labelGenerator
+            'labelGenerator': this.options.labelGenerator
         };
         var dist = new mapfish.GeoStat.Distribution(values, distOptions);
         this.classification = dist.classify(
