@@ -51,7 +51,8 @@ import org.hisp.dhis.i18n.util.PathUtils;
  * @author Torgeir Lorange Ostby
  * @author Pham Thi Thuy
  * @author Nguyen Dang Quang
- * @version $Id: DefaultResourceBundleManager.java 6335 2008-11-20 11:11:26Z larshelg $
+ * @version $Id: DefaultResourceBundleManager.java 6335 2008-11-20 11:11:26Z
+ *          larshelg $
  */
 public class DefaultResourceBundleManager
     implements ResourceBundleManager
@@ -174,13 +175,14 @@ public class DefaultResourceBundleManager
 
     private Collection<Locale> getAvailableLocalesFromDir( String dirPath )
     {
-        dirPath = dirPath.replaceAll( "%20", " " );
-        File dir = new File( dirPath );    
+        dirPath = convertURLToFilePath( dirPath );
+
+        File dir = new File( dirPath );
         Set<Locale> availableLocales = new HashSet<Locale>();
         File[] files = dir.listFiles( new FilenameFilter()
         {
             public boolean accept( File dir, String name )
-            {             
+            {
                 return name.startsWith( globalResourceBundleName ) && name.endsWith( EXT_RESOURCE_BUNDLE );
             }
         } );
@@ -219,5 +221,25 @@ public class DefaultResourceBundleManager
         }
 
         return LocaleManager.DHIS_STANDARD_LOCALE;
+    }
+
+    // -------------------------------------------------------------------------
+    // Support method
+    // -------------------------------------------------------------------------
+
+    private String convertURLToFilePath( String url )
+    {
+        return url.replaceAll( "%20", " " )
+                .replaceAll( "%21", "!" ).replaceAll( "%22", "\"" )
+                .replaceAll( "%23", "#" ).replaceAll( "%24", "$" )
+                .replaceAll( "%25", "%" ).replaceAll( "%26", "&" )
+                .replaceAll( "%27", "\'").replaceAll( "%28", "(" )
+                .replaceAll( "%29", ")" ).replaceAll( "%2a", "*" )
+                .replaceAll( "%2b", "+" ).replaceAll( "%2c", "," )
+                .replaceAll( "%2d", "-" ).replaceAll( "%2e", "." )
+                .replaceAll( "%2f", "/" ).replaceAll( "%3a", ":" )
+                .replaceAll( "%3b", ";" ).replaceAll( "%3c", "<" )
+                .replaceAll( "%3d", "=" ).replaceAll( "%3e", ">" )
+                .replaceAll( "%3f", "?" ).replaceAll( "%40", "@" );
     }
 }
