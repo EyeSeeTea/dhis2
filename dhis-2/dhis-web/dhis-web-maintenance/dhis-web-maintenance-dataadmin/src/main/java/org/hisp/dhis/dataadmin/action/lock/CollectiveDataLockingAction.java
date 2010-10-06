@@ -53,6 +53,11 @@ import com.opensymphony.xwork2.Action;
 public class CollectiveDataLockingAction
     implements Action
 {
+
+    private static final String SELECTED = "selected";
+
+    private static final String CHILDTREE = "childtree";
+
     Collection<Period> periods = new ArrayList<Period>();
 
     Collection<DataSet> dataSets = new ArrayList<DataSet>();
@@ -139,6 +144,13 @@ public class CollectiveDataLockingAction
         this.selectBetweenLockUnlock = selectBetweenLockUnlock;
     }
 
+    private String selectionValue = new String();
+
+    public void setSelectionValue( String selectionValue )
+    {
+        this.selectionValue = selectionValue;
+    }
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -171,22 +183,46 @@ public class CollectiveDataLockingAction
         Set<Source> selectedSources = new HashSet<Source>();
 
         selectedOrganisationUnits = selectionTreeManager.getSelectedOrganisationUnits();
-        selectedSources = organisationUnitService.convert( selectedOrganisationUnits );
-
-        if ( selectBetweenLockUnlock )
+        
+        if ( selectionValue.equalsIgnoreCase( SELECTED ) )
         {
-            dataSetLockService.applyCollectiveDataLock( dataSets, periods, selectedSources, currentUserName );
+            selectedSources = organisationUnitService.convert( selectedOrganisationUnits );
 
-            message = i18n.getString( "information_successfully_locked" );
+            this.executeCollectiveDataLock( selectedSources, currentUserName );
         }
-        else
+        else if ( selectionValue.equalsIgnoreCase( CHILDTREE ) )
         {
-            dataSetLockService.removeCollectiveDataLock( dataSets, periods, selectedSources, currentUserName );
+            selectedSources = new HashSet<Source>();
 
-            message = i18n.getString( "information_successfully_unlocked" );
+            for ( OrganisationUnit organisationUnitsElement : selectedOrganisationUnits )
+            {
+                selectedSources.addAll( organisationUnitService.convert( organisationUnitService
+                    .getOrganisationUnitWithChildren( organisationUnitsElement.getId() ) ) );
+            }
+            
+            this.executeCollectiveDataLock( selectedSources, currentUserName );
         }
 
         return SUCCESS;
     }
 
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private void executeCollectiveDataLock( Set<Source> sources, String currentUserName )
+    {
+        if ( selectBetweenLockUnlock )
+        {
+            dataSetLockService.applyCollectiveDataLock( dataSets, periods, sources, currentUserName );
+
+            message = i18n.getString( "information_successfully_locked" );
+        }
+        else if ( selectBetweenLockUnlock )
+        {
+            dataSetLockService.removeCollectiveDataLock( dataSets, periods, sources, currentUserName );
+
+            message = i18n.getString( "information_successfully_unlocked" );
+        }
+    }
 }
