@@ -22,6 +22,8 @@ import org.hisp.dhis.mobile.reporting.model.DataValue;
 import org.hisp.dhis.mobile.reporting.model.Period;
 import org.hisp.dhis.mobile.reporting.model.Program;
 import org.hisp.dhis.mobile.reporting.model.ProgramStage;
+import org.hisp.dhis.mobile.reporting.util.AlertUtil;
+import org.hisp.dhis.mobile.reporting.util.ReinitConfirmListener;
 
 /**
  * @author abyotag_adm
@@ -50,12 +52,15 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	private TextField dhisUserName;
 	private TextField userName;
 	private TextField password;
+	private TextField serverURL;
+	private TextField pinTextField;
 	private ChoiceGroup periodChoice;
 	private Alert successAlert;
 	private Alert errorAlert;
 	private Form activityEntryForm;
 	private Form dataEntryForm;
 	private Form loginForm;
+	private Form pinForm;
 	private Form settingsForm;
 	private Form periodForm;
 	private Form waitForm;		
@@ -100,6 +105,8 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	private Command periodNxtCmd;
 	private Command dsDeleteCmd;
 	private Command selectDailyPeriodCmd;
+	private Command pinFormNextCmd;
+	private Command pinFormReinitCmd;
 	private Image logo;
 
 	/**
@@ -119,7 +126,7 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	 * Performs an action assigned to the Mobile Device - MIDlet Started point.
 	 */
 	public void startMIDlet() {
-		new SplashScreen(getLogo(), getDisplay(), (Displayable) getLoginForm());
+		new SplashScreen(getLogo(), getDisplay(), (Displayable) getLoginForm(), (Displayable) getPinForm());
 	}
 
 	/**
@@ -255,8 +262,9 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 				exitMIDlet();
 			} else if (command == lgnFrmLgnCmd) 
 			{
+				switchDisplayable(null, getWaitForm());
 				login();
-				switchDisplayable(null, getMainMenuList());
+//				switchDisplayable(null, getMainMenuList());
 			}
 		} 
 		else if (displayable == mainMenuList) 
@@ -359,8 +367,48 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 			{
 				saveSettings();
 				switchDisplayable(null, getMainMenuList());
+			} 
+		} else if (displayable == pinForm) {
+			if (command == pinFormNextCmd) {
+				checkPIN();
+			} else if (command == exitCommand){
+				exitMIDlet();
+			} else if (command == pinFormReinitCmd) {
+				ReinitConfirmListener listener = new ReinitConfirmListener();
+				listener.setCurrentScrren(getPinForm());
+				listener.setNextScreen(getLoginForm());
+				this.getDisplay().setCurrent(AlertUtil.getConfirmAlert("Reinisialize", "All of the data will be lost. Are you sure you want to reinit", listener, this, getPinForm(), getLoginForm()));
 			}
 		}
+	}
+		
+	private void checkPIN() {
+		SettingsRecordStore settingRs = null;
+        try
+        {
+            settingRs = new SettingsRecordStore( SettingsRecordStore.SETTINGS_DB );
+            if ( settingRs.get( "pin" ).equals(""))
+            {
+                if (!getPinTextField().getString().equals("")){
+                	settingRs.put("pin", getPinTextField().getString().trim());
+                	settingRs.save();
+                	switchDisplayable(null, getMainMenuList());
+                } else {
+                	switchDisplayable(AlertUtil.getInfoAlert("Error", "PIN cannot be empty"), getPinForm());
+                }
+            } else {
+            	if (settingRs.get( "pin" ).equals(getPinTextField().getString())){
+            		switchDisplayable(null, getMainMenuList());
+            	} else {
+            		switchDisplayable(AlertUtil.getInfoAlert("Error", "Ivalid PIN"), getPinForm());
+            	}
+            }
+            settingRs = null;
+        }
+        catch ( RecordStoreException e )
+        {
+            e.printStackTrace();
+        }
 	}
 
 	/**
@@ -795,12 +843,49 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	public Form getLoginForm() {
 		if (loginForm == null) {
 			loginForm = new Form("Please login", new Item[] { getUserName(),
-					getPassword() });
+					getPassword(), getServerUrl() });
 			loginForm.addCommand(getLgnFrmExtCmd());
 			loginForm.addCommand(getLgnFrmLgnCmd());
 			loginForm.setCommandListener(this);
 		}
 		return loginForm;
+	}
+	
+	public Form getPinForm() {
+		if (pinForm == null) {
+			pinForm = new Form("Enter a 4 digit PIN");
+			pinForm.append(this.getPinTextField());
+			pinForm.addCommand(this.getPinFormNextCmd());
+			pinForm.addCommand(this.getPinFormReinitCmd());
+			pinForm.addCommand(this.getExitCommand());
+			pinForm.setCommandListener(this);
+		} else if (pinForm != null) {
+			getPinTextField().setString("");
+		}
+		return pinForm;
+	}
+	
+	private TextField getPinTextField() {
+		if (pinTextField == null) {
+			pinTextField = new TextField("PIN", "", 4, TextField.NUMERIC
+					| TextField.PASSWORD);
+
+		}
+		return pinTextField;
+	}
+
+	private Command getPinFormNextCmd() {
+		if (pinFormNextCmd == null) {
+			pinFormNextCmd = new Command("Next", Command.SCREEN, 0);
+		}
+		return pinFormNextCmd;
+	}
+
+	private Command getPinFormReinitCmd() {
+		if (pinFormReinitCmd == null) {
+			pinFormReinitCmd = new Command("ReInit", Command.SCREEN, 1);
+		}
+		return pinFormReinitCmd;
 	}
 
 	/**
@@ -827,6 +912,14 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 					| TextField.PASSWORD);
 		}
 		return password;
+	}
+	
+	public TextField getServerUrl() {
+		if (serverURL == null) {
+			serverURL = new TextField("Server Location",
+					"http://localhost:8080/api/", 64, TextField.URL);
+		}
+		return serverURL;
 	}
 
 	/**
@@ -1467,22 +1560,17 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 	}
 
 	private void login() {
-
 		if (getUserName().getString() != null
 				&& getPassword().getString() != null) {
 			if (getUserName().getString().trim().length() != 0
 					&& getPassword().getString().trim().length() != 0) {
-				login = true;
+				ConnectionManager connectionManager = new ConnectionManager(
+						this, getServerUrl().getString(), getUserName()
+								.getString(), getPassword().getString(),
+						getLocale().getString(), ConnectionManager.AUTHENTICATE);
+				connectionManager.start();
 			}
 		}
-		// Take action based on login value
-		if (login) {
-			System.out.println("Login successfull");
-
-		} else {
-			System.out.println("Login failed...");
-		}
-		login = false;
 	}
 
 	private void saveSettings() {
@@ -1570,16 +1658,12 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 		SettingsRecordStore settingsRecord;
 
 		try {
-			settingsRecord = new SettingsRecordStore(SettingsRecordStore.SETTINGS_DB);
-			String rootUrl = "";
+			settingsRecord = new SettingsRecordStore(
+					SettingsRecordStore.SETTINGS_DB);
+			
 			String localeSetting = "";
-
-			rootUrl = settingsRecord.get("url");
-			if (rootUrl.trim().length() == 0) {
-				rootUrl = "http://<your_server_address>/api/";
-			}
-
 			localeSetting = settingsRecord.get("locale");
+			
 			if (localeSetting.trim().length() == 0) {
 				localeSetting = System.getProperty("microedition.locale");
 				if (localeSetting == null) {
@@ -1587,10 +1671,10 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 				}
 			}
 
-			getUrl().setString(rootUrl);
+			getUrl().setString(settingsRecord.get("url"));
 			getDhisUserName().setString(settingsRecord.get("username"));
 			getDhisUserPass().setString(settingsRecord.get("password"));
-			getLocale().setString(localeSetting);		
+			getLocale().setString(localeSetting);
 
 		} catch (RecordStoreException rse) {
 		}
@@ -1986,5 +2070,13 @@ public class DHISMIDlet extends MIDlet implements CommandListener {
 			selectDailyPeriodCmd = new Command("Select Date", Command.OK, 1);
 		}
 		return selectDailyPeriodCmd;
+	}
+	
+	public boolean isLogin() {
+		return login;
+	}
+
+	public void setLogin(boolean login) {
+		this.login = login;
 	}
 }
