@@ -24,6 +24,8 @@ function validateCollectiveDataLockingForm( form )
 			}
 			else
 			{
+				selectAllById( "selectedPeriods" );
+				selectAllById( "selectedDataSets" );
 				form.submit();
 			}
 		}
