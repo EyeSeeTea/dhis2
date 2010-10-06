@@ -32,6 +32,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -229,17 +230,14 @@ public class DefaultResourceBundleManager
 
     private String convertURLToFilePath( String url )
     {
-        return url.replaceAll( "%20", " " )
-                .replaceAll( "%21", "!" ).replaceAll( "%22", "\"" )
-                .replaceAll( "%23", "#" ).replaceAll( "%24", "$" )
-                .replaceAll( "%25", "%" ).replaceAll( "%26", "&" )
-                .replaceAll( "%27", "\'").replaceAll( "%28", "(" )
-                .replaceAll( "%29", ")" ).replaceAll( "%2a", "*" )
-                .replaceAll( "%2b", "+" ).replaceAll( "%2c", "," )
-                .replaceAll( "%2d", "-" ).replaceAll( "%2e", "." )
-                .replaceAll( "%2f", "/" ).replaceAll( "%3a", ":" )
-                .replaceAll( "%3b", ";" ).replaceAll( "%3c", "<" )
-                .replaceAll( "%3d", "=" ).replaceAll( "%3e", ">" )
-                .replaceAll( "%3f", "?" ).replaceAll( "%40", "@" );
+        try
+        {
+            url = URLDecoder.decode( url, "iso-8859-1" );
+        }
+        catch ( Exception ex )
+        {
+            ex.printStackTrace();
+        }
+        return url;
     }
 }
