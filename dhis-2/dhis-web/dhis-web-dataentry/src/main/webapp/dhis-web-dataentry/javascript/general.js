@@ -382,8 +382,6 @@ function getCalculatedDataElement( dataElementId )
 function calculateAndSaveCDEs()
 {
 	lockScreen();
-	alert(document.selectForm.selectedDataSetId.value);
-	alert(document.selectForm.useDefaultForm.value);
 	
     var request = new Request();
     request.setCallbackSuccess( dataValuesReceived );
