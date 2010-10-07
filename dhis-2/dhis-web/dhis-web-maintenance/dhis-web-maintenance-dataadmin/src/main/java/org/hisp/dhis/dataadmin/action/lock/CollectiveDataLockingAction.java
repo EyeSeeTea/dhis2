@@ -190,7 +190,7 @@ public class CollectiveDataLockingAction
 
             message = i18n.getString( "information_successfully_locked" );
         }
-        else if ( selectBetweenLockUnlock )
+        else
         {
             dataSetLockService.removeCollectiveDataLock( dataSets, periods, sources, currentUserName );
 
