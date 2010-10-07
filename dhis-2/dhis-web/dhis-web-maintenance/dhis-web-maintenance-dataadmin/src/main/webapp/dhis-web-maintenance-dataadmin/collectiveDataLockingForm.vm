@@ -4,7 +4,7 @@
 		validation( 'lockingForm', function( form )
 		{
 			validateCollectiveDataLockingForm( form );
-		} );
+		});
 	});
 </script>
 
@@ -75,22 +75,14 @@
 		<tr>
 			<td>#organisationUnitSelectionTree( true, true, false )</td>										
 		</tr>
-		<tr></tr>				
-	</table>	
-	<table>
+		<tr></tr>
 		<tr>
-			<td>
-				<select id="selectionValue" name="selectionValue" enabled="true">
-					<option value="selected" selected>$i18n.getString( "selected" )</option>
-					<option value="childtree">$i18n.getString( "child_tree" )</option>
-				</select>   
-			</td>
 			<td>
 				<input type="submit" id="lock" name="lock" onclick="setClickedButtonElementValue( true )" value="$i18n.getString( 'lock' )" style="width:10em" disabled="true"/>
 				<input type="submit" id="unlock" name="unlock" onclick="setClickedButtonElementValue( false )" value="$i18n.getString( 'unlock' )" style="width:10em" disabled="true"/>
 			</td>
 		</tr>
-	</table>	
+	</table>
 </form>
 
 <span id="message"></span>
