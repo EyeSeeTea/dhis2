@@ -714,6 +714,7 @@ function removeItem( itemId, itemName, confirmation, action )
     
     if ( result )
     {
+		setWaitMessage( i18n_process );
     	$.postJSON(
     	    action,
     	    {
@@ -728,6 +729,7 @@ function removeItem( itemId, itemName, confirmation, action )
 	                jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
 	                jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
 	                jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
+					setMessage( i18n_delete_success );
     	    	}
     	    	else if ( json.response == "error" )
     	    	{
