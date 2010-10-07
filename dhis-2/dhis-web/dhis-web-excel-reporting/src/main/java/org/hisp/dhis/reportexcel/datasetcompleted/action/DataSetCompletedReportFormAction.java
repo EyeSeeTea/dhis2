@@ -28,11 +28,14 @@ package org.hisp.dhis.reportexcel.datasetcompleted.action;
  */
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.reportexcel.Bookmark;
 import org.hisp.dhis.reportexcel.BookmarkService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -100,6 +103,13 @@ public class DataSetCompletedReportFormAction
         return dataSets;
     }
 
+    private Set<PeriodType> periodTypes;
+
+    public Set<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
     @Override
     public String execute()
         throws Exception
@@ -120,6 +130,13 @@ public class DataSetCompletedReportFormAction
             {
                 dataSets.addAll( userAuthorityGroup.getDataSets() );
             }
+        }
+
+        periodTypes = new HashSet<PeriodType>();
+
+        for ( DataSet dataSet : this.dataSets )
+        {
+            periodTypes.add( dataSet.getPeriodType() );
         }
 
         Collections.sort( dataSets, new DataSetNameComparator() );

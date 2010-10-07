@@ -74,7 +74,7 @@
 			</td>
 		</tr>
 		<tr><th colspan="4">$i18n.getString('period')</th></tr>
-		<tr>
+		<tr id="selectLoadPeriodBy">
 			<td><label for="type">$i18n.getString('load_period_by')</label></td>
 			<td>
 				<select id="loadPeriodBy" name="loadPeriodBy" onchange="showPeriodSelection()" style="width:250px;" >

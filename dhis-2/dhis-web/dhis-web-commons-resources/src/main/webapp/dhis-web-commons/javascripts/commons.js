@@ -1123,6 +1123,12 @@ function showPopupWindowById( id, width, height )
 	container.show(  jQuery.blockUI({message:null}));
 	
 }
+
+function hidePopupWindow( id )
+{
+	hideById( id );
+	unLockScreen();
+}
 /**
 * load All Data Element Groups into select combo box
 * @param selectorJQueryString is String fo jQuery selector, this string is anything but it must valid with jQuery format. This component will contain list of result* 

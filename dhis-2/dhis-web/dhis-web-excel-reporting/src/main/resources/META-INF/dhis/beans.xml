@@ -169,35 +169,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 	</bean>
 
-	<bean
-		id="org.hisp.dhis.reportexcel.association.action.GetNumberOfLevelsAction"
-		class="org.hisp.dhis.reportexcel.association.action.GetNumberOfLevelsAction"
-		scope="prototype">
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-	</bean>
-
-	<bean id="org.hisp.dhis.reportexcel.association.action.SelectLevelAction"
-		class="org.hisp.dhis.reportexcel.association.action.SelectLevelAction"
-		scope="prototype">
-		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.reportexcel.association.action.UnselectLevelAction"
-		class="org.hisp.dhis.reportexcel.association.action.UnselectLevelAction"
-		scope="prototype">
-		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-	</bean>
-
-	<bean id="org.hisp.dhis.reportexcel.association.action.UnselectAllAction"
-		class="org.hisp.dhis.reportexcel.association.action.UnselectAllAction"
-		scope="prototype">
-		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-	</bean>
 
 	<!-- REPORT EXCEL USER ROLE BEAN -->
 
@@ -608,14 +579,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<!-- DATA SET COMPLETED BEAN -->
-
-	<bean
-		id="org.hisp.dhis.reportexcel.datasetcompleted.action.GetSelectedOrganisationUnitAction"
-		class="org.hisp.dhis.reportexcel.datasetcompleted.action.GetSelectedOrganisationUnitAction"
-		scope="prototype">
-		<property name="organisationUnitSelectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
-	</bean>
+	
 
 	<bean
 		id="org.hisp.dhis.reportexcel.datasetcompleted.action.ViewCompletedReportByPeriodsAction"
@@ -623,8 +587,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-		<property name="organisationUnitSelectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
+		<property name="selectionTreeManager"
+			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 		<property name="completeDataSetRegistrationService"
 			ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
 		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
@@ -636,10 +600,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-		<property name="organisationUnitSelectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+		<property name="selectionTreeManager"
+			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />		
 		<property name="completeDataSetRegistrationService"
 			ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
 	</bean>
@@ -924,9 +886,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="excelItemService"
 			ref="org.hisp.dhis.reportexcel.excelitem.ExcelItemService" />
 		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />		
 	</bean>
 
 	<bean
@@ -1388,9 +1348,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="bookmarkService" ref="org.hisp.dhis.reportexcel.BookmarkService" />
 		<property name="userStore" ref="org.hisp.dhis.user.UserStore" />
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />	
+		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
 	</bean>
-	
+
 	<bean
 		id="org.hisp.dhis.reportexcel.datasetcompleted.action.ViewByPeriodFormAction"
 		class="org.hisp.dhis.reportexcel.datasetcompleted.action.ViewByPeriodFormAction"
@@ -1398,7 +1358,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="selectionTreeManager"
 			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />		
+		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
 	</bean>
 
 	<!-- jChart -->
@@ -1419,6 +1379,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.reportexcel.jchart.action.GetALLJchartAction"
 		scope="prototype">
 		<property name="jchartService" ref="org.hisp.dhis.jchart.JChartService" />
+		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+		<property name="userStore" ref="org.hisp.dhis.user.UserStore" />
 	</bean>
 
 	<bean id="org.hisp.dhis.reportexcel.jchart.action.AddJChartAction"
@@ -1426,6 +1388,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="jchartService" ref="org.hisp.dhis.jchart.JChartService" />
 		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />		
 	</bean>
 
 	<bean id="org.hisp.dhis.reportexcel.jchart.action.GetJChartAction"

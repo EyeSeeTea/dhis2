@@ -119,9 +119,11 @@ function selectCategoryType()
 	loadperiodBy = getRadioValue( "loadPeriodBy" );
 	if( value == 'PERIOD_CATEGORY' ){
 		showById( 'periods_selection' );		
+		showById( 'selectLoadPeriodBy' );		
 		showPeriodSelection();
 	}else{
-		hideById( "periods_selection" );	
+		hideById( "periods_selection" );			
+		hideById( "selectLoadPeriodBy" );		
 		removeValidatorRulesById( 'periodIds' );
 	}	
 	
