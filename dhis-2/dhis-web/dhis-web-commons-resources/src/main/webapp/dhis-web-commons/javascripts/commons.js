@@ -721,24 +721,30 @@ function removeItem( itemId, itemName, confirmation, action )
     	        "id": itemId   
     	    },
     	    function( json )
-    	    {
+    	    { 
     	    	if ( json.response == "success" )
     	    	{
-    	    		jQuery( "tr#tr" + itemId ).remove();
-                
-	                jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
+					jQuery( "tr#tr" + itemId ).remove();
+	                
+					jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
 	                jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
 	                jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
-					setMessage( i18n_delete_success );
+					
+					var usersTable = $("table.listTable tbody");
+					usersTable.trigger("update");
+  
+					showWarningMessage( i18n_delete_success );
     	    	}
     	    	else if ( json.response == "error" )
-    	    	{
-    	    		showWarningMessage( json.message );
+    	    	{ 
+					showWarningMessage( json.message );
     	    	}
+				hideMessage();
     	    }
     	);
     }
 }
+
 
 /**
  * Create jQuery datepicker for input text with id * * 
