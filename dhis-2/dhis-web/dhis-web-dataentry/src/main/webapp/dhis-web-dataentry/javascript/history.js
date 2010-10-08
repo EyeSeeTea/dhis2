@@ -148,20 +148,24 @@ function saveMinLimit( organisationUnitId, dataElementId, optionComboId )
 
 function saveMaxLimit( organisationUnitId, dataElementId, optionComboId )
 {
-    var minLimitField = document.getElementById( "minLimit" );
+   
+	var minLimitField = document.getElementById( "minLimit" );
     var maxLimitField = document.getElementById( "maxLimit" );
-
+    
     var request = new Request();
+    
     request.setCallbackSuccess( refreshWindow );
     request.setCallbackError( refreshWindow );
 
     if ( maxLimitField.value == '' )
     {
-        request.send( 'removeMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId );
+       
+    	request.send( 'removeMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId );
+   
     }
     else
     {
-        var minLimit = Number( minLimitField.value );
+    	var minLimit = Number( minLimitField.value );
         var maxLimit = Number( maxLimitField.value );
         
         if ( maxLimit )
@@ -180,7 +184,8 @@ function saveMaxLimit( organisationUnitId, dataElementId, optionComboId )
                 minLimit = maxLimit - 1;
             }
 
-            request.send( 'saveMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId + '&minLimit=' + minLimit + '&maxLimit=' + maxLimit );
+          request.send( 'saveMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId + '&minLimit=' + minLimit + '&maxLimit=' + maxLimit );
+            
         }
         else
         {
