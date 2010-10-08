@@ -733,7 +733,7 @@ function removeItem( itemId, itemName, confirmation, action )
 					var usersTable = $("table.listTable tbody");
 					usersTable.trigger("update");
   
-					showWarningMessage( i18n_delete_success );
+					showSuccessMessage( i18n_delete_success );
     	    	}
     	    	else if ( json.response == "error" )
     	    	{ 
