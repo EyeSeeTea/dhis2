@@ -80,11 +80,10 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 
     setClassification: function() {
         var values = [];
-        // var features = this.layer.features;
 
-        for (var i = 0; i < FEATURE[thematicMap2].length; i++) {
-           // values.push(features[i].attributes[this.colorIndicator]);
-           values.push(FEATURE[thematicMap2][i].attributes.value);
+        for (var i = 0; i < this.layer.features.length; i++) {
+           // values.push(this.layer.features[i].attributes[this.colorIndicator]);
+           values.push(this.layer.features[i].attributes.value);
         }
         
         var distOptions = {

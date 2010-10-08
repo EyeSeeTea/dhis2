@@ -1460,8 +1460,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 this.mapView = false;
             }
             
-            FEATURE[thematicMap2] = this.layer.features;
-            
             var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                 Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
             var dataUrl = this.valueType == map_value_type_indicator ?
@@ -1493,10 +1491,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     }
                     
                     for (var i = 0; i < mapvalues.length; i++) {
-                        for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
-                            if (mapvalues[i].orgUnitName == FEATURE[thematicMap2][j].attributes.name) {
-                                FEATURE[thematicMap2][j].attributes.value = parseFloat(mapvalues[i].value);
-                                FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes.name + ' (' + FEATURE[thematicMap2][j].attributes.value + ')';
+                        for (var j = 0; j < this.layer.features.length; j++) {
+                            if (mapvalues[i].orgUnitName == this.layer.features[j].attributes.name) {
+                                this.layer.features[j].attributes.value = parseFloat(mapvalues[i].value);
+                                this.layer.features[j].attributes.labelString = this.layer.features[j].attributes.name + ' (' + this.layer.features[j].attributes.value + ')';
                                 break;
                             }
                         }
@@ -1548,8 +1546,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         this.mapView = false;
                     }
             
-                    FEATURE[thematicMap2] = this.layer.features;
-                    
                     var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
                     var dataUrl = this.valueType == map_value_type_indicator ?
@@ -1592,12 +1588,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         mour[relations[i].featureId] = relations[i].organisationUnit;
                                     }
 
-                                    for (var j = 0; j < FEATURE[thematicMap2].length; j++) {
-                                        var value = mv[mour[FEATURE[thematicMap2][j].attributes[nameColumn]]];
-                                        FEATURE[thematicMap2][j].attributes.value = value ? parseFloat(value) : '';
-                                        FEATURE[thematicMap2][j].data.id = FEATURE[thematicMap2][j].attributes[nameColumn];
-                                        FEATURE[thematicMap2][j].data.name = FEATURE[thematicMap2][j].attributes[nameColumn];
-                                        FEATURE[thematicMap2][j].attributes.labelString = FEATURE[thematicMap2][j].attributes[nameColumn] + ' (' + FEATURE[thematicMap2][j].attributes.value + ')';
+                                    for (var j = 0; j < this.layer.features.length; j++) {
+                                        var value = mv[mour[this.layer.features[j].attributes[nameColumn]]];
+                                        this.layer.features[j].attributes.value = value ? parseFloat(value) : '';
+                                        this.layer.features[j].data.id = this.layer.features[j].attributes[nameColumn];
+                                        this.layer.features[j].data.name = this.layer.features[j].attributes[nameColumn];
+                                        this.layer.features[j].attributes.labelString = this.layer.features[j].attributes[nameColumn] + ' (' + this.layer.features[j].attributes.value + ')';
                                     }
                                     
                                     this.applyValues();

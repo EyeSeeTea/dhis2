@@ -143,12 +143,12 @@ Ext.onReady( function() {
                     var ed = MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : '';
 					var ms = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue();
 					var mlt = Ext.getCmp('maplegendtype_cb').getValue();
-                    var m = Ext.getCmp('method_cb').getValue();
-					var c = Ext.getCmp('numClasses_cb').getValue();
-                    var b = Ext.getCmp('bounds_tf').getValue() || '';
+                    var m = mlt == map_legend_type_automatic ? Ext.getCmp('method_cb').getValue() : '';
+					var c = mlt == map_legend_type_automatic ? Ext.getCmp('numClasses_cb').getValue() : '';
+                    var b = mlt == map_legend_type_automatic ? Ext.getCmp('bounds_tf').getValue() || '' : '';
 					var ca = Ext.getCmp('colorA_cf').getValue();
 					var cb = Ext.getCmp('colorB_cf').getValue();
-					var mlsid = Ext.getCmp('maplegendset_cb').getValue() || '';
+					var mlsid = mlt == map_legend_type_predefined ? Ext.getCmp('maplegendset_cb').getValue() || '' : '';
 					var lon = MAP.getCenter().lon;
 					var lat = MAP.getCenter().lat;
 					var zoom = parseInt(MAP.getZoom());
