@@ -729,9 +729,7 @@ function removeItem( itemId, itemName, confirmation, action )
 					jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
 	                jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
 	                jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
-					
-					var usersTable = $("table.listTable tbody");
-					usersTable.trigger("update");
+					jQuery( "table.listTable tbody" ).trigger("update");
   
 					showSuccessMessage( i18n_delete_success );
     	    	}
