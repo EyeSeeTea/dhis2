@@ -36,6 +36,8 @@
 
 			
 			leftBar.hideAnimated();
+			
+			select( 1 );
 
 	});
 	
