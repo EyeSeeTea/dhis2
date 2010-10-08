@@ -211,9 +211,13 @@
 			var inputList = entryform.getElementsByTagName('input');
 			for(var i=0;i<inputList.length;i++){
 				var input = inputList[i];
-				
 					input.disabled = disabled;
-				
+			}	
+			
+			var selectList = entryform.getElementsByTagName('select');
+			for(var i=0;i< selectList.length;i++){
+				var select =  selectList[i];
+					select.disabled = disabled;
 			}	
 		}		
 	
