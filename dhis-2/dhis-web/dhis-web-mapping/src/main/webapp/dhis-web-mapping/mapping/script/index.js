@@ -40,7 +40,7 @@ Ext.onReady( function() {
 
 	MAP = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
 	MASK = new Ext.LoadMask(Ext.getBody(),{msg:i18n_loading,msgCls:'x-mask-loading2'});
-    PARAMETER = GLOBALS.util.getUrlParam('view') ? GLOBALS.util.getUrlParam('view') : 0;
+    PARAMETER = GLOBALS.util.getUrlParam('view') !== '' ? {id: GLOBALS.util.getUrlParam('view')} : false;
     
 	/* Base layers */
 	function addBaseLayersToMap() {
@@ -89,19 +89,20 @@ Ext.onReady( function() {
 			Ext.Ajax.request({
 				url: path_mapping + 'getMapView' + type,
 				method: 'GET',
-				params: {id: PARAMETER || 0},
+				params: {id: PARAMETER.id || 0},
 				success: function(r) {
-					var mst = Ext.util.JSON.decode(r.responseText).mapView[0].mapSourceType;
-                    var mdt = Ext.util.JSON.decode(r.responseText).mapView[0].mapDateType;
+                    var mv = Ext.util.JSON.decode(r.responseText).mapView[0];
+                    if (PARAMETER) {
+                        PARAMETER.mapView = mv;
+                    }
 					
 					Ext.Ajax.request({
 						url: path_mapping + 'getMapUserSettings' + type,
 						method: 'GET',
 						success: function(r) {
-							var mst_ss = Ext.util.JSON.decode(r.responseText).mapSource;
-                            var mdt_ss = Ext.util.JSON.decode(r.responseText).mapDateType;
-							MAPSOURCE = PARAMETER ? mst : mst_ss;
-                            MAPDATETYPE = PARAMETER ? mdt : mdt_ss;
+                            var us = Ext.util.JSON.decode(r.responseText);
+							MAPSOURCE = PARAMETER ? PARAMETER.mapView.mapSourceType : us.mapSource;
+                            MAPDATETYPE = PARAMETER ? PARAMETER.mapView.mapDateType : us.mapDateType;
                             
 							Ext.Ajax.request({
 								url: path_mapping + 'setMapUserSettings' + type,

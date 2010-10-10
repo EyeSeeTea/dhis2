@@ -96,42 +96,34 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.createSelectFeatures();
         
         if (PARAMETER) {
-            Ext.Ajax.request({
-                url: path_mapping + 'getMapView' + type,
-                method: 'POST',
-                params: {id: PARAMETER},
-                scope: this,
-                success: function(r) {
-                    this.mapView = GLOBALS.util.getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
-                    this.legend.type = this.mapView.mapLegendType;
-                    this.legend.method = this.mapView.method || this.legend.method;
-                    this.legend.classes = this.mapView.classes || this.legend.classes;
+            this.mapView = PARAMETER.mapView;
+            this.legend.type = this.mapView.mapLegendType;
+            this.legend.method = this.mapView.method || this.legend.method;
+            this.legend.classes = this.mapView.classes || this.legend.classes;
+            
+            PARAMETER = false;        
+            MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
                     
-                    PARAMETER = false;
-                    MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-                            
-                    Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
-                    Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
-                    
-                    function mapViewStoreCallback(scope) {
-                        Ext.getCmp('mapview_cb').setValue(scope.mapView.id);
+            Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
+            Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
+            
+            function mapViewStoreCallback(scope) {
+                Ext.getCmp('mapview_cb').setValue(scope.mapView.id);
 
-                        scope.valueType = scope.mapView.mapValueType;
-                        Ext.getCmp('mapvaluetype_cb').setValue(scope.valueType);
-                        
-                        scope.setMapView();
-                    }
-                    
-                    if (this.stores.mapView.isLoaded) {
-                        mapViewStoreCallback(this);
-                    }                    
-                    else {
-                        this.stores.mapView.load({scope: this, callback: function() {
-                            mapViewStoreCallback(this);
-                        }});
-                    }
-                }
-            });
+                scope.valueType = scope.mapView.mapValueType;
+                Ext.getCmp('mapvaluetype_cb').setValue(scope.valueType);
+                
+                scope.setMapView();
+            }
+            
+            if (this.stores.mapView.isLoaded) {
+                mapViewStoreCallback(this);
+            }                    
+            else {
+                this.stores.mapView.load({scope: this, callback: function() {
+                    mapViewStoreCallback(this);
+                }});
+            }
         }
         
 		mapfish.widgets.geostat.Choropleth.superclass.initComponent.apply(this);
