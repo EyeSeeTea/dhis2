@@ -382,20 +382,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 				'select': {
                     scope: this,
 					fn: function(cb) {
-						if (cb.getValue() == map_value_type_indicator) {
-							Ext.getCmp('indicatorgroup_cb').showField();
-							Ext.getCmp('indicator_cb').showField();
-							Ext.getCmp('dataelementgroup_cb').hideField();
-							Ext.getCmp('dataelement_cb').hideField();
-							this.valueType = map_value_type_indicator;
-						}
-						else if (cb.getValue() == map_value_type_dataelement) {
-							Ext.getCmp('indicatorgroup_cb').hideField();
-							Ext.getCmp('indicator_cb').hideField();
-							Ext.getCmp('dataelementgroup_cb').showField();
-							Ext.getCmp('dataelement_cb').showField();
-							this.valueType = map_value_type_dataelement;
-						}
+                        this.valueType = cb.getValue();
+                        this.prepareMapViewValueType();
                         this.classify(false, true);
 					}
 				}
@@ -462,35 +450,25 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
                                     this.legend.type = map_legend_type_predefined;
-                                    Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
-                                    Ext.getCmp('maplegendset_cb').showField();
-                                    Ext.getCmp('method_cb').hideField();
-                                    Ext.getCmp('numClasses_cb').hideField();
-                                    Ext.getCmp('colorA_cf').hideField();
-                                    Ext.getCmp('colorB_cf').hideField();
+                                    this.prepareMapViewLegend();
                                     
-                                    this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                    function load(scope) {
                                         Ext.getCmp('maplegendset_cb').setValue(mapLegendSet.id);
-                                        this.applyPredefinedLegend();
-                                    }});
+                                        scope.applyPredefinedLegend();
+                                    }
+                                    
+                                    if (!this.stores.predefinedMapLegendSet.isLoaded) {
+                                        this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                            load(this);
+                                        }});
+                                    }
+                                    else {
+                                        load(this);
+                                    }
                                 }
                                 else {
-                                    if (this.legend.type == map_legend_type_predefined) {
-                                        this.legend.type = map_legend_type_automatic;
-                                        Ext.getCmp('maplegendtype_cb').setValue(this.legend.type);
-                                        Ext.getCmp('method_cb').showField();
-                                        if (Ext.getCmp('method_cb').getValue() == classify_with_bounds) {
-                                            Ext.getCmp('bounds_tf').showField();
-                                            Ext.getCmp('numClasses_cb').hideField();
-                                        }
-                                        else {
-                                            Ext.getCmp('bounds_tf').hideField();
-                                            Ext.getCmp('numClasses_cb').showField();
-                                        }
-                                        Ext.getCmp('colorA_cf').showField();
-                                        Ext.getCmp('colorB_cf').showField();
-                                        Ext.getCmp('maplegendset_cb').hideField();
-                                    }
+                                    this.legend.type = map_legend_type_automatic;
+                                    this.prepareMapViewLegend();
                                     this.classify(false, true);
                                 }
                             }
