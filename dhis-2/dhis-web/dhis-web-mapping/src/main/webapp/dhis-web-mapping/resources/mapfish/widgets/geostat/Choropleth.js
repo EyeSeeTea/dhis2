@@ -853,7 +853,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             w.show();
                         }
 
-                        if (TOPLEVELUNIT.id) {
+                        if (TOPLEVELUNIT) {
                             showTree(this);
                         }
                         else {
@@ -864,9 +864,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 scope: this,
                                 success: function(r) {
                                     var rootNode = Ext.util.JSON.decode(r.responseText).organisationUnits[0];
-                                    TOPLEVELUNIT.id = rootNode.id;
-                                    TOPLEVELUNIT.name = rootNode.name;
-                                    TOPLEVELUNIT.hasChildrenWithCoordinates = rootNode.hasChildrenWithCoordinates;
+                                    TOPLEVELUNIT = {
+                                        id: rootNode.id,
+                                        name: rootNode.name,
+                                        hasChildrenWithCoordinates: rootNode.hasChildrenWithCoordinates
+                                    };
                                     showTree(this);
                                 },
                                 failure: function(r) {

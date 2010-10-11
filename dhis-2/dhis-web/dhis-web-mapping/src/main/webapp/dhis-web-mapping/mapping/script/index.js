@@ -16,14 +16,10 @@ var MASK;
 var COLORINTERPOLATION;
 /* Export values */
 var EXPORTVALUES;
-/* Currently selected vector feature */
-var FEATURE = {};
-FEATURE[thematicMap] = {};
-FEATURE[thematicMap2] = {};
 /* Global chart for show/hide */
 var CHART;
 /* Top level organisation unit */
-var TOPLEVELUNIT = {};
+var TOPLEVELUNIT;
 /* Locate feature window */
 var lfw;
 /* Feature popup */
