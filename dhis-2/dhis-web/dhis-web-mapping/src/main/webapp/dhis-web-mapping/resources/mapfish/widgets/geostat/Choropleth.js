@@ -919,13 +919,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         if (cb.getValue() == classify_with_bounds && cb.getValue() != this.legend.method) {
 							this.legend.method = classify_with_bounds;
-                            Ext.getCmp('bounds_tf').showField();
-                            Ext.getCmp('numClasses_cb').hideField();
+                            this.prepareMapViewLegend();
                         }
                         else if (cb.getValue() != this.legend.method) {
 							this.legend.method = cb.getValue();
-                            Ext.getCmp('bounds_tf').hideField();
-                            Ext.getCmp('numClasses_cb').showField();
+                            this.prepareMapViewLegend();
                             this.classify(false, true);
                         }
                     }
@@ -1401,15 +1399,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         }
     },
     
-    displayMapLegendTypeFields: function() {
-        if (this.legend.type == map_legend_type_automatic) {
-			Ext.getCmp('maplegendset_cb').hideField();
-		}
-		else if (this.legend.type == map_legend_type_predefined) {
-			Ext.getCmp('maplegendset_cb').showField();
-		}
-    },
-    
     validateForm: function(exception) {
         if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator) {
             if (!Ext.getCmp('indicator_cb').getValue()) {
@@ -1456,11 +1445,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         return true;
     },
     
-    getIndicatorOrDataElementId: function() {
-        return this.valueType == map_value_type_indicator ?
-            Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
-    },
-    
     applyValues: function() {
         var options = {};
         this.indicator = 'value';
@@ -1486,9 +1470,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     classifyDatabase: function(exception, position) {
-		this.displayMapLegendTypeFields();
         if (this.validateForm(exception)) {
-        
             MASK.msg = i18n_aggregating_map_values;
             MASK.show();
             
@@ -1513,22 +1495,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 }
                 this.mapView = false;
             }
-
-            var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
-                Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+            
             var dataUrl = this.valueType == map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
-            var params = {};
-            if (MAPDATETYPE == map_date_type_fixed) {
-                params.periodId = Ext.getCmp('period_cb').getValue();
-            }
-            else {
-                params.startDate = new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d');
-                params.endDate = new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d');
-            }
-            params.id = indicatorOrDataElementId;
-            params.parentId = this.parentId;
-
+            
+            var params = {
+                id: this.valueType == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue(),
+                periodId: MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : null,
+                startDate: MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
+                endDate: MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
+                parentId: this.parentId
+            };
+                
             Ext.Ajax.request({
                 url: path_mapping + dataUrl + type,
                 method: 'POST',
@@ -1561,7 +1539,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     classifyFile: function(exception, position) {
-		this.displayMapLegendTypeFields();
         if (this.validateForm(exception)) {
         
             MASK.msg = i18n_aggregating_map_values;
@@ -1596,6 +1573,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         }
                         this.mapView = false;
                     }
+                    
+                    var params = {
+                        id: this.valueType == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue()
+                    };
+                        
             
                     var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
                         Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();

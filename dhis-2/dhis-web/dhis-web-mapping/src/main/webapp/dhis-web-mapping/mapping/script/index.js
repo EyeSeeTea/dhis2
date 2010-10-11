@@ -2428,19 +2428,17 @@ Ext.onReady( function() {
 						}),
 						listeners: {
 							'select': {
-								fn: function() {
-									var msv = Ext.getCmp('mapsource_cb').getValue();
-									var msrw = Ext.getCmp('mapsource_cb').getRawValue();
-
-									if (MAPSOURCE != msv) {
+								fn: function(cb) {
+                                    if (MAPSOURCE != cb.getValue()) {
+                                        MAPSOURCE = cb.getValue();
+                                        
                                         Ext.Ajax.request({
                                             url: path_mapping + 'setMapUserSettings' + type,
 											method: 'POST',
-											params: {mapSourceType: msv, mapDateType: MAPDATETYPE},
+											params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
 											success: function(r) {
-                                                MAPSOURCE = msv;
-                                                
 												Ext.getCmp('map_cb').getStore().load();
+                                                Ext.getCmp('map_cb2').getStore().load();
 												Ext.getCmp('maps_cb').getStore().load();
 												Ext.getCmp('mapview_cb').getStore().load();
 												Ext.getCmp('view_cb').getStore().load();
@@ -2448,20 +2446,26 @@ Ext.onReady( function() {
 												Ext.getCmp('maplayer_cb').getStore().load();
 
 												Ext.getCmp('map_cb').clearValue();
+                                                Ext.getCmp('map_cb2').clearValue();
 												Ext.getCmp('mapview_cb').clearValue();
-												
+                                                
 												if (MAPSOURCE == map_source_type_geojson) {
 													Ext.getCmp('register_chb').enable();
 													
 													if (Ext.getCmp('register_chb').checked) {
 														mapping.show();
 														shapefilePanel.show();
-													}                                                   
-
-                                                    Ext.getCmp('map_cb').showField();
+													}
+                                                    
+                                                    choropleth.prepareMapViewMap();
                                                     Ext.getCmp('map_cb2').showField();
-                                                    Ext.getCmp('map_tf').hideField();
                                                     Ext.getCmp('map_tf2').hideField();
+                                                    
+                                                    if (MAPDATETYPE == map_date_type_start_end) {
+                                                        MAPDATETYPE = map_date_type_fixed;
+                                                        Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
+                                                        choropleth.prepareMapViewDateType();
+                                                    }
 												}
 												else if (MAPSOURCE == map_source_type_shapefile) {
 													Ext.getCmp('register_chb').enable();
@@ -2470,11 +2474,16 @@ Ext.onReady( function() {
 														mapping.show();
 														shapefilePanel.show();
 													}
-
-                                                    Ext.getCmp('map_cb').showField();
+                                                    
+                                                    choropleth.prepareMapViewMap();
                                                     Ext.getCmp('map_cb2').showField();
-                                                    Ext.getCmp('map_tf').hideField();
                                                     Ext.getCmp('map_tf2').hideField();
+                                                    
+                                                    if (MAPDATETYPE == map_date_type_start_end) {
+                                                        MAPDATETYPE = map_date_type_fixed;
+                                                        Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
+                                                        choropleth.prepareMapViewDateType();
+                                                    }
 												}
 												else if (MAPSOURCE == map_source_type_database) {
 													Ext.getCmp('register_chb').disable();
@@ -2482,9 +2491,8 @@ Ext.onReady( function() {
 													mapping.hide();
 													shapefilePanel.hide();
                                                     
-                                                    Ext.getCmp('map_cb').hideField();
+                                                    choropleth.prepareMapViewMap();
                                                     Ext.getCmp('map_cb2').hideField();
-                                                    Ext.getCmp('map_tf').showField();
                                                     Ext.getCmp('map_tf2').showField();
 												}
                                                 
@@ -2497,7 +2505,7 @@ Ext.onReady( function() {
 												}
 												addOverlaysToMap();
 												
-												Ext.message.msg(true, '<span class="x-msg-hl">' + msrw + '</span> '+i18n_is_saved_as_map_source);
+												Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_is_saved_as_map_source);
 											},
 											failure: function() {
 												alert( i18n_status, i18n_error_while_saving_data );
@@ -2646,18 +2654,21 @@ Ext.onReady( function() {
                         }),
                         listeners: {
                             'select': {
-                                fn: function() {
-                                    var mdtv = Ext.getCmp('mapdatetype_cb').getValue();
-                                    var mdtrv = Ext.getCmp('mapdatetype_cb').getRawValue();
-                                    
-                                    if (mdtv != MAPDATETYPE) {
+                                fn: function(cb) {
+                                    if (cb.getValue() != MAPDATETYPE) {
+                                        if (cb.getValue() == map_date_type_start_end && MAPSOURCE != map_source_type_database) {
+                                            cb.setValue(map_date_type_fixed);
+                                            Ext.message.msg(false, 'Start-end dates require map source <span class="x-msg-hl">' + map_source_type_database + '</span>');
+                                            return;
+                                        }
+
+                                        MAPDATETYPE = cb.getValue();
                                         Ext.Ajax.request({
                                             url: path_mapping + 'setMapUserSettings' + type,
                                             method: 'POST',
-                                            params: {mapSourceType: MAPSOURCE, mapDateType: mdtv},
+                                            params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
                                             success: function() {
-                                                MAPDATETYPE = mdtv;
-                                                Ext.message.msg(true, '<span class="x-msg-hl">' + mdtrv + '</span> '+i18n_saved_as_date_type);
+                                                Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_saved_as_date_type);
                                                 
                                                 if (MAPDATETYPE == map_date_type_fixed) {
                                                     Ext.getCmp('periodtype_cb').showField();
