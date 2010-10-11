@@ -69,7 +69,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
             baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
-            autoLoad: true
+            autoLoad: false
         });
             
         var gridStore = new Ext.data.JsonStore({
