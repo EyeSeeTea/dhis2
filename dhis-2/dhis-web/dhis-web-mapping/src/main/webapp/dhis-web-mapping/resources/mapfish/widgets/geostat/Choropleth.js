@@ -728,7 +728,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         height: GLOBALS.util.getMultiSelectHeight(),
                                         autoScroll: true,
                                         loader: new Ext.tree.TreeLoader({
-                                            dataUrl: GLOBALS.config.path_mapping + 'getOrganisationUnitChildren' + type
+                                            dataUrl: GLOBALS.config.path_mapping + 'getOrganisationUnitChildren' + GLOBALS.config.type
                                         }),
                                         root: {
                                             id: TOPLEVELUNIT.id,

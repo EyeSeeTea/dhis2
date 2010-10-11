@@ -107,7 +107,7 @@ Ext.onReady( function() {
 								success: function() {
 			
 	/* Section: mapview */
-	var viewStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapViews'+GLOBALS.config.type,root:'mapViews',fields:['id','name'],id:'id',sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var viewStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapViews'+GLOBALS.config.type,root:'mapViews',fields:['id','name'],id:'id',sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
 	var viewNameTextField=new Ext.form.TextField({id:'viewname_tf',emptytext:'',width:GLOBALS.config.combo_width,hideLabel:true});
 	var viewComboBox=new Ext.form.ComboBox({id:'view_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:viewStore});
 	var view2ComboBox=new Ext.form.ComboBox({id:'view2_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:viewStore});
