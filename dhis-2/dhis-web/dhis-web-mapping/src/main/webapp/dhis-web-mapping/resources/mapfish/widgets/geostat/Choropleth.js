@@ -76,11 +76,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     selectFeatures: false,
     
-    initComponent: function() {
-        
-        Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
-        Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
-                            
+    initComponent: function() {                            
         this.legend = {
             type: GLOBALS.config.map_legend_type_automatic,
             method: GLOBALS.config.classify_by_equal_intervals,
@@ -944,9 +940,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
+            id: 'numClasses_cb',
             fieldLabel: i18n_classes,
 			labelSeparator: GLOBALS.config.labelseparator,
-            id: 'numClasses_cb',
             editable: false,
             valueField: 'value',
             displayField: 'value',
@@ -975,9 +971,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'colorfield',
+            id: 'colorA_cf',
             fieldLabel: i18n_low_color,
 			labelSeparator: GLOBALS.config.labelseparator,
-            id: 'colorA_cf',
             allowBlank: false,
             isFormField: true,
             width: GLOBALS.config.combo_width,
@@ -986,9 +982,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'colorfield',
+            id: 'colorB_cf',
             fieldLabel: i18n_high_color,
 			labelSeparator: GLOBALS.config.labelseparator,
-            id: 'colorB_cf',
             allowBlank: false,
             isFormField: true,
             width: GLOBALS.config.combo_width,

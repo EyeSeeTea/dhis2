@@ -3660,6 +3660,9 @@ Ext.onReady( function() {
             }
         }
     });
+        
+    Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
+    Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
     
     Ext.getCmp('maplegendset_cb').hideField();
     Ext.getCmp('maplegendset_cb2').hideField();
@@ -3682,8 +3685,6 @@ Ext.onReady( function() {
         Ext.getCmp('map_tf').hideField();
         Ext.getCmp('map_tf2').hideField();
     }
-    
-    Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
     
     if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
         Ext.getCmp('periodtype_cb').showField();
