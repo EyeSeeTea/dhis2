@@ -78,14 +78,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 
     initComponent: function() {
         this.legend = {};
-        this.legend.type = map_legend_type_automatic;
+        this.legend.type = GLOBALS.config.map_legend_type_automatic;
         this.legend.method = 2;
         this.legend.classes = 5;
         this.mapData = {};
-        this.valueType = map_value_type_indicator;
+        this.valueType = GLOBALS.config.map_value_type_indicator;
     
         var mapViewStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllMapViews' + type,
+            url: path_mapping + 'getAllMapViews' + GLOBALS.config.type,
             root: 'mapViews',
             fields: ['id', 'name'],
             sortInfo: {field: 'name', direction: 'ASC'},
@@ -93,7 +93,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
     
         var indicatorGroupStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllIndicatorGroups' + type,
+            url: path_mapping + 'getAllIndicatorGroups' + GLOBALS.config.type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
             idProperty: 'id',
@@ -102,7 +102,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
         
         var indicatorStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getIndicatorsByIndicatorGroup' + type,
+            url: path_mapping + 'getIndicatorsByIndicatorGroup' + GLOBALS.config.type,
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
             idProperty: 'id',
@@ -125,7 +125,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         if (this.mapView) {
                             Ext.getCmp('indicator_cb2').setValue(this.mapView.indicatorId);
 
-                            if (this.mapView.mapDateType == map_date_type_fixed) {
+                            if (this.mapView.mapDateType == GLOBALS.config.map_date_type_fixed) {
                                 Ext.getCmp('periodtype_cb2').showField();
                                 Ext.getCmp('period_cb2').showField();
                                 Ext.getCmp('startdate_df2').hideField();
@@ -134,7 +134,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 this.stores.periodStore.setBaseParam('name', this.mapView.periodTypeId);
                                 this.stores.periodStore.load();
                             }
-                            else if (this.mapView.mapDateType == map_date_type_start_end) {
+                            else if (this.mapView.mapDateType == GLOBALS.config.map_date_type_start_end) {
                                 Ext.getCmp('periodtype_cb2').hideField();
                                 Ext.getCmp('period_cb2').hideField();
                                 Ext.getCmp('startdate_df2').showField();
@@ -143,9 +143,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('startdate_df2').setValue(new Date(this.mapView.startDate));
                                 Ext.getCmp('enddate_df2').setValue(new Date(this.mapView.endDate));
                                 
-                                if (MAPSOURCE == map_source_type_database) {
+                                if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
                                     Ext.Ajax.request({
-                                        url: path_commons + 'getOrganisationUnit' + type,
+                                        url: GLOBALS.config.path_commons + 'getOrganisationUnit' + GLOBALS.config.type,
                                         method: 'POST',
                                         params: {id:this.mapView.mapSource},
                                         scope: this,
@@ -172,7 +172,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		var dataElementGroupStore = new Ext.data.JsonStore({
-			url: path_mapping + 'getAllDataElementGroups' + type,
+			url: path_mapping + 'getAllDataElementGroups' + GLOBALS.config.type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -180,7 +180,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		var dataElementStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getDataElementsByDataElementGroup' + type,
+            url: path_mapping + 'getDataElementsByDataElementGroup' + GLOBALS.config.type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -202,7 +202,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         if (this.mapView) {
                             Ext.getCmp('dataelement_cb2').setValue(this.mapView.dataElementId);
                             
-                            if (this.mapView.mapDateType == map_date_type_fixed) {
+                            if (this.mapView.mapDateType == GLOBALS.config.map_date_type_fixed) {
                                 Ext.getCmp('periodtype_cb2').showField();
                                 Ext.getCmp('period_cb2').showField();
                                 Ext.getCmp('startdate_df2').hideField();
@@ -212,7 +212,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 this.stores.periodStore.setBaseParam('name', this.mapView.periodTypeId);
                                 this.stores.periodStore.load();
                             }
-                            else if (this.mapView.mapDateType == map_date_type_start_end) {
+                            else if (this.mapView.mapDateType == GLOBALS.config.map_date_type_start_end) {
                                 Ext.getCmp('periodtype_cb2').hideField();
                                 Ext.getCmp('period_cb2').hideField();
                                 Ext.getCmp('startdate_df2').showField();
@@ -221,9 +221,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('startdate_df2').setValue(new Date(this.mapView.startDate));
                                 Ext.getCmp('enddate_df2').setValue(new Date(this.mapView.endDate));
                                 
-                                if (MAPSOURCE == map_source_type_database) {
+                                if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
                                     Ext.Ajax.request({
-                                        url: path_commons + 'getOrganisationUnit' + type,
+                                        url: GLOBALS.config.path_commons + 'getOrganisationUnit' + GLOBALS.config.type,
                                         method: 'POST',
                                         params: {id:this.mapView.mapSource},
                                         scope: this,
@@ -250,14 +250,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
         
         var periodTypeStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllPeriodTypes' + type,
+            url: path_mapping + 'getAllPeriodTypes' + GLOBALS.config.type,
             root: 'periodTypes',
             fields: ['name'],
             autoLoad: true
         });
 
         var periodStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getPeriodsByPeriodType' + type,
+            url: path_mapping + 'getPeriodsByPeriodType' + GLOBALS.config.type,
             root: 'periods',
             fields: ['id', 'name'],
             autoLoad: false,
@@ -269,7 +269,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             Ext.getCmp('period_cb2').setValue(this.mapView.periodId);
 
                             Ext.Ajax.request({
-                                url: path_mapping + 'setMapUserSettings' + type,
+                                url: path_mapping + 'setMapUserSettings' + GLOBALS.config.type,
                                 method: 'POST',
                                 params: {mapSourceType: this.mapView.mapSourceType, mapDateType: MAPDATETYPE },
 								success: function(r) {
@@ -288,7 +288,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
             
         var mapStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllMaps' + type,
+            url: path_mapping + 'getAllMaps' + GLOBALS.config.type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
@@ -299,9 +299,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     fn: function() {
                         if (this.mapView) {
-                            if (MAPSOURCE == map_source_type_database) {
+                            if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
                                 Ext.Ajax.request({
-                                    url: path_commons + 'getOrganisationUnit' + type,
+                                    url: GLOBALS.config.path_commons + 'getOrganisationUnit' + GLOBALS.config.type,
                                     method: 'POST',
                                     params: {id:this.mapView.mapSource},
                                     scope: this,
@@ -327,8 +327,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		var predefinedMapLegendSetStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getMapLegendSetsByType' + type,
-            baseParams: {type: map_legend_type_predefined},
+            url: path_mapping + 'getMapLegendSetsByType' + GLOBALS.config.type,
+            baseParams: {type: GLOBALS.config.map_legend_type_predefined},
             root: 'mapLegendSets',
             fields: ['id', 'name'],
             autoLoad: true,
@@ -338,7 +338,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     fn: function() {
 						if (this.mapView) {
 							Ext.Ajax.request({
-								url: path_mapping + 'getMapLegendSet' + type,
+								url: path_mapping + 'getMapLegendSet' + GLOBALS.config.type,
 								method: 'POST',
 								params: {id: this.mapView.mapLegendSetId},
                                 scope: this,
@@ -381,7 +381,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 var x = east_panel.x - 210;
                 var y = east_panel.y + 41;
                 
-                if (MAPSOURCE == map_source_type_database) {
+                if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
                     if (feature.attributes.hasChildrenWithCoordinates) {
                         if (lfw) {
                             lfw.destroy();
@@ -423,8 +423,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             emptyText: i18n_optional,
             selectOnFocus: true,
-			labelSeparator: labelseparator,
-            width: combo_width,
+			labelSeparator: GLOBALS.config.labelseparator,
+            width: GLOBALS.config.combo_width,
             store: this.stores.mapViewStore,
             listeners: {
                 'select': {
@@ -433,7 +433,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var mId = Ext.getCmp('mapview_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapView' + type,
+                            url: path_mapping + 'getMapView' + GLOBALS.config.type,
                             method: 'POST',
                             params: {id: mId},
                             scope: this,
@@ -446,7 +446,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 Ext.getCmp('mapvaluetype_cb2').setValue(this.mapView.mapValueType);
 								this.valueType = this.mapView.mapValueType;
                                 
-                                if (this.mapView.mapValueType == map_value_type_indicator) {
+                                if (this.mapView.mapValueType == GLOBALS.config.map_value_type_indicator) {
                                     Ext.getCmp('indicatorgroup_cb2').showField();
                                     Ext.getCmp('indicator_cb2').showField();
                                     Ext.getCmp('dataelementgroup_cb2').hideField();
@@ -456,7 +456,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     this.stores.indicatorStore.setBaseParam('indicatorGroupId', this.mapView.indicatorGroupId);
                                     this.stores.indicatorStore.load();
                                 }
-                                else if (this.mapView.mapValueType == map_value_type_dataelement) {
+                                else if (this.mapView.mapValueType == GLOBALS.config.map_value_type_dataelement) {
                                     Ext.getCmp('indicatorgroup_cb2').hideField();
                                     Ext.getCmp('indicator_cb2').hideField();
                                     Ext.getCmp('dataelementgroup_cb2').showField();
@@ -467,9 +467,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     this.stores.dataElementStore.load();
                                 }                                        
 								
-								if (this.mapView.mapLegendType == map_legend_type_automatic) {
-                                    this.legend.type = map_legend_type_automatic;
-									Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_automatic);
+								if (this.mapView.mapLegendType == GLOBALS.config.map_legend_type_automatic) {
+                                    this.legend.type = GLOBALS.config.map_legend_type_automatic;
+									Ext.getCmp('maplegendtype_cb2').setValue(GLOBALS.config.map_legend_type_automatic);
                                     Ext.getCmp('maplegendset_cb2').hideField();
 									Ext.getCmp('method_cb2').showField();
                                     Ext.getCmp('method_cb2').setValue(this.mapView.method);
@@ -478,7 +478,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     Ext.getCmp('colorB_cf2').showField();
 									Ext.getCmp('colorB_cf2').setValue(this.mapView.colorHigh);
                                     
-                                    if (this.mapView.method == classify_with_bounds) {
+                                    if (this.mapView.method == GLOBALS.config.classify_with_bounds) {
                                         Ext.getCmp('numClasses_cb2').hideField();
                                         Ext.getCmp('bounds_tf2').showField();
                                         Ext.getCmp('bounds_tf2').setValue(this.mapView.bounds);
@@ -489,9 +489,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         Ext.getCmp('numClasses_cb2').setValue(this.mapView.classes);
                                     }
 								}
-								else if (this.mapView.mapLegendType == map_legend_type_predefined) {
-                                    this.legend.type = map_legend_type_predefined;
-									Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
+								else if (this.mapView.mapLegendType == GLOBALS.config.map_legend_type_predefined) {
+                                    this.legend.type = GLOBALS.config.map_legend_type_predefined;
+									Ext.getCmp('maplegendtype_cb2').setValue(GLOBALS.config.map_legend_type_predefined);
 									Ext.getCmp('method_cb2').hideField();
 									Ext.getCmp('bounds_tf2').hideField();
 									Ext.getCmp('numClasses_cb2').hideField();
@@ -518,35 +518,35 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             xtype: 'combo',
 			id: 'mapvaluetype_cb2',
             fieldLabel: i18n_mapvaluetype,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             mode: 'local',
             triggerAction: 'all',
-            width: combo_width,
-			value: map_value_type_indicator,
+            width: GLOBALS.config.combo_width,
+			value: GLOBALS.config.map_value_type_indicator,
             store: new Ext.data.SimpleStore({
                 fields: ['id', 'name'],
-                data: [[map_value_type_indicator, 'Indicators'], [map_value_type_dataelement, 'Data elements']]
+                data: [[GLOBALS.config.map_value_type_indicator, 'Indicators'], [GLOBALS.config.map_value_type_dataelement, 'Data elements']]
             }),
 			listeners: {
 				'select': {
                     scope: this,
 					fn: function() {
-						if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator) {
+						if (Ext.getCmp('mapvaluetype_cb2').getValue() == GLOBALS.config.map_value_type_indicator) {
 							Ext.getCmp('indicatorgroup_cb2').showField();
 							Ext.getCmp('indicator_cb2').showField();
 							Ext.getCmp('dataelementgroup_cb2').hideField();
 							Ext.getCmp('dataelement_cb2').hideField();
-							this.valueType = map_value_type_indicator;
+							this.valueType = GLOBALS.config.map_value_type_indicator;
 						}
-						else if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_dataelement) {
+						else if (Ext.getCmp('mapvaluetype_cb2').getValue() == GLOBALS.config.map_value_type_dataelement) {
 							Ext.getCmp('indicatorgroup_cb2').hideField();
 							Ext.getCmp('indicator_cb2').hideField();
 							Ext.getCmp('dataelementgroup_cb2').showField();
 							Ext.getCmp('dataelement_cb2').showField();
-							this.valueType = map_value_type_dataelement;
+							this.valueType = GLOBALS.config.map_value_type_dataelement;
 						}
                         
                         this.classify(false, true);
@@ -566,10 +566,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.indicatorGroupStore,
             listeners: {
                 'select': {
@@ -598,10 +598,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.indicatorStore,
             listeners: {
                 'select': {
@@ -614,14 +614,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var iId = Ext.getCmp('indicator_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapLegendSetByIndicator' + type,
+                            url: path_mapping + 'getMapLegendSetByIndicator' + GLOBALS.config.type,
                             method: 'POST',
                             params: {indicatorId: iId},
                             scope: this,
                             success: function(r) {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
-                                    Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
+                                    Ext.getCmp('maplegendtype_cb2').setValue(GLOBALS.config.map_legend_type_predefined);
                                     Ext.getCmp('maplegendset_cb2').showField();
                                     Ext.getCmp('maplegendset_cb2').setValue(mapLegendSet.id);
                                     Ext.getCmp('method_cb2').hideField();
@@ -632,11 +632,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     this.applyPredefinedLegend();
                                 }
                                 else {
-                                    if (this.legend.type == map_legend_type_predefined) {
-                                        this.legend.type = map_legend_type_automatic;
+                                    if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
+                                        this.legend.type = GLOBALS.config.map_legend_type_automatic;
                                         Ext.getCmp('maplegendtype_cb2').setValue(this.legend.type);
                                         Ext.getCmp('method_cb2').showField();
-                                        if (Ext.getCmp('method_cb2').getValue() == classify_with_bounds) {
+                                        if (Ext.getCmp('method_cb2').getValue() == GLOBALS.config.classify_with_bounds) {
                                             Ext.getCmp('bounds_tf2').showField();
                                             Ext.getCmp('numClasses_cb2').hideField();
                                         }
@@ -672,10 +672,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.dataElementGroupStore,
             listeners: {
                 'select': {
@@ -703,10 +703,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.dataElementStore,
             listeners: {
                 'select': {
@@ -719,14 +719,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var deId = Ext.getCmp('dataelement_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapLegendSetByDataElement' + type,
+                            url: path_mapping + 'getMapLegendSetByDataElement' + GLOBALS.config.type,
                             method: 'POST',
                             params: {dataElementId: deId},
                             scope: this,
                             success: function(r) {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
-                                    Ext.getCmp('maplegendtype_cb2').setValue(map_legend_type_predefined);
+                                    Ext.getCmp('maplegendtype_cb2').setValue(GLOBALS.config.map_legend_type_predefined);
                                     Ext.getCmp('maplegendset_cb2').showField();
                                     Ext.getCmp('maplegendset_cb2').setValue(mapLegendSet.id);
                                     Ext.getCmp('method_cb2').hideField();
@@ -737,11 +737,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     this.applyPredefinedLegend();
                                 }
                                 else {
-                                    if (this.legend.type == map_legend_type_predefined) {
-                                        this.legend.type = map_legend_type_automatic;
+                                    if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
+                                        this.legend.type = GLOBALS.config.map_legend_type_automatic;
                                         Ext.getCmp('maplegendtype_cb2').setValue(this.legend.type);
                                         Ext.getCmp('method_cb2').showField();
-                                        if (Ext.getCmp('method_cb2').getValue() == classify_with_bounds) {
+                                        if (Ext.getCmp('method_cb2').getValue() == GLOBALS.config.classify_with_bounds) {
                                             Ext.getCmp('bounds_tf2').showField();
                                             Ext.getCmp('numClasses_cb2').hideField();
                                         }
@@ -777,10 +777,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.periodTypeStore,
             listeners: {
                 'select': {
@@ -808,10 +808,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.periodStore,
             listeners: {
                 'select': {
@@ -832,9 +832,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_start_date,
             format: 'Y-m-d',
             hidden: true,
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
-            width: combo_width,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
+            width: GLOBALS.config.combo_width,
             listeners: {
                 'select': {
                     scope: this,
@@ -852,9 +852,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_end_date,
             format: 'Y-m-d',
             hidden: true,
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
-            width: combo_width,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
+            width: GLOBALS.config.combo_width,
             listeners: {
                 'select': {
                     scope: this,
@@ -877,10 +877,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.mapStore,
             listeners: {
                 'select': {
@@ -909,10 +909,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             listeners: {
                 'focus': {
                     scope: this,
@@ -1008,7 +1008,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         }
                         else {
                             Ext.Ajax.request({
-                                url: path_commons + 'getOrganisationUnits' + type,
+                                url: GLOBALS.config.path_commons + 'getOrganisationUnits' + GLOBALS.config.type,
                                 params: { level: 1 },
                                 method: 'POST',
                                 scope: this,
@@ -1039,24 +1039,24 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             value: this.legend.type,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: [
-					[map_legend_type_automatic, i18n_automatic],
-					[map_legend_type_predefined, i18n_predefined]
+					[GLOBALS.config.map_legend_type_automatic, i18n_automatic],
+					[GLOBALS.config.map_legend_type_predefined, i18n_predefined]
 				]
             }),
             listeners: {
                 'select': {
                     scope: this,
                     fn: function() {
-                        if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_predefined && Ext.getCmp('maplegendtype_cb2').getValue() != this.legend.type ) {
-							this.legend.type = map_legend_type_predefined;
+                        if (Ext.getCmp('maplegendtype_cb2').getValue() == GLOBALS.config.map_legend_type_predefined && Ext.getCmp('maplegendtype_cb2').getValue() != this.legend.type ) {
+							this.legend.type = GLOBALS.config.map_legend_type_predefined;
 							Ext.getCmp('method_cb2').hideField();
 							Ext.getCmp('bounds_tf2').hideField();
                             Ext.getCmp('numClasses_cb2').hideField();
@@ -1068,8 +1068,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 								this.applyPredefinedLegend();
 							}
                         }
-                        else if (Ext.getCmp('maplegendtype_cb2').getValue() == map_legend_type_automatic && Ext.getCmp('maplegendtype_cb2').getValue() != this.legend.type) {
-							this.legend.type = map_legend_type_automatic;
+                        else if (Ext.getCmp('maplegendtype_cb2').getValue() == GLOBALS.config.map_legend_type_automatic && Ext.getCmp('maplegendtype_cb2').getValue() != this.legend.type) {
+							this.legend.type = GLOBALS.config.map_legend_type_automatic;
 							Ext.getCmp('method_cb2').showField();
 							if (Ext.getCmp('method_cb2').getValue() == 0) {
 								Ext.getCmp('bounds_tf2').showField();
@@ -1098,10 +1098,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             valueField: 'id',
             displayField: 'name',
             mode: 'remote',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
 			hidden: true,
             store: this.stores.predefinedMapLegendSetStore,
             listeners: {
@@ -1122,11 +1122,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             value: this.legend.method,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: [
@@ -1139,8 +1139,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     scope: this,
                     fn: function() {
-                        if (Ext.getCmp('method_cb2').getValue() == classify_with_bounds && Ext.getCmp('method_cb2').getValue() != this.legend.method) {
-							this.legend.method = classify_with_bounds;
+                        if (Ext.getCmp('method_cb2').getValue() == GLOBALS.config.classify_with_bounds && Ext.getCmp('method_cb2').getValue() != this.legend.method) {
+							this.legend.method = GLOBALS.config.classify_with_bounds;
                             Ext.getCmp('bounds_tf2').showField();
                             Ext.getCmp('numClasses_cb2').hideField();
                         }
@@ -1159,17 +1159,17 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             xtype: 'textfield',
             id: 'bounds_tf2',
             fieldLabel: i18n_bounds,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             emptyText: i18n_comma_separated_values,
             isFormField: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             hidden: true
         },
         
         {
             xtype: 'combo',
             fieldLabel: i18n_classes,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             id: 'numClasses_cb2',
             editable: false,
             valueField: 'value',
@@ -1177,7 +1177,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             value: this.legend.classes,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: new Ext.data.SimpleStore({
                 fields: ['value'],
                 data: [[1], [2], [3], [4], [5], [6], [7]]
@@ -1202,22 +1202,22 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'colorfield',
             fieldLabel: i18n_low_color,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             id: 'colorA_cf2',
             allowBlank: false,
             isFormField: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             value: "#FFFF00"
         },
         
         {
             xtype: 'colorfield',
             fieldLabel: i18n_high_color,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             id: 'colorB_cf2',
             allowBlank: false,
             isFormField: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             value: "#FF0000"
         },
         
@@ -1273,11 +1273,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
 	
 	applyPredefinedLegend: function() {
-        this.legend.type = map_legend_type_predefined;
+        this.legend.type = GLOBALS.config.map_legend_type_predefined;
 		var mls = Ext.getCmp('maplegendset_cb2').getValue();
 		var bounds = [];
 		Ext.Ajax.request({
-			url: path_mapping + 'getMapLegendsByMapLegendSet' + type,
+			url: path_mapping + 'getMapLegendsByMapLegendSet' + GLOBALS.config.type,
 			method: 'POST',
 			params: {mapLegendSetId: mls},
             scope: this,
@@ -1337,11 +1337,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         if (url != this.newUrl) {
             this.newUrl = url;
 
-            if (MAPSOURCE == map_source_type_geojson) {
+            if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
                 this.setUrl(path_mapping + 'getGeoJsonFromFile.action?name=' + url);
             }
-			else if (MAPSOURCE == map_source_type_shapefile) {
-				this.setUrl(path_geoserver + wfs + url + output);
+			else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
+				this.setUrl(GLOBALS.config.path_geoserver + GLOBALS.config.wfs + url + GLOBALS.config.output);
 			}
         }
         else {
@@ -1350,16 +1350,16 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     displayMapLegendTypeFields: function() {
-        if (this.legend.type == map_legend_type_automatic) {
+        if (this.legend.type == GLOBALS.config.map_legend_type_automatic) {
 			Ext.getCmp('maplegendset_cb2').hideField();
 		}
-		else if (this.legend.type == map_legend_type_predefined) {
+		else if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
 			Ext.getCmp('maplegendset_cb2').showField();
 		}
     },
     
     validateForm: function(exception) {
-        if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_indicator) {
+        if (Ext.getCmp('mapvaluetype_cb2').getValue() == GLOBALS.config.map_value_type_indicator) {
             if (!Ext.getCmp('indicator_cb2').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1367,7 +1367,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 return false;
             }
         }
-        else if (Ext.getCmp('mapvaluetype_cb2').getValue() == map_value_type_dataelement) {
+        else if (Ext.getCmp('mapvaluetype_cb2').getValue() == GLOBALS.config.map_value_type_dataelement) {
             if (!Ext.getCmp('dataelement_cb2').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1376,7 +1376,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         }
         
-        if (MAPDATETYPE == map_date_type_fixed) {
+        if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
             if (!Ext.getCmp('period_cb2').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1393,7 +1393,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         }
         
-        var cmp = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf2') : Ext.getCmp('map_cb2');
+        var cmp = MAPSOURCE == GLOBALS.config.map_source_type_database ? Ext.getCmp('map_tf2') : Ext.getCmp('map_cb2');
          if (!cmp.getValue()) {
             if (exception) {
                 Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1405,7 +1405,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     getIndicatorOrDataElementId: function() {
-        return this.valueType == map_value_type_indicator ?
+        return this.valueType == GLOBALS.config.map_value_type_indicator ?
             Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
     },
     
@@ -1425,7 +1425,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
 
     classify: function(exception, position) {
-        if (MAPSOURCE == map_source_type_database) {
+        if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
             this.classifyDatabase(exception, position);
         }
         else {
@@ -1460,12 +1460,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 this.mapView = false;
             }
             
-            var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
+            var indicatorOrDataElementId = this.valueType == GLOBALS.config.map_value_type_indicator ?
                 Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
-            var dataUrl = this.valueType == map_value_type_indicator ?
+            var dataUrl = this.valueType == GLOBALS.config.map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
             var params = {};
-            if (MAPDATETYPE == map_date_type_fixed) {
+            if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
                 params.periodId = Ext.getCmp('period_cb2').getValue();
             }
             else {
@@ -1476,7 +1476,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             params.parentId = this.parentId;
             
             Ext.Ajax.request({
-                url: path_mapping + dataUrl + type,
+                url: path_mapping + dataUrl + GLOBALS.config.type,
                 method: 'POST',
                 params: params,
                 scope: this,
@@ -1517,7 +1517,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             MASK.show();
             
             Ext.Ajax.request({
-                url: path_mapping + 'getMapByMapLayerPath' + type,
+                url: path_mapping + 'getMapByMapLayerPath' + GLOBALS.config.type,
                 method: 'POST',
                 params: {mapLayerPath: this.newUrl},
                 scope: this,
@@ -1546,15 +1546,15 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         this.mapView = false;
                     }
             
-                    var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
+                    var indicatorOrDataElementId = this.valueType == GLOBALS.config.map_value_type_indicator ?
                         Ext.getCmp('indicator_cb2').getValue() : Ext.getCmp('dataelement_cb2').getValue();
-                    var dataUrl = this.valueType == map_value_type_indicator ?
+                    var dataUrl = this.valueType == GLOBALS.config.map_value_type_indicator ?
                         'getIndicatorMapValuesByMap' : 'getDataMapValuesByMap';
                     var periodId = Ext.getCmp('period_cb2').getValue();
                     var mapLayerPath = this.newUrl;
                     
                     Ext.Ajax.request({
-                        url: path_mapping + dataUrl + type,
+                        url: path_mapping + dataUrl + GLOBALS.config.type,
                         method: 'POST',
                         params: {id:indicatorOrDataElementId, periodId:periodId, mapLayerPath:mapLayerPath},
                         scope: this,
@@ -1577,7 +1577,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             }
                             
                             Ext.Ajax.request({
-                                url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
+                                url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + GLOBALS.config.type,
                                 method: 'POST',
                                 params: { mapLayerPath: mapLayerPath },
                                 scope: this,

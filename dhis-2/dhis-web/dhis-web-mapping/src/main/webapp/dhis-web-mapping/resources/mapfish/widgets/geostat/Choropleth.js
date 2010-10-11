@@ -82,12 +82,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
                             
         this.legend = {
-            type: map_legend_type_automatic,
-            method: classify_by_equal_intervals,
+            type: GLOBALS.config.map_legend_type_automatic,
+            method: GLOBALS.config.classify_by_equal_intervals,
             classes: 5
         };
         
-        this.valueType = map_value_type_indicator;
+        this.valueType = GLOBALS.config.map_value_type_indicator;
         
         this.createStores();
         
@@ -156,7 +156,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     createStores: function() {
         var mapViewStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllMapViews' + type,
+            url: GLOBALS.config.path_mapping + 'getAllMapViews' + GLOBALS.config.type,
             root: 'mapViews',
             fields: ['id', 'name'],
             sortInfo: {field: 'name', direction: 'ASC'},
@@ -170,7 +170,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
 
         var indicatorGroupStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllIndicatorGroups' + type,
+            url: GLOBALS.config.path_mapping + 'getAllIndicatorGroups' + GLOBALS.config.type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
             idProperty: 'id',
@@ -185,7 +185,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
         
         var indicatorStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getIndicatorsByIndicatorGroup' + type,
+            url: GLOBALS.config.path_mapping + 'getIndicatorsByIndicatorGroup' + GLOBALS.config.type,
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
             idProperty: 'id',
@@ -207,7 +207,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
 		
 		var dataElementGroupStore = new Ext.data.JsonStore({
-			url: path_mapping + 'getAllDataElementGroups' + type,
+			url: GLOBALS.config.path_mapping + 'getAllDataElementGroups' + GLOBALS.config.type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
             sortInfo: {field: 'name', direction: 'ASC'},
@@ -221,7 +221,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
 		
 		var dataElementStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getDataElementsByDataElementGroup' + type,
+            url: GLOBALS.config.path_mapping + 'getDataElementsByDataElementGroup' + GLOBALS.config.type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
             sortInfo: {field: 'name', direction: 'ASC'},
@@ -242,7 +242,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
         
         var periodTypeStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllPeriodTypes' + type,
+            url: GLOBALS.config.path_mapping + 'getAllPeriodTypes' + GLOBALS.config.type,
             root: 'periodTypes',
             fields: ['name'],
             autoLoad: false,
@@ -255,7 +255,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
             
         var periodStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getPeriodsByPeriodType' + type,
+            url: GLOBALS.config.path_mapping + 'getPeriodsByPeriodType' + GLOBALS.config.type,
             root: 'periods',
             fields: ['id', 'name'],
             autoLoad: false,
@@ -268,7 +268,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
             
         var mapStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllMaps' + type,
+            url: GLOBALS.config.path_mapping + 'getAllMaps' + GLOBALS.config.type,
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
             idProperty: 'mapLayerPath',
@@ -282,8 +282,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         });
 		
 		var predefinedMapLegendSetStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getMapLegendSetsByType' + type,
-            baseParams: {type: map_legend_type_predefined},
+            url: GLOBALS.config.path_mapping + 'getMapLegendSetsByType' + GLOBALS.config.type,
+            baseParams: {type: GLOBALS.config.map_legend_type_predefined},
             root: 'mapLegendSets',
             fields: ['id', 'name'],
             autoLoad: false,
@@ -323,15 +323,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             emptyText: i18n_optional,
             selectOnFocus: true,
-			labelSeparator: labelseparator,
-            width: combo_width,
+			labelSeparator: GLOBALS.config.labelseparator,
+            width: GLOBALS.config.combo_width,
             store: this.stores.mapView,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapView' + type,
+                            url: GLOBALS.config.path_mapping + 'getMapView' + GLOBALS.config.type,
                             method: 'POST',
                             params: {id: cb.getValue()},
                             scope: this,
@@ -363,19 +363,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'combo',
 			id: 'mapvaluetype_cb',
             fieldLabel: i18n_mapvaluetype,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             mode: 'local',
             triggerAction: 'all',
-            width: combo_width,
-			value: map_value_type_indicator,
+            width: GLOBALS.config.combo_width,
+			value: GLOBALS.config.map_value_type_indicator,
             store: new Ext.data.SimpleStore({
                 fields: ['id', 'name'],
                 data: [
-                    [map_value_type_indicator, 'Indicators'],
-                    [map_value_type_dataelement, 'Data elements']
+                    [GLOBALS.config.map_value_type_indicator, 'Indicators'],
+                    [GLOBALS.config.map_value_type_dataelement, 'Data elements']
                 ]
             }),
 			listeners: {
@@ -401,10 +401,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.indicatorGroup,
             listeners: {
                 'select': {
@@ -430,10 +430,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.indicator,
             listeners: {
                 'select': {
@@ -442,14 +442,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         Ext.getCmp('mapview_cb').clearValue();
  
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapLegendSetByIndicator' + type,
+                            url: GLOBALS.config.path_mapping + 'getMapLegendSetByIndicator' + GLOBALS.config.type,
                             method: 'POST',
                             params: {indicatorId: cb.getValue()},
                             scope: this,
                             success: function(r) {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
-                                    this.legend.type = map_legend_type_predefined;
+                                    this.legend.type = GLOBALS.config.map_legend_type_predefined;
                                     this.prepareMapViewLegend();
                                     
                                     function load(scope) {
@@ -467,7 +467,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     }
                                 }
                                 else {
-                                    this.legend.type = map_legend_type_automatic;
+                                    this.legend.type = GLOBALS.config.map_legend_type_automatic;
                                     this.prepareMapViewLegend();
                                     this.classify(false, true);
                                 }
@@ -489,10 +489,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.dataElementGroup,
             listeners: {
                 'select': {
@@ -518,10 +518,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.dataElement,
             listeners: {
                 'select': {
@@ -530,14 +530,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         Ext.getCmp('mapview_cb').clearValue();
  
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapLegendSetByDataElement' + type,
+                            url: GLOBALS.config.path_mapping + 'getMapLegendSetByDataElement' + GLOBALS.config.type,
                             method: 'POST',
                             params: {dataElementId: cb.getValue()},
                             scope: this,
                             success: function(r) {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
-                                    this.legend.type = map_legend_type_predefined;
+                                    this.legend.type = GLOBALS.config.map_legend_type_predefined;
                                     this.prepareMapViewLegend();
                                     
                                     function load(scope) {
@@ -555,7 +555,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     }
                                 }
                                 else {
-                                    this.legend.type = map_legend_type_automatic;
+                                    this.legend.type = GLOBALS.config.map_legend_type_automatic;
                                     this.prepareMapViewLegend();
                                     this.classify(false, true);
                                 }
@@ -577,10 +577,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.periodType,
             listeners: {
                 'select': {
@@ -606,10 +606,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.period,
             listeners: {
                 'select': {
@@ -628,9 +628,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_start_date,
             format: 'Y-m-d',
             hidden: true,
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
-            width: combo_width,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
+            width: GLOBALS.config.combo_width,
             listeners: {
                 'select': {
                     scope: this,
@@ -649,9 +649,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_end_date,
             format: 'Y-m-d',
             hidden: true,
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
-            width: combo_width,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
+            width: GLOBALS.config.combo_width,
             listeners: {
                 'select': {
                     scope: this,
@@ -675,10 +675,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: this.stores.map,
             listeners: {
                 'select': {
@@ -705,10 +705,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             listeners: {
                 'focus': {
                     scope: this,
@@ -732,7 +732,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         height: GLOBALS.util.getMultiSelectHeight(),
                                         autoScroll: true,
                                         loader: new Ext.tree.TreeLoader({
-                                            dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
+                                            dataUrl: GLOBALS.config.path_mapping + 'getOrganisationUnitChildren' + type
                                         }),
                                         root: {
                                             id: TOPLEVELUNIT.id,
@@ -804,7 +804,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         }
                         else {
                             Ext.Ajax.request({
-                                url: path_commons + 'getOrganisationUnits' + type,
+                                url: GLOBALS.config.path_commons + 'getOrganisationUnits' + GLOBALS.config.type,
                                 params: {level: 1},
                                 method: 'POST',
                                 scope: this,
@@ -834,32 +834,32 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             value: this.legend.type,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: [
-					[map_legend_type_automatic, i18n_automatic],
-					[map_legend_type_predefined, i18n_predefined]
+					[GLOBALS.config.map_legend_type_automatic, i18n_automatic],
+					[GLOBALS.config.map_legend_type_predefined, i18n_predefined]
 				]
             }),
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        if (cb.getValue() == map_legend_type_predefined && cb.getValue() != this.legend.type) {
-							this.legend.type = map_legend_type_predefined;
+                        if (cb.getValue() == GLOBALS.config.map_legend_type_predefined && cb.getValue() != this.legend.type) {
+							this.legend.type = GLOBALS.config.map_legend_type_predefined;
                             this.prepareMapViewLegend();
 							
 							if (Ext.getCmp('maplegendset_cb').getValue()) {
                                 this.applyPredefinedLegend();
 							}
                         }
-                        else if (cb.getValue() == map_legend_type_automatic && cb.getValue() != this.legend.type) {
-							this.legend.type = map_legend_type_automatic;
+                        else if (cb.getValue() == GLOBALS.config.map_legend_type_automatic && cb.getValue() != this.legend.type) {
+							this.legend.type = GLOBALS.config.map_legend_type_automatic;
 							this.prepareMapViewLegend();                            
                             this.classify(false, true);
                         }
@@ -876,10 +876,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             valueField: 'id',
             displayField: 'name',
             mode: 'remote',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
 			hidden: true,
             store: this.stores.predefinedMapLegendSet,
             listeners: {
@@ -900,11 +900,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
-            emptyText: emptytext,
-			labelSeparator: labelseparator,
+            emptyText: GLOBALS.config.emptytext,
+			labelSeparator: GLOBALS.config.labelseparator,
             value: this.legend.method,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: new Ext.data.SimpleStore({
                 fields: ['value', 'text'],
                 data: [
@@ -917,8 +917,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        if (cb.getValue() == classify_with_bounds && cb.getValue() != this.legend.method) {
-							this.legend.method = classify_with_bounds;
+                        if (cb.getValue() == GLOBALS.config.classify_with_bounds && cb.getValue() != this.legend.method) {
+							this.legend.method = GLOBALS.config.classify_with_bounds;
                             this.prepareMapViewLegend();
                         }
                         else if (cb.getValue() != this.legend.method) {
@@ -935,17 +935,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'textfield',
             id: 'bounds_tf',
             fieldLabel: i18n_bounds,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             emptyText: i18n_comma_separated_values,
             isFormField: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             hidden: true
         },
         
         {
             xtype: 'combo',
             fieldLabel: i18n_classes,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             id: 'numClasses_cb',
             editable: false,
             valueField: 'value',
@@ -953,7 +953,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             value: this.legend.classes,
             triggerAction: 'all',
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             store: new Ext.data.SimpleStore({
                 fields: ['value'],
                 data: [[1], [2], [3], [4], [5], [6], [7]]
@@ -976,22 +976,22 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'colorfield',
             fieldLabel: i18n_low_color,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             id: 'colorA_cf',
             allowBlank: false,
             isFormField: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             value: "#FFFF00"
         },
         
         {
             xtype: 'colorfield',
             fieldLabel: i18n_high_color,
-			labelSeparator: labelseparator,
+			labelSeparator: GLOBALS.config.labelseparator,
             id: 'colorB_cf',
             allowBlank: false,
             isFormField: true,
-            width: combo_width,
+            width: GLOBALS.config.combo_width,
             value: "#FF0000"
         },
         
@@ -1022,10 +1022,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     createSelectFeatures: function() {
         this.selectFeatures = {
             onHoverSelect: function onHoverSelect(feature) {
-                if (ACTIVEPANEL == thematicMap) {
+                if (ACTIVEPANEL == GLOBALS.config.thematicMap) {
                     Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[choropleth.mapData.nameColumn] + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
                 }
-                else if (ACTIVEPANEL == organisationUnitAssignment) {
+                else if (ACTIVEPANEL == GLOBALS.config.organisationUnitAssignment) {
                     Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[mapping.mapData.nameColumn] + '</div>', false);
                 }
             },
@@ -1037,7 +1037,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 var x = east_panel.x - 210;
                 var y = east_panel.y + 41;
                 
-                if (ACTIVEPANEL == thematicMap && MAPSOURCE == map_source_type_database) {
+                if (ACTIVEPANEL == GLOBALS.config.thematicMap && MAPSOURCE == GLOBALS.config.map_source_type_database) {
                     if (feature.attributes.hasChildrenWithCoordinates) {
                         if (lfw) {
                             lfw.destroy();
@@ -1052,7 +1052,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     }
                 }
                 
-                if (ACTIVEPANEL == organisationUnitAssignment && MAPSOURCE != map_source_type_database) {
+                if (ACTIVEPANEL == GLOBALS.config.organisationUnitAssignment && MAPSOURCE != GLOBALS.config.map_source_type_database) {
                     if (selectFeaturePopup) {
                         selectFeaturePopup.destroy();
                     }
@@ -1096,7 +1096,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     prepareMapViewValueType: function() {
         var obj = {};
-        if (this.valueType == map_value_type_indicator) {
+        if (this.valueType == GLOBALS.config.map_value_type_indicator) {
             Ext.getCmp('indicatorgroup_cb').showField();
             Ext.getCmp('indicator_cb').showField();
             Ext.getCmp('dataelementgroup_cb').hideField();
@@ -1114,7 +1114,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 valueType: 'indicatorId'
             };
         }
-        else if (this.valueType == map_value_type_dataelement) {
+        else if (this.valueType == GLOBALS.config.map_value_type_dataelement) {
             Ext.getCmp('indicatorgroup_cb').hideField();
             Ext.getCmp('indicator_cb').hideField();
             Ext.getCmp('dataelementgroup_cb').showField();
@@ -1137,7 +1137,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     prepareMapViewDateType: function() {
         var obj = {};
-        if (MAPDATETYPE == map_date_type_fixed) {
+        if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
             Ext.getCmp('periodtype_cb').showField();
             Ext.getCmp('period_cb').showField();
             Ext.getCmp('startdate_df').hideField();
@@ -1155,7 +1155,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 c2: 'periodId'
             };
         }
-        else if (MAPDATETYPE == map_date_type_start_end) {
+        else if (MAPDATETYPE == GLOBALS.config.map_date_type_start_end) {
             Ext.getCmp('periodtype_cb').hideField();
             Ext.getCmp('period_cb').hideField();
             Ext.getCmp('startdate_df').showField();
@@ -1175,13 +1175,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     prepareMapViewLegend: function() {
         Ext.getCmp('maplegendtype_cb').setValue(this.legend.type);
         
-        if (this.legend.type == map_legend_type_automatic) {
+        if (this.legend.type == GLOBALS.config.map_legend_type_automatic) {
             Ext.getCmp('method_cb').showField();
             Ext.getCmp('colorA_cf').showField();
             Ext.getCmp('colorB_cf').showField();
             Ext.getCmp('maplegendset_cb').hideField();
             
-            if (this.legend.method == classify_with_bounds) {
+            if (this.legend.method == GLOBALS.config.classify_with_bounds) {
                 Ext.getCmp('numClasses_cb').hideField();
                 Ext.getCmp('bounds_tf').showField();
             }
@@ -1190,7 +1190,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 Ext.getCmp('bounds_tf').hideField();
             }                
         }
-        else if (this.legend.type == map_legend_type_predefined) {
+        else if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
             Ext.getCmp('method_cb').hideField();
             Ext.getCmp('numClasses_cb').hideField();
             Ext.getCmp('bounds_tf').hideField();
@@ -1201,7 +1201,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     prepareMapViewMap: function() {
-        if (MAPSOURCE == map_source_type_database) {
+        if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
             Ext.getCmp('map_cb').hideField();
             Ext.getCmp('map_tf').showField();
         }
@@ -1222,7 +1222,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 obj.components.valueType.setValue(scope.mapView[obj.mapView.valueType]);
                 
                 obj = scope.prepareMapViewDateType();
-                if (MAPDATETYPE == map_date_type_fixed) {
+                if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
                     if (obj.stores.c1.isLoaded) {
                         dateTypeGroupStoreCallback(scope);
                     }
@@ -1232,7 +1232,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         }});
                     }
                 }
-                else if (MAPDATETYPE == map_date_type_start_end) {
+                else if (MAPDATETYPE == GLOBALS.config.map_date_type_start_end) {
                     obj.components.c1.setValue(new Date(scope.mapView[obj.mapView.c1]));
                     obj.components.c2.setValue(new Date(scope.mapView[obj.mapView.c2]));
                     
@@ -1270,12 +1270,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             scope.applyPredefinedLegend(true);
         }
         
-        if (this.legend.type == map_legend_type_automatic) {
+        if (this.legend.type == GLOBALS.config.map_legend_type_automatic) {
             Ext.getCmp('method_cb').setValue(this.mapView.method);
             Ext.getCmp('colorA_cf').setValue(this.mapView.colorLow);
             Ext.getCmp('colorB_cf').setValue(this.mapView.colorHigh);
             
-            if (this.legend.method == classify_with_bounds) {
+            if (this.legend.method == GLOBALS.config.classify_with_bounds) {
                 Ext.getCmp('bounds_tf').setValue(this.mapView.bounds);
             }
             else {
@@ -1284,7 +1284,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
             this.setMapViewMap();
         }
-        else if (this.legend.type == map_legend_type_predefined) {
+        else if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
             if (this.stores.isLoaded) {
                 predefinedMapLegendSetStoreCallback(this);
             }
@@ -1299,9 +1299,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     setMapViewMap: function() {
         this.prepareMapViewMap();
 
-        if (MAPSOURCE == map_source_type_database) {
+        if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
             Ext.Ajax.request({
-                url: path_commons + 'getOrganisationUnit' + type,
+                url: GLOBALS.config.path_commons + 'getOrganisationUnit' + GLOBALS.config.type,
                 method: 'POST',
                 params: {id: this.mapView.mapSource},
                 scope: this,
@@ -1320,11 +1320,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
 	
 	applyPredefinedLegend: function(isMapView) {
-        this.legend.type = map_legend_type_predefined;
+        this.legend.type = GLOBALS.config.map_legend_type_predefined;
 		var mls = Ext.getCmp('maplegendset_cb').getValue();
 		var bounds = [];
 		Ext.Ajax.request({
-			url: path_mapping + 'getMapLegendsByMapLegendSet' + type,
+			url: GLOBALS.config.path_mapping + 'getMapLegendsByMapLegendSet' + GLOBALS.config.type,
 			method: 'POST',
 			params: {mapLegendSetId: mls},
             scope: this,
@@ -1379,7 +1379,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             MASK.show();
             
             scope.parentId = id;
-            scope.setUrl(path_mapping + 'getGeoJson.action?parentId=' + scope.parentId);
+            scope.setUrl(GLOBALS.config.path_mapping + 'getGeoJson.action?parentId=' + scope.parentId);
         }
     },
     
@@ -1387,11 +1387,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         if (url != this.newUrl) {
             this.newUrl = url;
 
-            if (MAPSOURCE == map_source_type_geojson) {
-                this.setUrl(path_mapping + 'getGeoJsonFromFile.action?name=' + url);
+            if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
+                this.setUrl(GLOBALS.config.path_mapping + 'getGeoJsonFromFile.action?name=' + url);
             }
-			else if (MAPSOURCE == map_source_type_shapefile) {
-				this.setUrl(path_geoserver + wfs + url + output);
+			else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
+				this.setUrl(GLOBALS.config.path_geoserver + GLOBALS.config.wfs + url + GLOBALS.config.output);
 			}
         }
         else {
@@ -1400,7 +1400,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     validateForm: function(exception) {
-        if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_indicator) {
+        if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.config.map_value_type_indicator) {
             if (!Ext.getCmp('indicator_cb').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1408,7 +1408,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 return false;
             }
         }
-        else if (Ext.getCmp('mapvaluetype_cb').getValue() == map_value_type_dataelement) {
+        else if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.config.map_value_type_dataelement) {
             if (!Ext.getCmp('dataelement_cb').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1417,7 +1417,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
         
-        if (MAPDATETYPE == map_date_type_fixed) {
+        if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
             if (!Ext.getCmp('period_cb').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1434,7 +1434,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
         
-        var cmp = MAPSOURCE == map_source_type_database ? Ext.getCmp('map_tf') : Ext.getCmp('map_cb');
+        var cmp = MAPSOURCE == GLOBALS.config.map_source_type_database ? Ext.getCmp('map_tf') : Ext.getCmp('map_cb');
         if (!cmp.getValue()) {
             if (exception) {
                 Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1461,7 +1461,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
 
     classify: function(exception, position) {
-        if (MAPSOURCE == map_source_type_database) {
+        if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
             this.classifyDatabase(exception, position);
         }
         else {
@@ -1496,19 +1496,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 this.mapView = false;
             }
             
-            var dataUrl = this.valueType == map_value_type_indicator ?
+            var dataUrl = this.valueType == GLOBALS.config.map_value_type_indicator ?
                 'getIndicatorMapValuesByParentOrganisationUnit' : 'getDataMapValuesByParentOrganisationUnit';
             
             var params = {
-                id: this.valueType == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue(),
-                periodId: MAPDATETYPE == map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : null,
-                startDate: MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
-                endDate: MAPDATETYPE == map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
+                id: this.valueType == GLOBALS.config.map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue(),
+                periodId: MAPDATETYPE == GLOBALS.config.map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : null,
+                startDate: MAPDATETYPE == GLOBALS.config.map_date_type_start_end ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
+                endDate: MAPDATETYPE == GLOBALS.config.map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
                 parentId: this.parentId
             };
                 
             Ext.Ajax.request({
-                url: path_mapping + dataUrl + type,
+                url: GLOBALS.config.path_mapping + dataUrl + GLOBALS.config.type,
                 method: 'POST',
                 params: params,
                 scope: this,
@@ -1545,7 +1545,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             MASK.show();
             
             Ext.Ajax.request({
-                url: path_mapping + 'getMapByMapLayerPath' + type,
+                url: GLOBALS.config.path_mapping + 'getMapByMapLayerPath' + GLOBALS.config.type,
                 method: 'POST',
                 params: {mapLayerPath: this.newUrl},
                 scope: this,
@@ -1575,19 +1575,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     }
                     
                     var params = {
-                        id: this.valueType == map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue()
+                        id: this.valueType == GLOBALS.config.map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue()
                     };
                         
             
-                    var indicatorOrDataElementId = this.valueType == map_value_type_indicator ?
+                    var indicatorOrDataElementId = this.valueType == GLOBALS.config.map_value_type_indicator ?
                         Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
-                    var dataUrl = this.valueType == map_value_type_indicator ?
+                    var dataUrl = this.valueType == GLOBALS.config.map_value_type_indicator ?
                         'getIndicatorMapValuesByMap' : 'getDataMapValuesByMap';
                     var periodId = Ext.getCmp('period_cb').getValue();
                     var mapLayerPath = this.newUrl;
                     
                     Ext.Ajax.request({
-                        url: path_mapping + dataUrl + type,
+                        url: GLOBALS.config.path_mapping + dataUrl + GLOBALS.config.type,
                         method: 'POST',
                         params: {id:indicatorOrDataElementId, periodId:periodId, mapLayerPath:mapLayerPath},
                         scope: this,
@@ -1610,7 +1610,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             }
                             
                             Ext.Ajax.request({
-                                url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
+                                url: GLOBALS.config.path_mapping + 'getAvailableMapOrganisationUnitRelations' + GLOBALS.config.type,
                                 method: 'POST',
                                 params: {mapLayerPath: mapLayerPath},
                                 scope: this,
