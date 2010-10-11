@@ -31,6 +31,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 
@@ -123,6 +124,13 @@ public class MapView
         this.zoom = zoom;
     }
 
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -163,6 +171,12 @@ public class MapView
     public String getMapDateTypeNullSafe()
     {
         return mapDateType != null ? mapDateType : MappingService.MAP_DATE_TYPE_FIXED;
+    }
+
+    public String getParentOrganisationUnitName()
+    {
+        return mapSourceType.equals( MappingService.MAP_SOURCE_TYPE_DATABASE ) ? organisationUnitService
+            .getOrganisationUnit( Integer.parseInt( mapSource ) ).getName() : "";
     }
 
     // -------------------------------------------------------------------------

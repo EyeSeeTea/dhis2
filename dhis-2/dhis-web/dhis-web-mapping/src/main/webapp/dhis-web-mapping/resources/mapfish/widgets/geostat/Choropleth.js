@@ -337,7 +337,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             params: {id: cb.getValue()},
                             scope: this,
                             success: function(r) {
-                                this.mapView = GLOBALS.util.getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);                                    
+                                this.mapView = GLOBALS.util.getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
                                 this.legend.type = this.mapView.mapLegendType;
                                 this.legend.method = this.mapView.method || this.legend.method;
                                 this.legend.classes = this.mapView.classes || this.legend.classes;
@@ -1374,7 +1374,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     setMapViewMap: function() {
         this.prepareMapViewMap();
-        
+
         if (MAPSOURCE == map_source_type_database) {
             Ext.Ajax.request({
                 url: path_commons + 'getOrganisationUnit' + type,
@@ -1425,11 +1425,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
 				this.colorInterpolation = colors;
 				this.bounds = bounds;
-				this.classify(false, true);
                 
                 if (isMapView) {
                     this.setMapViewMap();
                 }
+                else {
+                    this.classify(false, true);
+                }                   
 			},
 			failure: function() {
 				alert('Error: getMapLegendsByMapLegendSet');
