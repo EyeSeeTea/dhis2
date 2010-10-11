@@ -79,7 +79,7 @@ Ext.onReady( function() {
 		url: GLOBALS.config.path_mapping + 'getBaseCoordinate' + GLOBALS.config.type,
 		method: 'GET',
 		success: function(r) {
-			var bc = Ext.util.JSON.decode( r.responseText ).baseCoordinate;
+			var bc = Ext.util.JSON.decode(r.responseText).baseCoordinate;
 			BASECOORDINATE = {longitude:bc[0].longitude, latitude:bc[0].latitude};
 			
 			Ext.Ajax.request({
@@ -337,7 +337,7 @@ Ext.onReady( function() {
 							Ext.getCmp('mapview_cb').getStore().load();
 						},
 						failure: function() {
-							alert( i18n_status , i18n_error_while_saving_data );
+							alert(i18n_status, i18n_error_while_saving_data);
 						}
 					});
 				}
@@ -426,7 +426,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'combo',
 				id: 'exportimagequality_cb',
-				// fieldLabel: i18n_image_resolution,
+				fieldLabel: i18n_image_resolution,
                 fieldLabel: 'Image resolution',
 				labelSeparator: GLOBALS.config.labelseparator,
 				editable: false,
@@ -516,7 +516,7 @@ Ext.onReady( function() {
                         }
                     }
                     else {
-                        Ext.message.msg(false, i18n_please_render_map_fist );
+                        Ext.message.msg(false, i18n_please_render_map_fist);
                     }
 				}
 			}	
@@ -620,10 +620,10 @@ Ext.onReady( function() {
 	var exportExcelWindow=new Ext.Window({id:'exportexcel_w',title:'<span id="window-excel-title">'+i18n_export_excel+'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:260,height:157,items:[{xtype:'panel',items:[exportExcelPanel]}]});
 	
 	/* Section: predefined legend set */
-	var predefinedMapLegendStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapLegends'+GLOBALS.config.type,root:'mapLegends',id:'id',fields:['id','name','startValue','endValue','color','displayString'],autoLoad:true});
-	var predefinedMapLegendSetStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLegendSetsByType'+GLOBALS.config.type,baseParams:{type:GLOBALS.config.map_legend_type_predefined},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
-	var predefinedMapLegendSetIndicatorStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllIndicators'+GLOBALS.config.type,root:'indicators',fields:['id','name','shortName'],sortInfo:{field:'shortName',direction:'ASC'},autoLoad:true});
-    var predefinedMapLegendSetDataElementStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllDataElements'+GLOBALS.config.type,root:'dataElements',fields:['id','name','shortName'],sortInfo:{field:'shortName',direction:'ASC'},autoLoad:true});
+	var predefinedMapLegendStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapLegends'+GLOBALS.config.type,root:'mapLegends',id:'id',fields:['id','name','startValue','endValue','color','displayString'],autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
+	var predefinedMapLegendSetStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLegendSetsByType'+GLOBALS.config.type,baseParams:{type:GLOBALS.config.map_legend_type_predefined},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
+	var predefinedMapLegendSetIndicatorStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllIndicators'+GLOBALS.config.type,root:'indicators',fields:['id','name','shortName'],sortInfo:{field:'shortName',direction:'ASC'},autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
+    var predefinedMapLegendSetDataElementStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllDataElements'+GLOBALS.config.type,root:'dataElements',fields:['id','name','shortName'],sortInfo:{field:'shortName',direction:'ASC'},autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
 
 	var newPredefinedMapLegendPanel = new Ext.form.FormPanel({
         id: 'newpredefinedmaplegend_p',
@@ -676,7 +676,7 @@ Ext.onReady( function() {
                             Ext.Ajax.request({
                                 url: GLOBALS.config.path_mapping + 'addOrUpdateMapLegend' + GLOBALS.config.type,
                                 method: 'POST',
-                                params: { name: mln, startValue: mlsv, endValue: mlev, color: mlc },
+                                params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc},
                                 success: function(r) {
                                     Ext.message.msg(true, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
                                     Ext.getCmp('predefinedmaplegend_cb').getStore().load();
@@ -716,14 +716,14 @@ Ext.onReady( function() {
                     var mlrv = Ext.getCmp('predefinedmaplegend_cb').getRawValue();
                     
                     if (!mlv) {
-                        Ext.message.msg(false, i18n_please_select_a_legend );
+                        Ext.message.msg(false, i18n_please_select_a_legend);
                         return;
                     }
                     
                     Ext.Ajax.request({
                         url: GLOBALS.config.path_mapping + 'deleteMapLegend' + GLOBALS.config.type,
                         method: 'POST',
-                        params: { id: mlv },
+                        params: {id: mlv},
                         success: function(r) {
                             Ext.message.msg(true, i18n_legend+ ' <span class="x-msg-hl">' + mlrv + '</span> ' + i18n_was_deleted);
                             Ext.getCmp('predefinedmaplegend_cb').getStore().load();
@@ -800,7 +800,7 @@ Ext.onReady( function() {
                     Ext.Ajax.request({
                         url: GLOBALS.config.path_mapping + 'addOrUpdateMapLegendSet.action' + params,
                         method: 'POST',
-                        params: { name: mlsv, type: GLOBALS.config.map_legend_type_predefined },
+                        params: {name: mlsv, type: GLOBALS.config.map_legend_type_predefined},
                         success: function(r) {
                             Ext.message.msg(true, i18n_new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + i18n_was_registered );
                             Ext.getCmp('predefinedmaplegendsetindicator_cb').getStore().load();
@@ -849,9 +849,6 @@ Ext.onReady( function() {
                             Ext.getCmp('predefinedmaplegendsetindicator_cb').clearValue();
                             Ext.getCmp('predefinedmaplegendsetindicator2_cb').getStore().load();
 							Ext.getCmp('maplegendset_cb').getStore().load();
-                        },
-                        failure: function() {
-                            alert( 'Error: deleteMapLegendSet' );
                         }
                     });
                 }
@@ -1260,13 +1257,15 @@ Ext.onReady( function() {
     });
 
     /* Section: register maps */
-	var organisationUnitLevelStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getOrganisationUnitLevels'+GLOBALS.config.type,id:'id',baseParams:{format:'json'},root:'organisationUnitLevels',fields:['id','level','name'],autoLoad:true});
+	var organisationUnitLevelStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getOrganisationUnitLevels'+GLOBALS.config.type,id:'id',baseParams:{format:'json'},root:'organisationUnitLevels',fields:['id','level','name'],autoLoad:false});
 	var organisationUnitStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getOrganisationUnitsAtLevel'+GLOBALS.config.type,baseParams:{level:1,format:'json'},root:'organisationUnits',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
-	var existingMapsStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMaps'+GLOBALS.config.type,baseParams:{format:'jsonmin'},root:'maps',fields:['id','name','mapLayerPath','organisationUnitLevel'],autoLoad:true});
+	var existingMapsStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMaps'+GLOBALS.config.type,baseParams:{format:'jsonmin'},root:'maps',fields:['id','name','mapLayerPath','organisationUnitLevel'],autoLoad:false});
 	var wmsMapStore=new GeoExt.data.WMSCapabilitiesStore({url:GLOBALS.config.path_geoserver+GLOBALS.config.ows});
-	var geojsonStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getGeoJsonFiles'+GLOBALS.config.type,root:'files',fields:['name'],autoLoad:true});
+	var geojsonStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getGeoJsonFiles'+GLOBALS.config.type,root:'files',fields:['name'],autoLoad:false});
 	var nameColumnStore=new Ext.data.SimpleStore({fields:['name'],data:[]});
-	var baseCoordinateStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getBaseCoordinate'+GLOBALS.config.type,root:'baseCoordinate',fields:['longitude','latitude'],autoLoad:true});
+    var longitudeStore = new Ext.data.SimpleStore({fields:['value'],data:[[BASECOORDINATE.longitude]]});
+    var latitudeStore = new Ext.data.SimpleStore({fields:['value'],data:[[BASECOORDINATE.latitude]]});
+	// var baseCoordinateStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getBaseCoordinate'+GLOBALS.config.type,root:'baseCoordinate',fields:['longitude','latitude'],autoLoad:false});
 	var organisationUnitComboBox=new Ext.form.ComboBox({id:'organisationunit_cb',fieldLabel:'Organisation unit',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:organisationUnitStore});
 	var organisationUnitLevelComboBox=new Ext.form.ComboBox({id:'organisationunitlevel_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:organisationUnitLevelStore});
 	var newNameTextField=new Ext.form.TextField({id:'newname_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
@@ -1467,10 +1466,10 @@ Ext.onReady( function() {
 	});
 	
 	var editNameColumnComboBox=new Ext.form.ComboBox({id:'editnamecolumn_cb',editable:false,displayField:'name',valueField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,triggerAction:'all',mode:'local',store:nameColumnStore});
-	var newLongitudeComboBox=new Ext.form.ComboBox({id:'newlongitude_cb',valueField:'longitude',displayField:'longitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',value:BASECOORDINATE.longitude,mode:'remote',store:baseCoordinateStore});
-	var editLongitudeComboBox=new Ext.form.ComboBox({id:'editlongitude_cb',valueField:'longitude',displayField:'longitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'remote',store:baseCoordinateStore});
-	var newLatitudeComboBox=new Ext.form.ComboBox({id:'newlatitude_cb',valueField:'latitude',displayField:'latitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',value:BASECOORDINATE.latitude,mode:'remote',store:baseCoordinateStore});
-	var editLatitudeComboBox=new Ext.form.ComboBox({id:'editlatitude_cb',valueField:'latitude',displayField:'latitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'remote',store:baseCoordinateStore});
+	var newLongitudeComboBox=new Ext.form.ComboBox({id:'newlongitude_cb',valueField:'value',displayField:'value',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',value:BASECOORDINATE.longitude,mode:'local',store:longitudeStore});
+	var editLongitudeComboBox=new Ext.form.ComboBox({id:'editlongitude_cb',valueField:'longitude',displayField:'longitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'local',store:longitudeStore});
+	var newLatitudeComboBox=new Ext.form.ComboBox({id:'newlatitude_cb',valueField:'latitude',displayField:'latitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',value:BASECOORDINATE.latitude,mode:'local',store:latitudeStore});
+	var editLatitudeComboBox=new Ext.form.ComboBox({id:'editlatitude_cb',valueField:'latitude',displayField:'latitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'local',store:latitudeStore});
 	var newZoomComboBox=new Ext.form.ComboBox({id:'newzoom_cb',editable:true,displayField:'text',valueField:'value',hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'local',value:7,store:new Ext.data.SimpleStore({fields:['value','text'],data:[[3,'3 (out)'],[4,'4'],[5,'5'],[6,'6'],[7,'7'],[8,'8'],[9,'9'],[10,'10 (in)']]})});
 	var editZoomComboBox=new Ext.form.ComboBox({id:'editzoom_cb',editable:false,emptyText:'',displayField:'value',valueField:'value',hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width+17,triggerAction:'all',mode:'local',store:new Ext.data.SimpleStore({fields:['value','text'],data:[[5,'5 (out)'],[6,'6'],[7,'7'],[8,'8'],[9,'9 (in)']]})});
     
@@ -1485,7 +1484,7 @@ Ext.onReady( function() {
                 method: 'POST',
                 params: {level:1},
                 success: function(r) {
-                    var oui = Ext.util.JSON.decode( r.responseText ).organisationUnits[0].id;
+                    var oui = Ext.util.JSON.decode(r.responseText).organisationUnits[0].id;
                     var ouli = Ext.getCmp('organisationunitlevel_cb').getValue();
                     var nn = Ext.getCmp('newname_tf').getValue();
                     var t = Ext.getCmp('type_cb').getValue();
@@ -2009,7 +2008,7 @@ Ext.onReady( function() {
 	var mapLayerFillOpacityComboBox=new Ext.form.ComboBox({id:'maplayerfillopacity_cb',hideLabel:true,editable:true,valueField:'value',displayField:'value',mode:'local',triggerAction:'all',width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,value:0.5,store:new Ext.data.SimpleStore({fields:['value'],data:[[0.0],[0.1],[0.2],[0.3],[0.4],[0.5],[0.6],[0.7],[0.8],[0.9],[1.0]]})});
 	var mapLayerStrokeColorColorField=new Ext.ux.ColorField({id:'maplayerstrokecolor_cf',hideLabel:true,allowBlank:false,width:GLOBALS.config.combo_width,value:'#222222'});
 	var mapLayerStrokeWidthComboBox=new Ext.form.ComboBox({id:'maplayerstrokewidth_cb',hideLabel:true,editable:true,valueField:'value',displayField:'value',mode:'local',triggerAction:'all',width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,value:2,store:new Ext.data.SimpleStore({fields:['value'],data:[[0],[1],[2],[3],[4]]})});
-	var mapLayerStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLayersByType'+GLOBALS.config.type,baseParams:{type:GLOBALS.config.map_layer_type_baselayer},root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+	var mapLayerStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLayersByType'+GLOBALS.config.type,baseParams:{type:GLOBALS.config.map_layer_type_baselayer},root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
 	var mapLayerComboBox=new Ext.form.ComboBox({id:'maplayer_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,hideLabel:true,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:mapLayerStore});
     
     var deleteMapLayerButton = new Ext.Button({
@@ -2214,7 +2213,7 @@ Ext.onReady( function() {
     var mapLayerBaseLayersUrlTextField=new Ext.form.TextField({id:'maplayerbaselayersurl_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
     var mapLayerBaseLayersLayerTextField=new Ext.form.TextField({id:'maplayerbaselayerslayer_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
     
-    var mapLayerBaseLayerStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLayersByType'+GLOBALS.config.type,baseParams:{ type:GLOBALS.config.map_layer_type_baselayer },root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:true});
+    var mapLayerBaseLayerStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLayersByType'+GLOBALS.config.type,baseParams:{ type:GLOBALS.config.map_layer_type_baselayer },root:'mapLayers',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
 	var mapLayerBaseLayerComboBox=new Ext.form.ComboBox({id:'maplayerbaselayers_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,hideLabel:true,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:mapLayerBaseLayerStore});
     
     var deleteMapLayerBaseLayersButton = new Ext.Button({
@@ -2249,9 +2248,6 @@ Ext.onReady( function() {
                                 for (var i = 0; i < mapLayers.length; i++) {
                                     MAP.getLayersByName(mapLayers[i].name)[0].setVisibility(false);
                                 }
-                            },
-                            failure: function() {
-                                alert( 'Error: getMapLayersByType' );
                             }
                         });
                     }
@@ -2573,8 +2569,8 @@ Ext.onReady( function() {
 						minListWidth: GLOBALS.config.combo_number_width,
 						triggerAction: 'all',
 						value: BASECOORDINATE.longitude,
-						mode: 'remote',
-						store: baseCoordinateStore
+						mode: 'local',
+						store: longitudeStore
 					},	
 					{
 						xtype: 'combo',
@@ -2589,8 +2585,8 @@ Ext.onReady( function() {
 						minListWidth: GLOBALS.config.combo_number_width,
 						triggerAction: 'all',
 						value: BASECOORDINATE.latitude,
-						mode: 'remote',
-						store: baseCoordinateStore
+						mode: 'local',
+						store: latitudeStore
 					},
 					{ html: '<p style="height:5px;">' },
 					{
@@ -2759,7 +2755,7 @@ Ext.onReady( function() {
 	function addOverlaysToMap() {
 		Ext.Ajax.request({
 			url: GLOBALS.config.path_mapping + 'getMapLayersByType' + GLOBALS.config.type,
-            params: { type: GLOBALS.config.map_layer_type_baselayer },
+            params: {type: GLOBALS.config.map_layer_type_baselayer},
 			method: 'POST',
 			success: function(r) {
 				var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
@@ -3441,6 +3437,15 @@ Ext.onReady( function() {
 			}
 			else {
 				predefinedMapLegendSetWindow.show();
+                if (!predefinedMapLegendStore.isLoaded) {
+                    predefinedMapLegendStore.load();
+                }
+                if (!predefinedMapLegendSetIndicatorStore.isLoaded) {
+                    predefinedMapLegendSetIndicatorStore.load();
+                }
+                if (!predefinedMapLegendSetDataElementStore.isLoaded) {
+                    predefinedMapLegendSetDataElementStore.load();
+                }                
 			}
 		}
 	});
