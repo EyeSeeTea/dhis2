@@ -85,7 +85,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         this.valueType = GLOBALS.config.map_value_type_indicator;
     
         var mapViewStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllMapViews' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getAllMapViews' + GLOBALS.config.type,
             root: 'mapViews',
             fields: ['id', 'name'],
             sortInfo: {field: 'name', direction: 'ASC'},
@@ -93,7 +93,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
     
         var indicatorGroupStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllIndicatorGroups' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getAllIndicatorGroups' + GLOBALS.config.type,
             root: 'indicatorGroups',
             fields: ['id', 'name'],
             idProperty: 'id',
@@ -102,7 +102,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
         
         var indicatorStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getIndicatorsByIndicatorGroup' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getIndicatorsByIndicatorGroup' + GLOBALS.config.type,
             root: 'indicators',
             fields: ['id', 'name', 'shortName'],
             idProperty: 'id',
@@ -172,7 +172,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		var dataElementGroupStore = new Ext.data.JsonStore({
-			url: path_mapping + 'getAllDataElementGroups' + GLOBALS.config.type,
+			url: GLOBALS.config.path_mapping + 'getAllDataElementGroups' + GLOBALS.config.type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -180,7 +180,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		var dataElementStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getDataElementsByDataElementGroup' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getDataElementsByDataElementGroup' + GLOBALS.config.type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
             sortInfo: { field: 'name', direction: 'ASC' },
@@ -250,14 +250,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
         
         var periodTypeStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllPeriodTypes' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getAllPeriodTypes' + GLOBALS.config.type,
             root: 'periodTypes',
             fields: ['name'],
             autoLoad: true
         });
 
         var periodStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getPeriodsByPeriodType' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getPeriodsByPeriodType' + GLOBALS.config.type,
             root: 'periods',
             fields: ['id', 'name'],
             autoLoad: false,
@@ -288,7 +288,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
             
         var mapStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getAllMaps' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getAllMaps' + GLOBALS.config.type,
             baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
@@ -327,7 +327,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         });
 		
 		var predefinedMapLegendSetStore = new Ext.data.JsonStore({
-            url: path_mapping + 'getMapLegendSetsByType' + GLOBALS.config.type,
+            url: GLOBALS.config.path_mapping + 'getMapLegendSetsByType' + GLOBALS.config.type,
             baseParams: {type: GLOBALS.config.map_legend_type_predefined},
             root: 'mapLegendSets',
             fields: ['id', 'name'],
@@ -338,7 +338,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     fn: function() {
 						if (this.mapView) {
 							Ext.Ajax.request({
-								url: path_mapping + 'getMapLegendSet' + GLOBALS.config.type,
+								url: GLOBALS.config.path_mapping + 'getMapLegendSet' + GLOBALS.config.type,
 								method: 'POST',
 								params: {id: this.mapView.mapLegendSetId},
                                 scope: this,
@@ -433,7 +433,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var mId = Ext.getCmp('mapview_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapView' + GLOBALS.config.type,
+                            url: GLOBALS.config.path_mapping + 'getMapView' + GLOBALS.config.type,
                             method: 'POST',
                             params: {id: mId},
                             scope: this,
@@ -614,7 +614,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var iId = Ext.getCmp('indicator_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapLegendSetByIndicator' + GLOBALS.config.type,
+                            url: GLOBALS.config.path_mapping + 'getMapLegendSetByIndicator' + GLOBALS.config.type,
                             method: 'POST',
                             params: {indicatorId: iId},
                             scope: this,
@@ -719,7 +719,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var deId = Ext.getCmp('dataelement_cb2').getValue();
                         
                         Ext.Ajax.request({
-                            url: path_mapping + 'getMapLegendSetByDataElement' + GLOBALS.config.type,
+                            url: GLOBALS.config.path_mapping + 'getMapLegendSetByDataElement' + GLOBALS.config.type,
                             method: 'POST',
                             params: {dataElementId: deId},
                             scope: this,
@@ -936,7 +936,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         height: GLOBALS.util.getMultiSelectHeight(),
                                         autoScroll: true,
                                         loader: new Ext.tree.TreeLoader({
-                                            dataUrl: path_mapping + 'getOrganisationUnitChildren' + type
+                                            dataUrl: GLOBALS.config.path_mapping + 'getOrganisationUnitChildren' + type
                                         }),
                                         root: {
                                             id: TOPLEVELUNIT.id,
@@ -1277,7 +1277,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 		var mls = Ext.getCmp('maplegendset_cb2').getValue();
 		var bounds = [];
 		Ext.Ajax.request({
-			url: path_mapping + 'getMapLegendsByMapLegendSet' + GLOBALS.config.type,
+			url: GLOBALS.config.path_mapping + 'getMapLegendsByMapLegendSet' + GLOBALS.config.type,
 			method: 'POST',
 			params: {mapLegendSetId: mls},
             scope: this,
@@ -1329,7 +1329,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             MASK.show();
             
             scope.parentId = id;
-            scope.setUrl(path_mapping + 'getGeoJson.action?parentId=' + scope.parentId);
+            scope.setUrl(GLOBALS.config.path_mapping + 'getGeoJson.action?parentId=' + scope.parentId);
         }
     },
     
@@ -1338,7 +1338,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             this.newUrl = url;
 
             if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
-                this.setUrl(path_mapping + 'getGeoJsonFromFile.action?name=' + url);
+                this.setUrl(GLOBALS.config.path_mapping + 'getGeoJsonFromFile.action?name=' + url);
             }
 			else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
 				this.setUrl(GLOBALS.config.path_geoserver + GLOBALS.config.wfs + url + GLOBALS.config.output);
@@ -1476,7 +1476,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             params.parentId = this.parentId;
             
             Ext.Ajax.request({
-                url: path_mapping + dataUrl + GLOBALS.config.type,
+                url: GLOBALS.config.path_mapping + dataUrl + GLOBALS.config.type,
                 method: 'POST',
                 params: params,
                 scope: this,
@@ -1517,7 +1517,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             MASK.show();
             
             Ext.Ajax.request({
-                url: path_mapping + 'getMapByMapLayerPath' + GLOBALS.config.type,
+                url: GLOBALS.config.path_mapping + 'getMapByMapLayerPath' + GLOBALS.config.type,
                 method: 'POST',
                 params: {mapLayerPath: this.newUrl},
                 scope: this,
@@ -1554,7 +1554,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     var mapLayerPath = this.newUrl;
                     
                     Ext.Ajax.request({
-                        url: path_mapping + dataUrl + GLOBALS.config.type,
+                        url: GLOBALS.config.path_mapping + dataUrl + GLOBALS.config.type,
                         method: 'POST',
                         params: {id:indicatorOrDataElementId, periodId:periodId, mapLayerPath:mapLayerPath},
                         scope: this,
@@ -1577,7 +1577,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             }
                             
                             Ext.Ajax.request({
-                                url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + GLOBALS.config.type,
+                                url: GLOBALS.config.path_mapping + 'getAvailableMapOrganisationUnitRelations' + GLOBALS.config.type,
                                 method: 'POST',
                                 params: { mapLayerPath: mapLayerPath },
                                 scope: this,
