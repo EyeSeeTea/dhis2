@@ -528,7 +528,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();
-                        
+ 
                         Ext.Ajax.request({
                             url: path_mapping + 'getMapLegendSetByDataElement' + type,
                             method: 'POST',
@@ -538,35 +538,25 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
                                     this.legend.type = map_legend_type_predefined;
-                                    Ext.getCmp('maplegendtype_cb').setValue(map_legend_type_predefined);
-                                    Ext.getCmp('maplegendset_cb').showField();
-                                    Ext.getCmp('method_cb').hideField();
-                                    Ext.getCmp('numClasses_cb').hideField();
-                                    Ext.getCmp('colorA_cf').hideField();
-                                    Ext.getCmp('colorB_cf').hideField();
+                                    this.prepareMapViewLegend();
                                     
-                                    this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                    function load(scope) {
                                         Ext.getCmp('maplegendset_cb').setValue(mapLegendSet.id);
-                                        this.applyPredefinedLegend();
-                                    }});
+                                        scope.applyPredefinedLegend();
+                                    }
+                                    
+                                    if (!this.stores.predefinedMapLegendSet.isLoaded) {
+                                        this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                            load(this);
+                                        }});
+                                    }
+                                    else {
+                                        load(this);
+                                    }
                                 }
                                 else {
-                                    if (this.legend.type == map_legend_type_predefined) {
-                                        this.legend.type = map_legend_type_automatic;
-                                        Ext.getCmp('maplegendtype_cb').setValue(this.legend.type);
-                                        Ext.getCmp('method_cb').showField();
-                                        if (Ext.getCmp('method_cb').getValue() == classify_with_bounds) {
-                                            Ext.getCmp('bounds_tf').showField();
-                                            Ext.getCmp('numClasses_cb').hideField();
-                                        }
-                                        else {
-                                            Ext.getCmp('bounds_tf').hideField();
-                                            Ext.getCmp('numClasses_cb').showField();
-                                        }
-                                        Ext.getCmp('colorA_cf').showField();
-                                        Ext.getCmp('colorB_cf').showField();
-                                        Ext.getCmp('maplegendset_cb').hideField();
-                                    }
+                                    this.legend.type = map_legend_type_automatic;
+                                    this.prepareMapViewLegend();
                                     this.classify(false, true);
                                 }
                             }
@@ -862,12 +852,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         if (cb.getValue() == map_legend_type_predefined && cb.getValue() != this.legend.type) {
 							this.legend.type = map_legend_type_predefined;
-							Ext.getCmp('method_cb').hideField();
-							Ext.getCmp('bounds_tf').hideField();
-                            Ext.getCmp('numClasses_cb').hideField();
-							Ext.getCmp('colorA_cf').hideField();
-							Ext.getCmp('colorB_cf').hideField();
-							Ext.getCmp('maplegendset_cb').showField();
+                            this.prepareMapViewLegend();
 							
 							if (Ext.getCmp('maplegendset_cb').getValue()) {
                                 this.applyPredefinedLegend();
@@ -875,19 +860,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         }
                         else if (cb.getValue() == map_legend_type_automatic && cb.getValue() != this.legend.type) {
 							this.legend.type = map_legend_type_automatic;
-							Ext.getCmp('method_cb').showField();
-							if (Ext.getCmp('method_cb').getValue() == classify_with_bounds) {
-								Ext.getCmp('bounds_tf').showField();
-								Ext.getCmp('numClasses_cb').hideField();
-							}
-							else {
-								Ext.getCmp('bounds_tf').hideField();
-								Ext.getCmp('numClasses_cb').showField();
-							}
-							Ext.getCmp('colorA_cf').showField();
-							Ext.getCmp('colorB_cf').showField();
-							Ext.getCmp('maplegendset_cb').hideField();
-                            
+							this.prepareMapViewLegend();                            
                             this.classify(false, true);
                         }
                     }
