@@ -174,7 +174,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             root: 'indicatorGroups',
             fields: ['id', 'name'],
             idProperty: 'id',
-            sortInfo: { field: 'name', direction: 'ASC' },
+            sortInfo: {field: 'name', direction: 'ASC'},
             autoLoad: false,
             isLoaded: false,
             listeners: {
@@ -210,7 +210,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			url: path_mapping + 'getAllDataElementGroups' + type,
             root: 'dataElementGroups',
             fields: ['id', 'name'],
-            sortInfo: { field: 'name', direction: 'ASC' },
+            sortInfo: {field: 'name', direction: 'ASC'},
             autoLoad: false,
             isLoaded: false,
             listeners: {
@@ -224,7 +224,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             url: path_mapping + 'getDataElementsByDataElementGroup' + type,
             root: 'dataElements',
             fields: ['id', 'name', 'shortName'],
-            sortInfo: { field: 'name', direction: 'ASC' },
+            sortInfo: {field: 'name', direction: 'ASC'},
             autoLoad: false,
             isLoaded: false,
             listeners: {
@@ -269,7 +269,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
         var mapStore = new Ext.data.JsonStore({
             url: path_mapping + 'getAllMaps' + type,
-            baseParams: { format: 'jsonmin' },
             root: 'maps',
             fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
             idProperty: 'mapLayerPath',
@@ -1362,9 +1361,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     Ext.getCmp('map_tf').setValue(name);
                     Ext.getCmp('map_tf').value = this.mapView.mapSource;
                     this.loadFromDatabase(this.mapView.mapSource);
-                },
-                failure: function() {
-                    alert('Error: getOrganisationUnit');
                 }
             });
         }
@@ -1408,9 +1404,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 else {
                     this.classify(false, true);
                 }                   
-			},
-			failure: function() {
-				alert('Error: getMapLegendsByMapLegendSet');
 			}
 		});
 	},
@@ -1611,9 +1604,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     }
                     
                     this.applyValues();
-                },
-                failure: function(r) {
-                    alert('Error: ' + dataUrl);
                 }
             });
         }
@@ -1689,7 +1679,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             Ext.Ajax.request({
                                 url: path_mapping + 'getAvailableMapOrganisationUnitRelations' + type,
                                 method: 'POST',
-                                params: { mapLayerPath: mapLayerPath },
+                                params: {mapLayerPath: mapLayerPath},
                                 scope: this,
                                 success: function(r) {
                                     var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
