@@ -20,9 +20,9 @@
 				validateDataEntryForm();
 			} );	
 
-			oFCKeditor = new FCKeditor( 'designTextarea', "100%", 600 );
-			oFCKeditor.BasePath = "javascript/FCK/";
-	        oFCKeditor.ReplaceTextarea();
+			//oFCKeditor = new FCKeditor( 'designTextarea', "100%", 600 );
+			//oFCKeditor.BasePath = "javascript/FCK/";
+	       // oFCKeditor.ReplaceTextarea();
 						
 			jQuery("#dataElementSelection").resizable({
 				minHeight:210,
@@ -110,7 +110,9 @@
         <th>$i18n.getString( "dataentryform_design" )</th>
       </tr>
       <tr>
-        <td><textarea id="designTextarea" name="designTextarea">#if($status == "EDIT")${htmlCode}#end</textarea></td>
+        <td>
+			$editorManager.create( "fckeditor", "100%", "400" )
+		</td>
       </tr>
       <tr>
       <td>
@@ -196,7 +198,7 @@ function select( id )
 
 function insertDataElement()
 {
-	var oEditor = FCKeditorAPI.GetInstance('designTextarea') ;
+	var oEditor = FCKeditorAPI.GetInstance('fckeditor') ;
 	var viewByValue = getFieldValue( 'viewBySelector' );
 	
 	var json = JSON.parse( jQuery("#json_" + selected ).val() );
