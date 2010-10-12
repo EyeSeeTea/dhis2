@@ -1,7 +1,5 @@
 ﻿/* OpenLayers map */
 var MAP;
-/* Center point of the country */
-var BASECOORDINATE = {};
 /* Geojson, shapefile or database */
 var MAPSOURCE;
 /* Fixed periods or from-to dates */

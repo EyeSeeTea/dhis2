@@ -1474,6 +1474,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 MAP.zoomToExtent(this.layer.getDataExtent());
             }
             
+            this.mapData = {
+                nameColumn: 'name'
+            };
+            
             if (this.mapView) {
                 if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
                     MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
