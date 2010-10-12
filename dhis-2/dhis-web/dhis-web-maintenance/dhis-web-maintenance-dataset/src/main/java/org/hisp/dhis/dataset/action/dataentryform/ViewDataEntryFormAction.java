@@ -28,6 +28,7 @@ package org.hisp.dhis.dataset.action.dataentryform;
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,10 +38,13 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataelement.comparator.DataElementOperandNameComparator;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.editor.EditorManager;
 import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
@@ -84,6 +88,18 @@ public class ViewDataEntryFormAction
         this.userSettingService = userSettingService;
     }
 
+    private EditorManager editorManager;
+
+    public EditorManager getEditorManager()
+    {
+        return editorManager;
+    }
+
+    public void setEditorManager( EditorManager editorManager )
+    {
+        this.editorManager = editorManager;
+    }
+
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
@@ -109,26 +125,20 @@ public class ViewDataEntryFormAction
         return dataSet;
     }
 
-    private String status;
-
-    public String getStatus()
-    {
-        return status;
-    }
-    
     private Boolean autoSave;
 
     public Boolean getAutoSave()
     {
         return autoSave;
     }
-    
-    private String htmlCode;
 
-    public String getHtmlCode()
+    public List<DataElementOperand> operands;
+
+    public List<DataElementOperand> getOperands()
     {
-        return htmlCode;
-    }
+        return operands;
+    }   
+
 
     // -------------------------------------------------------------------------
     // Execute
@@ -137,22 +147,23 @@ public class ViewDataEntryFormAction
     public String execute()
         throws Exception
     {
+
         dataSet = dataSetService.getDataSet( dataSetId );
 
-        dataEntryForm = dataSet.getDataEntryForm();
+        dataEntryForm = dataSet.getDataEntryForm();        
 
-        if ( dataEntryForm == null )
+        if ( dataEntryForm != null )
         {
-            status = "ADD";
-        }
-        else
-        {
-            status = "EDIT";
-            htmlCode = prepareDataEntryFormCode( dataEntryForm.getHtmlCode() );
+            editorManager.setValue( prepareDataEntryFormCode( dataEntryForm.getHtmlCode() ) );
         }
 
         autoSave = (Boolean) userSettingService.getUserSetting( UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM, false );
-        
+
+        operands = new ArrayList<DataElementOperand>( dataElementCategoryService.getFullOperands( dataSet
+            .getDataElements() ) );
+
+        Collections.sort( operands, new DataElementOperandNameComparator() );
+
         return SUCCESS;
     }
 

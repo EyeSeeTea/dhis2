@@ -87,7 +87,7 @@ public class UpdateJChartAction
     public void setTitle( String title )
     {
         this.title = title;
-    }  
+    }
 
     private String legend;
 
@@ -138,6 +138,13 @@ public class UpdateJChartAction
         this.colors = colors;
     }
 
+    private String categoryType;
+
+    public void setCategoryType( String categoryType )
+    {
+        this.categoryType = categoryType;
+    }
+
     @Override
     public String execute()
         throws Exception
@@ -146,10 +153,16 @@ public class UpdateJChartAction
 
         PeriodType pt = periodService.getPeriodTypeByName( periodType );
 
-        jChart.setTitle( title );        
+        jChart.setTitle( title );
         jChart.setLegend( legend );
         jChart.setLoadPeriodBy( loadPeriodBy );
         jChart.setPeriodType( periodService.getPeriodTypeByClass( pt.getClass() ) );
+        jChart.setCategoryType( categoryType );
+
+        if ( jChart.isOrganisationUnitCategory() )
+        {
+            jChart.setLoadPeriodBy( JChart.LOAD_PERIOD_SELECTED );
+        }
 
         jChart.clearAllSeries();
 
@@ -164,13 +177,14 @@ public class UpdateJChartAction
 
         jChart.clearAllPeriod();
 
-        if ( loadPeriodBy.equals( JChart.LOAD_PERIOD_SELECTED ) )
+        if ( categoryType.equals( JChart.PERIOD_CATEGORY ) && loadPeriodBy.equals( JChart.LOAD_PERIOD_SELECTED ) )
         {
 
             for ( Integer id : periodIds )
             {
                 jChart.addPeriod( periodService.getPeriod( id ) );
             }
+
         }
 
         jchartService.updateJChart( jChart );

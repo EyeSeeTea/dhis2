@@ -46,6 +46,9 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 
 public class JChart
 {
+    public static final String PERIOD_CATEGORY = "PERIOD_CATEGORY";
+
+    public static final String ORGANISATION_UNIT_CATEGORY = "ORGANISATION_UNIT_CATEGORY";
 
     public static final String LOAD_PERIOD_AUTO = "LOAD_PERIOD_AUTO";
 
@@ -54,6 +57,8 @@ public class JChart
     private int id;
 
     private String title;
+
+    private String categoryType;
 
     private Set<JChartSeries> series = new HashSet<JChartSeries>();
 
@@ -70,6 +75,8 @@ public class JChart
      */
     private String legend;
 
+    private String storedby;
+
     // -------------------------------------------
     // Contructor
     // -------------------------------------------
@@ -81,6 +88,16 @@ public class JChart
     // -------------------------------------------
     // Method
     // -------------------------------------------
+
+    public boolean isPeriodCategory()
+    {
+        return this.categoryType.equals( PERIOD_CATEGORY );
+    }
+
+    public boolean isOrganisationUnitCategory()
+    {
+        return this.categoryType.equals( ORGANISATION_UNIT_CATEGORY );
+    }
 
     public boolean isLoadSelectedPeriods()
     {
@@ -154,6 +171,16 @@ public class JChart
         this.id = id;
     }
 
+    public String getCategoryType()
+    {
+        return categoryType;
+    }
+
+    public void setCategoryType( String categoryType )
+    {
+        this.categoryType = categoryType;
+    }
+
     public String getTitle()
     {
         return title;
@@ -222,6 +249,16 @@ public class JChart
     public void setUserRoles( Set<UserAuthorityGroup> userRoles )
     {
         this.userRoles = userRoles;
+    }
+
+    public String getStoredby()
+    {
+        return storedby;
+    }
+
+    public void setStoredby( String storedby )
+    {
+        this.storedby = storedby;
     }
 
     // -------------------------------------------

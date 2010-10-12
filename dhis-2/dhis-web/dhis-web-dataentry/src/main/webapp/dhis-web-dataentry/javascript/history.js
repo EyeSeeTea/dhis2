@@ -48,21 +48,23 @@ function saveComment( dataElementId, optionComboId, commentValue )
 {
     var field = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comment' );                
     var select = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comments' );
-    
+    var organisationUnitId = getFieldValue( 'organisationUnitId' );
+
     field.style.backgroundColor = '#ffffcc';
     select.style.backgroundColor = '#ffffcc';
     
-    var commentSaver = new CommentSaver( dataElementId, optionComboId, commentValue );
+    var commentSaver = new CommentSaver( dataElementId, optionComboId, organisationUnitId, commentValue );
     commentSaver.save();
 }
 
-function CommentSaver( dataElementId_, optionComboId_, value_ )
+function CommentSaver( dataElementId_, optionComboId_, organisationUnitId_, value_ )
 {
     var SUCCESS = '#ccffcc';
     var ERROR = '#ccccff';
 
     var dataElementId = dataElementId_;
-    var optionComboId = optionComboId_
+    var optionComboId = optionComboId_;
+    var organisationUnitId = organisationUnitId_;
     var value = value_;
     
     this.save = function()
@@ -71,7 +73,7 @@ function CommentSaver( dataElementId_, optionComboId_, value_ )
         request.setCallbackSuccess( handleResponse );
         request.setCallbackError( handleHttpError );
         request.setResponseTypeXML( 'status' );
-        request.send( 'saveComment.action?dataElementId=' +
+        request.send( 'saveComment.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
                 dataElementId + '&optionComboId=' + optionComboId + '&comment=' + value );
     };
     
@@ -107,11 +109,35 @@ function CommentSaver( dataElementId_, optionComboId_, value_ )
     }
 }
 
+function isInt(value)
+{
+	if( ((value) == parseInt(value)) && !isNaN(parseInt(value)) ) {
+		return true;
+	} else {
+		  return false;
+	} 
+}
+
 function saveMinLimit( organisationUnitId, dataElementId, optionComboId )
 {
     var minLimitField = document.getElementById( "minLimit" );
-    var maxLimitField = document.getElementById( "maxLimit" );
-
+	
+	if( !isInt(minLimitField.value) ) {
+		setInnerHTML('minSpan', i18n_enter_digits);
+		return;
+	}else {
+		setInnerHTML('minSpan', "");
+	}
+	
+	var maxLimitField = document.getElementById( "maxLimit" );
+	
+	if( !isInt(maxLimitField.value) ) {
+		setInnerHTML('maxSpan', i18n_enter_digits);
+		return;
+	}else {
+		setInnerHTML('maxSpan', "");
+	}
+    
     var request = new Request();
     request.setCallbackSuccess( refreshWindow );
     request.setCallbackError( refreshWindow );
@@ -147,21 +173,37 @@ function saveMinLimit( organisationUnitId, dataElementId, optionComboId )
 }
 
 function saveMaxLimit( organisationUnitId, dataElementId, optionComboId )
-{
-    var minLimitField = document.getElementById( "minLimit" );
-    var maxLimitField = document.getElementById( "maxLimit" );
-
+{	 
+	var maxLimitField = document.getElementById( "maxLimit" );
+	
+	if( !isInt(maxLimitField.value) ) {
+		setInnerHTML('maxSpan', i18n_enter_digits);
+		return;
+	}else {
+		setInnerHTML('maxSpan', "");
+	}
+    
+	var minLimitField = document.getElementById( "minLimit" );
+	
+	if( !isInt(minLimitField.value) ) {
+		setInnerHTML('minSpan', i18n_enter_digits);
+		return;
+	}else {
+		setInnerHTML('minSpan', "");
+	}
+	
     var request = new Request();
+    
     request.setCallbackSuccess( refreshWindow );
     request.setCallbackError( refreshWindow );
 
     if ( maxLimitField.value == '' )
     {
-        request.send( 'removeMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId );
+    	request.send( 'removeMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId );
     }
     else
     {
-        var minLimit = Number( minLimitField.value );
+    	var minLimit = Number( minLimitField.value );
         var maxLimit = Number( maxLimitField.value );
         
         if ( maxLimit )
@@ -180,7 +222,8 @@ function saveMaxLimit( organisationUnitId, dataElementId, optionComboId )
                 minLimit = maxLimit - 1;
             }
 
-            request.send( 'saveMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId + '&minLimit=' + minLimit + '&maxLimit=' + maxLimit );
+          request.send( 'saveMinMaxLimits.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId + '&optionComboId=' + optionComboId + '&minLimit=' + minLimit + '&maxLimit=' + maxLimit );
+            
         }
         else
         {
@@ -221,5 +264,3 @@ function markValueForFollowupReceived( messageElement )
         image.alt = i18n_mark_value_for_followup;  	
     }
 }
-
-

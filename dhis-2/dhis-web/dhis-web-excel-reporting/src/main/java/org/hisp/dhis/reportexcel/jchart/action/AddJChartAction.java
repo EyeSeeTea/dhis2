@@ -35,6 +35,8 @@ import org.hisp.dhis.jchart.JChart;
 import org.hisp.dhis.jchart.JChartSeries;
 import org.hisp.dhis.jchart.JChartSevice;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.UserStore;
 
 import com.opensymphony.xwork2.Action;
 
@@ -69,6 +71,13 @@ public class AddJChartAction
     {
         this.indicatorService = indicatorService;
     }
+   
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
 
     // -------------------------------------------
     // Input
@@ -80,13 +89,19 @@ public class AddJChartAction
     {
         this.title = title;
     }
-  
 
     private String legend;
 
     public void setLegend( String legend )
     {
         this.legend = legend;
+    }
+
+    private String categoryType;
+
+    public void setCategoryType( String categoryType )
+    {
+        this.categoryType = categoryType;
     }
 
     private String loadPeriodBy;
@@ -136,10 +151,18 @@ public class AddJChartAction
         throws Exception
     {
         JChart jChart = new JChart();
-        jChart.setTitle( title );       
-        jChart.setLegend( legend );
+        jChart.setTitle( title );
+        jChart.setLegend( legend );   
         jChart.setLoadPeriodBy( loadPeriodBy );
         jChart.setPeriodType( periodService.getPeriodTypeByName( periodType ) );
+        jChart.setCategoryType( categoryType );
+
+        jChart.setStoredby( currentUserService.getCurrentUsername() );
+        
+        if ( jChart.isOrganisationUnitCategory() )
+        {
+            jChart.setLoadPeriodBy( JChart.LOAD_PERIOD_SELECTED );
+        }
 
         for ( int i = 0; i < indicatorIds.size(); i++ )
         {
@@ -150,8 +173,9 @@ public class AddJChartAction
             jChart.addSeries( s );
         }
 
-        if ( loadPeriodBy.equals( JChart.LOAD_PERIOD_SELECTED ) )
+        if ( categoryType.equals( JChart.PERIOD_CATEGORY ) && loadPeriodBy.equals( JChart.LOAD_PERIOD_SELECTED ) )
         {
+            jChart.setLoadPeriodBy( loadPeriodBy );
 
             for ( Integer id : periodIds )
             {
