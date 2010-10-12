@@ -50,7 +50,7 @@
 		<td #if( $mark == 0 ) style="background-color:#dddddd" #end>
 			<span id="value[$dataElement.id].name" title="$!encoder.htmlEncode( $dataElement.description )">
 			#if( $dataElement.type == "int" && $auth.hasAccess( "dhis-web-dataentry", "viewHistory" ) )
-				<a href="javascript:viewHistory( $dataElement.id  )">
+				<a href="javascript:viewHistory( $dataElement.id, $optionComboId, true )">
 			#end
 			#if( $useShortName )
 				$encoder.htmlEncode( $dataElement.shortName )
