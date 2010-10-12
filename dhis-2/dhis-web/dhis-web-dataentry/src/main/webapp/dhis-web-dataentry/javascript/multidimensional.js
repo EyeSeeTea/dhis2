@@ -30,6 +30,7 @@ function commentSelected( dataElementId, optionComboId )
     if ( value == 'custom' )
     {
         commentSelector.style.display = 'none';
+        commentField.style.css = 'text';
         commentField.style.display = 'inline';
         
         commentField.select();
@@ -55,7 +56,7 @@ function commentLeft( dataElementId, optionComboId )
     if ( value == '' )
     {
         commentField.style.display = 'none';
-		commentSelector.style.css = "combobox";
+		commentSelector.style.css = 'combobox';
         commentSelector.style.display = 'inline';
 
         commentSelector.selectedIndex = 0;
