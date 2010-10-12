@@ -114,13 +114,10 @@ public interface MappingService
      *        organisation unit value.
      * @param nameColumn, the shapefile column which holds the name of the
      *        organisation unit.
-     * @param longitude
-     * @param latitude
-     * @param zoom
      * @return a generated unique id of the added Map.
      */
     int addMap( String name, String mapLayerPath, String type, String sourceType, int organisationUnitId,
-        int organisationUnitLevelId, String nameColumn, String longitude, String latitude, int zoom );
+        int organisationUnitLevelId, String nameColumn );
 
     /**
      * Adds a map. If a map with the same mapLayerPath already exists, the map
@@ -134,12 +131,9 @@ public interface MappingService
      *        which the map is devided.
      * @param nameColumn, the shapefile column which holds the name of the
      *        organisation unit.
-     * @param longitude
-     * @param latitude
-     * @param zoom
      */
     void addOrUpdateMap( String name, String mapLayerPath, String type, String sourceType, int organisationUnitId,
-        int organisationUnitLevelId, String nameColumn, String longitude, String latitude, int zoom );
+        int organisationUnitLevelId, String nameColumn );
 
     /**
      * Updates a Map.

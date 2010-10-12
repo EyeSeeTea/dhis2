@@ -102,27 +102,6 @@ public class AddOrUpdateMapAction
         this.nameColumn = nameColumn;
     }
 
-    private String longitude;
-
-    public void setLongitude( String longitude )
-    {
-        this.longitude = longitude;
-    }
-
-    private String latitude;
-
-    public void setLatitude( String latitude )
-    {
-        this.latitude = latitude;
-    }
-
-    private int zoom;
-
-    public void setZoom( int zoom )
-    {
-        this.zoom = zoom;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -131,7 +110,7 @@ public class AddOrUpdateMapAction
         throws Exception
     {
         mappingService.addOrUpdateMap( name, mapLayerPath, type, sourceType, organisationUnitId, 
-            organisationUnitLevelId, nameColumn, longitude, latitude, zoom );
+            organisationUnitLevelId, nameColumn );
         
         return SUCCESS;
     }

@@ -271,7 +271,7 @@ public class DefaultMappingService
     }
 
     public int addMap( String name, String mapLayerPath, String type, String sourceType, int organisationUnitId,
-        int organisationUnitLevelId, String nameColumn, String longitude, String latitude, int zoom )
+        int organisationUnitLevelId, String nameColumn )
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
 
@@ -279,14 +279,13 @@ public class DefaultMappingService
             .getOrganisationUnitLevel( organisationUnitLevelId );
 
         Map map = new Map( name, mapLayerPath, type, sourceType, organisationUnit, organisationUnitLevel, nameColumn,
-            longitude, latitude, zoom, null );
+            null );
 
         return addMap( map );
     }
 
     public void addOrUpdateMap( String name, String mapLayerPath, String type, String sourceType,
-        int organisationUnitId, int organisationUnitLevelId, String nameColumn, String longitude, String latitude,
-        int zoom )
+        int organisationUnitId, int organisationUnitLevelId, String nameColumn )
     {
         Map map = getMapByMapLayerPath( mapLayerPath );
 
@@ -294,9 +293,6 @@ public class DefaultMappingService
         {
             map.setName( name );
             map.setNameColumn( nameColumn );
-            map.setLongitude( longitude );
-            map.setLatitude( latitude );
-            map.setZoom( zoom );
 
             updateMap( map );
         }
@@ -308,7 +304,7 @@ public class DefaultMappingService
                 .getOrganisationUnitLevel( organisationUnitLevelId );
 
             map = new Map( name, mapLayerPath, type, sourceType, organisationUnit, organisationUnitLevel, nameColumn,
-                longitude, latitude, zoom, null );
+                null );
 
             addMap( map );
         }
@@ -660,7 +656,7 @@ public class DefaultMappingService
         MapLegendSet mapLegendSet = getMapLegendSetByName( name );
 
         Set<Indicator> indicators = new HashSet<Indicator>();
-        
+
         Set<DataElement> dataElements = new HashSet<DataElement>();
 
         if ( mapLegendSet != null )
@@ -678,7 +674,8 @@ public class DefaultMappingService
         }
         else
         {
-            mapLegendSet = new MapLegendSet( name, type, method, classes, colorLow, colorHigh, mapLegends, indicators, dataElements );
+            mapLegendSet = new MapLegendSet( name, type, method, classes, colorLow, colorHigh, mapLegends, indicators,
+                dataElements );
 
             this.mappingStore.addMapLegendSet( mapLegendSet );
         }
