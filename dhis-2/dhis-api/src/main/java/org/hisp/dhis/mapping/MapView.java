@@ -67,7 +67,7 @@ public class MapView
     private String mapSourceType;
 
     private String mapSource;
-
+    
     private String mapLegendType;
 
     private int method;

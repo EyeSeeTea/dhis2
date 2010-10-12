@@ -1,5 +1,3 @@
-var GLOBALS = {};
-
 GLOBALS.util = {
     
     /* Detect mapview parameter in URL */

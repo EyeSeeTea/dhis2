@@ -9,7 +9,7 @@
     "indicatorId": "$!{mapView.indicator.id}",
     "dataElementGroupId": "$!{mapView.dataElementGroup.id}",
     "dataElementId": "$!{mapView.dataElement.id}",
-    "mapDateType": "$!encoder.jsEncode( ${object.mapDateType} )",
+    "mapDateType": "$!encoder.jsEncode( ${object.mapDateTypeNullSafe} )",
     "periodTypeId": "$!encoder.jsEncode( ${mapView.periodType.name} )",
     "periodId": "$!{mapView.period.id}",
     "startDate": "$!encoder.jsEncode( ${object.startDate} )",

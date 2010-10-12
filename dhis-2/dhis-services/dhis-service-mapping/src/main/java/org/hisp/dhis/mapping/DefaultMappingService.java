@@ -917,7 +917,7 @@ public class DefaultMappingService
 
     public Collection<MapView> getMapViewsByMapSourceType()
     {
-        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_DATABASE );
 
         return mappingStore.getMapViewsByMapSourceType( type );
     }
@@ -928,7 +928,7 @@ public class DefaultMappingService
 
         Collection<MapView> mapViews = mappingStore.getAllMapViews();
 
-        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+        String type = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_DATABASE );
 
         if ( mapViews != null )
         {
