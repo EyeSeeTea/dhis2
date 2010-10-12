@@ -26,7 +26,7 @@ var lfw;
 var selectFeaturePopup;
 
 Ext.onReady( function() {
-    Ext.BLANK_IMAGE_URL = '../resources/ext/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = '../resources/ext-ux/theme/gray-extend/gray-extend/s.gif';
 	/* Ext 3.2.0 override */
 	Ext.override(Ext.form.Field,{showField:function(){this.show();this.container.up('div.x-form-item').setDisplayed(true);},hideField:function(){this.hide();this.container.up('div.x-form-item').setDisplayed(false);}});
     /* Disallow right clicks */
