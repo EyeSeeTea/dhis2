@@ -1407,14 +1407,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             MASK.msg = i18n_aggregating_map_values;
             MASK.show();
             
-            this.mapData = {
-                name: Ext.getCmp('map_tf2').getValue(),
-                nameColumn: 'name',
-                longitude: BASECOORDINATE.longitude,
-                latitude: BASECOORDINATE.latitude,
-                zoom: 7
-            };
-
             if (!position) {
                 MAP.zoomToExtent(this.layer.getDataExtent());
             }
@@ -1424,7 +1416,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
                 }
                 else {
-                    MAP.setCenter(new OpenLayers.LonLat(this.mapData.longitude, this.mapData.latitude), this.mapData.zoom);
+                    MAP.zoomToExtent(this.layer.getDataExtent());
                 }
                 this.mapView = false;
             }

@@ -1,7 +1,7 @@
 ﻿/* OpenLayers map */
 var MAP;
 /* Center point of the country */
-var BASECOORDINATE;
+var BASECOORDINATE = {};
 /* Geojson, shapefile or database */
 var MAPSOURCE;
 /* Fixed periods or from-to dates */
@@ -75,36 +75,29 @@ Ext.onReady( function() {
     }
     addBaseLayersToMap();
     
-	Ext.Ajax.request({
-		url: GLOBALS.config.path_mapping + 'getBaseCoordinate' + GLOBALS.config.type,
-		method: 'GET',
-		success: function(r) {
-			var bc = Ext.util.JSON.decode(r.responseText).baseCoordinate;
-			BASECOORDINATE = {longitude:bc[0].longitude, latitude:bc[0].latitude};
-			
-			Ext.Ajax.request({
-				url: GLOBALS.config.path_mapping + 'getMapView' + GLOBALS.config.type,
-				method: 'GET',
-				params: {id: PARAMETER.id || 0},
-				success: function(r) {
-                    var mv = Ext.util.JSON.decode(r.responseText).mapView[0];
-                    if (PARAMETER) {
-                        PARAMETER.mapView = mv;
-                    }
-					
-					Ext.Ajax.request({
-						url: GLOBALS.config.path_mapping + 'getMapUserSettings' + GLOBALS.config.type,
-						method: 'GET',
-						success: function(r) {
-                            var us = Ext.util.JSON.decode(r.responseText);
-							MAPSOURCE = PARAMETER ? PARAMETER.mapView.mapSourceType : us.mapSource;
-                            MAPDATETYPE = PARAMETER ? PARAMETER.mapView.mapDateType : us.mapDateType;
-                            
-							Ext.Ajax.request({
-								url: GLOBALS.config.path_mapping + 'setMapUserSettings' + GLOBALS.config.type,
-								method: 'POST',
-								params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
-								success: function() {
+    Ext.Ajax.request({
+        url: GLOBALS.config.path_mapping + 'getMapView' + GLOBALS.config.type,
+        method: 'GET',
+        params: {id: PARAMETER.id || 0},
+        success: function(r) {
+            var mv = Ext.util.JSON.decode(r.responseText).mapView[0];
+            if (PARAMETER) {
+                PARAMETER.mapView = mv;
+            }
+            
+            Ext.Ajax.request({
+                url: GLOBALS.config.path_mapping + 'getMapUserSettings' + GLOBALS.config.type,
+                method: 'GET',
+                success: function(r) {
+                    var us = Ext.util.JSON.decode(r.responseText);
+                    MAPSOURCE = PARAMETER ? PARAMETER.mapView.mapSourceType : us.mapSource;
+                    MAPDATETYPE = PARAMETER ? PARAMETER.mapView.mapDateType : us.mapDateType;
+                    
+                    Ext.Ajax.request({
+                        url: GLOBALS.config.path_mapping + 'setMapUserSettings' + GLOBALS.config.type,
+                        method: 'POST',
+                        params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
+                        success: function() {
 			
 	/* Section: mapview */
 	var viewStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapViews'+GLOBALS.config.type,root:'mapViews',fields:['id','name'],id:'id',sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
@@ -1263,9 +1256,6 @@ Ext.onReady( function() {
 	var wmsMapStore=new GeoExt.data.WMSCapabilitiesStore({url:GLOBALS.config.path_geoserver+GLOBALS.config.ows});
 	var geojsonStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getGeoJsonFiles'+GLOBALS.config.type,root:'files',fields:['name'],autoLoad:false});
 	var nameColumnStore=new Ext.data.SimpleStore({fields:['name'],data:[]});
-    var longitudeStore = new Ext.data.SimpleStore({fields:['value'],data:[[BASECOORDINATE.longitude]]});
-    var latitudeStore = new Ext.data.SimpleStore({fields:['value'],data:[[BASECOORDINATE.latitude]]});
-	// var baseCoordinateStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getBaseCoordinate'+GLOBALS.config.type,root:'baseCoordinate',fields:['longitude','latitude'],autoLoad:false});
 	var organisationUnitComboBox=new Ext.form.ComboBox({id:'organisationunit_cb',fieldLabel:'Organisation unit',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:organisationUnitStore});
 	var organisationUnitLevelComboBox=new Ext.form.ComboBox({id:'organisationunitlevel_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:organisationUnitLevelStore});
 	var newNameTextField=new Ext.form.TextField({id:'newname_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
@@ -1456,8 +1446,7 @@ Ext.onReady( function() {
 								}
 								
 								Ext.getCmp('newnamecolumn_cb').getStore().loadData(data, false);
-							},
-							failure: function() {}
+							}
 						});
 					}
 				}
@@ -1466,12 +1455,6 @@ Ext.onReady( function() {
 	});
 	
 	var editNameColumnComboBox=new Ext.form.ComboBox({id:'editnamecolumn_cb',editable:false,displayField:'name',valueField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,triggerAction:'all',mode:'local',store:nameColumnStore});
-	var newLongitudeComboBox=new Ext.form.ComboBox({id:'newlongitude_cb',valueField:'value',displayField:'value',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',value:BASECOORDINATE.longitude,mode:'local',store:longitudeStore});
-	var editLongitudeComboBox=new Ext.form.ComboBox({id:'editlongitude_cb',valueField:'longitude',displayField:'longitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'local',store:longitudeStore});
-	var newLatitudeComboBox=new Ext.form.ComboBox({id:'newlatitude_cb',valueField:'latitude',displayField:'latitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',value:BASECOORDINATE.latitude,mode:'local',store:latitudeStore});
-	var editLatitudeComboBox=new Ext.form.ComboBox({id:'editlatitude_cb',valueField:'latitude',displayField:'latitude',editable:true,emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'local',store:latitudeStore});
-	var newZoomComboBox=new Ext.form.ComboBox({id:'newzoom_cb',editable:true,displayField:'text',valueField:'value',hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width,triggerAction:'all',mode:'local',value:7,store:new Ext.data.SimpleStore({fields:['value','text'],data:[[3,'3 (out)'],[4,'4'],[5,'5'],[6,'6'],[7,'7'],[8,'8'],[9,'9'],[10,'10 (in)']]})});
-	var editZoomComboBox=new Ext.form.ComboBox({id:'editzoom_cb',editable:false,emptyText:'',displayField:'value',valueField:'value',hideLabel:true,width:GLOBALS.config.combo_number_width,minListWidth:GLOBALS.config.combo_number_width+17,triggerAction:'all',mode:'local',store:new Ext.data.SimpleStore({fields:['value','text'],data:[[5,'5 (out)'],[6,'6'],[7,'7'],[8,'8'],[9,'9 (in)']]})});
     
     var newMapButton = new Ext.Button({
         id: 'newmap_b',
@@ -1491,11 +1474,8 @@ Ext.onReady( function() {
 					var mlp = Ext.getCmp('maplayerpath_cb').getValue();
 					var mlpwms = Ext.getCmp('maplayerpathwms_tf').getValue();					
                     var nc = Ext.getCmp('newnamecolumn_cb').getValue();
-                    var lon = Ext.getCmp('newlongitude_cb').getRawValue();
-                    var lat = Ext.getCmp('newlatitude_cb').getRawValue();
-                    var zoom = Ext.getCmp('newzoom_cb').getValue();
                      
-                    if (!nn || !oui || !ouli || !nc || !lon || !lat) {
+                    if (!nn || !oui || !ouli || !nc) {
 						Ext.message.msg(false, i18n_form_is_not_complete );
 						return;
 					}
@@ -1507,28 +1487,6 @@ Ext.onReady( function() {
                     if (GLOBALS.util.validateInputNameLength(nn) == false) {
                         Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
                         return;
-                    }
-                    
-                    if (!Ext.num(parseFloat(lon), false)) {
-                        Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_longitude_x + '</span>' + i18n_must_be_a_number);
-                        return;
-                    }
-                    else {
-                        if (lon < -180 || lon > 180) {
-                            Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_longitude_x + '</span> ' + i18n_must_be_between_180_and_180);
-                            return;
-                        }
-                    }
-                    
-                    if (!Ext.num(parseFloat(lat), false)) {
-                        Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_a_number);
-                        return;
-                    }
-                    else {
-                        if (lat < -90 || lat > 90) {
-                            Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_latitude_y + '</span> ' + i18n_must_be_between_90_and_90);
-                            return;
-                        }
                     }
 
                     Ext.Ajax.request({
@@ -1559,10 +1517,7 @@ Ext.onReady( function() {
                                     sourceType: MAPSOURCE,
                                     organisationUnitId: oui,
                                     organisationUnitLevelId: ouli,
-                                    nameColumn: nc,
-                                    longitude: lon,
-                                    latitude: lat,
-                                    zoom: zoom
+                                    nameColumn: nc
                                 },
                                 success: function(r) {
                                     Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + nn + '</span> (<span class="x-msg-hl">' + source + '</span>) ' + i18n_was_registered);
@@ -1575,10 +1530,7 @@ Ext.onReady( function() {
                                     Ext.getCmp('organisationunitlevel_cb').clearValue();
                                     Ext.getCmp('newname_tf').reset();
                                     Ext.getCmp('maplayerpath_cb').clearValue();
-                                    Ext.getCmp('newnamecolumn_cb').clearValue();
-                                    Ext.getCmp('newlongitude_cb').clearValue();
-                                    Ext.getCmp('newlatitude_cb').clearValue();
-                                    Ext.getCmp('newzoom_cb').clearValue();                                    
+                                    Ext.getCmp('newnamecolumn_cb').clearValue();                            
                                 }
                             });
                         }
@@ -1596,12 +1548,9 @@ Ext.onReady( function() {
             var en = Ext.getCmp('editname_tf').getValue();
             var em = Ext.getCmp('editmap_cb').getValue();
             var nc = Ext.getCmp('editnamecolumn_cb').getValue();
-            var lon = Ext.getCmp('editlongitude_cb').getRawValue();
-            var lat = Ext.getCmp('editlatitude_cb').getRawValue();
-            var zoom = Ext.getCmp('editzoom_cb').getValue();
 			var t = Ext.getCmp('type_cb').getValue();
 			
-            if (!en || !em || !nc || !lon || !lat) {
+            if (!en || !em || !nc) {
                 Ext.message.msg(false, i18n_form_is_not_complete );
                 return;
             }
@@ -1614,7 +1563,7 @@ Ext.onReady( function() {
             Ext.Ajax.request({
                 url: GLOBALS.config.path_mapping + 'addOrUpdateMap' + GLOBALS.config.type,
                 method: 'GET',
-                params: { name: en, mapLayerPath: em, nameColumn: nc, longitude: lon, latitude: lat, zoom: zoom },
+                params: {name: en, mapLayerPath: em, nameColumn: nc},
                 success: function(r) {
                     Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + en + '</span> (<span class="x-msg-hl">' + em + '</span>)' + i18n_was_updated);
                     
@@ -1628,9 +1577,6 @@ Ext.onReady( function() {
                     Ext.getCmp('editmap_cb').clearValue();
                     Ext.getCmp('editname_tf').reset();
                     Ext.getCmp('editnamecolumn_cb').clearValue();
-                    Ext.getCmp('editlongitude_cb').clearValue();
-                    Ext.getCmp('editlatitude_cb').clearValue();
-                    Ext.getCmp('editzoom_cb').clearValue();
                 }
             });
         }
@@ -1669,9 +1615,6 @@ Ext.onReady( function() {
                     Ext.getCmp('deletemap_cb').clearValue();
                     Ext.getCmp('mapview_cb').getStore().load();
                     Ext.getCmp('mapview_cb').clearValue();
-                },
-                failure: function() {
-                     alert( i18n_status, i18n_error_while_saving_data );
                 }
             });
         }
@@ -1703,12 +1646,8 @@ Ext.onReady( function() {
                         params: {mapLayerPath: mlp},
                         success: function(r) {
                             var map = Ext.util.JSON.decode( r.responseText ).map[0];
-                            
                             Ext.getCmp('editname_tf').setValue(map.name);
                             Ext.getCmp('editnamecolumn_cb').setValue(map.nameColumn);
-                            Ext.getCmp('editlongitude_cb').setValue(map.longitude);
-                            Ext.getCmp('editlatitude_cb').setValue(map.latitude);
-                            Ext.getCmp('editzoom_cb').setValue(map.zoom);
                         }
                     });
 					
@@ -1746,12 +1685,10 @@ Ext.onReady( function() {
 								}
 								
 								Ext.getCmp('editnamecolumn_cb').getStore().loadData(data, false);
-							},
-							failure: function() {}
+							}
 						});
 					}
-                },
-                scope: this
+                }
             }
         }
     });
@@ -1781,10 +1718,7 @@ Ext.onReady( function() {
             { html: '<div class="panel-fieldlabel-first">'+i18n_display_name+'</div>' }, newNameTextField,
             { html: '<div class="panel-fieldlabel">'+i18n_organisation_unit_level+'</div>' }, organisationUnitLevelComboBox,
 			{ html: '<div class="panel-fieldlabel">'+i18n_map_source_file+'</div>' }, mapLayerPathComboBox, mapLayerPathWMSTextField,
-            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, newNameColumnComboBox,
-            { html: '<div class="panel-fieldlabel">'+i18n_longitude_x+'</div>' }, newLongitudeComboBox,
-            { html: '<div class="panel-fieldlabel">'+i18n_latitude_y+'</div>' }, newLatitudeComboBox,
-            { html: '<div class="panel-fieldlabel">'+i18n_zoom+'</div>' }, newZoomComboBox
+            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, newNameColumnComboBox
         ]
     });
     
@@ -1793,10 +1727,7 @@ Ext.onReady( function() {
         items: [
             { html: '<div class="panel-fieldlabel-first">'+i18n_map+'</div>' }, editMapComboBox,
             { html: '<div class="panel-fieldlabel">'+i18n_display_name+'</div>' }, editNameTextField,
-            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, editNameColumnComboBox,
-            { html: '<div class="panel-fieldlabel">'+i18n_longitude_x+'</div>' }, editLongitudeComboBox,
-            { html: '<div class="panel-fieldlabel">'+i18n_latitude_y+'</div>' }, editLatitudeComboBox,
-            { html: '<div class="panel-fieldlabel">'+i18n_zoom+'</div>' }, editZoomComboBox
+            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, editNameColumnComboBox
         ]
     });
     
@@ -2491,11 +2422,7 @@ Ext.onReady( function() {
 													}
 												}
 												addOverlaysToMap();
-												
 												Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_is_saved_as_map_source);
-											},
-											failure: function() {
-												alert( i18n_status, i18n_error_while_saving_data );
 											}
 										});
 										
@@ -2512,6 +2439,7 @@ Ext.onReady( function() {
 							}
 						}
 					},
+                    
 					{
 						xtype: 'checkbox',
 						id: 'register_chb',
@@ -2531,84 +2459,8 @@ Ext.onReady( function() {
 										shapefilePanel.hide();
 										Ext.getCmp('west').doLayout();
 									}
-								},
-								scope: this
-							}
-						}
-					}
-				]
-			},
-			{
-				xtype:'fieldset',
-				columnWidth: 0.5,
-				title: '&nbsp;<span class="panel-tab-title">'+i18n_base_coordinate+'</span>&nbsp;',
-				collapsible: true,
-				animCollapse: true,
-				autoHeight:true,
-				items:
-				[
-					{
-						xtype: 'combo',
-						id: 'baselongitude_cb',
-						fieldLabel: i18n_longitude_x,
-						valueField: 'longitude',
-						displayField: 'longitude',
-						editable: true,
-						isFormField: true,
-						emptyText: GLOBALS.config.emptytext,
-						width: GLOBALS.config.combo_number_width,
-						minListWidth: GLOBALS.config.combo_number_width,
-						triggerAction: 'all',
-						value: BASECOORDINATE.longitude,
-						mode: 'local',
-						store: longitudeStore
-					},	
-					{
-						xtype: 'combo',
-						id: 'baselatitude_cb',
-						fieldLabel: i18n_latitude_y,
-						valueField: 'latitude',
-						displayField: 'latitude',
-						editable: true,
-						isFormField: true,
-						emptyText: GLOBALS.config.emptytext,
-						width: GLOBALS.config.combo_number_width,
-						minListWidth: GLOBALS.config.combo_number_width,
-						triggerAction: 'all',
-						value: BASECOORDINATE.latitude,
-						mode: 'local',
-						store: latitudeStore
-					},
-					{ html: '<p style="height:5px;">' },
-					{
-						xtype: 'button',
-						isFormField: true,
-						fieldLabel: '',
-						labelSeparator: '',
-						text: i18n_save_coordinate,
-						cls: 'aa_med',
-						handler: function() {
-							var blo = Ext.getCmp('baselongitude_cb').getRawValue();
-							var bla = Ext.getCmp('baselatitude_cb').getRawValue();
-							
-							Ext.Ajax.request({
-								url: GLOBALS.config.path_mapping + 'setBaseCoordinate' + GLOBALS.config.type,
-								method: 'POST',
-								params: {longitude:blo, latitude:bla},
-								success: function() {
-									BASECOORDINATE = {longitude:blo, latitude:bla};
-									Ext.message.msg(true, i18n_longitude_x + ' <span class="x-msg-hl">' + blo + '</span> '+i18n_and+' '+i18n_latitude_y+' <span class="x-msg-hl">' + bla + '</span> ' + i18n_was_saved_as_base_coordinate);
-									Ext.getCmp('newlongitude_cb').getStore().load();
-									Ext.getCmp('newlongitude_cb').setValue(blo);
-									Ext.getCmp('newlatitude_cb').setValue(bla);
-									Ext.getCmp('baselongitude_cb').getStore().load();
-									Ext.getCmp('baselongitude_cb').setValue(blo);
-									Ext.getCmp('baselatitude_cb').setValue(bla);
-								},
-								failure: function() {
-									alert('Error: setBaseCoordinate');
 								}
-							});
+							}
 						}
 					}
 				]
@@ -3316,7 +3168,7 @@ Ext.onReady( function() {
 		}
 	});
 	
-	var zoomMaxExtentButton = new Ext.Button({
+	var zoomToVisibleExtentButton = new Ext.Button({
 		iconCls: 'icon-zoommin',
 		tooltip: i18n_zoom_to_visible_extent,
 		handler: function() {
@@ -3471,7 +3323,7 @@ Ext.onReady( function() {
 			' ',' ',' ',' ',' ',
 			zoomInButton,
 			zoomOutButton,
-			zoomMaxExtentButton,
+			zoomToVisibleExtentButton,
 			'-',
 			exportImageButton,
 			// exportExcelButton,
@@ -3625,8 +3477,6 @@ Ext.onReady( function() {
     
     MAP.addControl(new OpenLayers.Control.ZoomBox());
 	
-	MAP.setCenter(new OpenLayers.LonLat(BASECOORDINATE.longitude, BASECOORDINATE.latitude), 6);
-    
 	MAP.events.on({
         changelayer: function(e) {
             var isOverlay = false;
@@ -3705,7 +3555,6 @@ Ext.onReady( function() {
     
     Ext.get('loading').fadeOut({remove: true});
 	
-	}});
 	}});
 	}});
 	}});
