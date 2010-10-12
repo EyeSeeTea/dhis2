@@ -797,9 +797,6 @@ public abstract class DhisConvenienceTest
         map.setOrganisationUnitLevel( level );
         map.setMapLayerPath( "MapLayerPath" + uniqueCharacter );
         map.setNameColumn( "NameColumn" + uniqueCharacter );
-        map.setLongitude( "Longitude" + uniqueCharacter );
-        map.setLatitude( "Latitude" + uniqueCharacter );
-        map.setZoom( 1 );
         map.setStaticMapLayerPaths( new HashSet<String>() );
 
         return map;
