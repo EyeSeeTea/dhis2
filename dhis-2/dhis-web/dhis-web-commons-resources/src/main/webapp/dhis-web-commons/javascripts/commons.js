@@ -494,15 +494,17 @@ function updateHeaderWaitMessage( message )
 }
 
 /**
- * Sets the header message and hides it after 3 seconds.
+ * Sets the header message and hides it after 3 seconds, as default.
  */
-function setHeaderDelayMessage( message )
+function setHeaderDelayMessage( message, timing )
 {
+	if ( timing == undefined ) { timing = 3000; }
+	
 	setHeaderMessage( message );
 	
 	window.clearTimeout( headerMessageTimeout ); // Clear waiting invocations
 	
-	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", 3000 );
+	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", timing );
 }
 
 /**
