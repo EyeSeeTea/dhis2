@@ -176,7 +176,7 @@ GLOBALS.util = {
     },
 
     getLegendsJSON: function() {
-        var widget = ACTIVEPANEL == thematicMap ? choropleth : proportionalSymbol;
+        var widget = ACTIVEPANEL == GLOBALS.config.thematicMap ? choropleth : proportionalSymbol;
         var json = '{';
         json += '"legends":';
         json += '[';
