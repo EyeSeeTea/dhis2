@@ -198,7 +198,7 @@ function select( id )
 
 function insertDataElement()
 {
-	var oEditor = FCKeditorAPI.GetInstance('fckeditor') ;
+	var oEditor = FCKeditorAPI.GetInstance('designTextarea') ;
 	var viewByValue = getFieldValue( 'viewBySelector' );
 	
 	var json = JSON.parse( jQuery("#json_" + selected ).val() );

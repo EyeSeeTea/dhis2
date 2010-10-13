@@ -749,7 +749,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataEntryManager">
 			<ref bean="org.hisp.dhis.patient.screen.DataEntryManager" />
 		</property>		
-		<property name="editorManager" ref="editorManager"/>			
+		<property name="editorManager" ref="editorManager"/>
+		<property name="programStageDataElementService"
+			ref="org.hisp.dhis.program.ProgramStageDataElementService" />
+		<property name="dataElementCategoryService"
+			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />					
 	</bean>
 	
 	<bean id="org.hisp.dhis.patient.screen.DataEntryManager" class="org.hisp.dhis.patient.screen.DefaultDataEntryManager"

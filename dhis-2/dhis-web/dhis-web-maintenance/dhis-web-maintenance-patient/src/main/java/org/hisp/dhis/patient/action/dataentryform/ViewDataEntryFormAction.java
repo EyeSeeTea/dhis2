@@ -33,11 +33,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.editor.EditorManager;
 import org.hisp.dhis.patient.screen.DataEntryManager;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
@@ -88,6 +92,20 @@ public class ViewDataEntryFormAction
         this.editorManager = editorManager;
     }
 
+    private ProgramStageDataElementService programStageDataElementService;
+
+    public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
+    {
+        this.programStageDataElementService = programStageDataElementService;
+    }
+
+    private DataElementCategoryService dataElementCategoryService;
+
+    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    {
+        this.dataElementCategoryService = dataElementCategoryService;
+    }
+
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
@@ -127,6 +145,13 @@ public class ViewDataEntryFormAction
         return listDataEntryForm;
     }
 
+    public List<DataElementOperand> operands;
+
+    public List<DataElementOperand> getOperands()
+    {
+        return operands;
+    }
+
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
@@ -146,7 +171,7 @@ public class ViewDataEntryFormAction
         }
 
         Set<ProgramStage> listProgramStage = programStage.getProgram().getProgramStages();
-        System.out.println( "listProgramStages: " + listProgramStage );
+
         List<Integer> listAssociationIds = new ArrayList<Integer>();
 
         Iterator<ProgramStage> itr = listProgramStage.iterator();
@@ -160,17 +185,20 @@ public class ViewDataEntryFormAction
         if ( dataEntryForm == null )
         {
             status = "ADD";
+            editorManager.setValue( "" );
         }
         else
         {
             status = "EDIT";
             listDataEntryForm.remove( dataEntryForm );
 
-            String htmlCode = dataEntryManager.prepareDataEntryFormCode( dataEntryForm.getHtmlCode() );
-
-            dataEntryForm.setHtmlCode( htmlCode );
-            editorManager.setValue( htmlCode );
+            editorManager.setValue( dataEntryManager.prepareDataEntryFormCode( dataEntryForm.getHtmlCode() ) );
         }
+
+        List<DataElement> dataElements = new ArrayList<DataElement>( programStageDataElementService
+            .getListDataElement( association ) );
+
+        operands = new ArrayList<DataElementOperand>( dataElementCategoryService.getFullOperands( dataElements ) );
 
         return SUCCESS;
     }
