@@ -76,7 +76,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     selectFeatures: false,
     
-    initComponent: function() {                            
+    initComponent: function() {
+    
         this.legend = {
             type: GLOBALS.config.map_legend_type_automatic,
             method: GLOBALS.config.classify_by_equal_intervals,
@@ -94,9 +95,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         if (PARAMETER) {
             this.mapView = PARAMETER.mapView;
             this.legend = {
-                type = this.mapView.mapLegendType,
-                method = this.mapView.method || this.legend.method,
-                classes = this.mapView.classes || this.legend.classes
+                type: this.mapView.mapLegendType,
+                method: this.mapView.method || this.legend.method,
+                classes: this.mapView.classes || this.legend.classes
             };
             
             PARAMETER = false;        
