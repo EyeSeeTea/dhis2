@@ -35,6 +35,7 @@ import java.util.Set;
 
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
+import org.hisp.dhis.editor.EditorManager;
 import org.hisp.dhis.patient.screen.DataEntryManager;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
@@ -44,6 +45,7 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Bharath Kumar
  * @modify Viet Nguyen 3-11-2009
+ * @modify Tran Thanh Tri 13 Oct 2010
  * @version $Id$
  */
 public class ViewDataEntryFormAction
@@ -52,7 +54,7 @@ public class ViewDataEntryFormAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private DataEntryFormService dataEntryFormService;
 
     public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
@@ -61,24 +63,39 @@ public class ViewDataEntryFormAction
     }
 
     private ProgramStageService programStageService;
-    
-    public void setProgramStageService(ProgramStageService programStageService) {
-		this.programStageService = programStageService;
+
+    public void setProgramStageService( ProgramStageService programStageService )
+    {
+        this.programStageService = programStageService;
     }
-    
+
     private DataEntryManager dataEntryManager;
-    
+
     public void setDataEntryManager( DataEntryManager dataEntryManager )
     {
         this.dataEntryManager = dataEntryManager;
     }
+
+    private EditorManager editorManager;
+
+    public EditorManager getEditorManager()
+    {
+        return editorManager;
+    }
+
+    public void setEditorManager( EditorManager editorManager )
+    {
+        this.editorManager = editorManager;
+    }
+
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
-    
+
     private int associationId;
 
-    public void setAssociationId(int associationId) {
+    public void setAssociationId( int associationId )
+    {
         this.associationId = associationId;
     }
 
@@ -88,20 +105,21 @@ public class ViewDataEntryFormAction
     {
         return dataEntryForm;
     }
-    
+
     private ProgramStage association;
 
-    public ProgramStage getAssociation() {
+    public ProgramStage getAssociation()
+    {
         return association;
     }
-    
+
     private String status;
 
     public String getStatus()
     {
         return status;
     }
-    
+
     private Collection<DataEntryForm> listDataEntryForm;
 
     public Collection<DataEntryForm> getListDataEntryForm()
@@ -112,28 +130,27 @@ public class ViewDataEntryFormAction
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
-    
-   
+
     public String execute()
         throws Exception
     {
         association = programStageService.getProgramStage( associationId );
 
         dataEntryForm = association.getDataEntryForm();
-        
+
         ProgramStage programStage = programStageService.getProgramStage( associationId );
-        
-        if( programStage == null )
+
+        if ( programStage == null )
         {
             return SUCCESS;
         }
-        
+
         Set<ProgramStage> listProgramStage = programStage.getProgram().getProgramStages();
-        System.out.println("listProgramStages: "+listProgramStage);
+        System.out.println( "listProgramStages: " + listProgramStage );
         List<Integer> listAssociationIds = new ArrayList<Integer>();
-        
+
         Iterator<ProgramStage> itr = listProgramStage.iterator();
-        while( itr.hasNext() )
+        while ( itr.hasNext() )
         {
             int programStageId = itr.next().getId();
             listAssociationIds.add( programStageId );
@@ -148,11 +165,14 @@ public class ViewDataEntryFormAction
         {
             status = "EDIT";
             listDataEntryForm.remove( dataEntryForm );
-            dataEntryForm.setHtmlCode( dataEntryManager.prepareDataEntryFormCode( dataEntryForm.getHtmlCode() ) );
+
+            String htmlCode = dataEntryManager.prepareDataEntryFormCode( dataEntryForm.getHtmlCode() );
+
+            dataEntryForm.setHtmlCode( htmlCode );
+            editorManager.setValue( htmlCode );
         }
 
         return SUCCESS;
     }
 
-    
 }

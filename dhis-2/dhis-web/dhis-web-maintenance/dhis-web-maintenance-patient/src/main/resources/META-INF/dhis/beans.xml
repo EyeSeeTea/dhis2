@@ -748,7 +748,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 		<property name="dataEntryManager">
 			<ref bean="org.hisp.dhis.patient.screen.DataEntryManager" />
-		</property>
+		</property>		
+		<property name="editorManager" ref="editorManager"/>			
 	</bean>
 	
 	<bean id="org.hisp.dhis.patient.screen.DataEntryManager" class="org.hisp.dhis.patient.screen.DefaultDataEntryManager"

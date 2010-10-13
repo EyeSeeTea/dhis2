@@ -111,7 +111,7 @@
       </tr>
       <tr>
         <td>
-			$editorManager.create( "fckeditor", "100%", "400" )
+			$editorManager.create( "designTextarea", "100%", "400" )
 		</td>
       </tr>
       <tr>
