@@ -494,11 +494,23 @@ function updateHeaderWaitMessage( message )
 }
 
 /**
- * Sets the header message and hides it after 3 seconds, as default.
+ * Sets the header message and hides it after 3 seconds.
  */
-function setHeaderDelayMessage( message, timing )
+function setHeaderDelayMessage( message )
 {
-	if ( timing == undefined ) { timing = 3000; }
+	setHeaderMessage( message );
+	
+	window.clearTimeout( headerMessageTimeout ); // Clear waiting invocations
+	
+	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", 3000 );
+}
+
+/**
+ * Sets the header message and hides it after the given seconds, default as 3s.
+ */
+function setHeaderTimeDelayMessage( message, timing )
+{
+	if ( timing == undefined ) { setHeaderDelayMessage( message ); return;}
 	
 	setHeaderMessage( message );
 	
@@ -539,7 +551,10 @@ function hideInfo()
  */
 function showDetails()
 {
-    $( '#detailsArea' ).show( "fast" );
+    $( '#detailsArea' )
+	.resizable()
+	.draggable()
+	.show( "fast" );
 }
 
 /**

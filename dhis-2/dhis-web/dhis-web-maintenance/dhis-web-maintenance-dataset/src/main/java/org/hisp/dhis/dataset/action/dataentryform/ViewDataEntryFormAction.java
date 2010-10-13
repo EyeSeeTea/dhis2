@@ -137,8 +137,7 @@ public class ViewDataEntryFormAction
     public List<DataElementOperand> getOperands()
     {
         return operands;
-    }   
-
+    }
 
     // -------------------------------------------------------------------------
     // Execute
@@ -150,11 +149,15 @@ public class ViewDataEntryFormAction
 
         dataSet = dataSetService.getDataSet( dataSetId );
 
-        dataEntryForm = dataSet.getDataEntryForm();        
+        dataEntryForm = dataSet.getDataEntryForm();
 
         if ( dataEntryForm != null )
         {
             editorManager.setValue( prepareDataEntryFormCode( dataEntryForm.getHtmlCode() ) );
+        }
+        else
+        {
+            editorManager.setValue( "" );
         }
 
         autoSave = (Boolean) userSettingService.getUserSetting( UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM, false );
