@@ -93,9 +93,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         if (PARAMETER) {
             this.mapView = PARAMETER.mapView;
-            this.legend.type = this.mapView.mapLegendType;
-            this.legend.method = this.mapView.method || this.legend.method;
-            this.legend.classes = this.mapView.classes || this.legend.classes;
+            this.legend = {
+                type = this.mapView.mapLegendType,
+                method = this.mapView.method || this.legend.method,
+                classes = this.mapView.classes || this.legend.classes
+            };
             
             PARAMETER = false;        
             MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
