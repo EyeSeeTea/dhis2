@@ -3094,7 +3094,13 @@ Ext.onReady( function() {
                     if (ACTIVEPANEL != GLOBALS.config.thematicMap) {
                         ACTIVEPANEL = GLOBALS.config.thematicMap;
                         this.layer.setVisibility(false);
-                        this.classify(false, true);
+                        
+                        if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
+                            this.applyPredefinedLegend();
+                        }
+                        else {
+                            this.classify(false, true);
+                        }
                     }
                 }
             }
@@ -3116,7 +3122,13 @@ Ext.onReady( function() {
                     if (ACTIVEPANEL != GLOBALS.config.thematicMap2) {
                         ACTIVEPANEL = GLOBALS.config.thematicMap2;
                         this.layer.setVisibility(false);
-                        this.classify(false, true);
+                        
+                        if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
+                            this.applyPredefinedLegend();
+                        }
+                        else {
+                            this.classify(false, true);
+                        }
                     }
                 }
             }
