@@ -385,7 +385,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
             nbBins = this.sturgesRule();
         }
 
-        switch (method) {
+        switch (parseFloat(method)) {
         case mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS :
             classification = this.classifyWithBounds(bounds);
             break;
