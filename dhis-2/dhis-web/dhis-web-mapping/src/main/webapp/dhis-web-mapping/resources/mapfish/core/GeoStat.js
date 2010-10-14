@@ -255,10 +255,10 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
             var labelGenerator = this.labelGenerator || this.defaultLabelGenerator;
             bins[i].label = labelGenerator(bins[i], i, nbBins, maxDec);
 			imageLegend[i] = new Object();
-			imageLegend[i].label = bins[i].label;
+			imageLegend[i].label = bins[i].label.replace('&nbsp;&nbsp;', ' ');
         }
         
-        if (ACTIVEPANEL == GLOBALS.config.thematicMap) {   
+        if (ACTIVEPANEL == GLOBALS.config.thematicMap) {
             choropleth.imageLegend = imageLegend;
         }
         else if (ACTIVEPANEL == GLOBALS.config.thematicMap2) {
