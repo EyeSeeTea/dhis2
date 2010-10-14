@@ -1233,18 +1233,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         this.prepareMapViewMap();
 
         if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
-            Ext.Ajax.request({
-                url: GLOBALS.config.path_commons + 'getOrganisationUnit' + GLOBALS.config.type,
-                method: 'POST',
-                params: {id: this.mapView.mapSource},
-                scope: this,
-                success: function(r) {
-                    var name = Ext.util.JSON.decode(r.responseText).organisationUnit.name;
-                    Ext.getCmp('map_tf2').setValue(name);
-                    Ext.getCmp('map_tf2').value = this.mapView.mapSource;
-                    this.loadFromDatabase(this.mapView.mapSource);
-                }
-            });
+            Ext.getCmp('map_tf2').setValue(this.mapView.parentOrganisationUnitName);
+            Ext.getCmp('map_tf2').value = this.mapView.mapSource;
+            this.loadFromDatabase(this.mapView.mapSource);
         }
         else {
             Ext.getCmp('map_cb2').setValue(this.mapView.mapSource);
