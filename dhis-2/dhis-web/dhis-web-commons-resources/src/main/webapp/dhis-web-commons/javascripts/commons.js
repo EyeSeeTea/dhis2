@@ -783,6 +783,26 @@ function datePicker( id )
 	if( s.val()=='' ) s.val( getCurrentDate() );		
 }
 
+function datePickerjQuery( jQueryString )
+{
+	jQuery( jQueryString ).datepicker(
+	{
+		dateFormat:dateFormat,
+		changeMonth: true,
+		changeYear: true,			
+		monthNamesShort: monthNames,
+		dayNamesMin: dayNamesMin,
+		showOn: 'both',
+		buttonImage: '../images/calendar.png',
+		buttonImageOnly: true,
+		constrainInput: true		
+	});
+	s = jQuery( jQueryString );		
+	if( s.val()=='' ) s.val( getCurrentDate() );		
+}
+
+
+
 /**
  * Create jQuery datepicker for input text with id * * 
  * @param id the id of input filed which you want enter date *
