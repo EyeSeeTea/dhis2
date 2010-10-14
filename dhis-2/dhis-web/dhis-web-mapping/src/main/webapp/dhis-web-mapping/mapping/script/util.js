@@ -168,11 +168,11 @@ GLOBALS.util = {
             json += '{';
             json += '"organisation": "' + mapValues[i].orgUnitId + '",';
             json += '"value": "' + mapValues[i].value + '" ';
-            json += i < mapValues.length - 1 ? '},' : '}'
+            json += i < mapValues.length - 1 ? '},' : '}';
         }
         json += ']';
         json += '}';
-        return json
+        return json;
     },
 
     getLegendsJSON: function() {
