@@ -1375,7 +1375,52 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             return false;
         }
         
+        if (Ext.getCmp('maplegendtype_cb2').getValue() == GLOBALS.config.map_legend_type_automatic) {
+            if (Ext.getCmp('method_cb2').getValue() == GLOBALS.config.classify_with_bounds) {
+                if (!Ext.getCmp('bounds_tf2').getValue()) {
+                    if (exception) {
+                        Ext.message.msg(false, i18n_form_is_not_complete);
+                    }
+                    return false;
+                }
+            }
+        }
+        else if (Ext.getCmp('maplegendtype_cb2').getValue() == GLOBALS.config.map_legend_type_predefined) {
+            if (!Ext.getCmp('maplegendset_cb2').getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, i18n_form_is_not_complete);
+                }
+                return false;
+            }
+        }            
+        
         return true;
+    },
+    
+    getFormValues: function() {
+        return {
+            mapValueType: Ext.getCmp('mapvaluetype_cb2').getValue(),
+            indicatorGroupId: Ext.getCmp('indicatorgroup_cb2').getValue() || '',
+            indicatorId: Ext.getCmp('indicator_cb2').getValue() || '',
+            dataElementGroupId: Ext.getCmp('dataelementgroup_cb2').getValue() || '',
+            dataElementId: Ext.getCmp('dataelement_cb2').getValue() || '',
+            periodTypeId: Ext.getCmp('periodtype_cb2').getValue() || '',
+            periodId: Ext.getCmp('period_cb2').getValue() || '',
+            startDate: Ext.getCmp('startdate_df2').getValue() || '',
+            endDate: Ext.getCmp('enddate_df2').getValue() || '',
+            mapSource: MAPSOURCE == GLOBALS.config.map_source_type_database ?
+                Ext.getCmp('map_tf2').value : Ext.getCmp('map_cb2').getValue(),
+            mapLegendType: Ext.getCmp('maplegendtype_cb2').getValue(),
+            method: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('method_cb2').getValue() : '',
+            classes: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('numClasses_cb2').getValue() : '',
+            bounds: this.legend.type == GLOBALS.config.map_legend_type_automatic && this.legend.method == GLOBALS.config.classify_with_bounds ? Ext.getCmp('bounds_tf2').getValue() : '',
+            colorLow: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('colorA_cf2').getValue() : '',
+            colorHigh: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('colorB_cf2').getValue() : '',
+            mapLegendSetId: Ext.getCmp('maplegendset_cb2').getValue() || '',
+            longitude: MAP.getCenter().lon,
+            latitude: MAP.getCenter().lon,
+            zoom: parseInt(MAP.getZoom())
+        };
     },
     
     applyValues: function() {

@@ -1441,7 +1441,52 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             return false;
         }
         
+        if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.config.map_legend_type_automatic) {
+            if (Ext.getCmp('method_cb').getValue() == GLOBALS.config.classify_with_bounds) {
+                if (!Ext.getCmp('bounds_tf').getValue()) {
+                    if (exception) {
+                        Ext.message.msg(false, i18n_form_is_not_complete);
+                    }
+                    return false;
+                }
+            }
+        }
+        else if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.config.map_legend_type_predefined) {
+            if (!Ext.getCmp('maplegendset_cb').getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, i18n_form_is_not_complete);
+                }
+                return false;
+            }
+        }            
+        
         return true;
+    },
+    
+    getFormValues: function() {
+        return {
+            mapValueType: Ext.getCmp('mapvaluetype_cb').getValue(),
+            indicatorGroupId: Ext.getCmp('indicatorgroup_cb').getValue() || '',
+            indicatorId: Ext.getCmp('indicator_cb').getValue() || '',
+            dataElementGroupId: Ext.getCmp('dataelementgroup_cb').getValue() || '',
+            dataElementId: Ext.getCmp('dataelement_cb').getValue() || '',
+            periodTypeId: Ext.getCmp('periodtype_cb').getValue() || '',
+            periodId: Ext.getCmp('period_cb').getValue() || '',
+            startDate: Ext.getCmp('startdate_df').getValue() || '',
+            endDate: Ext.getCmp('enddate_df').getValue() || '',
+            mapSource: MAPSOURCE == GLOBALS.config.map_source_type_database ?
+                Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue(),
+            mapLegendType: Ext.getCmp('maplegendtype_cb').getValue(),
+            method: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('method_cb').getValue() : '',
+            classes: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('numClasses_cb').getValue() : '',
+            bounds: this.legend.type == GLOBALS.config.map_legend_type_automatic && this.legend.method == GLOBALS.config.classify_with_bounds ? Ext.getCmp('bounds_tf').getValue() : '',
+            colorLow: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('colorA_cf').getValue() : '',
+            colorHigh: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('colorB_cf').getValue() : '',
+            mapLegendSetId: Ext.getCmp('maplegendset_cb').getValue() || '',
+            longitude: MAP.getCenter().lon,
+            latitude: MAP.getCenter().lon,
+            zoom: parseInt(MAP.getZoom())
+        };
     },
     
     applyValues: function() {
