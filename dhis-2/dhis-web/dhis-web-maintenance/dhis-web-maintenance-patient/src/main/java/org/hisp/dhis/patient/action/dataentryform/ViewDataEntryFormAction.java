@@ -28,14 +28,11 @@ package org.hisp.dhis.patient.action.dataentryform;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementOperand;
+import org.hisp.dhis.dataelement.comparator.DataElementNameComparator;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.editor.EditorManager;
@@ -43,6 +40,7 @@ import org.hisp.dhis.patient.screen.DataEntryManager;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.program.comparator.ProgramStageNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -99,13 +97,6 @@ public class ViewDataEntryFormAction
         this.programStageDataElementService = programStageDataElementService;
     }
 
-    private DataElementCategoryService dataElementCategoryService;
-
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
@@ -115,6 +106,18 @@ public class ViewDataEntryFormAction
     public void setAssociationId( int associationId )
     {
         this.associationId = associationId;
+    }
+
+    private Integer programStageId;
+
+    public Integer getProgramStageId()
+    {
+        return programStageId;
+    }
+
+    public void setProgramStageId( Integer programStageId )
+    {
+        this.programStageId = programStageId;
     }
 
     private DataEntryForm dataEntryForm;
@@ -131,25 +134,25 @@ public class ViewDataEntryFormAction
         return association;
     }
 
-    private String status;
+    private List<DataEntryForm> existingDataEntryForms;
 
-    public String getStatus()
+    public List<DataEntryForm> getExistingDataEntryForms()
     {
-        return status;
+        return existingDataEntryForms;
     }
 
-    private Collection<DataEntryForm> listDataEntryForm;
+    public List<DataElement> dataElements;
 
-    public Collection<DataEntryForm> getListDataEntryForm()
+    public List<DataElement> getDataElements()
     {
-        return listDataEntryForm;
+        return dataElements;
     }
 
-    public List<DataElementOperand> operands;
+    private List<ProgramStage> programStages;
 
-    public List<DataElementOperand> getOperands()
+    public List<ProgramStage> getProgramStages()
     {
-        return operands;
+        return programStages;
     }
 
     // -------------------------------------------------------------------------
@@ -163,44 +166,31 @@ public class ViewDataEntryFormAction
 
         dataEntryForm = association.getDataEntryForm();
 
-        ProgramStage programStage = programStageService.getProgramStage( associationId );
-
-        if ( programStage == null )
-        {
-            return SUCCESS;
-        }
-
-        Set<ProgramStage> listProgramStage = programStage.getProgram().getProgramStages();
-
         List<Integer> listAssociationIds = new ArrayList<Integer>();
 
-        Iterator<ProgramStage> itr = listProgramStage.iterator();
-        while ( itr.hasNext() )
+        for ( ProgramStage ps : association.getProgram().getProgramStages() )
         {
-            int programStageId = itr.next().getId();
-            listAssociationIds.add( programStageId );
-        }
-        listDataEntryForm = dataEntryFormService.listDisctinctDataEntryFormByProgramStageIds( listAssociationIds );
-
-        if ( dataEntryForm == null )
-        {
-            status = "ADD";
-            editorManager.setValue( "" );
-        }
-        else
-        {
-            status = "EDIT";
-            listDataEntryForm.remove( dataEntryForm );
-
-            editorManager.setValue( dataEntryManager.prepareDataEntryFormCode( dataEntryForm.getHtmlCode() ) );
+            listAssociationIds.add( ps.getId() );
         }
 
-        List<DataElement> dataElements = new ArrayList<DataElement>( programStageDataElementService
-            .getListDataElement( association ) );
+        existingDataEntryForms = new ArrayList<DataEntryForm>( dataEntryFormService
+            .listDisctinctDataEntryFormByProgramStageIds( listAssociationIds ) );
 
-        operands = new ArrayList<DataElementOperand>( dataElementCategoryService.getFullOperands( dataElements ) );
+        editorManager.setValue( dataEntryForm == null ? "" : dataEntryManager.prepareDataEntryFormCode( dataEntryForm
+            .getHtmlCode() ) );
+
+        existingDataEntryForms.remove( dataEntryForm );
+
+        dataElements = new ArrayList<DataElement>( programStageDataElementService.getListDataElement( association ) );
+
+        Collections.sort( dataElements, new DataElementNameComparator() );
+        
+        programStages = new ArrayList<ProgramStage>( association.getProgram().getProgramStages() );
+        
+        programStages.remove( association );
+        
+        Collections.sort( programStages, new ProgramStageNameComparator() );
 
         return SUCCESS;
     }
-
 }

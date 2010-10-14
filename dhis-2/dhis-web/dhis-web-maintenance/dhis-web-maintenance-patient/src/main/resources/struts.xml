@@ -765,81 +765,35 @@
 		<action name="viewDataEntryForm"
 			class="org.hisp.dhis.patient.action.dataentryform.ViewDataEntryFormAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-maintenance-patient/viewDataEntryForm.vm</param>
-			<param name="javascripts">javascript/dataEntryForm.js,javascript/hashtable.js</param>
+			<param name="page">/dhis-web-maintenance-patient/viewDataEntryForm.vm</param>			
 		</action>
 
 		<action name="saveDataEntryForm"
 			class="org.hisp.dhis.patient.action.dataentryform.SaveDataEntryFormAction">
-			<result name="success" type="redirect">index.action</result>
+			<result name="success" type="redirect">programStage.action?id=${programStageId}</result>
 		</action>
 
 		<action name="delDataEntryForm"
 			class="org.hisp.dhis.patient.action.dataentryform.DelDataEntryFormAction">
-			<result name="success" type="redirect">index.action</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm
-			</result>
+			<result name="success" type="redirect">programStage.action?id=${programStageId}</result>			
 		</action>
 
 		<action name="validateDataEntryForm"
 			class="org.hisp.dhis.patient.action.dataentryform.ValidateDataEntryFormAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm
-			</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm
-			</result>
-			<result name="mismatch" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseMismatch.vm
-			</result>
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      		<result name="error" type="velocity-json">../dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
-		</action>
-
-		<action name="selectDataElement"
-			class="org.hisp.dhis.patient.action.dataentryform.SelectDataElementAction">
-			<result name="success" type="velocity">selectDataElement.vm
-			</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm
-			</result>
-			<param name="javascripts">javascript/hashtable.js</param>
-		</action>
+		</action>		
 
 		<action name="getSelectedDataElements"
 			class="org.hisp.dhis.patient.action.dataentryform.GetSelectedDataElementsAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSelDataElementList.vm
-			</result>
-		</action>
-
-		<action name="getOptionCombos"
-			class="org.hisp.dhis.patient.action.dataentryform.GetOptionCombosAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseOptionCombo.vm
-			</result>
-		</action>
+			<result name="success" type="velocity-xml">/dhis-web-maintenance-patient/responseSelDataElementList.vm</result>
+		</action>		
 
 		<action name="getCustomValues"
 			class="org.hisp.dhis.patient.action.dataentryform.GetCustomValuesAction">
 			<result name="success" type="velocity-xml">
 				/dhis-web-maintenance-patient/responseCustomValue.vm
-			</result>
-		</action>
-
-		<action name="selectProgramStageDataElement"
-			class="org.hisp.dhis.patient.action.dataentryform.SelectProgramStageDataElementAction">
-			<result name="success" type="velocity">selectProgramStageDataElement.vm
-			</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm
-			</result>
-		</action>
-
-		<action name="getSelectedProgramStages"
-			class="org.hisp.dhis.patient.action.dataentryform.GetSelectedProgramStagesAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSelProgramStageList.vm
 			</result>
 		</action>
 

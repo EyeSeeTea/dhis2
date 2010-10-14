@@ -33,6 +33,20 @@
 			<param name="requiredAuthorities">F_MOBILE_SETTINGS</param>
         </action>
 
+        <action name="receiveAllMessages" class="org.hisp.dhis.mobile.action.ReceiveMessagesPageAction">
+            <result name="success" type="velocity">/main.vm</result>
+            <param name="page">/dhis-web-mobile/inbox.vm</param>
+            <param name="menu">/dhis-web-mobile/menu.vm</param>
+			<param name="stylesheets">css/receiveImportPage.css</param>
+        </action>
+
+        <action name="getAllDraftMessages" class="org.hisp.dhis.mobile.action.DraftPageAction">
+            <result name="success" type="velocity">/main.vm</result>
+            <param name="page">/dhis-web-mobile/draft.vm</param>
+            <param name="menu">/dhis-web-mobile/menu.vm</param>
+            <param name="stylesheets">css/receiveImportPage.css</param>
+        </action>
+
         <!-- Create Mobile Application -->
         <action name="createMobileApp" class="org.hisp.dhis.mobile.app.action.CreateMobileAppAction">
             <result name="success" type="velocity">/main.vm</result>

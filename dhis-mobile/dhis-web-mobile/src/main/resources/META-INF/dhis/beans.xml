@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="org.hisp.dhis.mobile.action.MobileHomePageAction"
           class="org.hisp.dhis.mobile.action.MobileHomePageAction"
@@ -14,6 +14,22 @@
         <property name="smsService" ref="org.hisp.dhis.mobile.SmsService" />
         <property name="mobileImportService" ref="org.hisp.dhis.mobile.api.MobileImportService"/>
     </bean>
+
+<!-- Inbox -->
+    <bean id="org.hisp.dhis.mobile.action.ReceiveMessagesPageAction"
+          class="org.hisp.dhis.mobile.action.ReceiveMessagesPageAction"
+          scope="prototype">
+        <property name="smsService" ref="org.hisp.dhis.mobile.SmsService" />
+        <property name="mobileImportService" ref="org.hisp.dhis.mobile.api.MobileImportService"/>
+    </bean>
+<!-- Draft -->
+    <bean id="org.hisp.dhis.mobile.action.DraftPageAction"
+          class="org.hisp.dhis.mobile.action.DraftPageAction"
+          scope="prototype">
+        <property name="smsService" ref="org.hisp.dhis.mobile.SmsService" />
+        <property name="sendSMSService" ref="org.hisp.dhis.mobile.api.SendSMSService"/>
+    </bean>
+	
 
     <bean id="org.hisp.dhis.mobile.app.action.CreateMobileAppAction"
           class="org.hisp.dhis.mobile.app.action.CreateMobileAppAction"
@@ -43,4 +59,5 @@
           scope="prototype">
         <property name="smsService" ref="org.hisp.dhis.mobile.SmsService" />
     </bean>
+
 </beans>

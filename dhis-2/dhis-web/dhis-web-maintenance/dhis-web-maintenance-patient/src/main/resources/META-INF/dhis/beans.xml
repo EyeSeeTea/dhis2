@@ -751,9 +751,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>		
 		<property name="editorManager" ref="editorManager"/>
 		<property name="programStageDataElementService"
-			ref="org.hisp.dhis.program.ProgramStageDataElementService" />
-		<property name="dataElementCategoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />					
+			ref="org.hisp.dhis.program.ProgramStageDataElementService" />					
 	</bean>
 	
 	<bean id="org.hisp.dhis.patient.screen.DataEntryManager" class="org.hisp.dhis.patient.screen.DefaultDataEntryManager"
@@ -785,20 +783,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataEntryFormService">
 			<ref bean="org.hisp.dhis.dataentryform.DataEntryFormService" />
 		</property>
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.patient.action.dataentryform.SelectProgramStageDataElementAction"
-		class="org.hisp.dhis.patient.action.dataentryform.SelectProgramStageDataElementAction"
-		scope="prototype">
 		<property name="programStageService">
 			<ref bean="org.hisp.dhis.program.ProgramStageService" />
 		</property>
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.patient.action.dataentryform.GetSelectedProgramStagesAction"
-		class="org.hisp.dhis.patient.action.dataentryform.GetSelectedProgramStagesAction"
+		id="org.hisp.dhis.patient.action.dataentryform.SelectProgramStageDataElementAction"
+		class="org.hisp.dhis.patient.action.dataentryform.SelectProgramStageDataElementAction"
 		scope="prototype">
 		<property name="programStageService">
 			<ref bean="org.hisp.dhis.program.ProgramStageService" />
@@ -825,15 +817,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 		<property name="programStageDataElementService"
 			ref="org.hisp.dhis.program.ProgramStageDataElementService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.patient.action.dataentryform.GetOptionCombosAction"
-		class="org.hisp.dhis.patient.action.dataentryform.GetOptionCombosAction"
-		scope="prototype">
-		<property name="dataElementService">
-			<ref bean="org.hisp.dhis.dataelement.DataElementService" />
-		</property>		
 	</bean>
 
 	<bean
