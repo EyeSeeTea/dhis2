@@ -1,11 +1,10 @@
 <script type="text/javascript">   
-    
+    var i18n_dataelement_is_inserted = '$encoder.jsEscape( $i18n.getString( "dataelement_is_inserted" ) , "'" )';
+	var i18n_specify_dataelememt = '$encoder.jsEscape( $i18n.getString( "specify_dataelememt" ) , "'" )';
        
 	jQuery(document).ready(	function()
 	{		
-		var validator1 = validation( 'saveDataEntryForm', function( form ){ form.submit() } );
-		var validator2 = validation( 'otherProgramStageDataElementsForm', function(){insertDataElement( '#otherProgramStageDataElements' )} );
-		var validator3 = validation( 'dataElementSelectionForm', function(){insertDataElement( '#dataElementSelection')} );
+		validation( 'saveDataEntryForm', function( form ){ form.submit() } );		
 		
 		#if( $!dataEntryForm )
 			checkValueIsExist('name', 'validateDataEntryForm.action', {dataEntryFormId:$dataEntryForm.id});
@@ -55,6 +54,11 @@
 	margin-top:5px;
 }
 
+#message_{
+	display:block;
+	color:red;	
+}
+
 </style>
 
 <form id="saveDataEntryForm" name="saveDataEntryForm" action="saveDataEntryForm.action" method="post">
@@ -99,7 +103,7 @@
     <tr>
         <td align="right">
             <input type="submit" name="save" value="$i18n.getString( 'save' )" style="width:100px"/>
-            <input type="button" name="cancel" value="$i18n.getString( 'cancel' )" style="width:100px" onclick="window.location='programStage.action?id=$!programStageId'">
+            <input type="button" name="cancel" value="$i18n.getString( 'cancel' )" style="width:100px" onclick="window.location='programStage.action?id=$!programStageId'">            
 			#if( $!dataEntryForm )
 			<input type="button" name="delete" value="$i18n.getString( 'delete' )" style="width:100px" onclick="deleteDataEntryForm( $association.id )" />
 			#end
@@ -109,8 +113,7 @@
   
 </form>
 
-<div id="dataElementSelection">
-	<form id="dataElementSelectionForm" name="dataElementSelectionForm">
+<div id="dataElementSelection">	
 	<table>
 		<tr>
 			<td>
@@ -126,20 +129,24 @@
 				<select id="optionComboIds" name="optionComboIds" style="min-width:300px" size="10" class="{validate:{required:true}}"/>					
 			</td>
 		</tr>
-	</table>
-	<br>
-	<b>$i18n.getString( "view_as" )</b>
-	<select name="viewBySelector" id="viewBySelector" style="width:150px">		
-		<option value="deid">$i18n.getString( "id" )</option>
-		<option value="dename">$i18n.getString( "name" )</option>
-		<option value="deshortname" selected>$i18n.getString( "short_name" )</option> 	
-	</select>
-	<input type="submit" value="Insert"/>
-	</form>
+		<tr>
+			<td>
+				<b>$i18n.getString( "view_as" )</b><br>
+				<select name="viewBySelector" id="viewBySelector" style="width:150px">		
+					<option value="deid">$i18n.getString( "id" )</option>
+					<option value="dename">$i18n.getString( "name" )</option>
+					<option value="deshortname" selected>$i18n.getString( "short_name" )</option> 	
+				</select>
+				<input type="button" value="Insert" id="insert" name="insert" onclick="insertDataElement( '#dataElementSelection')"/>
+			</td>
+			<td>
+				<span id="message_"></span>
+			</td>
+		</tr>
+	</table>	
 </div>
 
-<div id="otherProgramStageDataElements">
-	<form id="otherProgramStageDataElementsForm" name="otherProgramStageDataElementsForm">
+<div id="otherProgramStageDataElements">	
 	<table>
 		<tr>
 			<td>
@@ -162,16 +169,21 @@
 				<select id="optionComboIds" name="optionComboIds" style="min-width:300px" size="10" class="{validate:{required:true}}"/>					
 			</td>
 		</tr>
-	</table>
-	<br>
-	<b>$i18n.getString( "view_as" )</b>
-	<select name="viewBySelector" id="viewBySelector" style="width:150px">		
-		<option value="deid">$i18n.getString( "id" )</option>
-		<option value="dename">$i18n.getString( "name" )</option>
-		<option value="deshortname" selected>$i18n.getString( "short_name" )</option> 	
-	</select>
-	<input type="submit" value="Insert"/>
-	</form>
+		<tr>
+			<td>
+				<b>$i18n.getString( "view_as" )</b><br>
+				<select name="viewBySelector" id="viewBySelector" style="width:150px">		
+					<option value="deid">$i18n.getString( "id" )</option>
+					<option value="dename">$i18n.getString( "name" )</option>
+					<option value="deshortname" selected>$i18n.getString( "short_name" )</option> 	
+				</select>
+				<input type="button" value="Insert" id="insert" name="insert" onclick="insertDataElement( '#otherProgramStageDataElements')"/>
+			</td>
+			<td>
+				<span id="message_"></span>
+			</td>
+		</tr>
+	</table>	
 </div>
 
 
@@ -217,7 +229,7 @@ jQuery(function(){
 		width:400,
 		autoOpen: false,
 		zIndex:99999
-	});
+	});	
 });
 
 function openOtherProgramStageDataElements()
@@ -296,13 +308,21 @@ function insertDataElement( source )
 	var oEditor = FCKeditorAPI.GetInstance('designTextarea') ;
 	
 	var dataElement = JSON.parse( jQuery( source + ' #dataElementIds').val() );
+	if( dataElement == null )
+	{
+		jQuery( source + " #message_").html( "<b>" + i18n_specify_dataelememt + "</b>" );
+		return;
+	}else{
+		jQuery( source + " #message_").html( "" );
+	}
+	var categoryOptionCombos = getSelectedValues( source + ' #optionComboIds' );
+	
 	var associationId = $association.id;
 	
 	var dataElementId = dataElement.id;	
 	var dataElementName = dataElement.name;	
 	var dataElementType = dataElement.type;
-	var viewByValue = jQuery( source + ' #viewBySelector' ).val();
-	var categoryOptionCombos = getSelectedValues( source + ' #optionComboIds' );
+	var viewByValue = jQuery( source + ' #viewBySelector' ).val();	
 	
 	var strPSDataEntryId   = "value["+ associationId +"].value:value["+ dataElementId +"].value";
     var comboPSDataEntryId = "value["+ associationId +"].combo:value["+ dataElementId +"].combo";
@@ -315,14 +335,18 @@ function insertDataElement( source )
 	
 	viewByValue = "@@" + viewByValue + "@@";
 	
+	var id = "";
+	
 	var selectString = "";
 	
 	if( dataElementType == "string" )
 	{
-		if( categoryOptionCombos[0].default == 'true' ){
+		if( categoryOptionCombos[0].default == 'true' )
+		{			
 			strPSDataEntryId  = strPSDataEntryId + ":value["+ categoryOptionCombos[0].id +"].value";
-			selectString += "<input name=\"entryfield\" id=\""+strPSDataEntryId+"\" type=\"text\" value=\"\" onkeypress=\"return keyPress(event, this)\" >";
-		}else{
+			selectString += "<input name=\"entryfield\" id=\""+strPSDataEntryId+"\" type=\"text\" value=\"\" onkeypress=\"return keyPress(event, this)\" >";			
+			id = strPSDataEntryId;
+		}else{			
 			selectString = "<select name=\"entryselect\" id=\"" + comboPSDataEntryId + "\" > <option value=\"\">i18n_select_value</option>";
 		
 			jQuery.each( categoryOptionCombos, function(i, item ){
@@ -330,6 +354,8 @@ function insertDataElement( source )
 			});
 			
 			selectString += "</select>";
+			
+			id = comboPSDataEntryId;
 		}		
 		
 	}else if (dataElementType == "bool")
@@ -338,6 +364,8 @@ function insertDataElement( source )
 		selectString += "<option value=\"true\" >i18n_yes</option>";
 		selectString += "<option value=\"false\" >i18n_no</option>";
 		selectString += "</select>";
+		
+		id = boolPSDataEntryId;
 	}else if (dataElementType == "date")
 	{
 		clazz = "date_" + associationId + "_" + dataElementId;
@@ -348,7 +376,7 @@ function insertDataElement( source )
 		selectString += "});";	
 		selectString += "<\/script>";
 		
-
+		id = datePSDataEntryId;
 	} else if ( dataElementType == "int" )
 	{
 		jQuery.each( categoryOptionCombos, function(i, item ){
@@ -358,10 +386,20 @@ function insertDataElement( source )
 			var displayName = dispName + " - " + optionComboName + " ]";
 			var dataEntryId = "value[" + associationId + "].value:value[" + dataElementId + "].value:value[" + optionComboId + "].value";
 			selectString += "<input title=\"" + titleValue + "\" view=\""+viewByValue+"\" value=\"" + displayName + "\" name=\"entryfield\" id=\"" + dataEntryId + "\" style=\"width:10em;text-align:center\"/><br/>";
-		});		
+			id = dataEntryId;
+		});
+	}
+	
+	if( checkExisted( id ) )
+	{		
+		jQuery( source + " #message_").html( "<b>" + i18n_dataelement_is_inserted + "</b>" );
+		return;
+	}else{
+		jQuery( source + " #message_").html("");
 	}
 	
 	oEditor.InsertHtml( selectString );
+	
 }
 
 function getSelectedValues( jQueryString )
@@ -375,6 +413,20 @@ function getSelectedValues( jQueryString )
 	
 	return result;
 }
+
+
+function checkExisted( id )
+{	
+	var result = false;
+	var html = FCKeditorAPI.GetInstance('designTextarea').GetHTML();
+	var input = jQuery( html ).find("select, :text");
+	input.each( function(i, item){		
+		if( id == item.id ) result = true;		
+	});
+	
+	return result;
+}
+
 
 	
 </script>
