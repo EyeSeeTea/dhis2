@@ -99,7 +99,8 @@ Ext.onReady( function() {
 			
 	/* Section: mapview */
 	var viewStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapViews'+GLOBALS.config.type,root:'mapViews',fields:['id','name'],id:'id',sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
-	var viewNameTextField=new Ext.form.TextField({id:'viewname_tf',emptytext:'',width:GLOBALS.config.combo_width,hideLabel:true});
+	var viewNameTextField=new Ext.form.TextField({id:'viewname_tf',emptytext:'',width:GLOBALS.config.combo_width,hideLabel:true,autoCreate:{tag:'input',type:'text',size:'20',autocomplete:'off', maxlength:'35'}
+});
 	var viewComboBox=new Ext.form.ComboBox({id:'view_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:viewStore});
 	var view2ComboBox=new Ext.form.ComboBox({id:'view2_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:viewStore});
     
@@ -120,75 +121,27 @@ Ext.onReady( function() {
 				text: i18n_save,
 				handler: function() {
 					var vn = Ext.getCmp('viewname_tf').getValue();
-                    var mvt = Ext.getCmp('mapvaluetype_cb').getValue();
-					var ig = mvt == GLOBALS.config.map_value_type_indicator ? Ext.getCmp('indicatorgroup_cb').getValue() : '';
-					var ii = mvt == GLOBALS.config.map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : '';
-                    var deg = mvt == GLOBALS.config.map_value_type_dataelement ? Ext.getCmp('dataelementgroup_cb').getValue() : '';
-					var de = mvt == GLOBALS.config.map_value_type_dataelement ? Ext.getCmp('dataelement_cb').getValue() : '';
-					var pt = MAPDATETYPE == GLOBALS.config.map_date_type_fixed ? Ext.getCmp('periodtype_cb').getValue() : '';
-					var p = MAPDATETYPE == GLOBALS.config.map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : '';
-                    var sd = MAPDATETYPE == GLOBALS.config.map_date_type_start_end ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : '';
-                    var ed = MAPDATETYPE == GLOBALS.config.map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : '';
-					var ms = MAPSOURCE == GLOBALS.config.map_source_type_database ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue();
-					var mlt = Ext.getCmp('maplegendtype_cb').getValue();
-                    var m = mlt == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('method_cb').getValue() : '';
-					var c = mlt == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('numClasses_cb').getValue() : '';
-                    var b = mlt == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('bounds_tf').getValue() || '' : '';
-					var ca = Ext.getCmp('colorA_cf').getValue();
-					var cb = Ext.getCmp('colorB_cf').getValue();
-					var mlsid = mlt == GLOBALS.config.map_legend_type_predefined ? Ext.getCmp('maplegendset_cb').getValue() || '' : '';
-					var lon = MAP.getCenter().lon;
-					var lat = MAP.getCenter().lat;
-					var zoom = parseInt(MAP.getZoom());
-					
-					if (!vn) {
-						Ext.message.msg(false, i18n_map_view_form_is_not_complete);
+                    
+                    if (!vn) {
+						Ext.message.msg(false, i18n_form_is_not_complete);
 						return;
 					}
                     
-                    if (!ii && !de) {
-                        Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
-						return;
-					}
+                    var formValues;
                     
-                    if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
-                        if (!p) {
-                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                    if (ACTIVEPANEL == GLOBALS.config.thematicMap) {
+                        if (!choropleth.validateForm(true)) {
                             return;
                         }
-					}
-                    else {
-                        if (!Ext.getCmp('startdate_df').getValue() || !Ext.getCmp('enddate_df').getValue()) {
-                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
-                            return;
-                        }
-					}
-					
-					if (!ms) {
-						Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
-						return;
-					}
-                    
-                    if (mlt == GLOBALS.config.map_legend_type_automatic) {
-                        if (m == GLOBALS.config.classify_with_bounds) {
-                            if (!b) {
-                                Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
-                                return;
-                            }
-                        }
+                        formValues = choropleth.getFormValues();
                     }
-                    else {
-                        if (!mlsid) {
-                            Ext.message.msg(false, i18n_thematic_map_form_is_not_complete);
+                    else if (ACTIVEPANEL == GLOBALS.config.thematicMap2) {
+                        if (!proportionalSymbol.validateForm(true)) {
                             return;
                         }
-                    }
-					
-					if (GLOBALS.util.validateInputNameLength(vn) == false) {
-						Ext.message.msg(false, i18n_map_view_name_cannot_be_longer_than_25_characters );
-						return;
-					}
-					
+                        formValues = proportionalSymbol.getFormValues();
+                    }					
+                    
 					Ext.Ajax.request({
 						url: GLOBALS.config.path_mapping + 'getAllMapViews' + GLOBALS.config.type,
 						method: 'GET',
@@ -207,31 +160,32 @@ Ext.onReady( function() {
 								method: 'POST',
 								params: {
                                     name: vn,
-                                    mapValueType: mvt,
-                                    indicatorGroupId: ig,
-                                    indicatorId: ii,
-                                    dataElementGroupId: deg,
-                                    dataElementId: de,
-                                    periodTypeId: pt,
-                                    periodId: p,
-                                    startDate: sd,
-                                    endDate: ed,
-                                    mapSource: ms,
-                                    mapLegendType: mlt,
-                                    method: m,
-                                    classes: c,
-                                    bounds: b,
-                                    colorLow: ca,
-                                    colorHigh: cb,
-                                    mapLegendSetId: mlsid,
-                                    longitude: lon,
-                                    latitude: lat,
-                                    zoom: zoom
+                                    mapValueType: formValues.mapValueType,
+                                    indicatorGroupId: formValues.indicatorGroupId,
+                                    indicatorId: formValues.indicatorId,
+                                    dataElementGroupId: formValues.dataElementGroupId,
+                                    dataElementId: formValues.dataElementId,
+                                    periodTypeId: formValues.periodTypeId,
+                                    periodId: formValues.periodId,
+                                    startDate: formValues.startDate,
+                                    endDate: formValues.endDate,
+                                    mapSource:formValues.mapSource,
+                                    mapLegendType: formValues.mapLegendType,
+                                    method: formValues.method,
+                                    classes: formValues.classes,
+                                    bounds: formValues.bounds,
+                                    colorLow: formValues.colorLow,
+                                    colorHigh: formValues.colorHigh,
+                                    mapLegendSetId: formValues.mapLegendSetId,
+                                    longitude: formValues.longitude,
+                                    latitude: formValues.latitude,
+                                    zoom: formValues.zoom
                                 },
 								success: function(r) {
 									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
 									Ext.getCmp('view_cb').getStore().load();
 									Ext.getCmp('mapview_cb').getStore().load();
+                                    Ext.getCmp('mapview_cb2').getStore().load();
 									Ext.getCmp('viewname_tf').reset();
 								}
 							});
