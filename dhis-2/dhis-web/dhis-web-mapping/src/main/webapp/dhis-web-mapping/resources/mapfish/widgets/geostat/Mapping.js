@@ -213,10 +213,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                                         Ext.message.msg(true, i18n_all_relations_for_the_map + '<span class="x-msg-hl"> ' + Ext.getCmp('maps_cb').getRawValue() + '</span> ' + i18n_removed);
                                         
                                         mapping.classify(true, true);
-                                    },
-                                    failure: function() {
-                                        alert( i18n_error_while_deleting_relation_map_and_oranisation_unit );
-                                    } 
+                                    }
                                 });
                             },
                             scope: this
@@ -267,10 +264,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 										Ext.message.msg(true, msg);
 										
 										mapping.classify(true, true);
-									},
-									failure: function() {
-										alert(i18n_error_while_deleting_relation_map_and_oranisation_unit);
-									} 
+									}
 								});
                             },
                             scope: this
@@ -303,10 +297,7 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
 													mapping.relation = false;
 													Ext.getCmp('filter_tf').setValue('');
 													mapping.classify(true, true);
-												},
-												failure: function() {
-													alert( 'Error: addOrUpdateMapOrganisationUnitRelation' );
-												} 
+												}
 											});
 										}
 										else {
@@ -463,15 +454,9 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
                        
                         Ext.getCmp('grid_gp').getStore().load();
                         mapping.classify(false, position);
-                    },
-                    failure: function() {
-                        alert( 'Error: addOrUpdateMapOrganisationUnitRelations' );
-                    } 
+                    }
                 });
-            },
-            failure: function() {
-                alert( i18n_status , i18n_error_while_retrieving_data );
-            } 
+            }
         });
     },        
 

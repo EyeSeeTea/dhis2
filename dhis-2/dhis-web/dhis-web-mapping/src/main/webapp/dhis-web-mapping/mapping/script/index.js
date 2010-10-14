@@ -233,14 +233,8 @@ Ext.onReady( function() {
 									Ext.getCmp('view_cb').getStore().load();
 									Ext.getCmp('mapview_cb').getStore().load();
 									Ext.getCmp('viewname_tf').reset();
-								},
-								failure: function() {
-									alert( 'Error: addOrUpdateMapView' );
 								}
 							});
-						},
-						failure: function() {
-									alert( 'Error: getAllMapViews' );
 						}
 					});
 				}
@@ -283,9 +277,6 @@ Ext.onReady( function() {
                             if (v == Ext.getCmp('mapview_cb').getValue()) {
                                 Ext.getCmp('mapview_cb').clearValue();
                             }
-						},
-						failure: function() {
-							alert( i18n_status , i18n_error_while_saving_data );
 						}
 					});
 				}
@@ -326,9 +317,6 @@ Ext.onReady( function() {
 							Ext.getCmp('view_cb').getStore().load();
 							Ext.getCmp('view_cb').clearValue();
 							Ext.getCmp('mapview_cb').getStore().load();
-						},
-						failure: function() {
-							alert(i18n_status, i18n_error_while_saving_data);
 						}
 					});
 				}
@@ -675,14 +663,8 @@ Ext.onReady( function() {
                                     Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
                                     Ext.getCmp('predefinedmaplegendendvalue_tf').reset();
                                     Ext.getCmp('predefinedmaplegendcolor_cp').reset();
-                                },
-                                failure: function() {
-                                    alert( 'Error: addOrUpdateMapLegend' );
                                 }
                             });
-                        },
-                        failure: function() {
-                            alert( 'Error: getAllMapLegends' );
                         }
                     });
                 }
@@ -719,9 +701,6 @@ Ext.onReady( function() {
                             Ext.message.msg(true, i18n_legend+ ' <span class="x-msg-hl">' + mlrv + '</span> ' + i18n_was_deleted);
                             Ext.getCmp('predefinedmaplegend_cb').getStore().load();
                             Ext.getCmp('predefinedmaplegend_cb').clearValue();
-                        },
-                        failure: function() {
-                            alert( 'Error: deleteMapLegend' );
                         }
                     });
                 }
@@ -799,9 +778,6 @@ Ext.onReady( function() {
 							Ext.getCmp('maplegendset_cb').getStore().load();
 							Ext.getCmp('predefinedmaplegendsetname_tf').reset();
 							Ext.getCmp('predefinednewmaplegend_ms').reset();							
-                        },
-                        failure: function() {
-                            alert( 'Error: addOrUpdateMapLegendSet' );
                         }
                     });
                 }
@@ -890,9 +866,6 @@ Ext.onReady( function() {
                                     }
                                     
                                     Ext.getCmp('predefinedmaplegendsetindicator_ms').setValue(indicatorString);							
-                                },
-                                failure: function() {
-                                    alert( i18n_status , i18n_error_while_saving_data );
                                 }
                             });
                         }
@@ -939,9 +912,6 @@ Ext.onReady( function() {
                         success: function(r) {
                             Ext.message.msg(true, i18n_legend_set+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             Ext.getCmp('predefinedmaplegendsetindicator_cb').getStore().load();
-                        },
-                        failure: function() {
-                            alert( 'Error: assignIndicatorsToMapLegendSet' );
                         }
                     });
                 }
@@ -992,9 +962,6 @@ Ext.onReady( function() {
                                     }
                                     
                                     Ext.getCmp('predefinedmaplegendsetdataelement_ms').setValue(dataElementString);							
-                                },
-                                failure: function() {
-                                    alert( i18n_status , i18n_error_while_saving_data );
                                 }
                             });
                         }
@@ -1041,9 +1008,6 @@ Ext.onReady( function() {
                         success: function(r) {
                             Ext.message.msg(true, i18n_legend_set+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             Ext.getCmp('predefinedmaplegendsetdataelement_cb').getStore().load();
-                        },
-                        failure: function() {
-                            alert( 'Error: assignDataElementsToMapLegendSet' );
                         }
                     });
                 }
@@ -1148,10 +1112,6 @@ Ext.onReady( function() {
 			params: {id: topic},
 			success: function(r) {
 				Ext.getCmp(tab).body.update('<div id="help">' + r.responseText + '</div>');
-			},
-			failure: function() {
-				alert('Error: getHelpText');
-				return;
 			}
 		});
 	}
@@ -1296,8 +1256,7 @@ Ext.onReady( function() {
 							}
 							
 							Ext.getCmp('newnamecolumn_cb').getStore().loadData(data, false);
-						},
-						failure: function() {}
+						}
 					});
 				},
 				scope: this
@@ -1952,9 +1911,6 @@ Ext.onReady( function() {
                     Ext.message.msg(true, i18n_overlay + ' <span class="x-msg-hl">' + mln + '</span> '+i18n_was_deleted);
                     Ext.getCmp('maplayer_cb').getStore().load();
                     Ext.getCmp('maplayer_cb').clearValue();
-                },
-                failure: function() {
-                    alert( i18n_status , i18n_error_while_saving_data );
                 }
             });
             
@@ -2047,11 +2003,9 @@ Ext.onReady( function() {
 									Ext.getCmp('maplayername_tf').reset();
 									Ext.getCmp('maplayermapsourcefile_cb').clearValue();
 									Ext.getCmp('maplayerpathwmsoverlay_tf').reset();
-								},
-								failure: function() {}
+								}
 							});
-						},
-						failure: function() {}
+						}
 					});
 				}
 			}
@@ -2097,18 +2051,12 @@ Ext.onReady( function() {
                     {
                         title: '<span class="panel-tab-title">'+i18n_new+'</span>',
                         id: 'overlay0',
-                        items:
-                        [
-                            newMapLayerPanel
-                        ]
+                        items: [newMapLayerPanel]
                     },
                     {
                         title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
                         id: 'overlay1',
-                        items:
-                        [
-                            deleteMapLayerPanel
-                        ]
+                        items: [deleteMapLayerPanel]
                     }
                 ]
             }
@@ -2171,9 +2119,6 @@ Ext.onReady( function() {
                             }
                         });
                     }
-                },
-                failure: function() {
-                    alert( 'Error: deleteMapLayer' );
                 }
             });
             
@@ -2240,11 +2185,9 @@ Ext.onReady( function() {
 									Ext.getCmp('maplayerbaselayersname_tf').reset();
 									Ext.getCmp('maplayerbaselayersurl_tf').reset();
 									Ext.getCmp('maplayerbaselayerslayer_tf').reset();
-								},
-								failure: function() {}
+								}
 							});
-						},
-						failure: function() {}
+						}
 					});
 				}
 			}
@@ -2638,9 +2581,6 @@ Ext.onReady( function() {
 						
 					MAP.addLayer(treeLayer);
 				}
-			},
-			failure: function() {
-				alert('Error: getAllMapLayers');
 			}
 		});
 	}
