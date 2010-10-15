@@ -47,8 +47,7 @@ function displayCompleteness()
             url += "&dataSetId=" + dataSetId;
             
             request.setCallbackSuccess( displayCompletenessByOrganisationUnitReceived );
-        }               
-        alert(url);
+        }
         request.send( url );
     }
 }
