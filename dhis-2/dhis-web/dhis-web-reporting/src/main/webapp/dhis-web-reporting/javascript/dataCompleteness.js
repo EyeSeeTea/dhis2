@@ -47,7 +47,8 @@ function displayCompleteness()
             url += "&dataSetId=" + dataSetId;
             
             request.setCallbackSuccess( displayCompletenessByOrganisationUnitReceived );
-        }
+        }               
+        alert(url);
         request.send( url );
     }
 }
@@ -87,7 +88,6 @@ function displayCompletenessTable( xmlObject, headerText )
     // -------------------------------------------------------------------------
     
     var headerRow = table.insertRow( 0 );
-    
     var columnWidth = "55px";
     
     var headerA = document.createElement( "th" );
@@ -124,13 +124,14 @@ function displayCompletenessTable( xmlObject, headerText )
     // -------------------------------------------------------------------------
     
     var results = xmlObject.getElementsByTagName( "dataSetCompletenessResult" );
-    
     var mark = false;
-    
     var rowIndex = 1;
+    var className = "";
     
     for ( var i = 0; i < results.length; i++ )
     {
+		className = mark ? "listAlternateRow" : "listRow" ;
+	
         var resultName = results[i].getElementsByTagName( "name" )[0].firstChild.nodeValue;
         var sources = results[i].getElementsByTagName( "sources" )[0].firstChild.nodeValue;
         var registrations = results[i].getElementsByTagName( "registrations" )[0].firstChild.nodeValue;
@@ -143,28 +144,28 @@ function displayCompletenessTable( xmlObject, headerText )
         var cellA = row.insertCell( 0 );
         cellA.style.height = "32px";
         cellA.innerHTML = resultName;
-        cellA.className = mark ? "listAlternateRow" : "listRow" ;
+        cellA.className = className
         
         var cellB = row.insertCell( 1 );
         cellB.innerHTML = registrations;
-        cellB.className = mark ? "listAlternateRow" : "listRow" ;
+        cellB.className = className
         
         var cellC = row.insertCell( 2 );
         cellC.innerHTML = sources;
-        cellC.className = mark ? "listAlternateRow" : "listRow" ;
+        cellC.className = className
         
         var cellD = row.insertCell( 3 );
         cellD.innerHTML = percentage;
-        cellD.className = mark ? "listAlternateRow" : "listRow" ;
+        cellD.className = className
         
         var cellE = row.insertCell( 4 );
         cellE.innerHTML = registrationsOnTime;
-        cellE.className = mark ? "listAlternateRow" : "listRow" ;
+        cellE.className = className
                 
         var cellF = row.insertCell( 5 );
         cellF.innerHTML = percentageOnTime;
-        cellF.className = mark ? "listAlternateRow" : "listRow" ;
+        cellF.className = className
         
-        mark = mark ? false : true;
+        mark = !mark;
 	}
 }
