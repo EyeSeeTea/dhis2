@@ -1,9 +1,6 @@
 target
 *.log
 *.log.*
-.classpath
-*.classpath
-*.project
 ./taret
 ./target
 ./target/classes
