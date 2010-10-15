@@ -1,51 +1,40 @@
 
-var selectedOrganisationUnitId = null;
-
-function setSelectedOrganisationUnitId( ids )
+function getPeriods( periodTypeList, availableList, selectedList, timespan )
 {
-    if ( ids != null && ids.length == 1 )
-    {
-        selectedOrganisationUnitId = ids[0];
-    }
-
-    displayCompleteness();
+	getAvailablePeriods( periodTypeList, availableList, selectedList, timespan );
+	displayCompleteness();
 }
-
-selectionTreeSelection.setListenerFunction( setSelectedOrganisationUnitId );
 
 function displayCompleteness()
 {
     var criteria = $( "input[name='criteria']:checked" ).val();
-    var dataSetList = document.getElementById( "dataSetId" );    
+    var dataSetList = byId( "dataSetId" );    
     var dataSetId = dataSetList.options[ dataSetList.selectedIndex ].value;    
-    var periodList = document.getElementById( "periodId" );
+    var periodList = byId( "periodId" );
     var periodId = null;
     
-    if ( periodList.disabled == false )
+    if ( !periodList.disabled && (periodList.options.length > 0) )
     {
         periodId = periodList.options[ periodList.selectedIndex ].value;
     }
     
-    if ( periodId != null && selectedOrganisationUnitId != null )
+    if ( periodId != null )
     {
         clearTable( "resultTable" );
-        
         showLoader();
         
-        var request = new Request();        
-        var url = null;
+        var request = new Request();   
+        var url = "getDataCompleteness.action" 
+				+ "?periodId=" + periodId 
+				+ "&criteria=" + criteria;
         
         request.setResponseTypeXML( "dataSetCompletenessResult" );
-        
+                    
         if ( dataSetId == "ALL" )
         {            
             // -----------------------------------------------------------------
             // Display completeness by DataSets
             // -----------------------------------------------------------------
-            
-            url = "getDataCompleteness.action?periodId=" + periodId + 
-                  "&organisationUnitId=" + selectedOrganisationUnitId +
-                  "&criteria=" + criteria;
             
             request.setCallbackSuccess( displayCompletenessByDataSetReceived );
         }
@@ -55,21 +44,17 @@ function displayCompleteness()
             // Display completeness by child OrganisationUnits for a DataSet
             // -----------------------------------------------------------------
             
-            url = "getDataCompleteness.action?periodId=" + periodId + 
-                  "&organisationUnitId=" + selectedOrganisationUnitId +
-                  "&dataSetId=" + dataSetId +
-                  "&criteria=" + criteria;
+            url += "&dataSetId=" + dataSetId;
             
             request.setCallbackSuccess( displayCompletenessByOrganisationUnitReceived );
-        }               
-        
+        }
         request.send( url );
     }
 }
 
 function clearTable( tableId )
 {
-    var table = document.getElementById( tableId );
+    var table = byId( tableId );
     
     while ( table.rows.length >  0 )
     {
@@ -95,7 +80,7 @@ function displayCompletenessTable( xmlObject, headerText )
 {
     hideLoader();
     
-    var table = document.getElementById( "resultTable" );
+    var table = byId( "resultTable" );
     
     // -------------------------------------------------------------------------
     // Adding header
