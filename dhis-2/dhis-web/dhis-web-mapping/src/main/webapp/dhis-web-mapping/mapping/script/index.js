@@ -229,11 +229,25 @@ Ext.onReady( function() {
         }
     });
     
+	var predefinedMapLegendStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getAllMapLegends' + GLOBALS.config.type,
+        root: 'mapLegends',
+        fields: ['id', 'name', 'startValue', 'endValue', 'color', 'displayString'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });    
+    
     var predefinedMapLegendSetStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getMapLegendSetsByType' + GLOBALS.config.type,
         baseParams: {type: GLOBALS.config.map_legend_type_predefined},
         root: 'mapLegendSets',
         fields: ['id', 'name'],
+        sortInfo:{field:'name',direction:'ASC'},
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -252,6 +266,7 @@ Ext.onReady( function() {
         periodType: periodTypeStore,
         period: periodStore,
         map: mapStore,
+        predefinedMapLegend: predefinedMapLegendStore,
         predefinedMapLegendSet: predefinedMapLegendSetStore
     };
 			
@@ -685,8 +700,8 @@ Ext.onReady( function() {
 	var exportExcelWindow=new Ext.Window({id:'exportexcel_w',title:'<span id="window-excel-title">'+i18n_export_excel+'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:260,height:157,items:[{xtype:'panel',items:[exportExcelPanel]}]});
 	
 	/* Section: predefined legend set */
-	var predefinedMapLegendStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapLegends'+GLOBALS.config.type,root:'mapLegends',id:'id',fields:['id','name','startValue','endValue','color','displayString'],autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
-	var predefinedMapLegendSetStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLegendSetsByType'+GLOBALS.config.type,baseParams:{type:GLOBALS.config.map_legend_type_predefined},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
+	// var predefinedMapLegendStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapLegends'+GLOBALS.config.type,root:'mapLegends',id:'id',fields:['id','name','startValue','endValue','color','displayString'],autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
+	// var predefinedMapLegendSetStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLegendSetsByType'+GLOBALS.config.type,baseParams:{type:GLOBALS.config.map_legend_type_predefined},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
 	var predefinedMapLegendSetIndicatorStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllIndicators'+GLOBALS.config.type,root:'indicators',fields:['id','name','shortName'],sortInfo:{field:'shortName',direction:'ASC'},autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
     var predefinedMapLegendSetDataElementStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllDataElements'+GLOBALS.config.type,root:'dataElements',fields:['id','name','shortName'],sortInfo:{field:'shortName',direction:'ASC'},autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
 
@@ -763,8 +778,25 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">'+i18n_legend+'</p>' },
-            new Ext.form.ComboBox({id:'predefinedmaplegend_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:predefinedMapLegendStore}),
+            { html: '<div class="window-field-label-first">' + i18n_legend + '</p>' },
+            {
+                xtype: 'combo',
+                id: 'predefinedmaplegend_cb',
+                isFormField: true,
+                hideLabel: true,
+                typeAhead: true,
+                editable: false,
+                valueField: 'id',
+                displayField: 'name',
+                mode: 'remote',
+                forceSelection: true,
+                triggerAction: 'all',
+                emptyText: GLOBALS.config.emptytext,
+                selectOnFocus: true,
+                width: GLOBALS.config.combo_width,
+                minListWidth: GLOBALS.config.combo_width,
+                store: GLOBALS.stores.predefinedMapLegend
+            },
             {
                 xtype: 'button',
                 id: 'deletepredefinedmaplegend_b',
@@ -785,7 +817,7 @@ Ext.onReady( function() {
                         params: {id: mlv},
                         success: function(r) {
                             Ext.message.msg(true, i18n_legend+ ' <span class="x-msg-hl">' + mlrv + '</span> ' + i18n_was_deleted);
-                            Ext.getCmp('predefinedmaplegend_cb').getStore().load();
+                            GLOBALS.stores.predefinedMapLegendStore.load();
                             Ext.getCmp('predefinedmaplegend_cb').clearValue();
                         }
                     });
@@ -800,9 +832,9 @@ Ext.onReady( function() {
         items:
         [   
             { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
-            new Ext.form.TextField({id:'predefinedmaplegendsetname_tf',isFormField:true,hideLabel:true,emptyText:GLOBALS.config.emptytext,width:GLOBALS.config.combo_width}),
+            new Ext.form.TextField({id:'predefinedmaplegendsetname_tf',hideLabel:true,emptyText:GLOBALS.config.emptytext,width:GLOBALS.config.combo_width}),
             { html: '<div class="window-field-label">'+i18n_legends+'</div>' },
-			new Ext.ux.Multiselect({id:'predefinednewmaplegend_ms',isFormField:true,hideLabel:true,dataFields:['id','name','startValue','endValue','color','displayString'],valueField:'id',displayField:'displayString',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:predefinedMapLegendStore}),
+			new Ext.ux.Multiselect({id:'predefinednewmaplegend_ms',hideLabel:true,dataFields:['id','name','startValue','endValue','color','displayString'],valueField:'id',displayField:'displayString',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:GLOBALS.stores.predefinedMapLegend}),
             {
                 xtype: 'button',
                 id: 'newpredefinedmaplegendset_b',
@@ -825,7 +857,7 @@ Ext.onReady( function() {
 										var temp_ev = predefinedMapLegendStore.getById(array[j]).get('endValue');
 										for (var k = sv+1; k < ev; k++) {
 											if (k > temp_sv && k < temp_ev) {
-												Ext.message.msg(false, i18n_overlapping_legends_are_not_allowed );
+												Ext.message.msg(false, i18n_overlapping_legends_are_not_allowed);
 												return;
 											}
 										}
@@ -835,7 +867,7 @@ Ext.onReady( function() {
 						}
 					}
 					else {
-						Ext.message.msg(false, i18n_please_select_at_least_one_legend );
+						Ext.message.msg(false, i18n_please_select_at_least_one_legends);
                         return;
 					}
 					
@@ -858,10 +890,8 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: {name: mlsv, type: GLOBALS.config.map_legend_type_predefined},
                         success: function(r) {
-                            Ext.message.msg(true, i18n_new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + i18n_was_registered );
-                            Ext.getCmp('predefinedmaplegendsetindicator_cb').getStore().load();
-                            Ext.getCmp('predefinedmaplegendsetindicator2_cb').getStore().load();
-							Ext.getCmp('maplegendset_cb').getStore().load();
+                            Ext.message.msg(true, i18n_new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + i18n_was_registered);
+                            GLOBALS.stores.predefinedMapLegendSet.load();
 							Ext.getCmp('predefinedmaplegendsetname_tf').reset();
 							Ext.getCmp('predefinednewmaplegend_ms').reset();							
                         }
@@ -877,7 +907,7 @@ Ext.onReady( function() {
         items:
         [   
             { html: '<div class="window-field-label-first">'+i18n_legend_set+'</p>' },
-            new Ext.form.ComboBox({id:'predefinedmaplegendsetindicator_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:predefinedMapLegendSetStore}),
+            new Ext.form.ComboBox({id:'predefinedmaplegendsetindicator_cb',hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:GLOBALS.stores.predefinedMapLegendSet}),
             {
                 xtype: 'button',
                 id: 'deletepredefinedmaplegendset_b',
@@ -888,7 +918,7 @@ Ext.onReady( function() {
                     var mlsrv = Ext.getCmp('predefinedmaplegendsetindicator_cb').getRawValue();
                     
                     if (!mlsv) {
-                        Ext.message.msg(false, i18n_please_select_a_legend_set );
+                        Ext.message.msg(false, i18n_please_select_a_legend_set);
                         return;
                     }
                     
@@ -898,10 +928,14 @@ Ext.onReady( function() {
                         params: {id: mlsv},
                         success: function(r) {
                             Ext.message.msg(true, i18n_legend_set + ' <span class="x-msg-hl">' + mlsrv + '</span> ' + i18n_was_deleted);
-                            Ext.getCmp('predefinedmaplegendsetindicator_cb').getStore().load();
+                            GLOBALS.stores.predefinedMapLegendSet.load();
                             Ext.getCmp('predefinedmaplegendsetindicator_cb').clearValue();
-                            Ext.getCmp('predefinedmaplegendsetindicator2_cb').getStore().load();
-							Ext.getCmp('maplegendset_cb').getStore().load();
+                            if (mlsv == Ext.getCmp('predefinedmaplegendsetindicator2_cb').getValue) {
+                                Ext.getCmp('predefinedmaplegendsetindicator2_cb').clearValue();
+                            }
+                            if (mlsv == Ext.getCmp('predefinedmaplegendsetindicator2_cb').getValue) {
+                                Ext.getCmp('predefinedmaplegendsetdataelement_cb').clearValue();
+                            }                            
                         }
                     });
                 }
