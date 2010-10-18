@@ -140,7 +140,7 @@
 	<div id="dataElementList" style="height:150px;overflow:auto;border:1px solid #7AAED5">
 	<table width="100%">
 		#foreach( $operand in $operands )
-			<tr id="tr$velocityCount" onclick="select($velocityCount)">
+			<tr id="tr$velocityCount" onclick="select($velocityCount)" ondblclick="insertDataElement()">
 				<td>
 					<input type="hidden" id="json_$velocityCount" value='$operand.toJSON()'/>
 					$encoder.htmlEncode( $operand.operandName )
