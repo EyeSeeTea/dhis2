@@ -72,8 +72,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     valueType: false,
     
-    stores: false,
-    
     selectFeatures: false,
     
     initComponent: function() {
@@ -85,8 +83,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         };
         
         this.valueType = GLOBALS.config.map_value_type_indicator;
-        
-        this.createStores();
         
         this.createItems();
         
@@ -114,11 +110,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 this.setMapView();
             }
             
-            if (this.stores.mapView.isLoaded) {
+            if (GLOBALS.stores.mapView.isLoaded) {
                 mapViewStoreCallback.call(this);
             }                    
             else {
-                this.stores.mapView.load({scope: this, callback: function() {
+                GLOBALS.stores.mapView.load({scope: this, callback: function() {
                     mapViewStoreCallback.call(this);
                 }});
             }
@@ -152,160 +148,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         return [colorA, colorB];
     },
     
-    createStores: function() {
-        var mapViewStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getAllMapViews' + GLOBALS.config.type,
-            root: 'mapViews',
-            fields: ['id', 'name'],
-            sortInfo: {field: 'name', direction: 'ASC'},
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                }
-            }
-        });
-
-        var indicatorGroupStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getAllIndicatorGroups' + GLOBALS.config.type,
-            root: 'indicatorGroups',
-            fields: ['id', 'name'],
-            idProperty: 'id',
-            sortInfo: {field: 'name', direction: 'ASC'},
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                }
-            }
-        });
-        
-        var indicatorStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getIndicatorsByIndicatorGroup' + GLOBALS.config.type,
-            root: 'indicators',
-            fields: ['id', 'name', 'shortName'],
-            idProperty: 'id',
-            sortInfo: {field: 'name', direction: 'ASC'},
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                    store.each(
-                        function fn(record) {
-                            var name = record.get('name');
-                            name = name.replace('&lt;', '<').replace('&gt;', '>');
-                            record.set('name', name);
-                        }
-                    );
-                }
-            }
-        });
-		
-		var dataElementGroupStore = new Ext.data.JsonStore({
-			url: GLOBALS.config.path_mapping + 'getAllDataElementGroups' + GLOBALS.config.type,
-            root: 'dataElementGroups',
-            fields: ['id', 'name'],
-            sortInfo: {field: 'name', direction: 'ASC'},
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                }
-            }
-        });
-		
-		var dataElementStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getDataElementsByDataElementGroup' + GLOBALS.config.type,
-            root: 'dataElements',
-            fields: ['id', 'name', 'shortName'],
-            sortInfo: {field: 'name', direction: 'ASC'},
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                    store.each(
-                        function fn(record) {
-                            var name = record.get('name');
-                            name = name.replace('&lt;', '<').replace('&gt;', '>');
-                            record.set('name', name);
-                        }
-                    );
-                }
-            }
-        });
-        
-        var periodTypeStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getAllPeriodTypes' + GLOBALS.config.type,
-            root: 'periodTypes',
-            fields: ['name'],
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                }
-            }
-        });
-            
-        var periodStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getPeriodsByPeriodType' + GLOBALS.config.type,
-            root: 'periods',
-            fields: ['id', 'name'],
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                }
-            }
-        });
-            
-        var mapStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getAllMaps' + GLOBALS.config.type,
-            root: 'maps',
-            fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
-            idProperty: 'mapLayerPath',
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                }
-            }
-        });
-		
-		var predefinedMapLegendSetStore = new Ext.data.JsonStore({
-            url: GLOBALS.config.path_mapping + 'getMapLegendSetsByType' + GLOBALS.config.type,
-            baseParams: {type: GLOBALS.config.map_legend_type_predefined},
-            root: 'mapLegendSets',
-            fields: ['id', 'name'],
-            autoLoad: false,
-            isLoaded: false,
-            listeners: {
-                'load': function(store) {
-                    store.isLoaded = true;
-                }
-            }
-        });
-        
-        this.stores = {
-            mapView: mapViewStore,
-            indicatorGroup: indicatorGroupStore,
-            indicator: indicatorStore,
-            dataElementGroup: dataElementGroupStore,
-            dataElement: dataElementStore,
-            periodType: periodTypeStore,
-            period: periodStore,
-            map: mapStore,
-            predefinedMapLegendSet: predefinedMapLegendSetStore
-        };
-    },
-    
     createItems: function() {
         this.items = [
         {
@@ -323,7 +165,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
 			labelSeparator: GLOBALS.config.labelseparator,
             width: GLOBALS.config.combo_width,
-            store: this.stores.mapView,
+            store: GLOBALS.stores.mapView,
             listeners: {
                 'select': {
                     scope: this,
@@ -403,15 +245,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: this.stores.indicatorGroup,
+            store: GLOBALS.stores.indicatorGroup,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();						
 						Ext.getCmp('indicator_cb').clearValue();
-                        this.stores.indicator.setBaseParam('indicatorGroupId', cb.getValue());
-                        this.stores.indicator.load();
+                        GLOBALS.stores.indicator.setBaseParam('indicatorGroupId', cb.getValue());
+                        GLOBALS.stores.indicator.load();
                     }
                 }
             }
@@ -432,7 +274,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: this.stores.indicator,
+            store: GLOBALS.stores.indicator,
             listeners: {
                 'select': {
                     scope: this,
@@ -455,8 +297,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         this.applyPredefinedLegend();
                                     }
                                     
-                                    if (!this.stores.predefinedMapLegendSet.isLoaded) {
-                                        this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                    if (!GLOBALS.stores.predefinedMapLegendSet.isLoaded) {
+                                        GLOBALS.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
                                             load.call(this);
                                         }});
                                     }
@@ -491,15 +333,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: this.stores.dataElementGroup,
+            store: GLOBALS.stores.dataElementGroup,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();
                         Ext.getCmp('dataelement_cb').clearValue();
-						this.stores.dataElement.setBaseParam('dataElementGroupId', cb.getValue());
-                        this.stores.dataElement.load();
+						GLOBALS.stores.dataElement.setBaseParam('dataElementGroupId', cb.getValue());
+                        GLOBALS.stores.dataElement.load();
                     }
                 }
             }
@@ -520,7 +362,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: this.stores.dataElement,
+            store: GLOBALS.stores.dataElement,
             listeners: {
                 'select': {
                     scope: this,
@@ -543,8 +385,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         this.applyPredefinedLegend();
                                     }
                                     
-                                    if (!this.stores.predefinedMapLegendSet.isLoaded) {
-                                        this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                    if (!GLOBALS.stores.predefinedMapLegendSet.isLoaded) {
+                                        GLOBALS.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
                                             load.call(this);
                                         }});
                                     }
@@ -579,15 +421,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: this.stores.periodType,
+            store: GLOBALS.stores.periodType,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();                        
                         Ext.getCmp('period_cb').clearValue();
-                        this.stores.period.setBaseParam('name', cb.getValue());
-                        this.stores.period.load();
+                        GLOBALS.stores.period.setBaseParam('name', cb.getValue());
+                        GLOBALS.stores.period.load();
                     }
                 }
             }
@@ -608,7 +450,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: this.stores.period,
+            store: GLOBALS.stores.period,
             listeners: {
                 'select': {
                     scope: this,
@@ -677,7 +519,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: this.stores.map,
+            store: GLOBALS.stores.map,
             listeners: {
                 'select': {
                     scope: this,
@@ -879,7 +721,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             width: GLOBALS.config.combo_width,
 			hidden: true,
-            store: this.stores.predefinedMapLegendSet,
+            store: GLOBALS.stores.predefinedMapLegendSet,
             listeners: {
                 'select': {
                     scope: this,
@@ -1105,8 +947,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 valueType: Ext.getCmp('indicator_cb')
             };
             obj.stores = {
-                valueTypeGroup: this.stores.indicatorGroup,
-                valueType: this.stores.indicator
+                valueTypeGroup: GLOBALS.stores.indicatorGroup,
+                valueType: GLOBALS.stores.indicator
             };
             obj.mapView = {
                 valueTypeGroup: 'indicatorGroupId',
@@ -1123,8 +965,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 valueType: Ext.getCmp('dataelement_cb')
             };
             obj.stores = {
-                valueTypeGroup: this.stores.dataElementGroup,
-                valueType: this.stores.dataElement
+                valueTypeGroup: GLOBALS.stores.dataElementGroup,
+                valueType: GLOBALS.stores.dataElement
             };
             obj.mapView = {
                 valueTypeGroup: 'dataElementGroupId',
@@ -1146,8 +988,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 c2: Ext.getCmp('period_cb')
             };
             obj.stores = {
-                c1: this.stores.periodType,
-                c2: this.stores.period
+                c1: GLOBALS.stores.periodType,
+                c2: GLOBALS.stores.period
             };
             obj.mapView = {
                 c1: 'periodTypeId',
@@ -1284,11 +1126,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.setMapViewMap();
         }
         else if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
-            if (this.stores.isLoaded) {
+            if (GLOBALS.stores.isLoaded) {
                 predefinedMapLegendSetStoreCallback.call(this);
             }
             else {
-                this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                GLOBALS.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
                     predefinedMapLegendSetStoreCallback.call(this);
                 }});
             }

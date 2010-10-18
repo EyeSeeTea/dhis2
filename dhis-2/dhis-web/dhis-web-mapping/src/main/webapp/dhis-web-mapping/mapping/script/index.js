@@ -101,21 +101,172 @@ Ext.onReady( function() {
                         method: 'POST',
                         params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
                         success: function() {
+                        
+    /* Section: stores */
+    var mapViewStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getAllMapViews' + GLOBALS.config.type,
+        root: 'mapViews',
+        fields: ['id', 'name'],
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+
+    var indicatorGroupStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getAllIndicatorGroups' + GLOBALS.config.type,
+        root: 'indicatorGroups',
+        fields: ['id', 'name'],
+        idProperty: 'id',
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+    
+    var indicatorStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getIndicatorsByIndicatorGroup' + GLOBALS.config.type,
+        root: 'indicators',
+        fields: ['id', 'name', 'shortName'],
+        idProperty: 'id',
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+                store.each(
+                    function fn(record) {
+                        var name = record.get('name');
+                        name = name.replace('&lt;', '<').replace('&gt;', '>');
+                        record.set('name', name);
+                    }
+                );
+            }
+        }
+    });
+    
+    var dataElementGroupStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getAllDataElementGroups' + GLOBALS.config.type,
+        root: 'dataElementGroups',
+        fields: ['id', 'name'],
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+    
+    var dataElementStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getDataElementsByDataElementGroup' + GLOBALS.config.type,
+        root: 'dataElements',
+        fields: ['id', 'name', 'shortName'],
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+                store.each(
+                    function fn(record) {
+                        var name = record.get('name');
+                        name = name.replace('&lt;', '<').replace('&gt;', '>');
+                        record.set('name', name);
+                    }
+                );
+            }
+        }
+    });
+    
+    var periodTypeStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getAllPeriodTypes' + GLOBALS.config.type,
+        root: 'periodTypes',
+        fields: ['name'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+        
+    var periodStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getPeriodsByPeriodType' + GLOBALS.config.type,
+        root: 'periods',
+        fields: ['id', 'name'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+        
+    var mapStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getAllMaps' + GLOBALS.config.type,
+        root: 'maps',
+        fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
+        idProperty: 'mapLayerPath',
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+    
+    var predefinedMapLegendSetStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getMapLegendSetsByType' + GLOBALS.config.type,
+        baseParams: {type: GLOBALS.config.map_legend_type_predefined},
+        root: 'mapLegendSets',
+        fields: ['id', 'name'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+    
+    GLOBALS.stores = {
+        mapView: mapViewStore,
+        indicatorGroup: indicatorGroupStore,
+        indicator: indicatorStore,
+        dataElementGroup: dataElementGroupStore,
+        dataElement: dataElementStore,
+        periodType: periodTypeStore,
+        period: periodStore,
+        map: mapStore,
+        predefinedMapLegendSet: predefinedMapLegendSetStore
+    };
 			
 	/* Section: mapview */
-	var viewStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapViews'+GLOBALS.config.type,root:'mapViews',fields:['id','name'],id:'id',sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
-	var viewNameTextField=new Ext.form.TextField({id:'viewname_tf',emptytext:'',width:GLOBALS.config.combo_width,hideLabel:true,autoCreate:{tag:'input',type:'text',size:'20',autocomplete:'off', maxlength:'35'}
-});
-	var viewComboBox=new Ext.form.ComboBox({id:'view_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:viewStore});
-	var view2ComboBox=new Ext.form.ComboBox({id:'view2_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:viewStore});
+	var viewNameTextField=new Ext.form.TextField({id:'viewname_tf',emptytext:'',width:GLOBALS.config.combo_width,hideLabel:true,autoCreate:{tag:'input',type:'text',size:'20',autocomplete:'off', maxlength:'35'}});
+	var deleteMapViewComboBox=new Ext.form.ComboBox({id:'view_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:GLOBALS.stores.mapView});
+	var dashboardMapViewComboBox=new Ext.form.ComboBox({id:'view2_cb',isFormField:true,hideLabel:true,typeAhead:true,editable:false,valueField:'id',displayField:'name',mode:'remote',forceSelection:true,triggerAction:'all',emptyText:GLOBALS.config.emptytext,selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:GLOBALS.stores.mapView});
     
     var newViewPanel = new Ext.form.FormPanel({
         id: 'newview_p',
 		bodyStyle: 'border:0px solid #fff',
         items:
         [
-            { html: '<div class="window-info">'+i18n_saving_current_thematic_map_selection+'</div>' },
-            { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
+            {html: '<div class="window-info">' + i18n_saving_current_thematic_map_selection + '</div>'},
+            {html: '<div class="window-field-label-first">' + i18n_display_name + '</div>'},
 			viewNameTextField,
 			{
 				xtype: 'button',
@@ -145,57 +296,45 @@ Ext.onReady( function() {
                             return;
                         }
                         formValues = proportionalSymbol.getFormValues();
-                    }					
+                    }
                     
-					Ext.Ajax.request({
-						url: GLOBALS.config.path_mapping + 'getAllMapViews' + GLOBALS.config.type,
-						method: 'GET',
-						success: function(r) {
-							var mapViews = Ext.util.JSON.decode(r.responseText).mapViews;
-							
-							for (var i = 0; i < mapViews.length; i++) {
-								if (mapViews[i].name == vn) {
-									Ext.message.msg(false, i18n_there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>');
-									return;
-								}
-							}
-					
-							Ext.Ajax.request({
-								url: GLOBALS.config.path_mapping + 'addOrUpdateMapView' + GLOBALS.config.type,
-								method: 'POST',
-								params: {
-                                    name: vn,
-                                    mapValueType: formValues.mapValueType,
-                                    indicatorGroupId: formValues.indicatorGroupId,
-                                    indicatorId: formValues.indicatorId,
-                                    dataElementGroupId: formValues.dataElementGroupId,
-                                    dataElementId: formValues.dataElementId,
-                                    periodTypeId: formValues.periodTypeId,
-                                    periodId: formValues.periodId,
-                                    startDate: formValues.startDate,
-                                    endDate: formValues.endDate,
-                                    mapSource:formValues.mapSource,
-                                    mapLegendType: formValues.mapLegendType,
-                                    method: formValues.method,
-                                    classes: formValues.classes,
-                                    bounds: formValues.bounds,
-                                    colorLow: formValues.colorLow,
-                                    colorHigh: formValues.colorHigh,
-                                    mapLegendSetId: formValues.mapLegendSetId,
-                                    longitude: formValues.longitude,
-                                    latitude: formValues.latitude,
-                                    zoom: formValues.zoom
-                                },
-								success: function(r) {
-									Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
-									Ext.getCmp('view_cb').getStore().load();
-									Ext.getCmp('mapview_cb').getStore().load();
-                                    Ext.getCmp('mapview_cb2').getStore().load();
-									Ext.getCmp('viewname_tf').reset();
-								}
-							});
-						}
-					});
+                    if (GLOBALS.stores.mapView.find('name', vn) !== -1) {
+                        Ext.message.msg(false, i18n_there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>');
+                        return;
+                    }
+                    
+                    Ext.Ajax.request({
+                        url: GLOBALS.config.path_mapping + 'addOrUpdateMapView' + GLOBALS.config.type,
+                        method: 'POST',
+                        params: {
+                            name: vn,
+                            mapValueType: formValues.mapValueType,
+                            indicatorGroupId: formValues.indicatorGroupId,
+                            indicatorId: formValues.indicatorId,
+                            dataElementGroupId: formValues.dataElementGroupId,
+                            dataElementId: formValues.dataElementId,
+                            periodTypeId: formValues.periodTypeId,
+                            periodId: formValues.periodId,
+                            startDate: formValues.startDate,
+                            endDate: formValues.endDate,
+                            mapSource:formValues.mapSource,
+                            mapLegendType: formValues.mapLegendType,
+                            method: formValues.method,
+                            classes: formValues.classes,
+                            bounds: formValues.bounds,
+                            colorLow: formValues.colorLow,
+                            colorHigh: formValues.colorHigh,
+                            mapLegendSetId: formValues.mapLegendSetId,
+                            longitude: formValues.longitude,
+                            latitude: formValues.latitude,
+                            zoom: formValues.zoom
+                        },
+                        success: function(r) {
+                            Ext.message.msg(true, 'The view <span class="x-msg-hl">' + vn + '</span> ' + i18n_was_registered);
+                            GLOBALS.stores.mapView.load();
+                            Ext.getCmp('viewname_tf').reset();
+                        }
+                    });
 				}
 			}
         ]
@@ -206,8 +345,8 @@ Ext.onReady( function() {
 		bodyStyle: 'border:0px solid #fff',
         items:
         [   
-            { html: '<div class="window-field-label-first">'+i18n_view+'</div>' },
-			viewComboBox,
+            { html: '<div class="window-field-label-first">' + i18n_view + '</div>' },
+			deleteMapViewComboBox,
 			{
 				xtype: 'button',
                 id: 'deleteview_b',
@@ -222,19 +361,21 @@ Ext.onReady( function() {
 						Ext.message.msg(false, i18n_please_select_a_map_view);
 						return;
 					}
-					var name = Ext.getCmp('view_cb').getStore().getById(v).get('name');				
+                    
+					var name = GLOBALS.stores.mapView.getById(v).get('name');				
 					
 					Ext.Ajax.request({
 						url: GLOBALS.config.path_mapping + 'deleteMapView' + GLOBALS.config.type,
 						method: 'POST',
 						params: {id:v},
 						success: function(r) {
-							Ext.message.msg(true, 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted );
-							Ext.getCmp('view_cb').getStore().load();
-							Ext.getCmp('view_cb').clearValue();
-							Ext.getCmp('mapview_cb').getStore().load();
+							Ext.message.msg(true, 'The map view <span class="x-msg-hl">' + name + '</span> '+ i18n_was_deleted);
+                            GLOBALS.stores.mapView.load();
                             if (v == Ext.getCmp('mapview_cb').getValue()) {
                                 Ext.getCmp('mapview_cb').clearValue();
+                            }
+                            if (v == Ext.getCmp('mapview_cb2').getValue()) {
+                                Ext.getCmp('mapview_cb2').clearValue();
                             }
 						}
 					});
@@ -249,7 +390,7 @@ Ext.onReady( function() {
         items:
         [   
             { html: '<div class="window-field-label-first">'+i18n_view+'</div>' },
-			view2ComboBox,
+			dashboardMapViewComboBox,
 			{
 				xtype: 'button',
                 id: 'dashboardview_b',
@@ -258,24 +399,20 @@ Ext.onReady( function() {
 				text: 'Add to DHIS dashboard',
 				cls: 'window-button',
 				handler: function() {
-					var v2 = Ext.getCmp('view2_cb').getValue();
-					var nv = Ext.getCmp('view2_cb').getRawValue();
+					var v = Ext.getCmp('view2_cb').getValue();
+					var rv = Ext.getCmp('view2_cb').getRawValue();
 					
-					if (!v2) {
-						Ext.message.msg(false, i18n_please_select_a_map_view );
+					if (!v) {
+						Ext.message.msg(false, i18n_please_select_a_map_view);
 						return;
 					}
 					
 					Ext.Ajax.request({
 						url: GLOBALS.config.path_mapping + 'addMapViewToDashboard' + GLOBALS.config.type,
 						method: 'POST',
-						params: {id:v2},
+						params: {id:v},
 						success: function(r) {
-							Ext.message.msg(true, i18n_the_view + ' <span class="x-msg-hl">' + nv + '</span> ' + i18n_was_added_to_dashboard );
-							
-							Ext.getCmp('view_cb').getStore().load();
-							Ext.getCmp('view_cb').clearValue();
-							Ext.getCmp('mapview_cb').getStore().load();
+							Ext.message.msg(true, i18n_the_view + ' <span class="x-msg-hl">' + rv + '</span> ' + i18n_was_added_to_dashboard);
 						}
 					});
 				}
@@ -285,7 +422,7 @@ Ext.onReady( function() {
     
 	var viewWindow = new Ext.Window({
         id: 'view_w',
-        title: '<span id="window-GLOBALS.config.favorites-title">'+i18n_favorite+'</span>',
+        title: '<span id="window-favorites-title">' + i18n_favorite + '</span>',
 		layout: 'fit',
         closeAction: 'hide',
 		width: 234,
@@ -315,28 +452,19 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">'+i18n_new+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_new + '</span>',
                         id: 'view0',
-                        items:
-                        [
-							newViewPanel
-                        ]
+                        items: [newViewPanel]
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_delete + '</span>',
                         id: 'view1',
-                        items:
-                        [
-                            deleteViewPanel
-                        ]
+                        items: [deleteViewPanel]
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_add_to_dashboard+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_add_to_dashboard + '</span>',
                         id: 'view2',
-                        items:
-                        [
-                            dashboardViewPanel
-                        ]
+                        items: [dashboardViewPanel]
                     }
                 ]
             }
@@ -407,7 +535,7 @@ Ext.onReady( function() {
                         lcb = Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.config.map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb').getValue() ? true : false;
                     }
                     else if (ACTIVEPANEL == GLOBALS.config.thematicMap2) {
-                        Ext.message.msg(false,'Please use <span class="x-msg-hl">polygon layer</span> for printing');
+                        Ext.message.msg(false, 'Please use <span class="x-msg-hl">polygon layer</span> for printing');
                         return;
                     }
                     else {
@@ -416,7 +544,6 @@ Ext.onReady( function() {
                     }
                     
                     if (vcb && dcb && mcb && lcb) {
-                    	
 						var svgElement = document.getElementsByTagName('svg')[0];
 						var parentSvgElement = svgElement.parentNode;
 						

@@ -807,7 +807,7 @@ function datePickerjQuery( jQueryString )
  * Create jQuery datepicker for input text with id * * 
  * @param id the id of input filed which you want enter date *
  */
-function datePickerValid( id )
+function datePickerValid( id, today )
 {
 	jQuery("#" + id).datepicker(
 	{
@@ -823,8 +823,12 @@ function datePickerValid( id )
 		constrainInput: true
 	});
 	
-	s = jQuery("#" + id );		
-	if( s.val()=='' ) s.val( getCurrentDate() );		
+	if( today == undefined ) today = false;
+	
+	if( today ){
+		s = jQuery("#" + id );		
+		if( s.val()=='' ) s.val( getCurrentDate() );		
+	}
 }
 
 
