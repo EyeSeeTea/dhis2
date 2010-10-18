@@ -822,6 +822,9 @@ function datePickerValid( id, today )
 		maxDate: '+0d +0w',
 		constrainInput: true
 	});
+	
+	if( today == undefined ) today = false;
+	
 	if( today ){
 		s = jQuery("#" + id );		
 		if( s.val()=='' ) s.val( getCurrentDate() );		
