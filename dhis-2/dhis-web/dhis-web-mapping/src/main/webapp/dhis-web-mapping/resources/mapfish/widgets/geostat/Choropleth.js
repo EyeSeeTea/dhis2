@@ -106,21 +106,20 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
             Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
             
-            function mapViewStoreCallback(scope) {
-                Ext.getCmp('mapview_cb').setValue(scope.mapView.id);
+            function mapViewStoreCallback() {
+                Ext.getCmp('mapview_cb').setValue(this.mapView.id);
+                this.valueType = this.mapView.mapValueType;
+                Ext.getCmp('mapvaluetype_cb').setValue(this.valueType);
 
-                scope.valueType = scope.mapView.mapValueType;
-                Ext.getCmp('mapvaluetype_cb').setValue(scope.valueType);
-                
-                scope.setMapView();
+                this.setMapView();
             }
             
             if (this.stores.mapView.isLoaded) {
-                mapViewStoreCallback(this);
+                mapViewStoreCallback.call(this);
             }                    
             else {
                 this.stores.mapView.load({scope: this, callback: function() {
-                    mapViewStoreCallback(this);
+                    mapViewStoreCallback.call(this);
                 }});
             }
         }
@@ -1095,6 +1094,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     prepareMapViewValueType: function() {
         var obj = {};
+
         if (this.valueType == GLOBALS.config.map_value_type_indicator) {
             Ext.getCmp('indicatorgroup_cb').showField();
             Ext.getCmp('indicator_cb').showField();
@@ -1211,7 +1211,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     setMapView: function() {
-        obj = this.prepareMapViewValueType();
+        var obj = this.prepareMapViewValueType();
         
         function valueTypeGroupStoreCallback(scope) {
             obj.components.valueTypeGroup.setValue(scope.mapView[obj.mapView.valueTypeGroup]);
@@ -1250,7 +1250,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 scope.setMapViewLegend();
             }});
         }
-        
+
         if (obj.stores.valueTypeGroup.isLoaded) {
             valueTypeGroupStoreCallback(this);
         }
