@@ -80,7 +80,12 @@ Ext.onReady( function() {
         success: function(r) {
             var mv = Ext.util.JSON.decode(r.responseText).mapView[0];
             if (PARAMETER) {
-                PARAMETER.mapView = mv;
+                if (!mv.id) {
+                    PARAMETER = false;
+                }
+                else {
+                    PARAMETER.mapView = mv;
+                }
             }
             
             Ext.Ajax.request({
@@ -2262,52 +2267,38 @@ Ext.onReady( function() {
                                                 Ext.getCmp('map_cb2').clearValue();
 												Ext.getCmp('mapview_cb').clearValue();
                                                 
-												if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
-													Ext.getCmp('register_chb').enable();
-													
-													if (Ext.getCmp('register_chb').checked) {
-														mapping.show();
-														shapefilePanel.show();
-													}
-                                                    
-                                                    choropleth.prepareMapViewMap();
-                                                    Ext.getCmp('map_cb2').showField();
-                                                    Ext.getCmp('map_tf2').hideField();
-                                                    
-                                                    if (MAPDATETYPE == GLOBALS.config.map_date_type_start_end) {
-                                                        MAPDATETYPE = GLOBALS.config.map_date_type_fixed;
-                                                        Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
-                                                        choropleth.prepareMapViewDateType();
-                                                    }
-												}
-												else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
-													Ext.getCmp('register_chb').enable();
-													
-													if (Ext.getCmp('register_chb').checked) {
-														mapping.show();
-														shapefilePanel.show();
-													}
-                                                    
-                                                    choropleth.prepareMapViewMap();
-                                                    Ext.getCmp('map_cb2').showField();
-                                                    Ext.getCmp('map_tf2').hideField();
-                                                    
-                                                    if (MAPDATETYPE == GLOBALS.config.map_date_type_start_end) {
-                                                        MAPDATETYPE = GLOBALS.config.map_date_type_fixed;
-                                                        Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
-                                                        choropleth.prepareMapViewDateType();
-                                                    }
-												}
-												else if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
-													Ext.getCmp('register_chb').disable();
-													
+                                                if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
+													Ext.getCmp('register_chb').disable();													
 													mapping.hide();
 													shapefilePanel.hide();
-                                                    
-                                                    choropleth.prepareMapViewMap();
-                                                    Ext.getCmp('map_cb2').hideField();
-                                                    Ext.getCmp('map_tf2').showField();
 												}
+                                                else {
+                                                    Ext.getCmp('register_chb').enable();
+													
+													if (Ext.getCmp('register_chb').checked) {
+														mapping.show();
+														shapefilePanel.show();
+													}
+                                                    
+                                                    if (MAPDATETYPE == GLOBALS.config.map_date_type_start_end) {
+                                                        MAPDATETYPE = GLOBALS.config.map_date_type_fixed;
+                                                        Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
+                                                        choropleth.prepareMapViewDateType();
+                                                        proportionalSymbol.prepareMapViewDateType();
+                                                    }
+										
+                                                    if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
+                                                        mapLayerMapSourceFileComboBox.show();
+                                                        mapLayerPathWMSOverlayTextField.hide();
+                                                    }
+                                                    else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
+                                                        mapLayerMapSourceFileComboBox.hide();
+                                                        mapLayerPathWMSOverlayTextField.show();
+                                                    }
+												}
+                                                
+                                                choropleth.prepareMapViewMap();
+                                                proportionalSymbol.prepareMapViewMap();
                                                 
 												if (MAP.layers.length > 2) {
 													for (var i = 0; i < MAP.layers.length; i++) {
@@ -2320,15 +2311,6 @@ Ext.onReady( function() {
 												Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_is_saved_as_map_source);
 											}
 										});
-										
-										if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
-											mapLayerMapSourceFileComboBox.show();
-											mapLayerPathWMSOverlayTextField.hide();
-										}
-										else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
-											mapLayerMapSourceFileComboBox.hide();
-											mapLayerPathWMSOverlayTextField.show();
-										}
 									}
 								}
 							}
@@ -2403,27 +2385,8 @@ Ext.onReady( function() {
                                             params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
                                             success: function() {
                                                 Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_saved_as_date_type);
-                                                
-                                                if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
-                                                    Ext.getCmp('periodtype_cb').showField();
-                                                    Ext.getCmp('periodtype_cb2').showField();
-                                                    Ext.getCmp('period_cb').showField();
-                                                    Ext.getCmp('period_cb2').showField();
-                                                    Ext.getCmp('startdate_df').hideField();
-                                                    Ext.getCmp('startdate_df2').hideField();
-                                                    Ext.getCmp('enddate_df').hideField();
-                                                    Ext.getCmp('enddate_df2').hideField();
-                                                }
-                                                else if (MAPDATETYPE == GLOBALS.config.map_date_type_start_end) {
-                                                    Ext.getCmp('periodtype_cb').hideField();
-                                                    Ext.getCmp('periodtype_cb2').hideField();
-                                                    Ext.getCmp('period_cb').hideField();
-                                                    Ext.getCmp('period_cb2').hideField();
-                                                    Ext.getCmp('startdate_df').showField();
-                                                    Ext.getCmp('startdate_df2').showField();
-                                                    Ext.getCmp('enddate_df').showField();
-                                                    Ext.getCmp('enddate_df2').showField();
-                                                }
+                                                choropleth.prepareMapViewDateType();
+                                                proportionalSymbol.prepareMapViewDateType();
                                             }
                                         });
                                     }
@@ -3366,17 +3329,17 @@ Ext.onReady( function() {
         separator: '<br/><span style="color:#666;">y: &nbsp;</span>'
     }));
     
-    var vmap0 = new OpenLayers.Layer.WMS(
-        "World",
-        "http://labs.metacarta.com/wms/vmap0", 
-        {layers: "basic"}
-    );
-    
     MAP.addControl(new OpenLayers.Control.OverviewMap({
         div: $('overviewmap'),
         size: new OpenLayers.Size(188, 97),
         minRectSize: 0,
-        layers: [vmap0]
+        layers: [
+            new OpenLayers.Layer.WMS(
+                "World",
+                "http://labs.metacarta.com/wms/vmap0", 
+                {layers: "basic"}
+            )
+        ]
     }));
     
     MAP.addControl(new OpenLayers.Control.ZoomBox());
@@ -3410,55 +3373,22 @@ Ext.onReady( function() {
             }
         }
     });
-        
+    
     Ext.getCmp('mapsource_cb').setValue(MAPSOURCE);
     Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
     
-    Ext.getCmp('maplegendset_cb').hideField();
-    Ext.getCmp('maplegendset_cb2').hideField();
-	Ext.getCmp('bounds_tf').hideField();
-    Ext.getCmp('bounds_tf2').hideField();
-	Ext.getCmp('dataelementgroup_cb').hideField();
-    Ext.getCmp('dataelementgroup_cb2').hideField();
-	Ext.getCmp('dataelement_cb').hideField();
-    Ext.getCmp('dataelement_cb2').hideField();
+    choropleth.prepareMapViewValueType();
+    proportionalSymbol.prepareMapViewValueType();
     
-    if (MAPSOURCE == GLOBALS.config.map_source_type_database) {
-        Ext.getCmp('map_cb').hideField();
-        Ext.getCmp('map_cb2').hideField();
-        Ext.getCmp('map_tf').showField();
-        Ext.getCmp('map_tf2').showField();
-    }
-    else {
-        Ext.getCmp('map_cb').showField()
-        Ext.getCmp('map_cb2').showField();
-        Ext.getCmp('map_tf').hideField();
-        Ext.getCmp('map_tf2').hideField();
-    }
+    choropleth.prepareMapViewDateType();
+    proportionalSymbol.prepareMapViewDateType();
     
-    if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
-        Ext.getCmp('periodtype_cb').showField();
-        Ext.getCmp('periodtype_cb2').showField();
-        Ext.getCmp('period_cb').showField();
-        Ext.getCmp('period_cb2').showField();
-        Ext.getCmp('startdate_df').hideField();
-        Ext.getCmp('startdate_df2').hideField();
-        Ext.getCmp('enddate_df').hideField();
-        Ext.getCmp('enddate_df2').hideField();
-    }
-    else {
-        Ext.getCmp('periodtype_cb').hideField();
-        Ext.getCmp('periodtype_cb2').hideField();
-        Ext.getCmp('period_cb').hideField();
-        Ext.getCmp('period_cb2').hideField();
-        Ext.getCmp('startdate_df').showField();
-        Ext.getCmp('startdate_df2').showField();
-        Ext.getCmp('enddate_df').showField();
-        Ext.getCmp('enddate_df2').showField();
-    }
+    choropleth.prepareMapViewLegend();
+    proportionalSymbol.prepareMapViewLegend();
     
-    Ext.get('loading').fadeOut({remove: true});
-	
+    choropleth.prepareMapViewMap();
+    proportionalSymbol.prepareMapViewMap();
+    
 	}});
 	}});
 	}});
