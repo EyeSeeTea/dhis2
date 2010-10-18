@@ -450,18 +450,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     this.legend.type = GLOBALS.config.map_legend_type_predefined;
                                     this.prepareMapViewLegend();
                                     
-                                    function load(scope) {
+                                    function load() {
                                         Ext.getCmp('maplegendset_cb').setValue(mapLegendSet.id);
-                                        scope.applyPredefinedLegend();
+                                        this.applyPredefinedLegend();
                                     }
                                     
                                     if (!this.stores.predefinedMapLegendSet.isLoaded) {
                                         this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                                            load(this);
+                                            load.call(this);
                                         }});
                                     }
                                     else {
-                                        load(this);
+                                        load.call(this);
                                     }
                                 }
                                 else {
@@ -538,18 +538,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     this.legend.type = GLOBALS.config.map_legend_type_predefined;
                                     this.prepareMapViewLegend();
                                     
-                                    function load(scope) {
+                                    function load() {
                                         Ext.getCmp('maplegendset_cb').setValue(mapLegendSet.id);
-                                        scope.applyPredefinedLegend();
+                                        this.applyPredefinedLegend();
                                     }
                                     
                                     if (!this.stores.predefinedMapLegendSet.isLoaded) {
                                         this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                                            load(this);
+                                            load.call(this);
                                         }});
                                     }
                                     else {
-                                        load(this);
+                                        load.call(this);
                                     }
                                 }
                                 else {
@@ -711,7 +711,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'focus': {
                     scope: this,
                     fn: function(tf) {
-                        function showTree(scope) {
+                        function showTree() {
                             var value, rawvalue;
                             var w = new Ext.Window({
                                 id: 'orgunit_w',
@@ -770,7 +770,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                 xtype: 'button',
                                                 text: 'Select',
                                                 width: 133,
-                                                scope: scope,
+                                                scope: this,
                                                 handler: function() {
                                                     if (tf.getValue() && tf.getValue() != this.parentId) {
                                                         this.loadFromDatabase(tf.value);
@@ -798,7 +798,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         }
 
                         if (TOPLEVELUNIT) {
-                            showTree(this);
+                            showTree.call(this);
                         }
                         else {
                             Ext.Ajax.request({
@@ -813,7 +813,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         name: rootNode.name,
                                         hasChildrenWithCoordinates: rootNode.hasChildrenWithCoordinates
                                     };
-                                    showTree(this);
+                                    showTree.call(this);
                                 }
                             });
                         }
@@ -1213,50 +1213,50 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     setMapView: function() {
         var obj = this.prepareMapViewValueType();
         
-        function valueTypeGroupStoreCallback(scope) {
-            obj.components.valueTypeGroup.setValue(scope.mapView[obj.mapView.valueTypeGroup]);
+        function valueTypeGroupStoreCallback() {
+            obj.components.valueTypeGroup.setValue(this.mapView[obj.mapView.valueTypeGroup]);
             
             obj.stores.valueType.setBaseParam(obj.mapView.valueTypeGroup, obj.components.valueTypeGroup.getValue());
-            obj.stores.valueType.load({scope: scope, callback: function() {
-                obj.components.valueType.setValue(scope.mapView[obj.mapView.valueType]);
+            obj.stores.valueType.load({scope: this, callback: function() {
+                obj.components.valueType.setValue(this.mapView[obj.mapView.valueType]);
                 
-                obj = scope.prepareMapViewDateType();
+                obj = this.prepareMapViewDateType();
                 if (MAPDATETYPE == GLOBALS.config.map_date_type_fixed) {
                     if (obj.stores.c1.isLoaded) {
-                        dateTypeGroupStoreCallback(scope);
+                        dateTypeGroupStoreCallback.call(this);
                     }
                     else {
-                        obj.stores.c1.load({scope: scope, callback: function() {
-                            dateTypeGroupStoreCallback(scope);
+                        obj.stores.c1.load({scope: this, callback: function() {
+                            dateTypeGroupStoreCallback.call(this);
                         }});
                     }
                 }
                 else if (MAPDATETYPE == GLOBALS.config.map_date_type_start_end) {
-                    obj.components.c1.setValue(new Date(scope.mapView[obj.mapView.c1]));
-                    obj.components.c2.setValue(new Date(scope.mapView[obj.mapView.c2]));
+                    obj.components.c1.setValue(new Date(this.mapView[obj.mapView.c1]));
+                    obj.components.c2.setValue(new Date(this.mapView[obj.mapView.c2]));
                     
-                    scope.setMapViewLegend();
+                    this.setMapViewLegend();
                 }                
             }});
         }
         
-        function dateTypeGroupStoreCallback(scope) {
-            obj.components.c1.setValue(scope.mapView[obj.mapView.c1]);
+        function dateTypeGroupStoreCallback() {
+            obj.components.c1.setValue(this.mapView[obj.mapView.c1]);
             
-            obj.stores.c2.setBaseParam('name', scope.mapView[obj.mapView.c1]);
-            obj.stores.c2.load({scope: scope, callback: function() {
-                obj.components.c2.setValue(scope.mapView[obj.mapView.c2]);
+            obj.stores.c2.setBaseParam('name', this.mapView[obj.mapView.c1]);
+            obj.stores.c2.load({scope: this, callback: function() {
+                obj.components.c2.setValue(this.mapView[obj.mapView.c2]);
                 
-                scope.setMapViewLegend();
+                this.setMapViewLegend();
             }});
         }
 
         if (obj.stores.valueTypeGroup.isLoaded) {
-            valueTypeGroupStoreCallback(this);
+            valueTypeGroupStoreCallback.call(this);
         }
         else {
             obj.stores.valueTypeGroup.load({scope: this, callback: function() {
-                valueTypeGroupStoreCallback(this);
+                valueTypeGroupStoreCallback.call(this);
             }});
         }
     },
@@ -1264,9 +1264,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     setMapViewLegend: function() {
         this.prepareMapViewLegend();
         
-        function predefinedMapLegendSetStoreCallback(scope) {
-            Ext.getCmp('maplegendset_cb').setValue(scope.mapView.mapLegendSetId);
-            scope.applyPredefinedLegend(true);
+        function predefinedMapLegendSetStoreCallback() {
+            Ext.getCmp('maplegendset_cb').setValue(this  .mapView.mapLegendSetId);
+            this.applyPredefinedLegend(true);
         }
         
         if (this.legend.type == GLOBALS.config.map_legend_type_automatic) {
@@ -1285,11 +1285,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         }
         else if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
             if (this.stores.isLoaded) {
-                predefinedMapLegendSetStoreCallback(this);
+                predefinedMapLegendSetStoreCallback.call(this);
             }
             else {
                 this.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                    predefinedMapLegendSetStoreCallback(this);
+                    predefinedMapLegendSetStoreCallback.call(this);
                 }});
             }
         }            
@@ -1348,8 +1348,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 	},
     
     loadFromDatabase: function(id, isDrillDown) {
+        function load() {
+            MASK.msg = i18n_loading_geojson;
+            MASK.show();
+            
+            this.parentId = id;
+            this.setUrl(GLOBALS.config.path_mapping + 'getGeoJson.action?parentId=' + this.parentId);
+        }
+        
         if (isDrillDown) {
-            load(this);
+            load.call(this);
         }
         else if (id != this.parentId || this.mapView) {
             if (!this.mapView) {
@@ -1361,15 +1369,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     return;
                 }
             }
-            load(this);
-        }
-            
-        function load(scope) {
-            MASK.msg = i18n_loading_geojson;
-            MASK.show();
-            
-            scope.parentId = id;
-            scope.setUrl(GLOBALS.config.path_mapping + 'getGeoJson.action?parentId=' + scope.parentId);
+            load.call(this);
         }
     },
     
@@ -1475,7 +1475,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             colorHigh: this.legend.type == GLOBALS.config.map_legend_type_automatic ? Ext.getCmp('colorB_cf').getValue() : '',
             mapLegendSetId: Ext.getCmp('maplegendset_cb').getValue() || '',
             longitude: MAP.getCenter().lon,
-            latitude: MAP.getCenter().lon,
+            latitude: MAP.getCenter().lat,
             zoom: parseInt(MAP.getZoom())
         };
     },
