@@ -246,7 +246,7 @@ Ext.onReady( function() {
     var mapStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getAllMaps' + GLOBALS.config.type,
         root: 'maps',
-        fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel'],
+        fields: ['id', 'name', 'mapLayerPath', 'organisationUnitLevel', 'nameColumn'],
         idProperty: 'mapLayerPath',
         autoLoad: false,
         isLoaded: false,
@@ -327,9 +327,8 @@ Ext.onReady( function() {
         }
     });
     
-	var nameColumnStore = new Ext.data.SimpleStore({
-        fields: ['name'],
-        data: []
+	var nameColumnStore = new Ext.data.ArrayStore({
+        fields: ['name']
     });
     
 	var wmsCapabilitiesStore = new GeoExt.data.WMSCapabilitiesStore({
@@ -1392,10 +1391,10 @@ Ext.onReady( function() {
     });
 
     /* Section: register maps */
-	var organisationUnitLevelComboBox=new Ext.form.ComboBox({id:'organisationunitlevel_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:GLOBALS.stores.organisationUnitLevel});
 	var newNameTextField=new Ext.form.TextField({id:'newname_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
-	var editNameTextField=new Ext.form.TextField({id:'editname_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
-	
+    var editNameTextField=new Ext.form.TextField({id:'editname_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
+	var organisationUnitLevelComboBox=new Ext.form.ComboBox({id:'organisationunitlevel_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:GLOBALS.stores.organisationUnitLevel});
+		
 	var mapLayerPathComboBox = new Ext.form.ComboBox({
         id: 'maplayerpath_cb',
 		typeAhead: true,
@@ -1452,8 +1451,8 @@ Ext.onReady( function() {
         }
     });
     
-    function mapPreview(grid, index) {
-        var record = grid.getStore().getAt(index);
+    function mapPreview(grid, i) {
+        var record = grid.getStore().getAt(i);
         var layer = record.get('layer').clone();
         
         var wmsPreviewWindow = new Ext.Window({
@@ -1481,14 +1480,6 @@ Ext.onReady( function() {
 			id: 'wmswindow_sb',
 			items:
 			[
-				/* {
-					 xtype: 'button',
-					 id: 'previewwms_b',
-					 text: 'Preview',
-					 handler: function() {
-						
-					 }
-				 },*/
 				{
 					xtype: 'button',
 					id: 'selectwms_b',
@@ -1544,13 +1535,13 @@ Ext.onReady( function() {
         minListWidth: GLOBALS.config.combo_width,
         triggerAction: 'all',
         mode: 'local',
-        store: nameColumnStore,
+        store: GLOBALS.stores.nameColumn,
 		listeners: {
 			'focus': {
 				fn: function() {
 					var mlp = Ext.getCmp('maplayerpathwms_tf').getValue();
 					
-					if (mlp) {					
+					if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile && mlp) {
 						Ext.Ajax.request({
 							url: GLOBALS.config.path_geoserver + GLOBALS.config.wfs + mlp + GLOBALS.config.output,
 							method: 'POST',
@@ -1563,7 +1554,7 @@ Ext.onReady( function() {
 									data.push(new Array(nameList[i]));
 								}
 								
-								Ext.getCmp('newnamecolumn_cb').getStore().loadData(data, false);
+								GLOBALS.stores.nameColumn.loadData(data, false);
 							}
 						});
 					}
@@ -1572,7 +1563,7 @@ Ext.onReady( function() {
 		}				
 	});
 	
-	var editNameColumnComboBox=new Ext.form.ComboBox({id:'editnamecolumn_cb',editable:false,displayField:'name',valueField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,triggerAction:'all',mode:'local',store:nameColumnStore});
+	var editNameColumnComboBox=new Ext.form.ComboBox({id:'editnamecolumn_cb',editable:false,displayField:'name',valueField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,triggerAction:'all',mode:'local',store:GLOBALS.stores.nameColumn});
     
     var newMapButton = new Ext.Button({
         id: 'newmap_b',
@@ -1580,79 +1571,55 @@ Ext.onReady( function() {
 		cls: 'aa_med',
         handler: function()
         {
+            var ouli = Ext.getCmp('organisationunitlevel_cb').getValue();
+            var nn = Ext.getCmp('newname_tf').getValue();
+            var mlp = Ext.getCmp('maplayerpath_cb').getValue();
+            var mlpwms = Ext.getCmp('maplayerpathwms_tf').getValue();					
+            var nc = Ext.getCmp('newnamecolumn_cb').getValue();
+             
+            if (!nn || !ouli || !nc) {
+                Ext.message.msg(false, i18n_form_is_not_complete);
+                return;
+            }
+            else if (!mlp && !mlpwms) {
+                Ext.message.msg(false, i18n_form_is_not_complete);
+                return;
+            }
+            
+            if (GLOBALS.util.validateInputNameLength(nn) == false) {
+                Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
+                return;
+            }
+            
+            if (GLOBALS.stores.map.find('name', nn) !== -1) {
+                Ext.message.msg(false, i18n_map + ' <span class="x-msg-hl">' + nn + ' </span>' + i18n_already_exists);
+                return;
+            }
+            
+            if (GLOBALS.stores.map.find('mapLayerPath', mlp) !== -1) {
+                Ext.message.msg(false, i18n_the_source_file + ' <span class="x-msg-hl">' + mlp + '</span> ' + i18n_already_exists);
+                return;
+            }
+                            
+            var source = mlp || mlpwms;
+            
             Ext.Ajax.request({
-                url: GLOBALS.config.path_mapping + 'getOrganisationUnitsAtLevel' + GLOBALS.config.type,
+                url: GLOBALS.config.path_mapping + 'addOrUpdateMap' + GLOBALS.config.type,
                 method: 'POST',
-                params: {level:1},
+                params: {
+                    name: nn,
+                    mapLayerPath: source,
+                    organisationUnitLevelId: ouli,
+                    nameColumn: nc
+                },
                 success: function(r) {
-                    var oui = Ext.util.JSON.decode(r.responseText).organisationUnits[0].id;
-                    var ouli = Ext.getCmp('organisationunitlevel_cb').getValue();
-                    var nn = Ext.getCmp('newname_tf').getValue();
-                    var t = Ext.getCmp('type_cb').getValue();
-					var mlp = Ext.getCmp('maplayerpath_cb').getValue();
-					var mlpwms = Ext.getCmp('maplayerpathwms_tf').getValue();					
-                    var nc = Ext.getCmp('newnamecolumn_cb').getValue();
-                     
-                    if (!nn || !oui || !ouli || !nc) {
-						Ext.message.msg(false, i18n_form_is_not_complete );
-						return;
-					}
-					else if (!mlp && !mlpwms) {
-						Ext.message.msg(false, i18n_form_is_not_complete );
-						return;
-                    }
+                    Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + nn + '</span> (<span class="x-msg-hl">' + source + '</span>) ' + i18n_was_registered);
                     
-                    if (GLOBALS.util.validateInputNameLength(nn) == false) {
-                        Ext.message.msg(false, '<span class="x-msg-hl">' + i18n_map + ' ' + i18n_name_can_not_longer_than_25 + '</span>');
-                        return;
-                    }
-
-                    Ext.Ajax.request({
-                        url: GLOBALS.config.path_mapping + 'getAllMaps' + GLOBALS.config.type,
-                        method: 'GET',
-                        success: function(r) {
-                            var maps = Ext.util.JSON.decode(r.responseText).maps;
-                            for (var i = 0; i < maps.length; i++) {
-                                if (maps[i].name == nn) {
-                                    Ext.message.msg(false, i18n_map + ' <span class="x-msg-hl">' + nn + ' </span>' + i18n_already_exists);
-                                    return;
-                                }
-                                else if (maps[i].mapLayerPath == mlp) {
-                                    Ext.message.msg(false, i18n_the_source_file+' <span class="x-msg-hl">' + mlp + '</span> ' + i18n_already_exists );
-                                    return;
-                                }
-                            }
-							
-							var source = mlp ? mlp : mlpwms;
-							
-                            Ext.Ajax.request({
-                                url: GLOBALS.config.path_mapping + 'addOrUpdateMap' + GLOBALS.config.type,
-                                method: 'POST',
-                                params: {
-                                    name: nn,
-                                    mapLayerPath: source,
-                                    type: t,
-                                    sourceType: MAPSOURCE,
-                                    organisationUnitId: oui,
-                                    organisationUnitLevelId: ouli,
-                                    nameColumn: nc
-                                },
-                                success: function(r) {
-                                    Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + nn + '</span> (<span class="x-msg-hl">' + source + '</span>) ' + i18n_was_registered);
-                                    
-                                    Ext.getCmp('map_cb').getStore().load();
-                                    Ext.getCmp('maps_cb').getStore().load();
-                                    Ext.getCmp('editmap_cb').getStore().load();
-                                    Ext.getCmp('deletemap_cb').getStore().load();
-                                    
-                                    Ext.getCmp('organisationunitlevel_cb').clearValue();
-                                    Ext.getCmp('newname_tf').reset();
-                                    Ext.getCmp('maplayerpath_cb').clearValue();
-                                    Ext.getCmp('newnamecolumn_cb').clearValue();                            
-                                }
-                            });
-                        }
-                    });
+                    GLOBALS.stores.map.load();
+                    Ext.getCmp('organisationunitlevel_cb').clearValue();
+                    Ext.getCmp('newname_tf').reset();
+                    Ext.getCmp('maplayerpath_cb').clearValue();
+                    Ext.getCmp('newnamecolumn_cb').clearValue();                            
                 }
             });
         }
@@ -1666,32 +1633,27 @@ Ext.onReady( function() {
             var en = Ext.getCmp('editname_tf').getValue();
             var em = Ext.getCmp('editmap_cb').getValue();
             var nc = Ext.getCmp('editnamecolumn_cb').getValue();
-			var t = Ext.getCmp('type_cb').getValue();
-			
+
             if (!en || !em || !nc) {
                 Ext.message.msg(false, i18n_form_is_not_complete );
                 return;
             }
             
             if (GLOBALS.util.validateInputNameLength(en) == false) {
-                Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
+                Ext.message.msg(false, i18n_name_can_not_longer_than_25);
                 return;
             }
            
             Ext.Ajax.request({
                 url: GLOBALS.config.path_mapping + 'addOrUpdateMap' + GLOBALS.config.type,
-                method: 'GET',
+                method: 'POST',
                 params: {name: en, mapLayerPath: em, nameColumn: nc},
                 success: function(r) {
                     Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + en + '</span> (<span class="x-msg-hl">' + em + '</span>)' + i18n_was_updated);
                     
-                    Ext.getCmp('map_cb').getStore().load();
-                    Ext.getCmp('maps_cb').getStore().load();
-                    Ext.getCmp('editmap_cb').getStore().load();
+                    GLOBALS.stores.map.load();
                     Ext.getCmp('editmap_cb').clearValue();
-                    Ext.getCmp('deletemap_cb').getStore().load();
                     Ext.getCmp('deletemap_cb').clearValue();
-                    
                     Ext.getCmp('editmap_cb').clearValue();
                     Ext.getCmp('editname_tf').reset();
                     Ext.getCmp('editnamecolumn_cb').clearValue();
@@ -1715,23 +1677,27 @@ Ext.onReady( function() {
             
             Ext.Ajax.request({
                 url: GLOBALS.config.path_mapping + 'deleteMap' + GLOBALS.config.type,
-                method: 'GET',
+                method: 'POST',
                 params: {mapLayerPath: mlp},
                 success: function(r) {
-                    Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + mn + '</span> (<span class="x-msg-hl">' + mlp + '</span>) ' + i18n_was_deleted );
+                    Ext.message.msg(true, i18n_map + ' <span class="x-msg-hl">' + mn + '</span> (<span class="x-msg-hl">' + mlp + '</span>) ' + i18n_was_deleted);
                     
-                    Ext.getCmp('map_cb').getStore().load();
-					
-					if (Ext.getCmp('map_cb').getValue() == mlp) {
+					if (mlp == Ext.getCmp('map_cb').getValue()) {
 						Ext.getCmp('map_cb').clearValue();
 					}
-					
-                    Ext.getCmp('maps_cb').getStore().load();
-                    Ext.getCmp('editmap_cb').getStore().load();
+                    if (mlp == Ext.getCmp('map_cb2').getValue()) {
+						Ext.getCmp('map_cb2').clearValue();
+					}
+                    if (mlp == Ext.getCmp('editmap_cb').getValue()) {
+                        Ext.getCmp('editmap_cb').clearValue();
+                        Ext.getCmp('editname_tf').reset();
+                        Ext.getCmp('editnamecolumn_cb').clearValue();
+                    }
+                    
+                    GLOBALS.stores.map.load();
+                    GLOBALS.stores.mapView.load();
                     Ext.getCmp('editmap_cb').clearValue();
-                    Ext.getCmp('deletemap_cb').getStore().load();
                     Ext.getCmp('deletemap_cb').clearValue();
-                    Ext.getCmp('mapview_cb').getStore().load();
                     Ext.getCmp('mapview_cb').clearValue();
                 }
             });
@@ -1755,57 +1721,38 @@ Ext.onReady( function() {
         store: GLOBALS.stores.map,
         listeners: {
             'select': {
-                fn: function() {
-                    var mlp = Ext.getCmp('editmap_cb').getValue();
+                fn: function(cb, record, i) {
+                    Ext.getCmp('editname_tf').setValue(record.data.name);
+                    Ext.getCmp('editnamecolumn_cb').setValue(record.data.nameColumn);
+					
+                    var url;
+                    var params = {};
+                    
+					if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
+                        url = GLOBALS.config.path_mapping + 'getGeoJsonFromFile' + GLOBALS.config.type;
+                        params.name = cb.getValue();
+                    }
+                    else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
+                        url = GLOBALS.config.path_geoserver + GLOBALS.config.wfs + mlp + GLOBALS.config.output;
+                    }
                     
                     Ext.Ajax.request({
-                        url: GLOBALS.config.path_mapping + 'getMapByMapLayerPath' + GLOBALS.config.type,
-                        method: 'GET',
-                        params: {mapLayerPath: mlp},
+                        url: url,
+                        method: 'POST',
+                        params: params,
                         success: function(r) {
-                            var map = Ext.util.JSON.decode( r.responseText ).map[0];
-                            Ext.getCmp('editname_tf').setValue(map.name);
-                            Ext.getCmp('editnamecolumn_cb').setValue(map.nameColumn);
+                            var file = Ext.util.JSON.decode(r.responseText);
+                            var keys = [];
+                            var data = [];
+
+                            var nameList = GLOBALS.util.getKeys(file.features[0].properties);
+                            for (var i = 0; i < nameList.length; i++) {
+                                data.push(new Array(nameList[i]));
+                            }
+                            
+                            GLOBALS.stores.nameColumn.loadData(data, false);
                         }
                     });
-					
-					if (MAPSOURCE == GLOBALS.config.map_source_type_geojson) {
-						Ext.Ajax.request({
-							url: GLOBALS.config.path_mapping + 'getGeoJsonFromFile' + GLOBALS.config.type,
-							method: 'POST',
-							params: {name: mlp},
-							success: function(r) {
-								var file = Ext.util.JSON.decode(r.responseText);
-								var keys = [];
-								var data = [];
-
-								var nameList = GLOBALS.util.getKeys(file.features[0].properties);
-								for (var i = 0; i < nameList.length; i++) {
-									data.push(new Array(nameList[i]));
-								}
-								
-								Ext.getCmp('editnamecolumn_cb').getStore().loadData(data, false);
-							}
-						});
-					}
-					else if (MAPSOURCE == GLOBALS.config.map_source_type_shapefile) {
-						Ext.Ajax.request({
-							url: GLOBALS.config.path_geoserver + GLOBALS.config.wfs + mlp + GLOBALS.config.output,
-							method: 'POST',
-							success: function(r) {
-								var file = Ext.util.JSON.decode(r.responseText);
-								var keys = [];
-								var data = [];
-
-								var nameList = GLOBALS.util.getKeys(file.features[0].properties);
-								for (var i = 0; i < nameList.length; i++) {
-									data.push(new Array(nameList[i]));
-								}
-								
-								Ext.getCmp('editnamecolumn_cb').getStore().loadData(data, false);
-							}
-						});
-					}
                 }
             }
         }
@@ -1833,32 +1780,32 @@ Ext.onReady( function() {
         id: 'newmap_p',
         items:
         [   
-            { html: '<div class="panel-fieldlabel-first">'+i18n_display_name+'</div>' }, newNameTextField,
-            { html: '<div class="panel-fieldlabel">'+i18n_organisation_unit_level+'</div>' }, organisationUnitLevelComboBox,
-			{ html: '<div class="panel-fieldlabel">'+i18n_map_source_file+'</div>' }, mapLayerPathComboBox, mapLayerPathWMSTextField,
-            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, newNameColumnComboBox
+            { html: '<div class="panel-fieldlabel-first">' + i18n_display_name + '</div>' }, newNameTextField,
+            { html: '<div class="panel-fieldlabel">' + i18n_organisation_unit_level + '</div>' }, organisationUnitLevelComboBox,
+			{ html: '<div class="panel-fieldlabel">' + i18n_map_source_file + '</div>' }, mapLayerPathComboBox, mapLayerPathWMSTextField,
+            { html: '<div class="panel-fieldlabel">' + i18n_name_column + '</div>' }, newNameColumnComboBox
         ]
     });
     
     var editMapPanel = new Ext.form.FormPanel({
         id: 'editmap_p',
         items: [
-            { html: '<div class="panel-fieldlabel-first">'+i18n_map+'</div>' }, editMapComboBox,
-            { html: '<div class="panel-fieldlabel">'+i18n_display_name+'</div>' }, editNameTextField,
-            { html: '<div class="panel-fieldlabel">'+i18n_name_column+'</div>' }, editNameColumnComboBox
+            { html: '<div class="panel-fieldlabel-first">' + i18n_map + '</div>' }, editMapComboBox,
+            { html: '<div class="panel-fieldlabel">' + i18n_display_name + '</div>' }, editNameTextField,
+            { html: '<div class="panel-fieldlabel">' + i18n_name_column + '</div>' }, editNameColumnComboBox
         ]
     });
     
     var deleteMapPanel = new Ext.form.FormPanel({
         id: 'deletemap_p',
         items: [
-            { html: '<div class="panel-fieldlabel-first">'+i18n_map+'</div>' }, deleteMapComboBox
+            { html: '<div class="panel-fieldlabel-first">' + i18n_map + '</div>' }, deleteMapComboBox
         ]
     });
 
-    shapefilePanel = new Ext.Panel({
+    var shapefilePanel = new Ext.Panel({
         id: 'shapefile_p',
-        title: '<span class="panel-title">'+i18n_register_maps+'</span>',
+        title: '<span class="panel-title">' + i18n_register_maps + '</span>',
         items:
         [
             {
@@ -1898,17 +1845,17 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">'+i18n_new+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_new + '</span>',
                         id: 'map0',
                         items: [newMapPanel]
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_edit+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_edit + '</span>',
                         id: 'map1',
                         items: [editMapPanel]
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_delete + '</span>',
                         id: 'map2',
                         items: [deleteMapPanel]
                     }
