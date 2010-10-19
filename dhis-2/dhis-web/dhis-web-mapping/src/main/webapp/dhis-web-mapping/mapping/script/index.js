@@ -833,7 +833,7 @@ Ext.onReady( function() {
                         params: {id: mlv},
                         success: function(r) {
                             Ext.message.msg(true, i18n_legend + ' <span class="x-msg-hl">' + mlrv + '</span> ' + i18n_was_deleted);
-                            GLOBALS.stores.predefinedMapLegendStore.load();
+                            GLOBALS.stores.predefinedMapLegend.load();
                             Ext.getCmp('predefinedmaplegend_cb').clearValue();
                         }
                     });
