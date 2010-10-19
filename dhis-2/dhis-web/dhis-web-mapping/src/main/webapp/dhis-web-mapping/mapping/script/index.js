@@ -285,6 +285,35 @@ Ext.onReady( function() {
         }
     });
     
+	var organisationUnitLevelStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getOrganisationUnitLevels' + GLOBALS.config.type,
+        id: 'id',
+        root: 'organisationUnitLevels',
+        fields: ['id', 'level', 'name'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+    
+	var organisationUnitsAtLevelStore = new Ext.data.JsonStore({
+        url: GLOBALS.config.path_mapping + 'getOrganisationUnitsAtLevel' + GLOBALS.config.type,
+        baseParams: {level: 1},
+        root: 'organisationUnits',
+        fields: ['id', 'name'],
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': function(store) {
+                store.isLoaded = true;
+            }
+        }
+    });
+    
     GLOBALS.stores = {
         mapView: mapViewStore,
         indicatorGroup: indicatorGroupStore,
@@ -297,7 +326,9 @@ Ext.onReady( function() {
         periodsByTypeStore: periodsByTypeStore,
         map: mapStore,
         predefinedMapLegend: predefinedMapLegendStore,
-        predefinedMapLegendSet: predefinedMapLegendSetStore
+        predefinedMapLegendSet: predefinedMapLegendSetStore,
+        organisationUnitLevel: organisationUnitLevelStore,
+        organisationUnitsAtLevel: organisationUnitsAtLevelStore
     };
 			
 	/* Section: mapview */
@@ -1313,13 +1344,11 @@ Ext.onReady( function() {
     });
 
     /* Section: register maps */
-	var organisationUnitLevelStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getOrganisationUnitLevels'+GLOBALS.config.type,id:'id',baseParams:{format:'json'},root:'organisationUnitLevels',fields:['id','level','name'],autoLoad:false});
-	var organisationUnitStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getOrganisationUnitsAtLevel'+GLOBALS.config.type,baseParams:{level:1,format:'json'},root:'organisationUnits',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
 	var wmsMapStore=new GeoExt.data.WMSCapabilitiesStore({url:GLOBALS.config.path_geoserver+GLOBALS.config.ows});
 	var geojsonStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getGeoJsonFiles'+GLOBALS.config.type,root:'files',fields:['name'],autoLoad:false});
 	var nameColumnStore=new Ext.data.SimpleStore({fields:['name'],data:[]});
-	var organisationUnitComboBox=new Ext.form.ComboBox({id:'organisationunit_cb',fieldLabel:'Organisation unit',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:organisationUnitStore});
-	var organisationUnitLevelComboBox=new Ext.form.ComboBox({id:'organisationunitlevel_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:organisationUnitLevelStore});
+	var organisationUnitComboBox=new Ext.form.ComboBox({id:'organisationunit_cb',fieldLabel:'Organisation unit',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:GLOBALS.stores.organisationUnitsAtLevel});
+	var organisationUnitLevelComboBox=new Ext.form.ComboBox({id:'organisationunitlevel_cb',typeAhead:true,editable:false,valueField:'id',displayField:'name',emptyText:GLOBALS.config.emptytext,hideLabel:true,mode:'remote',forceSelection:true,triggerAction:'all',selectOnFocus:true,width:GLOBALS.config.combo_width,minListWidth:GLOBALS.config.combo_width,store:GLOBALS.stores.organisationUnitLevel});
 	var newNameTextField=new Ext.form.TextField({id:'newname_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
 	var editNameTextField=new Ext.form.TextField({id:'editname_tf',emptyText:GLOBALS.config.emptytext,hideLabel:true,width:GLOBALS.config.combo_width});
 	
