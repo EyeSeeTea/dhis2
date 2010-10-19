@@ -132,7 +132,7 @@ Ext.onReady( function() {
         }
     });
     
-    var indicatorStore = new Ext.data.JsonStore({
+    var indicatorsByGroupStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getIndicatorsByIndicatorGroup' + GLOBALS.config.type,
         root: 'indicators',
         fields: ['id', 'name', 'shortName'],
@@ -154,7 +154,7 @@ Ext.onReady( function() {
         }
     });
     
-	var indicatorsStore = new Ext.data.JsonStore({
+	var indicatorStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getAllIndicators' + GLOBALS.config.type,
         root: 'indicators',
         fields: ['id','name','shortName'],
@@ -182,7 +182,7 @@ Ext.onReady( function() {
         }
     });
     
-    var dataElementStore = new Ext.data.JsonStore({
+    var dataElementsByGroupStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getDataElementsByDataElementGroup' + GLOBALS.config.type,
         root: 'dataElements',
         fields: ['id', 'name', 'shortName'],
@@ -203,7 +203,7 @@ Ext.onReady( function() {
         }
     });
     
-    var dataElementsStore = new Ext.data.JsonStore({
+    var dataElementStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getAllDataElements' + GLOBALS.config.type,
         root: 'dataElements',
         fields: ['id','name','shortName'],
@@ -230,7 +230,7 @@ Ext.onReady( function() {
         }
     });
         
-    var periodStore = new Ext.data.JsonStore({
+    var periodsByTypeStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getPeriodsByPeriodType' + GLOBALS.config.type,
         root: 'periods',
         fields: ['id', 'name'],
@@ -241,7 +241,7 @@ Ext.onReady( function() {
                 store.isLoaded = true;
             }
         }
-    });
+    });  
         
     var mapStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getAllMaps' + GLOBALS.config.type,
@@ -288,13 +288,13 @@ Ext.onReady( function() {
     GLOBALS.stores = {
         mapView: mapViewStore,
         indicatorGroup: indicatorGroupStore,
+        indicatorsByGroup: indicatorsByGroupStore,
         indicator: indicatorStore,
-        indicators: indicatorsStore,
         dataElementGroup: dataElementGroupStore,
+        dataElementsByGroup: dataElementsByGroupStore,
         dataElement: dataElementStore,
-        dataElements: dataElementsStore,
         periodType: periodTypeStore,
-        period: periodStore,
+        periodsByTypeStore: periodsByTypeStore,
         map: mapStore,
         predefinedMapLegend: predefinedMapLegendStore,
         predefinedMapLegendSet: predefinedMapLegendSetStore
@@ -999,7 +999,7 @@ Ext.onReady( function() {
                 }					
             }),
             { html: '<div class="window-field-label">' + i18n_indicator + '</div>' },
-			new Ext.ux.Multiselect({id:'predefinedmaplegendsetindicator_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:GLOBALS.stores.indicators}),
+			new Ext.ux.Multiselect({id:'predefinedmaplegendsetindicator_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:GLOBALS.stores.indicator}),
             {
                 xtype: 'button',
                 id: 'assignpredefinedmaplegendsetindicator_b',
@@ -1086,7 +1086,7 @@ Ext.onReady( function() {
                 }					
             }),
             { html: '<div class="window-field-label">' + i18n_dataelement + '</div>' },
-			new Ext.ux.Multiselect({id:'predefinedmaplegendsetdataelement_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:GLOBALS.stores.dataElements}),
+			new Ext.ux.Multiselect({id:'predefinedmaplegendsetdataelement_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:GLOBALS.stores.dataElement}),
             {
                 xtype: 'button',
                 id: 'assignpredefinedmaplegendsetdataelement_b',
@@ -1269,31 +1269,31 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">'+i18n_thematic_map+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_thematic_map + '</span>',
                         id: 'help0'
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_map+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_map + '</span>',
                         id: 'help1'
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_assignment+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_assignment + '</span>',
                         id: 'help2'
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_overlays+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_overlays + '</span>',
                         id: 'help3'
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_administrator+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_administrator + '</span>',
                         id: 'help4'
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_favorite+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_favorite + '</span>',
                         id: 'help5'
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_legend_set+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_legend_set + '</span>',
                         id: 'help6'
                     },
                     {
@@ -1315,7 +1315,6 @@ Ext.onReady( function() {
     /* Section: register maps */
 	var organisationUnitLevelStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getOrganisationUnitLevels'+GLOBALS.config.type,id:'id',baseParams:{format:'json'},root:'organisationUnitLevels',fields:['id','level','name'],autoLoad:false});
 	var organisationUnitStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getOrganisationUnitsAtLevel'+GLOBALS.config.type,baseParams:{level:1,format:'json'},root:'organisationUnits',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
-	var existingMapsStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMaps'+GLOBALS.config.type,baseParams:{format:'jsonmin'},root:'maps',fields:['id','name','mapLayerPath','organisationUnitLevel'],autoLoad:false});
 	var wmsMapStore=new GeoExt.data.WMSCapabilitiesStore({url:GLOBALS.config.path_geoserver+GLOBALS.config.ows});
 	var geojsonStore=new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getGeoJsonFiles'+GLOBALS.config.type,root:'files',fields:['name'],autoLoad:false});
 	var nameColumnStore=new Ext.data.SimpleStore({fields:['name'],data:[]});
@@ -1696,7 +1695,7 @@ Ext.onReady( function() {
         selectOnFocus: true,
         width: GLOBALS.config.combo_width,
         minListWidth: GLOBALS.config.combo_width,
-        store: existingMapsStore,
+        store: GLOBALS.stores.map,
         listeners: {
             'select': {
                 fn: function() {
@@ -1770,7 +1769,7 @@ Ext.onReady( function() {
         selectOnFocus: true,
         width: GLOBALS.config.combo_width,
         minListWidth: GLOBALS.config.combo_width,
-        store: existingMapsStore
+        store: GLOBALS.stores.map
     });
     
     var newMapPanel = new Ext.form.FormPanel({
@@ -3296,11 +3295,11 @@ Ext.onReady( function() {
                 if (!GLOBALS.stores.predefinedMapLegend.isLoaded) {
                     GLOBALS.stores.predefinedMapLegend.load();
                 }
-                if (!GLOBALS.stores.indicators.isLoaded) {
-                    GLOBALS.stores.indicators.load();
+                if (!GLOBALS.stores.indicator.isLoaded) {
+                    GLOBALS.stores.indicator.load();
                 }
-                if (!GLOBALS.stores.dataElements.isLoaded) {
-                    GLOBALS.stores.dataElements.load();
+                if (!GLOBALS.stores.dataElement.isLoaded) {
+                    GLOBALS.stores.dataElement.load();
                 }                
 			}
 		}

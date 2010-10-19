@@ -252,8 +252,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();						
 						Ext.getCmp('indicator_cb').clearValue();
-                        GLOBALS.stores.indicator.setBaseParam('indicatorGroupId', cb.getValue());
-                        GLOBALS.stores.indicator.load();
+                        GLOBALS.stores.indicatorsByGroup.setBaseParam('indicatorGroupId', cb.getValue());
+                        GLOBALS.stores.indicatorsByGroup.load();
                     }
                 }
             }
@@ -274,7 +274,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: GLOBALS.stores.indicator,
+            store: GLOBALS.stores.indicatorsByGroup,
             listeners: {
                 'select': {
                     scope: this,
@@ -340,8 +340,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();
                         Ext.getCmp('dataelement_cb').clearValue();
-						GLOBALS.stores.dataElement.setBaseParam('dataElementGroupId', cb.getValue());
-                        GLOBALS.stores.dataElement.load();
+						GLOBALS.stores.dataElementsByGroup.setBaseParam('dataElementGroupId', cb.getValue());
+                        GLOBALS.stores.dataElementsByGroup.load();
                     }
                 }
             }
@@ -362,7 +362,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: GLOBALS.stores.dataElement,
+            store: GLOBALS.stores.dataElementsByGroup,
             listeners: {
                 'select': {
                     scope: this,
@@ -428,8 +428,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();                        
                         Ext.getCmp('period_cb').clearValue();
-                        GLOBALS.stores.period.setBaseParam('name', cb.getValue());
-                        GLOBALS.stores.period.load();
+                        GLOBALS.stores.periodsByTypeStore.setBaseParam('name', cb.getValue());
+                        GLOBALS.stores.periodsByTypeStore.load();
                     }
                 }
             }
@@ -450,7 +450,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 			labelSeparator: GLOBALS.config.labelseparator,
             selectOnFocus: true,
             width: GLOBALS.config.combo_width,
-            store: GLOBALS.stores.period,
+            store: GLOBALS.stores.periodsByTypeStore,
             listeners: {
                 'select': {
                     scope: this,
@@ -948,7 +948,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             };
             obj.stores = {
                 valueTypeGroup: GLOBALS.stores.indicatorGroup,
-                valueType: GLOBALS.stores.indicator
+                valueType: GLOBALS.stores.indicatorsByGroup
             };
             obj.mapView = {
                 valueTypeGroup: 'indicatorGroupId',
@@ -966,7 +966,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             };
             obj.stores = {
                 valueTypeGroup: GLOBALS.stores.dataElementGroup,
-                valueType: GLOBALS.stores.dataElement
+                valueType: GLOBALS.stores.dataElementsByGroup
             };
             obj.mapView = {
                 valueTypeGroup: 'dataElementGroupId',
@@ -989,7 +989,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             };
             obj.stores = {
                 c1: GLOBALS.stores.periodType,
-                c2: GLOBALS.stores.period
+                c2: GLOBALS.stores.periodsByTypeStore
             };
             obj.mapView = {
                 c1: 'periodTypeId',
