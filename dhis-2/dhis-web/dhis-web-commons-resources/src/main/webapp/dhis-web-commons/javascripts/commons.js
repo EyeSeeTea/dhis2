@@ -1276,3 +1276,13 @@ function jumpToPage( baseLink )
     var currentPage = jQuery("#jumpToPage").val();
     window.location.href = baseLink +"pageSize=" + pageSize +"&currentPage=" +currentPage;
 }
+
+/**
+ * Used to export PDF file by the given type and
+ * the active items in table
+ */
+function exportPdfByType( type )
+{
+	var activeIds = getArrayIdOfActiveRows();
+	window.location.href = 'exportToPdf.action?type=' + type + activeIds;
+}
