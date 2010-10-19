@@ -292,7 +292,7 @@ Ext.onReady( function() {
         indicators: indicatorsStore,
         dataElementGroup: dataElementGroupStore,
         dataElement: dataElementStore,
-        dateElements: dataElementsStore,
+        dataElements: dataElementsStore,
         periodType: periodTypeStore,
         period: periodStore,
         map: mapStore,
@@ -726,13 +726,10 @@ Ext.onReady( function() {
 		]
 	});
 	
-	var exportImageWindow=new Ext.Window({id:'exportimage_w',title:'<span id="window-image-title">'+ i18n_export_map_as_image +'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:250,height:158,items:[{xtype:'panel',items:[exportImagePanel]}]});
-	var exportExcelWindow=new Ext.Window({id:'exportexcel_w',title:'<span id="window-excel-title">'+i18n_export_excel+'</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:260,height:157,items:[{xtype:'panel',items:[exportExcelPanel]}]});
+	var exportImageWindow=new Ext.Window({id:'exportimage_w',title:'<span id="window-image-title">' + i18n_export_map_as_image + '</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:250,height:158,items:[{xtype:'panel',items:[exportImagePanel]}]});
+	var exportExcelWindow=new Ext.Window({id:'exportexcel_w',title:'<span id="window-excel-title">' + i18n_export_excel + '</span>',layout:'fit',closeAction:'hide',defaults:{layout:'fit',bodyStyle:'padding:8px; border:0px'},width:260,height:157,items:[{xtype:'panel',items:[exportExcelPanel]}]});
 	
-	/* Section: predefined legend set */
-	// var predefinedMapLegendStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getAllMapLegends'+GLOBALS.config.type,root:'mapLegends',id:'id',fields:['id','name','startValue','endValue','color','displayString'],autoLoad:false,isLoaded:false,listeners:{'load':function(store){store.isLoaded=true;}}});
-	// var predefinedMapLegendSetStore = new Ext.data.JsonStore({url:GLOBALS.config.path_mapping+'getMapLegendSetsByType'+GLOBALS.config.type,baseParams:{type:GLOBALS.config.map_legend_type_predefined},root:'mapLegendSets',id:'id',fields:['id','name'],sortInfo:{field:'name',direction:'ASC'},autoLoad:false});
-
+	/* Section: predefined map legend set */
 	var newPredefinedMapLegendPanel = new Ext.form.FormPanel({
         id: 'newpredefinedmaplegend_p',
 		bodyStyle: 'border:0px solid #fff',
@@ -760,40 +757,31 @@ Ext.onReady( function() {
                     var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
 					
 					if (!mln || mlsv == "" || mlev == "" || !mlc) {
-                        Ext.message.msg(false, i18n_form_is_not_complete );
+                        Ext.message.msg(false, i18n_form_is_not_complete);
                         return;
                     }
                     
                     if (!GLOBALS.util.validateInputNameLength(mln)) {
-                        Ext.message.msg(false, i18n_name_can_not_longer_than_25 );
+                        Ext.message.msg(false, i18n_name_can_not_longer_than_25);
+                        return;
+                    }
+                    
+                    if (GLOBALS.stores.predefinedMapLegend.find('name', mln) !== -1) {
+                        Ext.message.msg(false, i18n_legend + '<span class="x-msg-hl">' + mln + '</span> ' + i18n_already_exists);
                         return;
                     }
                     
                     Ext.Ajax.request({
-                        url: GLOBALS.config.path_mapping + 'getAllMapLegends' + GLOBALS.config.type,
-                        method: 'GET',
-						success: function(r) {
-                            var mapLegends = Ext.util.JSON.decode(r.responseText).mapLegends;
-                            for (var i = 0; i < mapLegends.length; i++) {
-                                if (mln == mapLegends[i].name) {
-                                    Ext.message.msg(false, i18n_legend + '<span class="x-msg-hl">' + mln + '</span> ' + i18n_already_exists);
-                                    return;
-                                }
-                            }
-
-                            Ext.Ajax.request({
-                                url: GLOBALS.config.path_mapping + 'addOrUpdateMapLegend' + GLOBALS.config.type,
-                                method: 'POST',
-                                params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc},
-                                success: function(r) {
-                                    Ext.message.msg(true, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
-                                    Ext.getCmp('predefinedmaplegend_cb').getStore().load();
-                                    Ext.getCmp('predefinedmaplegendname_tf').reset();
-                                    Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
-                                    Ext.getCmp('predefinedmaplegendendvalue_tf').reset();
-                                    Ext.getCmp('predefinedmaplegendcolor_cp').reset();
-                                }
-                            });
+                        url: GLOBALS.config.path_mapping + 'addOrUpdateMapLegend' + GLOBALS.config.type,
+                        method: 'POST',
+                        params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc},
+                        success: function(r) {
+                            Ext.message.msg(true, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
+                            GLOBALS.stores.predefinedMapLegend.load();
+                            Ext.getCmp('predefinedmaplegendname_tf').reset();
+                            Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
+                            Ext.getCmp('predefinedmaplegendendvalue_tf').reset();
+                            Ext.getCmp('predefinedmaplegendcolor_cp').reset();
                         }
                     });
                 }
@@ -877,12 +865,12 @@ Ext.onReady( function() {
 						array = mlms.split(',');
 						if (array.length > 1) {
 							for (var i = 0; i < array.length; i++) {
-								var sv = predefinedMapLegendStore.getById(array[i]).get('startValue');
-								var ev = predefinedMapLegendStore.getById(array[i]).get('endValue');
+								var sv = GLOBALS.stores.predefinedMapLegend.getById(array[i]).get('startValue');
+								var ev = GLOBALS.stores.predefinedMapLegend.getById(array[i]).get('endValue');
 								for (var j = 0; j < array.length; j++) {
 									if (j != i) {
-										var temp_sv = predefinedMapLegendStore.getById(array[j]).get('startValue');
-										var temp_ev = predefinedMapLegendStore.getById(array[j]).get('endValue');
+										var temp_sv = GLOBALS.stores.predefinedMapLegend.getById(array[j]).get('startValue');
+										var temp_ev = GLOBALS.stores.predefinedMapLegend.getById(array[j]).get('endValue');
 										for (var k = sv+1; k < ev; k++) {
 											if (k > temp_sv && k < temp_ev) {
 												Ext.message.msg(false, i18n_overlapping_legends_are_not_allowed);
@@ -900,7 +888,7 @@ Ext.onReady( function() {
 					}
 					
                     if (!mlsv) {
-                        Ext.message.msg(false, i18n_form_is_not_complete );
+                        Ext.message.msg(false, i18n_form_is_not_complete);
                         return;
                     }
                     
@@ -995,7 +983,7 @@ Ext.onReady( function() {
                 listeners: {
                     'select': {
                         fn: function(cb, record, i) {
-                            var indicators = record.data.indicators;
+                            var indicators = record.data.indicators || [];
                             var indicatorString = '';
                             
                             for (var i = 0; i < indicators.length; i++) {
@@ -1011,7 +999,7 @@ Ext.onReady( function() {
                 }					
             }),
             { html: '<div class="window-field-label">' + i18n_indicator + '</div>' },
-			new Ext.ux.Multiselect({id:'predefinedmaplegendsetindicator_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:predefinedMapLegendSetIndicatorStore}),
+			new Ext.ux.Multiselect({id:'predefinedmaplegendsetindicator_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:GLOBALS.stores.indicators}),
             {
                 xtype: 'button',
                 id: 'assignpredefinedmaplegendsetindicator_b',
@@ -1082,9 +1070,9 @@ Ext.onReady( function() {
                 listeners:{
                     'select': {
                         fn: function(cb, record, i) {
-                            var dataElements = record.data.dataElements;
+                            var dataElements = record.data.dataElements || [];
                             var dataElementString = '';
-                            
+
                             for (var i = 0; i < dataElements.length; i++) {
                                 dataElementString += dataElements[i];
                                 if (i < dataElements.length-1) {
@@ -1098,7 +1086,7 @@ Ext.onReady( function() {
                 }					
             }),
             { html: '<div class="window-field-label">' + i18n_dataelement + '</div>' },
-			new Ext.ux.Multiselect({id:'predefinedmaplegendsetdataelement_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:predefinedMapLegendSetDataElementStore}),
+			new Ext.ux.Multiselect({id:'predefinedmaplegendsetdataelement_ms',hideLabel:true,dataFields:['id','name','shortName'],valueField:'id',displayField:'shortName',width:GLOBALS.config.multiselect_width,height:GLOBALS.util.getMultiSelectHeight(),store:GLOBALS.stores.dataElements}),
             {
                 xtype: 'button',
                 id: 'assignpredefinedmaplegendsetdataelement_b',
@@ -3305,14 +3293,14 @@ Ext.onReady( function() {
 			}
 			else {
 				predefinedMapLegendSetWindow.show();
-                if (!predefinedMapLegendStore.isLoaded) {
-                    predefinedMapLegendStore.load();
+                if (!GLOBALS.stores.predefinedMapLegend.isLoaded) {
+                    GLOBALS.stores.predefinedMapLegend.load();
                 }
-                if (!predefinedMapLegendSetIndicatorStore.isLoaded) {
-                    predefinedMapLegendSetIndicatorStore.load();
+                if (!GLOBALS.stores.indicators.isLoaded) {
+                    GLOBALS.stores.indicators.load();
                 }
-                if (!predefinedMapLegendSetDataElementStore.isLoaded) {
-                    predefinedMapLegendSetDataElementStore.load();
+                if (!GLOBALS.stores.dataElements.isLoaded) {
+                    GLOBALS.stores.dataElements.load();
                 }                
 			}
 		}
