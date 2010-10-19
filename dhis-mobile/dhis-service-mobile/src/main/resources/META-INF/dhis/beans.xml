@@ -44,8 +44,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="sendSMSStore" ref="org.hisp.dhis.mobile.api.SendSMSStore"/>
     </bean>
 
-<!-- UserGroup Store and Service -->
-    <bean id="org.hisp.dhis.user.UserGroupStore"
+    <!-- UserGroup Store and Service -->
+    <!--bean id="org.hisp.dhis.user.UserGroupStore"
         class="org.hisp.dhis.user.impl.HiberntateUserGroupStore">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
@@ -53,7 +53,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <bean id="org.hisp.dhis.user.UserGroupService"
         class="org.hisp.dhis.user.impl.DefaultUserGroupService">
         <property name="userGroupStore" ref="org.hisp.dhis.user.UserGroupStore"/>
-    </bean>
+    </bean-->
 
 
 	<!-- Send ACK Job -->
