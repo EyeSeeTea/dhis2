@@ -42,10 +42,6 @@
 		</td>
 		
 		<td style="text-align:center" #alternate( $mark )>
-		  <a href="defineValidationCriteriaAssociationsForm.action?id=$program.id" title="$i18n.getString( "validation_associations" )"><img src="../images/assign_a.png" alt="$i18n.getString( "validation_associations" )"></a>
-		</td>
-		
-		<td style="text-align:center" #alternate( $mark )>
 		  <a href="defineValidationDEAssociationsForm.action?id=$program.id" title="$i18n.getString( "validationDE_associations" )"><img src="../images/assign_b.png" alt="$i18n.getString( "validationDE_associations" )"></a>
 		</td>
 		
