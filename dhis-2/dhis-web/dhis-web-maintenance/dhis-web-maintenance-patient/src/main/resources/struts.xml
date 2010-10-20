@@ -674,10 +674,8 @@
 		<action name="programStage"
 			class="org.hisp.dhis.patient.action.programstage.GetProgramStageListAction">
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">
-				/dhis-web-maintenance-patient/programStageList.vm</param>
-			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
-			<param name="javascripts">javascript/programStage.js</param>
+			<param name="page">/dhis-web-maintenance-patient/programStageList.vm</param>
+			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>			
 		</action>
 
 		<action name="getProgramStage"
@@ -695,7 +693,7 @@
 			<param name="page">
 				/dhis-web-maintenance-patient/addProgramStageForm.vm</param>
 			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
-			<param name="javascripts">javascript/programStage.js,javascript/jquery/jquery.json-2.2.min.js</param>
+			<param name="javascripts">javascript/programStage.js</param>
 			<param name="requiredAuthorities">F_PROGRAMSTAGE_ADD</param>
 		</action>
 
@@ -708,12 +706,8 @@
 
 		<action name="validateProgramStage"
 			class="org.hisp.dhis.patient.action.programstage.ValidateProgramStageAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseSuccess.vm</result>
-			<result name="error" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseError.vm</result>
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm</result>
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      		<result name="error" type="velocity-json">../dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
@@ -730,26 +724,23 @@
 			<param name="page">
 				/dhis-web-maintenance-patient/updateProgramStageForm.vm</param>
 			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
-			<param name="javascripts">javascript/programStage.js,javascript/jquery/jquery.json-2.2.min.js</param>
+			<param name="javascripts">javascript/programStage.js</param>
 			<param name="requiredAuthorities">F_PROGRAMSTAGE_UPDATE</param>
 		</action>
 
 		<action name="removeProgramStage"
 			class="org.hisp.dhis.patient.action.programstage.RemoveProgramStageAction">
-			<result name="success" type="redirect">programStage.action
-			</result>
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      		<result name="error" type="velocity-json">../dhis-web-commons/ajax/jsonResponseError.vm</result>
+			<param name="onExceptionReturn">plainTextError</param>
 			<param name="requiredAuthorities">F_PROGRAMSTAGE_DELETE</param>
 		</action>
 
 		<action name="showSortProgramStageForm"
-			class="org.hisp.dhis.patient.action.programstage.ShowSortProgramStageFormAction">
-			<result name="input" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseInput.vm</result>
+			class="org.hisp.dhis.patient.action.programstage.ShowSortProgramStageFormAction">			
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">
-				/dhis-web-maintenance-patient/sortProgramStageForm.vm</param>
-			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
-			<param name="javascripts">javascript/programStage.js</param>
+			<param name="page">/dhis-web-maintenance-patient/sortProgramStageForm.vm</param>
+			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>			
 			<param name="requiredAuthorities">F_PROGRAMSTAGE_ADD</param>
 		</action>
 

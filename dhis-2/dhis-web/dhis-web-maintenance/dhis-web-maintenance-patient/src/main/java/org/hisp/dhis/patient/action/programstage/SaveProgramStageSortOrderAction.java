@@ -58,9 +58,9 @@ public class SaveProgramStageSortOrderAction
     // Input
     // -------------------------------------------------------------------------
 
-    private List<String> programStageList;
+    private List<Integer> programStageList;
 
-    public void setprogramStageList( List<String> programStageList )
+    public void setprogramStageList( List<Integer> programStageList )
     {
         this.programStageList = programStageList;
     }
@@ -87,9 +87,9 @@ public class SaveProgramStageSortOrderAction
         
         List<ProgramStage> programStages = new ArrayList<ProgramStage>(programStageList.size());       
 
-        for ( String programStageId : programStageList )
+        for ( Integer programStageId : programStageList )
         {
-            ProgramStage programStage = programStageService.getProgramStage( Integer.parseInt( programStageId ) );
+            ProgramStage programStage = programStageService.getProgramStage( programStageId );
             
             programStages.add( programStage );
 
