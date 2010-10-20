@@ -2254,46 +2254,35 @@ Ext.onReady( function() {
 					}
 					
 					if (GLOBALS.util.validateInputNameLength(mlbn) == false) {
-						Ext.message.msg(false, i18n_baselayer_name_cannot_be_longer_than_25_characters );
+						Ext.message.msg(false, i18n_baselayer_name_cannot_be_longer_than_25_characters);
 						return;
 					}
+                    
+                    if (GLOBALS.stores.baseLayer.find('name', mlbn) !== -1) {
+                        Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mlbn + '</span> ' + i18n_is_already_in_use);
+                        return;
+                    }
 					
-					Ext.Ajax.request({
-						url: GLOBALS.config.path_mapping + 'getMapLayersByType' + GLOBALS.config.type,
-                        params: {type: GLOBALS.config.map_layer_type_baselayer},
-						method: 'POST',
-						success: function(r) {
-							var mapLayers = Ext.util.JSON.decode(r.responseText).mapLayers;
-							
-							for (i in mapLayers) {
-								if (mapLayers[i].name == mlbn) {
-									Ext.message.msg(false, i18n_name + ' <span class="x-msg-hl">' + mlbn + '</span> '+i18n_is_already_in_use);
-									return;
-								}
-							}
-					
-							Ext.Ajax.request({
-								url: GLOBALS.config.path_mapping + 'addOrUpdateMapLayer' + GLOBALS.config.type,
-								method: 'POST',
-								params: {name: mlbn, type: GLOBALS.config.map_layer_type_baselayer, mapSource: mlbu, layer: mlbl, fillColor: '', fillOpacity: 0, strokeColor: '', strokeWidth: 0},
-								success: function(r) {
-									Ext.message.msg(true, 'The base layer <span class="x-msg-hl">' + mlbn + '</span> '+i18n_was_registered);
-									Ext.getCmp('maplayerbaselayers_cb').getStore().load();
-									MAP.addLayers([
-                                        new OpenLayers.Layer.WMS(
-                                            mlbn,
-                                            mlbu,
-                                            {layers: mlbl}
-                                        )
-                                    ]);
-									
-									Ext.getCmp('maplayerbaselayersname_tf').reset();
-									Ext.getCmp('maplayerbaselayersurl_tf').reset();
-									Ext.getCmp('maplayerbaselayerslayer_tf').reset();
-								}
-							});
-						}
-					});
+                    Ext.Ajax.request({
+                        url: GLOBALS.config.path_mapping + 'addOrUpdateMapLayer' + GLOBALS.config.type,
+                        method: 'POST',
+                        params: {name: mlbn, type: GLOBALS.config.map_layer_type_baselayer, mapSource: mlbu, layer: mlbl, fillColor: '', fillOpacity: 0, strokeColor: '', strokeWidth: 0},
+                        success: function(r) {
+                            Ext.message.msg(true, 'The base layer <span class="x-msg-hl">' + mlbn + '</span> ' + i18n_was_registered);
+                            GLOBALS.stores.baseLayer.load();
+                            MAP.addLayers([
+                                new OpenLayers.Layer.WMS(
+                                    mlbn,
+                                    mlbu,
+                                    {layers: mlbl}
+                                )
+                            ]);
+                            
+                            Ext.getCmp('maplayerbaselayersname_tf').reset();
+                            Ext.getCmp('maplayerbaselayersurl_tf').reset();
+                            Ext.getCmp('maplayerbaselayerslayer_tf').reset();
+                        }
+                    });
 				}
 			}
         ]
@@ -2336,20 +2325,14 @@ Ext.onReady( function() {
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">'+i18n_new+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_new + '</span>',
                         id: 'baselayer0',
-                        items:
-                        [
-                            newMapLayerBaseLayersPanel
-                        ]
+                        items: [newMapLayerBaseLayersPanel]
                     },
                     {
-                        title: '<span class="panel-tab-title">'+i18n_delete+'</span>',
+                        title: '<span class="panel-tab-title">' + i18n_delete + '</span>',
                         id: 'baselayer1',
-                        items:
-                        [
-                            deleteMapLayerBaseLayerPanel
-                        ]
+                        items: [deleteMapLayerBaseLayerPanel]
                     }
                 ]
             }
@@ -2359,14 +2342,14 @@ Ext.onReady( function() {
     /* Section: administrator */
     var adminPanel = new Ext.form.FormPanel({
         id: 'admin_p',
-        title: '<span class="panel-title">'+i18n_administrator+'</span>',
+        title: '<span class="panel-title">' + i18n_administrator + '</span>',
         items:
         [
 			{ html: '<p style="height:5px;">' },
 			{
 				xtype:'fieldset',
 				columnWidth: 0.5,
-				title: '&nbsp;<span class="panel-tab-title">'+i18n_map_source+'</span>&nbsp;',
+				title: '&nbsp;<span class="panel-tab-title">' + i18n_map_source + '</span>&nbsp;',
 				collapsible: true,
 				animCollapse: true,
 				autoHeight:true,
@@ -2386,9 +2369,13 @@ Ext.onReady( function() {
 						mode: 'local',
 						triggerAction: 'all',
 						value: MAPSOURCE,
-						store: new Ext.data.SimpleStore({
+						store: new Ext.data.ArrayStore({
 							fields: ['id', 'text'],
-							data: [[GLOBALS.config.map_source_type_database, 'DHIS database'], [GLOBALS.config.map_source_type_geojson, 'GeoJSON files'], [GLOBALS.config.map_source_type_shapefile, 'Shapefiles']]
+							data: [
+                                [GLOBALS.config.map_source_type_database, 'DHIS database'],
+                                [GLOBALS.config.map_source_type_geojson, 'GeoJSON files'],
+                                [GLOBALS.config.map_source_type_shapefile, 'Shapefiles']
+                            ]
 						}),
 						listeners: {
 							'select': {
@@ -2401,13 +2388,9 @@ Ext.onReady( function() {
 											method: 'POST',
 											params: {mapSourceType: MAPSOURCE, mapDateType: MAPDATETYPE},
 											success: function(r) {
-												Ext.getCmp('map_cb').getStore().load();
-                                                Ext.getCmp('map_cb2').getStore().load();
-												Ext.getCmp('maps_cb').getStore().load();
-												Ext.getCmp('mapview_cb').getStore().load();
-												Ext.getCmp('view_cb').getStore().load();
-												Ext.getCmp('editmap_cb').getStore().load();
-												Ext.getCmp('maplayer_cb').getStore().load();
+                                                GLOBALS.stores.map.load();
+                                                GLOBALS.stores.mapView.load();
+                                                GLOBALS.stores.overlay.load();
 
 												Ext.getCmp('map_cb').clearValue();
                                                 Ext.getCmp('map_cb2').clearValue();
@@ -2492,7 +2475,7 @@ Ext.onReady( function() {
 			{
 				xtype:'fieldset',
 				columnWidth: 0.5,
-				title: '&nbsp;<span class="panel-tab-title">'+i18n_date_type+'</span>&nbsp;',
+				title: '&nbsp;<span class="panel-tab-title">' + i18n_date_type + '</span>&nbsp;',
 				collapsible: true,
 				animCollapse: true,
 				autoHeight:true,
@@ -2512,7 +2495,10 @@ Ext.onReady( function() {
 						minListWidth: GLOBALS.config.combo_width_fieldset,
                         store: new Ext.data.SimpleStore({
                             fields: ['value', 'text'],
-                            data: [[GLOBALS.config.map_date_type_fixed, i18n_fixed_periods], [GLOBALS.config.map_date_type_start_end, i18n_start_end_dates]]
+                            data: [
+                                [GLOBALS.config.map_date_type_fixed, i18n_fixed_periods],
+                                [GLOBALS.config.map_date_type_start_end, i18n_start_end_dates]
+                            ]
                         }),
                         listeners: {
                             'select': {
@@ -3382,7 +3368,7 @@ Ext.onReady( function() {
                 [
                     layerTree,
                     {
-                        title: '<span class="panel-title">'+i18n_overview_map+'</span>',
+                        title: '<span class="panel-title">' + i18n_overview_map + '</span>',
                         html:'<div id="overviewmap" style="height:97px; padding-top:0px;"></div>'
                     },
                     {
@@ -3408,7 +3394,7 @@ Ext.onReady( function() {
 						]
 					},
                     {
-                        title: '<span class="panel-title">'+ i18n_map_legend_polygon +'</span>',
+                        title: '<span class="panel-title">' + i18n_map_legend_polygon + '</span>',
                         minHeight: 65,
                         autoHeight: true,
                         contentEl: 'polygonlegendpanel',
@@ -3416,7 +3402,7 @@ Ext.onReady( function() {
 						bodyStyle: 'padding-left: 4px;'
                     },
                     {
-                        title: '<span class="panel-title">'+ i18n_map_legend_point +'</span>',
+                        title: '<span class="panel-title">' + i18n_map_legend_point + '</span>',
                         minHeight: 65,
                         autoHeight: true,
                         contentEl: 'pointlegendpanel',
