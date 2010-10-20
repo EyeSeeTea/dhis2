@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< TREE
+<mtjMetadata jad="DHISMobile.jad" version="1.2.1.v201009031435">
+   <device group="Series 40 5th Edition SDK, Feature Pack 1" name="S40_5th_Edition_SDK_Feature_Pack_1"/>
+=======
 <mtjMetadata jad="DHISMobile.jad" version="1.2.1.v201009031435">
    <device group="Series 40 5th Edition SDK, Feature Pack 1 Lite" name="S40_5th_Edition_SDK_Feature_Pack_1_Lite"/>
+>>>>>>> MERGE-SOURCE
    <signing projectSpecific="false" signProject="false">
       <alias/>
    </signing>
    <configurations>
+<<<<<<< TREE
+      <configuration active="true" name="S40_5th_Edition_SDK_Feature_Pack_1">
+         <device group="Series 40 5th Edition SDK, Feature Pack 1" name="S40_5th_Edition_SDK_Feature_Pack_1"/>
+         <symbolSet name="AmharicColorPhone">
+            <symbol name="MMAPI" value="1.1"/>
+=======
       <configuration active="true" name="S40_5th_Edition_SDK_Feature_Pack_1">
          <device group="Series 40 5th Edition SDK, Feature Pack 1" name="S40_5th_Edition_SDK_Feature_Pack_1"/>
          <symbolSet name="S40_5th_Edition_SDK_Feature_Pack_1">
             <symbol name="MMAPI" value="1.2"/>
+>>>>>>> MERGE-SOURCE
             <symbol name="screen.isColor" value="true"/>
             <symbol name="model" value="Series 40 5th Edition SDK,  Feature Pack 1"/>
             <symbol name="screen.bitDepth" value="16"/>
@@ -36,8 +48,8 @@
             <symbol name="screen.height" value="320"/>
          </symbolSet>
       </configuration>
-      <configuration active="false" name="S40_5th_Edition_SDK_Feature_Pack_1_Lite">
-         <device group="Series 40 5th Edition SDK, Feature Pack 1 Lite" name="S40_5th_Edition_SDK_Feature_Pack_1_Lite"/>
+      <configuration active="false" name="S40_5th_Edition_SDK_Feature_Pack_1">
+         <device group="Series 40 5th Edition SDK, Feature Pack 1" name="S40_5th_Edition_SDK_Feature_Pack_1"/>
          <symbolSet name="S40_5th_Edition_SDK_Feature_Pack_1_Lite">
             <symbol name="MMAPI" value="1.2"/>
             <symbol name="screen.isColor" value="true"/>
@@ -50,9 +62,17 @@
             <symbol name="screen.canvas.width" value="128"/>
             <symbol name="screen.canvas.y" value="40"/>
             <symbol name="screen.canvas.x" value="0"/>
-            <symbol name="SATSA-APDU" value="1.0"/>
-            <symbol name="MIDP" value="1.0"/>
+<<<<<<< TREE
             <symbol name="JSR75" value="1.0"/>
+            <symbol name="SATSA-APDU" value="1.0"/>
+=======
+            <symbol name="SATSA-APDU" value="1.0"/>
+>>>>>>> MERGE-SOURCE
+            <symbol name="MIDP" value="1.0"/>
+<<<<<<< TREE
+=======
+            <symbol name="JSR75" value="1.0"/>
+>>>>>>> MERGE-SOURCE
             <symbol name="CLDC" value="1.0"/>
             <symbol name="screen.canvas.height" value="160"/>
             <symbol name="SATSA-CRYPTO" value="1.0"/>
@@ -62,6 +82,56 @@
             <symbol name="screen.height" value="160"/>
          </symbolSet>
       </configuration>
+<<<<<<< TREE
+      <configuration active="false" name="S40_5th_Edition_SDK_Feature_Pack_1">
+         <device group="Series 40 5th Edition SDK, Feature Pack 1" name="S40_5th_Edition_SDK_Feature_Pack_1"/>
+         <symbolSet name="DefaultColorPhone">
+            <symbol name="MMAPI" value="1.1"/>
+            <symbol name="screen.isColor" value="true"/>
+            <symbol name="screen.bitDepth" value="8"/>
+            <symbol name="JSR82" value="1.1"/>
+            <symbol name="JSR226" value="1.0"/>
+            <symbol name="MIDP" value="2.1"/>
+            <symbol name="JSR229" value="1.1"/>
+            <symbol name="SATSA-PKI" value="1.0"/>
+            <symbol name="CLDC" value="1.1"/>
+            <symbol name="JSR179" value="1.0"/>
+            <symbol name="SATSA-JCRMI" value="1.0"/>
+            <symbol name="WMA" value="2.0"/>
+            <symbol name="J2ME-WS" value="1.0"/>
+            <symbol name="screen.width" value="240"/>
+            <symbol name="JSR238" value="1.0"/>
+            <symbol name="JSR239" value="1.0"/>
+            <symbol name="screen.isTouch" value="false"/>
+            <symbol name="JSR211" value="1.0"/>
+            <symbol name="JSR234" value="1.0"/>
+            <symbol name="SATSA-APDU" value="1.0"/>
+            <symbol name="JSR75" value="1.0"/>
+            <symbol name="J2ME-XMLRPC" value="1.0"/>
+            <symbol name="JSR184" value="1.1"/>
+            <symbol name="SATSA-CRYPTO" value="1.0"/>
+            <symbol name="version.configuration" value="CLDC-1.1"/>
+            <symbol name="version.profile" value="MIDP-2.1"/>
+            <symbol name="JSR180" value="1.0"/>
+            <symbol name="screen.height" value="320"/>
+         </symbolSet>
+      </configuration>
+      <configuration active="false" name="DefaultColorPhone">
+         <device group="Sun Java(TM) Wireless Toolkit 2.5.2_01 for CLDC" name="DefaultColorPhone"/>
+         <symbolSet name="DefaultColorPhone">
+            <symbol name="screen.isColor" value="true"/>
+            <symbol name="MMAPI" value="1.1"/>
+            <symbol name="screen.bitDepth" value="8"/>
+            <symbol name="JSR82" value="1.1"/>
+            <symbol name="JSR226" value="1.0"/>
+            <symbol name="MIDP" value="2.1"/>
+            <symbol name="JSR229" value="1.1"/>
+            <symbol name="SATSA-PKI" value="1.0"/>
+            <symbol name="CLDC" value="1.1"/>
+            <symbol name="JSR179" value="1.0"/>
+            <symbol name="WMA" value="2.0"/>
+            <symbol name="SATSA-JCRMI" value="1.0"/>
+=======
       <configuration active="false" name="DefaultColorPhone">
          <device group="Sun Java(TM) Wireless Toolkit 2.5.2 for CLDC" name="DefaultColorPhone"/>
          <symbolSet name="DefaultColorPhone">
@@ -77,6 +147,7 @@
             <symbol name="JSR179" value="1.0"/>
             <symbol name="SATSA-JCRMI" value="1.0"/>
             <symbol name="WMA" value="2.0"/>
+>>>>>>> MERGE-SOURCE
             <symbol name="J2ME-WS" value="1.0"/>
             <symbol name="screen.width" value="240"/>
             <symbol name="JSR238" value="1.0"/>
