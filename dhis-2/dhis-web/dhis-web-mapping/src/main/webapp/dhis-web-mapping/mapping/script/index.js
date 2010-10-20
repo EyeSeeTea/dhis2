@@ -3478,7 +3478,7 @@ Ext.onReady( function() {
     
     MAP.addControl(new OpenLayers.Control.ZoomBox());
     
-    function toggleSelectFeatures() {
+    function toggleSelectFeatures(e) {
         if (GLOBALS.stores.overlay.find('name', e.layer.name) !== -1) {
             var names = GLOBALS.stores.overlay.collect('name');
             var visibleOverlays = false;
@@ -3506,11 +3506,11 @@ Ext.onReady( function() {
                 if (e.property == 'visibility') {
                     if (!GLOBALS.stores.overlay.isLoaded) {
                         GLOBALS.stores.overlay.load({callback: function() {
-                            toggleSelectFeatures();
+                            toggleSelectFeatures(e);
                         }});
                     }
                     else {
-                        toggleSelectFeatures();
+                        toggleSelectFeatures(e);
                     }
                 }
             }
