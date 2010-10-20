@@ -211,7 +211,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             width: GLOBALS.config.combo_width,
 			value: GLOBALS.config.map_value_type_indicator,
-            store: new Ext.data.SimpleStore({
+            store: new Ext.data.ArrayStore({
                 fields: ['id', 'name'],
                 data: [
                     [GLOBALS.config.map_value_type_indicator, 'Indicators'],
@@ -668,12 +668,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            fieldLabel: i18n_legend_type,
             id: 'maplegendtype_cb',
             editable: false,
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
+            fieldLabel: i18n_legend_type,
             emptyText: GLOBALS.config.emptytext,
 			labelSeparator: GLOBALS.config.labelseparator,
             value: this.legend.type,
@@ -710,12 +710,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            fieldLabel: i18n_legend_set,
             id: 'maplegendset_cb',
             editable: false,
             valueField: 'id',
             displayField: 'name',
             mode: 'remote',
+            fieldLabel: i18n_legend_set,
             emptyText: GLOBALS.config.emptytext,
 			labelSeparator: GLOBALS.config.labelseparator,
             triggerAction: 'all',
@@ -794,7 +794,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             value: this.legend.classes,
             triggerAction: 'all',
             width: GLOBALS.config.combo_width,
-            store: new Ext.data.SimpleStore({
+            store: new Ext.data.ArrayStore({
                 fields: ['value'],
                 data: [[1], [2], [3], [4], [5], [6], [7]]
             }),
@@ -1126,7 +1126,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.setMapViewMap();
         }
         else if (this.legend.type == GLOBALS.config.map_legend_type_predefined) {
-            if (GLOBALS.stores.isLoaded) {
+            if (GLOBALS.stores.predefinedMapLegendSet.isLoaded) {
                 predefinedMapLegendSetStoreCallback.call(this);
             }
             else {
