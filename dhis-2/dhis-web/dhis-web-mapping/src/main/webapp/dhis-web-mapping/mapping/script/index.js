@@ -102,7 +102,9 @@ Ext.onReady( function() {
     var mapViewStore = new Ext.data.JsonStore({
         url: GLOBALS.config.path_mapping + 'getAllMapViews' + GLOBALS.config.type,
         root: 'mapViews',
-        fields: ['id', 'name'],
+        fields: ['id', 'name', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId', 'mapDateType', 'periodTypeId',
+            'periodId', 'startDate', 'endDate', 'mapSourceType', 'mapSource', 'parentOrganisationUnitName', 'mapLegendType', 'method', 'classes',
+            'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'longitude', 'latitude', 'zoom'],
         sortInfo: {field: 'name', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
@@ -3475,40 +3477,41 @@ Ext.onReady( function() {
     }));
     
     MAP.addControl(new OpenLayers.Control.ZoomBox());
+    
+    function toggleSelectFeatures() {
+        if (GLOBALS.stores.overlay.find('name', e.layer.name) !== -1) {
+            var names = GLOBALS.stores.overlay.collect('name');
+            var visibleOverlays = false;
+            
+            for (var i = 0; i < names.length; i++) {
+                if (MAP.getLayersByName(names[i])[0].visibility) {
+                    visibleOverlays = true;
+                }
+            }
+            
+            var widget = ACTIVEPANEL == GLOBALS.config.thematicMap ? choropleth : proportionalSymbol;
+            
+            if (visibleOverlays) {
+                widget.selectFeatures.deactivate();
+            }
+            else {
+                widget.selectFeatures.activate();
+            }
+        }
+    }
 	
 	MAP.events.on({
         changelayer: function(e) {
-            if (e.property == 'visibility') {
-                
-                function toggleSelectFeatures() {
-                    if (GLOBALS.stores.overlay.find('name', e.layer.name) !== -1) {
-                        var names = GLOBALS.stores.overlay.collect('name');
-                        var visibleOverlays = false;
-                        
-                        for (var i = 0; i < names.length; i++) {
-                            if (MAP.getLayersByName(names[i])[0].visibility) {
-                                visibleOverlays = true;
-                            }
-                        }
-                        
-                        var widget = ACTIVEPANEL == GLOBALS.config.thematicMap ? choropleth : proportionalSymbol;
-                        
-                        if (visibleOverlays) {
-                            widget.selectFeatures.deactivate();
-                        }
-                        else {
-                            widget.selectFeatures.activate();
-                        }
+            if (e.layer.name != 'Polygon layer' && e.layer.name != 'Point layer') {
+                if (e.property == 'visibility') {
+                    if (!GLOBALS.stores.overlay.isLoaded) {
+                        GLOBALS.stores.overlay.load({callback: function() {
+                            toggleSelectFeatures();
+                        }});
                     }
-                }
-                
-                if (!GLOBALS.stores.overlay.isLoaded) {
-                    GLOBALS.stores.overlay.load({callback: function() {
+                    else {
                         toggleSelectFeatures();
-                    }});
-                }
-                else {
-                    toggleSelectFeatures();
+                    }
                 }
             }
         }

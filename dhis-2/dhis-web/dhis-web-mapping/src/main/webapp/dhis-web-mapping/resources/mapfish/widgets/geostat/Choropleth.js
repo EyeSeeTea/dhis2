@@ -170,28 +170,21 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        Ext.Ajax.request({
-                            url: GLOBALS.config.path_mapping + 'getMapView' + GLOBALS.config.type,
-                            method: 'POST',
-                            params: {id: cb.getValue()},
-                            scope: this,
-                            success: function(r) {
-                                this.mapView = GLOBALS.util.getNumericMapView(Ext.util.JSON.decode(r.responseText).mapView[0]);
-                                this.legend.type = this.mapView.mapLegendType;
-                                this.legend.method = this.mapView.method || this.legend.method;
-                                this.legend.classes = this.mapView.classes || this.legend.classes;
+                        this.mapView = GLOBALS.stores.mapView.getAt(GLOBALS.stores.mapView.find('id', cb.getValue())).data;
+                        
+                        this.legend.type = this.mapView.mapLegendType;
+                        this.legend.method = this.mapView.method || this.legend.method;
+                        this.legend.classes = this.mapView.classes || this.legend.classes;
 
-                                MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
+                        MAP.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
 
-                                Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
-                                Ext.getCmp('mapview_cb').setValue(this.mapView.id);
+                        Ext.getCmp('mapdatetype_cb').setValue(MAPDATETYPE);
+                        Ext.getCmp('mapview_cb').setValue(this.mapView.id);
 
-                                this.valueType = this.mapView.mapValueType;
-                                Ext.getCmp('mapvaluetype_cb').setValue(this.valueType);
+                        this.valueType = this.mapView.mapValueType;
+                        Ext.getCmp('mapvaluetype_cb').setValue(this.valueType);
 
-                                this.setMapView();
-                            }
-                        });
+                        this.setMapView();
                     }
                 }
             }
