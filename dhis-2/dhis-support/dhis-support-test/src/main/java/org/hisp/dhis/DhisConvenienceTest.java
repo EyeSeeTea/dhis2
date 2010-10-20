@@ -880,7 +880,7 @@ public abstract class DhisConvenienceTest
         return programStage;
     }
 
-    public static Patient createPatient( char uniqueChar )
+    public static Patient createPatient( char uniqueChar, OrganisationUnit organisationUnit )
     {
         Patient patient = new Patient();
 
