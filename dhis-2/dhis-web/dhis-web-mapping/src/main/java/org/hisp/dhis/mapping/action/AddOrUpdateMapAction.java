@@ -66,27 +66,6 @@ public class AddOrUpdateMapAction
     {
         this.mapLayerPath = mapLayerPath;
     }
-    
-    private String type;
-
-    public void setType( String type )
-    {
-        this.type = type;
-    }
-    
-    private String sourceType;
-    
-    public void setSourceType( String sourceType )
-    {
-        this.sourceType = sourceType;
-    }
-
-    private int organisationUnitId;
-
-    public void setOrganisationUnitId( int organisationUnitId )
-    {
-        this.organisationUnitId = organisationUnitId;
-    }
 
     private int organisationUnitLevelId;
 
@@ -109,8 +88,7 @@ public class AddOrUpdateMapAction
     public String execute()
         throws Exception
     {
-        mappingService.addOrUpdateMap( name, mapLayerPath, type, sourceType, organisationUnitId, 
-            organisationUnitLevelId, nameColumn );
+        mappingService.addOrUpdateMap( name, mapLayerPath, organisationUnitLevelId, nameColumn );
         
         return SUCCESS;
     }

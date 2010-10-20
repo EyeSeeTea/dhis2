@@ -29,7 +29,6 @@ package org.hisp.dhis.mapping;
 
 import java.util.Set;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 
 /**
@@ -44,11 +43,7 @@ public class Map
 
     private String mapLayerPath;
 
-    private String type;
-
     private String sourceType;
-
-    private OrganisationUnit organisationUnit;
 
     private OrganisationUnitLevel organisationUnitLevel;
 
@@ -60,14 +55,12 @@ public class Map
     {
     }
 
-    public Map( String name, String mapLayerPath, String type, String sourceType, OrganisationUnit organisationUnit,
-        OrganisationUnitLevel organisationUnitLevel, String nameColumn, Set<String> staticMapLayerPaths )
+    public Map( String name, String mapLayerPath, String sourceType, OrganisationUnitLevel organisationUnitLevel,
+        String nameColumn, Set<String> staticMapLayerPaths )
     {
         this.name = name;
         this.mapLayerPath = mapLayerPath;
-        this.type = type;
         this.sourceType = sourceType;
-        this.organisationUnit = organisationUnit;
         this.organisationUnitLevel = organisationUnitLevel;
         this.nameColumn = nameColumn;
         this.staticMapLayerPaths = staticMapLayerPaths;
@@ -140,16 +133,6 @@ public class Map
         this.mapLayerPath = mapLayerPath;
     }
 
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType( String type )
-    {
-        this.type = type;
-    }
-
     public String getSourceType()
     {
         return sourceType;
@@ -158,16 +141,6 @@ public class Map
     public void setSourceType( String sourceType )
     {
         this.sourceType = sourceType;
-    }
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    public void setOrganisationUnit( OrganisationUnit organisationUnit )
-    {
-        this.organisationUnit = organisationUnit;
     }
 
     public OrganisationUnitLevel getOrganisationUnitLevel()

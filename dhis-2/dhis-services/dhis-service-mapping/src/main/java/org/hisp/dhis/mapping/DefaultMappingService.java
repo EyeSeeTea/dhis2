@@ -270,22 +270,19 @@ public class DefaultMappingService
         return mappingStore.addMap( map );
     }
 
-    public int addMap( String name, String mapLayerPath, String type, String sourceType, int organisationUnitId,
-        int organisationUnitLevelId, String nameColumn )
+    public int addMap( String name, String mapLayerPath, int organisationUnitLevelId, String nameColumn )
     {
-        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-
         OrganisationUnitLevel organisationUnitLevel = organisationUnitService
             .getOrganisationUnitLevel( organisationUnitLevelId );
 
-        Map map = new Map( name, mapLayerPath, type, sourceType, organisationUnit, organisationUnitLevel, nameColumn,
-            null );
+        String sourceType = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE, MAP_SOURCE_TYPE_GEOJSON );
+
+        Map map = new Map( name, mapLayerPath, sourceType, organisationUnitLevel, nameColumn, null );
 
         return addMap( map );
     }
 
-    public void addOrUpdateMap( String name, String mapLayerPath, String type, String sourceType,
-        int organisationUnitId, int organisationUnitLevelId, String nameColumn )
+    public void addOrUpdateMap( String name, String mapLayerPath, int organisationUnitLevelId, String nameColumn )
     {
         Map map = getMapByMapLayerPath( mapLayerPath );
 
@@ -298,13 +295,13 @@ public class DefaultMappingService
         }
         else
         {
-            OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-
             OrganisationUnitLevel organisationUnitLevel = organisationUnitService
                 .getOrganisationUnitLevel( organisationUnitLevelId );
 
-            map = new Map( name, mapLayerPath, type, sourceType, organisationUnit, organisationUnitLevel, nameColumn,
-                null );
+            String sourceType = (String) userSettingService.getUserSetting( KEY_MAP_SOURCE_TYPE,
+                MAP_SOURCE_TYPE_GEOJSON );
+
+            map = new Map( name, mapLayerPath, sourceType, organisationUnitLevel, nameColumn, null );
 
             addMap( map );
         }
