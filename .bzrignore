@@ -10,3 +10,6 @@ target/**
 build.sh
 .springBeans
 nbactions.xml
+.classpath
+.project
+.mtj
