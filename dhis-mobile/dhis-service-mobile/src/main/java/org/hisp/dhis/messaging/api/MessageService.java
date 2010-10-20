@@ -64,4 +64,6 @@ public interface MessageService
     String sendDrafts();
     
     Map<String,String> readAllPendingMessages();
+
+    String sendOtaMessage(String recipient, String url, String prompt);
 }

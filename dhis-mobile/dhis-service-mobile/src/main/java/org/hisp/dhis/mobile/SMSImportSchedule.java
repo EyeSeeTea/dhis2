@@ -1,12 +1,6 @@
 package org.hisp.dhis.mobile;
 
-import java.util.Date;
-
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SimpleTrigger;
-import org.quartz.impl.StdSchedulerFactory;
 
 public class SMSImportSchedule extends AbstractStartupRoutine
 {
@@ -15,11 +9,12 @@ public class SMSImportSchedule extends AbstractStartupRoutine
     // -------------------------------------------------------------------------
     
     
+    @Override
     public void execute() throws Exception
     {
         System.out.println("*************Inside SMSImportShedule execute method");
         //specify your sceduler task details
-        JobDetail job = new JobDetail();
+        /*JobDetail job = new JobDetail();
         job.setName("SMSImport");
         job.setJobClass(SMSImportJob.class);
         
@@ -36,7 +31,7 @@ public class SMSImportSchedule extends AbstractStartupRoutine
         
         scheduler.start();
         
-        scheduler.scheduleJob(job, trigger);
+        scheduler.scheduleJob(job, trigger);*/
 
         
 

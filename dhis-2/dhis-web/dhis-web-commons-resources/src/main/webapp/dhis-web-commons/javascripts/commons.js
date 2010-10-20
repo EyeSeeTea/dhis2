@@ -1276,3 +1276,22 @@ function jumpToPage( baseLink )
     var currentPage = jQuery("#jumpToPage").val();
     window.location.href = baseLink +"pageSize=" + pageSize +"&currentPage=" +currentPage;
 }
+
+function addShowDetail( jQueryString, width, success, responseType )
+{
+	if( success == undefined ) success = function(data){return data;}
+	if( responseType == undefined ) responseType = 'html';	
+	jQuery( jQueryString ).cluetip( {
+		ajaxProcess: success,
+		ajaxCache: true,
+		ajaxSettings: {
+			dataType: responseType
+		},
+		activation: 'click',
+		sticky: true,
+		closePosition: 'title',
+		closeText: '<img src="../images/hide.png" alt="" />',
+		width: width,
+		arrows: true
+	});
+}

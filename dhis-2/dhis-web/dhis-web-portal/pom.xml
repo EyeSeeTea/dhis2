@@ -38,7 +38,7 @@
       <artifactId>dhis-web-maintenance-datadictionary</artifactId>
       <version>${version}</version>
       <type>war</type>
-    </dependency>		
+    </dependency>	
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-maintenance-dataset</artifactId>
@@ -68,17 +68,17 @@
       <artifactId>dhis-web-maintenance-settings</artifactId>
       <version>${version}</version>
       <type>war</type>
-    </dependency>
-	
+    </dependency>	
+
 	<dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-maintenance-patient</artifactId>
       <version>${version}</version>
       <type>war</type>
     </dependency>
-   
+	
     <!-- Web service modules -->
-
+	
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-importexport</artifactId>
@@ -91,6 +91,7 @@
       <version>${version}</version>
       <type>war</type>
     </dependency>
+
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-validationrule</artifactId>
@@ -103,40 +104,44 @@
       <artifactId>dhis-web-dataentry</artifactId>
       <version>${version}</version>
       <type>war</type>
-    </dependency>
-
+    </dependency>	
+	
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-reporting</artifactId>
       <version>${version}</version>
       <type>war</type>
     </dependency>
+	
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-dashboard-integration</artifactId>
       <version>${version}</version>
       <type>war</type>
     </dependency>	
+	
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-mapping</artifactId>
       <version>${version}</version>
       <type>war</type>
     </dependency>
+	
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-excel-reporting</artifactId>
       <version>${version}</version>
       <type>war</type>
-    </dependency>
+    </dependency>	
 	
-
 	<dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-caseentry</artifactId>
       <version>${version}</version>
       <type>war</type>
     </dependency>
+	
+	
     
     <!-- India modules -->
     
