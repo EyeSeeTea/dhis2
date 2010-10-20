@@ -407,11 +407,9 @@
 			<param name="menuTreeHeight">285</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js
-				,../dhis-web-commons/javascripts/date.js
-				,javascript/jquery/thickbox/thickbox-compressed.js
+				,../dhis-web-commons/javascripts/date.js				
 				,javascript/patient.js				
-			</param>
-			<param name="stylesheets">javascript/jquery/thickbox/thickbox.css</param>
+			</param>			
 			<param name="requiredAuthorities">F_PATIENT_ADD</param>
 		</action>
 
@@ -425,8 +423,7 @@
 			<param name="menuTreeHeight">285</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js
-				,../dhis-web-commons/javascripts/date.js
-				,javascript/jquery/thickbox/thickbox-compressed.js
+				,../dhis-web-commons/javascripts/date.js				
 				,javascript/jquery/cluetip/jquery.cluetip.min.js
 				,javascript/patient.js						
 			</param>
@@ -564,8 +561,7 @@
 
 		<action name="getProgram"
 			class="org.hisp.dhis.patient.action.program.GetProgramAction">
-			<result name="success" type="velocity-xml">
-				/dhis-web-maintenance-patient/responseProgram.vm</result>
+			<result name="success" type="velocity-json">/dhis-web-maintenance-patient/responseProgram.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 

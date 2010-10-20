@@ -1277,12 +1277,21 @@ function jumpToPage( baseLink )
     window.location.href = baseLink +"pageSize=" + pageSize +"&currentPage=" +currentPage;
 }
 
-/**
- * Used to export PDF file by the given type and
- * the active items in table
- */
-function exportPdfByType( type )
+function addShowDetail( jQueryString, width, success, responseType )
 {
-	var activeIds = getArrayIdOfActiveRows();
-	window.location.href = 'exportToPdf.action?type=' + type + activeIds;
+	if( success == undefined ) success = function(data){return data;}
+	if( responseType == undefined ) responseType = 'html';	
+	jQuery( jQueryString ).cluetip( {
+		ajaxProcess: success,
+		ajaxCache: true,
+		ajaxSettings: {
+			dataType: responseType
+		},
+		activation: 'click',
+		sticky: true,
+		closePosition: 'title',
+		closeText: '<img src="../images/hide.png" alt="" />',
+		width: width,
+		arrows: true
+	});
 }
