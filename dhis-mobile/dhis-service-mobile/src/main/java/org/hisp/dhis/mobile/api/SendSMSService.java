@@ -20,6 +20,6 @@ public interface SendSMSService
     
     Collection<SendSMS> getAllSendSMS( );
     
-    int getRowCount();
+    long getRowCount();
 
 }

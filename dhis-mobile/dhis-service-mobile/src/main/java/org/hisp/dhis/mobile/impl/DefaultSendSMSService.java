@@ -50,7 +50,7 @@ public class DefaultSendSMSService implements SendSMSService
         return sendSMSStore.getAllSendSMS();
     }
     
-    public int getRowCount()
+    public long getRowCount()
     {
         return sendSMSStore.getRowCount();
     }

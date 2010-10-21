@@ -1295,3 +1295,13 @@ function addShowDetail( jQueryString, width, success, responseType )
 		arrows: true
 	});
 }
+
+/**
+ * Used to export PDF file by the given type and
+ * the active items in table
+ */
+function exportPdfByType( type )
+{
+	var activeIds = getArrayIdOfActiveRows();
+	window.location.href = 'exportToPdf.action?type=' + type + activeIds;
+}

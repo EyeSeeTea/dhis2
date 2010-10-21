@@ -20,5 +20,5 @@ public interface SendSMSStore
 
     Collection<SendSMS> getAllSendSMS( );
     
-    int getRowCount();
+    long getRowCount();
 }

@@ -9,7 +9,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupStore;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class HiberntateUserGroupStore implements UserGroupStore
 {
@@ -17,8 +16,12 @@ public class HiberntateUserGroupStore implements UserGroupStore
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private SessionFactory sessionFactory;
+    
+    public void setSessionFactory( SessionFactory sessionFactory )
+    {
+        this.sessionFactory = sessionFactory;
+    }
 
     // -------------------------------------------------------------------------
     // UserGroup
