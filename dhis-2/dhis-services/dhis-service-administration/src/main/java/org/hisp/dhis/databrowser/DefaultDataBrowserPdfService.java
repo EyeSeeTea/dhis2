@@ -171,7 +171,7 @@ public class DefaultDataBrowserPdfService
 
         Paragraph periodParagraph = new Paragraph( i18n.getString( "from_date" ) + ": " + fromDate + " "
             + i18n.getString( "to_date" ) + ": " + toDate + ", " + i18n.getString( "period_type" ) + ": "
-            + dataBrowserPeriodType, periodFont );
+            + i18n.getString( dataBrowserPeriodType ), periodFont );
 
         if ( i18n != null )
         {
