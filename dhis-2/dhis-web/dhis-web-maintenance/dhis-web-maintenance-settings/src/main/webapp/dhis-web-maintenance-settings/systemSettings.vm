@@ -84,6 +84,12 @@
 	<input type="text" id="factorDeviation" name="factorDeviation" value="$factorDeviation"/>
 </p>
 
+<h4>$i18n.getString( "format_date" )</h4>
+
+<p>
+	<input type="text" id="formatDate" name="formatDate" value="$formatDate"/>
+</p>
+
 <p><input type="submit" value="$i18n.getString( 'save' )" style="width:10em"/></p>
 
 </form>

@@ -10,7 +10,8 @@ function validateAddRepresentative()
 			middleName: getFieldValue( 'middleName' ),
 			lastName: getFieldValue( 'lastName' ),
 			gender: getFieldValue( 'gender' ) ,
-			birthDate: getFieldValue( 'birthDate' ), 	        
+			birthDate: getFieldValue( 'birthDate' ), 
+			formatDate: getFieldValue( 'formatDate' ),
 			age: getFieldValue( 'age' ) ,
 			genre: getFieldValue('gender') 
 		},

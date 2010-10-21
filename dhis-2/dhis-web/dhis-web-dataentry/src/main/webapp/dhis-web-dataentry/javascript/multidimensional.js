@@ -156,11 +156,9 @@ function saveBoolean( dataElementId, optionComboId, selectedOption  )
      selectedOption.style.backgroundColor = '#ffffcc';     
     
      var valueSaver = new ValueSaver( dataElementId, optionComboId, organisationUnitId, select, '#ccffcc', selectedOption );
-     valueSaver.save(); 
-   
+     valueSaver.save();   
 
 }
-
 function saveComment( dataElementId, optionComboId, commentValue )
 {
     var field = byId( 'value[' + dataElementId + ':' + optionComboId + '].comment' );                
@@ -245,11 +243,13 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
         var type = byId( 'value[' + dataElementId + '].type' ).innerText;
         var element;
         
-        if ( type == 'bool' )
-        {
-            element = byId( 'value[' + dataElementId + '].boolean' );
-        }
-        else if( selectedOption )
+        //if ( type == 'bool' )
+        //{
+        //    element = byId( 'value[' + dataElementId + '].boolean' );
+        //}
+        //else 
+		
+		if( selectedOption )
         {
         	element = selectedOption;    
         }

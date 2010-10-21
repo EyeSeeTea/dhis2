@@ -13,6 +13,7 @@
 
 <h3>$i18n.getString( "add_validation_criteria" )</h3>
 <form id="validationCriteriaForm" action="addValidationCriteria.action" method="post" >
+<input type="hidden" id="formatDate" name="formatDate" value="$formatDate"/>
   <table>
 	<tr>
       <th colspan="3">$i18n.getString('details')</th>
@@ -69,7 +70,7 @@
 				<div id="birthDateDiv" style="display:none ">
 					<input type="text" id="birthDateValue" name="birthDateValue" onChange="fillValue(this.value);"style="width: 14em">			
 					<script type="text/javascript">
-						datePickerValid( 'birthDateValue' );
+						datePicker( 'birthDateValue', '$formatDate' );
 					</script> 
 				</div>
 				

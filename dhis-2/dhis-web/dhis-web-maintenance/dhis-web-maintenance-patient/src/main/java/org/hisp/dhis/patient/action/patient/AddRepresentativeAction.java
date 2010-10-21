@@ -62,8 +62,18 @@ public class AddRepresentativeAction implements Action
     private PatientIdentifierTypeService patientIdentifierTypeService;
 
     private OrganisationUnitSelectionManager selectionManager;
-
+   
     // -------------------------------------------------------------------------
+	// Input - formatDate
+	// -------------------------------------------------------------------------
+	
+	private String formatDate;
+	
+    public void setFormatDate(String formatDate) {
+		this.formatDate = formatDate;
+	}
+
+	// -------------------------------------------------------------------------
     // Input - name
     // -------------------------------------------------------------------------
     private String firstName;
@@ -122,7 +132,7 @@ public class AddRepresentativeAction implements Action
 
             if ( birthDate.length() != 0 )
             {
-                patient.setBirthDate( format.parseDate( birthDate ) );
+                patient.setBirthDate( format.parseDate( birthDate, formatDate ) );
                 patient.setBirthDateEstimated( birthDateEstimated );
             }
             else

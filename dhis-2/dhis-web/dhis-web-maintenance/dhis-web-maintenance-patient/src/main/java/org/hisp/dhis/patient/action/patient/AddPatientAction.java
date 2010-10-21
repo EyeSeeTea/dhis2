@@ -38,6 +38,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.options.SystemSetting;
+import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
@@ -61,94 +63,97 @@ import com.opensymphony.xwork2.Action;
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
-public class AddPatientAction
-    implements Action
-{
-    public static final String PREFIX_ATTRIBUTE = "attr";
+public class AddPatientAction implements Action {
+	public static final String PREFIX_ATTRIBUTE = "attr";
 
-    public static final String PREFIX_IDENTIFIER = "iden";
+	public static final String PREFIX_IDENTIFIER = "iden";
 
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// Dependencies
+	// -------------------------------------------------------------------------
 
-    private I18nFormat format;
+	private I18nFormat format;
 
-    private PatientService patientService;
+	private PatientService patientService;
 
-    private PatientIdentifierService patientIdentifierService;
+	private PatientIdentifierService patientIdentifierService;
 
-    private PatientIdentifierTypeService patientIdentifierTypeService;
+	private PatientIdentifierTypeService patientIdentifierTypeService;
 
-    private OrganisationUnitSelectionManager selectionManager;
+	private OrganisationUnitSelectionManager selectionManager;
 
-    private SelectedStateManager selectedStateManager;
+	private SelectedStateManager selectedStateManager;
 
-    private PatientAttributeService patientAttributeService;
+	private PatientAttributeService patientAttributeService;
 
-    private PatientAttributeOptionService patientAttributeOptionService;
+	private PatientAttributeOptionService patientAttributeOptionService;
+	
+	// -------------------------------------------------------------------------
+	// Input - formatDate
+	// -------------------------------------------------------------------------
+	
+	private String formatDate;
+	
+	// -------------------------------------------------------------------------
+	// Input - name
+	// -------------------------------------------------------------------------
+	
+	private String firstName;
 
-    // -------------------------------------------------------------------------
-    // Input - name
-    // -------------------------------------------------------------------------
-    private String firstName;
+	private String middleName;
 
-    private String middleName;
+	private String lastName;
 
-    private String lastName;
+	// -------------------------------------------------------------------------
+	// Input - demographics
+	// -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Input - demographics
-    // -------------------------------------------------------------------------
+	private String birthDate;
 
-    private String birthDate;
+	private Integer age;
 
-    private Integer age;
+	private boolean birthDateEstimated;
 
-    private boolean birthDateEstimated;
+	private String gender;
 
-    private String gender;
+	private String bloodGroup;
 
-    private String bloodGroup;
+	// -------------------------------------------------------------------------
+	// OutPut
+	// -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // OutPut
-    // -------------------------------------------------------------------------
+	private Integer id;
 
-    private Integer id;
+	public Integer getId() {
+		return id;
+	}
 
-    public Integer getId()
-    {
-        return id;
-    }
+	// -------------------------------------------------------------------------
+	// Input - others
+	// -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Input - others
-    // -------------------------------------------------------------------------
+	private boolean underAge;
 
-    private boolean underAge;
+	private Integer representativeId;
 
-    private Integer representativeId;
+	private Integer relationshipTypeId;
 
-    private Integer relationshipTypeId;
+	// -------------------------------------------------------------------------
+	// Output - making the patient available so that its attributes can be
+	// edited
+	// -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Output - making the patient available so that its attributes can be
-    // edited
-    // -------------------------------------------------------------------------
+	private Patient patient;
 
-    private Patient patient;
+	public Patient getPatient() {
+		return patient;
+	}
 
-    public Patient getPatient()
-    {
-        return patient;
-    }
+	// -------------------------------------------------------------------------
+	// Action implementation
+	// -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+	public String execute()
     {
         // ---------------------------------------------------------------------
         // Prepare values
@@ -172,7 +177,7 @@ public class AddPatientAction
 
             if ( birthDate.length() != 0 )
             {
-                patient.setBirthDate( format.parseDate( birthDate ) );
+                patient.setBirthDate( format.parseDate( birthDate, formatDate ) );
                 patient.setBirthDateEstimated( birthDateEstimated );
             }
             else
@@ -313,102 +318,97 @@ public class AddPatientAction
         return SUCCESS;
     }
 
-    // -----------------------------------------------------------------------------
-    // Getter/Setter
-    // -----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
+	// Getter/Setter
+	// -----------------------------------------------------------------------------
 
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
-    {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
-    }
+	public void setPatientIdentifierTypeService(
+			PatientIdentifierTypeService patientIdentifierTypeService) {
+		this.patientIdentifierTypeService = patientIdentifierTypeService;
+	}
 
-    public void setBirthDate( String birthDate )
-    {
-        this.birthDate = birthDate;
-    }
+	public void setBirthDate(String birthDate) {
+		this.birthDate = birthDate;
+	}
 
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
+	public void setFormat(I18nFormat format) {
+		this.format = format;
+	}
 
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
+	public void setPatientService(PatientService patientService) {
+		this.patientService = patientService;
+	}
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }
+	public void setPatientIdentifierService(
+			PatientIdentifierService patientIdentifierService) {
+		this.patientIdentifierService = patientIdentifierService;
+	}
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
+	public void setSelectionManager(
+			OrganisationUnitSelectionManager selectionManager) {
+		this.selectionManager = selectionManager;
+	}
 
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
-    {
-        this.selectedStateManager = selectedStateManager;
-    }
+	public void setSelectedStateManager(
+			SelectedStateManager selectedStateManager) {
+		this.selectedStateManager = selectedStateManager;
+	}
 
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
-    }
+	public void setPatientAttributeService(
+			PatientAttributeService patientAttributeService) {
+		this.patientAttributeService = patientAttributeService;
+	}
 
-    public void setFirstName( String firstName )
-    {
-        this.firstName = firstName;
-    }
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    public void setMiddleName( String middleName )
-    {
-        this.middleName = middleName;
-    }
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
+	}
 
-    public void setLastName( String lastName )
-    {
-        this.lastName = lastName;
-    }
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    public void setAge( Integer age )
-    {
-        this.age = age;
-    }
+	public void setAge(Integer age) {
+		this.age = age;
+	}
 
-    public void setBirthDateEstimated( boolean birthDateEstimated )
-    {
-        this.birthDateEstimated = birthDateEstimated;
-    }
+	public void setBirthDateEstimated(boolean birthDateEstimated) {
+		this.birthDateEstimated = birthDateEstimated;
+	}
 
-    public void setGender( String gender )
-    {
-        this.gender = gender;
-    }
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
 
-    public void setBloodGroup( String bloodGroup )
-    {
-        this.bloodGroup = bloodGroup;
-    }
+	public void setBloodGroup(String bloodGroup) {
+		this.bloodGroup = bloodGroup;
+	}
 
-    public void setPatientAttributeOptionService( PatientAttributeOptionService patientAttributeOptionService )
-    {
-        this.patientAttributeOptionService = patientAttributeOptionService;
-    }
+	public void setFormatDate(String formatDate) {
+		this.formatDate = formatDate;
+	}
 
-    public void setRepresentativeId( Integer representativeId )
-    {
-        this.representativeId = representativeId;
-    }
+//	public void setSystemSettingManager(SystemSettingManager systemSettingManager) {
+//		this.systemSettingManager = systemSettingManager;
+//	}
 
-    public void setRelationshipTypeId( Integer relationshipTypeId )
-    {
-        this.relationshipTypeId = relationshipTypeId;
-    }
+	public void setPatientAttributeOptionService(
+			PatientAttributeOptionService patientAttributeOptionService) {
+		this.patientAttributeOptionService = patientAttributeOptionService;
+	}
 
-    public void setUnderAge( boolean underAge )
-    {
-        this.underAge = underAge;
-    }
+	public void setRepresentativeId(Integer representativeId) {
+		this.representativeId = representativeId;
+	}
+
+	public void setRelationshipTypeId(Integer relationshipTypeId) {
+		this.relationshipTypeId = relationshipTypeId;
+	}
+	
+	public void setUnderAge(boolean underAge) {
+		this.underAge = underAge;
+	}
 }

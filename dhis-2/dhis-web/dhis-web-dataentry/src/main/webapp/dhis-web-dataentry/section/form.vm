@@ -18,7 +18,7 @@
     	<table class="mainPageTable">    		
    			<tr>		   
        			<td onclick="openCloseSection( $section.id )" onmouseover="style.backgroundColor='#ebf0f6';" onmouseout="style.backgroundColor='#FFFFFF'">
-       				<div id="$section.id:name" style="text-align:center"><h3>$encoder.htmlEncode( $section.name )</h3></div>
+       				<div id="$section.id:name" style="text-align:center"><h3>$section.name</h3></div>
        			</td>       				   			        		  
     		</tr>    	
     		<tr>

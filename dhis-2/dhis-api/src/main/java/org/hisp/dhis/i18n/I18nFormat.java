@@ -31,12 +31,10 @@ import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.ResourceBundle;
 
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.QuarterlyPeriodType;
 
 /**
  * @author Pham Thi Thuy
@@ -112,6 +110,16 @@ public class I18nFormat
 
         return commonParsing( date, resourceBundle.getString( "format.date" ) );
     }
+    
+    public Date parseDate( String date, String format )
+    {
+        if ( date == null )
+        {
+            return null;
+        }
+
+        return commonParsing( date, format );
+    }
 
     public Date parseTime( String time )
     {
@@ -143,6 +151,16 @@ public class I18nFormat
         return commonFormatting( date, resourceBundle.getString( "format.date" ) );
     }
 
+    public String formatDate( Date date, String formatDate )
+    {
+        if ( date == null )
+        {
+            return null;
+        }
+
+        return commonFormatting( date, formatDate );
+    }
+    
     public String formatTime( Date date )
     {
         if ( date == null )
@@ -232,7 +250,7 @@ public class I18nFormat
         {
             return null;
         }
-
+        
         if ( !commonFormatting( parsedDate, pattern ).equals( input ) )
         {
             return null;

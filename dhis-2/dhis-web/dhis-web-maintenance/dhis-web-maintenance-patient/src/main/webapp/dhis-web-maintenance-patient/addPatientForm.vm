@@ -21,9 +21,8 @@ td.error {padding-left:1em}
 
 <script>
 	jQuery(document).ready(	function(){
-		//validation( 'addPatientForm', validateAddPatient );		
-		datePickerValid( 'birthDate' );
 		
+		datePicker( 'birthDate', '$formatDate' );
 		jQuery("#addPatientForm").validate({
 				 meta:"validate"
 				,errorElement:"span"
@@ -51,6 +50,7 @@ td.error {padding-left:1em}
 <form id="addPatientForm" name="addPatientForm" action="addPatient.action" method="post">
 <input type="hidden" id="representativeId" name="representativeId"/> 
 <input type="hidden" id="relationshipTypeId" name="relationshipTypeId"/>
+<input type="hidden" id="formatDate" name="formatDate" value="$formatDate"/>
 <table>
 
     <tr><td>&nbsp;</td></tr>
@@ -89,7 +89,7 @@ td.error {padding-left:1em}
 	<tr>
 		<td><label for="birthDate">$i18n.getString( "date_of_birth" )<em title="$i18n.getString( "required" )" class="required">*</em> </label></td>
 		<td>			
-			<input type="text" id="birthDate" name="birthDate" style="width:10em" onchange="bdOnchange()" >
+			<input type="text" id="birthDate" name="birthDate" style="width:10em" onchange="bdOnchange()">
 			&nbsp;
 			<label for="age">$i18n.getString( "or" )  $i18n.getString( "age" ) </label>
 			<input type="text" id="age" name="age" style="width:4em" onchange="ageOnchange()" class="{validate:{number:true, alphanumeric: true}}">

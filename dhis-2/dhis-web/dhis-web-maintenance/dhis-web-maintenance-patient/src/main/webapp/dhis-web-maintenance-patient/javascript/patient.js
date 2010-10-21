@@ -270,7 +270,8 @@ function validateAddPatient()
 				+'&middleName=' + getFieldValue( 'middleName' ) 
 				+'&lastName=' + getFieldValue( 'lastName' ) 
 				+'&gender=' + getFieldValue( 'gender' ) 
-				+'&birthDate=' + getFieldValue( 'birthDate' ) 	        
+				+'&birthDate=' + getFieldValue( 'birthDate' ) 	
+				+'&formatDate=' + getFieldValue('formatDate')				
 				+'&age=' + getFieldValue( 'age' ) 
 				+'&genre=' + getFieldValue('gender') 
 				+'&underAge=' + jQuery("#underAge").is(":checked")
@@ -326,9 +327,7 @@ function validateUpdatePatient()
 				+'&lastName=' + getFieldValue( 'lastName' ) 
 				+'&gender=' + getFieldValue( 'gender' ) 
 				+'&birthDate=' + getFieldValue( 'birthDate' ) 
-//				+'&underAge=' + jQuery("#underAge").is(":checked")
-//				+'&representativeId=' + getFieldValue('representativeId')
-//				+'&relationshipTypeId=' + getFieldValue('relationshipTypeId')
+				+'&formatDate=' + getFieldValue( 'formatDate' )
 				+ getIdParams();
 	
 	var request = new Request();
@@ -448,17 +447,12 @@ function selectAll( list )
 
 function ageOnchange()
 {
-	//jQuery("#birthDate").val("").removeClass("error").rules("remove","required");
-	//jQuery("#age").rules("add",{required:true});
 	jQuery("#birthDate").val("");
 
 }
 
 function bdOnchange()
 {
-	//jQuery("#age").rules("remove","required");
-	//jQuery("#age").val("");
-	//jQuery("#birthDate").rules("add",{required:true});
 	jQuery("#age").val("");
 }
 
@@ -471,7 +465,8 @@ function checkDuplicate()
 				'&middleName=' + getFieldValue( 'middleName' ) +
 				'&lastName=' + getFieldValue( 'lastName' ) +
 				'&gender=' + getFieldValue( 'gender' ) +
-				'&birthDate=' + getFieldValue( 'birthDate' ) +	        
+				'&birthDate=' + getFieldValue( 'birthDate' ) +	 
+				'&formatDate=' + getFieldValue( 'formatDate' ) +
 				'&age=' + getFieldValue( 'age' ) ;
 	
 	var request = new Request();

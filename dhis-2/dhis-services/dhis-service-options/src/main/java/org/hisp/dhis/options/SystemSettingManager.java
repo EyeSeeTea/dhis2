@@ -57,9 +57,12 @@ public interface SystemSettingManager
     final String KEY_CHR_IMAGE_DIRECTORY = "chrImageDirectory";
     final String KEY_CHR_NUMBER_OF_RECORDS = "chrNumberOfRecords";
     
+    final String KEY_FORMAT_DATE = "formatDate";
+    
     final int DEFAULT_MAX_NUMBER_OF_ATTEMPTS = 20;
     final int DEFAULT_TIMEFRAME_MINUTES = 1;
     final double DEFAULT_FACTOR_OF_DEVIATION = 2.0;
+    final String DEFAULT_FORMAT_DATE = "yyyy-MM-dd";
     
     void saveSystemSetting( String name, Serializable value );   
 
