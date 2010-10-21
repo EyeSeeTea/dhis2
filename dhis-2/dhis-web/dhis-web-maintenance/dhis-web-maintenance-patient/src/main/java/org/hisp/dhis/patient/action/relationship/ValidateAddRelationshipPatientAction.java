@@ -45,13 +45,7 @@ implements Action
     private PatientIdentifierService patientIdentifierService;
 
     private PatientIdentifierTypeService identifierTypeService;
-    
-    // -------------------------------------------------------------------------
-	// Input - formatDate
-	// -------------------------------------------------------------------------
-	
-	private String formatDate;
-	
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -151,7 +145,7 @@ implements Action
 
             if ( birthDate.length() != 0 )
             {
-                dateOfBirth = format.parseDate( birthDate, formatDate );
+                dateOfBirth = format.parseDate( birthDate );
 
                 if ( dateOfBirth == null || dateOfBirth.after( new Date() ) )
                 {
@@ -326,11 +320,7 @@ implements Action
         this.lastName = lastName;
     }
 
-    public void setFormatDate(String formatDate) {
-		this.formatDate = formatDate;
-	}
-
-	public void setBirthDate( String birthDate )
+    public void setBirthDate( String birthDate )
     {
         this.birthDate = birthDate;
     }

@@ -71,7 +71,7 @@ function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSave
     var field = document.getElementById( 'value[' + dataElementId + '].value' + ':' +  'value[' + optionComboId + '].value');
     var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML; 
 	var organisationUnitId = getFieldValue( 'organisationUnitId' );
-	
+    
     field.style.backgroundColor = '#ffffcc';   
     
     if ( field.value != '' )
@@ -246,7 +246,7 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
         
         var element;
         
-        /* if ( type == 'bool' )
+        if ( type == 'bool' )
         {
             element = document.getElementById( 'value[' + dataElementId + '].boolean' );
         }
@@ -254,9 +254,7 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
         {
         	element = document.getElementById( 'value[' + dataElementId + '].date' );
         }
-        else  */
-		
-		if( selectedOption )
+        else if( selectedOption )
         {
         	element = selectedOption;    
         }

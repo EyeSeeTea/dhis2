@@ -18,8 +18,8 @@ td.error {padding-left:1em}
 <script>
 	jQuery(document).ready(	function(){
 			validation( 'addRelationshipPatientForm', validateAddRelationshipPatient );		
-			datePicker( 'birthDate', '$formatDate' );
-			jQuery("#birthDate").rules("add",{required:true,datelessthanequaltoday:true});			
+			datePickerValid( 'birthDate' );
+			jQuery("#birthDate").rules("add",{required:true,dateISO:true,datelessthanequaltoday:true});			
 	});		
 </script>
 
@@ -28,7 +28,6 @@ td.error {padding-left:1em}
 																			
 <form  id="addRelationshipPatientForm" action="addRelationshipPatient.action" method="post">
 <input type="hidden" id="relationshipId"  name="relationshipId" value="$patient.id"/> 
-<input type="hidden" id="formatDate" name="formatDate" value="$formatDate"/>
 <table>	
 	<tr>
 		<td ><strong>$i18n.getString("relationship_type")</strong></td>

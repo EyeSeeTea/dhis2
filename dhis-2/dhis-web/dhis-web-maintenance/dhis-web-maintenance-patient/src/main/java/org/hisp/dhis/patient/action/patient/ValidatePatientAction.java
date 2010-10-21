@@ -78,9 +78,7 @@ public class ValidatePatientAction
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
-    
-    private String formatDate;
-    
+
     private String firstName;
 
     private String middleName;
@@ -176,7 +174,7 @@ public class ValidatePatientAction
 
             if ( birthDate.length() != 0 )
             {
-                dateOfBirth = format.parseDate( birthDate, formatDate );
+                dateOfBirth = format.parseDate( birthDate );
 
                 if ( dateOfBirth == null || dateOfBirth.after( new Date() ) )
                 {
@@ -443,8 +441,4 @@ public class ValidatePatientAction
     {
         this.relationshipTypeId = relationshipTypeId;
     }
-
-	public void setFormatDate(String formatDate) {
-		this.formatDate = formatDate;
-	}
 }

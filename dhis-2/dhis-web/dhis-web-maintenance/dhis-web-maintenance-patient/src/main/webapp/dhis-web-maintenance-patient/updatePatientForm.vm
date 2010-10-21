@@ -11,8 +11,8 @@
 <script>
 	jQuery(document).ready(	function(){
 		validation( 'updatePatientForm', validateUpdatePatient );		
-		datePicker( 'birthDate', '$formatDate' );
-		jQuery("#birthDate").rules("add",{required:true});		
+		datePickerValid( 'birthDate' );
+		jQuery("#birthDate").rules("add",{required:true,dateISO:true,datelessthanequaltoday:true});		
 		jQuery("#btnRepresentativeInfo").cluetip({local:"#representativeInfo"});	
 	});		
 </script>
@@ -23,7 +23,6 @@
 <form id="updatePatientForm" action="updatePatient.action" method="post">
 <input type="hidden" id="representativeId" name="representativeId"/> 
 <input type="hidden" id="relationshipTypeId" name="relationshipTypeId"/>
-<input type="hidden" id="formatDate" name="formatDate" value="$formatDate"/>
 <div>
 	<input type="hidden" id="id" name="id" value="$patient.id">
 </div>
@@ -64,7 +63,7 @@
 	<tr>
 		<td><label for="birthDate">$i18n.getString( "date_of_birth" )<em title="$i18n.getString( "required" )" class="required">*</em> </label></td>
 		<td>
-		    <input type="text" id="birthDate" name="birthDate" value="$format.formatDate( $patient.birthDate, $formatDate )" style="width:10em">
+		    <input type="text" id="birthDate" name="birthDate" value="$format.formatDate( $patient.birthDate )" style="width:10em">
 		    <!--<img src="../images/calendar_icon.gif" width="16" height="16" id="getBirthDate" style="cursor: pointer;" title="$i18n.getString("date_selector")" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( "date_of_birth" )">-->		    
             &nbsp;&nbsp;&nbsp;
             <label for="estimated">$i18n.getString( "estimated" )</label>

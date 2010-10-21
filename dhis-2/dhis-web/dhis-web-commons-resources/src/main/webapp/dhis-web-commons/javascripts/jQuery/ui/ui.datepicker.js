@@ -72,7 +72,7 @@ function Datepicker() {
 		changeMonth: false, // True if month can be selected directly, false if only prev/next
 		changeYear: false, // True if year can be selected directly, false if only prev/next
 		showMonthAfterYear: false, // True if the year select precedes month, false for month then year
-		yearRange: '-100:+100', // Range of years to display in drop-down,
+		yearRange: '-10:+10', // Range of years to display in drop-down,
 			// either relative to current year (-nn:+nn) or absolute (nnnn:nnnn)
 		showOtherMonths: false, // True to show dates in other months, false to leave blank
 		calculateWeek: this.iso8601Week, // How to calculate the week of the year,

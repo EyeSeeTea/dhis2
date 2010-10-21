@@ -82,21 +82,22 @@
 		    #set( $dataEntryId = "value[$dataElement.id].value:value[$optionComboId].value" )
 		    ##Data Entry
 			#if( $dataElement.type == "bool" )
-			 <select name="entryfield" id="$dataEntryId" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue" )) onchange="saveBoolean( $dataElement.id, $optionComboId, this )"  #else disabled="disabled" #end style="width:100%  #if( $greyedField ) ;background-color:#000000 #end " tabindex="$tabIndex" #if( $greyedField ) disabled="disabled" #end onkeypress="return keyPress(event, this)">
+			 <select name="entryselect" id="$dataEntryId" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue" )) onchange="saveBoolean( $dataElement.id, $optionComboId, this )" #else disabled="disabled" #end style="width:100%  #if( $greyedField ) ;background-color:#000000 #end " tabindex="$tabIndex" #if( $greyedField ) disabled="disabled" #end>
 				<option value="">[$i18n.getString( "no_value" )]</option>
 				<option value="true" #if( $datavalue && $dataValue.value == "true" ) selected="selected" #end>$i18n.getString( "yes" )</option>
 				<option value="false" #if( $datavalue && $dataValue.value == "false" ) selected="selected" #end>$i18n.getString( "no" )</option>
 			 </select>
+			 
             #elseif( $dataElement.type == "date" )
-                <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionComboId, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" #else disabled="disabled" #end #if( $greyedField ) disabled="disabled" #end onkeypress="return keyPress(event, this)">
-                <img src="../images/calendar_icon.gif" width="16" height="16" id="getValueDate$dataEntryId" style="cursor: pointer;" title="$i18n.getString( 'date_selector' )" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( 'value_date' )"/>
+                <input name="entryfield" id="value[$dataElement.id].date" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveDate( $dataElement.id, '$encoder.jsEncode( $dataElement.name )' )" #else disabled="disabled" #end #if( $greyedField ) disabled="disabled" #end>
+                <img src="../images/calendar_icon.gif" width="16" height="16" id="getValueDate" style="cursor: pointer;" title="$i18n.getString( 'date_selector' )" onmouseover="this.style.background='orange';" onmouseout="this.style.background=''" alt="$i18n.getString( 'value_date' )"/>
                 <script type="text/javascript">
                     Calendar.setup({
-                        inputField     :    "$dataEntryId",      // id of the input field
+                        inputField     :    "value[$dataElement.id].date",      // id of the input field
                         ifFormat       :    "$i18n.getString('format.date.label')",       // format of the input field
-                        button         :    "getValueDate$dataEntryId"   // trigger for the calendar (button ID)
+                        button         :    "getValueDate"   // trigger for the calendar (button ID)
                     });
-                </script> 
+                </script>   
             #else
             
                 #if( $dataElement.type == "string" )
@@ -107,7 +108,7 @@
                         #end
                     #end  
                         #if($coun>0)   
-                            <select name="entryfield" id="$dataEntryId" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue" )) onchange="saveBoolean( $dataElement.id, $optionComboId, this )"  #else disabled="disabled" #end style="width:100% #if( $greyedField ) ;background-color:#000000 #end " tabindex="$tabIndex" #if( $locked ) disabled="disabled" #end #if( $greyedField ) disabled="disabled" #end onkeypress="return keyPress(event, this)">
+                            <select name="entryselect" id="$dataEntryId" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue" )) onchange="saveBoolean( $dataElement.id, $optionComboId, this )"  #else disabled="disabled" #end style="width:100% #if( $greyedField ) ;background-color:#000000 #end " tabindex="$tabIndex" #if( $locked ) disabled="disabled" #end #if( $greyedField ) disabled="disabled" #end>
                             <option value="">[$i18n.getString( "please_select" )] </option>                
                                 #foreach($customValue in $customValues)
                                     #if($dataElement.id == $customValue.dataElement.id && $dataValue.optionCombo.id == $customValue.optionCombo.id)
@@ -117,7 +118,7 @@
                             </select>
                         #else
                         #set( $zeroValueSaveMode = true )
-                            <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionComboId, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" ondblclick="viewHistory( $dataElement.id, $optionComboId, true  )" #else disabled="disabled" #end onkeypress="return keyPress(event, this)" style="width:100% #if( $minMaxError ) ;background-color:#ffcccc #end #if( $greyedField ) ;background-color:#000000 #end #if( $dataElement.type == 'int' ) ;text-align:center #end" tabindex="$tabIndex" #if( $locked ) disabled="disabled" #end #if( $greyedField ) disabled="disabled" #end onkeypress="return keyPress(event, this)"/>
+                            <input name="entryfield" id="$dataEntryId" type="text" value="$!encoder.htmlEncode( $dataValue.value )" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) onchange="saveValue( $dataElement.id, $optionComboId, '$encoder.jsEncode( $dataElement.name )', $zeroValueSaveMode )" ondblclick="viewHistory( $dataElement.id, $optionComboId, true  )" #else disabled="disabled" #end onkeypress="return keyPress(event, this)" style="width:100% #if( $minMaxError ) ;background-color:#ffcccc #end #if( $greyedField ) ;background-color:#000000 #end #if( $dataElement.type == 'int' ) ;text-align:center #end" tabindex="$tabIndex" #if( $locked ) disabled="disabled" #end #if( $greyedField ) disabled="disabled" #end />
                         #end    
                 #end           
 
@@ -135,7 +136,6 @@
                     #end
                 #end
 		  #end
-		  <span id="value[$dataElement.id].type" style="display:none">$dataElement.type</span>
 		</td>
 		
 		##max value

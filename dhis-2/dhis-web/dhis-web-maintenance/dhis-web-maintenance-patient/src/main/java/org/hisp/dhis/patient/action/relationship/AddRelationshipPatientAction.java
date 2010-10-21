@@ -66,12 +66,6 @@ public class AddRelationshipPatientAction
     private RelationshipTypeService relationshipTypeService;
 
     // -------------------------------------------------------------------------
-	// Input - formatDate
-	// -------------------------------------------------------------------------
-	
-	private String formatDate;
-	
-    // -------------------------------------------------------------------------
     // Input - name
     // -------------------------------------------------------------------------
     private String firstName;
@@ -144,7 +138,7 @@ public class AddRelationshipPatientAction
 
             if ( birthDate.length() != 0 )
             {
-                patient.setBirthDate( format.parseDate( birthDate, formatDate ) );
+                patient.setBirthDate( format.parseDate( birthDate ) );
                 patient.setBirthDateEstimated( birthDateEstimated );
             }
             else
@@ -398,11 +392,7 @@ public class AddRelationshipPatientAction
         this.relationshipTypeService = relationshipTypeService;
     }
 
-    public void setFormatDate(String formatDate) {
-		this.formatDate = formatDate;
-	}
-
-	public void setUnderAge( boolean underAge )
+    public void setUnderAge( boolean underAge )
     {
         this.underAge = underAge;
     }

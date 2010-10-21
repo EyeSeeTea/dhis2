@@ -28,7 +28,6 @@ package org.hisp.dhis.interceptor;
  */
 
 import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_FACTOR_OF_DEVIATION;
-import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_FORMAT_DATE;
 import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_MAX_NUMBER_OF_ATTEMPTS;
 import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_TIMEFRAME_MINUTES;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_APPLICATION_TITLE;
@@ -42,7 +41,6 @@ import static org.hisp.dhis.options.SystemSettingManager.KEY_REPORT_FRAMEWORK;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_START_MODULE;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_TIMEFRAME_MINUTES;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_ZERO_VALUE_SAVE_MODE;
-import static org.hisp.dhis.options.SystemSettingManager.KEY_FORMAT_DATE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,7 +97,6 @@ public class SystemSettingInterceptor
         map.put( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, systemSettingManager.getSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, false ) );
         map.put( KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED, systemSettingManager.getSystemSetting( KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED, false ) );
         map.put( KEY_FACTOR_OF_DEVIATION, systemSettingManager.getSystemSetting( KEY_FACTOR_OF_DEVIATION, DEFAULT_FACTOR_OF_DEVIATION ) );
-        map.put( KEY_FORMAT_DATE, systemSettingManager.getSystemSetting( KEY_FORMAT_DATE, DEFAULT_FORMAT_DATE ) );
         
         invocation.getStack().push( map );
         

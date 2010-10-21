@@ -50,16 +50,7 @@ public class UpdateValidationCriteriaAction
     // -------------------------------------------------------------------------
 
     private ValidationCriteriaService validationCriteriaService;
-    
-    // -------------------------------------------------------------------------
-	// Input - formatDate
-	// -------------------------------------------------------------------------
-	
-	private String formatDate;
-	
-    public void setFormatDate(String formatDate) {
-		this.formatDate = formatDate;
-	}
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -163,7 +154,7 @@ public class UpdateValidationCriteriaAction
         }
         else if ( type.equals( Date.class ) )
         {
-            return format.parseDate( value.trim(), formatDate );
+            return format.parseDate( value.trim() );
         }
 
         return value;

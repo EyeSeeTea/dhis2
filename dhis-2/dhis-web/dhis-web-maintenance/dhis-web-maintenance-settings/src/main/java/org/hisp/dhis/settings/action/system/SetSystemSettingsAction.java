@@ -38,7 +38,6 @@ import static org.hisp.dhis.options.SystemSettingManager.KEY_START_MODULE;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_ZERO_VALUE_SAVE_MODE;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_FACTOR_OF_DEVIATION;
-import static org.hisp.dhis.options.SystemSettingManager.KEY_FORMAT_DATE;
 
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.options.style.StyleManager;
@@ -157,13 +156,7 @@ public class SetSystemSettingsAction
         this.currentStyle = style;
     }
     
-    private String formatDate;
-        
-    public void setFormatDate(String formatDate) {
-		this.formatDate = formatDate;
-	}
-    
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
     public String execute()
@@ -196,7 +189,6 @@ public class SetSystemSettingsAction
         systemSettingManager
             .saveSystemSetting( KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED, disableDataEntryWhenCompleted );
         systemSettingManager.saveSystemSetting( KEY_FACTOR_OF_DEVIATION, factorDeviation );
-        systemSettingManager.saveSystemSetting( KEY_FORMAT_DATE, formatDate );
         styleManager.setCurrentStyle( currentStyle );
         
         return SUCCESS;

@@ -783,27 +783,6 @@ function datePicker( id )
 	if( s.val()=='' ) s.val( getCurrentDate() );		
 }
 
-function datePicker( id, dateFormat )
-{
-	dateFormat = dateFormat.indexOf('yyyy') ? dateFormat.replace('yyyy', 'yy') : dateFormat.replace('yy', 'y');
-	
-	$("#" + id).datepicker(
-	{
-		dateFormat:dateFormat,
-		changeMonth: true,
-		changeYear: true,			
-		monthNamesShort: monthNames,
-		dayNamesMin: dayNamesMin,
-		showOn: 'both',
-		buttonImage: '../images/calendar.png',
-		buttonImageOnly: true,
-		constrainInput: true		
-	});
-	s = jQuery("#" + id );	
-	var date = jQuery.datepicker.formatDate( dateFormat , new Date() ) ;	
-	if( s.val()=='' ) s.val( date );		
-}
-
 function datePickerjQuery( jQueryString )
 {
 	jQuery( jQueryString ).datepicker(
@@ -816,12 +795,13 @@ function datePickerjQuery( jQueryString )
 		showOn: 'both',
 		buttonImage: '../images/calendar.png',
 		buttonImageOnly: true,
-		maxDate: '+0d +0w',	
-		constrainInput: true	
+		constrainInput: true		
 	});
 	s = jQuery( jQueryString );		
 	if( s.val()=='' ) s.val( getCurrentDate() );		
 }
+
+
 
 /**
  * Create jQuery datepicker for input text with id * * 
@@ -1297,14 +1277,23 @@ function jumpToPage( baseLink )
     window.location.href = baseLink +"pageSize=" + pageSize +"&currentPage=" +currentPage;
 }
 
-/**
- * Used to export PDF file by the given type and
- * the active items in table
- */
-function exportPdfByType( type )
+function addShowDetail( jQueryString, width, success, responseType )
 {
-	var activeIds = getArrayIdOfActiveRows();
-	window.location.href = 'exportToPdf.action?type=' + type + activeIds;
+	if( success == undefined ) success = function(data){return data;}
+	if( responseType == undefined ) responseType = 'html';	
+	jQuery( jQueryString ).cluetip( {
+		ajaxProcess: success,
+		ajaxCache: true,
+		ajaxSettings: {
+			dataType: responseType
+		},
+		activation: 'click',
+		sticky: true,
+		closePosition: 'title',
+		closeText: '<img src="../images/hide.png" alt="" />',
+		width: width,
+		arrows: true
+	});
 }
 
 /**

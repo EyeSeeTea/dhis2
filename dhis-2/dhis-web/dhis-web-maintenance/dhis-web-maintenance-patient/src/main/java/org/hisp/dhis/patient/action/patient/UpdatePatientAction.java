@@ -79,18 +79,11 @@ public class UpdatePatientAction
     private OrganisationUnitSelectionManager selectionManager;
 
     private PatientAttributeOptionService patientAttributeOptionService;
- 
-    // -------------------------------------------------------------------------
-	// Input - formatDate
-	// -------------------------------------------------------------------------
-	
-	private String formatDate;
-	
+
     // -------------------------------------------------------------------------
     // Input - Id
     // -------------------------------------------------------------------------
-    
-	private Integer id;
+    private Integer id;
 
     // -------------------------------------------------------------------------
     // Input - name
@@ -154,7 +147,7 @@ public class UpdatePatientAction
 
             if ( birthDate.length() != 0 )
             {
-                patient.setBirthDate( format.parseDate( birthDate, formatDate ) );
+                patient.setBirthDate( format.parseDate( birthDate ) );
                 patient.setBirthDateEstimated( birthDateEstimated );
             }
             else
@@ -328,11 +321,7 @@ public class UpdatePatientAction
         this.format = format;
     }
 
-    public void setFormatDate(String formatDate) {
-		this.formatDate = formatDate;
-	}
-
-	public void setPatientService( PatientService patientService )
+    public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
     }
