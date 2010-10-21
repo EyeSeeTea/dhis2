@@ -8,7 +8,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hisp.dhis.mobile.api.SendSMS;
 import org.hisp.dhis.mobile.api.SendSMSStore;
-import org.hisp.dhis.user.User;
 
 public class HibernateSendSMSStore implements SendSMSStore
 {
@@ -66,14 +65,14 @@ public class HibernateSendSMSStore implements SendSMSStore
     }
     
     @SuppressWarnings( "unchecked" )
-    public int getRowCount()
+    public long getRowCount()
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( SendSMS.class );
         criteria.setProjection( Projections.rowCount() );
-        Integer count = (Integer) criteria.uniqueResult();
-        return count != null ? count.intValue() : 0;
+        Long count = (Long) criteria.uniqueResult();
+        return count != null ? count.longValue() : (long) 0;
     }
 
 }

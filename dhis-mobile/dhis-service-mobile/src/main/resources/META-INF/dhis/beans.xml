@@ -45,7 +45,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </bean>
 
     <!-- UserGroup Store and Service -->
-    <!--bean id="org.hisp.dhis.user.UserGroupStore"
+    <bean id="org.hisp.dhis.user.UserGroupStore"
         class="org.hisp.dhis.user.impl.HiberntateUserGroupStore">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
@@ -53,25 +53,25 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <bean id="org.hisp.dhis.user.UserGroupService"
         class="org.hisp.dhis.user.impl.DefaultUserGroupService">
         <property name="userGroupStore" ref="org.hisp.dhis.user.UserGroupStore"/>
-    </bean-->
+    </bean>
 
 
 	<!-- Send ACK Job -->
-	<!--
+	
 	<bean id="org.hisp.dhis.mobile.SendSMSJob"
 		class="org.hisp.dhis.mobile.SendSMSJob">
 		<property name="smsService" ref="org.hisp.dhis.mobile.SmsService"/>
 		<property name="mobileImportService" ref="org.hisp.dhis.mobile.api.MobileImportService" />
 	</bean>
-	-->
-	<!--
+	
+	
 	<bean id="sendSMSJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="org.hisp.dhis.mobile.SendSMSJob"/>-->
+		<property name="targetObject" ref="org.hisp.dhis.mobile.SendSMSJob"/>
 		<!--<property name="targetMethod" value="executeCompleteProcess"/>-->
 		<!--<property name="targetMethod" value="executeProcessPendingMessage"/>-->
 		<!--<property name="targetMethod" value="executeImportProcess"/>-->
 		<!--<property name="targetMethod" value="executeSendSMSProcess"/>-->
-	<!--	<property name="targetMethod" value="executeImportAndSendSMSProcess"/>
+		<property name="targetMethod" value="executeImportAndSendSMSProcess"/>
 		<property name="concurrent" value="false"/>
 	</bean>
 	
@@ -79,7 +79,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="jobDetail" ref="sendSMSJobDetail"/>
 		<property name="startDelay" value="10000"/>
 		<property name="repeatInterval" value="10000"/>
-	</bean>-->
+	</bean>
 
 	<!-- SMSImport Job 
 	<bean id="org.hisp.dhis.mobile.SMSImportJob"
@@ -105,19 +105,19 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
  -->
 
 <!-- Scheduler for all Jobs -->
-<!--
-	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<!--
 		<property name="jobDetails">
 			<list><ref bean="schedulerJob" /></list>
 		</property>
 		-->
-	<!--	<property name="triggers">
-			<list>-->
+		<property name="triggers">
+			<list>
 				<!--<ref bean="cronTriggerForSMSImport" />-->
-		<!--		<ref bean="simpleTriggerForSendSMS" />
+				<ref bean="simpleTriggerForSendSMS" />
 			</list>
 		</property>
-   </bean>-->
+   </bean>
 
 </beans>

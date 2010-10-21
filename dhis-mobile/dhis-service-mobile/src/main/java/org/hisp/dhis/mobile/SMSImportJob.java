@@ -5,10 +5,10 @@ import java.util.Date;
 import org.hisp.dhis.mobile.api.MobileImportService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 
 
-public class SMSImportJob 
-//extends QuartzJobBean
+public class SMSImportJob extends QuartzJobBean
 {
     // -------------------------------------------------------------------------
     // Dependencies
