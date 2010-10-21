@@ -318,7 +318,7 @@ public class ItextPdfService
     {
         initFont();
         Document document = openDocument( out );
-        
+
         PdfPTable table = getPdfPTable( true, 0.19f, 0.13f, 0.21f, 0.07f, 0.12f, 0.07f, 0.21f );
 
         table.setHeaderRows( 0 );
@@ -368,6 +368,7 @@ public class ItextPdfService
         closeDocument( document );
     }
 
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -406,4 +407,5 @@ public class ItextPdfService
         ITALIC = new Font( bf, 9, Font.ITALIC );
         HEADER3 = new Font( bf, 12, Font.BOLD );
     }
+
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.pdf;
+package org.hisp.dhis.databrowser;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -28,32 +28,35 @@ package org.hisp.dhis.pdf;
  */
 
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
 
-import org.hisp.dhis.completeness.DataSetCompletenessResult;
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.validation.ValidationResult;
 
 /**
- * @author Lars Helge Overland
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public interface PdfService
+public interface DataBrowserPdfService
 {
-    String ID = PdfService.class.getName();
+    final String ID = DataBrowserPdfService.class.getName();
 
-    void writeAllDataElements( OutputStream outputStream, I18n i18n );
-
-    void writeAllIndicators( OutputStream outputStream, I18n i18n );
-
-    void writeAllOrganisationUnits( OutputStream outputStream, I18n i18n );
-
-    void writeDataSetCompletenessResult( Collection<DataSetCompletenessResult> results, OutputStream out, I18n i18n,
-        OrganisationUnit unit, DataSet dataSet );
-
-    void writeValidationResult( List<ValidationResult> results, OutputStream out, I18n i18n, I18nFormat format );
+    /**
+     * Returns an InputStream representing the tally sheet The InputStream will
+     * give the opportunity to either print or save the tally sheet.
+     * 
+     * @param dataBrowserTitleName the title name of data browser
+     * @param dataBrowserFromDate the start date
+     * @param dataBrowserToDate the end date
+     * @param dataBrowserPeriodType the period type
+     * @param pageLayout the layout of page
+     * @param fileName the output file name
+     * @param fontSize the font size
+     * @param dataBrowserTable the given instance of DataBrowserTable
+     * @param out the output stream
+     * @param i18n the internationalization
+     * @param format the formatter for Date
+     * @return void
+     */
+    void writeDataBrowserResult( String dataBrowserTitleName, String dataBrowserFromDate, String dataBrowserToDate,
+        String dataBrowserPeriodType, String pageLayout, String fileName, int fontSize,
+        DataBrowserTable dataBrowserTable, OutputStream out, I18n i18n );
 }
