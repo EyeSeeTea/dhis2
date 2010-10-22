@@ -27,7 +27,11 @@ package org.hisp.dhis.pdf;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
@@ -36,9 +40,9 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
+import org.hisp.dhis.mock.MockI18n;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.StreamUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -62,11 +66,6 @@ public class PdfServiceTest
 
     private I18n i18n;
 
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -74,6 +73,8 @@ public class PdfServiceTest
     @Override
     public void setUpTest()
     {
+        i18n = new MockI18n();
+
         pdfService = (PdfService) getBean( PdfService.ID );
 
         dataElementService = (DataElementService) getBean( DataElementService.ID );
@@ -96,6 +97,7 @@ public class PdfServiceTest
         organisationUnitService.addOrganisationUnit( createOrganisationUnit( 'A' ) );
         organisationUnitService.addOrganisationUnit( createOrganisationUnit( 'B' ) );
         organisationUnitService.addOrganisationUnit( createOrganisationUnit( 'C' ) );
+
     }
 
     // -------------------------------------------------------------------------
@@ -103,19 +105,19 @@ public class PdfServiceTest
     // -------------------------------------------------------------------------
 
     @Test
-    @Ignore
     public void testWriteAllDataElements()
         throws Exception
     {
-        OutputStream outputStream = new BufferedOutputStream( new FileOutputStream( "dataElementsTest.pdf" ) );
+        OutputStream outputStreamA = new BufferedOutputStream( new FileOutputStream( "dataElementsTest.pdf" ) );
 
-        pdfService.writeAllDataElements( outputStream, i18n );
+        pdfService.writeAllDataElements( outputStreamA, i18n );
+        
+        assertNotNull( outputStreamA );
 
-        StreamUtils.closeOutputStream( outputStream );
+        StreamUtils.closeOutputStream( outputStreamA );
     }
 
     @Test
-    @Ignore
     public void testWriteAllIndicators()
         throws Exception
     {
@@ -123,18 +125,21 @@ public class PdfServiceTest
 
         pdfService.writeAllIndicators( outputStreamB, i18n );
 
+        assertNotNull( outputStreamB );
+        
         StreamUtils.closeOutputStream( outputStreamB );
     }
 
     @Test
-    @Ignore
     public void testWriteAllOrganisationUnits()
         throws Exception
     {
-        OutputStream outputStream = new BufferedOutputStream( new FileOutputStream( "organisationUnitsTest.pdf" ) );
+        OutputStream outputStreamC = new BufferedOutputStream( new FileOutputStream( "organisationUnitsTest.pdf" ) );
 
-        pdfService.writeAllOrganisationUnits( outputStream, i18n );
+        pdfService.writeAllOrganisationUnits( outputStreamC, i18n );
 
-        StreamUtils.closeOutputStream( outputStream );
+        assertNotNull( outputStreamC );
+        
+        StreamUtils.closeOutputStream( outputStreamC );
     }
 }
