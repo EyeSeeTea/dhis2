@@ -63,14 +63,18 @@ public interface SqlViewService
 
     Collection<String> getAllSqlViewNames();
 
+    Collection<String> getAllResourceProperties( String resourceTableName );
+
     boolean isViewTableExists( String viewTableName );
+
+    boolean createViewTable( SqlView sqlViewInstance );
+
+    void dropViewTable( Object object );
 
     SqlViewTable getDataSqlViewTable( String viewTableName );
 
-    Collection<String> getAllResourceProperties( String resourceTableName );
-
     String testSqlGrammar( String sql );
-    
+
     String setUpJoinQuery( Collection<String> tableList );
 
 }
