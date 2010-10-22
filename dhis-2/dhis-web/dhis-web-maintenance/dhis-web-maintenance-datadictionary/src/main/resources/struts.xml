@@ -16,12 +16,6 @@
 		</action>
 
 		<!-- DataElement -->
-		
-		<action name="showDataElementDetails"
-			class="org.hisp.dhis.dd.action.dataelement.GetDataElementAction">
-			<result name="success" type="velocity">/dhis-web-maintenance-datadictionary/ajax/htmlDataElement.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
-		</action>
 
 		<action name="dataElement"
 			class="org.hisp.dhis.dd.action.dataelement.GetDataElementListAction">
@@ -205,14 +199,7 @@
 			<param name="requiredAuthorities">F_DATAELEMENTGROUP_UPDATE</param>
 		</action>
 
-		<!-- DataElementGroup -->
-		
-		<action name="showDataElementGroupDetails"
-			class="org.hisp.dhis.dd.action.dataelementgroup.GetDataElementGroupAction">
-			<result name="success" type="velocity">
-				/dhis-web-maintenance-datadictionary/ajax/htmlDataElementGroup.vm
-			</result>
-		</action>
+		<!-- DataElementGroup -->	
 
 		<action name="dataElementGroup"
 			class="org.hisp.dhis.dd.action.dataelementgroup.GetDataElementGroupListAction">
