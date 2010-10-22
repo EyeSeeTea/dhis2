@@ -28,10 +28,8 @@ package org.hisp.dhis.pdf;
  */
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
