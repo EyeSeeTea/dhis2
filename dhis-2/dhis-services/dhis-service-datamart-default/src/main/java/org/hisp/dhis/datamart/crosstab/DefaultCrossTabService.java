@@ -101,7 +101,7 @@ public class DefaultCrossTabService
             crossTabStore.createCrossTabTable( operandList, key );
             
             log.info( "Created crosstab table" );
-            
+            System.out.println("\n\n ================= \n create table name : " + CrossTabStore.TABLE_NAME + key);
             final BatchHandler<Object> batchHandler = batchHandlerFactory.createBatchHandler( GenericBatchHandler.class );
             batchHandler.setTableName( CrossTabStore.TABLE_NAME + key );
             batchHandler.init();

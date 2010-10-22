@@ -175,36 +175,33 @@ public class VisitPlanAction
     public String execute()
         throws Exception
     {
-
         // ---------------------------------------------------------------------
         // Make attributes available so that users can sort based on attributes
         // ---------------------------------------------------------------------
 
         attributes = patientAttributeService.getAllPatientAttributes();
-
+        
         // ---------------------------------------------------------------------
         // Get the facility planning to do a visit
         // ---------------------------------------------------------------------
 
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
+        
         // ---------------------------------------------------------------------
         // Get all the programs the facility is providing
         // ---------------------------------------------------------------------
 
-        Collection<Program> programs = programService.getPrograms( organisationUnit );
-        
+        Collection<Program> programs = programService.getPrograms( organisationUnit ); 
 
         if ( programs.size() > 0 )
         {
-
             // -----------------------------------------------------------------
             // For all the programs a facility is servicing get the active
             // instances completed = false
             // -----------------------------------------------------------------
 
             Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( programs, false );
-
+            
             // -----------------------------------------------------------------
             // For all the active program instances determine the next visits
             // and group these visits based on the patient to be visited

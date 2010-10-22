@@ -1,5 +1,3 @@
-package org.hisp.dhis.patient;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,26 +25,31 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.patientattributevalue;
+
 import java.util.Collection;
 
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Quang Nguyen
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version PatientAttributeValueDeletionHandler.java Sep 30, 2010 1:34:28 PM
  */
-public class PatientIdentifierDeletionHandler
+public class PatientAttributeValueDeletionHandler
     extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientIdentifierService patientIdentifierService;
+    private PatientAttributeValueService patientAttributeValueService;
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
     {
-        this.patientIdentifierService = patientIdentifierService;
+        this.patientAttributeValueService = patientAttributeValueService;
     }
 
     // -------------------------------------------------------------------------
@@ -56,32 +59,32 @@ public class PatientIdentifierDeletionHandler
     @Override
     public String getClassName()
     {
-        return PatientIdentifier.class.getSimpleName();
+        return PatientAttributeValue.class.getSimpleName();
     }
 
     @Override
     public void deletePatient( Patient patient )
     {
-        Collection<PatientIdentifier> patientIdentifiers = patientIdentifierService.getPatientIdentifiers( patient );
+        Collection<PatientAttributeValue> attributeValues = patientAttributeValueService
+            .getPatientAttributeValues( patient );
 
-        if ( patientIdentifiers.size() > 0 )
+        for ( PatientAttributeValue attributeValue : attributeValues )
         {
-            for ( PatientIdentifier identifier : patientIdentifiers )
-            {
-                patientIdentifierService.deletePatientIdentifier( identifier );
-            }
+            patientAttributeValueService.deletePatientAttributeValue( attributeValue );
         }
     }
 
-    @Override
-    public void deletePatientIdentifierType( PatientIdentifierType patientIdentifierType )
+    public void deletePatientAttribute( PatientAttribute patientAttribute )
     {
-        Collection<PatientIdentifier> identifiers = patientIdentifierService
-            .getPatientIdentifiersByType( patientIdentifierType );
+        Collection<PatientAttributeValue> attributeValues = patientAttributeValueService
+            .getPatientAttributeValues( patientAttribute );
 
-        for ( PatientIdentifier identifier : identifiers )
+        if ( attributeValues != null && attributeValues.size() > 0 )
         {
-            patientIdentifierService.deletePatientIdentifier( identifier );
+            for ( PatientAttributeValue attributeValue : attributeValues )
+            {
+                patientAttributeValueService.deletePatientAttributeValue( attributeValue );
+            }
         }
     }
 }

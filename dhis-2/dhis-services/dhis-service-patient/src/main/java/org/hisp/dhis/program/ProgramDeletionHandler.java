@@ -1,5 +1,3 @@
-package org.hisp.dhis.patient;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,61 +25,75 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+package org.hisp.dhis.program;
 
+import java.util.Collection;
+import java.util.Set;
+
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.hisp.dhis.validation.ValidationCriteria;
 
 /**
- * @author Quang Nguyen
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version ProgramDeleteHandler.java Sep 30, 2010 1:39:15 PM
  */
-public class PatientIdentifierDeletionHandler
+public class ProgramDeletionHandler
     extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientIdentifierService patientIdentifierService;
+    private PatientService patientService;
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    public void setPatientService( PatientService patientService )
     {
-        this.patientIdentifierService = patientIdentifierService;
+        this.patientService = patientService;
+    }
+
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
     }
 
     // -------------------------------------------------------------------------
+
     // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String getClassName()
     {
-        return PatientIdentifier.class.getSimpleName();
+        return Program.class.getSimpleName();
     }
 
     @Override
     public void deletePatient( Patient patient )
     {
-        Collection<PatientIdentifier> patientIdentifiers = patientIdentifierService.getPatientIdentifiers( patient );
+        Set<Program> programs = patient.getPrograms();
 
-        if ( patientIdentifiers.size() > 0 )
+        if ( programs != null )
         {
-            for ( PatientIdentifier identifier : patientIdentifiers )
-            {
-                patientIdentifierService.deletePatientIdentifier( identifier );
-            }
+            patient.setPrograms( null );
+
+            patientService.updatePatient( patient );
         }
     }
 
     @Override
-    public void deletePatientIdentifierType( PatientIdentifierType patientIdentifierType )
+    public void deleteValidationCriteria( ValidationCriteria validationCriteria )
     {
-        Collection<PatientIdentifier> identifiers = patientIdentifierService
-            .getPatientIdentifiersByType( patientIdentifierType );
-
-        for ( PatientIdentifier identifier : identifiers )
-        {
-            patientIdentifierService.deletePatientIdentifier( identifier );
+        Collection<Program> programs = programService.getPrograms( validationCriteria );
+        
+        for(Program program : programs){
+            program.getPatientValidationCriteria().remove( validationCriteria );
+            programService.updateProgram( program );
         }
+        
     }
 }

@@ -90,7 +90,6 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-datadictionary/addDataElementForm.vm</param>
 			<param name="javascripts">javascript/shortName.js,javascript/dataElement.js</param>
-			<param name="stylesheets">style/dhis-web-maintenance-datadictionary.css</param>
 			<param name="requiredAuthorities">F_DATAELEMENT_ADD</param>
 		</action>
 
@@ -106,7 +105,6 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-datadictionary/updateDataElementForm.vm</param>
 			<param name="javascripts">javascript/shortName.js,javascript/dataElement.js,javascript/updateLoad.js</param>
-			<param name="stylesheets">style/dhis-web-maintenance-datadictionary.css</param>
 			<param name="requiredAuthorities">F_DATAELEMENT_UPDATE</param>
 		</action>
 
