@@ -29,8 +29,7 @@ package org.hisp.dhis.pdf;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.hisp.dhis.DhisSpringTest;
@@ -44,8 +43,7 @@ import org.hisp.dhis.system.util.StreamUtils;
 import org.junit.Test;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Hieu
  */
 public class PdfServiceTest
     extends DhisSpringTest
@@ -95,18 +93,21 @@ public class PdfServiceTest
         organisationUnitService.addOrganisationUnit( createOrganisationUnit( 'A' ) );
         organisationUnitService.addOrganisationUnit( createOrganisationUnit( 'B' ) );
         organisationUnitService.addOrganisationUnit( createOrganisationUnit( 'C' ) );
-
     }
 
     // -------------------------------------------------------------------------
     // Tests
+    //
+    // Change to
+    // new BufferedOutputStream( new FileOutputStream( "file.pdf" ) )
+    // to verify output visually
     // -------------------------------------------------------------------------
 
     @Test
     public void testWriteAllDataElements()
         throws Exception
     {
-        OutputStream outputStreamA = new BufferedOutputStream( new FileOutputStream( "dataElementsTest.pdf" ) );
+        OutputStream outputStreamA = new ByteArrayOutputStream();
 
         pdfService.writeAllDataElements( outputStreamA, i18n );
         
@@ -119,7 +120,7 @@ public class PdfServiceTest
     public void testWriteAllIndicators()
         throws Exception
     {
-        OutputStream outputStreamB = new BufferedOutputStream( new FileOutputStream( "indicatorsTest.pdf" ) );
+        OutputStream outputStreamB = new ByteArrayOutputStream();
 
         pdfService.writeAllIndicators( outputStreamB, i18n );
 
@@ -132,7 +133,7 @@ public class PdfServiceTest
     public void testWriteAllOrganisationUnits()
         throws Exception
     {
-        OutputStream outputStreamC = new BufferedOutputStream( new FileOutputStream( "organisationUnitsTest.pdf" ) );
+        OutputStream outputStreamC = new ByteArrayOutputStream();
 
         pdfService.writeAllOrganisationUnits( outputStreamC, i18n );
 
