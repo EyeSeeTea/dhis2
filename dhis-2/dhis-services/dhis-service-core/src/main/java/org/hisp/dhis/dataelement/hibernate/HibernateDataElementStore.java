@@ -497,6 +497,8 @@ public class HibernateDataElementStore
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<DataElement> getAllDataElements( int from, int to )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -512,14 +514,6 @@ public class HibernateDataElementStore
 
     public int getNumberOfDataElements()
     {
-        // Session session = sessionFactory.getCurrentSession();
-        //
-        // Criteria criteria = session.createCriteria( DataElement.class );
-        // criteria.setCacheable( true );
-        // criteria.setProjection( Projections.rowCount() ).uniqueResult();
-        //
-        // return ((Number) criteria).intValue();
-
         String sql = "select count(*) from DataElement";
         Query query = sessionFactory.getCurrentSession().createQuery( sql );
         Number countResult = (Number) query.uniqueResult();
@@ -527,13 +521,12 @@ public class HibernateDataElementStore
         return countResult.intValue();
     }
 
-    @Override
     public int countNumberOfSearchDataElementByName( String key )
     {
         return searchDataElementByName( key ).size();
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
     public Collection<DataElement> searchDataElementByName( String key, int from, int to )
     {
         Session session = sessionFactory.getCurrentSession();
