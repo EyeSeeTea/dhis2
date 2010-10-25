@@ -1,5 +1,3 @@
-package org.hisp.dhis.program;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,25 +25,30 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.relationship;
+
+import java.util.Collection;
+
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Quang Nguyen
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version RelationshipDeletionHandler.java Sep 30, 2010 1:20:23 PM
  */
-public class ProgramInstanceDeleteHandler
+public class RelationshipDeletionHandler
     extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramInstanceService programInstanceService;
+    private RelationshipService relationshipSevice;
 
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    public void setRelationshipSevice( RelationshipService relationshipSevice )
     {
-        this.programInstanceService = programInstanceService;
+        this.relationshipSevice = relationshipSevice;
     }
 
     // -------------------------------------------------------------------------
@@ -55,15 +58,33 @@ public class ProgramInstanceDeleteHandler
     @Override
     public String getClassName()
     {
-        return ProgramInstance.class.getSimpleName();
+        return Relationship.class.getSimpleName();
     }
 
     @Override
     public void deletePatient( Patient patient )
     {
-        for(ProgramInstance programInstance : programInstanceService.getProgramInstances( patient ))
+        Collection<Relationship> relationships = relationshipSevice.getRelationshipsForPatient( patient );
+
+        if ( relationships != null )
         {
-            programInstanceService.deleteProgramInstance( programInstance );
+            for ( Relationship relationship : relationships )
+            {
+                relationshipSevice.deleteRelationship( relationship );
+            }
         }
     }
+
+    @Override
+    public void deleteRelationshipType( RelationshipType relationshipType )
+    {
+        Collection<Relationship> relationships = relationshipSevice
+            .getRelationshipsByRelationshipType( relationshipType );
+        
+        for ( Relationship relationship : relationships )
+        {
+            relationshipSevice.deleteRelationship( relationship );
+        }
+    }
+
 }
