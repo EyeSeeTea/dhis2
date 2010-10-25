@@ -11,15 +11,10 @@ import org.hisp.dhis.user.UserStore;
 
 import com.opensymphony.xwork2.Action;
 
-public class AddUserGroupAction implements Action
-{
-
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
+public class UpdateUserGroupAction implements Action
+{ 
     private UserStore userStore;
-    
+
     public void setUserStore( UserStore userStore )
     {
         this.userStore = userStore;
@@ -37,44 +32,50 @@ public class AddUserGroupAction implements Action
     // -------------------------------------------------------------------------
 
     private List<Integer> groupMembers;
-    
+
     public void setGroupMembers( List<Integer> groupMembers )
     {
         this.groupMembers = groupMembers;
     }
-    
+
     private String name;
-    
+
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    private Integer userGroupId;
+    
+    public void setUserGroupId( Integer userGroupId )
+    {
+        this.userGroupId = userGroupId;
     }
     
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
 
-    public String execute() throws Exception
+    public String execute()
+        throws Exception
     {
 
-        
+        System.out.println("  groupMembers size : "+ groupMembers.size());
         
         Set<User> userList = new HashSet<User>();
-        
-        for( Integer groupMember : groupMembers )
+
+        for ( Integer groupMember : groupMembers )
         {
             User user = userStore.getUser( groupMember );
             userList.add( user );
-           
-            
         }
+
+        UserGroup userGroup = userGroupService.getUserGroup( userGroupId );
         
-        UserGroup userGroup = new UserGroup( name, userList );
-        
-        userGroupService.addUserGroup( userGroup );
-        
-        
-        
+        userGroup.setName( name );
+        userGroup.setMembers( userList );
+
+        userGroupService.updateUserGroup( userGroup);
         
         return SUCCESS;
     }
