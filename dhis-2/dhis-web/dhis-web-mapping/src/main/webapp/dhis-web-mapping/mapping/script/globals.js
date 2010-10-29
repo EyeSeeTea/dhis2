@@ -245,7 +245,7 @@ GLOBALS.util = {
     },
 
     getLegendsJSON: function() {
-        var widget = ACTIVEPANEL == GLOBALS.config.thematicMap ? choropleth : proportionalSymbol;
+        var widget = GLOBALS.vars.activePanel == GLOBALS.conf.thematicMap ? choropleth : proportionalSymbol;
         var json = '{';
         json += '"legends":';
         json += '[';
@@ -259,4 +259,47 @@ GLOBALS.util = {
         json += '}';
         return json;
     }
+};
+
+GLOBALS.vars = {
+    
+    map: null,
+    
+    mapSource: {
+        value: null,
+        setDatabase: function() {
+            this.value = GLOBALS.conf.map_source_type_database;
+        },
+        setGeojson: function() {
+            this.value = GLOBALS.conf.map_source_type_geojson;
+        },
+        setShapefile: function() {
+            this.value = GLOBALS.conf.map_source_type_shapefile;
+        },
+        isDatabase: function() {
+            return this.value == GLOBALS.conf.map_source_type_database;
+        },
+        isGeojson: function() {
+            return this.value == GLOBALS.conf.map_source_type_geojson;
+        },
+        isShapefile: function() {
+            return this.value == GLOBALS.conf.map_source_type_shapefile;
+        }
+    },
+    
+    mapDateType: null,
+    
+    parameter: null,
+    
+    activepanel: null,
+    
+    mask: null,
+    
+    exportValues: null,
+    
+    topLevelUnit: null,
+    
+    locateFeatureWindow: null,
+    
+    selectFeatureWindow: null
 };
