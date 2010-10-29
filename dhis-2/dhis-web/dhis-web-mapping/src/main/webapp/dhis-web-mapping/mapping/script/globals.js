@@ -265,7 +265,7 @@ GLOBALS.vars = {
     
     map: null,
     
-    mapSource: {
+    mapSourceType: {
         value: null,
         setDatabase: function() {
             this.value = GLOBALS.conf.map_source_type_database;
@@ -287,11 +287,45 @@ GLOBALS.vars = {
         }
     },
     
-    mapDateType: null,
+    mapDateType: {
+        value: null,
+        setFixed: function() {
+            this.value = GLOBALS.conf.map_date_type_fixed;
+        },
+        setStartEnd: function() {
+            this.value = GLOBALS.conf.map_date_type_start_end;
+        },
+        isFixed: function() {
+            return this.value == GLOBALS.conf.map_date_type_fixed;
+        },
+        isStartEnd: function() {
+            return this.value == GLOBALS.conf.map_date_type_start_end;
+        }
+    },
     
     parameter: null,
     
-    activepanel: null,
+    activePanel: {
+        value: null,
+        setPolygon: function() {
+            this.value = GLOBALS.conf.thematicMap;
+        },
+        setPoint: function() {
+            this.value = GLOBALS.conf.thematicMap2;
+        },
+        setAssignment: function() {
+            this.value = GLOBALS.conf.organisationUnitAssignment;
+        },
+        isPolygon: function() {
+            return this.value == GLOBALS.conf.thematicMap;
+        },
+        isPoint: function() {
+            return this.value == GLOBALS.conf.thematicMap2;
+        },
+        isAssignment: function() {
+            return this.value == GLOBALS.conf.organisationUnitAssignment;
+        }
+    },
     
     mask: null,
     

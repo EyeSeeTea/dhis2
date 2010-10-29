@@ -372,10 +372,10 @@ mapfish.widgets.geostat.Mapping = Ext.extend(Ext.FormPanel, {
         if (url != mapping.newUrl) {
             mapping.newUrl = url;
             
-            if (GLOBALS.vars.mapSource.isGeojson()) {
+            if (GLOBALS.vars.mapSourceType.isGeojson()) {
                 mapping.setUrl(GLOBALS.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + url);
             }
-			else if (GLOBALS.vars.mapSource.isShapefile()) {
+			else if (GLOBALS.vars.mapSourceType.isShapefile()) {
 				mapping.setUrl(GLOBALS.conf.path_geoserver + GLOBALS.conf.wfs + url + GLOBALS.conf.output);
 			}
         }

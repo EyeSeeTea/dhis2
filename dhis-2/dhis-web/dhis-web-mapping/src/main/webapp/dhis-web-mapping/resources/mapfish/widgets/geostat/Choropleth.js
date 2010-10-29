@@ -93,8 +93,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             GLOBALS.vars.parameter = false;        
             GLOBALS.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
                     
-            Ext.getCmp('mapsource_cb').setValue(GLOBALS.vars.mapSource.value);
-            Ext.getCmp('mapdatetype_cb').setValue(GLOBALS.vars.mapDateType);
+            Ext.getCmp('mapsource_cb').setValue(GLOBALS.vars.mapSourceType.value);
+            Ext.getCmp('mapdatetype_cb').setValue(GLOBALS.vars.mapDateType.value);
             
             function mapViewStoreCallback() {
                 Ext.getCmp('mapview_cb').setValue(this.mapView.id);
@@ -202,7 +202,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
                         GLOBALS.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
 
-                        Ext.getCmp('mapdatetype_cb').setValue(GLOBALS.vars.mapDateType);
+                        Ext.getCmp('mapdatetype_cb').setValue(GLOBALS.vars.mapDateType.value);
                         Ext.getCmp('mapview_cb').setValue(this.mapView.id);
 
                         this.valueType = this.mapView.mapValueType;
@@ -975,10 +975,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         var scope = this;
         
         var onHoverSelect = function onHoverSelect(feature) {
-            if (GLOBALS.vars.activePanel == GLOBALS.conf.thematicMap) {
+            if (GLOBALS.vars.activePanel.isPolygon()) {
                 Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[choropleth.mapData.nameColumn] + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
             }
-            else if (GLOBALS.vars.activePanel == GLOBALS.conf.organisationUnitAssignment) {
+            else if (GLOBALS.vars.activePanel.isAssignment()) {
                 Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[mapping.mapData.nameColumn] + '</div>', false);
             }
         };
@@ -992,7 +992,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             var x = east_panel.x - 210;
             var y = east_panel.y + 41;
             
-            if (GLOBALS.vars.activePanel == GLOBALS.conf.thematicMap && GLOBALS.vars.mapSource.isDatabase()) {
+            if (GLOBALS.vars.activePanel.isPolygon() && GLOBALS.vars.mapSourceType.isDatabase()) {
                 if (feature.attributes.hasChildrenWithCoordinates) {
                     if (GLOBALS.vars.locateFeatureWindow) {
                         GLOBALS.vars.locateFeatureWindow.destroy();
@@ -1008,7 +1008,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 }
             }
             
-            if (GLOBALS.vars.activePanel == GLOBALS.conf.organisationUnitAssignment && GLOBALS.vars.mapSource.value != GLOBALS.conf.map_source_type_database) {
+            if (GLOBALS.vars.activePanel.isAssignment() && GLOBALS.vars.mapSourceType.value != GLOBALS.conf.map_source_type_database) {
                 if (GLOBALS.vars.selectFeatureWindow) {
                     GLOBALS.vars.selectFeatureWindow.destroy();
                 }
@@ -1093,7 +1093,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     prepareMapViewDateType: function() {
         var obj = {};
-        if (GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_fixed) {
+        if (GLOBALS.vars.mapDateType.isFixed()) {
             Ext.getCmp('periodtype_cb').showField();
             Ext.getCmp('period_cb').showField();
             Ext.getCmp('startdate_df').hideField();
@@ -1111,7 +1111,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 c2: 'periodId'
             };
         }
-        else if (GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_start_end) {
+        else if (GLOBALS.vars.mapDateType.isStartEnd()) {
             Ext.getCmp('periodtype_cb').hideField();
             Ext.getCmp('period_cb').hideField();
             Ext.getCmp('startdate_df').showField();
@@ -1157,7 +1157,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     prepareMapViewMap: function() {
-        if (GLOBALS.vars.mapSource.isDatabase()) {
+        if (GLOBALS.vars.mapSourceType.isDatabase()) {
             Ext.getCmp('map_cb').hideField();
             Ext.getCmp('map_tf').showField();
         }
@@ -1186,7 +1186,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 obj.components.valueType.setValue(this.mapView[obj.mapView.valueType]);
                 
                 obj = this.prepareMapViewDateType();
-                if (GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_fixed) {
+                if (GLOBALS.vars.mapDateType.isFixed()) {
                     if (obj.stores.c1.isLoaded) {
                         dateTypeGroupStoreCallback.call(this);
                     }
@@ -1196,7 +1196,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         }});
                     }
                 }
-                else if (GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_start_end) {
+                else if (GLOBALS.vars.mapDateType.isStartEnd()) {
                     obj.components.c1.setValue(new Date(this.mapView[obj.mapView.c1]));
                     obj.components.c2.setValue(new Date(this.mapView[obj.mapView.c2]));
                     
@@ -1263,7 +1263,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     setMapViewMap: function() {
         this.prepareMapViewMap();
 
-        if (GLOBALS.vars.mapSource.isDatabase()) {
+        if (GLOBALS.vars.mapSourceType.isDatabase()) {
             Ext.getCmp('map_tf').setValue(this.mapView.organisationUnitSelectionTypeName);
             Ext.getCmp('map_tf').value = this.mapView.mapSource;
             this.loadFromDatabase(this.mapView.mapSource);
@@ -1330,7 +1330,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
         
-        if (GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_fixed) {
+        if (GLOBALS.vars.mapDateType.isFixed()) {
             if (!Ext.getCmp('period_cb').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1347,7 +1347,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
         
-        var cmp = GLOBALS.vars.mapSource.isDatabase() ? Ext.getCmp('map_tf') : Ext.getCmp('map_cb');
+        var cmp = GLOBALS.vars.mapSourceType.isDatabase() ? Ext.getCmp('map_tf') : Ext.getCmp('map_cb');
         if (!cmp.getValue()) {
             if (exception) {
                 Ext.message.msg(false, i18n_form_is_not_complete);
@@ -1389,7 +1389,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             startDate: Ext.getCmp('startdate_df').getValue() || '',
             endDate: Ext.getCmp('enddate_df').getValue() || '',
             organisationUnitSelectionType: this.organisationUnitSelectionType.value,
-            mapSource: GLOBALS.vars.mapSource.isDatabase() ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue(),
+            mapSource: GLOBALS.vars.mapSourceType.isDatabase() ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue(),
             mapLegendType: Ext.getCmp('maplegendtype_cb').getValue(),
             method: this.legend.type == GLOBALS.conf.map_legend_type_automatic ? Ext.getCmp('method_cb').getValue() : '',
             classes: this.legend.type == GLOBALS.conf.map_legend_type_automatic ? Ext.getCmp('numClasses_cb').getValue() : '',
@@ -1435,10 +1435,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         if (url != this.newUrl) {
             this.newUrl = url;
 
-            if (GLOBALS.vars.mapSource.isGeojson()) {
+            if (GLOBALS.vars.mapSourceType.isGeojson()) {
                 this.setUrl(GLOBALS.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + url);
             }
-			else if (GLOBALS.vars.mapSource.isShapefile()) {
+			else if (GLOBALS.vars.mapSourceType.isShapefile()) {
 				this.setUrl(GLOBALS.conf.path_geoserver + GLOBALS.conf.wfs + url + GLOBALS.conf.output);
 			}
         }
@@ -1448,7 +1448,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
 
     classify: function(exception, position) {
-        if (GLOBALS.vars.mapSource.isDatabase()) {
+        if (GLOBALS.vars.mapSourceType.isDatabase()) {
             this.classifyDatabase(exception, position);
         }
         else {
@@ -1485,9 +1485,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
             var params = {
                 id: this.valueType == GLOBALS.conf.map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue(),
-                periodId: GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_fixed ? Ext.getCmp('period_cb').getValue() : null,
-                startDate: GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_start_end ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
-                endDate: GLOBALS.vars.mapDateType == GLOBALS.conf.map_date_type_start_end ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
+                periodId: GLOBALS.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getValue() : null,
+                startDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
+                endDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
                 parentId: this.organisationUnitSelectionType.parent,
                 level: this.organisationUnitSelectionType.level
             };
