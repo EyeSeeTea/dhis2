@@ -1,6 +1,6 @@
 ﻿Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext-ux/theme/gray-extend/gray-extend/s.gif';
-	/* Ext 3.2.0 override */
+	/* Ext 3.2.0 overrides */
 	Ext.override(Ext.form.Field,{showField:function(){this.show();this.container.up('div.x-form-item').setDisplayed(true);},hideField:function(){this.hide();this.container.up('div.x-form-item').setDisplayed(false);}});
     /* Disallow right clicks */
 	document.body.oncontextmenu = function(){return false;};
@@ -3062,7 +3062,7 @@
                 fn: function() {
                     if (GLOBALS.vars.activePanel.value != GLOBALS.conf.thematicMap) {
                         GLOBALS.vars.activePanel.setPolygon();
-                        this.layer.setVisibility(false);
+                        this.layer.setVisibility(true);
                         
                         if (this.legend.type == GLOBALS.conf.map_legend_type_predefined) {
                             this.applyPredefinedLegend();
