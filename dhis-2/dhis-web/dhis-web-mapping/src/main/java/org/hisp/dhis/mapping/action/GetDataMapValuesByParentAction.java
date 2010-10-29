@@ -27,58 +27,97 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.InputStream;
+import java.util.Collection;
 
-import org.hisp.dhis.external.location.LocationManager;
+import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.mapping.MappingService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.system.util.DateUtils;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetGeoJsonAction
+public class GetDataMapValuesByParentAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private MappingService mappingService;
 
-    @Autowired
-    private LocationManager locationManager;
+    public void setMappingService( MappingService mappingService )
+    {
+        this.mappingService = mappingService;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    private Integer periodId;
+
+    public void setPeriodId( Integer periodId )
+    {
+        this.periodId = periodId;
+    }
+
+    private String startDate;
+    
+    public void setStartDate( String startDate )
+    {
+        this.startDate = startDate;
+    }
+
+    private String endDate;
+
+    public void setEndDate( String endDate )
+    {
+        this.endDate = endDate;
+    }
+
+    private Integer parentId;    
+
+    public void setParentId( Integer parentId )
+    {
+        this.parentId = parentId;
+    }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String name;
+    private Collection<AggregatedMapValue> object;
 
-    public void setName( String name )
+    public Collection<AggregatedMapValue> getObject()
     {
-        this.name = name;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private InputStream inputStream;
-
-    public InputStream getInputStream()
-    {
-        return inputStream;
+        return object;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
-    {        
-        inputStream = locationManager.getInputStream( name, MappingService.GEOJSON_DIR );
+    {
+        if ( periodId != null ) // Period
+        {
+            object = mappingService.getDataElementMapValues( id, periodId, parentId );
+        }
+        else // Start and end date
+        {
+            object = mappingService.getDataElementMapValues( id, DateUtils.getMediumDate( startDate ), DateUtils.getMediumDate( endDate ), parentId );
+        }
         
         return SUCCESS;
     }
