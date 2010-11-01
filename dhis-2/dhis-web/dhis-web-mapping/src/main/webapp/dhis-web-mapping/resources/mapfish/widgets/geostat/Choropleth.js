@@ -1014,7 +1014,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     
                     Ext.getCmp('map_tf').setValue(feature.data.name);
                     Ext.getCmp('map_tf').value = feature.attributes.id;
-                    scope.organisationUnitSelectionType.setParent(feature.attributes.id);
+                    choropleth.organisationUnitSelectionType.setParent(feature.attributes.id);
                     choropleth.loadFromDatabase(feature.attributes.id, true);
                 }
                 else {

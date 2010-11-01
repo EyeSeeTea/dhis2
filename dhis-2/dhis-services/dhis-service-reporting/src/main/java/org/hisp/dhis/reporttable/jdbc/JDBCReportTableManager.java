@@ -30,7 +30,6 @@ package org.hisp.dhis.reporttable.jdbc;
 import static org.hisp.dhis.reporttable.ReportTable.SEPARATOR;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -51,10 +50,8 @@ import org.hisp.dhis.reporttable.ReportTableData;
 import org.hisp.dhis.reporttable.statement.CreateReportTableStatement;
 import org.hisp.dhis.reporttable.statement.DisplayReportTableStatement;
 import org.hisp.dhis.reporttable.statement.GetReportTableDataStatement;
-import org.hisp.dhis.reporttable.statement.GetReportTableStatement;
 import org.hisp.dhis.reporttable.statement.RemoveReportTableStatement;
 import org.hisp.dhis.reporttable.statement.ReportTableStatement;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -69,8 +66,12 @@ public class JDBCReportTableManager
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private StatementManager statementManager;
+
+    public void setStatementManager( StatementManager statementManager )
+    {
+        this.statementManager = statementManager;
+    }
 
     private StatementBuilder statementBuilder;
 
@@ -133,7 +134,7 @@ public class JDBCReportTableManager
     {
         try
         {
-            statementManager.getHolder().getStatement().executeQuery( "SELECT count(*) FROM " + reportTable.getTableName() );
+            statementManager.getHolder().getStatement().executeQuery( "SELECT count(*) FROM " + reportTable.getExistingTableName() );
             
             return true;
         }
@@ -265,75 +266,6 @@ public class JDBCReportTableManager
         catch ( Exception ex )
         {
             throw new RuntimeException( "Failed to get display report table data", ex );
-        }
-        finally
-        {
-            holder.close();
-        }
-        
-        return data;
-    }
-    
-    public ReportTableData getReportTableData( ReportTable reportTable )
-    {
-        ReportTableData data = new ReportTableData();
-        
-        // ---------------------------------------------------------------------
-        // Set name
-        // ---------------------------------------------------------------------
-
-        data.setName( reportTable.getName() );
-
-        ReportTableStatement statement = new GetReportTableStatement( reportTable );
-        
-        StatementHolder holder = statementManager.getHolder();
-
-        try
-        {
-            log.debug( "Get report table data statement: " + statement.getStatement() );
-            
-            ResultSet resultSet = holder.getStatement().executeQuery( statement.getStatement() );
-            
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            
-            int columnCount = metaData.getColumnCount();
-
-            // -----------------------------------------------------------------
-            // Set columns
-            // -----------------------------------------------------------------
-
-            for ( int i = 0; i < columnCount; i++ )
-            {
-                final int index = i + 1;
-                
-                data.getColumns().put( index, metaData.getColumnName( index ) );
-                
-                data.getPrettyPrintColumns().add( reportTable.prettyPrintColumn( metaData.getColumnName( index ) ) );                        
-            }
-
-            // -----------------------------------------------------------------
-            // Set data
-            // -----------------------------------------------------------------
-
-            while ( resultSet.next() )
-            {
-                SortedMap<Integer, String> row = new TreeMap<Integer, String>();
-                
-                for ( int i = 0; i < columnCount; i++ )
-                {
-                    final int index = i + 1;
-                                
-                    row.put( index, String.valueOf( resultSet.getObject( index ) ) );
-                }
-                
-                data.getRows().add( row );
-            }
-            
-            log.debug( "Number of rows: " + data.getRows().size() );
-        }
-        catch ( Exception ex )
-        {
-            throw new RuntimeException( "Failed to get report table data", ex );
         }
         finally
         {
