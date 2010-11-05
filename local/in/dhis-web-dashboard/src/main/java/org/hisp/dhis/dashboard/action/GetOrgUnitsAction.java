@@ -1,15 +1,13 @@
 package org.hisp.dhis.dashboard.action;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Action;
 
-public class GetOrgUnitsAction
-    extends ActionSupport
+public class GetOrgUnitsAction implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -75,30 +73,23 @@ public class GetOrgUnitsAction
         }
 
         orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
-        maxOrgUnitLevel = orgUnitLevel;
+        maxOrgUnitLevel = organisationUnitService.getNumberOfOrganisationalLevels();
         
         // Hardcoded : if it is Tabular Analysis, Null Reporter
-        if(type!=null && type.equalsIgnoreCase( "ta" ))
+        if( type != null && type.equalsIgnoreCase( "ta" ) )
         {
-        
-        List<OrganisationUnit> orgUnitTree = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitWithChildren( orgUnitId ) );
-        
-        for( OrganisationUnit ou : orgUnitTree )
-        {
-            if( organisationUnitService.getLevelOfOrganisationUnit( ou ) > maxOrgUnitLevel )
+            for( int i = orgUnitLevel+1; i <= maxOrgUnitLevel; i++ )
             {
-                maxOrgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( ou );
+                Collection<OrganisationUnit> tempOrgUnitList = organisationUnitService.getOrganisationUnitsAtLevel( i, orgUnit );
+                if( tempOrgUnitList == null || tempOrgUnitList.size() == 0 )
+                {
+                    maxOrgUnitLevel = i-1;
+                    break;
+                }
             }
         }
-        }
         
-            
-       
-        //System.out.println( "OrgUnitLevel : " + orgUnitLevel + " Name : " + orgUnit.getShortName() + " MaxLevel : "+ maxOrgUnitLevel );
-
         return SUCCESS;
     }
-
-    
 
 }
