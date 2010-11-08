@@ -1022,81 +1022,78 @@ public class DefaultReportService
     
  // functoin getBooleanDataValue end
     
-    //function getStartingEndingPeriods starts
     
-    public List<Calendar> getStartingEndingPeriods( String deType , Period selectedPeriod)
+//function getStartingEndingPeriods starts
+    
+public List<Calendar> getStartingEndingPeriods( String deType , Period selectedPeriod)
+{
+    List<Calendar> calendarList = new ArrayList<Calendar>();
+
+    Calendar tempStartDate = Calendar.getInstance();
+    Calendar tempEndDate = Calendar.getInstance();
+
+    Period previousPeriod = new Period();
+    previousPeriod = getPreviousPeriod( selectedPeriod );
+
+    if ( deType.equalsIgnoreCase( "ccmcy" ) )
     {
-
-        List<Calendar> calendarList = new ArrayList<Calendar>();
-
-        Calendar tempStartDate = Calendar.getInstance();
-        Calendar tempEndDate = Calendar.getInstance();
-
-        Period previousPeriod = new Period();
-        previousPeriod = getPreviousPeriod( selectedPeriod );
-
-        if ( deType.equalsIgnoreCase( "ccmcy" ) )
+        tempStartDate.setTime( selectedPeriod.getStartDate() );
+        if ( tempStartDate.get( Calendar.MONTH ) < Calendar.APRIL )
         {
-            tempStartDate.setTime( selectedPeriod.getStartDate() );
-            if ( tempStartDate.get( Calendar.MONTH ) < Calendar.APRIL )
-            {
-                tempStartDate.roll( Calendar.YEAR, -1 );
-            }
-            tempStartDate.set( Calendar.MONTH, Calendar.APRIL );
-            tempEndDate.setTime( selectedPeriod.getEndDate() );
-            // System.out.println("CCMCY : "+ String.valueOf(
-            // tempStartDate.getTime()) +" ------ "+String.valueOf(
-            // tempEndDate.getTime()));
-        } 
-        else if ( deType.equalsIgnoreCase( "cpmcy" ) )
-            {
-                tempStartDate.setTime( previousPeriod.getStartDate() );
-                if ( tempStartDate.get( Calendar.MONTH ) < Calendar.APRIL )
-                {
-                    tempStartDate.roll( Calendar.YEAR, -1 );
-                }
-                tempStartDate.set( Calendar.MONTH, Calendar.APRIL );
-                tempEndDate.setTime( previousPeriod.getEndDate() );
-            } 
-        else if ( deType.equalsIgnoreCase( "cmpy" ) )
-                {
-                    tempStartDate.setTime( selectedPeriod.getStartDate() );
-                    tempEndDate.setTime( selectedPeriod.getEndDate() );
+            tempStartDate.roll( Calendar.YEAR, -1 );
+        }
+        tempStartDate.set( Calendar.MONTH, Calendar.APRIL );
+        tempEndDate.setTime( selectedPeriod.getEndDate() );
+    } 
+    else if ( deType.equalsIgnoreCase( "cpmcy" ) )
+    {
+        tempStartDate.setTime( previousPeriod.getStartDate() );
+        if ( tempStartDate.get( Calendar.MONTH ) < Calendar.APRIL )
+        {
+            tempStartDate.roll( Calendar.YEAR, -1 );
+        }
+        tempStartDate.set( Calendar.MONTH, Calendar.APRIL );
+        tempEndDate.setTime( previousPeriod.getEndDate() );
+    } 
+    else if ( deType.equalsIgnoreCase( "cmpy" ) )
+    {
+        tempStartDate.setTime( selectedPeriod.getStartDate() );
+        tempEndDate.setTime( selectedPeriod.getEndDate() );
+    
+        tempStartDate.roll( Calendar.YEAR, -1 );
+        tempEndDate.roll( Calendar.YEAR, -1 );
+    } 
+    else if ( deType.equalsIgnoreCase( "ccmpy" ) )
+    {
+        tempStartDate.setTime( selectedPeriod.getStartDate() );
+        tempEndDate.setTime( selectedPeriod.getEndDate() );
 
-                    tempStartDate.roll( Calendar.YEAR, -1 );
-                    tempEndDate.roll( Calendar.YEAR, -1 );
-                } 
-        else if ( deType.equalsIgnoreCase( "ccmpy" ) )
-                    {
-                        tempStartDate.setTime( selectedPeriod.getStartDate() );
-                        tempEndDate.setTime( selectedPeriod.getEndDate() );
+        tempStartDate.roll( Calendar.YEAR, -1 );
+        tempEndDate.roll( Calendar.YEAR, -1 );
 
-                        tempStartDate.roll( Calendar.YEAR, -1 );
-                        tempEndDate.roll( Calendar.YEAR, -1 );
-
-                        if ( tempStartDate.get( Calendar.MONTH ) < Calendar.APRIL )
-                        {
-                            tempStartDate.roll( Calendar.YEAR, -1 );
-                        }
-                        tempStartDate.set( Calendar.MONTH, Calendar.APRIL );
-
-                    } else if ( deType.equalsIgnoreCase( "pmcy" ) )
-                        {
-                            tempStartDate.setTime( previousPeriod.getStartDate() );
-                            tempEndDate.setTime( previousPeriod.getEndDate() );
-                        } else
-                        {
-                            tempStartDate.setTime( selectedPeriod.getStartDate() );
-                            tempEndDate.setTime( selectedPeriod.getEndDate() );
-                        }
-
-        // System.out.print(deType+" -- ");
-        calendarList.add( tempStartDate );
-        calendarList.add( tempEndDate );
-
-        return calendarList;
+        if ( tempStartDate.get( Calendar.MONTH ) < Calendar.APRIL )
+        {
+            tempStartDate.roll( Calendar.YEAR, -1 );
+        }
+        tempStartDate.set( Calendar.MONTH, Calendar.APRIL );
+    } 
+    else if ( deType.equalsIgnoreCase( "pmcy" ) )
+    {
+        tempStartDate.setTime( previousPeriod.getStartDate() );
+        tempEndDate.setTime( previousPeriod.getEndDate() );
+    } 
+    else
+    {
+        tempStartDate.setTime( selectedPeriod.getStartDate() );
+        tempEndDate.setTime( selectedPeriod.getEndDate() );
     }
-  //function getStartingEndingPeriods end
+
+    calendarList.add( tempStartDate );
+    calendarList.add( tempEndDate );
+
+    return calendarList;
+}
+//function getStartingEndingPeriods end
     
     //function getPreviousPeriod starts
     
@@ -1313,5 +1310,75 @@ public class DefaultReportService
                 throw new RuntimeException( "Illegal DataElement id", ex );
             }
         }
+    
+    // -------------------------------------------------------------------------
+    // Get Aggregated Result for dataelement expression 
+    // -------------------------------------------------------------------------
+
+    public List<Report_inDesign> getReportDesign( String fileName )
+    {
+        List<Report_inDesign> reportDesignList = new ArrayList<Report_inDesign>();
+        
+        String path = System.getProperty( "user.home" ) + File.separator + "dhis" + File.separator + configurationService.getConfigurationByKey( Configuration_IN.KEY_REPORTFOLDER ).getValue()
+            + File.separator + fileName;
+        try
+        {
+            String newpath = System.getenv( "DHIS2_HOME" );
+            if ( newpath != null )
+            {
+                path = newpath + File.separator + configurationService.getConfigurationByKey( Configuration_IN.KEY_REPORTFOLDER ).getValue() + File.separator + fileName;
+            }
+        }
+        catch ( NullPointerException npe )
+        {
+            System.out.println("DHIS2_HOME not set");
+        }
+
+        try
+        {
+            DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse( new File( path ) );
+            if ( doc == null )
+            {
+                System.out.println( "There is no DECodes related XML file in the ra folder" );
+                return null;
+            }
+
+            NodeList listOfDECodes = doc.getElementsByTagName( "de-code" );
+            int totalDEcodes = listOfDECodes.getLength();
+
+            for ( int s = 0; s < totalDEcodes; s++ )
+            {
+                Element deCodeElement = (Element) listOfDECodes.item( s );
+                NodeList textDECodeList = deCodeElement.getChildNodes();
+                
+                String expression = ((Node) textDECodeList.item( 0 )).getNodeValue().trim();
+                String stype = deCodeElement.getAttribute( "stype" );
+                String ptype = deCodeElement.getAttribute( "type" );
+                int sheetno = new Integer( deCodeElement.getAttribute( "sheetno" ) );
+                int rowno = new Integer( deCodeElement.getAttribute( "rowno" ) );
+                int colno = new Integer( deCodeElement.getAttribute( "colno" ) );
+                
+                Report_inDesign report_inDesign = new Report_inDesign( stype, ptype, sheetno, rowno, colno, expression );
+                reportDesignList.add( report_inDesign );
+            }// end of for loop with s var
+        }// try block end
+        catch ( SAXParseException err )
+        {
+            System.out.println( "** Parsing error" + ", line " + err.getLineNumber() + ", uri " + err.getSystemId() );
+            System.out.println( " " + err.getMessage() );
+        }
+        catch ( SAXException e )
+        {
+            Exception x = e.getException();
+            ((x == null) ? e : x).printStackTrace();
+        }
+        catch ( Throwable t )
+        {
+            t.printStackTrace();
+        }
+        return reportDesignList;
+    }
     
 }
