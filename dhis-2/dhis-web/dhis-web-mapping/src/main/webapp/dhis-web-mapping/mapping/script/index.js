@@ -3061,7 +3061,6 @@
             }
         }
     });
-console.log(mapfish);    
 
     proportionalSymbol = new mapfish.widgets.geostat.Symbol({
         id: 'proportionalsymbol',
