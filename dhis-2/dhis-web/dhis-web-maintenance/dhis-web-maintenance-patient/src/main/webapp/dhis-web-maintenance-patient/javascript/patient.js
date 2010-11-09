@@ -472,6 +472,7 @@ function checkDuplicate()
 				'&firstName=' + getFieldValue( 'firstName' ) +
 				'&middleName=' + getFieldValue( 'middleName' ) +
 				'&lastName=' + getFieldValue( 'lastName' ) +
+				'&dobType=' + getFieldValue( 'dobType' ) +
 				'&gender=' + getFieldValue( 'gender' ) +
 				'&birthDate=' + getFieldValue( 'birthDate' ) +	        
 				'&age=' + getFieldValue( 'age' ) ;
@@ -492,12 +493,11 @@ function checkDuplicateCompleted( messageElement )
     
     if( type == 'success')
     {
-    	alert(i18n_no_duplicate_found);
+    	showSuccessMessage(i18n_no_duplicate_found);
     }
     if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        showWarningMessage(message);
     }
     else if( type == 'duplicate' )
     {
@@ -660,4 +660,9 @@ function f_filterResults(n_win, n_docel, n_body) {
 	if (n_docel && (!n_result || (n_result > n_docel)))
 		n_result = n_docel;
 	return n_body && (!n_result || (n_result > n_body)) ? n_body : n_result;
+}
+
+function removeEnrollment(){
+	byId('programEnrollmentForm').action = "removeEnrollment.action";
+	byId('programEnrollmentForm').submit();
 }

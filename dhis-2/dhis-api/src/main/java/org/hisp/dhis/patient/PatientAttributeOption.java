@@ -33,7 +33,7 @@ import java.io.Serializable;
  *
  * @version $Id$
  */
-public class PatientAttributeOption  implements Serializable
+public class PatientAttributeOption implements Serializable
 {
     private int id;
     

@@ -41,13 +41,13 @@ public class PatientAttributeValue
 {
 
     public static final String UNKNOWN = " ";
-    
+
     private PatientAttribute patientAttribute;
 
     private Patient patient;
 
     private String value;
-    
+
     private PatientAttributeOption patientAttributeOption;
 
     // -------------------------------------------------------------------------
@@ -96,7 +96,7 @@ public class PatientAttributeValue
         final PatientAttributeValue other = (PatientAttributeValue) o;
 
         return patientAttribute.equals( other.getPatientAttribute() ) && patient.equals( other.getPatient() );
-            
+
     }
 
     @Override
@@ -107,7 +107,7 @@ public class PatientAttributeValue
 
         result = result * prime + patientAttribute.hashCode();
         result = result * prime + patient.hashCode();
-        
+
         return result;
     }
 
@@ -145,12 +145,13 @@ public class PatientAttributeValue
         this.value = value;
     }
 
-	public PatientAttributeOption getPatientAttributeOption() {
-		return patientAttributeOption;
-	}
+    public PatientAttributeOption getPatientAttributeOption()
+    {
+        return patientAttributeOption;
+    }
 
-	public void setPatientAttributeOption(
-			PatientAttributeOption patientAttributeOption) {
-		this.patientAttributeOption = patientAttributeOption;
-	}
+    public void setPatientAttributeOption( PatientAttributeOption patientAttributeOption )
+    {
+        this.patientAttributeOption = patientAttributeOption;
+    }
 }

@@ -9,18 +9,67 @@
 #end
 
 <script>
-	jQuery(document).ready(	function(){
+	/* jQuery(document).ready(	function(){
 		validation( 'updatePatientForm', validateUpdatePatient );		
 		datePickerValid( 'birthDate' );
 		jQuery("#birthDate").rules("add",{required:true,dateISO:true,datelessthanequaltoday:true});		
 		jQuery("#btnRepresentativeInfo").cluetip({local:"#representativeInfo"});	
-	});		
+	}); */
+
+	/* jQuery(document).ready(	function(){
+
+		jQuery("#birthDate").rules("add",{required:true,dateISO:true,datelessthanequaltoday:true});		
+		jQuery("#btnRepresentativeInfo").cluetip({local:"#representativeInfo"});
+		
+		jQuery("#updatePatientForm").validate({
+				 meta:"validate"
+				,errorElement:"span"
+				,submitHandler: function(form)
+					{
+						validateUpdatePatient();
+					}
+			});
+	});		*/
+
+	jQuery(document).ready(	function(){
+
+		datePickerValid( 'birthDate' );	
+		jQuery("#btnRepresentativeInfo").cluetip({local:"#representativeInfo"});
+		
+		jQuery("#updatePatientForm").validate({
+				 meta:"validate"
+				,errorElement:"span"
+				,submitHandler: function(form)
+					{
+						validateUpdatePatient();
+					}
+				,beforeValidateHandler: function(form)
+					{
+						var dobType = $('#dobType').val();
+						
+						if( dobType=='V' || dobType=='D' ) 
+						{
+							var birthDate = $('#birthDate').val();
+							if( birthDate != '' ){
+								$("#memberValidator").val(birthDate);
+							}
+						}else{
+							var age = $('#age').val();
+							$("#memberValidator").val(age);
+						}
+						
+					}
+			});
+					
+	});
+	
+	
 </script>
 
 
 <h3>$i18n.getString( "update_patient" )</h3>
 
-<form id="updatePatientForm" action="updatePatient.action" method="post">
+<form id="updatePatientForm" name="updatePatientForm" action="updatePatient.action" method="post">
 <input type="hidden" id="representativeId" name="representativeId"/> 
 <input type="hidden" id="relationshipTypeId" name="relationshipTypeId"/>
 <div>
@@ -35,16 +84,16 @@
 		<th colspan="2">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></th>
 	</tr>
 	<tr>
-		<td><label for="firstName">$i18n.getString( "first_name" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-		<td><input type="text" id="firstName" name="firstName" value="$encoder.htmlEncode( $patient.firstName )" style="width:30em" class="required_group {validate:{required_group:true,rangelength:[2,30], letterswithbasicpunc: true}}"></td>
+		<td><label for="firstName">$i18n.getString( "first_name" )</label></td>
+		<td><input type="text" id="firstName" name="firstName" value="$encoder.htmlEncode( $patient.firstName )" style="width:30em" class="required_group {validate:{required_group:true, unicodechars:true, rangelength:[2,30]}}"></td>
 	</tr>
 	<tr>
 		<td><label for="middleName">$i18n.getString( "middle_name" )</label></td>
-		<td><input type="text" id="middleName" name="middleName" value="$encoder.htmlEncode( $patient.middleName )" style="width:30em" class="{validate:{required:false, letterswithbasicpunc: true}}"></td>
+		<td><input type="text" id="middleName" name="middleName" value="$encoder.htmlEncode( $patient.middleName )" style="width:30em" class="required_group {validate:{required_group:true, unicodechars:true, rangelength:[2,30]}}"></td>
 	</tr>
 	<tr>
 		<td><label for="lastName">$i18n.getString( "last_name" )</label></td>
-		<td><input type="text" id="lastName" name="lastName" value="$encoder.htmlEncode( $patient.lastName )" style="width:30em" class="{validate:{required:false, letterswithbasicpunc: true}}"></td>
+		<td><input type="text" id="lastName" name="lastName" value="$encoder.htmlEncode( $patient.lastName )" style="width:30em" class="required_group {validate:{required_group:true, unicodechars:true, rangelength:[2,30]}}"></td>
 	</tr>
 	<tr><td>&nbsp;</td></tr>	
 	<tr>
@@ -90,9 +139,14 @@
 				<option value="M"> $i18n.getString('month')</option>
 				<option value="Y"> $i18n.getString('year')</option>
 			</select>
-			<input type="text" id="age" name="age" value="$patient.getAge()" style="width:14.5em"  style="width:12em" onchange="ageOnchange()" class="{validate:{number:true, alphanumeric: true}}">
+			<input type="text" id="age" name="age" value="$patient.getIntegerValueOfAge()" style="width:14.5em"  style="width:12em" onchange="ageOnchange()" class="{validate:{number:true, alphanumeric: true}}">
 		</td>
 		<td></td>
+	</tr>
+	
+	<tr>
+		<td></td>
+		<td><input id="memberValidator" style="display:none" class="{validate:{required:true}}"/></td>
 	</tr>
 	
 	<tr>
