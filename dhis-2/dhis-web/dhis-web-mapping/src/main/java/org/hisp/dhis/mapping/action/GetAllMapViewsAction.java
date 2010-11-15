@@ -85,13 +85,13 @@ public class GetAllMapViewsAction
 
     public String execute()
     {
-        object = new ArrayList<MapView>( mappingService.getMapViewsByMapSourceType() );
+        object = new ArrayList<MapView>( mappingService.getAllMapViews() );
 
         Collections.sort( object, new MapViewNameComparator() );
 
         for ( MapView mapView : object )
         {
-            if ( mapView != null && mapView.getMapSourceType().equals( MappingService.MAP_SOURCE_TYPE_DATABASE ) )
+            if ( mapView != null )
             {
                 if ( mapView.getOrganisationUnitSelectionType() == null
                     || mapView.getOrganisationUnitSelectionType().trim().isEmpty()

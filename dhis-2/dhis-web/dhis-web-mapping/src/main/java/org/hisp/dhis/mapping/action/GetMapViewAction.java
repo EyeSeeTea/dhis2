@@ -95,9 +95,7 @@ public class GetMapViewAction
     {
         object = mappingService.getMapView( id );
 
-        log.info( "Getting map view: " + object );
-
-        if ( object != null && object.getMapSourceType().equals( MappingService.MAP_SOURCE_TYPE_DATABASE ) )
+        if ( object != null )
         {
             if ( object.getOrganisationUnitSelectionType() == null
                 || object.getOrganisationUnitSelectionType().trim().isEmpty()
