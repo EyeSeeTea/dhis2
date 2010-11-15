@@ -41,9 +41,10 @@
     var mapViewStore = new Ext.data.JsonStore({
         url: GLOBALS.conf.path_mapping + 'getAllMapViews' + GLOBALS.conf.type,
         root: 'mapViews',
-        fields: ['id', 'name', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId', 'mapDateType', 'periodTypeId',
-            'periodId', 'startDate', 'endDate', 'mapSourceType', 'organisationUnitSelectionType', 'mapSource', 'organisationUnitSelectionTypeName', 'mapLegendType',
-			'method', 'classes', 'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'longitude', 'latitude', 'zoom'],
+        fields: ['id', 'name', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId', 'mapDateType',
+            'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName', 'organisationUnitLevelId',
+            'organisationUnitLevelName', 'mapLegendType', 'method', 'classes', 'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'longitude',
+            'latitude', 'zoom'],
         sortInfo: {field: 'name', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,

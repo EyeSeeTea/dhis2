@@ -72,8 +72,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     selectFeatures: false,
     
-    organisationUnitSelectionType: false,
-    
     updateValues: false,
     
     initComponent: function() {
@@ -96,7 +94,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             GLOBALS.vars.parameter = false;
             GLOBALS.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
 
-            Ext.getCmp('mapsource_cb').setValue(GLOBALS.vars.mapSourceType.value);
             Ext.getCmp('mapdatetype_cb').setValue(GLOBALS.vars.mapDateType.value);
             
             function mapViewStoreCallback() {
@@ -1017,49 +1014,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             var x = east_panel.x - 210;
             var y = east_panel.y + 41;
 
-            if (GLOBALS.vars.activePanel.isPolygon() && GLOBALS.vars.mapSourceType.isDatabase()) {
-                if (feature.attributes.hasChildrenWithCoordinates) {
-                    if (GLOBALS.vars.locateFeatureWindow) {
-                        GLOBALS.vars.locateFeatureWindow.destroy();
-                    }
-                    
-                    Ext.getCmp('map_tf').setValue(feature.data.name);
-                    Ext.getCmp('map_tf').value = feature.attributes.id;
-                    choropleth.updateValues = true;
-                    choropleth.organisationUnitSelectionType.setParent(feature.attributes.id);
-                    choropleth.loadFromDatabase(feature.attributes.id, true);
+            if (feature.attributes.hasChildrenWithCoordinates) {
+                if (GLOBALS.vars.locateFeatureWindow) {
+                    GLOBALS.vars.locateFeatureWindow.destroy();
                 }
-                else {
-                    Ext.message.msg(false, i18n_no_coordinates_found);
-                }
+                
+                Ext.getCmp('map_tf').setValue(feature.data.name);
+                Ext.getCmp('map_tf').value = feature.attributes.id;
+                choropleth.updateValues = true;
+                choropleth.organisationUnitSelectionType.setParent(feature.attributes.id);
+                choropleth.loadFromDatabase(feature.attributes.id, true);
             }
-            
-            if (GLOBALS.vars.activePanel.isAssignment() && GLOBALS.vars.mapSourceType.value != GLOBALS.conf.map_source_type_database) {
-                if (GLOBALS.vars.selectFeatureWindow) {
-                    GLOBALS.vars.selectFeatureWindow.destroy();
-                }
-                
-                var popup = new Ext.Window({
-                    title: '<span class="panel-title">Assign organisation unit</span>',
-                    width: 180,
-                    height: 65,
-                    layout: 'fit',
-                    plain: true,
-                    html: '<div class="window-orgunit-text">' + feature.attributes[mapping.mapData.nameColumn] + '</div>',
-                    x: x,
-                    y: y,
-                    listeners: {
-                        'close': {
-                            fn: function() {
-                                mapping.relation = false;
-                            }
-                        }
-                    }
-                });
-                
-                GLOBALS.vars.selectFeatureWindow = popup;		
-                popup.show();
-                mapping.relation = feature.attributes[mapping.mapData.nameColumn];
+            else {
+                Ext.message.msg(false, i18n_no_coordinates_found);
             }
         };
         
@@ -1183,14 +1150,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     prepareMapViewMap: function() {
-        if (GLOBALS.vars.mapSourceType.isDatabase()) {
-            Ext.getCmp('map_cb').hideField();
-            Ext.getCmp('map_tf').showField();
-        }
-        else {
-            Ext.getCmp('map_cb').showField();
-            Ext.getCmp('map_tf').hideField();
-        }
+        Ext.getCmp('map_cb').hideField();
+        Ext.getCmp('map_tf').showField();
 		
 		if (this.mapView.organisationUnitSelectionType == GLOBALS.conf.map_selection_type_parent ||
 			this.mapView.organisationUnitSelectionType == null) {

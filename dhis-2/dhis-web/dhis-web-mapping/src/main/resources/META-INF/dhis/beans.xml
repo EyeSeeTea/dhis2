@@ -163,13 +163,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<bean id="org.hisp.dhis.mapping.action.GetMapViewAction" class="org.hisp.dhis.mapping.action.GetMapViewAction"
 		scope="prototype">
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.mapping.action.GetAllMapViewsAction"
 		class="org.hisp.dhis.mapping.action.GetAllMapViewsAction" scope="prototype">
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.mapping.action.AddMapViewToDashboardAction"
