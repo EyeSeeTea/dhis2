@@ -1,5 +1,7 @@
+package org.hisp.dhis.web.api.model;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,29 +26,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.web.api.model;
 
-import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class PatientAttribute
+public class PatientAttribute implements MobileSerializable
 {
 
     private String name;
 
     private String value;
 
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
-    public PatientAttribute()
-    {
-    }
-
-    // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
     public String getName()
     {
         return name;
@@ -67,17 +58,20 @@ public class PatientAttribute
         this.value = value;
     }
 
-    public void serialize( DataOutputStream out )
+    @Override
+    public void serialize( DataOutputStream dout )
         throws IOException
     {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        DataOutputStream dout = new DataOutputStream( bout );
-        
         dout.writeUTF( this.name );
         dout.writeUTF( this.value );
+    }
+
+    @Override
+    public void deSerialize( DataInputStream dataInputStream )
+        throws IOException
+    {
+        // FIXME: Get implementation from client
         
-        bout.flush();
-        bout.writeTo( out );
     }
 
 }

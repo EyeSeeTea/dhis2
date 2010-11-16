@@ -27,32 +27,55 @@ package org.hisp.dhis.web.api.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class DataElement extends Model {	
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-	private String type;
+public class ModelList
+    implements MobileSerializable
+{
 
-	private ModelList categoryOptionCombos;
-	
-	public DataElement() {
+    private List<Model> models;
 
-	}	
+    public List<Model> getAbstractModels()
+    {
+        return models;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public void setModels( List<Model> models )
+    {
+        this.models = models;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    @Override
+    public void serialize( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+        dataOutputStream.writeInt( models.size() );
 
-        public ModelList getCategoryOptionCombos()
+        for ( int i = 0; i < models.size(); i++ )
         {
-            return categoryOptionCombos;
+            models.get( i ).serialize( dataOutputStream );
         }
-    
-        public void setCategoryOptionCombos( ModelList categoryOptionCombos )
+
+    }
+
+    @Override
+    public void deSerialize( DataInputStream dataInputStream )
+        throws IOException
+    {
+        int size = dataInputStream.readInt();
+        models = new ArrayList<Model>( size );
+
+        for ( int i = 0; i < size; i++ )
         {
-            this.categoryOptionCombos = categoryOptionCombos;
+            Model m = new Model();
+            m.deSerialize( dataInputStream );
+            models.add( m );
         }
-		
+
+    }
+
 }

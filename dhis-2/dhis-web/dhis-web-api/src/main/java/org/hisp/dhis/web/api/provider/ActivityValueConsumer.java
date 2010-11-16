@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.api.model;
+package org.hisp.dhis.web.api.provider;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,32 +27,43 @@ package org.hisp.dhis.web.api.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class DataElement extends Model {	
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
-	private String type;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.Provider;
 
-	private ModelList categoryOptionCombos;
-	
-	public DataElement() {
+import org.hisp.dhis.web.api.model.ActivityValue;
 
-	}	
+import com.sun.jersey.spi.resource.Singleton;
 
-	public String getType() {
-		return type;
-	}
+@Provider
+@Singleton
+@Consumes( "application/vnd.org.dhis2.activityvaluelist+serialized" )
+public class ActivityValueConsumer
+    implements MessageBodyReader<ActivityValue>
+{
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    @Override
+    public boolean isReadable( Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType )
+    {
+        return true;
+    }
 
-        public ModelList getCategoryOptionCombos()
-        {
-            return categoryOptionCombos;
-        }
-    
-        public void setCategoryOptionCombos( ModelList categoryOptionCombos )
-        {
-            this.categoryOptionCombos = categoryOptionCombos;
-        }
-		
+    @Override
+    public ActivityValue readFrom( Class<ActivityValue> type, Type genericType, Annotation[] annotations,
+        MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream )
+        throws IOException, WebApplicationException
+    {
+        ActivityValue activityValue = new ActivityValue();
+        activityValue.deSerialize( new DataInputStream( entityStream ) );
+        return activityValue;
+    }
 }

@@ -30,79 +30,100 @@ package org.hisp.dhis.web.api.model;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-public class DataSetValue
-    extends Model
+public class MobileModel
+    implements MobileSerializable
 {
+    private ActivityPlan activityPlan;
 
-    private String pName;
+    private List<Program> programs;
 
-    private boolean completed;
+    private List<DataSet> datasets;
 
-    private List<DataValue> dataValues = new ArrayList<DataValue>();
-
-    public DataSetValue()
+    public ActivityPlan getActivityPlan()
     {
+        return activityPlan;
     }
 
-    public boolean isCompleted()
+    public void setActivityPlan( ActivityPlan activityPlan )
     {
-        return completed;
+        this.activityPlan = activityPlan;
     }
 
-    public void setCompleted( boolean completed )
+    public List<Program> getPrograms()
     {
-        this.completed = completed;
+        return programs;
     }
 
-    public String getpName()
+    public void setPrograms( List<Program> programs )
     {
-        return pName;
+        this.programs = programs;
     }
 
-    public void setpName( String pName )
+    public List<DataSet> getDatasets()
     {
-        this.pName = pName;
+        return datasets;
     }
 
-    public void setDataValues( List<DataValue> dataValues )
+    public void setDatasets( List<DataSet> datasets )
     {
-        this.dataValues = dataValues;
-    }
-
-    public List<DataValue> getDataValues()
-    {
-        return dataValues;
+        this.datasets = datasets;
     }
 
     @Override
-    public void serialize( DataOutputStream dataOutputStream )
+    public void serialize( DataOutputStream dout )
+        throws IOException
+    {
+
+        if ( programs != null )
+        {
+            dout.writeInt( programs.size() );
+        }
+        else
+        {
+            dout.writeInt( 0 );
+        }
+
+        // Write ActivityPlans
+        if ( this.activityPlan == null )
+        {
+            dout.writeInt( 0 );
+        }
+        else
+        {
+            this.activityPlan.serialize( dout );
+        }
+
+        // Write Programs
+        if ( programs != null || programs.size() > 0 )
+        {
+            for ( Program prog : programs )
+            {
+                prog.serialize( dout );
+            }
+        }
+
+        // Write DataSets
+        if ( datasets == null )
+        {
+            dout.writeInt( 0 );
+        }
+        else
+        {
+            dout.writeInt( datasets.size() );
+            for ( DataSet ds : datasets )
+            {
+                ds.serialize( dout );
+            }
+        }
+    }
+
+    @Override
+    public void deSerialize( DataInputStream dataInputStream )
         throws IOException
     {
         // FIXME: Get implementation from client
-    }
-
-    @Override
-    public void deSerialize( DataInputStream din )
-        throws IOException
-    {
-
-        this.setId( din.readInt() );
-        this.setName( din.readUTF() );
-        this.setpName( din.readUTF() );
-        this.setCompleted( din.readBoolean() );
-        int size = din.readInt();
-
-        for ( int i = 0; i < size; i++ )
-        {
-            DataValue dv = new DataValue();
-            dv.setId( din.readInt() );
-            dv.setCategoryOptComboID( din.readInt() );
-            dv.setVal( din.readUTF() );
-            this.dataValues.add( dv );
-        }
 
     }
 

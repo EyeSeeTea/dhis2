@@ -27,32 +27,21 @@ package org.hisp.dhis.web.api.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class DataElement extends Model {	
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-	private String type;
+/**
+ * Interface for entities that needs to be serialized/deserialized for
+ * communication with low-bandwith mobile phones
+ */
+public interface MobileSerializable
+{
 
-	private ModelList categoryOptionCombos;
-	
-	public DataElement() {
+    public void serialize( DataOutputStream dataOutputStream )
+        throws IOException;
 
-	}	
+    public void deSerialize( DataInputStream dataInputStream )
+        throws IOException;
 
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-        public ModelList getCategoryOptionCombos()
-        {
-            return categoryOptionCombos;
-        }
-    
-        public void setCategoryOptionCombos( ModelList categoryOptionCombos )
-        {
-            this.categoryOptionCombos = categoryOptionCombos;
-        }
-		
 }
