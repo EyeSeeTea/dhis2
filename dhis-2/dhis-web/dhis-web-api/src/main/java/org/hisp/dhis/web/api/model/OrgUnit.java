@@ -38,10 +38,6 @@ public class OrgUnit implements MobileSerializable {
 
     private String name;
 
-    private String programFormsLink;
-    
-    private String activitiesLink;
-
     public int getId()
     {
         return id;
@@ -62,34 +58,12 @@ public class OrgUnit implements MobileSerializable {
         this.name = name;
     }
 
-    public String getProgramFormsLink()
-    {
-        return programFormsLink;
-    }
-
-    public void setProgramFormsLink( String programFormsLink )
-    {
-        this.programFormsLink = programFormsLink;
-    }
-
-    public String getActivitiesLink()
-    {
-        return activitiesLink;
-    }
-
-    public void setActivitiesLink( String activitiesLink )
-    {
-        this.activitiesLink = activitiesLink;
-    }
-
     @Override
     public void serialize( DataOutputStream dataOutputStream )
         throws IOException
     {
         dataOutputStream.write( this.id );
         dataOutputStream.writeUTF( this.name );
-        dataOutputStream.writeUTF( this.activitiesLink );
-        dataOutputStream.writeUTF( this.programFormsLink );
     }
 
     @Override
@@ -98,8 +72,6 @@ public class OrgUnit implements MobileSerializable {
     {
         this.id = dataInputStream.readInt();
         this.name = dataInputStream.readUTF();
-        this.activitiesLink = dataInputStream.readUTF();
-        this.programFormsLink = dataInputStream.readUTF();
     }
 
 }
