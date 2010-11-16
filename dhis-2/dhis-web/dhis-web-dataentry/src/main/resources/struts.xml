@@ -10,7 +10,17 @@
 		namespace="/dhis-web-dataentry">
 
 		<action name="index" class="org.hisp.dhis.de.action.EmptyAction">
-			<result name="success" type="redirect">select.action</result>
+			<result name="success" type="redirect">displayForm.action</result>
+		</action>
+
+		<action name="displayForm" class="org.hisp.dhis.de.action.LoadOrganisationUnitAction">
+			<interceptor-ref name="organisationUnitTreeStack" />
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-dataentry/select.vm</param>
+			<param name="menu">/dhis-web-dataentry/menu.vm</param>
+			<param name="menuTreeHeight">420</param>
+			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/form.js,javascript/entry.js</param>
+			<param name="stylesheets">style/dhis-web-dataentry.css</param>
 		</action>
 
 		<action name="select" class="org.hisp.dhis.de.action.SelectAction">
