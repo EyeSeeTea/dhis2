@@ -41,9 +41,9 @@ import com.opensymphony.xwork2.Action;
 public class UploadExcelFileAction
     implements Action
 {
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Input & Output
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private File output;
 
@@ -54,10 +54,10 @@ public class UploadExcelFileAction
 
     private File upload;
 
-//    public File getUpload()
-//    {
-//        return upload;
-//    }
+    public File getUpload()
+    {
+        return upload;
+    }
 
     public void setUpload( File upload )
     {

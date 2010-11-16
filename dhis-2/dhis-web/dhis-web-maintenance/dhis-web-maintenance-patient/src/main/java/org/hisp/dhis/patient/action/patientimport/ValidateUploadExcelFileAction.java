@@ -1,5 +1,3 @@
-package org.hisp.dhis.reportexcel.importing.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,72 +25,81 @@ package org.hisp.dhis.reportexcel.importing.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.patient.action.patientimport;
+
 import java.io.File;
 
-import org.hisp.dhis.reportexcel.ReportLocationManager;
-import org.hisp.dhis.reportexcel.action.ActionSupport;
-import org.hisp.dhis.reportexcel.state.SelectionManager;
-import org.hisp.dhis.system.util.StreamUtils;
+import org.hisp.dhis.i18n.I18n;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id
+ * @author Chau Thu Tran
+ * 
+ * @version ValidateUploadExcelFileAction.java Nov 16, 2010 1:19:57 PM
  */
-
-public class UploadExcelFileAction
-    extends ActionSupport
+public class ValidateUploadExcelFileAction
+    implements Action
 {
-    // -------------------------------------------
-    // Dependency
-    // -------------------------------------------
+    private static final String CONTENT_TYPE = "application/vnd.ms-excel";
 
-    private ReportLocationManager reportLocationManager;
-
-    public void setReportLocationManager( ReportLocationManager reportLocationManager )
-    {
-        this.reportLocationManager = reportLocationManager;
-    }
-
-    private SelectionManager selectionManager;
-
-    public void setSelectionManager( SelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Input & Output
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
-    private String fileName;
+    private String uploadContentType;
 
-    public void setUploadFileName( String fileName )
+    public void setUploadContentType( String uploadContentType )
     {
-        this.fileName = fileName;
+        this.uploadContentType = uploadContentType;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     private File upload;
+
+    public File getUpload()
+    {
+        return upload;
+    }
 
     public void setUpload( File upload )
     {
         this.upload = upload;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        File directory = reportLocationManager.getReportExcelTempDirectory();
+        if ( upload == null || !upload.exists() )
+        {
+            message = i18n.getString( "upload_file_null" );
 
-        File output = new File( directory, (Math.random() * 1000) + fileName );
+            return ERROR;
+        }
 
-        selectionManager.setUploadFilePath( output.getAbsolutePath() );
+        if ( !CONTENT_TYPE.contains( uploadContentType ) )
+        {
+            message = i18n.getString( "file_type_not_supported" );
 
-        StreamUtils.write( upload, output );
-        
+            return ERROR;
+        }
+
         return SUCCESS;
     }
 }
