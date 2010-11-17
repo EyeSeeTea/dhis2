@@ -72,9 +72,9 @@ public class MapView
 
     private String mapLegendType;
 
-    private int method;
+    private Integer method;
 
-    private int classes;
+    private Integer classes;
 
     private String bounds;
 
@@ -97,7 +97,7 @@ public class MapView
     public MapView( String name, String mapValueType, IndicatorGroup indicatorGroup, Indicator indicator,
         DataElementGroup dataElementGroup, DataElement dataElement, String mapDateType, PeriodType periodType,
         Period period, String startDate, String endDate, OrganisationUnit parentOrganisationUnit,
-        OrganisationUnitLevel organisationUnitLevel, String mapLegendType, int method, int classes, String bounds,
+        OrganisationUnitLevel organisationUnitLevel, String mapLegendType, Integer method, Integer classes, String bounds,
         String colorLow, String colorHigh, MapLegendSet mapLegendSet, String longitude, String latitude, int zoom )
     {
         this.name = name;
@@ -321,22 +321,22 @@ public class MapView
         this.mapLegendType = mapLegendType;
     }
 
-    public int getMethod()
+    public Integer getMethod()
     {
         return method;
     }
 
-    public void setMethod( int method )
+    public void setMethod( Integer method )
     {
         this.method = method;
     }
 
-    public int getClasses()
+    public Integer getClasses()
     {
         return classes;
     }
 
-    public void setClasses( int classes )
+    public void setClasses( Integer classes )
     {
         this.classes = classes;
     }

@@ -130,11 +130,11 @@ public class AddOrUpdateMapViewAction
         this.parentOrganisationUnitId = parentOrganisationUnitId;
     }
 
-    private Integer organisationUnitLevelId;
+    private Integer organisationUnitLevel;
 
-    public void setOrganisationUnitLevelId( Integer organisationUnitLevelId )
+    public void setOrganisationUnitLevel( Integer organisationUnitLevel )
     {
-        this.organisationUnitLevelId = organisationUnitLevelId;
+        this.organisationUnitLevel = organisationUnitLevel;
     }
 
     private String mapLegendType;
@@ -144,16 +144,16 @@ public class AddOrUpdateMapViewAction
         this.mapLegendType = mapLegendType;
     }
 
-    private int method;
+    private Integer method;
 
-    public void setMethod( int method )
+    public void setMethod( Integer method )
     {
         this.method = method;
     }
 
-    private int classes;
+    private Integer classes;
 
-    public void setClasses( int classes )
+    public void setClasses( Integer classes )
     {
         this.classes = classes;
     }
@@ -215,7 +215,7 @@ public class AddOrUpdateMapViewAction
         throws Exception
     {
         mappingService.addOrUpdateMapView( name, mapValueType, indicatorGroupId, indicatorId, dataElementGroupId,
-            dataElementId, periodTypeId, periodId, startDate, endDate, parentOrganisationUnitId, organisationUnitLevelId,
+            dataElementId, periodTypeId, periodId, startDate, endDate, parentOrganisationUnitId, organisationUnitLevel,
             mapLegendType, method, classes, bounds, colorLow, colorHigh, mapLegendSetId, longitude, latitude, zoom );
 
         return SUCCESS;

@@ -535,8 +535,8 @@ public class DefaultMappingService
 
     public void addOrUpdateMapView( String name, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
         Integer dataElementGroupId, Integer dataElementId, String periodTypeName, Integer periodId, String startDate,
-        String endDate, Integer parentOrganisationUnitId, Integer organisationUnitLevelId, String mapLegendType,
-        int method, int classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId,
+        String endDate, Integer parentOrganisationUnitId, Integer organisationUnitLevel, String mapLegendType,
+        Integer method, Integer classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId,
         String longitude, String latitude, int zoom )
     {
         IndicatorGroup indicatorGroup = null;
@@ -567,7 +567,7 @@ public class DefaultMappingService
 
         OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
 
-        OrganisationUnitLevel level = organisationUnitService.getOrganisationUnitLevel( organisationUnitLevelId );
+        OrganisationUnitLevel level = organisationUnitService.getOrganisationUnitLevelByLevel( organisationUnitLevel );
 
         MapLegendSet mapLegendSet = mapLegendSetId != null ? getMapLegendSet( mapLegendSetId ) : null;
 

@@ -153,7 +153,7 @@ public interface MappingService
     void addOrUpdateMapView( String name, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
         Integer dataElementGroupId, Integer dataElementId, String periodTypeName, Integer periodId, String startDate,
         String endDate, Integer parentOrganisationUnitId, Integer organisationUnitLevelId, String mapLegendType,
-        int method, int classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId,
+        Integer method, Integer classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId,
         String longitude, String latitude, int zoom );
 
     void deleteMapView( MapView view );
