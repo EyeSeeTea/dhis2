@@ -563,6 +563,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
             width: GLOBALS.conf.combo_width,
             node: {attributes: {hasChildrenWithCoordinates: false}},
+            selectedNode: null,
             listeners: {
                 'focus': {
                     scope: this,
@@ -595,6 +596,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                             nodeType: 'async',
                                             draggable: false,
                                             expanded: true
+                                        },
+                                        clickedNode: null,
+                                        listeners: {
+                                            'click': function(n) {
+                                                Ext.getCmp('map_tf').selectedNode = n;
+                                            }
                                         }
                                     },
                                     {
@@ -607,8 +614,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                 width: 133,
                                                 scope: this,
                                                 handler: function() {
-                                                    var node = Ext.getCmp('orgunit_tp').getSelectionModel().getSelectedNode();
-                                                    if (!node) {
+                                                    var node = Ext.getCmp('map_tf').selectedNode;
+                                                    if (!node) {                                                                                                           
                                                         return;
                                                     }
                                                     
