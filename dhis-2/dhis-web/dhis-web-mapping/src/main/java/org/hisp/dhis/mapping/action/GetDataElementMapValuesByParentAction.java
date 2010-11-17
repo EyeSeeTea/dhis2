@@ -39,7 +39,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetDataMapValuesByLevelAction
+public class GetDataElementMapValuesByParentAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -85,12 +85,12 @@ public class GetDataMapValuesByLevelAction
         this.endDate = endDate;
     }
 
-    private Integer level;
+    private Integer parentId;    
 
-    public void setLevel( Integer level )
+    public void setParentId( Integer parentId )
     {
-        this.level = level;
-    }    
+        this.parentId = parentId;
+    }
 
     // -------------------------------------------------------------------------
     // Input
@@ -112,11 +112,11 @@ public class GetDataMapValuesByLevelAction
     {
         if ( periodId != null ) // Period
         {
-            object = mappingService.getDataElementMapValues( id, periodId, level );
+            object = mappingService.getDataElementMapValues( id, periodId, parentId );
         }
         else // Start and end date
         {
-            object = mappingService.getDataElementMapValues( id, DateUtils.getMediumDate( startDate ), DateUtils.getMediumDate( endDate ), level );
+            object = mappingService.getDataElementMapValues( id, DateUtils.getMediumDate( startDate ), DateUtils.getMediumDate( endDate ), parentId );
         }
         
         return SUCCESS;

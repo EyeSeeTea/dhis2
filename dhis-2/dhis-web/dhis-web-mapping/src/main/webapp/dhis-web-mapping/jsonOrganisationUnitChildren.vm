@@ -2,15 +2,18 @@
 #set( $size = $units.size() )
 #foreach( $unit in $units )
 { 
-  "id": ${unit.id}, 
+  "id": ${unit.id},
+  "level": ${unit.level},
   "text": "$encoder.jsEncode( ${unit.name} )",
   "hasChildrenWithCoordinates":$!{unit.hasChildrenWithCoordinates()},
   #if( $unit.hasChild() )
   "children": [
   #set( $innerSize = $unit.children.size() )
+  #set( $level = $unit.level + 1 )
   #foreach( $child in $unit.children )
   {
     "id": ${child.id},
+    "level": ${level},
     "text": "$encoder.jsEncode( ${child.name} )",
     "hasChildrenWithCoordinates":$!{child.hasChildrenWithCoordinates()}
   }#if( $velocityCount < $innerSize ),#end

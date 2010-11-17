@@ -225,7 +225,6 @@
     
 	var organisationUnitLevelStore = new Ext.data.JsonStore({
         url: GLOBALS.conf.path_mapping + 'getOrganisationUnitLevels' + GLOBALS.conf.type,
-        id: 'id',
         root: 'organisationUnitLevels',
         fields: ['id', 'level', 'name'],
         autoLoad: false,
@@ -3268,19 +3267,13 @@
 			zoomOutButton, ' ',
 			zoomToVisibleExtentButton,
 			'-',
+			favoritesButton, ' ',
+            predefinedMapLegendSetButton, ' ',
 			exportImageButton,
-			// exportExcelButton,
-			// '-',
-            ' ',
-			favoritesButton,
-			// '-',
-            ' ',
-            predefinedMapLegendSetButton,
 			'-',
 			helpButton,
 			'->',
-			exitButton,
-            ' ',' '
+			exitButton, ' ',' '
 		]
 	});
     
@@ -3472,9 +3465,6 @@
     
     choropleth.prepareMapViewLegend();
     proportionalSymbol.prepareMapViewLegend();
-    
-    choropleth.prepareMapViewMap();
-    proportionalSymbol.prepareMapViewMap();
     
 	}});
 	}});

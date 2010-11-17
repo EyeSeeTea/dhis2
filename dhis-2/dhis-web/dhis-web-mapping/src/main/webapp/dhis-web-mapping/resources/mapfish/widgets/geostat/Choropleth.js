@@ -72,6 +72,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     selectFeatures: false,
     
+    organisationUnitSelection: false,
+    
     updateValues: false,
     
     initComponent: function() {
@@ -149,24 +151,26 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             classes: 5
         };
         
-        this.organisationUnitSelectionType = {
-            value: GLOBALS.conf.map_selection_type_parent,
-			parent: null,
-			level: null,
-            setParent: function(p) {
-                this.value = GLOBALS.conf.map_selection_type_parent;
-				this.parent = p;
+        this.organisationUnitSelection = {
+            parent: null,
+            level: null,
+            node: null,
+            setValues: function(parent, level) {
+                this.parent = parent || this.parent;
+                this.level = level || this.level;
             },
-            setLevel: function(p) {
-                this.value = GLOBALS.conf.map_selection_type_level;
-				this.level = p;
+            getValues: function() {
+                return {
+                    parent: this.parent,
+                    value: this.value
+                };
             },
-            isParent: function() {
-                return this.value == GLOBALS.conf.map_selection_type_parent;
+            setNode: function(node) {
+                this.node = node;
             },
-            isLevel: function() {
-                return this.value == GLOBALS.conf.map_selection_type_level;
-            }			
+            getNode: function() {
+                return this.node;
+            }
         };
         
         this.valueType = {
@@ -229,7 +233,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         },
         
-        { html: '<br>' },
+        { html: '<div class="thematic-br">' },
 		
 		{
             xtype: 'combo',
@@ -539,43 +543,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     }
                 }
             }
-        },                        
-        
-        {
-            xtype: 'combo',
-            id: 'map_cb',
-            fieldLabel: i18n_map ,
-            typeAhead: true,
-            editable: false,
-            valueField: 'mapLayerPath',
-            displayField: 'name',
-            mode: 'remote',
-            forceSelection: true,
-            triggerAction: 'all',
-            emptyText: GLOBALS.conf.emptytext,
-			labelSeparator: GLOBALS.conf.labelseparator,
-            selectOnFocus: true,
-            width: GLOBALS.conf.combo_width,
-            store: GLOBALS.stores.map,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        Ext.getCmp('mapview_cb').clearValue();
-                        this.updateValues = true;
-                        
-                        if (cb.getValue() != this.newUrl) {
-                            this.loadFromFile(cb.getValue());
-                        }
-                    }
-                }
-            }
         },
+        
+        { html: '<div class="thematic-br">' },
         
         {
             xtype: 'textfield',
             id: 'map_tf',
-            fieldLabel: 'Org. units',
+            fieldLabel: i18n_boundary,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -596,172 +571,62 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             var value, rawvalue;
                             var w = new Ext.Window({
                                 id: 'orgunit_w',
-                                title: 'Select organisation units',
-                                closeAction: 'close',
-                                layout: 'fit',
+                                title: 'Parent organisation unit',
+                                closeAction: 'hide',
                                 autoScroll: true,
-                                width: 276,
-                                height: GLOBALS.util.getMultiSelectHeight() + 82,
-                                boxMaxHeight: GLOBALS.util.getMultiSelectHeight() + 82,
+                                height: 'auto',
+                                autoHeight: true,
+                                width: 280,
+                                boxMaxWidth: 280,
                                 items: [
                                     {
-                                        xtype: 'tabpanel',
-                                        activeTab: 0,
-                                        layoutOnTabChange: false,
-                                        deferredRender: false,
-                                        plain: true,
-                                        listeners: {
-                                            tabchange: function(panel, tab) {
-                                                if (tab.id == 'maptab0') {
-                                                    w.setHeight(GLOBALS.util.getMultiSelectHeight() + 82);
-                                                    w.syncSize();
-                                                }
-                                                else if (tab.id == 'maptab1') {
-                                                    w.setHeight(152);
-                                                    w.syncSize();
-                                                }
-                                            }
-                                        },
+                                        xtype: 'treepanel',
+                                        id: 'orgunit_tp',
+                                        bodyStyle: 'padding:7px',
+                                        height: screen.height / 3,
+                                        autoScroll: true,
+                                        loader: new Ext.tree.TreeLoader({
+                                            dataUrl: GLOBALS.conf.path_mapping + 'getOrganisationUnitChildren' + GLOBALS.conf.type
+                                        }),
+                                        root: {
+                                            id: GLOBALS.vars.topLevelUnit.id,
+                                            text: GLOBALS.vars.topLevelUnit.name,
+                                            hasChildrenWithCoordinates: GLOBALS.vars.topLevelUnit.hasChildrenWithCoordinates,
+                                            nodeType: 'async',
+                                            draggable: false,
+                                            expanded: true
+                                        }
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'table',
                                         items: [
                                             {
-                                                title: '<span class="panel-tab-title">Parent organisation unit</span>',
-                                                id: 'maptab0',
-                                                items: [
-                                                    {
-                                                        xtype: 'treepanel',
-                                                        id: 'orgunit_tp',
-                                                        bodyStyle: 'padding:7px',
-                                                        height: GLOBALS.util.getMultiSelectHeight(),
-                                                        autoScroll: true,
-                                                        loader: new Ext.tree.TreeLoader({
-                                                            dataUrl: GLOBALS.conf.path_mapping + 'getOrganisationUnitChildren' + GLOBALS.conf.type
-                                                        }),
-                                                        root: {
-                                                            id: GLOBALS.vars.topLevelUnit.id,
-                                                            text: GLOBALS.vars.topLevelUnit.name,
-                                                            hasChildrenWithCoordinates: GLOBALS.vars.topLevelUnit.hasChildrenWithCoordinates,
-                                                            nodeType: 'async',
-                                                            draggable: false,
-                                                            expanded: true
-                                                        },
-                                                        listeners: {
-                                                            'click': {
-                                                                scope: this,
-                                                                fn: function(n) {
-                                                                    if (n.hasChildNodes()) {
-                                                                        tf.setValue(n.attributes.text);
-                                                                        tf.value = n.attributes.id;
-                                                                        tf.node = n;
-                                                                    }
-                                                                 }
-                                                            },
-                                                            'expandnode': {
-                                                                fn: function(n) {
-                                                                    Ext.getCmp('orgunit_w').syncSize();
-                                                                }
-                                                            },
-                                                            'collapsenode': {
-                                                                fn: function(n) {
-                                                                    Ext.getCmp('orgunit_w').syncSize();
-                                                                }
-                                                            }
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'panel',
-                                                        layout: 'table',
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                text: 'Select',
-                                                                width: 130,
-                                                                scope: this,
-                                                                handler: function() {
-                                                                    this.updateValues = true;
-                                                                    if (tf.getValue()) {
-                                                                        this.organisationUnitSelectionType.setParent(tf.value);
-                                                                        this.loadFromDatabase(tf.value);
-                                                                    }
-                                                                    Ext.getCmp('orgunit_w').close();
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                text: 'Cancel',
-                                                                width: 130,
-                                                                handler: function() {
-                                                                    Ext.getCmp('orgunit_w').close();
-                                                                }
-                                                            }
-                                                        ]
+                                                xtype: 'button',
+                                                text: i18n_select,
+                                                width: 133,
+                                                scope: this,
+                                                handler: function() {
+                                                    var node = Ext.getCmp('orgunit_tp').getSelectionModel().getSelectedNode();
+                                                    if (!node) {
+                                                        return;
                                                     }
-                                                ]
+                                                    
+                                                    this.updateValues = true;
+                                                    this.organisationUnitSelection.parent = node.attributes.id;
+                                                    this.organisationUnitSelection.setNode(node);
+                                                    Ext.getCmp('map_tf').setValue(node.attributes.text);
+                                                    Ext.getCmp('orgunit_w').hide();
+                                                    this.loadGeoJson();
+                                                }
                                             },
                                             {
-                                                title: '<span class="panel-tab-title">Level</span>',
-                                                id: 'maptab1',
-                                                items: [
-                                                    {
-                                                        xtype: 'panel',
-                                                        bodyStyle: 'padding:8px',
-                                                        items: [
-                                                            { html: '<div class="window-field-label-first">Level</div>' },
-                                                            {
-                                                                xtype: 'combo',
-                                                                id: 'maporganisationunitlevel_cb',
-                                                                typeAhead: true,
-                                                                editable: false,
-                                                                valueField: 'level',
-                                                                displayField: 'name',
-                                                                mode: 'remote',
-                                                                forceSelection: true,
-                                                                triggerAction: 'all',
-                                                                emptyText: GLOBALS.conf.emptytext,
-                                                                labelSeparator: GLOBALS.conf.labelseparator,
-                                                                selectOnFocus: true,
-                                                                width: GLOBALS.conf.combo_width,
-                                                                store: GLOBALS.stores.organisationUnitLevel,
-                                                                listeners: {
-                                                                    'select': function(cb) {
-                                                                        tf.setValue(cb.getRawValue());
-                                                                        tf.value = cb.getValue();
-                                                                    }
-                                                                }                                                                        
-                                                            }
-                                                        ]
-                                                    },
-                                                    
-                                                    { html: '<br>' },
-                                                    
-                                                    {
-                                                        xtype: 'panel',
-                                                        layout: 'table',
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                text: 'Select',
-                                                                width: 130,
-                                                                scope: this,
-                                                                handler: function() {
-                                                                    this.updateValues = true;
-                                                                    if (tf.value) {
-                                                                        this.organisationUnitSelectionType.setLevel(tf.value);
-                                                                        this.loadFromDatabase(tf.value);
-                                                                    }
-                                                                    Ext.getCmp('orgunit_w').close();
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                text: 'Cancel',
-                                                                width: 130,
-                                                                handler: function() {
-                                                                    Ext.getCmp('orgunit_w').close();
-                                                                }
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
+                                                xtype: 'button',
+                                                text: i18n_cancel,
+                                                width: 133,
+                                                handler: function() {
+                                                    Ext.getCmp('orgunit_w').hide();
+                                                }
                                             }
                                         ]
                                     }
@@ -798,8 +663,37 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 }
             }
         },
+
+        {
+            xtype: 'combo',
+            id: 'level_cb',
+            fieldLabel: i18n_level,
+            typeAhead: true,
+            editable: false,
+            valueField: 'level',
+            displayField: 'name',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            emptyText: GLOBALS.conf.emptytext,
+			labelSeparator: GLOBALS.conf.labelseparator,
+            selectOnFocus: true,
+            width: GLOBALS.conf.combo_width,
+            store: GLOBALS.stores.organisationUnitLevel,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        Ext.getCmp('mapview_cb').clearValue();
+                        this.updateValues = true;
+                        this.organisationUnitSelection.level = cb.getValue();
+                        this.loadGeoJson();
+                    }
+                }
+            }
+        },
         
-        { html: '<br>' },
+        { html: '<div class="thematic-br">' },
 		
 		{
             xtype: 'combo',
@@ -814,7 +708,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             value: this.legend.value,
             triggerAction: 'all',
             width: GLOBALS.conf.combo_width,
-            store: new Ext.data.SimpleStore({
+            store: new Ext.data.ArrayStore({
                 fields: ['value', 'text'],
                 data: [
 					[GLOBALS.conf.map_legend_type_automatic, i18n_automatic],
@@ -970,7 +864,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             value: "#FF0000"
         },
         
-        { html: '<br>' },
+        { html: '<div class="thematic-br">' },
 
         {
             xtype: 'button',
@@ -1023,7 +917,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 Ext.getCmp('map_tf').value = feature.attributes.id;
                 choropleth.updateValues = true;
                 choropleth.organisationUnitSelectionType.setParent(feature.attributes.id);
-                choropleth.loadFromDatabase(feature.attributes.id, true);
+                choropleth.loadGeoJson(feature.attributes.id, true);
             }
             else {
                 Ext.message.msg(false, i18n_no_coordinates_found);
@@ -1149,19 +1043,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         }
     },
     
-    prepareMapViewMap: function() {
-        Ext.getCmp('map_cb').hideField();
-        Ext.getCmp('map_tf').showField();
-		
-		if (this.mapView.organisationUnitSelectionType == GLOBALS.conf.map_selection_type_parent ||
-			this.mapView.organisationUnitSelectionType == null) {
-				this.organisationUnitSelectionType.setParent(this.mapView.mapSource);
-		}
-		else if (this.mapView.organisationUnitSelectionType == GLOBALS.conf.map_selection_type_level) {
-			this.organisationUnitSelectionType.setLevel(this.mapView.mapSource);
-		}
-    },
-    
     setMapView: function() {
         var obj = this.prepareMapViewValueType();
         
@@ -1248,17 +1129,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
     
     setMapViewMap: function() {
-        this.prepareMapViewMap();
-
-        if (GLOBALS.vars.mapSourceType.isDatabase()) {
-            Ext.getCmp('map_tf').setValue(this.mapView.organisationUnitSelectionTypeName);
-            Ext.getCmp('map_tf').value = this.mapView.mapSource;
-            this.loadFromDatabase(this.mapView.mapSource);
-        }
-        else {
-            Ext.getCmp('map_cb').setValue(this.mapView.mapSource);
-            this.loadFromFile(this.mapView.mapSource);
-        }
+        this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnit, this.mapView.organisationUnitLevel);
+        Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitName);
+        Ext.getCmp('level_cb').setValue(this.mapView.organisationUnitLevel);
+        this.loadGeoJson();
     },
 	
 	applyPredefinedLegend: function(isMapView) {
@@ -1334,8 +1208,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
         
-        var cmp = GLOBALS.vars.mapSourceType.isDatabase() ? Ext.getCmp('map_tf') : Ext.getCmp('map_cb');
-        if (!cmp.getValue()) {
+        if (!Ext.getCmp('map_tf').getValue() || !Ext.getCmp('level_cb').getValue()) {
             if (exception) {
                 Ext.message.msg(false, i18n_form_is_not_complete);
             }
@@ -1375,8 +1248,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             periodId: Ext.getCmp('period_cb').getValue() || '',
             startDate: Ext.getCmp('startdate_df').getValue() || '',
             endDate: Ext.getCmp('enddate_df').getValue() || '',
-            organisationUnitSelectionType: this.organisationUnitSelectionType.value,
-            mapSource: GLOBALS.vars.mapSourceType.isDatabase() ? Ext.getCmp('map_tf').value : Ext.getCmp('map_cb').getValue(),
+            parentOrganisationUnit: this.organisationUnitSelection.parent,
+            organisationUnitLevel: this.organisationUnitSelection.level,
             mapLegendType: Ext.getCmp('maplegendtype_cb').getValue(),
             method: this.legend.value == GLOBALS.conf.map_legend_type_automatic ? Ext.getCmp('method_cb').getValue() : '',
             classes: this.legend.value == GLOBALS.conf.map_legend_type_automatic ? Ext.getCmp('numClasses_cb').getValue() : '',
@@ -1390,60 +1263,36 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         };
     },
     
-    loadFromDatabase: function(id, isDrillDown) {
+    loadGeoJson: function(isDrillDown) {
         function load() {
             GLOBALS.vars.mask.msg = i18n_loading_geojson;
             GLOBALS.vars.mask.show();
-			
-            if (this.organisationUnitSelectionType.isParent()) {
-                this.setUrl(GLOBALS.conf.path_mapping + 'getGeoJsonByParent.action?parentId=' + id);
-            }
-            else if (this.organisationUnitSelectionType.isLevel()) {
-                this.setUrl(GLOBALS.conf.path_mapping + 'getGeoJsonByLevel.action?level=' + id);
-            }
+            
+            this.setUrl(GLOBALS.conf.path_mapping + 'getGeoJson.action?' +
+                'parentId=' + this.organisationUnitSelection.parent +
+                '&level=' + this.organisationUnitSelection.level
+            );
         }
         
         if (isDrillDown || this.mapView) {
             load.call(this);
         }
         else {
-            if (this.organisationUnitSelectionType.isParent() && !Ext.getCmp('map_tf').node.attributes.hasChildrenWithCoordinates) {
-                Ext.message.msg(false, i18n_no_coordinates_found);
-                Ext.getCmp('map_tf').setValue(Ext.getCmp('orgunit_tp').getNodeById(this.organisationUnitSelectionType.parent).attributes.text);                    
-                Ext.getCmp('map_tf').value = this.organisationUnitSelectionType.parent;
-                Ext.getCmp('map_tf').node = Ext.getCmp('orgunit_tp').getNodeById(this.organisationUnitSelectionType.parent);
-                return;
+            // TODO validering
+            if (Ext.getCmp('map_tf').getValue() && Ext.getCmp('level_cb').getValue()) {
+            // if (this.organisationUnitSelectionType.isParent() && !Ext.getCmp('map_tf').node.attributes.hasChildrenWithCoordinates) {
+                // Ext.message.msg(false, i18n_no_coordinates_found);
+                // Ext.getCmp('map_tf').setValue(Ext.getCmp('orgunit_tp').getNodeById(this.organisationUnitSelectionType.parent).attributes.text);                    
+                // Ext.getCmp('map_tf').value = this.organisationUnitSelectionType.parent;
+                // Ext.getCmp('map_tf').node = Ext.getCmp('orgunit_tp').getNodeById(this.organisationUnitSelectionType.parent);
+                // return;
+            // }
+                load.call(this);
             }
-            load.call(this);
-        }
-    },
-    
-    loadFromFile: function(url) {
-        if (url != this.newUrl) {
-            this.newUrl = url;
-
-            if (GLOBALS.vars.mapSourceType.isGeojson()) {
-                this.setUrl(GLOBALS.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + url);
-            }
-			else if (GLOBALS.vars.mapSourceType.isShapefile()) {
-				this.setUrl(GLOBALS.conf.path_geoserver + GLOBALS.conf.wfs + url + GLOBALS.conf.output);
-			}
-        }
-        else {
-            this.classify(false, true);
         }
     },
 
     classify: function(exception, position) {
-        if (GLOBALS.vars.mapSourceType.isDatabase()) {
-            this.classifyDatabase(exception, position);
-        }
-        else {
-            this.classifyFile(exception, position);
-        }
-    },
-    
-    classifyDatabase: function(exception, position) {
         if (this.validateForm(exception)) {
             GLOBALS.vars.mask.msg = i18n_aggregating_map_values;
             GLOBALS.vars.mask.show();
@@ -1467,17 +1316,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     this.mapView = false;
                 }
                 
-                var dataUrl = this.valueType.isIndicator() ?
-                    (this.organisationUnitSelectionType.isParent() ? 'getIndicatorMapValuesByParent' : 'getIndicatorMapValuesByLevel') :
-                        (this.organisationUnitSelectionType.isLevel() ? 'getDataMapValuesByParent' : 'getDataMapValuesByLevel');
+                var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
                 
                 var params = {
                     id: this.valueType.isIndicator() ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue(),
                     periodId: GLOBALS.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getValue() : null,
                     startDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
                     endDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
-                    parentId: this.organisationUnitSelectionType.parent,
-                    level: this.organisationUnitSelectionType.level
+                    parentId: this.organisationUnitSelection.parent,
+                    level: this.organisationUnitSelection.level
                 };
                     
                 Ext.Ajax.request({
@@ -1507,109 +1354,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         
                         this.updateValues = false;
                         this.applyValues();
-                    }
-                });
-            }
-            else {
-                this.applyValues();
-            }
-        }
-    },
-    
-    classifyFile: function(exception, position) {
-        if (this.validateForm(exception)) {
-        
-            GLOBALS.vars.mask.msg = i18n_aggregating_map_values;
-            GLOBALS.vars.mask.show();
-            
-            if (this.updateValues) {
-                Ext.Ajax.request({
-                    url: GLOBALS.conf.path_mapping + 'getMapByMapLayerPath' + GLOBALS.conf.type,
-                    method: 'POST',
-                    params: {mapLayerPath: this.newUrl},
-                    scope: this,
-                    success: function(r) {
-                        this.mapData = Ext.util.JSON.decode(r.responseText).map[0];
-                        this.mapData.organisationUnitLevel = parseFloat(this.mapData.organisationUnitLevel);
-                        this.mapData.longitude = parseFloat(this.mapData.longitude);
-                        this.mapData.latitude = parseFloat(this.mapData.latitude);
-                        this.mapData.zoom = parseFloat(this.mapData.zoom);
-                        
-                        if (!position) {
-                            GLOBALS.vars.map.zoomToExtent(this.layer.getDataExtent());
-                        }
-                        
-                        if (this.mapView) {
-                            if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
-                                GLOBALS.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-                            }
-                            else {
-                                GLOBALS.vars.map.zoomToExtent(this.layer.getDataExtent());
-                            }
-                            this.mapView = false;
-                        }
-                        
-                        var params = {
-                            id: this.valueType.isIndicator() ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue()
-                        };
-                            
-                
-                        var indicatorOrDataElementId = this.valueType.isIndicator() ?
-                            Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
-                        var dataUrl = this.valueType.isIndicator() ?
-                            'getIndicatorMapValuesByMap' : 'getDataMapValuesByMap';
-                        var periodId = Ext.getCmp('period_cb').getValue();
-                        var mapLayerPath = this.newUrl;
-                        
-                        Ext.Ajax.request({
-                            url: GLOBALS.conf.path_mapping + dataUrl + GLOBALS.conf.type,
-                            method: 'POST',
-                            params: {id:indicatorOrDataElementId, periodId:periodId, mapLayerPath:mapLayerPath},
-                            scope: this,
-                            success: function(r) {
-                                var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-                                GLOBALS.vars.exportValues = GLOBALS.util.getExportDataValueJSON(mapvalues);
-                                var mv = new Array();
-                                var mour = new Array();
-                                var nameColumn = this.mapData.nameColumn;
-                                var options = {};
-                                
-                                if (mapvalues.length == 0) {
-                                    Ext.message.msg(false, i18n_current_selection_no_data );
-                                    GLOBALS.vars.mask.hide();
-                                    return;
-                                }
-                                
-                                for (var i = 0; i < mapvalues.length; i++) {
-                                    mv[mapvalues[i].orgUnitName] = mapvalues[i].orgUnitName ? mapvalues[i].value : '';
-                                }
-                                
-                                Ext.Ajax.request({
-                                    url: GLOBALS.conf.path_mapping + 'getAvailableMapOrganisationUnitRelations' + GLOBALS.conf.type,
-                                    method: 'POST',
-                                    params: {mapLayerPath: mapLayerPath},
-                                    scope: this,
-                                    success: function(r) {
-                                        var relations = Ext.util.JSON.decode(r.responseText).mapOrganisationUnitRelations;
-                                       
-                                        for (var i = 0; i < relations.length; i++) {
-                                            mour[relations[i].featureId] = relations[i].organisationUnit;
-                                        }
-
-                                        for (var j = 0; j < this.layer.features.length; j++) {
-                                            var value = mv[mour[this.layer.features[j].attributes[nameColumn]]];
-                                            this.layer.features[j].attributes.value = value ? parseFloat(value) : '';
-                                            this.layer.features[j].data.id = this.layer.features[j].attributes[nameColumn];
-                                            this.layer.features[j].data.name = this.layer.features[j].attributes[nameColumn];
-                                            this.layer.features[j].attributes.labelString = this.layer.features[j].attributes[nameColumn] + ' (' + this.layer.features[j].attributes.value + ')';
-                                        }
-                                       
-                                        this.updateValues = false;
-                                        this.applyValues();
-                                    }
-                                });
-                            }
-                        });
                     }
                 });
             }

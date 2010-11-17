@@ -48,13 +48,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
 	<!-- Map values -->
 
-    <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByParentAction"
-        class="org.hisp.dhis.mapping.action.GetDataMapValuesByParentAction" scope="prototype">
-        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-    </bean>
-
-    <bean id="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction"
-        class="org.hisp.dhis.mapping.action.GetDataMapValuesByLevelAction" scope="prototype">
+    <bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesAction"
+        class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesAction" scope="prototype">
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
@@ -65,6 +60,21 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
     <bean id="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction"
         class="org.hisp.dhis.mapping.action.GetIndicatorMapValuesByLevelAction" scope="prototype">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.mapping.action.GetDataElementMapValuesAction"
+        class="org.hisp.dhis.mapping.action.GetDataElementMapValuesAction" scope="prototype">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.mapping.action.GetDataElementMapValuesByParentAction"
+        class="org.hisp.dhis.mapping.action.GetDataElementMapValuesByParentAction" scope="prototype">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
+    <bean id="org.hisp.dhis.mapping.action.GetDataElementMapValuesByLevelAction"
+        class="org.hisp.dhis.mapping.action.GetDataElementMapValuesByLevelAction" scope="prototype">
         <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
@@ -254,6 +264,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<!-- GeoJson -->
+
+    <bean id="org.hisp.dhis.mapping.action.GetGeoJsonAction"
+        class="org.hisp.dhis.mapping.action.GetGeoJsonAction"
+        scope="prototype">
+        <property name="organisationUnitService"
+            ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    </bean>
 
     <bean id="org.hisp.dhis.mapping.action.GetGeoJsonByParentAction"
         class="org.hisp.dhis.mapping.action.GetGeoJsonByParentAction"

@@ -110,7 +110,6 @@
 .menu-layeroptions-wmslegend {
     background-image:url(../../../images/wmslegend.png);
 }
-
 .no-icon-menu .x-menu-item-icon {
     display: none;
 }
@@ -367,4 +366,9 @@
 	padding:4px 0 4px 0;
 	font:normal 11px lucida sans unicode,arial;
 	color:#333;
+}
+
+/* GIS */
+.thematic-br {
+    padding:5px 0px;
 }

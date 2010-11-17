@@ -62,6 +62,25 @@ public interface MappingService
     final String ORGANISATION_UNIT_SELECTION_TYPE_LEVEL = "level";
 
     // -------------------------------------------------------------------------
+    // IndicatorMapValue
+    // -------------------------------------------------------------------------
+
+    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId );
+
+    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, Date startDate, Date endDate,
+        int parentOrganisationUnitId );
+
+    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId, int level );
+
+    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, Date startDate, Date endDate,
+        int parentOrganisationUnitId, int level );
+
+    Collection<AggregatedMapValue> getIndicatorMapValuesByLevel( int dataElementId, int periodId, int level );
+
+    Collection<AggregatedMapValue> getIndicatorMapValuesByLevel( int dataElementId, Date startDate, Date endDate,
+        int level );
+
+    // -------------------------------------------------------------------------
     // DataMapValue
     // -------------------------------------------------------------------------
 
@@ -71,23 +90,15 @@ public interface MappingService
     Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, Date startDate, Date endDate,
         int parentOrganisationUnitId );
 
+    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId,
+        int parentOrganisationUnitId, int level );
+
+    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, Date startDate, Date endDate,
+        int parentOrganisationUnitId, int level );
+
     Collection<AggregatedMapValue> getDataElementMapValuesByLevel( int dataElementId, int periodId, int level );
 
     Collection<AggregatedMapValue> getDataElementMapValuesByLevel( int dataElementId, Date startDate, Date endDate,
-        int level );
-
-    // -------------------------------------------------------------------------
-    // IndicatorMapValue
-    // -------------------------------------------------------------------------
-
-    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId );
-
-    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, Date startDate, Date endDate,
-        int parentOrganisationUnitId );
-
-    Collection<AggregatedMapValue> getIndicatorMapValuesByLevel( int dataElementId, int periodId, int level );
-
-    Collection<AggregatedMapValue> getIndicatorMapValuesByLevel( int dataElementId, Date startDate, Date endDate,
         int level );
 
     // -------------------------------------------------------------------------

@@ -116,85 +116,6 @@ public class DefaultMappingService
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    // DataMapValues
-    // -------------------------------------------------------------------------
-
-    public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId,
-        int parentOrganisationUnitId )
-    {
-        Period period = periodService.getPeriod( periodId );
-
-        return getDataElementMapValues( dataElementId, period.getStartDate(), period.getEndDate(),
-            parentOrganisationUnitId );
-    }
-
-    public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, Date startDate, Date endDate,
-        int parentOrganisationUnitId )
-    {
-        Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
-
-        OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
-        DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-        for ( OrganisationUnit organisationUnit : parent.getChildren() )
-        {
-            if ( organisationUnit.hasCoordinates() )
-            {
-                Double value = aggregationService.getAggregatedDataValue( dataElement, null, startDate, endDate,
-                    organisationUnit );
-
-                value = value != null ? value : 0; // TODO improve
-
-                AggregatedMapValue mapValue = new AggregatedMapValue();
-                mapValue.setOrganisationUnitId( organisationUnit.getId() );
-                mapValue.setOrganisationUnitName( organisationUnit.getName() );
-                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
-
-                values.add( mapValue );
-            }
-        }
-
-        return values;
-    }
-
-    public Collection<AggregatedMapValue> getDataElementMapValuesByLevel( int dataElementId, int periodId, int level )
-    {
-        Period period = periodService.getPeriod( periodId );
-
-        return getDataElementMapValuesByLevel( dataElementId, period.getStartDate(), period.getEndDate(), level );
-    }
-
-    public Collection<AggregatedMapValue> getDataElementMapValuesByLevel( int dataElementId, Date startDate,
-        Date endDate, int level )
-    {
-        Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
-
-        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level );
-
-        DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-        for ( OrganisationUnit organisationUnit : organisationUnits )
-        {
-            if ( organisationUnit.hasCoordinates() )
-            {
-                Double value = aggregationService.getAggregatedDataValue( dataElement, null, startDate, endDate,
-                    organisationUnit );
-
-                value = value != null ? value : 0; // TODO improve
-
-                AggregatedMapValue mapValue = new AggregatedMapValue();
-                mapValue.setOrganisationUnitId( organisationUnit.getId() );
-                mapValue.setOrganisationUnitName( organisationUnit.getName() );
-                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
-
-                values.add( mapValue );
-            }
-        }
-
-        return values;
-    }
-
-    // -------------------------------------------------------------------------
     // IndicatorMapValues
     // -------------------------------------------------------------------------
 
@@ -215,6 +136,46 @@ public class DefaultMappingService
         Indicator indicator = indicatorService.getIndicator( indicatorId );
 
         for ( OrganisationUnit organisationUnit : parent.getChildren() )
+        {
+            if ( organisationUnit.hasCoordinates() )
+            {
+                Double value = aggregationService.getAggregatedIndicatorValue( indicator, startDate, endDate,
+                    organisationUnit );
+
+                value = value != null ? value : 0; // TODO improve
+
+                AggregatedMapValue mapValue = new AggregatedMapValue();
+                mapValue.setOrganisationUnitId( organisationUnit.getId() );
+                mapValue.setOrganisationUnitName( organisationUnit.getName() );
+                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+
+                values.add( mapValue );
+            }
+        }
+
+        return values;
+    }
+    
+    public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId,
+        int parentOrganisationUnitId, int level )
+    {
+        Period period = periodService.getPeriod( periodId );
+
+        return getIndicatorMapValues( indicatorId, period.getStartDate(), period.getEndDate(), parentOrganisationUnitId, level );
+    }
+
+    public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, Date startDate, Date endDate,
+        int parentOrganisationUnitId, int level )
+    {
+        Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
+        
+        Indicator indicator = indicatorService.getIndicator( indicatorId );
+
+        OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
+        
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level, parent );
+
+        for ( OrganisationUnit organisationUnit : organisationUnits )
         {
             if ( organisationUnit.hasCoordinates() )
             {
@@ -256,6 +217,126 @@ public class DefaultMappingService
             if ( organisationUnit.hasCoordinates() )
             {
                 Double value = aggregationService.getAggregatedIndicatorValue( indicator, startDate, endDate,
+                    organisationUnit );
+
+                value = value != null ? value : 0; // TODO improve
+
+                AggregatedMapValue mapValue = new AggregatedMapValue();
+                mapValue.setOrganisationUnitId( organisationUnit.getId() );
+                mapValue.setOrganisationUnitName( organisationUnit.getName() );
+                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+
+                values.add( mapValue );
+            }
+        }
+
+        return values;
+    }
+
+    // -------------------------------------------------------------------------
+    // DataMapValues
+    // -------------------------------------------------------------------------
+
+    public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId,
+        int parentOrganisationUnitId )
+    {
+        Period period = periodService.getPeriod( periodId );
+
+        return getDataElementMapValues( dataElementId, period.getStartDate(), period.getEndDate(),
+            parentOrganisationUnitId );
+    }
+
+    public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, Date startDate, Date endDate,
+        int parentOrganisationUnitId )
+    {
+        Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
+
+        OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
+        DataElement dataElement = dataElementService.getDataElement( dataElementId );
+
+        for ( OrganisationUnit organisationUnit : parent.getChildren() )
+        {
+            if ( organisationUnit.hasCoordinates() )
+            {
+                Double value = aggregationService.getAggregatedDataValue( dataElement, null, startDate, endDate,
+                    organisationUnit );
+
+                value = value != null ? value : 0; // TODO improve
+
+                AggregatedMapValue mapValue = new AggregatedMapValue();
+                mapValue.setOrganisationUnitId( organisationUnit.getId() );
+                mapValue.setOrganisationUnitName( organisationUnit.getName() );
+                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+
+                values.add( mapValue );
+            }
+        }
+
+        return values;
+    }
+
+    public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId,
+        int parentOrganisationUnitId, int level )
+    {
+        Period period = periodService.getPeriod( periodId );
+
+        return getDataElementMapValues( dataElementId, period.getStartDate(), period.getEndDate(),
+            parentOrganisationUnitId, level );
+    }
+
+    public Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, Date startDate, Date endDate,
+        int parentOrganisationUnitId, int level )
+    {
+        Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
+
+        DataElement dataElement = dataElementService.getDataElement( dataElementId );
+
+        OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
+        
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level, parent );
+
+        for ( OrganisationUnit organisationUnit : organisationUnits )
+        {
+            if ( organisationUnit.hasCoordinates() )
+            {
+                Double value = aggregationService.getAggregatedDataValue( dataElement, null, startDate, endDate,
+                    organisationUnit );
+
+                value = value != null ? value : 0; // TODO improve
+
+                AggregatedMapValue mapValue = new AggregatedMapValue();
+                mapValue.setOrganisationUnitId( organisationUnit.getId() );
+                mapValue.setOrganisationUnitName( organisationUnit.getName() );
+                mapValue.setValue( MathUtils.getRounded( value, 2 ) );
+
+                values.add( mapValue );
+            }
+        }
+
+        return values;
+    }
+
+    public Collection<AggregatedMapValue> getDataElementMapValuesByLevel( int dataElementId, int periodId, int level )
+    {
+        Period period = periodService.getPeriod( periodId );
+
+        return getDataElementMapValuesByLevel( dataElementId, period.getStartDate(), period.getEndDate(), level );
+    }
+
+    public Collection<AggregatedMapValue> getDataElementMapValuesByLevel( int dataElementId, Date startDate,
+        Date endDate, int level )
+    {
+        Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
+
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level );
+
+        DataElement dataElement = dataElementService.getDataElement( dataElementId );
+
+        for ( OrganisationUnit organisationUnit : organisationUnits )
+        {
+            if ( organisationUnit.hasCoordinates() )
+            {
+                Double value = aggregationService.getAggregatedDataValue( dataElement, null, startDate, endDate,
                     organisationUnit );
 
                 value = value != null ? value : 0; // TODO improve

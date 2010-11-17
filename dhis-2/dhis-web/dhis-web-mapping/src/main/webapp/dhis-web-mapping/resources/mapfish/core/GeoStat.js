@@ -76,7 +76,7 @@ mapfish.GeoStat = OpenLayers.Class({
         this.legendDiv = Ext.get(options.legendDiv);
     },
  
-    setUrl: function(url) {
+    setUrl: function(url, params) {
         this.url = url;
         if (this.url) {
             OpenLayers.loadURL(this.url, '', this, this.onSuccess, this.onFailure);
