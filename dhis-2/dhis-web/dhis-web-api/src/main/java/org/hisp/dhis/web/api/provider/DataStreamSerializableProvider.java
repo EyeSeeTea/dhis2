@@ -49,7 +49,7 @@ import com.sun.jersey.spi.resource.Singleton;
 
 @Provider
 @Singleton
-@Produces( "application/vnd.org.dhis2.mobile+serialized" )
+@Produces( org.hisp.dhis.web.api.resources.DhisMediaType.MOBILE_SERIALIZED )
 public class DataStreamSerializableProvider
     implements MessageBodyWriter<DataStreamSerializable>
 {
