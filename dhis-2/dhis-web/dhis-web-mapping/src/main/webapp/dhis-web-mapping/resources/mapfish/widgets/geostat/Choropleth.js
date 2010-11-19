@@ -555,7 +555,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'textfield',
             id: 'map_tf',
-            fieldLabel: i18n_map,
+            fieldLabel: i18n_boundary,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -577,7 +577,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             var value, rawvalue;
                             var w = new Ext.Window({
                                 id: 'orgunit_w',
-                                title: 'Parent organisation unit',
+                                title: 'Boundary and level',
                                 closeAction: 'hide',
                                 autoScroll: true,
                                 height: 'auto',
@@ -592,7 +592,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         items: [
                                             {
                                                 xtype: 'fieldset',
+                                                id: 'boundary_fs',
                                                 title: '&nbsp;&nbsp;<span class="panel-tab-title">Boundary</span>&nbsp;&nbsp;',
+                                                bodyStyle: 'margin-bottom:3px',
                                                 autoHeight:true,
                                                 items: [
                                                     {
@@ -648,21 +650,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                         labelSeparator: GLOBALS.conf.labelseparator,
                                                         selectOnFocus: true,
                                                         width: GLOBALS.conf.combo_width,
-                                                        store: GLOBALS.stores.organisationUnitLevel,
-                                                        listeners: {
-                                                            'select': {
-                                                                scope: this,
-                                                                fn: function(cb) {
-                                                                    Ext.getCmp('mapview_cb').clearValue();
-                                                                    this.updateValues = true;
-                                                                    this.organisationUnitSelection.level = cb.getValue();
-                                                                                                
-                                                                    if (this.formValidation.validateLevel(true)) {
-                                                                        this.loadGeoJson();
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
+                                                        store: GLOBALS.stores.organisationUnitLevel
                                                     }
                                                 ]
                                             }
@@ -686,6 +674,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                     this.updateValues = true;
                                                     this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level);
                                                     Ext.getCmp('map_tf').setValue(node.attributes.text);
+                                                    if (Ext.getCmp('level_cb').getValue()) {
+                                                        Ext.getCmp('level_tf').setValue(Ext.getCmp('level_cb').getRawValue());
+                                                        this.organisationUnitSelection.setValues(null, null, null, Ext.getCmp('level_cb').getValue());
+                                                    }
                                                     Ext.getCmp('orgunit_w').hide();
                                                     
                                                     if (this.formValidation.validateLevel(true)) {
@@ -735,6 +727,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     }
                 }
             }
+        },
+        
+        {
+            xtype: 'textfield',
+            id: 'level_tf',
+            readOnly: true,
+            fieldLabel: i18n_level,
+            editable: false,
+            emptyText: GLOBALS.conf.emptytext,
+			labelSeparator: GLOBALS.conf.labelseparator,
+            width: GLOBALS.conf.combo_width
         },
         
         { html: '<div class="thematic-br">' },
@@ -1183,7 +1186,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitName);
         
         function organisationUnitLevelCallback() {
-            Ext.getCmp('level_cb').setValue(this.mapView.organisationUnitLevel);
+            Ext.getCmp('level_tf').setValue(this.mapView.organisationUnitLevel);
             this.loadGeoJson();
         }           
         

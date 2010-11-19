@@ -413,13 +413,13 @@
                     var formValues;
                     
                     if (GLOBALS.vars.activePanel.isPolygon()) {
-                        if (!choropleth.validateForm(true)) {
+                        if (!choropleth.formValidation.validateForm(true)) {
                             return;
                         }
                         formValues = choropleth.getFormValues();
                     }
                     else if (GLOBALS.vars.activePanel.isPoint()) {
-                        if (!proportionalSymbol.validateForm(true)) {
+                        if (!proportionalSymbol.formValidation.validateForm(true)) {
                             return;
                         }
                         formValues = proportionalSymbol.getFormValues();
