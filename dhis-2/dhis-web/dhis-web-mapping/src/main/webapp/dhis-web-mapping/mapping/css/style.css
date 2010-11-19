@@ -263,6 +263,12 @@
 	font:normal 11px lucida sans unicode,arial;
 	color:#333;
 }
+.window-info-grey {
+	padding:5px 0px 0px 8px;
+	font:normal 11px lucida sans unicode,arial;
+	color:#333;
+    background-color:#f8f8f8;
+}
 .window-field-label-first {
 	padding:0 0 3px 3px;
 	font:normal 11px lucida sans unicode,arial;

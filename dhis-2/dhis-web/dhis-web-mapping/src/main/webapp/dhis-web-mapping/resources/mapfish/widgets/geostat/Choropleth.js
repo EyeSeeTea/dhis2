@@ -555,7 +555,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'textfield',
             id: 'map_tf',
-            fieldLabel: i18n_boundary,
+            fieldLabel: i18n_map,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -586,28 +586,87 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 boxMaxWidth: 280,
                                 items: [
                                     {
-                                        xtype: 'treepanel',
-                                        id: 'orgunit_tp',
-                                        bodyStyle: 'padding:7px',
-                                        height: screen.height / 3,
-                                        autoScroll: true,
-                                        loader: new Ext.tree.TreeLoader({
-                                            dataUrl: GLOBALS.conf.path_mapping + 'getOrganisationUnitChildren' + GLOBALS.conf.type
-                                        }),
-                                        root: {
-                                            id: GLOBALS.vars.topLevelUnit.id,
-                                            text: GLOBALS.vars.topLevelUnit.name,
-                                            hasChildrenWithCoordinates: GLOBALS.vars.topLevelUnit.hasChildrenWithCoordinates,
-                                            nodeType: 'async',
-                                            draggable: false,
-                                            expanded: true
-                                        },
-                                        clickedNode: null,
-                                        listeners: {
-                                            'click': function(n) {
-                                                Ext.getCmp('map_tf').selectedNode = n;
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        bodyStyle: 'padding:4px 4px 0px 4px; background-color:#f8f8f8',
+                                        items: [
+                                            {
+                                                xtype: 'fieldset',
+                                                title: '&nbsp;&nbsp;<span class="panel-tab-title">Boundary</span>&nbsp;&nbsp;',
+                                                autoHeight:true,
+                                                items: [
+                                                    {
+                                                        xtype: 'treepanel',
+                                                        id: 'orgunit_tp',
+                                                        height: screen.height / 3,
+                                                        autoScroll: true,
+                                                        loader: new Ext.tree.TreeLoader({
+                                                            dataUrl: GLOBALS.conf.path_mapping + 'getOrganisationUnitChildren' + GLOBALS.conf.type
+                                                        }),
+                                                        root: {
+                                                            id: GLOBALS.vars.topLevelUnit.id,
+                                                            text: GLOBALS.vars.topLevelUnit.name,
+                                                            hasChildrenWithCoordinates: GLOBALS.vars.topLevelUnit.hasChildrenWithCoordinates,
+                                                            nodeType: 'async',
+                                                            draggable: false,
+                                                            expanded: true
+                                                        },
+                                                        clickedNode: null,
+                                                        listeners: {
+                                                            'click': function(n) {
+                                                                Ext.getCmp('map_tf').selectedNode = n;
+                                                            }
+                                                        }
+                                                    },
+                                                ]
                                             }
-                                        }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        bodyStyle: 'padding:4px 4px 0px 4px; background-color:#f8f8f8',
+                                        items: [
+                                            {
+                                                xtype: 'fieldset',
+                                                title: '&nbsp;&nbsp;<span class="panel-tab-title">Level</span>&nbsp;&nbsp;',
+                                                autoHeight:true,
+                                                layout: 'anchor',
+                                                items: [
+                                                    {
+                                                        xtype: 'combo',
+                                                        id: 'level_cb',
+                                                        fieldLabel: i18n_level,
+                                                        typeAhead: true,
+                                                        editable: false,
+                                                        valueField: 'level',
+                                                        displayField: 'name',
+                                                        mode: 'remote',
+                                                        forceSelection: true,
+                                                        triggerAction: 'all',
+                                                        emptyText: GLOBALS.conf.emptytext,
+                                                        labelSeparator: GLOBALS.conf.labelseparator,
+                                                        selectOnFocus: true,
+                                                        width: GLOBALS.conf.combo_width,
+                                                        store: GLOBALS.stores.organisationUnitLevel,
+                                                        listeners: {
+                                                            'select': {
+                                                                scope: this,
+                                                                fn: function(cb) {
+                                                                    Ext.getCmp('mapview_cb').clearValue();
+                                                                    this.updateValues = true;
+                                                                    this.organisationUnitSelection.level = cb.getValue();
+                                                                                                
+                                                                    if (this.formValidation.validateLevel(true)) {
+                                                                        this.loadGeoJson();
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
                                     },
                                     {
                                         xtype: 'panel',
@@ -672,38 +731,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     showTree.call(this);
                                 }
                             });
-                        }
-                    }
-                }
-            }
-        },
-
-        {
-            xtype: 'combo',
-            id: 'level_cb',
-            fieldLabel: i18n_level,
-            typeAhead: true,
-            editable: false,
-            valueField: 'level',
-            displayField: 'name',
-            mode: 'remote',
-            forceSelection: true,
-            triggerAction: 'all',
-            emptyText: GLOBALS.conf.emptytext,
-			labelSeparator: GLOBALS.conf.labelseparator,
-            selectOnFocus: true,
-            width: GLOBALS.conf.combo_width,
-            store: GLOBALS.stores.organisationUnitLevel,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        Ext.getCmp('mapview_cb').clearValue();
-                        this.updateValues = true;
-                        this.organisationUnitSelection.level = cb.getValue();
-                                                    
-                        if (this.formValidation.validateLevel(true)) {
-                            this.loadGeoJson();
                         }
                     }
                 }
