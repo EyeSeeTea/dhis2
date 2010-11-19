@@ -76,6 +76,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     updateValues: false,
     
+    isDrillDown: false,
+    
     initComponent: function() {
     
         this.initProperties();
@@ -152,24 +154,27 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         };
         
         this.organisationUnitSelection = {
-            parent: null,
+            parent: {
+                id: null,
+                name: null,
+                level: null
+            },
             level: null,
-            node: null,
-            setValues: function(parent, level) {
-                this.parent = parent || this.parent;
+            setValues: function(pi, pn, pl, level) {
+                this.parent.id = pi || this.parent.id;
+                this.parent.name = pn || this.parent.name;
+                this.parent.level = pl || this.parent.level;
                 this.level = level || this.level;
             },
             getValues: function() {
                 return {
-                    parent: this.parent,
-                    value: this.value
+                    parent: {
+                        id: this.parent.id,
+                        name: this.parent.name,
+                        level: this.parent.level
+                    },
+                    level: this.level
                 };
-            },
-            setNode: function(node) {
-                this.node = node;
-            },
-            getNode: function() {
-                return this.node;
             }
         };
         
@@ -620,11 +625,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                     }
                                                     
                                                     this.updateValues = true;
-                                                    this.organisationUnitSelection.parent = node.attributes.id;
-                                                    this.organisationUnitSelection.setNode(node);
+                                                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level);
                                                     Ext.getCmp('map_tf').setValue(node.attributes.text);
                                                     Ext.getCmp('orgunit_w').hide();
-                                                    this.loadGeoJson();
+                                                    
+                                                    if (this.formValidation.validateLevel(true)) {
+                                                        this.loadGeoJson();
+                                                    }
                                                 }
                                             },
                                             {
@@ -694,7 +701,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         Ext.getCmp('mapview_cb').clearValue();
                         this.updateValues = true;
                         this.organisationUnitSelection.level = cb.getValue();
-                        this.loadGeoJson();
+                                                    
+                        if (this.formValidation.validateLevel(true)) {
+                            this.loadGeoJson();
+                        }
                     }
                 }
             }
@@ -876,7 +886,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'button',
             text: i18n_refresh,
-			cls: 'aa_med',
             isFormField: true,
             fieldLabel: '',
             labelSeparator: '',
@@ -895,9 +904,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         ];
     },
     
-    createSelectFeatures: function() {        
+    createSelectFeatures: function() {
+        var scope = this;
+        
         var onHoverSelect = function onHoverSelect(feature) {
-console.log(feature);        
             if (feature.attributes.name) {
                 Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes.name + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
             }
@@ -927,9 +937,9 @@ console.log(feature);
                 
                 Ext.getCmp('map_tf').setValue(feature.data.name);
                 Ext.getCmp('map_tf').value = feature.attributes.id;
-                choropleth.updateValues = true;
-                choropleth.organisationUnitSelectionType.setParent(feature.attributes.id);
-                choropleth.loadGeoJson(feature.attributes.id, true);
+                scope.updateValues = true;
+                scope.isDrillDown = true;
+                scope.loadGeoJson();
             }
             else {
                 Ext.message.msg(false, i18n_no_coordinates_found);
@@ -1141,7 +1151,8 @@ console.log(feature);
     },
     
     setMapViewMap: function() {
-        this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.organisationUnitLevel);
+        this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
+            3, this.mapView.organisationUnitLevel);
         Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitName);
         
         function organisationUnitLevelCallback() {
@@ -1198,15 +1209,10 @@ console.log(feature);
 	},
     
     formValidation: {
-        
-        scope: this,
-        
-        exception: false,
-        
-        mapValue: function() {
+        validateForm: function(exception) {
             if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_indicator) {
                 if (!Ext.getCmp('indicator_cb').getValue()) {
-                    if (this.exception) {
+                    if (exception) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
                     }
                     return false;
@@ -1214,18 +1220,16 @@ console.log(feature);
             }
             else if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_dataelement) {
                 if (!Ext.getCmp('dataelement_cb').getValue()) {
-                    if (this.exception) {
+                    if (exception) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
                     }
                     return false;
                 }
             }
-        },
-        
-        mapDate: function() {
+
             if (GLOBALS.vars.mapDateType.isFixed()) {
                 if (!Ext.getCmp('period_cb').getValue()) {
-                    if (this.exception) {
+                    if (exception) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
                     }
                     return false;
@@ -1233,35 +1237,24 @@ console.log(feature);
             }
             else {
                 if (!Ext.getCmp('startdate_df').getValue() || !Ext.getCmp('enddate_df').getValue()) {
-                    if (this.exception) {
+                    if (exception) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
                     }
                     return false;
                 }
             }
-        },
-        
-        map: function() {
+
             if (!Ext.getCmp('map_tf').getValue() || !Ext.getCmp('level_cb').getValue()) {
-                if (this.exception) {
+                if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
                 }
                 return false;
             }
 
-            // if (this.scope.organisationUnitSelection.node.attributes.level > Ext.getCmp('level_cb').getValue()) {
-                // if (this.exception) {
-                    // Ext.message.msg(false, 'jeje');
-                // }
-                // return false;
-            // }
-        },
-        
-        mapLegend: function() {
             if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.conf.map_legend_type_automatic) {
                 if (Ext.getCmp('method_cb').getValue() == GLOBALS.conf.classify_with_bounds) {
                     if (!Ext.getCmp('bounds_tf').getValue()) {
-                        if (this.exception) {
+                        if (exception) {
                             Ext.message.msg(false, i18n_form_is_not_complete);
                         }
                         return false;
@@ -1270,27 +1263,34 @@ console.log(feature);
             }
             else if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.conf.map_legend_type_predefined) {
                 if (!Ext.getCmp('maplegendset_cb').getValue()) {
-                    if (this.exception) {
+                    if (exception) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
                     }
                     return false;
                 }
             }
-        },
-        
-        validate: function(exception) {
-            this.exception = exception;
-            this.mapValue();
-            this.mapDate();
-            this.map();
-            this.mapLegend();  
+            
             return true;
         },
         
-        validateMap: function(exception) {
-            this.exception = exception;
-            this.map();
-            return true;
+        validateLevel: function(exception) {
+            if (choropleth.mapView || choropleth.idDrillDown) {
+                return true;
+            }
+            
+            if (Ext.getCmp('map_tf').getValue() && Ext.getCmp('level_cb').getValue()) {
+                if (choropleth.organisationUnitSelection.parent.level <= Ext.getCmp('level_cb').getValue()) {
+                    return true;
+                }
+                else {
+                    if (exception) {
+                        Ext.message.msg(false, 'Level is higher than boundary level');
+                    }
+                    return false;
+                }
+            }
+
+            return false;
         }
     },
     
@@ -1305,7 +1305,7 @@ console.log(feature);
             periodId: Ext.getCmp('period_cb').getValue() || null,
             startDate: Ext.getCmp('startdate_df').getValue() || null,
             endDate: Ext.getCmp('enddate_df').getValue() || null,
-            parentOrganisationUnitId: this.organisationUnitSelection.parent,
+            parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
             organisationUnitLevel: this.organisationUnitSelection.level,
             mapLegendType: Ext.getCmp('maplegendtype_cb').getValue(),
             method: this.legend.value == GLOBALS.conf.map_legend_type_automatic ? Ext.getCmp('method_cb').getValue() : null,
@@ -1320,37 +1320,27 @@ console.log(feature);
         };
     },
     
-    loadGeoJson: function(isDrillDown) {
+    loadGeoJson: function() {
         function load() {
             GLOBALS.vars.mask.msg = i18n_loading_geojson;
             GLOBALS.vars.mask.show();
             
             this.setUrl(GLOBALS.conf.path_mapping + 'getGeoJson.action?' +
-                'parentId=' + this.organisationUnitSelection.parent +
+                'parentId=' + this.organisationUnitSelection.parent.id +
                 '&level=' + this.organisationUnitSelection.level
             );
         }
         
-        if (isDrillDown || this.mapView) {
+        if (this.isDrillDown || this.mapView) {
             load.call(this);
         }
         else {
-            // TODO validering
-            if (Ext.getCmp('map_tf').getValue() && Ext.getCmp('level_cb').getValue()) {
-            // if (this.organisationUnitSelectionType.isParent() && !Ext.getCmp('map_tf').node.attributes.hasChildrenWithCoordinates) {
-                // Ext.message.msg(false, i18n_no_coordinates_found);
-                // Ext.getCmp('map_tf').setValue(Ext.getCmp('orgunit_tp').getNodeById(this.organisationUnitSelectionType.parent).attributes.text);                    
-                // Ext.getCmp('map_tf').value = this.organisationUnitSelectionType.parent;
-                // Ext.getCmp('map_tf').node = Ext.getCmp('orgunit_tp').getNodeById(this.organisationUnitSelectionType.parent);
-                // return;
-            // }
-                load.call(this);
-            }
+            load.call(this);
         }
     },
 
     classify: function(exception, position) {
-        if (this.formValidation.validate(exception)) {
+        if (this.formValidation.validateForm(exception)) {
             GLOBALS.vars.mask.msg = i18n_aggregating_map_values;
             GLOBALS.vars.mask.show();
             
@@ -1375,10 +1365,10 @@ console.log(feature);
                     periodId: GLOBALS.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getValue() : null,
                     startDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
                     endDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
-                    parentId: this.organisationUnitSelection.parent,
+                    parentId: this.organisationUnitSelection.parent.id,
                     level: this.organisationUnitSelection.level
                 };
-                    
+
                 Ext.Ajax.request({
                     url: GLOBALS.conf.path_mapping + dataUrl + GLOBALS.conf.type,
                     method: 'POST',

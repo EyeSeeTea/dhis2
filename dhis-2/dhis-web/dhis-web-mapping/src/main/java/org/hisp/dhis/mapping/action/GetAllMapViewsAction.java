@@ -61,13 +61,6 @@ public class GetAllMapViewsAction
         this.mappingService = mappingService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -86,12 +79,6 @@ public class GetAllMapViewsAction
     public String execute()
     {
         object = new ArrayList<MapView>( mappingService.getAllMapViews() );
-
-        for ( MapView mapView : object )
-        {
-            mapView.getParentOrganisationUnit().setLevel(
-                organisationUnitService.getLevelOfOrganisationUnit( mapView.getParentOrganisationUnit() ) );
-        }
 
         Collections.sort( object, new MapViewNameComparator() );
 

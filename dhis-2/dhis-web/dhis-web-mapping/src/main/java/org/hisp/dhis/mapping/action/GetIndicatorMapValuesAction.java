@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.DateUtils;
 
 import com.opensymphony.xwork2.Action;
@@ -51,6 +52,13 @@ public class GetIndicatorMapValuesAction
     public void setMappingService( MappingService mappingService )
     {
         this.mappingService = mappingService;
+    }
+
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
     }
 
     // -------------------------------------------------------------------------
@@ -100,7 +108,7 @@ public class GetIndicatorMapValuesAction
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
     private Collection<AggregatedMapValue> object;
@@ -109,7 +117,7 @@ public class GetIndicatorMapValuesAction
     {
         return object;
     }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------

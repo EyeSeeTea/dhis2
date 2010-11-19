@@ -94,13 +94,13 @@ mapfish.GeoStat = OpenLayers.Class({
         this.requestSuccess(request);
 
         if (GLOBALS.vars.activePanel.isPolygon()) {
-            if (!choropleth.formValidation.validate()) {
+            if (!choropleth.formValidation.validateForm()) {
                 GLOBALS.vars.mask.hide();
             }
             choropleth.classify(false);
         }
         else if (GLOBALS.vars.activePanel.isPoint()) {
-            if (!proportionalSymbol.validateForm()) {
+            if (!proportionalSymbol.formValidation.validateForm()) {
                 GLOBALS.vars.mask.hide();
             }
             proportionalSymbol.classify(false);

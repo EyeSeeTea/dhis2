@@ -55,13 +55,6 @@ public class GetMapViewAction
         this.mappingService = mappingService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -92,9 +85,6 @@ public class GetMapViewAction
         throws Exception
     {
         object = mappingService.getMapView( id );
-
-        object.getParentOrganisationUnit().setLevel(
-            organisationUnitService.getLevelOfOrganisationUnit( object.getParentOrganisationUnit() ) );
 
         return SUCCESS;
     }
