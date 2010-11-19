@@ -27,13 +27,13 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.mapping.MapView;
-import org.hisp.dhis.mapping.MappingService;
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.system.filter.OrganisationUnitWithCoordinatesFilter;
+import org.hisp.dhis.system.util.FilterUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,19 +41,12 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetMapViewAction
+public class GetGeoJsonAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private MappingService mappingService;
-
-    public void setMappingService( MappingService mappingService )
-    {
-        this.mappingService = mappingService;
-    }
 
     private OrganisationUnitService organisationUnitService;
 
@@ -66,20 +59,27 @@ public class GetMapViewAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer parentId;
 
-    public void setId( Integer id )
+    public void setParentId( Integer id )
     {
-        this.id = id;
+        this.parentId = id;
     }
-
+    
+    private Integer level;
+    
+    public void setLevel( Integer level )
+    {
+        this.level = level;
+    }
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private MapView object;
+    private Collection<OrganisationUnit> object;
 
-    public MapView getObject()
+    public Collection<OrganisationUnit> getObject()
     {
         return object;
     }
@@ -91,11 +91,13 @@ public class GetMapViewAction
     public String execute()
         throws Exception
     {
-        object = mappingService.getMapView( id );
-
-        object.getParentOrganisationUnit().setLevel(
-            organisationUnitService.getLevelOfOrganisationUnit( object.getParentOrganisationUnit() ) );
-
-        return SUCCESS;
+        OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentId );
+        
+        object = organisationUnitService.getOrganisationUnitsAtLevel( level, parent );
+        
+        FilterUtils.filter( object, new OrganisationUnitWithCoordinatesFilter() );
+        
+        return object.iterator().next().getFeatureType();
     }
 }
+

@@ -1,7 +1,5 @@
-#set( $size = $object.size() )
-{ "mapViews": [
-#foreach( $mapView in $object )
-  {
+{
+  "mapView": { 
     "id": "$!{mapView.id}",
     "name": "$!encoder.jsEncode( ${mapView.name} )",
     "mapValueType": "$!encoder.jsEncode( ${mapView.mapValueType} )",
@@ -16,7 +14,6 @@
     "endDate": "$!encoder.jsEncode( ${mapView.endDate} )",
     "parentOrganisationUnitId": "$!{mapView.parentOrganisationUnit.id}",
     "parentOrganisationUnitName": "$!encoder.jsEncode( ${mapView.parentOrganisationUnit.name} )",
-    "parentOrganisationUnitLevel": "$!encoder.jsEncode( ${mapView.parentOrganisationUnit.level} )",
     "organisationUnitLevel": "$!{mapView.organisationUnitLevel.level}",
     "mapLegendType": "$!encoder.jsEncode( ${mapView.mapLegendType} )",
     "method": "$!{mapView.method}",
@@ -28,6 +25,8 @@
     "longitude": "$!encoder.jsEncode( ${mapView.longitude} )",
     "latitude": "$!encoder.jsEncode( ${mapView.latitude} )",
     "zoom": "$!{mapView.zoom}"
-  }#if( $velocityCount < $size ),#end
-#end
-] }
+  },
+  "userSettings": {
+    "mapDateType": "$!encoder.jsEncode( ${mapDateType} )"
+  }
+}

@@ -16,6 +16,14 @@
 			</result>
 		</action>
 
+        <!-- Initialize -->
+
+        <action name="initialize"
+            class="org.hisp.dhis.mapping.action.InitializeAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonInitialize.vm</result>
+        </action>
+
         <!-- UserSetting -->
 
         <action name="getMapUserSettings"

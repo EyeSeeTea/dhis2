@@ -27,13 +27,11 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.mapping.MapView;
+import java.util.Collection;
+
+import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.mapping.MappingService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.system.util.DateUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,7 +39,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetMapViewAction
+public class GetIndicatorMapValuesAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -55,13 +53,6 @@ public class GetMapViewAction
         this.mappingService = mappingService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -73,13 +64,48 @@ public class GetMapViewAction
         this.id = id;
     }
 
+    private Integer periodId;
+
+    public void setPeriodId( Integer periodId )
+    {
+        this.periodId = periodId;
+    }
+
+    private String startDate;
+
+    public void setStartDate( String startDate )
+    {
+        this.startDate = startDate;
+    }
+
+    private String endDate;
+
+    public void setEndDate( String endDate )
+    {
+        this.endDate = endDate;
+    }
+
+    private Integer parentId;
+
+    public void setParentId( Integer parentId )
+    {
+        this.parentId = parentId;
+    }
+
+    private Integer level;
+
+    public void setLevel( Integer level )
+    {
+        this.level = level;
+    }
+
     // -------------------------------------------------------------------------
-    // Output
+    // Input
     // -------------------------------------------------------------------------
 
-    private MapView object;
+    private Collection<AggregatedMapValue> object;
 
-    public MapView getObject()
+    public Collection<AggregatedMapValue> getObject()
     {
         return object;
     }
@@ -91,10 +117,16 @@ public class GetMapViewAction
     public String execute()
         throws Exception
     {
-        object = mappingService.getMapView( id );
-
-        object.getParentOrganisationUnit().setLevel(
-            organisationUnitService.getLevelOfOrganisationUnit( object.getParentOrganisationUnit() ) );
+        if ( periodId != null ) // Period
+        {
+            object = mappingService.getIndicatorMapValues( id, periodId, parentId, level );
+        }
+        else
+        // Start and end date
+        {
+            object = mappingService.getIndicatorMapValues( id, DateUtils.getMediumDate( startDate ),
+                DateUtils.getMediumDate( endDate ), parentId, level );
+        }
 
         return SUCCESS;
     }

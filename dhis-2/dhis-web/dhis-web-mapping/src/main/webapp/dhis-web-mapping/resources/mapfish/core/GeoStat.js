@@ -94,7 +94,7 @@ mapfish.GeoStat = OpenLayers.Class({
         this.requestSuccess(request);
 
         if (GLOBALS.vars.activePanel.isPolygon()) {
-            if (!choropleth.validateForm()) {
+            if (!choropleth.formValidation.validate()) {
                 GLOBALS.vars.mask.hide();
             }
             choropleth.classify(false);

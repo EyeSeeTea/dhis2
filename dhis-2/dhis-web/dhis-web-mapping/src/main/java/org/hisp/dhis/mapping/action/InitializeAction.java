@@ -27,6 +27,9 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.mapping.MappingService.KEY_MAP_DATE_TYPE;
+import static org.hisp.dhis.mapping.MappingService.MAP_DATE_TYPE_FIXED;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.mapping.MapView;
@@ -34,6 +37,7 @@ import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,7 +45,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetMapViewAction
+public class InitializeAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -55,11 +59,11 @@ public class GetMapViewAction
         this.mappingService = mappingService;
     }
 
-    private OrganisationUnitService organisationUnitService;
+    private UserSettingService userSettingService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.userSettingService = userSettingService;
     }
 
     // -------------------------------------------------------------------------
@@ -77,11 +81,18 @@ public class GetMapViewAction
     // Output
     // -------------------------------------------------------------------------
 
-    private MapView object;
+    private MapView mapView;
 
-    public MapView getObject()
+    public MapView getMapView()
     {
-        return object;
+        return mapView;
+    }
+
+    private String mapDateType;
+
+    public String getMapDateType()
+    {
+        return mapDateType;
     }
 
     // -------------------------------------------------------------------------
@@ -91,10 +102,17 @@ public class GetMapViewAction
     public String execute()
         throws Exception
     {
-        object = mappingService.getMapView( id );
+        if ( id == null )
+        {
+            mapDateType = (String) userSettingService.getUserSetting( KEY_MAP_DATE_TYPE, MAP_DATE_TYPE_FIXED );
+        }
 
-        object.getParentOrganisationUnit().setLevel(
-            organisationUnitService.getLevelOfOrganisationUnit( object.getParentOrganisationUnit() ) );
+        else
+        {
+            mapDateType = mapView.getMapDateType();
+            
+            mapView = mappingService.getMapView( id );
+        }
 
         return SUCCESS;
     }

@@ -9,41 +9,24 @@
     GLOBALS.vars.parameter = GLOBALS.util.getUrlParam('view') ? {id: GLOBALS.util.getUrlParam('view')} : false;
     
     Ext.Ajax.request({
-        url: GLOBALS.conf.path_mapping + 'getMapView' + GLOBALS.conf.type,
-        method: 'GET',
-        params: {id: GLOBALS.vars.parameter.id || 0},
+        url: GLOBALS.conf.path_mapping + 'initialize' + GLOBALS.conf.type,
+        method: 'POST',
+        params: GLOBALS.vars.parameter.id || null,
         success: function(r) {
-            var mv = Ext.util.JSON.decode(r.responseText).mapView[0];
+            var init = Ext.util.JSON.decode(r.responseText);
             if (GLOBALS.vars.parameter) {
-                if (!mv.id) {
-                    GLOBALS.vars.parameter = false;
-                }
-                else {
-                    GLOBALS.vars.parameter.mapView = mv;
-                }
+                GLOBALS.vars.parameter.mapView = init.mapView;
             }
-            
-            Ext.Ajax.request({
-                url: GLOBALS.conf.path_mapping + 'getMapUserSettings' + GLOBALS.conf.type,
-                method: 'GET',
-                success: function(r) {
-                    var us = Ext.util.JSON.decode(r.responseText);
-                    GLOBALS.vars.mapSourceType.value = GLOBALS.vars.parameter ? GLOBALS.vars.parameter.mapView.mapSourceType : us.mapSource;
-                    GLOBALS.vars.mapDateType.value = GLOBALS.vars.parameter ? GLOBALS.vars.parameter.mapView.mapDateType : us.mapDateType;
-                    
-                    Ext.Ajax.request({
-                        url: GLOBALS.conf.path_mapping + 'setMapUserSettings' + GLOBALS.conf.type,
-                        method: 'POST',
-                        params: {mapSourceType: GLOBALS.vars.mapSourceType.value, mapDateType: GLOBALS.vars.mapDateType.value},
-                        success: function() {
+            GLOBALS.vars.mapDateType.value = init.userSettings.mapDateType;
                         
     /* Section: stores */
     var mapViewStore = new Ext.data.JsonStore({
         url: GLOBALS.conf.path_mapping + 'getAllMapViews' + GLOBALS.conf.type,
         root: 'mapViews',
-        fields: [ 'id', 'name', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId', 'mapDateType',
-            'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName', 'organisationUnitLevel',
-            'mapLegendType', 'method', 'classes', 'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'longitude', 'latitude', 'zoom'
+        fields: [ 'id', 'name', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
+            'mapDateType', 'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName',
+            'parentOrganisationUnitLevel', 'organisationUnitLevel', 'mapLegendType', 'method', 'classes', 'bounds', 'colorLow', 'colorHigh',
+            'mapLegendSetId', 'longitude', 'latitude', 'zoom'
         ],
         sortInfo: {field: 'name', direction: 'ASC'},
         autoLoad: false,
@@ -264,10 +247,6 @@
         }
     });
     
-	var nameColumnStore = new Ext.data.ArrayStore({
-        fields: ['name']
-    });
-    
 	var wmsCapabilitiesStore = new GeoExt.data.WMSCapabilitiesStore({
         url: GLOBALS.conf.path_geoserver + GLOBALS.conf.ows,
         autoLoad: false,
@@ -337,7 +316,6 @@
         organisationUnitLevel: organisationUnitLevelStore,
         organisationUnitsAtLevel: organisationUnitsAtLevelStore,
         geojsonFiles: geojsonFilesStore,
-        nameColumn: nameColumnStore,
         wmsCapabilities: wmsCapabilitiesStore,
         baseLayer: baseLayerStore,
         overlay: overlayStore
@@ -2535,7 +2513,7 @@
         map: GLOBALS.vars.map,
         layer: choroplethLayer,
 		title: '<span class="panel-title">' + i18n_polygon_layer + '</span>',
-        url: 'init',
+        // url: 'init',
         featureSelection: false,
         legendDiv: 'polygonlegend',
         defaults: {width: 130},
@@ -2563,7 +2541,7 @@
         map: GLOBALS.vars.map,
         layer: proportionalSymbolLayer,
 		title: '<span class="panel-title">' + i18n_point_layer + '</span>',
-        url: 'init',
+        // url: 'init',
         featureSelection: false,
         legendDiv: 'pointlegend',
         defaults: {width: 130},
@@ -2591,7 +2569,7 @@
         map: GLOBALS.vars.map,
         layer: choroplethLayer,
         title: '<span class="panel-title">' + i18n_assign_organisation_units_to_map + '</span>',
-        url: 'init',
+        // url: 'init',
         featureSelection: false,
         legendDiv: 'polygonlegend',
         defaults: {width: 130},
@@ -2962,7 +2940,7 @@
     choropleth.prepareMapViewLegend();
     proportionalSymbol.prepareMapViewLegend();
     
-	}});
-	}});
+	// }});
+	// }});
 	}});
 });

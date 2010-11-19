@@ -185,7 +185,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 return this.value == GLOBALS.conf.map_value_type_indicator;
             },
             isDataElement: function() {
-                return this.value == GLOBALS.conf.map_value_type_datalement;
+                return this.value == GLOBALS.conf.map_value_type_dataelement;
             }
         };
     },
@@ -250,8 +250,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             store: new Ext.data.ArrayStore({
                 fields: ['id', 'name'],
                 data: [
-                    [GLOBALS.conf.map_value_type_indicator, 'Indicators'],
-                    [GLOBALS.conf.map_value_type_dataelement, 'Data elements']
+                    [GLOBALS.conf.map_value_type_indicator, 'Indicator'],
+                    [GLOBALS.conf.map_value_type_dataelement, 'Data element']
                 ]
             }),
 			listeners: {
@@ -897,8 +897,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     createSelectFeatures: function() {        
         var onHoverSelect = function onHoverSelect(feature) {
+console.log(feature);        
             if (feature.attributes.name) {
-                Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes[choropleth.mapData.nameColumn] + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
+                Ext.getCmp('featureinfo_l').setText('<div style="color:black">' + feature.attributes.name + '</div><div style="color:#555">' + feature.attributes.value + '</div>', false);
             }
             else {
                 Ext.getCmp('featureinfo_l').setText('', false);
@@ -1196,68 +1197,101 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		});
 	},
     
-    validateForm: function(exception) {
-        if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_indicator) {
-            if (!Ext.getCmp('indicator_cb').getValue()) {
-                if (exception) {
-                    Ext.message.msg(false, i18n_form_is_not_complete);
-                }
-                return false;
-            }
-        }
-        else if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_dataelement) {
-            if (!Ext.getCmp('dataelement_cb').getValue()) {
-                if (exception) {
-                    Ext.message.msg(false, i18n_form_is_not_complete);
-                }
-                return false;
-            }
-        }
+    formValidation: {
         
-        if (GLOBALS.vars.mapDateType.isFixed()) {
-            if (!Ext.getCmp('period_cb').getValue()) {
-                if (exception) {
-                    Ext.message.msg(false, i18n_form_is_not_complete);
-                }
-                return false;
-            }
-        }
-        else {
-            if (!Ext.getCmp('startdate_df').getValue() || !Ext.getCmp('enddate_df').getValue()) {
-                if (exception) {
-                    Ext.message.msg(false, i18n_form_is_not_complete);
-                }
-                return false;
-            }
-        }
+        scope: this,
         
-        if (!Ext.getCmp('map_tf').getValue() || !Ext.getCmp('level_cb').getValue()) {
-            if (exception) {
-                Ext.message.msg(false, i18n_form_is_not_complete);
-            }
-            return false;
-        }
+        exception: false,
         
-        if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.conf.map_legend_type_automatic) {
-            if (Ext.getCmp('method_cb').getValue() == GLOBALS.conf.classify_with_bounds) {
-                if (!Ext.getCmp('bounds_tf').getValue()) {
-                    if (exception) {
+        mapValue: function() {
+            if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_indicator) {
+                if (!Ext.getCmp('indicator_cb').getValue()) {
+                    if (this.exception) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
                     }
                     return false;
                 }
             }
-        }
-        else if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.conf.map_legend_type_predefined) {
-            if (!Ext.getCmp('maplegendset_cb').getValue()) {
-                if (exception) {
+            else if (Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_dataelement) {
+                if (!Ext.getCmp('dataelement_cb').getValue()) {
+                    if (this.exception) {
+                        Ext.message.msg(false, i18n_form_is_not_complete);
+                    }
+                    return false;
+                }
+            }
+        },
+        
+        mapDate: function() {
+            if (GLOBALS.vars.mapDateType.isFixed()) {
+                if (!Ext.getCmp('period_cb').getValue()) {
+                    if (this.exception) {
+                        Ext.message.msg(false, i18n_form_is_not_complete);
+                    }
+                    return false;
+                }
+            }
+            else {
+                if (!Ext.getCmp('startdate_df').getValue() || !Ext.getCmp('enddate_df').getValue()) {
+                    if (this.exception) {
+                        Ext.message.msg(false, i18n_form_is_not_complete);
+                    }
+                    return false;
+                }
+            }
+        },
+        
+        map: function() {
+            if (!Ext.getCmp('map_tf').getValue() || !Ext.getCmp('level_cb').getValue()) {
+                if (this.exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
                 }
                 return false;
             }
-        }
+
+            // if (this.scope.organisationUnitSelection.node.attributes.level > Ext.getCmp('level_cb').getValue()) {
+                // if (this.exception) {
+                    // Ext.message.msg(false, 'jeje');
+                // }
+                // return false;
+            // }
+        },
         
-        return true;
+        mapLegend: function() {
+            if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.conf.map_legend_type_automatic) {
+                if (Ext.getCmp('method_cb').getValue() == GLOBALS.conf.classify_with_bounds) {
+                    if (!Ext.getCmp('bounds_tf').getValue()) {
+                        if (this.exception) {
+                            Ext.message.msg(false, i18n_form_is_not_complete);
+                        }
+                        return false;
+                    }
+                }
+            }
+            else if (Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.conf.map_legend_type_predefined) {
+                if (!Ext.getCmp('maplegendset_cb').getValue()) {
+                    if (this.exception) {
+                        Ext.message.msg(false, i18n_form_is_not_complete);
+                    }
+                    return false;
+                }
+            }
+        },
+        
+        validate: function(exception) {
+            this.exception = exception;
+            this.mapValue();
+            this.mapDate();
+            this.map();
+            this.mapLegend();  
+            return true;
+        },
+        
+        validateMap: function(exception) {
+            this.exception = exception;
+            this.map();
+            return true;
+        }
     },
     
     getFormValues: function() {
@@ -1316,31 +1350,26 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
 
     classify: function(exception, position) {
-        if (this.validateForm(exception)) {
+        if (this.formValidation.validate(exception)) {
             GLOBALS.vars.mask.msg = i18n_aggregating_map_values;
             GLOBALS.vars.mask.show();
             
-            if (this.updateValues) {
-                this.mapData = {
-                    nameColumn: 'name'
-                };
-
-                if (!position) {
+            if (!position) {
+                GLOBALS.vars.map.zoomToExtent(this.layer.getDataExtent());
+            }
+            
+            if (this.mapView) {
+                if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
+                    GLOBALS.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
+                }
+                else {
                     GLOBALS.vars.map.zoomToExtent(this.layer.getDataExtent());
                 }
-                
-                if (this.mapView) {
-                    if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
-                        GLOBALS.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-                    }
-                    else {
-                        GLOBALS.vars.map.zoomToExtent(this.layer.getDataExtent());
-                    }
-                    this.mapView = false;
-                }
-                
-                var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
-                
+                this.mapView = false;
+            }
+            
+            if (this.updateValues) {                
+                var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';                
                 var params = {
                     id: this.valueType.isIndicator() ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue(),
                     periodId: GLOBALS.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getValue() : null,
