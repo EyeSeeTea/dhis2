@@ -461,9 +461,6 @@
 			<param name="javascripts">
 				../dhis-web-commons/javascripts/jQuery/ui/jquery-ui.js,
 				../dhis-web-commons/javascripts/date.js,
-				../dhis-web-commons/calendar/calendar.js,
-				../dhis-web-commons/calendar/calendar-lang.js,
-				../dhis-web-commons/calendar/calendar-setup.js,
 				../dhis-web-commons/javascripts/jQuery/jquery.metadata.js,
 				javascript/underage.js
 				,javascript/commons.js
@@ -1126,8 +1123,64 @@
 		<action name="removeProgramStageDEValidation"
 			class="org.hisp.dhis.patient.action.validation.RemoveProgramStageDEValidationAction">
 			<result name="success" type="velocity-json">
-				dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 		</action>
 
+		<!-- Configuration -->
+		
+		<action name="configuration"
+			class="org.hisp.dhis.patient.action.configuration.GetPatientExcelItemplateFileAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-maintenance-patient/configurationParams.vm</param>
+			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
+			<param name="javascripts">javascript/import.js</param>
+		</action>
+		
+		<action name="saveConfiguration"
+			class="org.hisp.dhis.patient.action.configuration.SetPatientExcelItemplateFileAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+		</action>
+		
+		<!-- Import Action -->
+		
+		<action name="importPatientForm"
+			class="org.hisp.dhis.patient.action.NoAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-maintenance-patient/importPatientParams.vm</param>
+			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
+			<param name="javascripts">../dhis-web-commons/javascripts/ajaxfileupload.js, javascript/import.js</param>
+		</action>
+
+		<action name="validateUploadExcelFile"
+			class="org.hisp.dhis.patient.action.patientimport.ValidateUploadExcelFileAction">
+			<interceptor-ref name="fileUploadStack" />
+			<result name="success" type="velocity-xml">
+				/dhis-web-maintenance-patient/responseSuccess.vm</result>
+			<result name="error" type="velocity-xml">
+				/dhis-web-maintenance-patient/responseError.vm</result>
+		</action>
+
+		<action name="importPatient"
+			class="org.hisp.dhis.patient.action.patientimport.UploadExcelFileAction">
+			<result name="success" type="chain">importPatientChain</result>
+			<result name="error" type="redirect">importPatientForm.action</result>
+			<interceptor-ref name="fileUploadStack" />
+		</action>
+		
+		<action name="importPatientChain"
+			class="org.hisp.dhis.patient.action.patientimport.ImportPatientAction">
+			<result name="success" type="chain">importPatientResult</result>
+			<result name="error" type="redirect">importPatientResult</result>
+		</action>
+		
+		<action name="importPatientResult"
+			class="org.hisp.dhis.patient.action.NoAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-maintenance-patient/importPatientResult.vm</param>
+			<param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
+			<param name="javascripts">../dhis-web-commons/javascripts/ajaxfileupload.js, javascript/import.js</param>
+		</action>
+		
 	</package>
 </struts>

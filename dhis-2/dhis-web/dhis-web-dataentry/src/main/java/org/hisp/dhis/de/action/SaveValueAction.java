@@ -36,8 +36,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueAudit;
-import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.de.state.SelectedStateManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -48,12 +46,13 @@ import org.hisp.dhis.user.CurrentUserService;
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
+ * @author Abyot Asalefew
+ * @version $Id$
  */
 public class SaveValueAction
     implements Action
 {
-    private static final Log log = LogFactory.getLog( SaveValueAction.class );
+    private static final Log LOG = LogFactory.getLog( SaveValueAction.class );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -78,13 +77,6 @@ public class SaveValueAction
     public void setDataValueService( DataValueService dataValueService )
     {
         this.dataValueService = dataValueService;
-    }
-
-    private DataValueAuditService dataValueAuditService;
-
-    public void setDataValueAuditService( DataValueAuditService dataValueAuditService )
-    {
-        this.dataValueAuditService = dataValueAuditService;
     }
 
     private SelectedStateManager selectedStateManager;
@@ -138,6 +130,18 @@ public class SaveValueAction
         this.organisationUnitId = organisationUnitId;
     }
 
+    private int optionComboId;
+
+    public void setOptionComboId( int optionComboId )
+    {
+        this.optionComboId = optionComboId;
+    }
+
+    public int getOptionComboId()
+    {
+        return optionComboId;
+    }
+
     private int statusCode;
 
     public int getStatusCode()
@@ -159,6 +163,18 @@ public class SaveValueAction
         return storedBy;
     }
 
+    private String inputId;
+
+    public String getInputId()
+    {
+        return inputId;
+    }
+
+    public void setInputId( String inputId )
+    {
+        this.inputId = inputId;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -168,10 +184,12 @@ public class SaveValueAction
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
 
         Period period = selectedStateManager.getSelectedPeriod();
-System.out.println("\n\n\n ++++  selected period : " + period + " +++++ \n" );
+
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
         storedBy = currentUserService.getCurrentUsername();
+
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
 
         if ( storedBy == null )
         {
@@ -189,45 +207,31 @@ System.out.println("\n\n\n ++++  selected period : " + period + " +++++ \n" );
         }
 
         // ---------------------------------------------------------------------
-        // Save or update
+        // Update data
         // ---------------------------------------------------------------------
 
-        DataElementCategoryOptionCombo defaultOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-
-        DataValue dataValue = dataValueService.getDataValue( organisationUnit, dataElement, period, defaultOptionCombo );
+        DataValue dataValue = dataValueService.getDataValue( organisationUnit, dataElement, period, optionCombo );
 
         if ( dataValue == null )
         {
             if ( value != null )
             {
-                log.debug( "Adding DataValue" );
+                LOG.debug( "Adding DataValue" );
 
                 dataValue = new DataValue( dataElement, period, organisationUnit, value, storedBy, new Date(), null,
-                    defaultOptionCombo );
-
+                    optionCombo );
                 dataValueService.addDataValue( dataValue );
             }
         }
         else
         {
-            log.debug( "Updating DataValue" );
-
-            DataValueAudit audit = new DataValueAudit( dataValue, dataValue.getValue(), storedBy, new Date(), "" );
+            LOG.debug( "Updating DataValue" );
 
             dataValue.setValue( value );
             dataValue.setTimestamp( new Date() );
             dataValue.setStoredBy( storedBy );
 
             dataValueService.updateDataValue( dataValue );
-
-            // -----------------------------------------------------------------
-            // Add DataValueAudit
-            // -----------------------------------------------------------------
-
-            if ( value != null )
-            {
-                dataValueAuditService.addDataValueAudit( audit );
-            }
         }
 
         if ( dataValue != null )

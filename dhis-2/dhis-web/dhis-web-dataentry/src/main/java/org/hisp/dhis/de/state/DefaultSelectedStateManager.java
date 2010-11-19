@@ -67,6 +67,8 @@ public class DefaultSelectedStateManager
     public static final String SESSION_KEY_SELECTED_PERIOD_INDEX = "data_entry_selected_period_index";
 
     public static final String SESSION_KEY_BASE_PERIOD = "data_entry_base_period";
+    
+    public static final String SESSION_KEY_SELECTED_DISPLAY_MODE = "data_entry_selected_display_mode";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -115,12 +117,11 @@ public class DefaultSelectedStateManager
     // OrganisationUnit
     // -------------------------------------------------------------------------
     
-
     public OrganisationUnit getSelectedOrganisationUnit()
     {
         return selectionManager.getSelectedOrganisationUnit();
     }
-
+    
     // -------------------------------------------------------------------------
     // DataSet
     // -------------------------------------------------------------------------
@@ -142,9 +143,9 @@ public class DefaultSelectedStateManager
         getSession().remove( SESSION_KEY_SELECTED_DATASET_ID );
     }
 
-    public List<DataSet> loadDataSetsForSelectedOrgUnit( OrganisationUnit organisationUnit )
+    public List<DataSet> loadDataSetsForSelectedOrgUnit()
     {
-        List<DataSet> dataSets = new ArrayList<DataSet>( dataSetService.getDataSetsBySource( organisationUnit ) );
+        List<DataSet> dataSets = new ArrayList<DataSet>( dataSetService.getDataSetsBySource( getSelectedOrganisationUnit() ) );
 
         // ---------------------------------------------------------------------
         // Retain only DataSets from current user's authority groups
@@ -274,6 +275,20 @@ public class DefaultSelectedStateManager
         Period period = getSelectedPeriod();
 
         return periodService.reloadPeriod( period );
+    }
+
+    // -------------------------------------------------------------------------
+    // DisplayMode
+    // -------------------------------------------------------------------------
+    
+    public void setSelectedDisplayMode( String displayMode )
+    {
+        getSession().put( SESSION_KEY_SELECTED_DISPLAY_MODE, displayMode );
+    }
+    
+    public String getSelectedDisplayMode()
+    {
+        return (String) getSession().get( SESSION_KEY_SELECTED_DISPLAY_MODE );
     }
     
     // -------------------------------------------------------------------------

@@ -16,6 +16,198 @@ window.onload = function ()
 	}
 }
 
+function clearPeriod()
+{	
+	clearList( document.getElementById( 'selectedPeriodIndex' ) );	
+	clearEntryForm();
+}
+
+function clearEntryForm()
+{
+	$('#contentDiv').html( '' );
+}
+
+// -----------------------------------------------------------------------------
+// OrganisationUnit Selection
+// -----------------------------------------------------------------------------
+
+function organisationUnitSelected( orgUnits )
+{
+    var dataSetId = $( '#selectedDataSetId' ).val();
+    
+    var url = 'loadDataSets.action';
+    
+    var list = document.getElementById( 'selectedDataSetId' );
+    
+    clearList( list );
+    
+    addOptionToList( list, '-1', '[ Select ]' );
+    
+    $.getJSON( url, function( json ) {
+    	$( '#selectedOrganisationUnit' ).val( json.organisationUnit.name );
+    	$( '#currentOrganisationUnit' ).html( json.organisationUnit.name );
+    	
+    	for ( i in json.dataSets ) {
+    		addOptionToList( list, json.dataSets[i].id, json.dataSets[i].name );
+    	}
+    	
+    	if ( json.dataSetValid && dataSetId != null ) {
+    		$( '#selectedDataSetId' ).val( dataSetId );
+    		
+    		if ( json.periodValid ) {
+    			displayEntryFormInternal( false );
+    		}
+    	}
+    	else {
+    		clearPeriod();
+    	}
+    } );
+}
+
+selection.setListenerFunction( organisationUnitSelected );
+
+// -----------------------------------------------------------------------------
+// Next/Previous Periods Selection
+// -----------------------------------------------------------------------------
+
+function nextPeriodsSelected()
+{
+	displayPeriodsInternal( true, false );
+}
+
+function previousPeriodsSelected()
+{
+	displayPeriodsInternal( false, true );
+}
+
+function displayPeriodsInternal( next, previous ) 
+{
+	var url = 'loadNextPreviousPeriods.action?next=' + next + '&previous=' + previous;
+	
+	var list = document.getElementById( 'selectedPeriodIndex' );
+		
+	clearList( list );
+	    
+	addOptionToList( list, '-1', '[ Select ]' );
+	
+    $.getJSON( url, function( json ) {
+    	for ( i in json.periods ) {
+    		addOptionToList( list, i, json.periods[i].name );
+    	}
+    } );
+}
+
+// -----------------------------------------------------------------------------
+// DataSet Selection
+// -----------------------------------------------------------------------------
+
+function dataSetSelected()
+{
+	var dataSetId = $( '#selectedDataSetId' ).val();	
+	var periodIndex = $( '#selectedPeriodIndex' ).val();
+	
+	if ( dataSetId && dataSetId != -1 )
+	{
+		var url = 'loadPeriods.action?dataSetId=' + dataSetId;
+
+		var list = document.getElementById( 'selectedPeriodIndex' );
+		
+	    clearList( list );
+	    
+	    addOptionToList( list, '-1', '[ Select ]' );
+		
+	    $.getJSON( url, function( json ) {
+	    	for ( i in json.periods ) {
+	    		addOptionToList( list, i, json.periods[i].name );
+	    	}
+	    	
+	    	if ( json.periodValid && periodIndex != null ) {
+	    		$( '#selectedPeriodIndex' ).val( periodIndex );	    		
+	    		displayEntryFormInternal( true );
+	    	}
+	    	else {
+	    		clearEntryForm();
+	    	}
+	    } );
+	}
+}
+
+// -----------------------------------------------------------------------------
+// DisplayMode Selection
+// -----------------------------------------------------------------------------
+
+function displayModeSelected()
+{
+	displayEntryFormInternal( false );
+}
+
+// -----------------------------------------------------------------------------
+// Period Selection
+// -----------------------------------------------------------------------------
+
+function periodSelected()
+{
+	displayEntryFormInternal( true );
+}
+
+function displayEntryFormInternal( updateDisplayModes )
+{
+	showLoader();
+	
+	var periodIndex = $( '#selectedPeriodIndex' ).val();
+	
+	if ( periodIndex && periodIndex != -1 )
+	{
+		var url = 'select.action?selectedPeriodIndex=' + periodIndex +
+			'&displayMode=' + $("input[name='displayMode']:checked").val();
+		
+		var callback = updateDisplayModes ? setDisplayModes : hideLoader;
+		
+		$( '#contentDiv' ).load( url, callback );
+	}
+}
+
+function setDisplayModes()
+{
+	hideLoader();
+	
+	$.getJSON( 'loadDisplayModes.action', function( json ) {
+		if ( json.customForm ) {
+			$( '#displayModeCustom' ).removeAttr( 'disabled' );
+		}
+		else {
+			$( '#displayModeCustom' ).attr( 'disabled', 'disabled' );
+		}
+		
+		if ( json.sectionForm ) {
+			$( '#displayModeSection' ).removeAttr( 'disabled' );
+		}
+		else {
+			$( '#displayModeSection' ).attr( 'disabled', 'disabled' );
+		}
+		
+		if ( json.displayMode == 'customform' ) {
+			$( '#displayModeCustom' ).attr( 'checked', 'checked' );
+			$( '#displayModeSection' ).removeAttr( 'checked' );
+			$( '#displayModeDefault' ).removeAttr( 'checked' );
+		}
+		else if ( json.displayMode = 'sectionform' ) {
+			$( '#displayModeCustom' ).removeAttr( 'checked' );
+			$( '#displayModeSection' ).attr( 'checked', 'checked' );
+			$( '#displayModeDefault' ).removeAttr( 'checked' );
+		}
+		else if ( json.displayMode = 'defaultform' ) {
+			$( '#displayModeCustom' ).removeAttr( 'checked' );
+			$( '#displayModeSection' ).removeAttr( 'checked' );
+			$( '#displayModeDefault' ).attr( 'checked', 'checked' );
+		}
+	} );
+}
+
+// -----------------------------------------------------------------------------
+// History
+// -----------------------------------------------------------------------------
+
 function viewHistory( dataElementId, optionComboId, showComment )
 {
     window.open( 'viewHistory.action?dataElementId=' + dataElementId + '&optionComboId=' + optionComboId + '&showComment=' + showComment, '_blank', 'width=580,height=710,scrollbars=yes' );
@@ -24,11 +216,9 @@ function viewHistory( dataElementId, optionComboId, showComment )
 /**
  * Display data element name in selection display when a value field recieves
  * focus.
- * XXX May want to move this to a separate function, called by valueFocus.
- * @param e focus event
- * @author Hans S. Tommerholt
  */
 var customDataEntryFormExists = "false";
+
 function valueFocus(e) 
 {
 	//Retrieve the data element id from the id of the field
@@ -54,7 +244,6 @@ function valueFocus(e)
 	deId = match1[1];
 	ocId = match2[1];		
 	
-	//Get the data element name
 	var nameContainer = document.getElementById('value[' + deId + '].name');
 	var opCbContainer = document.getElementById('value[option' + ocId + '].name');
 	var minContainer = document.getElementById('value[' + deId + ':' + ocId +'].min');	
@@ -250,7 +439,7 @@ function generateMinMaxValues()
     setGeneratedMinMaxValues.save();
 	
 	unLockScreen();
-	setMessage(i18n_generate_min_max_success);
+	setHeaderDelayMessage(i18n_generate_min_max_success);
 }
 
 // -----------------------------------------------------------------------------
@@ -289,7 +478,6 @@ function registerCompleteDataSet( messageElement )
     }
     else
     {
-		setMessage(i18n_register_complete_dataset_failed);
         window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
     }
 }
@@ -301,7 +489,6 @@ function registerReceived( messageElement )
     if ( type=='input' )
     {
 		setHeaderDelayMessage( messageElement.firstChild.nodeValue );
-		setMessage(i18n_register_complete_dataset_failed);
 		return;
 	}
 	
@@ -309,9 +496,6 @@ function registerReceived( messageElement )
 	document.getElementById( "undoButton" ).disabled = false;
     document.getElementById( "dateField" ).disabled = true;
     document.getElementById( "dateDiv" ).style.display = "none";
-    
-	setMessage(i18n_register_complete_dataset_success);
-	changeInputTextStatus( true );
 }
 
 function undoCompleteDataSet()
@@ -334,6 +518,13 @@ function undoReceived( messageElement )
     document.getElementById( "undoButton" ).disabled = true;
     document.getElementById( "dateField" ).disabled = false;
     document.getElementById( "dateDiv" ).style.display = "inline";
-	setMessage( i18n_undo_register_complete_dataset_success );
-	changeInputTextStatus( false );
+}
+
+// -----------------------------------------------------------------------------
+// Validation
+// -----------------------------------------------------------------------------
+
+function validate()
+{
+    window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
 }

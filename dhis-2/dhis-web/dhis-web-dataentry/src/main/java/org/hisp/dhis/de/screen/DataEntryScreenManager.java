@@ -45,16 +45,8 @@ import org.hisp.dhis.period.Period;
  * @version $Id$
  */
 public interface DataEntryScreenManager 
-{	    
-    String getScreenType( DataSet dataSet );
-    
-    boolean hasMixOfDimensions( DataSet dataset );
-    
-    boolean hasMultiDimensionalDataElement( DataSet dataSet );
-    
+{
     boolean hasMultiDimensionalDataElement( Section section );
-    
-    boolean hasSection( DataSet dataSet );
     
     Collection<Integer> getAllCalculatedDataElements( DataSet dataSet );
     

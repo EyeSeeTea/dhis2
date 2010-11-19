@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,22 +17,26 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dbmanager.DataBaseManagerInterface;
 import org.hisp.dhis.linelisting.LineListDataValue;
 import org.hisp.dhis.linelisting.LineListElement;
 import org.hisp.dhis.linelisting.LineListService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.comparator.PeriodComparator;
 import org.hisp.dhis.source.Source;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import java.util.Collections;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 public class MySQLDataBaseManager
     implements DataBaseManagerInterface
 {
+
+    private static final Log log = LogFactory.getLog( MySQLDataBaseManager.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -156,7 +161,6 @@ public class MySQLDataBaseManager
             String columnDefinition = "select " + lineListElement.getShortName() + " from " + tableName;
             //ResultSet rs = statement.executeQuery( query );
             SqlRowSet rs = jdbcTemplate.queryForRowSet( columnDefinition );
-            System.out.println( "query = " + columnDefinition );
             if ( rs != null )
             {
                 int i = 0;
@@ -196,15 +200,36 @@ public class MySQLDataBaseManager
                     }
                 }
             }
-            System.out.println( "dataIsThere " + doNotDelete );
+            log.debug( tableName + ", " + lineListElement.getShortName() + (doNotDelete ? " has data" : " can be deleted") );
         } catch ( Exception e )
         {
-            e.printStackTrace();
+            log.error( "Caught exception while checking " + tableName + ", " + lineListElement.getShortName() + ". Won't delete.", e );
             doNotDelete = false;
-            System.out.println( "dataIsThere " + doNotDelete );
         }
 
         return doNotDelete;
+    }
+    
+    
+ // function to get max row number
+    public int getMaxRecordNumber( String tableName )
+    {
+        int maxRecordNumber = 0;
+        try
+        {
+            String query = "SELECT MAX(recordNumber) FROM " + tableName;
+            SqlRowSet rs = jdbcTemplate.queryForRowSet( query );
+           
+            if( rs.next() )
+            {
+                maxRecordNumber = rs.getInt( 1 );
+            }
+        } 
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+        return maxRecordNumber;
     }
     
 // function for row count
@@ -527,7 +552,7 @@ public class MySQLDataBaseManager
         //Statement statement = null;
 
         // creating map of element and its values
-        Map<String, String> llElementValuesMap = new HashMap<String, String>();
+        //Map<String, String> llElementValuesMap = new HashMap<String, String>();
 
         List<LineListDataValue> llDataValues = new ArrayList<LineListDataValue>();
         // LineListDataValue llDataValue = new LineListDataValue();
@@ -585,12 +610,14 @@ public class MySQLDataBaseManager
                     while ( result.next() )
                     {
                         LineListDataValue llDataValue = new LineListDataValue();
+                        Map<String, String> llElementValuesMap = new HashMap<String, String>();
                         llDataValue.setRecordNumber( result.getInt( "recordnumber" ) );
                         Iterator it1 = elementsCollection.iterator();
                         while ( it1.hasNext() )
                         {
                             element = (LineListElement) it1.next();
-                            name = element.getShortName() + ":" + result.getInt( "recordnumber" );
+                            //name = element.getShortName() + ":" + result.getInt( "recordnumber" );
+                            name = element.getShortName();
                             if ( element.getDataType().equalsIgnoreCase( "string" ) )
                             {
                                 String tempString = result.getString( element.getShortName() );
@@ -642,7 +669,185 @@ public class MySQLDataBaseManager
         return llDataValues;
 
     }
+    
+    public List<LineListDataValue> getLLValuesFilterByLLElements( String tableName, Map<String, String> llElementValueMap, Source source )
+    {
+        String columnDefinition = "";
 
+        //Statement statement = null;
+
+        // creating map of element and its values
+        //Map<String, String> llElementValuesMap = new HashMap<String, String>();
+
+        List<LineListDataValue> llDataValues = new ArrayList<LineListDataValue>();
+        // LineListDataValue llDataValue = new LineListDataValue();
+        if ( source != null )
+        {
+            columnDefinition += "select * from " + tableName + " where sourceid = " + source.getId();
+
+            List<String> llElementNames = new ArrayList<String>( llElementValueMap.keySet() );
+            Iterator<String> llENamesIterator = llElementNames.iterator();
+            while ( llENamesIterator.hasNext() )
+            {
+                String lleName = llENamesIterator.next();
+
+                String lleValue = llElementValueMap.get( lleName );
+
+                if ( lleValue.equalsIgnoreCase( "notnull" ) )
+                {
+                    columnDefinition += " and " + lleName + " IS NOT NULL";
+                } else
+                {
+                    if ( lleValue.equalsIgnoreCase( "null" ) )
+                    {
+                        columnDefinition += " and " + lleName + " IS NULL";
+                    } else
+                    {
+                        columnDefinition += " and " + lleName + " LIKE '" + lleValue + "'";
+                    }
+                }
+            }
+
+
+            columnDefinition += " order by recordnumber";
+
+            System.out.println( columnDefinition );
+
+            Collection<LineListElement> elementsCollection = new ArrayList<LineListElement>();
+
+            elementsCollection = lineListService.getLineListGroupByShortName( tableName ).getLineListElements();
+
+            LineListElement element;
+            String name = "";
+
+            try
+            {
+               //Connection connection = jdbcTemplate.getDataSource().getConnection();
+                //statement = connection.createStatement( ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE );
+                //ResultSet result = statement.executeQuery( columnDefinition );
+                SqlRowSet result = jdbcTemplate.queryForRowSet( columnDefinition );
+                //System.out.println(columnDefinition);
+
+                if ( result != null )
+                {
+                    result.beforeFirst();
+
+                    while ( result.next() )
+                    {
+                        LineListDataValue llDataValue = new LineListDataValue();
+                        Map<String, String> llElementValuesMap = new HashMap<String, String>();
+                        llDataValue.setRecordNumber( result.getInt( "recordnumber" ) );
+                        Iterator it1 = elementsCollection.iterator();
+                        while ( it1.hasNext() )
+                        {
+                            element = (LineListElement) it1.next();
+                            //name = element.getShortName() + ":" + result.getInt( "recordnumber" );
+                            name = element.getShortName();
+                            if ( element.getDataType().equalsIgnoreCase( "string" ) )
+                            {
+                                String tempString = result.getString( element.getShortName() );
+                                if ( tempString == null )
+                                {
+                                    tempString = "";
+                                }
+                                llElementValuesMap.put( name, tempString );
+                            } else
+                            {
+                                if ( element.getDataType().equalsIgnoreCase( "date" ) )
+                                {
+                                    Date tempDate = result.getDate( element.getShortName() );
+                                    String tempStr = "";
+                                    if ( tempDate != null )
+                                    {
+                                        tempStr = tempDate.toString();
+                                    }
+                                    llElementValuesMap.put( name, tempStr );
+                                } else
+                                {
+                                    if ( element.getDataType().equalsIgnoreCase( "int" ) )
+                                    {
+                                        String tempStr = "";
+                                        Integer tempInt = result.getInt( element.getShortName() );
+                                        if ( tempInt != null )
+                                        {
+                                            tempStr = Integer.toString( tempInt );
+                                        }
+                                        llElementValuesMap.put( name, tempStr );
+                                    }
+                                }
+                            }
+                        }
+
+                        llDataValue.setLineListValues( llElementValuesMap );
+                        llDataValue.setSource( source );
+                        llDataValues.add( llDataValue );
+                    }
+
+                }
+
+            } catch ( Exception e )
+            {
+                e.printStackTrace();
+            }
+        }
+        return llDataValues;
+
+    }
+
+    public int getLLValueCountByLLElements( String tableName, Map<String, String> llElementValueMap, Source source )
+    {
+        String columnDefinition = "";
+        int noOfRows = 0;
+        if ( source != null )
+        {
+            //columnDefinition += "SELECT COUNT(*) FROM " + tableName + " WHERE periodid = " + period.getId() + " AND sourceid = " + source.getId();
+            columnDefinition += "SELECT COUNT(*) FROM " + tableName + " WHERE sourceid = " + source.getId();
+
+            List<String> llElementNames = new ArrayList<String>( llElementValueMap.keySet() );
+            Iterator<String> llENamesIterator = llElementNames.iterator();
+            while ( llENamesIterator.hasNext() )
+            {
+                String lleName = llENamesIterator.next();
+
+                String lleValue = llElementValueMap.get( lleName );
+
+                if ( lleValue.equalsIgnoreCase( "notnull" ) )
+                {
+                    columnDefinition += " AND " + lleName + " IS NOT NULL";
+                } else
+                {
+                    if ( lleValue.equalsIgnoreCase( "null" ) )
+                    {
+                        columnDefinition += " AND " + lleName + " IS NULL";
+                    } else
+                    {
+                        columnDefinition += " AND " + lleName + " LIKE '" + lleValue + "'";
+                    }
+                }
+            }
+            columnDefinition += " order by recordnumber";
+            System.out.println( columnDefinition );
+
+            try
+            {
+                SqlRowSet rs = jdbcTemplate.queryForRowSet( columnDefinition );
+               
+                if( rs.next() )
+                {
+                    noOfRows = rs.getInt( 1 );
+                }
+            } 
+            catch ( Exception e )
+            {
+                e.printStackTrace();
+            }
+        }
+        return noOfRows;
+    }
+
+    
+    
+    
     public List<LineListDataValue> getLLValuesSortBy( String tableName, String sortBy, Source source, Period period )
     {
         String columnDefinition = "";
@@ -741,6 +946,86 @@ public class MySQLDataBaseManager
         return llDataValues;
     }
 
+    
+    public boolean insertSingleLLValueIntoDb( LineListDataValue llDataValue, String tableName )
+    {
+        boolean updateLLValue = false;
+
+        String columnDefinition = "";
+        
+        columnDefinition = "INSERT INTO " + tableName + " (periodid,sourceid,storedby,lastupdated,";
+        
+        Period period = llDataValue.getPeriod();
+
+        Source source = llDataValue.getSource();
+
+        Map<String, String> elementValues = llDataValue.getLineListValues();
+        Set<String> elements = elementValues.keySet();
+
+        int size = elements.size();
+        int i = 1;
+        java.util.Date today = llDataValue.getTimestamp();
+        long t;
+        if ( today == null )
+        {
+            Date d = new Date();
+            t = d.getTime();
+        } 
+        else
+        {
+            t = today.getTime();
+        }
+
+        java.sql.Date date = new java.sql.Date( t );
+        String values = " values (" + period.getId() + "," + source.getId() + ",'" + llDataValue.getStoredBy() + "','" + date + "',";
+        for ( String elementName : elements )
+        {
+            LineListElement lineListElement = lineListService.getLineListElementByShortName( elementName );
+            if ( i == size )
+            {
+                columnDefinition += elementName + ")";
+
+                if ( lineListElement.getDataType().equalsIgnoreCase( "int" ) )
+                {
+                    values += Integer.parseInt( elementValues.get( elementName ) );
+                } 
+                else
+                {
+                    values += "'" + elementValues.get( elementName ) + "'";
+                }
+            } 
+            else
+            {
+                columnDefinition += elementName + ",";
+                if( lineListElement.getDataType().equalsIgnoreCase( "int" ) )
+                {
+                    values += Integer.parseInt( elementValues.get( elementName ) ) + ",";
+                } 
+                else
+                {
+                    values += "'" + elementValues.get( elementName ) + "'" + ",";
+                }
+                i++;
+            }
+
+        }
+        columnDefinition += values + ")";
+
+        try
+        {
+            int sqlResult = jdbcTemplate.update( columnDefinition );
+            updateLLValue = true;
+            columnDefinition = "";
+        } 
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+            updateLLValue = false;
+        }        
+        return updateLLValue;
+    }
+
+    
     public boolean insertLLValueIntoDb( List<LineListDataValue> llDataValuesList, String tableName )
     {
         boolean updateLLValue = false;

@@ -1,16 +1,40 @@
 package org.hisp.dhis.web.api.model;
 
+/*
+ * Copyright (c) 2004-2010, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Set;
+import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
-public class Beneficiary implements ISerializable
+public class Beneficiary
+    implements DataStreamSerializable
 {
     private int id;
 
@@ -19,24 +43,43 @@ public class Beneficiary implements ISerializable
     private String middleName;
 
     private String lastName;
-    
-    private Set<String> patientAttValues;
-    
-    
 
-    
-    
-    public Set<String> getPatientAttValues()
+    private int age;
+
+    private List<PatientAttribute> patientAttValues;
+
+    private PatientAttribute groupAttribute;
+
+    public int getAge()
+    {
+        return age;
+    }
+
+    public void setAge( int age )
+    {
+        this.age = age;
+    }
+
+    public PatientAttribute getGroupAttribute()
+    {
+        return groupAttribute;
+    }
+
+    public void setGroupAttribute( PatientAttribute groupAttribute )
+    {
+        this.groupAttribute = groupAttribute;
+    }
+
+    public List<PatientAttribute> getPatientAttValues()
     {
         return patientAttValues;
     }
 
-    public void setPatientAttValues( Set<String> patientAttValues )
+    public void setPatientAttValues( List<PatientAttribute> patientAttValues )
     {
         this.patientAttValues = patientAttValues;
     }
 
-    @XmlAttribute
     public int getId()
     {
         return id;
@@ -47,7 +90,6 @@ public class Beneficiary implements ISerializable
         this.id = id;
     }
 
-    @XmlAttribute
     public String getFirstName()
     {
         return firstName;
@@ -58,7 +100,6 @@ public class Beneficiary implements ISerializable
         this.firstName = firstName;
     }
 
-    @XmlAttribute
     public String getMiddleName()
     {
         return middleName;
@@ -69,7 +110,6 @@ public class Beneficiary implements ISerializable
         this.middleName = middleName;
     }
 
-    @XmlAttribute
     public String getLastName()
     {
         return lastName;
@@ -80,40 +120,50 @@ public class Beneficiary implements ISerializable
         this.lastName = lastName;
     }
 
-	public byte[] serialize() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public void serialize( DataOutputStream dout ) throws IOException
-    {		
-		dout.writeInt(this.getId());
-        dout.writeUTF(this.getFirstName());        
-        dout.writeUTF(this.getMiddleName());
-        dout.writeUTF(this.getLastName());
-                
-        dout.flush();            	
-    }
-	
-	public void serialize( OutputStream out ) throws IOException
+    @Override
+    public void serialize( DataOutputStream out )
+        throws IOException
     {
-    	ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        DataOutputStream dout = new DataOutputStream(bout);
-        
-        dout.writeInt(this.getId());
-        dout.writeUTF(this.getFirstName());        
-        dout.writeUTF(this.getMiddleName());
-        dout.writeUTF(this.getLastName());     
-        
-        bout.flush();
-        bout.writeTo(out);
-    	
-    } 
-	
-	public void deSerialize(byte[] data) throws IOException {
-		// TODO Auto-generated method stub		
-	}
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        DataOutputStream dout = new DataOutputStream( bout );
 
-    
+        dout.writeInt( this.getId() );
+        dout.writeUTF( this.getFirstName() );
+        dout.writeUTF( this.getMiddleName() );
+        dout.writeUTF( this.getLastName() );
+        dout.writeInt( this.getAge() );
+        // Write attribute which is used as group factor of beneficiary.
+        /*
+         * False: no group factor True: with group factor
+         */
+        if ( this.getGroupAttribute() != null )
+        {
+            dout.writeBoolean( true );
+            this.getGroupAttribute().serialize( dout );
+        }
+        else
+        {
+            dout.writeBoolean( false );
+        }
+
+        List<PatientAttribute> atts = this.getPatientAttValues();
+        dout.writeInt( atts.size() );
+        for ( PatientAttribute att : atts )
+        {
+            dout.writeUTF( att.getName() + ":" + att.getValue() );
+        }
+
+        bout.flush();
+        bout.writeTo( out );
+    }
+
+    @Override
+    public void deSerialize( DataInputStream dataInputStream )
+        throws IOException
+    {
+        // FIXME: Get implementation from client
+
+    }
+
 
 }

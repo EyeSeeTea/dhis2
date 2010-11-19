@@ -21,6 +21,8 @@ public interface DataBaseManagerInterface
     public boolean updateTable( String tableName, List<LineListElement> removeList, List<LineListElement> addList );
 
     public boolean insertLLValueIntoDb( List<LineListDataValue> llDataValuesList, String tableName );
+    
+    public boolean insertSingleLLValueIntoDb( LineListDataValue llDataValue, String tableName );
 
     //public List<Map<String, String>> getFromLLTable( String tableName, int source, int  period );
     public List<LineListDataValue> getFromLLTable( String tableName, Source source, Period  period );
@@ -33,14 +35,20 @@ public interface DataBaseManagerInterface
 
     public boolean updateLLValue( List<LineListDataValue> llDataValuesList, String tableName );
     
+    public int getLLValueCountByLLElements( String tablename, Map<String,String> llElementValueMap, Source source );
+    
     public List<LineListDataValue> getLLValuesFilterByLLElements( String tableName, Map<String,String> llElementValueMap, Source source, Period  period );
+    
+    public List<LineListDataValue> getLLValuesFilterByLLElements( String tableName, Map<String,String> llElementValueMap, Source source );
 
     public List<LineListDataValue> getLLValuesByLLElementValue( String tableName, String llElementName, String llElementValue, Source source, Period  period );
 
     public Period getRecentPeriodForOnChangeData( String tableName, String llElementName, String llElementValue, Source source );
     
     public List<LineListDataValue> getLLValuesSortBy( String tableName, String sortBy, Source source, Period  period );
+    
     public int rowCount( String tableName );
     
+    public int getMaxRecordNumber( String tableName );
     
 }

@@ -67,4 +67,8 @@ public class HibernatePatientAttributeStore
         return getCriteria( Restrictions.isNull( "patientAttributeGroup" ) ).list();
     }
     
+    public PatientAttribute getByGroupBy( boolean groupBy ){
+        return (PatientAttribute)getCriteria( Restrictions.eq( "groupBy", groupBy ) ).uniqueResult();
+    }
+    
 }

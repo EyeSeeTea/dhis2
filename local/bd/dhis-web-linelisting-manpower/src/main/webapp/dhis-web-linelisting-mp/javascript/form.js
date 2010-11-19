@@ -1,6 +1,89 @@
+var currentPDSCode;
 
+function validatePostVacant( dataValueMapKey )
+{
+	var reportingDate = document.getElementById('reportingDate').value;
+	var request = new Request();
+	request.setResponseTypeXML('element');
+	request.setCallbackSuccess( elementReceived );
+	request.send( 'getValidatePostVacant.action?dataValue=' + sancPos + '&dataValueMapKey=' + dataValueMapKey + '&reportingDate=' + reportingDate);
+}
 
+function elementReceived( recordNo )
+{
+	var type = recordNo.getAttribute( "type" );
+	if (type == 'success' )
+	{
+		if( confirm ( recordNo.firstChild.nodeValue ) )
+		{
+			showEmployeePostForm( sancPos, dataValueMapKey );
+		}
+	}
+	else if (type == 'input' )
+	{
+		alert( recordNo.firstChild.nodeValue );
+	}
 
+}
+function getEmployeeName( pdsCodeField, pdsCode )
+	{
+		currentPDSCode = pdsCodeField;
+		var request = new Request();
+		request.setResponseTypeXML( 'employee' );
+		request.setCallbackSuccess( employeeReceived );
+		request.send( 'validateEmployeeExist.action?pdsCode=' + pdsCode );
+	}
+
+function employeeReceived( employeeElement )
+{
+	var type = employeeElement.getAttribute( "type" );
+	if (type == 'success') 
+	{
+		if( confirm( employeeElement.firstChild.nodeValue ) )
+		{
+		}
+		else
+		{
+			var field = document.getElementById( currentPDSCode );
+			field.value = "";
+			setTimeout(function(){
+		        field.focus();field.select();
+		    },2);
+		}
+	}
+	else if(type == 'employeeexist')
+	{
+		if( confirm( employeeElement.firstChild.nodeValue ) )
+		{
+			alert("Edit Employee");
+		}
+		else
+		{
+			var field = document.getElementById( currentPDSCode );
+			field.value = "";
+			setTimeout(function(){
+        	field.focus();field.select();
+   			},2);
+		}
+	}
+	else if(type == 'input') 
+	{
+		if( confirm( employeeElement.firstChild.nodeValue ) )
+		{
+			var url = 'showAddEmployeeForm.action';
+			document.location.href = url;
+		}
+		else
+		{
+			var field = document.getElementById( currentPDSCode );
+			field.value = "";
+			setTimeout(function(){
+                field.focus();field.select();
+            },2);
+		}
+	}
+	
+}
 
 function addLLBNewRow()
 {
@@ -49,10 +132,7 @@ function addLLBNewRow()
         {
             var tempStr1;
 
-                tempStr1 = '<select name="'+tempStr+'" id="'+tempStr+'" ><option name="SelectOption" value="" selected>--Select--</option>';
-
-            //alert(oCell.innerHTML);
-            //<select name="+tempStr+" id="+tempStr+"><option value="NONE" selected="selected">--Select--</option></select>
+            tempStr1 = '<select name="'+tempStr+'" id="'+tempStr+'" ><option name="SelectOption" value="" selected>--Select--</option>';
 
             for( var j=0; j<options.length; j++ )
             {
@@ -66,9 +146,7 @@ function addLLBNewRow()
 
         i++;
     }
-
 }
-
 
 function removeLLRecord( delRecordNo )
 {
@@ -80,9 +158,22 @@ function removeLLRecord( delRecordNo )
         document.getElementById('delRecordNo').value = delRecordNo;
 
         document.getElementById('LineListDataEntryForm').submit();
-
-    //window.location.href = 'saveandDelValueAction.action?recordId=' + nextRecordNo;
     }
-
 }
 
+function showEmployeePostForm( sancPos, dataValueMapKey ) 
+{
+	var reportingDate = document.getElementById( "reportingDate" ).value;
+	var url = 'showEmployeePostForm.action?reportingDate=' + reportingDate + '&dataValue=' + sancPos + '&dataValueMapKey=' + dataValueMapKey;
+	$('#contentDataRecord').dialog('destroy').remove();
+    $('<div id="contentDataRecord" style="z-index: 1;">' ).load(url).dialog({
+    title: 'Employee Post Detail',
+	maximize: true, 
+	closable: true,
+	modal:true,
+	overlay:{background:'#000000', opacity:0.1},
+	width: 420,
+    height: 380
+});
+    
+}

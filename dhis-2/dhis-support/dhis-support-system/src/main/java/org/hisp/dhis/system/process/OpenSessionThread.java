@@ -38,7 +38,7 @@ public abstract class OpenSessionThread
     extends Thread
 {
     private SessionFactory sessionFactory;
-        
+
     public OpenSessionThread( SessionFactory sessionFactory )
     {
         this.sessionFactory = sessionFactory;
@@ -52,7 +52,7 @@ public abstract class OpenSessionThread
     public final void run()
     {
         DbmsUtils.bindSessionToThread( sessionFactory );
-        
+
         try
         {
             doRun();
@@ -62,11 +62,11 @@ public abstract class OpenSessionThread
             DbmsUtils.unbindSessionFromThread( sessionFactory );
         }
     }
-    
+
     /**
      * Method to override by subclasses.
      */
     protected void doRun()
-    {   
+    {
     }
 }

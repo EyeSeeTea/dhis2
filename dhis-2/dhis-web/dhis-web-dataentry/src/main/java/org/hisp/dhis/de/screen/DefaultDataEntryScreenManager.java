@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -49,7 +48,6 @@ import org.hisp.dhis.customvalue.CustomValue;
 import org.hisp.dhis.customvalue.CustomValueService;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -71,10 +69,6 @@ public class DefaultDataEntryScreenManager
 {
     private static final Log log = LogFactory.getLog( DefaultDataEntryScreenManager.class );
     
-    private static final String DEFAULT_FORM = "defaultform";
-
-    private static final String MULTI_DIMENSIONAL_FORM = "multidimensionalform";    
-
     private static final String EMPTY = "";
 
     // -------------------------------------------------------------------------
@@ -112,39 +106,6 @@ public class DefaultDataEntryScreenManager
     // -------------------------------------------------------------------------
     // DataEntryScreenManager implementation
     // -------------------------------------------------------------------------
-
-    public boolean hasMixOfDimensions( DataSet dataSet )
-    {
-        if ( dataSet.getDataElements().size() > 0 )
-        {
-            Iterator<DataElement> dataElementIterator = dataSet.getDataElements().iterator();
-
-            DataElementCategoryCombo catCombo = dataElementIterator.next().getCategoryCombo();
-
-            for ( DataElement de : dataSet.getDataElements() )
-            {
-                if ( catCombo != de.getCategoryCombo() )
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public boolean hasMultiDimensionalDataElement( DataSet dataSet )
-    {
-        for ( DataElement element : dataSet.getDataElements() )
-        {
-            if ( element.isMultiDimensional() )
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
     
     public boolean hasMultiDimensionalDataElement( Section section )
     {
@@ -157,11 +118,6 @@ public class DefaultDataEntryScreenManager
         }
 
         return false;
-    }
-
-    public String getScreenType( DataSet dataSet )
-    {
-        return hasMultiDimensionalDataElement( dataSet ) ? MULTI_DIMENSIONAL_FORM : DEFAULT_FORM;
     }
 
     public Collection<Integer> getAllCalculatedDataElements( DataSet dataSet )
@@ -203,13 +159,6 @@ public class DefaultDataEntryScreenManager
         }
 
         return calculatedDataElementMap;
-    }
-
-    public boolean hasSection( DataSet dataSet )
-    {
-        Collection<Section> sections = new ArrayList<Section> ( dataSet.getSections() );
-
-        return sections.size() != 0;
     }
 
     public Map<CalculatedDataElement, Integer> populateValuesForCalculatedDataElements(
