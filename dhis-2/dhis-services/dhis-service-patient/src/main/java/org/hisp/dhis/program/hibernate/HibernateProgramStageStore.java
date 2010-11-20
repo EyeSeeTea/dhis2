@@ -1,3 +1,5 @@
+package org.hisp.dhis.program.hibernate;
+
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -24,71 +26,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageStore;
 
 /**
- * @author Abyot Asalefew
+ * @author Tran Thanh Tri
  * @version $Id$
  */
-@Transactional
-public class DefaultProgramStageService
-    implements ProgramStageService
+
+public class HibernateProgramStageStore
+    extends HibernateGenericStore<ProgramStage>
+    implements ProgramStageStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
 
-    private ProgramStageStore programStageStore;
-
-    public void setProgramStageStore( ProgramStageStore programStageStore )
-    {
-        this.programStageStore = programStageStore;
-    }
-
-    // -------------------------------------------------------------------------
-    // ProgramStage implementation
-    // -------------------------------------------------------------------------
-
-   
-    public int saveProgramStage( ProgramStage programStage )
-    {
-        return programStageStore.save( programStage );
-    }
-
-    public void deleteProgramStage( ProgramStage programStage )
-    {
-        programStageStore.delete( programStage );
-    }
-
-    public ProgramStage getProgramStage( int id )
-    {
-        return programStageStore.get( id );
-    }
-
-    public ProgramStage getProgramStageByName( String name )
-    {
-        return programStageStore.getByName( name );
-    }
-
-    public void updateProgramStage( ProgramStage programStage )
-    {
-        programStageStore.update( programStage );
-    }
-
-    public Collection<ProgramStage> getAllProgramStages()
-    {
-        return programStageStore.getAll();
-    }
-
+    @SuppressWarnings( "unchecked" )
     @Override
     public Collection<ProgramStage> getAllProgramStageByDataEntryForm( DataEntryForm dataEntryForm )
     {       
-        return programStageStore.getAllProgramStageByDataEntryForm( dataEntryForm );
+        return getCriteria( Restrictions.eq( "dataEntryForm", dataEntryForm ) ).list();
     }
-
+    
+    
+   
 }
