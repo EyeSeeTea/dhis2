@@ -55,7 +55,8 @@ function organisationUnitSelected( orgUnits )
     		$( '#selectedDataSetId' ).val( dataSetId );
     		
     		if ( json.periodValid ) {
-    			displayEntryFormInternal( false );
+    			showLoader();
+    			$( '#contentDiv' ).load( 'select.action', displayEntryFormCompleted );
     		}
     	}
     	else {
@@ -122,8 +123,9 @@ function dataSetSelected()
 	    	}
 	    	
 	    	if ( json.periodValid && periodIndex != null ) {
-	    		$( '#selectedPeriodIndex' ).val( periodIndex );	    		
-	    		displayEntryFormInternal( true );
+	    		showLoader();	    		
+	    		$( '#selectedPeriodIndex' ).val( periodIndex );
+    			$( '#contentDiv' ).load( 'select.action', setDisplayModes );
 	    	}
 	    	else {
 	    		clearEntryForm();
@@ -138,7 +140,11 @@ function dataSetSelected()
 
 function displayModeSelected()
 {
-	displayEntryFormInternal( false );
+	showLoader();
+	
+	var url = 'select.action?displayMode=' + $("input[name='displayMode']:checked").val();
+	
+	$( '#contentDiv' ).load( url, displayEntryFormCompleted );
 }
 
 // -----------------------------------------------------------------------------
@@ -150,27 +156,13 @@ function periodSelected()
 	var periodName = $( '#selectedPeriodIndex :selected' ).text();
 	
 	$( '#currentPeriod' ).html( periodName );
-	
-	displayEntryFormInternal( true );
-}
-
-function displayEntryFormInternal( updateDisplayModes )
-{
-	showLoader();
-	
+		
 	var periodIndex = $( '#selectedPeriodIndex' ).val();
 	
-	if ( periodIndex && periodIndex != -1 )
-	{
+	if ( periodIndex && periodIndex != -1 )	{
+		showLoader();
 		var url = 'select.action?selectedPeriodIndex=' + periodIndex;
-		
-		var displayMode = $("input[name='displayMode']:checked").val();
-		
-		url += displayMode ? '&displayMode=' + displayMode : '';
-		
-		var callback = updateDisplayModes ? setDisplayModes : displayEntryFormCompleted;
-		
-		$( '#contentDiv' ).load( url, callback );
+		$( '#contentDiv' ).load( url, setDisplayModes );
 	}
 }
 
