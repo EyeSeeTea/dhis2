@@ -392,15 +392,13 @@ function SetGeneratedMinMaxValues()
             
             setInnerHTML('value[' + deId + ':' + ocId + '].min', getElementValue( dataElements[i], 'minLimit'));
             setInnerHTML('value[' + deId + ':' + ocId + '].max', getElementValue( dataElements[i], 'maxLimit'));
-        }
-        
+        }        
     }
     
     function handleHttpError( errorCode )
     {
         window.alert( i18n_saving_minmax_failed_error_code + '\n\n' + errorCode );
-    }   
-   
+    }
     
     function getElementValue( parentElement, childElementName )
     {
