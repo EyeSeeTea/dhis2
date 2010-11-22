@@ -159,12 +159,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 name: null,
                 level: null
             },
-            level: null,
-            setValues: function(pi, pn, pl, level) {
+            level: {
+                level: null,
+                name: null,
+            },
+            setValues: function(pi, pn, pl, ll, ln) {
                 this.parent.id = pi || this.parent.id;
                 this.parent.name = pn || this.parent.name;
                 this.parent.level = pl || this.parent.level;
-                this.level = level || this.level;
+                this.level.level = ll || this.level.level;
+                this.level.name = ln || this.level.name;
             },
             getValues: function() {
                 return {
@@ -173,7 +177,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         name: this.parent.name,
                         level: this.parent.level
                     },
-                    level: this.level
+                    level: {
+                        level: this.level.level,
+                        name: this.level.name
+                    }                    
                 };
             }
         };
@@ -316,6 +323,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
             width: GLOBALS.conf.combo_width,
             store: GLOBALS.stores.indicatorsByGroup,
+            keepPosition: false,
             listeners: {
                 'select': {
                     scope: this,
@@ -351,7 +359,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 else {
                                     this.legend.value = GLOBALS.conf.map_legend_type_automatic;
                                     this.prepareMapViewLegend();
-                                    this.classify(false, true);
+                                    this.classify(false, cb.keepPosition);
+                                    GLOBALS.util.setKeepPosition(cb);
                                 }
                             }
                         });
@@ -405,6 +414,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
             width: GLOBALS.conf.combo_width,
             store: GLOBALS.stores.dataElementsByGroup,
+            keepPosition: false,
             listeners: {
                 'select': {
                     scope: this,
@@ -440,7 +450,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                 else {
                                     this.legend.value = GLOBALS.conf.map_legend_type_automatic;
                                     this.prepareMapViewLegend();
-                                    this.classify(false, true);
+                                    this.classify(false, cb.keepPosition);
+                                    GLOBALS.util.setKeepPosition(cb);
                                 }
                             }
                         });
@@ -494,13 +505,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
             width: GLOBALS.conf.combo_width,
             store: GLOBALS.stores.periodsByTypeStore,
+            keepPosition: false,
             listeners: {
                 'select': {
                     scope: this,
-                    fn: function() {
+                    fn: function(cb) {
                         Ext.getCmp('mapview_cb').clearValue();
                         this.updateValues = true;
-                        this.classify(false, true);
+                        this.classify(false, cb.keepPosition);                        
+                        GLOBALS.util.setKeepPosition(cb);
                     }
                 }
             }
@@ -569,6 +582,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             width: GLOBALS.conf.combo_width,
             node: {attributes: {hasChildrenWithCoordinates: false}},
             selectedNode: null,
+            style: 'cursor:pointer',
             listeners: {
                 'focus': {
                     scope: this,
@@ -650,7 +664,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                         labelSeparator: GLOBALS.conf.labelseparator,
                                                         selectOnFocus: true,
                                                         width: GLOBALS.conf.combo_width,
-                                                        store: GLOBALS.stores.organisationUnitLevel
+                                                        store: GLOBALS.stores.organisationUnitLevel,
+                                                        listeners: {
+                                                            'select': function(cb) {
+                                                                Ext.getCmp('level_tf').level = cb.getValue();
+                                                                Ext.getCmp('level_tf').levelName = cb.getRawValue();
+                                                            }
+                                                        }
                                                     }
                                                 ]
                                             }
@@ -667,22 +687,23 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                 scope: this,
                                                 handler: function() {
                                                     var node = Ext.getCmp('map_tf').selectedNode;
-                                                    if (!node) {                                                                                                           
+                                                    if (!node || !Ext.getCmp('level_cb').getValue()) {
+                                                        return;
+                                                    }
+                                                    if (node.attributes.level > Ext.getCmp('level_tf').level) {
+                                                        Ext.message.msg(false, 'Level is higher than boundary level');
                                                         return;
                                                     }
                                                     
                                                     this.updateValues = true;
-                                                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level);
+                                                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
+                                                        Ext.getCmp('level_tf').level, Ext.getCmp('level_tf').levelName);
+                                                        
                                                     Ext.getCmp('map_tf').setValue(node.attributes.text);
-                                                    if (Ext.getCmp('level_cb').getValue()) {
-                                                        Ext.getCmp('level_tf').setValue(Ext.getCmp('level_cb').getRawValue());
-                                                        this.organisationUnitSelection.setValues(null, null, null, Ext.getCmp('level_cb').getValue());
-                                                    }
+                                                    Ext.getCmp('level_tf').setValue(Ext.getCmp('level_tf').levelName);
                                                     Ext.getCmp('orgunit_w').hide();
                                                     
-                                                    if (this.formValidation.validateLevel(true)) {
-                                                        this.loadGeoJson();
-                                                    }
+                                                    this.loadGeoJson();
                                                 }
                                             },
                                             {
@@ -732,12 +753,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'textfield',
             id: 'level_tf',
-            readOnly: true,
+            disabled: true,
+            // readOnly: true,
             fieldLabel: i18n_level,
             editable: false,
             emptyText: GLOBALS.conf.emptytext,
 			labelSeparator: GLOBALS.conf.labelseparator,
-            width: GLOBALS.conf.combo_width
+            width: GLOBALS.conf.combo_width,
+            // style: 'cursor:default',
+            style: 'color:black',
+            level: null,
+            levelName: null
         },
         
         { html: '<div class="thematic-br">' },
@@ -1182,22 +1208,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     setMapViewMap: function() {
         this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
-            3, this.mapView.organisationUnitLevel);
-        Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitName);
+            2, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
         
-        function organisationUnitLevelCallback() {
-            Ext.getCmp('level_tf').setValue(this.mapView.organisationUnitLevel);
-            this.loadGeoJson();
-        }           
+        Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitId);
+        Ext.getCmp('map_tf').setRawValue(this.mapView.parentOrganisationUnitName);
+        Ext.getCmp('level_tf').setValue(this.mapView.organisationUnitLevel);
+        Ext.getCmp('level_tf').setRawValue(this.mapView.organisationUnitLevelName);       
         
-        if (GLOBALS.stores.organisationUnitLevel.isLoaded) {
-            organisationUnitLevelCallback.call(this);
-        }
-        else {
-            GLOBALS.stores.organisationUnitLevel.load({scope: this, callback: function() {
-                organisationUnitLevelCallback.call(this);
-            }});
-        }        
+        this.loadGeoJson();
     },
 	
 	applyPredefinedLegend: function(isMapView) {
@@ -1274,7 +1292,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 }
             }
 
-            if (!Ext.getCmp('map_tf').getValue() || !Ext.getCmp('level_cb').getValue()) {
+            if (!Ext.getCmp('map_tf').getValue() || !Ext.getCmp('level_tf').getValue()) {
                 if (exception) {
                     Ext.message.msg(false, i18n_form_is_not_complete);
                 }
@@ -1308,8 +1326,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 return true;
             }
             
-            if (Ext.getCmp('map_tf').getValue() && Ext.getCmp('level_cb').getValue()) {
-                if (choropleth.organisationUnitSelection.parent.level <= Ext.getCmp('level_cb').getValue()) {
+            if (Ext.getCmp('map_tf').getValue() && Ext.getCmp('level_tf').getValue()) {
+console.log(choropleth.organisationUnitSelection);
+                if (choropleth.organisationUnitSelection.parent.level <= choropleth.organisationUnitSelection.level.level) {
+
                     return true;
                 }
                 else {
@@ -1336,7 +1356,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             startDate: Ext.getCmp('startdate_df').getValue() || null,
             endDate: Ext.getCmp('enddate_df').getValue() || null,
             parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
-            organisationUnitLevel: this.organisationUnitSelection.level,
+            organisationUnitLevel: this.organisationUnitSelection.level.level,
             mapLegendType: Ext.getCmp('maplegendtype_cb').getValue(),
             method: this.legend.value == GLOBALS.conf.map_legend_type_automatic ? Ext.getCmp('method_cb').getValue() : null,
             classes: this.legend.value == GLOBALS.conf.map_legend_type_automatic ? Ext.getCmp('numClasses_cb').getValue() : null,
@@ -1357,14 +1377,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
             this.setUrl(GLOBALS.conf.path_mapping + 'getGeoJson.action?' +
                 'parentId=' + this.organisationUnitSelection.parent.id +
-                '&level=' + this.organisationUnitSelection.level
+                '&level=' + this.organisationUnitSelection.level.level
             );
         }
         
         if (this.isDrillDown || this.mapView) {
             load.call(this);
         }
-        else {
+        else { //TODO
             load.call(this);
         }
     },
@@ -1396,7 +1416,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     startDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('startdate_df').getValue()).format('Y-m-d') : null,
                     endDate: GLOBALS.vars.mapDateType.isStartEnd() ? new Date(Ext.getCmp('enddate_df').getValue()).format('Y-m-d') : null,
                     parentId: this.organisationUnitSelection.parent.id,
-                    level: this.organisationUnitSelection.level
+                    level: this.organisationUnitSelection.level.level
                 };
 
                 Ext.Ajax.request({

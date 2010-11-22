@@ -18,6 +18,7 @@
     "parentOrganisationUnitName": "$!encoder.jsEncode( ${mapView.parentOrganisationUnit.name} )",
     "parentOrganisationUnitLevel": "$!encoder.jsEncode( ${mapView.parentOrganisationUnit.level} )",
     "organisationUnitLevel": "$!{mapView.organisationUnitLevel.level}",
+    "organisationUnitLevelName": "$!{mapView.organisationUnitLevel.name}",
     "mapLegendType": "$!encoder.jsEncode( ${mapView.mapLegendType} )",
     "method": "$!{mapView.method}",
     "classes": "$!{mapView.classes}",

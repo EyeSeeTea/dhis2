@@ -27,11 +27,6 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.de.state.SelectedStateManager.ALLOWED_FORM_TYPES;
-import static org.hisp.dhis.de.state.SelectedStateManager.CUSTOM_FORM;
-import static org.hisp.dhis.de.state.SelectedStateManager.DEFAULT_FORM;
-import static org.hisp.dhis.de.state.SelectedStateManager.SECTION_FORM;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -94,6 +89,24 @@ public class SelectAction
     }
 
     // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private String displayMode;
+
+    public void setDisplayMode( String displayMode )
+    {
+        this.displayMode = displayMode;
+    }
+
+    private Integer selectedPeriodIndex;
+
+    public void setSelectedPeriodIndex( Integer selectedPeriodIndex )
+    {
+        this.selectedPeriodIndex = selectedPeriodIndex;
+    }
+
+    // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
@@ -144,24 +157,6 @@ public class SelectAction
     public Date getRegistrationDate()
     {
         return registrationDate;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input/output
-    // -------------------------------------------------------------------------
-
-    private String displayMode;
-
-    public void setDisplayMode( String displayMode )
-    {
-        this.displayMode = displayMode;
-    }
-
-    private Integer selectedPeriodIndex;
-
-    public void setSelectedPeriodIndex( Integer selectedPeriodIndex )
-    {
-        this.selectedPeriodIndex = selectedPeriodIndex;
     }
 
     // -------------------------------------------------------------------------
@@ -228,8 +223,7 @@ public class SelectAction
 
         if ( selectedDataSet != null && period != null && organisationUnit != null )
         {
-            registration = registrationService.getCompleteDataSetRegistration( selectedDataSet, period,
-                organisationUnit );
+            registration = registrationService.getCompleteDataSetRegistration( selectedDataSet, period, organisationUnit );
 
             registrationDate = registration != null ? registration.getDate() : new Date();
         }
@@ -238,34 +232,17 @@ public class SelectAction
         // Get display mode
         // ---------------------------------------------------------------------
 
-        if ( displayMode == null )
+        if ( !selectedStateManager.displayModeIsValid( displayMode ) )
         {
             displayMode = selectedStateManager.getSelectedDisplayMode();
         }
-        else
+        
+        if ( !selectedStateManager.displayModeIsValid( displayMode ) )
         {
-            selectedStateManager.setSelectedDisplayMode( displayMode );
+            displayMode = selectedStateManager.getDisplayMode();
         }
-
-        boolean hasSection = selectedDataSet.getSections() != null && selectedDataSet.getSections().size() > 0;
-
-        boolean customDataEntryFormExists = selectedDataSet.getDataEntryForm() != null;
-
-        if ( displayMode == null || !ALLOWED_FORM_TYPES.contains( displayMode ) )
-        {
-            if ( customDataEntryFormExists )
-            {
-                displayMode = CUSTOM_FORM;
-            }
-            else if ( hasSection )
-            {
-                displayMode = SECTION_FORM;
-            }
-            else
-            {
-                displayMode = DEFAULT_FORM;
-            }
-        }
+        
+        selectedStateManager.setSelectedDisplayMode( displayMode );
         
         return displayMode;
     }

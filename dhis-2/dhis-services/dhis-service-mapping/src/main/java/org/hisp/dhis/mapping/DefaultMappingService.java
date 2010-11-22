@@ -155,25 +155,27 @@ public class DefaultMappingService
 
         return values;
     }
-    
+
     public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId,
         int parentOrganisationUnitId, int level )
     {
         Period period = periodService.getPeriod( periodId );
 
-        return getIndicatorMapValues( indicatorId, period.getStartDate(), period.getEndDate(), parentOrganisationUnitId, level );
+        return getIndicatorMapValues( indicatorId, period.getStartDate(), period.getEndDate(),
+            parentOrganisationUnitId, level );
     }
 
     public Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, Date startDate, Date endDate,
         int parentOrganisationUnitId, int level )
     {
         Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
-        
+
         Indicator indicator = indicatorService.getIndicator( indicatorId );
 
         OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
-        
-        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level, parent );
+
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level,
+            parent );
 
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
@@ -292,8 +294,9 @@ public class DefaultMappingService
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
         OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentOrganisationUnitId );
-        
-        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level, parent );
+
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level,
+            parent );
 
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
@@ -618,7 +621,12 @@ public class DefaultMappingService
 
     public MapView getMapView( int id )
     {
-        return mappingStore.getMapView( id );
+        MapView mapView = mappingStore.getMapView( id );
+        
+        mapView.getParentOrganisationUnit().setLevel(
+            organisationUnitService.getLevelOfOrganisationUnit( mapView.getParentOrganisationUnit() ) );
+
+        return mapView;
     }
 
     public MapView getMapViewByName( String name )
@@ -628,7 +636,15 @@ public class DefaultMappingService
 
     public Collection<MapView> getAllMapViews()
     {
-        return mappingStore.getAllMapViews();
+        Collection<MapView> mapViews = mappingStore.getAllMapViews();
+
+        for ( MapView mapView : mapViews )
+        {
+            mapView.getParentOrganisationUnit().setLevel(
+                organisationUnitService.getLevelOfOrganisationUnit( mapView.getParentOrganisationUnit() ) );
+        }
+        
+        return mapViews;
     }
 
     // -------------------------------------------------------------------------

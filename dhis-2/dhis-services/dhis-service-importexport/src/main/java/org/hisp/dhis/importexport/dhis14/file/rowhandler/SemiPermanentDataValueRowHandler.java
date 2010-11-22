@@ -37,6 +37,7 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.dhis14.object.Dhis14SemiPermanentDataValue;
+import org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler;
 import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -114,8 +115,16 @@ public class SemiPermanentDataValueRowHandler
         value.setOptionCombo( categoryOptionCombo );
         value.setPeriod( period );
         value.setSource( source );
-        value.setValue( String.valueOf( dhis14Value.getValue() ) );
 
+        if ( dhis14Value.getValue() != null )
+        {
+            value.setValue( String.valueOf( dhis14Value.getValue() ) );
+        }
+        else if ( dhis14Value.getYesNo() != null )
+        {
+            value.setValue( Dhis14TypeHandler.convertYesNoFromDhis14( dhis14Value.getYesNo() ) );
+        }   
+        
         if ( value.getDataElement() != null && value.getPeriod() != null && value.getSource() != null && value.getValue() != null )
         {
             importObject( value, params );

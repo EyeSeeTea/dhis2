@@ -258,6 +258,12 @@ GLOBALS.util = {
         json += ']';
         json += '}';
         return json;
+    },
+    
+    setKeepPosition: function(cb) {
+        if (!cb.keepPosition) {
+            cb.keepPosition = true;
+        }
     }
 };
 

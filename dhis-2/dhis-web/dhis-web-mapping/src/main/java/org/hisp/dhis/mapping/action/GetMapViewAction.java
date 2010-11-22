@@ -76,7 +76,7 @@ public class GetMapViewAction
     {
         return object;
     }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -85,7 +85,7 @@ public class GetMapViewAction
         throws Exception
     {
         object = mappingService.getMapView( id );
-
+        
         return SUCCESS;
     }
 }

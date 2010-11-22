@@ -25,8 +25,8 @@
         root: 'mapViews',
         fields: [ 'id', 'name', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
             'mapDateType', 'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName',
-            'parentOrganisationUnitLevel', 'organisationUnitLevel', 'mapLegendType', 'method', 'classes', 'bounds', 'colorLow', 'colorHigh',
-            'mapLegendSetId', 'longitude', 'latitude', 'zoom'
+            'parentOrganisationUnitLevel', 'organisationUnitLevel', 'organisationUnitLevelName', 'mapLegendType', 'method', 'classes',
+            'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'longitude', 'latitude', 'zoom'
         ],
         sortInfo: {field: 'name', direction: 'ASC'},
         autoLoad: false,

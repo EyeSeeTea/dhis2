@@ -1,5 +1,5 @@
 
-window.onload = function () 
+function addEventListeners() 
 {
 	var inputs = document.getElementsByName( "entryfield" ) 
 
@@ -24,7 +24,7 @@ function clearPeriod()
 
 function clearEntryForm()
 {
-	$('#contentDiv').html( '' );
+	$( '#contentDiv' ).html( '' );
 }
 
 // -----------------------------------------------------------------------------
@@ -55,7 +55,8 @@ function organisationUnitSelected( orgUnits )
     		$( '#selectedDataSetId' ).val( dataSetId );
     		
     		if ( json.periodValid ) {
-    			displayEntryFormInternal( false );
+    			showLoader();
+    			$( '#contentDiv' ).load( 'select.action', displayEntryFormCompleted );
     		}
     	}
     	else {
@@ -122,8 +123,9 @@ function dataSetSelected()
 	    	}
 	    	
 	    	if ( json.periodValid && periodIndex != null ) {
-	    		$( '#selectedPeriodIndex' ).val( periodIndex );	    		
-	    		displayEntryFormInternal( true );
+	    		showLoader();	    		
+	    		$( '#selectedPeriodIndex' ).val( periodIndex );
+    			$( '#contentDiv' ).load( 'select.action', setDisplayModes );
 	    	}
 	    	else {
 	    		clearEntryForm();
@@ -138,7 +140,11 @@ function dataSetSelected()
 
 function displayModeSelected()
 {
-	displayEntryFormInternal( false );
+	showLoader();
+	
+	var url = 'select.action?displayMode=' + $("input[name='displayMode']:checked").val();
+	
+	$( '#contentDiv' ).load( url, displayEntryFormCompleted );
 }
 
 // -----------------------------------------------------------------------------
@@ -147,77 +153,56 @@ function displayModeSelected()
 
 function periodSelected()
 {
-	displayEntryFormInternal( true );
-}
-
-function displayEntryFormInternal( updateDisplayModes )
-{
-	showLoader();
+	var periodName = $( '#selectedPeriodIndex :selected' ).text();
 	
+	$( '#currentPeriod' ).html( periodName );
+		
 	var periodIndex = $( '#selectedPeriodIndex' ).val();
 	
-	if ( periodIndex && periodIndex != -1 )
-	{
-		var url = 'select.action?selectedPeriodIndex=' + periodIndex +
-			'&displayMode=' + $("input[name='displayMode']:checked").val();
-		
-		var callback = updateDisplayModes ? setDisplayModes : hideLoader;
-		
-		$( '#contentDiv' ).load( url, callback );
+	if ( periodIndex && periodIndex != -1 )	{
+		showLoader();
+		var url = 'select.action?selectedPeriodIndex=' + periodIndex;
+		$( '#contentDiv' ).load( url, setDisplayModes );
 	}
+}
+
+function displayEntryFormCompleted()
+{
+	addEventListeners();
+	hideLoader();
 }
 
 function setDisplayModes()
 {
-	hideLoader();
+	displayEntryFormCompleted();
 	
 	$.getJSON( 'loadDisplayModes.action', function( json ) {
-		if ( json.customForm ) {
-			$( '#displayModeCustom' ).removeAttr( 'disabled' );
-		}
-		else {
-			$( '#displayModeCustom' ).attr( 'disabled', 'disabled' );
-		}
+		$( '#displayModeCustom' ).removeAttr( 'disabled' );
+		$( '#displayModeSection' ).removeAttr( 'disabled' );
+		$( '#displayModeDefault' ).removeAttr( 'disabled' );
 		
-		if ( json.sectionForm ) {
-			$( '#displayModeSection' ).removeAttr( 'disabled' );
-		}
-		else {
-			$( '#displayModeSection' ).attr( 'disabled', 'disabled' );
-		}
+		$( '#displayModeCustom' ).removeAttr( 'checked' );
+		$( '#displayModeSection' ).removeAttr( 'checked' );
+		$( '#displayModeDefault' ).removeAttr( 'checked' );
 		
 		if ( json.displayMode == 'customform' ) {
 			$( '#displayModeCustom' ).attr( 'checked', 'checked' );
-			$( '#displayModeSection' ).removeAttr( 'checked' );
-			$( '#displayModeDefault' ).removeAttr( 'checked' );
 		}
-		else if ( json.displayMode = 'sectionform' ) {
-			$( '#displayModeCustom' ).removeAttr( 'checked' );
+		else if ( json.displayMode == 'sectionform' ) {
 			$( '#displayModeSection' ).attr( 'checked', 'checked' );
-			$( '#displayModeDefault' ).removeAttr( 'checked' );
 		}
-		else if ( json.displayMode = 'defaultform' ) {
-			$( '#displayModeCustom' ).removeAttr( 'checked' );
-			$( '#displayModeSection' ).removeAttr( 'checked' );
+		else {
 			$( '#displayModeDefault' ).attr( 'checked', 'checked' );
 		}
+		
+		if ( !json.customForm ) {
+			$( '#displayModeCustom' ).attr( 'disabled', 'disabled' );
+		}		
+		if ( !json.sectionForm ) {
+			$( '#displayModeSection' ).attr( 'disabled', 'disabled' );
+		}		
 	} );
 }
-
-// -----------------------------------------------------------------------------
-// History
-// -----------------------------------------------------------------------------
-
-function viewHistory( dataElementId, optionComboId, showComment )
-{
-    window.open( 'viewHistory.action?dataElementId=' + dataElementId + '&optionComboId=' + optionComboId + '&showComment=' + showComment, '_blank', 'width=580,height=710,scrollbars=yes' );
-}
-
-/**
- * Display data element name in selection display when a value field recieves
- * focus.
- */
-var customDataEntryFormExists = "false";
 
 function valueFocus(e) 
 {
@@ -378,7 +363,7 @@ function getNextEntryField( field )
 }
 
 // -----------------------------------------------------------------------------
-// View history
+// Min max
 // -----------------------------------------------------------------------------
 
 /**
@@ -407,15 +392,13 @@ function SetGeneratedMinMaxValues()
             
             setInnerHTML('value[' + deId + ':' + ocId + '].min', getElementValue( dataElements[i], 'minLimit'));
             setInnerHTML('value[' + deId + ':' + ocId + '].max', getElementValue( dataElements[i], 'maxLimit'));
-        }
-        
+        }        
     }
     
     function handleHttpError( errorCode )
     {
         window.alert( i18n_saving_minmax_failed_error_code + '\n\n' + errorCode );
-    }   
-   
+    }
     
     function getElementValue( parentElement, childElementName )
     {
@@ -527,4 +510,13 @@ function undoReceived( messageElement )
 function validate()
 {
     window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
+}
+
+// -----------------------------------------------------------------------------
+// History
+// -----------------------------------------------------------------------------
+
+function viewHistory( dataElementId, optionComboId, showComment )
+{
+    window.open( 'viewHistory.action?dataElementId=' + dataElementId + '&optionComboId=' + optionComboId + '&showComment=' + showComment, '_blank', 'width=580,height=710,scrollbars=yes' );
 }
