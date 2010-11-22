@@ -260,6 +260,17 @@ GLOBALS.util = {
         return json;
     },
     
+    setCurrentValue: function(cb, mv) {
+        if (cb.getValue() == cb.currentValue) {
+            return true;
+        }
+        else {
+            cb.currentValue = cb.getValue();
+            this.form.findField(mv).clearValue();
+            return false;
+        }
+    },
+    
     setKeepPosition: function(cb) {
         if (!cb.keepPosition) {
             cb.keepPosition = true;
