@@ -1162,6 +1162,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             obj.stores.c2.load({scope: this, callback: function() {
                 obj.components.c2.setValue(this.mapView[obj.mapView.c2]);
                 obj.components.c2.currentValue = this.mapView[obj.mapView.c2];
+                obj.components.c2.keepPosition = true;
                 
                 this.setMapViewLegend();
             }});
@@ -1215,10 +1216,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
             2, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
         
-        Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitId);
-        Ext.getCmp('map_tf').setRawValue(this.mapView.parentOrganisationUnitName);
-        Ext.getCmp('level_tf').setValue(this.mapView.organisationUnitLevel);
-        Ext.getCmp('level_tf').setRawValue(this.mapView.organisationUnitLevelName);       
+        Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitName);
+        Ext.getCmp('level_tf').setValue(this.mapView.organisationUnitLevelName);
         
         this.loadGeoJson();
     },
