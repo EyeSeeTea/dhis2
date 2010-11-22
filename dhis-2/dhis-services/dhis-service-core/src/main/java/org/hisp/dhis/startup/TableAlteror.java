@@ -338,7 +338,7 @@ public class TableAlteror
         }
         catch ( Exception ex )
         {
-            log.error( ex );
+            log.debug( ex );
             return false;
         }
         finally
@@ -375,7 +375,7 @@ public class TableAlteror
         }
         catch ( Exception ex )
         {
-            log.error( ex );
+            log.debug( ex );
             return false;
         }
         finally

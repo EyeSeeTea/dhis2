@@ -256,7 +256,7 @@ public class ExportDataElementToExcelAction implements Action
                         }
                         else
                         {
-                            sheet0.addCell( new Label( tempCol1, tempRow1, "Service", wCellformat2) );
+                            sheet0.addCell( new Label( tempCol1, tempRow1, "DataElements", wCellformat2) );
                         }
                         tempCol1++;
                     
