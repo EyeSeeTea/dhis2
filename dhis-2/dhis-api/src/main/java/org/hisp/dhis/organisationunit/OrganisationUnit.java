@@ -48,6 +48,7 @@ public class OrganisationUnit
     extends Source implements DimensionOptionElement
 {
     public static final String FEATURETYPE_NONE = "None";
+    public static final String FEATURETYPE_MULTIPOLYGON = "MultiPolygon";
     public static final String FEATURETYPE_POLYGON = "Polygon";
     public static final String FEATURETYPE_POINT = "Point";
         

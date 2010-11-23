@@ -1,4 +1,4 @@
-package org.hisp.dhis.security.filter;
+package org.hisp.dhis.reporting.reportviewer.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,46 +27,66 @@ package org.hisp.dhis.security.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
+import java.io.OutputStream;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hisp.dhis.useraudit.UserAuditService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.report.ReportService;
+import org.hisp.dhis.util.StreamActionSupport;
 
 /**
  * @author Lars Helge Overland
+ * @version $Id$
  */
-public class UserAuditLogoutFilter
-    implements LogoutHandler
+public class GetReportDesignAction
+    extends StreamActionSupport
 {
-    private UserAuditService userAuditService;
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    public void setUserAuditService( UserAuditService userAuditService )
+    private ReportService reportService;
+        
+    public void setReportService( ReportService reportService )
     {
-        this.userAuditService = userAuditService;
+        this.reportService = reportService;
     }
 
-    public void logout( HttpServletRequest request, HttpServletResponse response, Authentication authentication )
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+    
+    public void setId( Integer id )
     {
-        if ( authentication != null && authentication.getPrincipal() != null )
-        {
-            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
-            userAuditService.registerLogout( username );
-        }
-        else
-        {
-            try
-            {
-                response.sendRedirect( request.getContextPath() );
-            }
-            catch ( IOException e )
-            {
-                e.printStackTrace();
-            }
-        }
+        this.id = id;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected String execute( HttpServletResponse response, OutputStream out ) throws Exception
+    {
+        Report report = reportService.getReport( id );
+        
+        out.write( report.getDesignContent().getBytes() );
+        
+        return SUCCESS;    
+    }
+
+    @Override
+    protected String getContentType()
+    {
+        return CONTENT_TYPE_XML;
+    }
+
+    @Override
+    protected String getFilename()
+    {
+        return "report.jrxml";
     }
 }
