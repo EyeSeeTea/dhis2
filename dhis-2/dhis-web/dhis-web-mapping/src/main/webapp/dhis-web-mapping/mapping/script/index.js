@@ -2513,7 +2513,7 @@
         map: GLOBALS.vars.map,
         layer: choroplethLayer,
 		title: '<span class="panel-title">' + i18n_polygon_layer + '</span>',
-        // url: 'init',
+        url: 'polygon',
         featureSelection: false,
         legendDiv: 'polygonlegend',
         defaults: {width: 130},

@@ -1001,8 +1001,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     GLOBALS.vars.locateFeatureWindow.destroy();
                 }
                 
-                scope.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
-                
+                scope.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);                
                 scope.updateValues = true;
                 scope.isDrillDown = true;
                 scope.loadGeoJson();
