@@ -105,9 +105,6 @@ mapfish.GeoStat = OpenLayers.Class({
             }
             proportionalSymbol.classify(false);
         }
-        else if (GLOBALS.vars.activePanel.isAssignment()) {
-            mapping.classify(false);
-        }
     },
 
     onFailure: function(request) {
@@ -204,15 +201,9 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
     },
 
     defaultLabelGenerator: function(bin, binIndex, nbBins, maxDec) {
-		if (GLOBALS.vars.activePanel.isAssignment()) {
-            return bin.upperBound < 1 ?
-                'Available' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )' : 'Assigned' + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
-		}
-		else {
-            lower = parseFloat(bin.lowerBound).toFixed(maxDec);
-            upper = parseFloat(bin.upperBound).toFixed(maxDec);
-            return lower + ' - ' + upper + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
-		}
+        lower = parseFloat(bin.lowerBound).toFixed(maxDec);
+        upper = parseFloat(bin.upperBound).toFixed(maxDec);
+        return lower + ' - ' + upper + '&nbsp;&nbsp; ( ' + bin.nbVal + ' )';
     },
 
     classifyWithBounds: function(bounds) {

@@ -290,7 +290,7 @@
     
     var userSettingStore = new Ext.data.JsonStore({
         url: GLOBALS.conf.path_mapping + 'getMapUserSettings' + GLOBALS.conf.type,
-        fields: ['mapSource', 'mapDateType'],
+        fields: ['mapDateType'],
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -656,13 +656,49 @@
 				cls: 'window-button',
 				text: i18n_export,
 				handler: function() {
-                    var vcb, dcb, mcb, lcb, period;
+                    var vcb, period;
                     if (GLOBALS.vars.activePanel.isPolygon()) {
-                        vcb = Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
-                        dcb = GLOBALS.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getValue() : Ext.getCmp('startdate_df').getValue() && Ext.getCmp('startdate_df').getValue() ? true : false;
-                        period = GLOBALS.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getRawValue() : new Date(Ext.getCmp('startdate_df').getRawValue()).format('Y M j') + ' - ' + new Date(Ext.getCmp('enddate_df').getRawValue()).format('Y M j');
-                        mcb = GLOBALS.vars.mapSourceType.isDatabase() ? Ext.getCmp('map_tf').getValue() : Ext.getCmp('map_cb').getValue();
-                        lcb = Ext.getCmp('maplegendtype_cb').getValue() == GLOBALS.conf.map_legend_type_automatic ? true : Ext.getCmp('maplegendset_cb').getValue() ? true : false;
+                        if (choropleth.formValidation.validateForm()) {
+                            vcb = Ext.getCmp('mapvaluetype_cb').getValue() == GLOBALS.conf.map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
+                            period = GLOBALS.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getRawValue() : new Date(Ext.getCmp('startdate_df').getRawValue()).format('Y M j') + ' - ' + new Date(Ext.getCmp('enddate_df').getRawValue()).format('Y M j');
+                    
+                            var svgElement = document.getElementsByTagName('svg')[0];
+                            var parentSvgElement = svgElement.parentNode;                            
+                            var svg = parentSvgElement.innerHTML;                            
+                            var viewBox = svgElement.getAttribute('viewBox');
+                            var title = Ext.getCmp('exportimagetitle_tf').getValue();
+                            
+                            if (!title) {
+                                Ext.message.msg(false, i18n_form_is_not_complete);
+                            }
+                            else {
+                                var q = Ext.getCmp('exportimagequality_cb').getValue();
+                                var w = svgElement.getAttribute('width') * q;
+                                var h = svgElement.getAttribute('height') * q;
+                                var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
+                                
+                                Ext.getCmp('exportimagetitle_tf').reset();
+                                
+                                var exportForm = document.getElementById('exportForm');
+                                exportForm.action = '../exportImage.action';
+                                exportForm.target = '_blank';
+                                
+                                document.getElementById('titleField').value = title;   
+                                document.getElementById('viewBoxField').value = viewBox;  
+                                document.getElementById('svgField').value = svg;  
+                                document.getElementById('widthField').value = w;  
+                                document.getElementById('heightField').value = h;  
+                                document.getElementById('includeLegendsField').value = includeLegend;  
+                                document.getElementById('periodField').value = period;  
+                                document.getElementById('indicatorField').value = vcb;
+                                document.getElementById('legendsField').value = GLOBALS.util.getLegendsJSON();
+
+                                exportForm.submit();
+                            }
+                        }
+                        else {
+                            Ext.message.msg(false, i18n_please_render_map_first);
+                        }
                     }
                     else if (GLOBALS.vars.activePanel.isPoint()) {
                         Ext.message.msg(false, 'Please use <span class="x-msg-hl">polygon layer</span> for printing');
@@ -671,48 +707,7 @@
                     else {
                         Ext.message.msg(false, i18n_please_expand_layer_panel);
                         return;
-                    }
-                    
-                    if (vcb && dcb && mcb && lcb) {
-						var svgElement = document.getElementsByTagName('svg')[0];
-						var parentSvgElement = svgElement.parentNode;
-						
-						var svg = parentSvgElement.innerHTML;
-						
-                        var viewBox = svgElement.getAttribute('viewBox');
-                        var title = Ext.getCmp('exportimagetitle_tf').getValue();
-                    	
-                        if (!title) {
-                            Ext.message.msg(false, i18n_form_is_not_complete);
-                        }
-                        else {
-                            var q = Ext.getCmp('exportimagequality_cb').getValue();
-                            var w = svgElement.getAttribute('width') * q;
-                            var h = svgElement.getAttribute('height') * q;
-                            var includeLegend = Ext.getCmp('exportimageincludelegend_chb').getValue();
-                            
-                            Ext.getCmp('exportimagetitle_tf').reset();
-                            
-                            var exportForm = document.getElementById('exportForm');
-                            exportForm.action = '../exportImage.action';
-                            exportForm.target = '_blank';
-                            
-                            document.getElementById('titleField').value = title;   
-                            document.getElementById('viewBoxField').value = viewBox;  
-                            document.getElementById('svgField').value = svg;  
-                            document.getElementById('widthField').value = w;  
-                            document.getElementById('heightField').value = h;  
-                            document.getElementById('includeLegendsField').value = includeLegend;  
-                            document.getElementById('periodField').value = period;  
-                            document.getElementById('indicatorField').value = vcb;
-                            document.getElementById('legendsField').value = GLOBALS.util.getLegendsJSON();
-
-                            exportForm.submit();
-                        }
-                    }
-                    else {
-                        Ext.message.msg(false, i18n_please_render_map_first);
-                    }
+                    }                    
 				}
 			}	
 		]
@@ -1387,14 +1382,7 @@
                     }
                 ]
             }
-        ],
-		listeners: {
-			'hide': {
-				fn: function() {
-					mapping.relation = false;
-				}
-			}
-		}
+        ]
     });
 
     /* Section: map layers */
@@ -1836,133 +1824,6 @@
         title: '<span class="panel-title">' + i18n_administrator + '</span>',
         items:
         [
-			{ html: '<p style="height:5px;">' },
-			{
-				xtype:'fieldset',
-				columnWidth: 0.5,
-				title: '&nbsp;<span class="panel-tab-title">' + i18n_map_source + '</span>&nbsp;',
-				collapsible: true,
-				animCollapse: true,
-				autoHeight:true,
-				items:
-				[
-					{
-						xtype: 'combo',
-						id: 'mapsource_cb',
-						fieldLabel: i18n_type,
-						labelSeparator: GLOBALS.conf.labelseparator,
-						editable: false,
-						valueField: 'id',
-						displayField: 'text',
-						isFormField: true,
-						width: GLOBALS.conf.combo_width_fieldset,
-						minListWidth: GLOBALS.conf.combo_width_fieldset,
-						mode: 'local',
-						triggerAction: 'all',
-						value: GLOBALS.vars.mapSourceType.value,
-						store: new Ext.data.ArrayStore({
-							fields: ['id', 'text'],
-							data: [
-                                [GLOBALS.conf.map_source_type_database, 'DHIS database'],
-                                [GLOBALS.conf.map_source_type_geojson, 'GeoJSON files'],
-                                [GLOBALS.conf.map_source_type_shapefile, 'Shapefiles']
-                            ]
-						}),
-						listeners: {
-							'select': {
-								fn: function(cb) {
-                                    if (GLOBALS.vars.mapSourceType.value != cb.getValue()) {
-                                        GLOBALS.vars.mapSourceType.value = cb.getValue();
-                                        
-                                        Ext.Ajax.request({
-                                            url: GLOBALS.conf.path_mapping + 'setMapUserSettings' + GLOBALS.conf.type,
-											method: 'POST',
-											params: {mapSourceType: GLOBALS.vars.mapSourceType.value, mapDateType: GLOBALS.vars.mapDateType.value},
-											success: function(r) {
-                                                GLOBALS.stores.map.load();
-                                                GLOBALS.stores.mapView.load();
-                                                GLOBALS.stores.overlay.load();
-
-												Ext.getCmp('map_cb').clearValue();
-                                                Ext.getCmp('map_cb2').clearValue();
-												Ext.getCmp('mapview_cb').clearValue();
-                                                
-                                                if (GLOBALS.vars.mapSourceType.isDatabase()) {
-													Ext.getCmp('register_chb').disable();													
-													mapping.hide();
-													shapefilePanel.hide();
-												}
-                                                else {
-                                                    Ext.getCmp('register_chb').enable();
-													
-													if (Ext.getCmp('register_chb').checked) {
-														mapping.show();
-														shapefilePanel.show();
-													}
-                                                    
-                                                    if (GLOBALS.vars.mapDateType.isStartEnd()) {
-                                                        GLOBALS.vars.mapDateType.setFixed();
-                                                        Ext.getCmp('mapdatetype_cb').setValue(GLOBALS.vars.mapDateType.value);
-                                                        choropleth.prepareMapViewDateType();
-                                                        proportionalSymbol.prepareMapViewDateType();
-                                                    }
-										
-                                                    if (GLOBALS.vars.mapSourceType.isGeojson()) {
-                                                        mapLayerMapSourceFileComboBox.show();
-                                                        mapLayerPathWMSOverlayTextField.hide();
-                                                    }
-                                                    else if (GLOBALS.vars.mapSourceType.isShapefile()) {
-                                                        mapLayerMapSourceFileComboBox.hide();
-                                                        mapLayerPathWMSOverlayTextField.show();
-                                                    }
-												}
-                                                
-                                                choropleth.prepareMapViewMap();
-                                                proportionalSymbol.prepareMapViewMap();
-                                                
-												if (GLOBALS.vars.map.layers.length > 2) {
-													for (var i = 0; i < GLOBALS.vars.map.layers.length; i++) {
-                                                        if (GLOBALS.vars.map.layers[i].isOverlay) {
-                                                            GLOBALS.vars.map.removeLayer(GLOBALS.vars.map.layers[i]);
-                                                        }
-													}
-												}
-												addOverlaysToMap();
-												Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_is_saved_as_map_source);
-											}
-										});
-									}
-								}
-							}
-						}
-					},
-                    
-					{
-						xtype: 'checkbox',
-						id: 'register_chb',
-						fieldLabel: i18n_admin_panels,
-						labelSeparator: GLOBALS.conf.labelseparator,
-						isFormField: true,
-						listeners: {
-							'check': {
-								fn: function(checkbox,checked) {
-									if (checked) {
-										mapping.show();
-										shapefilePanel.show();
-										Ext.getCmp('west').doLayout();
-									}
-									else {
-										mapping.hide();
-										shapefilePanel.hide();
-										Ext.getCmp('west').doLayout();
-									}
-								}
-							}
-						}
-					}
-				]
-			},
-            
 			{
 				xtype:'fieldset',
 				columnWidth: 0.5,
@@ -2021,22 +1882,11 @@
             }
         ],
         listeners: {
-            expand: {
-                fn: function() {
-                    if (GLOBALS.vars.mapSourceType.isGeojson()) {
-                        Ext.getCmp('register_chb').enable();
-                    }
-                    else if (GLOBALS.vars.mapSourceType.isDatabase()) {
-                        Ext.getCmp('register_chb').disable();
-                    }
-					
-					GLOBALS.vars.activePanel.value = GLOBALS.conf.administration;
-                }
+            expand: function() {					
+                GLOBALS.vars.activePanel.value = GLOBALS.conf.administration;
             },
-			collapse: {
-				fn: function() {
-					GLOBALS.vars.activePanel.value = null;
-				}
+			collapse: function() {
+                GLOBALS.vars.activePanel.value = null;
 			}
         }
     });
@@ -2344,9 +2194,6 @@
                                                 if (GLOBALS.vars.activePanel.isPolygon()) {
                                                     GLOBALS.util.toggleFeatureLabels(choropleth);
                                                 }
-                                                else if (GLOBALS.vars.activePanel.isAssignment()) {
-                                                    GLOBALS.util.toggleFeatureLabelsAssignment();
-                                                }
                                                 else {
                                                     Ext.message.msg(false, 'Please use <span class="x-msg-hl">Point layer</span> options');
                                                 }
@@ -2562,25 +2409,7 @@
         }
     });
     
-    mapping = new mapfish.widgets.geostat.Mapping({
-        id: 'mapping',
-        map: GLOBALS.vars.map,
-        layer: choroplethLayer,
-        title: '<span class="panel-title">' + i18n_assign_organisation_units_to_map + '</span>',
-        featureSelection: false,
-        legendDiv: 'polygonlegend',
-        defaults: {width: 130},
-        listeners: {
-            'expand': {
-                fn: function() {
-                    GLOBALS.vars.activePanel.setAssignment();
-                    this.layer.setVisibility(false);
-                    proportionalSymbol.layer.setVisibility(false);
-                    this.classify(false, true);
-                }
-            }
-        }
-    });
+    mapping = new mapfish.widgets.geostat.Mapping({});
 	
 	/* Section: map toolbar */  
 	var mapLabel = new Ext.form.Label({
@@ -2840,8 +2669,6 @@
                 items: [
                     choropleth,
                     proportionalSymbol,
-                    // shapefilePanel,
-                    mapping,
 					adminPanel
                 ]
             },
@@ -2859,9 +2686,6 @@
         ]
     });
 	
-    // shapefilePanel.hide();
-	mapping.hide();
-	// Ext.getCmp('printMultiPage_p').hide();
 	GLOBALS.vars.activePanel.setPolygon();
 
 	GLOBALS.vars.map.addControl(new OpenLayers.Control.MousePosition({
@@ -2925,7 +2749,6 @@
         }
     });
             
-    Ext.getCmp('mapsource_cb').setValue(GLOBALS.vars.mapSourceType.value);
     Ext.getCmp('mapdatetype_cb').setValue(GLOBALS.vars.mapDateType.value);
     
     choropleth.prepareMapViewValueType();
@@ -2937,7 +2760,5 @@
     choropleth.prepareMapViewLegend();
     proportionalSymbol.prepareMapViewLegend();
     
-	// }});
-	// }});
 	}});
 });
