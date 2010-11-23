@@ -14,7 +14,7 @@
     "endDate": "$!encoder.jsEncode( ${object.endDate} )",
     "parentOrganisationUnitId": "$!{object.parentOrganisationUnit.id}",
     "parentOrganisationUnitName": "$!encoder.jsEncode( ${object.parentOrganisationUnit.name} )",
-    "parentOrganisationUnitLevel": "$!encoder.jsEncode( ${object.parentOrganisationUnit.level} )",
+    "parentOrganisationUnitLevel": "$!{object.parentOrganisationUnit.level}",
     "organisationUnitLevel": "$!{object.organisationUnitLevel.level}",
     "organisationUnitLevelName": "$!{object.organisationUnitLevel.name}",
     "mapLegendType": "$!encoder.jsEncode( ${object.mapLegendType} )",

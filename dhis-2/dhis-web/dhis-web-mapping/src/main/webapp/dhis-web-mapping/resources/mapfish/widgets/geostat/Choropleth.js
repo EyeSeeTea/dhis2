@@ -163,8 +163,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 level: null,
                 name: null,
             },
-            setValues: function(pi, pn, pl, ll, ln) {
-                this.parent.id = pi || this.parent.id;
+            setValues: function(pid, pn, pl, ll, ln) {
+                this.parent.id = pid || this.parent.id;
                 this.parent.name = pn || this.parent.name;
                 this.parent.level = pl || this.parent.level;
                 this.level.level = ll || this.level.level;
@@ -182,7 +182,18 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         name: this.level.name
                     }                    
                 };
-            }
+            },
+            setValuesOnDrillDown: function(pid, pn) {
+                this.parent.id = pid;
+                this.parent.name = pn;
+                this.parent.level = this.level.level;
+                this.level.level++;
+                this.level.name = GLOBALS.stores.organisationUnitLevel.getAt(
+                    GLOBALS.stores.organisationUnitLevel.find('level', this.level.level)).data.name;
+                
+                Ext.getCmp('map_tf').setValue(this.parent.name);
+                Ext.getCmp('level_tf').setValue(this.level.name);
+            }                
         };
         
         this.valueType = {
@@ -985,17 +996,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         };
         
         var onClickSelect = function onClickSelect(feature) {
-            var east_panel = Ext.getCmp('east');
-            var x = east_panel.x - 210;
-            var y = east_panel.y + 41;
-
             if (feature.attributes.hasChildrenWithCoordinates) {
                 if (GLOBALS.vars.locateFeatureWindow) {
                     GLOBALS.vars.locateFeatureWindow.destroy();
                 }
                 
-                Ext.getCmp('map_tf').setValue(feature.data.name);
-                Ext.getCmp('map_tf').value = feature.attributes.id;
+                scope.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
+                
                 scope.updateValues = true;
                 scope.isDrillDown = true;
                 scope.loadGeoJson();
@@ -1214,7 +1221,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     setMapViewMap: function() {
         this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
-            2, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
+            this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
         
         Ext.getCmp('map_tf').setValue(this.mapView.parentOrganisationUnitName);
         Ext.getCmp('level_tf').setValue(this.mapView.organisationUnitLevelName);
