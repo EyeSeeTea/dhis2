@@ -61,18 +61,18 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
     createColorInterpolation: function() {
         var initialColors = this.colors;
         var numColors = this.classification.bins.length;
-		var mapLegendType = Ext.getCmp('maplegendtype_cb2').getValue();        
+		var mapLegendType = symbol.form.findField('maplegendtype').getValue();        
 		
 		if (mapLegendType == GLOBAL.conf.map_legend_type_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(initialColors[0], initialColors[1], numColors);
-			for (var i = 0; i < proportionalSymbol.imageLegend.length && i < this.colorInterpolation.length; i++) {
-				proportionalSymbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();
+			for (var i = 0; i < symbol.imageLegend.length && i < this.colorInterpolation.length; i++) {
+				symbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();
 			}
 		}
 		else if (mapLegendType == GLOBAL.conf.map_legend_type_predefined) {
-			this.colorInterpolation = proportionalSymbol.colorInterpolation;
-			for (var i = 0; i < proportionalSymbol.imageLegend.length && i < this.colorInterpolation.length; i++) {
-				proportionalSymbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();
+			this.colorInterpolation = symbol.colorInterpolation;
+			for (var i = 0; i < symbol.imageLegend.length && i < this.colorInterpolation.length; i++) {
+				symbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();
 			}
 		}
     },

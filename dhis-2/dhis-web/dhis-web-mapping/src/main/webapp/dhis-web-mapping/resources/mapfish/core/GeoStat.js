@@ -100,10 +100,10 @@ mapfish.GeoStat = OpenLayers.Class({
             choropleth.classify(false);
         }
         else if (GLOBAL.vars.activePanel.isPoint()) {
-            if (!proportionalSymbol.formValidation.validateForm()) {
+            if (!symbol.formValidation.validateForm()) {
                 GLOBAL.vars.mask.hide();
             }
-            proportionalSymbol.classify(false);
+            symbol.classify(false);
         }
     },
 
@@ -253,7 +253,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
             choropleth.imageLegend = imageLegend;
         }
         else if (GLOBAL.vars.activePanel.isPoint()) {
-            proportionalSymbol.imageLegend = imageLegend;
+            symbol.imageLegend = imageLegend;
         }
         
         return new mapfish.GeoStat.Classification(bins);
@@ -300,7 +300,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
     classify: function(method, nbBins, bounds) {
         var mlt = GLOBAL.vars.activePanel.isPolygon() ?
             choropleth.legend.value : GLOBAL.vars.activePanel.isPoint() ?
-                proportionalSymbol.legend.value : GLOBAL.conf.map_legend_type_automatic;
+                symbol.legend.value : GLOBAL.conf.map_legend_type_automatic;
     
 		if (mlt == GLOBAL.conf.map_legend_type_automatic) {
 			if (method == mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
@@ -345,7 +345,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 			}
 		}
 		else if (mlt == GLOBAL.conf.map_legend_type_predefined) {
-			bounds = GLOBAL.vars.activePanel.isPolygon() ? choropleth.bounds : proportionalSymbol.bounds;
+			bounds = GLOBAL.vars.activePanel.isPolygon() ? choropleth.bounds : symbol.bounds;
 
 			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);
@@ -353,7 +353,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                     choropleth.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
                 }
                 else {
-                    proportionalSymbol.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+                    symbol.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
                 }
 			}
 
@@ -363,7 +363,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                     choropleth.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
                 }
                 else {
-                    proportionalSymbol.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+                    symbol.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
                 }
 			}
 			

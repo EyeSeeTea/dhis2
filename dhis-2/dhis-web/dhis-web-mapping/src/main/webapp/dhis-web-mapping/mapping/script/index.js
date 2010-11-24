@@ -419,10 +419,10 @@
                         formValues = choropleth.getFormValues();
                     }
                     else if (GLOBAL.vars.activePanel.isPoint()) {
-                        if (!proportionalSymbol.formValidation.validateForm(true)) {
+                        if (!symbol.formValidation.validateForm(true)) {
                             return;
                         }
-                        formValues = proportionalSymbol.getFormValues();
+                        formValues = symbol.getFormValues();
                     }
                     
                     if (GLOBAL.stores.mapView.find('name', vn) !== -1) {
@@ -502,8 +502,8 @@
                             if (v == choropleth.form.findField('mapview').getValue()) {
                                 choropleth.form.findField('mapview').clearValue();
                             }
-                            if (v == proportionalSymbol.form.findField('mapview').getValue()) {
-                                proportionalSymbol.form.findField('mapview').clearValue();
+                            if (v == symbol.form.findField('mapview').getValue()) {
+                                symbol.form.findField('mapview').clearValue();
                             }
 						}
 					});
@@ -1870,7 +1870,7 @@
                                             success: function() {
                                                 Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_saved_as_date_type);
                                                 choropleth.prepareMapViewDateType();
-                                                proportionalSymbol.prepareMapViewDateType();
+                                                symbol.prepareMapViewDateType();
                                             }
                                         });
                                     }
@@ -2200,7 +2200,7 @@
                                             }
                                             else if (layer.name == 'Point layer') {
                                                 if (GLOBAL.vars.activePanel.isPoint()) {
-                                                    GLOBAL.util.toggleFeatureLabels(proportionalSymbol);
+                                                    GLOBAL.util.toggleFeatureLabels(symbol);
                                                 }
                                                 else {
                                                     Ext.message.msg(false, 'Please use <span class="x-msg-hl">Polygon layer</span> options');
@@ -2382,8 +2382,8 @@
         }
     });
 
-    proportionalSymbol = new mapfish.widgets.geostat.Symbol({
-        id: 'proportionalsymbol',
+    symbol = new mapfish.widgets.geostat.Symbol({
+        id: 'symbol',
         map: GLOBAL.vars.map,
         layer: proportionalSymbolLayer,
 		title: '<span class="panel-title">' + i18n_point_layer + '</span>',
@@ -2446,8 +2446,8 @@
                 }
             }
             else if (GLOBAL.vars.activePanel.isPoint()) {
-                if (proportionalSymbol.layer.getDataExtent()) {
-                    GLOBAL.vars.map.zoomToExtent(proportionalSymbol.layer.getDataExtent());
+                if (symbol.layer.getDataExtent()) {
+                    GLOBAL.vars.map.zoomToExtent(symbol.layer.getDataExtent());
                 }
                 else {
                     Ext.message.msg(false, 'Vector layer is empty');
@@ -2668,7 +2668,7 @@
                 },
                 items: [
                     choropleth,
-                    proportionalSymbol,
+                    symbol,
 					adminPanel
                 ]
             },
@@ -2721,7 +2721,7 @@
                 }
             }
             
-            var widget = GLOBAL.vars.activePanel.isPolygon() ? choropleth : proportionalSymbol;
+            var widget = GLOBAL.vars.activePanel.isPolygon() ? choropleth : symbol;
             
             if (visibleOverlays) {
                 widget.selectFeatures.deactivate();
@@ -2752,13 +2752,13 @@
     Ext.getCmp('mapdatetype_cb').setValue(GLOBAL.vars.mapDateType.value);
     
     choropleth.prepareMapViewValueType();
-    proportionalSymbol.prepareMapViewValueType();
+    symbol.prepareMapViewValueType();
     
     choropleth.prepareMapViewDateType();
-    proportionalSymbol.prepareMapViewDateType();
+    symbol.prepareMapViewDateType();
     
     choropleth.prepareMapViewLegend();
-    proportionalSymbol.prepareMapViewLegend();
+    symbol.prepareMapViewLegend();
     
 	}});
 });
