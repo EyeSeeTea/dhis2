@@ -63,13 +63,13 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
         var numColors = this.classification.bins.length;
 		var mapLegendType = Ext.getCmp('maplegendtype_cb2').getValue();        
 		
-		if (mapLegendType == GLOBALS.conf.map_legend_type_automatic) {
+		if (mapLegendType == GLOBAL.conf.map_legend_type_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(initialColors[0], initialColors[1], numColors);
 			for (var i = 0; i < proportionalSymbol.imageLegend.length && i < this.colorInterpolation.length; i++) {
 				proportionalSymbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();
 			}
 		}
-		else if (mapLegendType == GLOBALS.conf.map_legend_type_predefined) {
+		else if (mapLegendType == GLOBAL.conf.map_legend_type_predefined) {
 			this.colorInterpolation = proportionalSymbol.colorInterpolation;
 			for (var i = 0; i < proportionalSymbol.imageLegend.length && i < this.colorInterpolation.length; i++) {
 				proportionalSymbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();

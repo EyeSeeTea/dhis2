@@ -93,15 +93,15 @@ mapfish.GeoStat = OpenLayers.Class({
         this.layer.addFeatures(format.read(doc));
         this.requestSuccess(request);
 
-        if (GLOBALS.vars.activePanel.isPolygon()) {
+        if (GLOBAL.vars.activePanel.isPolygon()) {
             if (!choropleth.formValidation.validateForm()) {
-                GLOBALS.vars.mask.hide();
+                GLOBAL.vars.mask.hide();
             }
             choropleth.classify(false);
         }
-        else if (GLOBALS.vars.activePanel.isPoint()) {
+        else if (GLOBAL.vars.activePanel.isPoint()) {
             if (!proportionalSymbol.formValidation.validateForm()) {
-                GLOBALS.vars.mask.hide();
+                GLOBAL.vars.mask.hide();
             }
             proportionalSymbol.classify(false);
         }
@@ -235,7 +235,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         var maxDec = 0;
         
         for (var i = 0; i < bounds.length; i++) {
-            var dec = GLOBALS.util.getNumberOfDecimals(bounds[i].toString(), ".");
+            var dec = GLOBAL.util.getNumberOfDecimals(bounds[i].toString(), ".");
             maxDec = dec > maxDec ? dec : maxDec;
         }
         
@@ -249,10 +249,10 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 			imageLegend[i].label = bins[i].label.replace('&nbsp;&nbsp;', ' ');
         }
         
-        if (GLOBALS.vars.activePanel.isPolygon()) {
+        if (GLOBAL.vars.activePanel.isPolygon()) {
             choropleth.imageLegend = imageLegend;
         }
-        else if (GLOBALS.vars.activePanel.isPoint()) {
+        else if (GLOBAL.vars.activePanel.isPoint()) {
             proportionalSymbol.imageLegend = imageLegend;
         }
         
@@ -298,13 +298,13 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
     },
 	
     classify: function(method, nbBins, bounds) {
-        var mlt = GLOBALS.vars.activePanel.isPolygon() ?
-            choropleth.legend.value : GLOBALS.vars.activePanel.isPoint() ?
-                proportionalSymbol.legend.value : GLOBALS.conf.map_legend_type_automatic;
+        var mlt = GLOBAL.vars.activePanel.isPolygon() ?
+            choropleth.legend.value : GLOBAL.vars.activePanel.isPoint() ?
+                proportionalSymbol.legend.value : GLOBAL.conf.map_legend_type_automatic;
     
-		if (mlt == GLOBALS.conf.map_legend_type_automatic) {
+		if (mlt == GLOBAL.conf.map_legend_type_automatic) {
 			if (method == mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
-				var str = GLOBALS.vars.activePanel.isPolygon() ? Ext.getCmp('bounds_tf').getValue() : Ext.getCmp('bounds_tf2').getValue();
+				var str = GLOBAL.vars.activePanel.isPolygon() ? Ext.getCmp('bounds_tf').getValue() : Ext.getCmp('bounds_tf2').getValue();
 				
 				for (var i = 0; i < str.length; i++) {
 					str = str.replace(' ','');
@@ -326,7 +326,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 				
 				var newInput = bounds.join(',');
                 
-                if (GLOBALS.vars.activePanel.isPolygon()) {
+                if (GLOBAL.vars.activePanel.isPolygon()) {
                     Ext.getCmp('bounds_tf').setValue(newInput);
                 }
                 else {
@@ -344,12 +344,12 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 				bounds.push(this.maxVal);
 			}
 		}
-		else if (mlt == GLOBALS.conf.map_legend_type_predefined) {
-			bounds = GLOBALS.vars.activePanel.isPolygon() ? choropleth.bounds : proportionalSymbol.bounds;
+		else if (mlt == GLOBAL.conf.map_legend_type_predefined) {
+			bounds = GLOBAL.vars.activePanel.isPolygon() ? choropleth.bounds : proportionalSymbol.bounds;
 
 			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);
-                if (GLOBALS.vars.activePanel.isPolygon()) {
+                if (GLOBAL.vars.activePanel.isPolygon()) {
                     choropleth.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
                 }
                 else {
@@ -359,7 +359,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 
 			if (bounds[bounds.length-1] < this.maxVal) {
 				bounds.push(this.maxVal);
-                if (GLOBALS.vars.activePanel.isPolygon()) {
+                if (GLOBAL.vars.activePanel.isPolygon()) {
                     choropleth.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
                 }
                 else {
@@ -367,7 +367,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                 }
 			}
 			
-			method = GLOBALS.vars.activePanel.isAssignment() ? mapfish.GeoStat.Distribution.CLASSIFY_BY_EQUAL_INTERVALS : mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;
+			method = GLOBAL.vars.activePanel.isAssignment() ? mapfish.GeoStat.Distribution.CLASSIFY_BY_EQUAL_INTERVALS : mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;
 		}
         
         var classification = null;
