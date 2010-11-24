@@ -340,6 +340,14 @@
 	function addOverlaysToMap() {
 		GLOBAL.stores.overlay.load({callback: function(r) {
 			if (r.length) {
+                var loadStart = function() {
+                    GLOBAL.vars.mask.msg = i18n_loading;
+                    GLOBAL.vars.mask.show();
+                };
+                var loadEnd = function() {
+                    GLOBAL.vars.mask.hide();
+                };
+                
 				for (var i = 0; i < r.length; i++) {
 					var url = GLOBAL.vars.mapSourceType.isShapefile() ? GLOBAL.conf.path_geoserver + GLOBAL.conf.wfs + r[i].data.mapSource + GLOBAL.conf.output : GLOBAL.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + r[i].data.mapSource;
 					var fillColor = r[i].data.fillColor;
@@ -364,17 +372,9 @@
 						})
 					});
 					
-					overlay.events.register('loadstart', null, function() {
-						GLOBAL.vars.mask.msg = i18n_loading;
-						GLOBAL.vars.mask.show();
-					});
-					
-					overlay.events.register('loadend', null, function() {
-						GLOBAL.vars.mask.hide();
-					});
-                    
+					overlay.events.register('loadstart', null, loadStart);					
+					overlay.events.register('loadend', null, loadEnd);
                     overlay.isOverlay = true;
-						
 					GLOBAL.vars.map.addLayer(overlay);
 				}
 			}
@@ -623,7 +623,6 @@
 				xtype: 'combo',
 				id: 'exportimagequality_cb',
 				fieldLabel: i18n_image_resolution,
-                fieldLabel: 'Image resolution',
 				labelSeparator: GLOBAL.conf.labelseparator,
 				editable: false,
 				valueField: 'id',
@@ -777,7 +776,6 @@
                         var svg = document.getElementById('OpenLayers.Layer.Vector_17').innerHTML;	
                         var includeLegend = Ext.getCmp('exportexcelincludelegend_chb').getValue();
                         var includeValues = Ext.getCmp('exportexcelincludevalue_chb').getValue();
-                        var period = Ext.getCmp('period_cb').getValue();
                         var indicator = Ext.getCmp('indicator_cb').getValue();
                         
                         Ext.getCmp('exportexceltitle_ft').clearValue();
@@ -836,13 +834,18 @@
 					var mlev = Ext.getCmp('predefinedmaplegendendvalue_tf').getValue();
                     var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
 					
-					if (!mln || mlsv == "" || mlev == "" || !mlc) {
+					if (!mln || !mlsv || !mlev || !mlc) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
                         return;
                     }
                     
                     if (!GLOBAL.util.validateInputNameLength(mln)) {
                         Ext.message.msg(false, i18n_name_can_not_longer_than_25);
+                        return;
+                    }
+                    
+                    if (!Ext.isNumber(mlsv) || !Ext.isNumber(mlev)) {
+                        Ext.message.msg(false, 'Input invalid');
                         return;
                     }
                     
@@ -939,7 +942,7 @@
                 handler: function() {
                     var mlsv = Ext.getCmp('predefinedmaplegendsetname_tf').getValue();
                     var mlms = Ext.getCmp('predefinednewmaplegend_ms').getValue();
-					var array = new Array();
+					var array = [];
 					
 					if (mlms) {
 						array = mlms.split(',');
@@ -975,9 +978,9 @@
                     array = mlms.split(',');
                     var params = '?mapLegends=' + array[0];
                     if (array.length > 1) {
-                        for (var i = 1; i < array.length; i++) {
-                            array[i] = '&mapLegends=' + array[i];
-                            params += array[i];
+                        for (var l = 1; l < array.length; l++) {
+                            array[l] = '&mapLegends=' + array[l];
+                            params += array[l];
                         }
                     }
                     
@@ -1062,7 +1065,7 @@
                 store: GLOBAL.stores.predefinedMapLegendSet,
                 listeners: {
                     'select': {
-                        fn: function(cb, record, i) {
+                        fn: function(cb, record) {
                             var indicators = record.data.indicators || [];
                             var indicatorString = '';
                             
@@ -1100,7 +1103,7 @@
                         return;
                     }
                     
-                    var array = new Array();
+                    var array = [];
                     array = lims.split(',');
                     var params = '?indicators=' + array[0];
                     
@@ -1149,7 +1152,7 @@
                 store: GLOBAL.stores.predefinedMapLegendSet,
                 listeners:{
                     'select': {
-                        fn: function(cb, record, i) {
+                        fn: function(cb, record) {
                             var dataElements = record.data.dataElements || [];
                             var dataElementString = '';
 
@@ -1187,7 +1190,7 @@
                         return;
                     }
                     
-                    var array = new Array();
+                    var array = [];
                     array = lims.split(',');
                     var params = '?dataElements=' + array[0];
                     
@@ -1388,6 +1391,24 @@
     /* Section: map layers */
 	var mapLayerNameTextField=new Ext.form.TextField({id:'maplayername_tf',emptyText:GLOBAL.conf.emptytext,hideLabel:true,width:GLOBAL.conf.combo_width});
 	var mapLayerMapSourceFileComboBox=new Ext.form.ComboBox({id:'maplayermapsourcefile_cb',editable:false,displayField:'name',valueField:'name',emptyText:GLOBAL.conf.emptytext,hideLabel:true,width:GLOBAL.conf.combo_width,minListWidth:GLOBAL.conf.combo_width,triggerAction:'all',mode:'remote',store:GLOBAL.stores.geojsonFiles});
+    
+    function mapOverlayPreview(grid, index) {
+        var record = grid.getStore().getAt(index);
+        var layer = record.get('layer').clone();
+        
+        var wmsOverlayPreviewWindow = new Ext.Window({
+            title: '<span class="panel-title">'+i18n_preview+': ' + record.get("title") + '</span>',
+            width: screen.width * 0.4,
+            height: screen.height * 0.4,
+            layout: 'fit',
+            items: [{
+                xtype: 'gx_mappanel',
+                layers: [layer],
+                extent: record.get('llbbox')
+            }]
+        });
+        wmsOverlayPreviewWindow.show();
+    }
 	
 	var wmsOverlayGrid = new Ext.grid.GridPanel({
 		id: 'wmsoverlay_g',
@@ -1408,24 +1429,6 @@
             'rowdblclick': mapOverlayPreview
         }
     });
-    
-    function mapOverlayPreview(grid, index) {
-        var record = grid.getStore().getAt(index);
-        var layer = record.get('layer').clone();
-        
-        var wmsOverlayPreviewWindow = new Ext.Window({
-            title: '<span class="panel-title">'+i18n_preview+': ' + record.get("title") + '</span>',
-            width: screen.width * 0.4,
-            height: screen.height * 0.4,
-            layout: 'fit',
-            items: [{
-                xtype: 'gx_mappanel',
-                layers: [layer],
-                extent: record.get('llbbox')
-            }]
-        });
-        wmsOverlayPreviewWindow.show();
-    }
 	
 	var wmsOverlayWindow = new Ext.Window({
 		id: 'wmsoverlay_w',
@@ -1493,7 +1496,7 @@
     var deleteMapLayerButton = new Ext.Button({
         id: 'deletemaplayer_b',
         text: i18n_delete_overlay,
- 		cls: 'window-button',
+        cls: 'window-button',
         handler: function() {
             var ml = Ext.getCmp('maplayer_cb').getValue();
             var mln = Ext.getCmp('maplayer_cb').getRawValue();
@@ -1630,10 +1633,10 @@
                     tabchange: function(panel, tab)
                     {
                         if (tab.id == 'overlay0') {
-							Ext.getCmp('overlays_w').setHeight(395);                        
+							Ext.getCmp('overlays_w').setHeight(390);                        
                         }
                         else if (tab.id == 'overlay1') {
-							Ext.getCmp('overlays_w').setHeight(151);
+							Ext.getCmp('overlays_w').setHeight(150);
                         }
                     }
                 },
@@ -1655,14 +1658,8 @@
 		listeners: {
 			show: {
 				fn: function() {
-					if (GLOBAL.vars.mapSourceType.isGeojson() || GLOBAL.vars.mapSourceType.isDatabase()) {
-						mapLayerMapSourceFileComboBox.show();
-						mapLayerPathWMSOverlayTextField.hide();
-					}
-					else if (GLOBAL.vars.mapSourceType.isShapefile()) {
-						mapLayerMapSourceFileComboBox.hide();
-						mapLayerPathWMSOverlayTextField.show();
-					}
+                    mapLayerMapSourceFileComboBox.show();
+                    mapLayerPathWMSOverlayTextField.hide();
 				}
 			}
 		}
@@ -1678,7 +1675,7 @@
     var deleteMapLayerBaseLayersButton = new Ext.Button({
         id: 'deletemaplayerbaselayers_b',
         text: i18n_delete_baselayer,
- 		cls: 'window-button',
+        cls: 'window-button',
         handler: function() {
             var ml = Ext.getCmp('maplayerbaselayers_cb').getValue();
             var mln = Ext.getCmp('maplayerbaselayers_cb').getRawValue();
@@ -1908,7 +1905,7 @@
         })
     });
     
-    var proportionalSymbolLayer = new OpenLayers.Layer.Vector('Point layer', {
+    var symbolLayer = new OpenLayers.Layer.Vector('Point layer', {
         'visibility': false,
         'displayInLayerSwitcher': false,
         'styleMap': new OpenLayers.StyleMap({
@@ -1924,7 +1921,7 @@
         })
     });
     
-    GLOBAL.vars.map.addLayers([choroplethLayer, proportionalSymbolLayer]);
+    GLOBAL.vars.map.addLayers([choroplethLayer, symbolLayer]);
         
     /* Section: layer options */
     function showWMSLayerOptions(layer) {
@@ -2385,7 +2382,7 @@
     symbol = new mapfish.widgets.geostat.Symbol({
         id: 'symbol',
         map: GLOBAL.vars.map,
-        layer: proportionalSymbolLayer,
+        layer: symbolLayer,
 		title: '<span class="panel-title">' + i18n_point_layer + '</span>',
         featureSelection: false,
         legendDiv: 'pointlegend',
@@ -2553,7 +2550,7 @@
 		icon: '../../images/exit.png',
 		tooltip: i18n_return_to_DHIS_2_dashboard,
 		handler: function() {
-			window.location.href = '../../dhis-web-portal/redirect.action'
+			window.location.href = '../../dhis-web-portal/redirect.action';
 		}
 	});
 	
