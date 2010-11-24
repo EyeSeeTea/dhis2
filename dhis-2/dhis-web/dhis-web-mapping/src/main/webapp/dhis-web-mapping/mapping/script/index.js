@@ -499,11 +499,11 @@
 						success: function(r) {
 							Ext.message.msg(true, i18n_favorite + ' <span class="x-msg-hl">' + name + '</span> ' + i18n_deleted);
                             GLOBAL.stores.mapView.load();
-                            if (v == Ext.getCmp('mapview_cb').getValue()) {
-                                Ext.getCmp('mapview_cb').clearValue();
+                            if (v == choropleth.form.findField('mapview').getValue()) {
+                                choropleth.form.findField('mapview').clearValue();
                             }
-                            if (v == Ext.getCmp('mapview_cb2').getValue()) {
-                                Ext.getCmp('mapview_cb2').clearValue();
+                            if (v == proportionalSymbol.form.findField('mapview').getValue()) {
+                                proportionalSymbol.form.findField('mapview').clearValue();
                             }
 						}
 					});
@@ -659,8 +659,8 @@
                     var vcb, period;
                     if (GLOBAL.vars.activePanel.isPolygon()) {
                         if (choropleth.formValidation.validateForm()) {
-                            vcb = Ext.getCmp('mapvaluetype_cb').getValue() == GLOBAL.conf.map_value_type_indicator ? Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
-                            period = GLOBAL.vars.mapDateType.isFixed() ? Ext.getCmp('period_cb').getRawValue() : new Date(Ext.getCmp('startdate_df').getRawValue()).format('Y M j') + ' - ' + new Date(Ext.getCmp('enddate_df').getRawValue()).format('Y M j');
+                            vcb = choropleth.form.findField('mapvaluetype').getValue() == GLOBAL.conf.map_value_type_indicator ? choropleth.form.findField('indicator').getValue() : choropleth.form.findField('dataelement').getValue();
+                            period = GLOBAL.vars.mapDateType.isFixed() ? choropleth.form.findField('period').getRawValue() : new Date(choropleth.form.findField('startdate').getRawValue()).format('Y M j') + ' - ' + new Date(choropleth.form.findField('enddate').getRawValue()).format('Y M j');
                     
                             var svgElement = document.getElementsByTagName('svg')[0];
                             var parentSvgElement = svgElement.parentNode;                            

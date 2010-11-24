@@ -161,6 +161,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             id: 'mapview_cb2',
+            name: 'mapview',
             fieldLabel: i18n_favorite,
             typeAhead: true,
             editable: false,

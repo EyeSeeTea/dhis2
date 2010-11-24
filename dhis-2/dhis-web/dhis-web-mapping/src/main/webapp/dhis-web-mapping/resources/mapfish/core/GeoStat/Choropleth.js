@@ -53,7 +53,7 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
     createColorInterpolation: function() {
         var initialColors = this.colors;
         var numColors = this.classification.bins.length;
-		var mapLegendType = Ext.getCmp('maplegendtype_cb').getValue();
+		var mapLegendType = choropleth.form.findField('maplegendtype').getValue();
         
         if (mapLegendType == GLOBAL.conf.map_legend_type_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(initialColors[0], initialColors[1], numColors);

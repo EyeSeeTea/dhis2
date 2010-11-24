@@ -215,7 +215,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.items = [
         {
             xtype: 'combo',
-            id: 'mapview_cb',
             name: 'mapview',
             fieldLabel: i18n_favorite,
             typeAhead: true,
@@ -256,7 +255,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-			id: 'mapvaluetype_cb',
             name: 'mapvaluetype',
             fieldLabel: i18n_mapvaluetype,
 			labelSeparator: GLOBAL.conf.labelseparator,
@@ -288,7 +286,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'indicatorgroup_cb',
             name: 'indicatorgroup',
             fieldLabel: i18n_indicator_group,
             typeAhead: true,
@@ -317,7 +314,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'indicator_cb',
             name: 'indicator',
             fieldLabel: i18n_indicator ,
             typeAhead: true,
@@ -383,7 +379,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            id: 'dataelementgroup_cb',
             name: 'dataelementgroup',
             fieldLabel: i18n_dataelement_group,
             typeAhead: true,
@@ -412,7 +407,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'dataelement_cb',
             name: 'dataelement',
             fieldLabel: i18n_dataelement,
             typeAhead: true,
@@ -477,7 +471,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'periodtype_cb',
             name: 'periodtype',
             fieldLabel: i18n_period_type,
             typeAhead: true,
@@ -505,7 +498,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'combo',
-            id: 'period_cb',
             name: 'period',
             fieldLabel: i18n_period,
             typeAhead: true,
@@ -539,7 +531,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'datefield',
-            id: 'startdate_df',
             name: 'startdate',
             fieldLabel: i18n_start_date,
             format: 'Y-m-d',
@@ -562,7 +553,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'datefield',
-            id: 'enddate_df',
             name: 'enddate',
             fieldLabel: i18n_end_date,
             format: 'Y-m-d',
@@ -587,7 +577,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'textfield',
-            id: 'boundary_tf',
             name: 'boundary',
             fieldLabel: i18n_boundary,
             typeAhead: true,
@@ -611,7 +600,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         function showTree() {
                             var value, rawvalue;
                             var w = new Ext.Window({
-                                id: 'orgunit_w',
+                                id: 'tree_w',
                                 title: 'Boundary and level',
                                 closeAction: 'hide',
                                 autoScroll: true,
@@ -627,14 +616,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         items: [
                                             {
                                                 xtype: 'fieldset',
-                                                id: 'boundary_fs',
                                                 title: '&nbsp;&nbsp;<span class="panel-tab-title">Boundary</span>&nbsp;&nbsp;',
                                                 bodyStyle: 'margin-bottom:3px',
                                                 autoHeight: true,
                                                 items: [
                                                     {
                                                         xtype: 'treepanel',
-                                                        id: 'orgunit_tp',
                                                         height: screen.height / 3,
                                                         autoScroll: true,
                                                         loader: new Ext.tree.TreeLoader({
@@ -717,7 +704,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                     if (!node || !Ext.getCmp('level_cb').getValue()) {
                                                         return;
                                                     }
-                                                    if (node.attributes.level > Ext.getCmp('level_tf').level) {
+                                                    if (node.attributes.level > this.form.findField('level').level) {
                                                         Ext.message.msg(false, 'Level is higher than boundary level');
                                                         return;
                                                     }
@@ -729,7 +716,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                         
                                                     this.form.findField('boundary').setValue(node.attributes.text);
                                                     this.form.findField('level').setValue(this.form.findField('level').levelName);
-                                                    Ext.getCmp('orgunit_w').hide();
+                                                    Ext.getCmp('tree_w').hide();
                                                     
                                                     this.loadGeoJson();
                                                 }
@@ -738,8 +725,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                 xtype: 'button',
                                                 text: i18n_cancel,
                                                 width: 133,
+                                                scope: this,
                                                 handler: function() {
-                                                    Ext.getCmp('orgunit_w').hide();
+                                                    Ext.getCmp('tree_w').hide();
                                                 }
                                             }
                                         ]
@@ -780,7 +768,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'textfield',
-            id: 'level_tf',
             name: 'level',
             disabled: true,
             disabledClass: 'combo-disabled',
@@ -797,7 +784,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            id: 'maplegendtype_cb',
             name: 'maplegendtype',
             editable: false,
             valueField: 'value',
@@ -840,7 +826,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 		
 		{
             xtype: 'combo',
-            id: 'maplegendset_cb',
             name: 'maplegendset',
             editable: false,
             valueField: 'id',
@@ -866,9 +851,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'combo',
-            fieldLabel: i18n_method,
-            id: 'method_cb',
             name: 'method',
+            fieldLabel: i18n_method,
             editable: false,
             valueField: 'value',
             displayField: 'text',
@@ -907,7 +891,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'textfield',
-            id: 'bounds_tf',
             name: 'bounds',
             fieldLabel: i18n_bounds,
 			labelSeparator: GLOBAL.conf.labelseparator,
@@ -919,7 +902,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'combo',
-            id: 'classes_cb',
             name: 'classes',
             fieldLabel: i18n_classes,
 			labelSeparator: GLOBAL.conf.labelseparator,
@@ -951,7 +933,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
         {
             xtype: 'colorfield',
-            id: 'startcolor_cf',
             name: 'startcolor',
             fieldLabel: i18n_low_color,
 			labelSeparator: GLOBAL.conf.labelseparator,
@@ -963,7 +944,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         {
             xtype: 'colorfield',
-            id: 'endcolor_cf',
             name: 'endcolor',
             fieldLabel: i18n_high_color,
 			labelSeparator: GLOBAL.conf.labelseparator,
