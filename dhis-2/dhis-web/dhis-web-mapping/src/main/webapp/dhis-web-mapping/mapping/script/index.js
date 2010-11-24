@@ -2420,7 +2420,7 @@
 	var zoomInButton = new Ext.Button({
 		iconCls: 'icon-zoomin',
 		tooltip: i18n_zoom_in,
-		handler:function() {
+		handler: function() {
 			GLOBAL.vars.map.zoomIn();
 		}
 	});
