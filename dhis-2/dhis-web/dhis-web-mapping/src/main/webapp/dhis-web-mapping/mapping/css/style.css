@@ -254,10 +254,12 @@
     margin-bottom:4px;
 }
 
-#level_tf {
+/* Ext ComboBox */
+.combo-disabled {
     opacity:0.75;
     color:#000000;
     border-color:#9ca1b8;
+    cursor: default;
 }
 
 /* Ext Loading Mask */

@@ -762,7 +762,7 @@
                             Ext.getCmp('indicator_cb').getValue() : Ext.getCmp('dataelement_cb').getValue();
                         period = Ext.getCmp('period_cb').getValue();
                         mapOrOrganisationUnit = GLOBALS.vars.mapSourceType.isDatabase() ?
-                            Ext.getCmp('map_tf').getValue() : Ext.getCmp('map_cb').getValue();
+                            Ext.getCmp('boundary_tf').getValue() : Ext.getCmp('map_cb').getValue();
                     }
                     else if (GLOBALS.vars.activePanel.isPoint()) {
                         indicatorOrDataElement = Ext.getCmp('mapvaluetype_cb2').getValue() == GLOBALS.conf.map_value_type_indicator ?
