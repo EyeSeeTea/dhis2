@@ -4,7 +4,7 @@
 {
   "id": ${unit.id},
   "level": ${unit.level},
-  "text": "$encoder.jsEncode( ${unit.name} )",
+  "text": "$encoder.jsonEncode( ${unit.name} )",
   "hasChildrenWithCoordinates": $!{unit.hasChildrenWithCoordinates()},
 #if( $unit.hasChild() )
   "children": [
@@ -14,7 +14,7 @@
   {
     "id": ${child.id},
     "level": ${level},
-    "text": "$encoder.jsEncode( ${child.name} )",
+    "text": "$encoder.jsonEncode( ${child.name} )",
     "hasChildrenWithCoordinates": $!{child.hasChildrenWithCoordinates()}#if( !$child.hasChild() ),
     "leaf": true
 #end
