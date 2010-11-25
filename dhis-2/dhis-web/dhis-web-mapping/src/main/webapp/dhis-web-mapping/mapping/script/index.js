@@ -215,6 +215,7 @@
         listeners: {
             'load': function(store) {
                 store.isLoaded = true;
+                // Ext.getCmp('level_cb').mode = 'local';
             }
         }
     });

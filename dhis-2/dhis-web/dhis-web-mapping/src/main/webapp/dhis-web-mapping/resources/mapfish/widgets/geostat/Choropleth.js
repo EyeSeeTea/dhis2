@@ -305,7 +305,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     fn: function(cb) {
 						this.form.findField('indicator').clearValue();
-                        GLOBAL.stores.indicatorsByGroup.setBaseParam('indicatorGroupId', cb.getValue());
+                        GLOBAL.stores.indicatorsByGroup.setBaseParam('id', cb.getValue());
                         GLOBAL.stores.indicatorsByGroup.load();
                     }
                 }
@@ -680,8 +680,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                             'select': {
                                                                 scope: this,
                                                                 fn: function(cb) {
-                                                                    this.form.findField('level').level = cb.getValue();
-                                                                    this.form.findField('level').levelName = cb.getRawValue();
+                                                                    // this.form.findField('level').level = cb.getValue();
+                                                                    // this.form.findField('level').levelName = cb.getRawValue();
                                                                 }
                                                             }
                                                         }
@@ -704,7 +704,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                     if (!node || !Ext.getCmp('level_cb').getValue()) {
                                                         return;
                                                     }
-                                                    if (node.attributes.level > this.form.findField('level').level) {
+                                                    if (node.attributes.level > Ext.getCmp('level_cb').getValue()) {
                                                         Ext.message.msg(false, 'Level is higher than boundary level');
                                                         return;
                                                     }
@@ -712,10 +712,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                     this.form.findField('mapview').clearValue();
                                                     this.updateValues = true;
                                                     this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
-                                                        this.form.findField('level').level, this.form.findField('level').levelName);
+                                                        Ext.getCmp('level_cb').getValue(), Ext.getCmp('level_cb').getRawValue());
                                                         
                                                     this.form.findField('boundary').setValue(node.attributes.text);
-                                                    this.form.findField('level').setValue(this.form.findField('level').levelName);
+                                                    this.form.findField('level').setValue(Ext.getCmp('level_cb').getRawValue());
                                                     Ext.getCmp('tree_w').hide();
                                                     
                                                     this.loadGeoJson();
@@ -1238,6 +1238,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
             this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
         
+        GLOBAL.stores.organisationUnitLevel.load();
         this.form.findField('boundary').setValue(this.mapView.parentOrganisationUnitName);
         this.form.findField('level').setValue(this.mapView.organisationUnitLevelName);
         this.loadGeoJson();

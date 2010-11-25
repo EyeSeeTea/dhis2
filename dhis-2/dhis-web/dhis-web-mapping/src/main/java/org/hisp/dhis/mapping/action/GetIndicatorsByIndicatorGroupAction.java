@@ -76,11 +76,11 @@ public class GetIndicatorsByIndicatorGroupAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer indicatorGroupId;
+    private Integer id;
 
-    public void setIndicatorGroupId( Integer indicatorGroupId )
+    public void setIndicatorGroupId( Integer id )
     {
-        this.indicatorGroupId = indicatorGroupId;
+        this.id = id;
     }
     
     // -------------------------------------------------------------------------
@@ -101,17 +101,22 @@ public class GetIndicatorsByIndicatorGroupAction
     public String execute()
         throws Exception
     {
-        IndicatorGroup group = indicatorService.getIndicatorGroup( indicatorGroupId );
-        
-        if ( group != null )
+        if ( id != null )
         {
-            object = new ArrayList<Indicator>( group.getMembers() );
-
-            Collections.sort( object, indicatorComparator );
+            IndicatorGroup group = indicatorService.getIndicatorGroup( id );
             
-            displayPropertyHandler.handle( object );
+            if ( group != null )
+            {
+                object = new ArrayList<Indicator>( group.getMembers() );
+    
+                Collections.sort( object, indicatorComparator );
+                
+                displayPropertyHandler.handle( object );
+                
+                return SUCCESS;
+            }
         }
         
-        return SUCCESS;
+        return NONE;
     }
 }
