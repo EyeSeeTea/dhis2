@@ -78,7 +78,7 @@ public class GetIndicatorsByIndicatorGroupAction
 
     private Integer id;
 
-    public void setIndicatorGroupId( Integer id )
+    public void setId( Integer id )
     {
         this.id = id;
     }
