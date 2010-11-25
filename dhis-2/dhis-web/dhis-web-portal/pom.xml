@@ -138,9 +138,10 @@
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
+
 	
 	<!-- India modules -->
-    
+    <!--
     
     <dependency>
       <groupId>org.hisp.dhis</groupId>
@@ -176,6 +177,7 @@
       <version>${version}</version>
       <type>war</type>
     </dependency>
+	-->
 	
     <!-- Vietnam modules -->
     <!--
@@ -207,6 +209,7 @@
       <type>war</type>
     </dependency>
     -->
+
     
   </dependencies>
   <properties>

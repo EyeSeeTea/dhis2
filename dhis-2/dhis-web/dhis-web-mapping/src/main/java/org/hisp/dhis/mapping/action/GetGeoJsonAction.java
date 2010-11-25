@@ -97,11 +97,6 @@ public class GetGeoJsonAction
         
         FilterUtils.filter( object, new OrganisationUnitWithCoordinatesFilter() );
         
-        for ( OrganisationUnit unit : object )
-        {
-            unit.setName( unit.getName().replaceAll( "'", "" ) );
-        }
-        
         return object.iterator().next().getFeatureType();
     }
 }
