@@ -25,67 +25,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.caseaggregation;
+package org.hisp.dhis.patient.action.caseaggregation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
+import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
+import org.hisp.dhis.caseaggregation.CaseAggregationConditionService;
 
 import com.opensymphony.xwork2.Action;
 
-public class CaseAggregationFormAction
+/**
+ * @author Chau Thu Tran
+ * 
+ * @version RemoveCaseAggregationConditionAction.java Nov 18, 2010 10:42:01 AM
+ */
+public class RemoveCaseAggregationConditionAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private DataSetService dataSetService;
+    private CaseAggregationConditionService aggregationConditionService;
 
-    public void setDataSetService( DataSetService dataSetService )
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private int id;
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    public void setAggregationConditionService( CaseAggregationConditionService aggregationConditionService )
     {
-        this.dataSetService = dataSetService;
+        this.aggregationConditionService = aggregationConditionService;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Implementation Action
     // -------------------------------------------------------------------------
 
-    private List<DataSet> datasets;
-
-    public List<DataSet> getDatasets()
-    {
-        return datasets;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
+    @Override
     public String execute()
         throws Exception
     {
+        CaseAggregationCondition condition = aggregationConditionService.getCaseAggregationCondition( id );
 
-        datasets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
-
-        Iterator<DataSet> dataSetListIterator = datasets.iterator();
-
-        while ( dataSetListIterator.hasNext() )
-        {
-            DataSet d = (DataSet) dataSetListIterator.next();
-
-            if ( d.getSources().size() <= 0 )
-
-                dataSetListIterator.remove();
-        }
-
-        Collections.sort( datasets, new DataSetNameComparator() );
+        aggregationConditionService.deleteCaseAggregationCondition( condition );
 
         return SUCCESS;
     }
+
 }
