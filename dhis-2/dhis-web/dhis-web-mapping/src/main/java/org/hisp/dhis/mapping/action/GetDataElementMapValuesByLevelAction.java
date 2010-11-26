@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.system.util.DateUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -38,51 +39,58 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class GetIndicatorMapValuesByMapAndFeatureIdAction
+public class GetDataElementMapValuesByLevelAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private MappingService mappingService;
 
     public void setMappingService( MappingService mappingService )
     {
         this.mappingService = mappingService;
     }
-
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private int indicatorId;
+    private Integer id;
 
-    public void setIndicatorId( int indicatorId )
+    public void setId( Integer id )
     {
-        this.indicatorId = indicatorId;
+        this.id = id;
     }
 
-    private Collection<Integer> periodIds;
+    private Integer periodId;
 
-    public void setPeriodIds( Collection<Integer> periodIds )
+    public void setPeriodId( Integer periodId )
     {
-        this.periodIds = periodIds;
+        this.periodId = periodId;
     }
 
-    private String mapLayerPath;
-
-    public void setMapLayerPath( String mapLayerPath )
-    {
-        this.mapLayerPath = mapLayerPath;
-    }
+    private String startDate;
     
-    private String featureId;
-
-    public void setFeatureId( String featureId )
+    public void setStartDate( String startDate )
     {
-        this.featureId = featureId;
+        this.startDate = startDate;
     }
+
+    private String endDate;
+
+    public void setEndDate( String endDate )
+    {
+        this.endDate = endDate;
+    }
+
+    private Integer level;
+
+    public void setLevel( Integer level )
+    {
+        this.level = level;
+    }    
 
     // -------------------------------------------------------------------------
     // Input
@@ -98,12 +106,19 @@ public class GetIndicatorMapValuesByMapAndFeatureIdAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
     {
-        object = mappingService.getAggregatedIndicatorMapValues( indicatorId, periodIds, mapLayerPath, featureId );
-
+        if ( periodId != null ) // Period
+        {
+            object = mappingService.getDataElementMapValues( id, periodId, level );
+        }
+        else // Start and end date
+        {
+            object = mappingService.getDataElementMapValues( id, DateUtils.getMediumDate( startDate ), DateUtils.getMediumDate( endDate ), level );
+        }
+        
         return SUCCESS;
     }
 }

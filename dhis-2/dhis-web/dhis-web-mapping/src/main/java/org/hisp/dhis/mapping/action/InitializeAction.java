@@ -27,7 +27,17 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.mapping.MappingService.KEY_MAP_DATE_TYPE;
+import static org.hisp.dhis.mapping.MappingService.MAP_DATE_TYPE_FIXED;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -35,7 +45,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class AddMapOrganisationUnitRelationAction
+public class InitializeAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -49,31 +59,42 @@ public class AddMapOrganisationUnitRelationAction
         this.mappingService = mappingService;
     }
 
+    private UserSettingService userSettingService;
+
+    public void setUserSettingService( UserSettingService userSettingService )
+    {
+        this.userSettingService = userSettingService;
+    }
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String mapLayerPath;
+    private Integer id;
 
-    public void setMapLayerPath( String mapLayerPath )
+    public void setId( Integer id )
     {
-        this.mapLayerPath = mapLayerPath;
+        this.id = id;
     }
 
-    private int organisationUnitId;
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    public void setOrganisationUnitId( int organisationUnitId )
+    private MapView mapView;
+
+    public MapView getMapView()
     {
-        this.organisationUnitId = organisationUnitId;
+        return mapView;
     }
 
-    private String featureId;
+    private String mapDateType;
 
-    public void setFeatureId( String featureId )
+    public String getMapDateType()
     {
-        this.featureId = featureId;
+        return mapDateType;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -81,8 +102,18 @@ public class AddMapOrganisationUnitRelationAction
     public String execute()
         throws Exception
     {
-        mappingService.addMapOrganisationUnitRelation( mapLayerPath, organisationUnitId, featureId );
-        
+        if ( id == null )
+        {
+            mapDateType = (String) userSettingService.getUserSetting( KEY_MAP_DATE_TYPE, MAP_DATE_TYPE_FIXED );
+        }
+
+        else
+        {
+            mapView = mappingService.getMapView( id );
+            
+            mapDateType = mapView.getMapDateType();
+        }
+
         return SUCCESS;
     }
 }
