@@ -7,11 +7,11 @@
 	GLOBAL.vars.map = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
 	GLOBAL.vars.mask = new Ext.LoadMask(Ext.getBody(),{msg:i18n_loading,msgCls:'x-mask-loading2'});
     GLOBAL.vars.parameter = GLOBAL.util.getUrlParam('view') ? {id: GLOBAL.util.getUrlParam('view')} : false;
-    
+
     Ext.Ajax.request({
         url: GLOBAL.conf.path_mapping + 'initialize' + GLOBAL.conf.type,
         method: 'POST',
-        params: GLOBAL.vars.parameter.id || null,
+        params: {id: GLOBAL.vars.parameter.id || null},
         success: function(r) {
             var init = Ext.util.JSON.decode(r.responseText);
             if (GLOBAL.vars.parameter) {
@@ -554,7 +554,7 @@
         title: '<span id="window-favorites-title">' + i18n_favorite + '</span>',
 		layout: 'fit',
         closeAction: 'hide',
-		width: 234,
+		width: 223,
         items:
         [
             {
@@ -825,15 +825,19 @@
             {
                 xtype: 'button',
                 id: 'newpredefinedmaplegend_b',
-				isFormField: true,
 				hideLabel: true,
                 text: i18n_register,
 				cls: 'window-button',
                 handler: function() {
                     var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
-					var mlsv = Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue();
-					var mlev = Ext.getCmp('predefinedmaplegendendvalue_tf').getValue();
+					var mlsv = parseFloat(Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue());
+					var mlev = parseFloat(Ext.getCmp('predefinedmaplegendendvalue_tf').getValue());
                     var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
+                    
+                    if (!Ext.isNumber(parseFloat(mlsv)) || !Ext.isNumber(mlev)) {
+                        Ext.message.msg(false, 'Input invalid');
+                        return;
+                    }
 					
 					if (!mln || !mlsv || !mlev || !mlc) {
                         Ext.message.msg(false, i18n_form_is_not_complete);
@@ -842,11 +846,6 @@
                     
                     if (!GLOBAL.util.validateInputNameLength(mln)) {
                         Ext.message.msg(false, i18n_name_can_not_longer_than_25);
-                        return;
-                    }
-                    
-                    if (!Ext.isNumber(mlsv) || !Ext.isNumber(mlev)) {
-                        Ext.message.msg(false, 'Input invalid');
                         return;
                     }
                     
@@ -1120,7 +1119,7 @@
                         method: 'POST',
                         params: {id: ls},
                         success: function(r) {
-                            Ext.message.msg(true, i18n_legend_set+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
+                            Ext.message.msg(true, i18n_legendset+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             GLOBAL.stores.predefinedMapLegendSet.load();
                         }
                     });
@@ -1207,7 +1206,7 @@
                         method: 'POST',
                         params: {id: ls},
                         success: function(r) {
-                            Ext.message.msg(true, i18n_legend_set+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
+                            Ext.message.msg(true, i18n_legendset+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
                             GLOBAL.stores.predefinedMapLegendSet.load();
                         }
                     });
@@ -1555,7 +1554,7 @@
 						return;
 					}
 					
-					if (GLOBAL.util.validateInputNameLength(mln) == false) {
+					if (GLOBAL.util.validateInputNameLength(mln)) {
 						Ext.message.msg(false, i18n_overlay_name_cannot_be_longer_than_25_characters);
 						return;
 					}
@@ -1730,7 +1729,7 @@
 						return;
 					}
 					
-					if (GLOBAL.util.validateInputNameLength(mlbn) == false) {
+					if (GLOBAL.util.validateInputNameLength(mlbn)) {
 						Ext.message.msg(false, i18n_baselayer_name_cannot_be_longer_than_25_characters);
 						return;
 					}
@@ -1851,27 +1850,19 @@
                             ]
                         }),
                         listeners: {
-                            'select': {
-                                fn: function(cb) {
-                                    if (cb.getValue() != GLOBAL.vars.mapDateType.value) {
-                                        if (cb.getValue() == GLOBAL.conf.map_date_type_start_end && GLOBAL.vars.mapSourceType.value != GLOBAL.conf.map_source_type_database) {
-                                            cb.setValue(GLOBAL.conf.map_date_type_fixed);
-                                            Ext.message.msg(false, 'Start-end dates require map source <span class="x-msg-hl">' + GLOBAL.conf.map_source_type_database + '</span>');
-                                            return;
+                            'select': function(cb) {
+                                if (cb.getValue() != GLOBAL.vars.mapDateType.value) {
+                                    GLOBAL.vars.mapDateType.value = cb.getValue();
+                                    Ext.Ajax.request({
+                                        url: GLOBAL.conf.path_mapping + 'setMapUserSettings' + GLOBAL.conf.type,
+                                        method: 'POST',
+                                        params: {mapDateType: GLOBAL.vars.mapDateType.value},
+                                        success: function() {
+                                            Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_saved_as_date_type);
+                                            choropleth.prepareMapViewDateType();
+                                            symbol.prepareMapViewDateType();
                                         }
-
-                                        GLOBAL.vars.mapDateType.value = cb.getValue();
-                                        Ext.Ajax.request({
-                                            url: GLOBAL.conf.path_mapping + 'setMapUserSettings' + GLOBAL.conf.type,
-                                            method: 'POST',
-                                            params: {mapSourceType: GLOBAL.vars.mapSourceType.value, mapDateType: GLOBAL.vars.mapDateType.value},
-                                            success: function() {
-                                                Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+i18n_saved_as_date_type);
-                                                choropleth.prepareMapViewDateType();
-                                                symbol.prepareMapViewDateType();
-                                            }
-                                        });
-                                    }
+                                    });
                                 }
                             }
                         }
@@ -2362,20 +2353,8 @@
         legendDiv: 'polygonlegend',
         defaults: {width: 130},
         listeners: {
-            'expand': {
-                fn: function() {
-                    if (GLOBAL.vars.activePanel.value != GLOBAL.conf.thematicMap) {
-                        GLOBAL.vars.activePanel.setPolygon();
-                        this.layer.setVisibility(true);
-                        
-                        if (this.legend.type == GLOBAL.conf.map_legend_type_predefined) {
-                            this.applyPredefinedLegend();
-                        }
-                        else {
-                            this.classify(false, true);
-                        }
-                    }
-                }
+            'expand': function() {
+                GLOBAL.vars.activePanel.setPolygon();
             }
         }
     });
@@ -2389,20 +2368,8 @@
         legendDiv: 'pointlegend',
         defaults: {width: 130},
         listeners: {
-            'expand': {
-                fn: function() {
-                    if (GLOBAL.vars.activePanel.value != GLOBAL.conf.thematicMap2) {
-                        GLOBAL.vars.activePanel.setPoint();
-                        this.layer.setVisibility(false);
-                        
-                        if (this.legend.type == GLOBAL.conf.map_legend_type_predefined) {
-                            this.applyPredefinedLegend();
-                        }
-                        else {
-                            this.classify(false, true);
-                        }
-                    }
-                }
+            'expand': function() {
+                GLOBAL.vars.activePanel.setPoint();
             }
         }
     });
@@ -2439,16 +2406,10 @@
                 if (choropleth.layer.getDataExtent()) {
                     GLOBAL.vars.map.zoomToExtent(choropleth.layer.getDataExtent());
                 }
-                else {
-                    Ext.message.msg(false, 'Vector layer is empty');
-                }
             }
             else if (GLOBAL.vars.activePanel.isPoint()) {
                 if (symbol.layer.getDataExtent()) {
                     GLOBAL.vars.map.zoomToExtent(symbol.layer.getDataExtent());
-                }
-                else {
-                    Ext.message.msg(false, 'Vector layer is empty');
                 }
             }
         }

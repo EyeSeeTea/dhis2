@@ -151,29 +151,9 @@ mapfish.GeoStat = OpenLayers.Class({
         this.layer.setVisibility(true);
     },
 
-    showDetails: function(obj) {
-        var feature = obj.feature;
-        var html = typeof this.nameAttribute == 'string' ?
-            '<h4 style="margin-top:5px">'
-                + feature.attributes[this.nameAttribute] +'</h4>' : '';
-        html += this.indicator + ": " + feature.attributes[this.indicator];
-        var bounds = this.layer.map.getExtent();
-        var lonlat = new OpenLayers.LonLat(bounds.right, bounds.bottom);
-        var size = new OpenLayers.Size(200, 100);
-        var popup = new OpenLayers.Popup.AnchoredBubble(
-            feature.attributes[this.nameAttribute],
-            lonlat, size, html, 0.5, false);
-        var symbolizer = feature.layer.styleMap.createSymbolizer(feature, 'default');
-        popup.setBackgroundColor(symbolizer.fillColor);
-        this.layer.map.addPopup(popup);
-    },
+    showDetails: function(obj) {},
 
-    hideDetails: function(obj) {
-        var map= this.layer.map;
-        for (var i = map.popups.length - 1; i >= 0; --i) {
-            map.removePopup(map.popups[i]);
-        }
-    },
+    hideDetails: function(obj) {},
 
     CLASS_NAME: "mapfish.GeoStat"
 });
@@ -181,7 +161,7 @@ mapfish.GeoStat = OpenLayers.Class({
 mapfish.GeoStat.Distribution = OpenLayers.Class({
 
     labelGenerator: function(bin, binIndex, nbBins, maxDec) {
-        return this.defaultLabelGenerator(bin, binIndex, nbBins, maxDec)
+        return this.defaultLabelGenerator(bin, binIndex, nbBins, maxDec);
     },
 
     values: null,
@@ -216,16 +196,16 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         sortedValues.sort(function(a,b) {return a-b;});
         var nbBins = bounds.length - 1;
 
-        for (var i = 0; i < nbBins; i++) {
-            binCount[i] = 0;
+        for (var j = 0; j < nbBins; j++) {
+            binCount[j] = 0;
         }
 
-        for (var i = 0; i < nbBins - 1; i) {
-            if (sortedValues[0] < bounds[i + 1]) {
-                binCount[i] = binCount[i] + 1;
+        for (var k = 0; k < nbBins - 1; k) {
+            if (sortedValues[0] < bounds[k + 1]) {
+                binCount[k] = binCount[k] + 1;
                 sortedValues.shift();
             } else {
-                i++;
+                k++;
             }
         }
 
@@ -234,19 +214,19 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 		var imageLegend = [];
         var maxDec = 0;
         
-        for (var i = 0; i < bounds.length; i++) {
-            var dec = GLOBAL.util.getNumberOfDecimals(bounds[i].toString(), ".");
+        for (var l = 0; l < bounds.length; l++) {
+            var dec = GLOBAL.util.getNumberOfDecimals(bounds[l].toString(), ".");
             maxDec = dec > maxDec ? dec : maxDec;
         }
         
         maxDec = maxDec > 3 ? 3 : maxDec;
 		
-        for (var i = 0; i < nbBins; i++) {
-            bins[i] = new mapfish.GeoStat.Bin(binCount[i], bounds[i], bounds[i + 1], i == (nbBins - 1));
+        for (var m = 0; m < nbBins; m++) {
+            bins[m] = new mapfish.GeoStat.Bin(binCount[m], bounds[m], bounds[m + 1], m == (nbBins - 1));
             var labelGenerator = this.labelGenerator || this.defaultLabelGenerator;
-            bins[i].label = labelGenerator(bins[i], i, nbBins, maxDec);
-			imageLegend[i] = {};
-			imageLegend[i].label = bins[i].label.replace('&nbsp;&nbsp;', ' ');
+            bins[m].label = labelGenerator(bins[m], m, nbBins, maxDec);
+			imageLegend[m] = {};
+			imageLegend[m].label = bins[m].label.replace('&nbsp;&nbsp;', ' ');
         }
         
         if (GLOBAL.vars.activePanel.isPolygon()) {
@@ -275,7 +255,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         var binSize = Math.round(this.values.length / nbBins);
 
         var bounds = [];
-        var binLastValPos = (binSize == 0) ? 0 : binSize;
+        var binLastValPos = (binSize === 0) ? 0 : binSize;
 
         if (values.length > 0) {
             bounds[0] = values[0];
@@ -286,8 +266,8 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
             bounds.push(values[values.length - 1]);
         }
         
-        for (var i = 0; i < bounds.length; i++) {
-            bounds[i] = parseFloat(bounds[i]);
+        for (var j = 0; j < bounds.length; j++) {
+            bounds[j] = parseFloat(bounds[j]);
         }
 
         return this.classifyWithBounds(bounds);
@@ -314,13 +294,13 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 					str = str.substring(0, str.length-1);
 				}
 				
-				bounds = new Array();
+				bounds = [];
 				bounds = str.split(',');
 				
-				for (var i = 0; i < bounds.length; i++) {
-					if (!Ext.num(parseFloat(bounds[i]), false)) {
-						bounds.remove(bounds[i]);
-						i--;
+				for (var j = 0; j < bounds.length; j++) {
+					if (!Ext.num(parseFloat(bounds[j]), false)) {
+						bounds.remove(bounds[j]);
+						j--;
 					}
 				}
 				
@@ -333,9 +313,9 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                     Ext.getCmp('bounds_tf2').setValue(newInput);
                 }
 				
-				for (var i = 0; i < bounds.length; i++) {
-					bounds[i] = parseFloat(bounds[i]);
-					if (bounds[i] < this.minVal || bounds[i] > this.maxVal) {
+				for (var k = 0; k < bounds.length; k++) {
+					bounds[k] = parseFloat(bounds[k]);
+					if (bounds[k] < this.minVal || bounds[k] > this.maxVal) {
 						Ext.message.msg(false, 'Class breaks must be higher than <span class="x-msg-hl">' + this.minVal + '</span> and lower than <span class="x-msg-hl">' + this.maxVal + '</span>.');
 					}
 				}

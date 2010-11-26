@@ -79,7 +79,7 @@ GLOBAL.util = {
             for (var iParam = 0; iParam < aQueryString.length; iParam++) {
                 if (aQueryString[iParam].indexOf(strParam.toLowerCase() + '=') > -1) {
                     var aParam = aQueryString[iParam].split('=');
-                    output  =aParam[1];
+                    output = aParam[1];
                     break;
                 }
             }

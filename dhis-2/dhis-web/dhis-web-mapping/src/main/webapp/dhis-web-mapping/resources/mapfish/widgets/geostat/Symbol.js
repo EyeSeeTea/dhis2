@@ -160,7 +160,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             },
             level: {
                 level: null,
-                name: null,
+                name: null
             },
             setValues: function(pid, pn, pl, ll, ln) {
                 this.parent.id = pid || this.parent.id;
@@ -600,7 +600,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         function showTree() {
                             var value, rawvalue;
                             var w = new Ext.Window({
-                                id: 'tree_w',
+                                id: 'tree_w2',
                                 title: 'Boundary and level',
                                 closeAction: 'hide',
                                 autoScroll: true,
@@ -644,7 +644,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                                 }
                                                             }
                                                         }
-                                                    },
+                                                    }
                                                 ]
                                             }
                                         ]
@@ -662,7 +662,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                 items: [
                                                     {
                                                         xtype: 'combo',
-                                                        id: 'level_cb',
+                                                        id: 'level_cb2',
                                                         fieldLabel: i18n_level,
                                                         typeAhead: true,
                                                         editable: false,
@@ -701,7 +701,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                 scope: this,
                                                 handler: function() {
                                                     var node = this.form.findField('boundary').selectedNode;
-                                                    if (!node || !Ext.getCmp('level_cb').getValue()) {
+                                                    if (!node || !Ext.getCmp('level_cb2').getValue()) {
                                                         return;
                                                     }
                                                     if (node.attributes.level > this.form.findField('level').level) {
@@ -716,7 +716,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                         
                                                     this.form.findField('boundary').setValue(node.attributes.text);
                                                     this.form.findField('level').setValue(this.form.findField('level').levelName);
-                                                    Ext.getCmp('tree_w').hide();
+                                                    Ext.getCmp('tree_w2').hide();
                                                     
                                                     this.loadGeoJson();
                                                 }
@@ -727,7 +727,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                 width: 133,
                                                 scope: this,
                                                 handler: function() {
-                                                    Ext.getCmp('tree_w').hide();
+                                                    Ext.getCmp('tree_w2').hide();
                                                 }
                                             }
                                         ]
@@ -874,7 +874,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        this.form.findField('mapview').clearValue;
+                        this.form.findField('mapview').clearValue();
                         if (cb.getValue() == GLOBAL.conf.classify_with_bounds && cb.getValue() != this.legend.method) {
 							this.legend.method = GLOBAL.conf.classify_with_bounds;
                             this.prepareMapViewLegend();
@@ -1258,7 +1258,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 				var bounds = [];
 				for (var i = 0; i < mapLegends.length; i++) {
 					if (bounds[bounds.length-1] != mapLegends[i].startValue) {
-						if (bounds.length != 0) {
+						if (bounds.length !== 0) {
 							colors.push(new mapfish.ColorRgb(240,240,240));
 						}
 						bounds.push(mapLegends[i].startValue);
@@ -1454,7 +1454,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
                         GLOBAL.vars.exportValues = GLOBAL.util.getExportDataValueJSON(mapvalues);
                         
-                        if (mapvalues.length == 0) {
+                        if (mapvalues.length === 0) {
                             Ext.message.msg(false, i18n_current_selection_no_data);
                             GLOBAL.vars.mask.hide();
                             return;

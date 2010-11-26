@@ -71,8 +71,8 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 		}
 		else if (mapLegendType == GLOBAL.conf.map_legend_type_predefined) {
 			this.colorInterpolation = symbol.colorInterpolation;
-			for (var i = 0; i < symbol.imageLegend.length && i < this.colorInterpolation.length; i++) {
-				symbol.imageLegend[i].color = this.colorInterpolation[i].toHexString();
+			for (var j = 0; j < symbol.imageLegend.length && j < this.colorInterpolation.length; j++) {
+				symbol.imageLegend[j].color = this.colorInterpolation[j].toHexString();
 			}
 		}
     },

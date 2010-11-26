@@ -97,7 +97,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
             GLOBAL.vars.parameter = false;
             GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-
             Ext.getCmp('mapdatetype_cb').setValue(GLOBAL.vars.mapDateType.value);
             
             function mapViewStoreCallback() {
@@ -160,7 +159,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             },
             level: {
                 level: null,
-                name: null,
+                name: null
             },
             setValues: function(pid, pn, pl, ll, ln) {
                 this.parent.id = pid || this.parent.id;
@@ -241,8 +240,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         this.legend.classes = this.mapView.classes || this.legend.classes;
 
                         GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-
+                        GLOBAL.vars.mapDateType.value = this.mapView.mapDateType;
                         Ext.getCmp('mapdatetype_cb').setValue(GLOBAL.vars.mapDateType.value);
+
                         this.valueType.value = this.mapView.mapValueType;
                         this.form.findField('mapvaluetype').setValue(this.valueType.value);
                         this.setMapView();
@@ -305,7 +305,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     fn: function(cb) {
 						this.form.findField('indicator').clearValue();
-                        GLOBAL.stores.indicatorsByGroup.setBaseParam('id', cb.getValue());
+                        GLOBAL.stores.indicatorsByGroup.setBaseParam('indicatorGroupId', cb.getValue());
                         GLOBAL.stores.indicatorsByGroup.load();
                     }
                 }
@@ -644,7 +644,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                                 }
                                                             }
                                                         }
-                                                    },
+                                                    }
                                                 ]
                                             }
                                         ]
@@ -874,7 +874,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        this.form.findField('mapview').clearValue;
+                        this.form.findField('mapview').clearValue();
                         if (cb.getValue() == GLOBAL.conf.classify_with_bounds && cb.getValue() != this.legend.method) {
 							this.legend.method = GLOBAL.conf.classify_with_bounds;
                             this.prepareMapViewLegend();
@@ -1041,7 +1041,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     prepareMapViewValueType: function() {
         var obj = {};
-
         if (this.valueType.isIndicator()) {
             this.form.findField('indicatorgroup').showField();
             this.form.findField('indicator').showField();
@@ -1259,7 +1258,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 				var bounds = [];
 				for (var i = 0; i < mapLegends.length; i++) {
 					if (bounds[bounds.length-1] != mapLegends[i].startValue) {
-						if (bounds.length != 0) {
+						if (bounds.length !== 0) {
 							colors.push(new mapfish.ColorRgb(240,240,240));
 						}
 						bounds.push(mapLegends[i].startValue);
@@ -1455,7 +1454,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
                         GLOBAL.vars.exportValues = GLOBAL.util.getExportDataValueJSON(mapvalues);
                         
-                        if (mapvalues.length == 0) {
+                        if (mapvalues.length === 0) {
                             Ext.message.msg(false, i18n_current_selection_no_data);
                             GLOBAL.vars.mask.hide();
                             return;

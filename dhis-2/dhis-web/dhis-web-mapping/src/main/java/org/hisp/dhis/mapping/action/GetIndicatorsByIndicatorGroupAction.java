@@ -76,11 +76,11 @@ public class GetIndicatorsByIndicatorGroupAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer indicatorGroupId;
 
-    public void setId( Integer id )
+    public void setIndicatorGroupId( Integer indicatorGroupId )
     {
-        this.id = id;
+        this.indicatorGroupId = indicatorGroupId;
     }
     
     // -------------------------------------------------------------------------
@@ -101,9 +101,9 @@ public class GetIndicatorsByIndicatorGroupAction
     public String execute()
         throws Exception
     {
-        if ( id != null )
+        if ( indicatorGroupId != null )
         {
-            IndicatorGroup group = indicatorService.getIndicatorGroup( id );
+            IndicatorGroup group = indicatorService.getIndicatorGroup( indicatorGroupId );
             
             if ( group != null )
             {

@@ -109,9 +109,9 @@ public class InitializeAction
 
         else
         {
-            mapDateType = mapView.getMapDateType();
-            
             mapView = mappingService.getMapView( id );
+            
+            mapDateType = mapView.getMapDateType();
         }
 
         return SUCCESS;
