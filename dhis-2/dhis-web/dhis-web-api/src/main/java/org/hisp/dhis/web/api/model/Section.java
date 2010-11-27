@@ -27,16 +27,23 @@ package org.hisp.dhis.web.api.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 
 public class Section
     extends Model
 {
 
     private List<DataElement> dataElements;
+
+    @XmlElement(name="dataElement")
+    public List<DataElement> getDataElements()
+    {
+        return dataElements;
+    }
 
     public void setDataElements( List<DataElement> des )
     {
@@ -60,36 +67,9 @@ public class Section
             for ( int i = 0; i < dataElements.size(); i++ )
             {
                 DataElement de = (DataElement) dataElements.get( i );
-                dout.writeInt( de.getId() );
-                dout.writeUTF( de.getName() );
-                dout.writeUTF( de.getType() );
-                dout.writeBoolean( de.isCompulsory() );
-                
-                List<Model> cateOptCombos = de.getCategoryOptionCombos().getModels();
-                if ( cateOptCombos == null || cateOptCombos.size() <= 0 )
-                {
-                    dout.writeInt( 0 );
-                }
-                else
-                {
-                    dout.writeInt( cateOptCombos.size() );
-                    for ( Model each : cateOptCombos )
-                    {
-                        dout.writeInt( each.getId() );
-                        dout.writeUTF( each.getName() );
-                    }
-                }
-
+                de.serializeHack( dout );
             }
         }
     }
-
-    @Override
-    public void deSerialize( DataInputStream dataInputStream )
-        throws IOException
-    {
-        // FIXME
-    }
-
 
 }

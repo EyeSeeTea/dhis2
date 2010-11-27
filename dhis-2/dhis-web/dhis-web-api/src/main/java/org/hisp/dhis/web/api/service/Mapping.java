@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.api.model;
+package org.hisp.dhis.web.api.service;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,58 +27,52 @@ package org.hisp.dhis.web.api.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import org.hisp.dhis.web.api.model.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.web.api.model.Model;
+import org.hisp.dhis.web.api.model.ModelList;
 
-@XmlRootElement
-public class ActivityPlan
-    implements DataStreamSerializable
+public class Mapping
 {
-
-    private List<Activity> activitiesList;
-
-    @XmlElement(name="activity")
-    public List<Activity> getActivitiesList()
+    
+    public static DataElement getDataElement( org.hisp.dhis.dataelement.DataElement dataElement )
     {
-        return activitiesList;
+        DataElement de = new DataElement();
+        de.setId( dataElement.getId() );
+        de.setName( dataElement.getName() );
+        de.setType( dataElement.getType() );
+        
+        de.setCategoryOptionCombos( getCategoryOptionCombos( dataElement ) );
+        return de;
     }
-
-    public void setActivitiesList( List<Activity> activitiesList )
+    
+    public static ModelList getCategoryOptionCombos( org.hisp.dhis.dataelement.DataElement dataElement )
     {
-        this.activitiesList = activitiesList;
-    }
+        Set<DataElementCategoryOptionCombo> deCatOptCombs = dataElement.getCategoryCombo().getOptionCombos();
 
-    @Override
-    public void serialize( DataOutputStream dout )
-        throws IOException
-    {
+//        if ( deCatOptCombs.size() < 2 )
+//        {
+//            return null;
+//        }
 
-        if ( activitiesList == null )
+        // Client DataElement
+        ModelList deCateOptCombo = new ModelList();
+        List<Model> listCateOptCombo = new ArrayList<Model>();
+        deCateOptCombo.setModels( listCateOptCombo );
+
+        for ( DataElementCategoryOptionCombo oneCatOptCombo : deCatOptCombs )
         {
-            dout.writeInt( 0 );
+            Model oneCateOptCombo = new Model();
+            oneCateOptCombo.setId( oneCatOptCombo.getId() );
+            oneCateOptCombo.setName( oneCatOptCombo.getName() );
+            listCateOptCombo.add( oneCateOptCombo );
         }
-        else
-        {
-            dout.writeInt( activitiesList.size() );
-            for ( int i = 0; i < activitiesList.size(); i++ )
-            {
-                activitiesList.get( i ).serialize( dout );
-            }
-        }
-
+        return deCateOptCombo;
     }
 
-    @Override
-    public void deSerialize( DataInputStream dataInputStream )
-        throws IOException
-    {
-        // FIXME: Get implementation from client
-
-    }
-
+    
 }
