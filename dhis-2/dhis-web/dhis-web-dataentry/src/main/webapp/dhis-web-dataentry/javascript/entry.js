@@ -3,6 +3,14 @@
 // Save
 // -----------------------------------------------------------------------------
 
+function saveVal( dataElementId, optionComboId )
+{
+	var zeroValueSaveMode = document.getElementById( 'zeroValueSaveMode' ).value;
+	var dataElementName = document.getElementById( 'value[' + dataElementId + '].name' ).innerHTML;
+	
+	saveValue( dataElementId, optionComboId, dataElementName, zeroValueSaveMode );
+}
+
 function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSaveMode )
 {
     var field = document.getElementById( 'value[' + dataElementId + '].value' + ':' +  'value[' + optionComboId + '].value');
@@ -155,7 +163,7 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
         request.setCallbackSuccess( handleResponse );
         request.setCallbackError( handleHttpError );
         request.setResponseTypeXML( 'status' );        
-        request.send( 'saveMultiDimensionalValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
+        request.send( 'saveValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
                 dataElementId + '&optionComboId=' + optionComboId + '&value=' + value );
     };
     
