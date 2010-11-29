@@ -601,7 +601,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             var value, rawvalue;
                             var w = new Ext.Window({
                                 id: 'tree_w2',
-                                title: 'Boundary and level',
+                                title: 'Boundary',
                                 closeAction: 'hide',
                                 autoScroll: true,
                                 height: 'auto',
@@ -609,87 +609,32 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 width: 280,
                                 boxMaxWidth: 280,
                                 items: [
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'fit',
-                                        bodyStyle: 'padding:4px 4px 0px 4px; background-color:#f8f8f8',
-                                        items: [
-                                            {
-                                                xtype: 'fieldset',
-                                                title: '&nbsp;&nbsp;<span class="panel-tab-title">Boundary</span>&nbsp;&nbsp;',
-                                                bodyStyle: 'margin-bottom:3px',
-                                                autoHeight: true,
-                                                items: [
-                                                    {
-                                                        xtype: 'treepanel',
-                                                        height: screen.height / 3,
-                                                        autoScroll: true,
-                                                        loader: new Ext.tree.TreeLoader({
-                                                            dataUrl: GLOBAL.conf.path_mapping + 'getOrganisationUnitChildren' + GLOBAL.conf.type
-                                                        }),
-                                                        root: {
-                                                            id: GLOBAL.vars.topLevelUnit.id,
-                                                            text: GLOBAL.vars.topLevelUnit.name,
-                                                            hasChildrenWithCoordinates: GLOBAL.vars.topLevelUnit.hasChildrenWithCoordinates,
-                                                            nodeType: 'async',
-                                                            draggable: false,
-                                                            expanded: true
-                                                        },
-                                                        clickedNode: null,
-                                                        listeners: {
-                                                            'click': {
-                                                                scope: this,
-                                                                fn: function(n) {
-                                                                    this.form.findField('boundary').selectedNode = n;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'fit',
-                                        bodyStyle: 'padding:4px 4px 0px 4px; background-color:#f8f8f8',
-                                        items: [
-                                            {
-                                                xtype: 'fieldset',
-                                                title: '&nbsp;&nbsp;<span class="panel-tab-title">Level</span>&nbsp;&nbsp;',
-                                                autoHeight: true,
-                                                layout: 'anchor',
-                                                items: [
-                                                    {
-                                                        xtype: 'combo',
-                                                        id: 'level_cb2',
-                                                        fieldLabel: i18n_level,
-                                                        typeAhead: true,
-                                                        editable: false,
-                                                        valueField: 'level',
-                                                        displayField: 'name',
-                                                        mode: 'remote',
-                                                        forceSelection: true,
-                                                        triggerAction: 'all',
-                                                        emptyText: GLOBAL.conf.emptytext,
-                                                        labelSeparator: GLOBAL.conf.labelseparator,
-                                                        selectOnFocus: true,
-                                                        width: GLOBAL.conf.combo_width,
-                                                        store: GLOBAL.stores.organisationUnitLevel,
-                                                        listeners: {
-                                                            'select': {
-                                                                scope: this,
-                                                                fn: function(cb) {
-                                                                    this.form.findField('level').level = cb.getValue();
-                                                                    this.form.findField('level').levelName = cb.getRawValue();
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
+									{
+										xtype: 'treepanel',
+										height: screen.height / 3,
+										bodyStyle: 'padding: 8px',
+										autoScroll: true,
+										loader: new Ext.tree.TreeLoader({
+											dataUrl: GLOBAL.conf.path_mapping + 'getOrganisationUnitChildren' + GLOBAL.conf.type
+										}),
+										root: {
+											id: GLOBAL.vars.topLevelUnit.id,
+											text: GLOBAL.vars.topLevelUnit.name,
+											hasChildrenWithCoordinates: GLOBAL.vars.topLevelUnit.hasChildrenWithCoordinates,
+											nodeType: 'async',
+											draggable: false,
+											expanded: true
+										},
+										clickedNode: null,
+										listeners: {
+											'click': {
+												scope: this,
+												fn: function(n) {
+													this.form.findField('boundary').selectedNode = n;
+												}
+											}
+										}
+									},
                                     {
                                         xtype: 'panel',
                                         layout: 'table',
@@ -701,21 +646,15 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                 scope: this,
                                                 handler: function() {
                                                     var node = this.form.findField('boundary').selectedNode;
-                                                    if (!node || !Ext.getCmp('level_cb2').getValue()) {
-                                                        return;
-                                                    }
-                                                    if (node.attributes.level > this.form.findField('level').level) {
-                                                        Ext.message.msg(false, 'Level is higher than boundary level');
+                                                    if (!node) {
                                                         return;
                                                     }
                                                     
                                                     this.form.findField('mapview').clearValue();
                                                     this.updateValues = true;
-                                                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
-                                                        this.form.findField('level').level, this.form.findField('level').levelName);
+                                                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level, null, null);
                                                         
                                                     this.form.findField('boundary').setValue(node.attributes.text);
-                                                    this.form.findField('level').setValue(this.form.findField('level').levelName);
                                                     Ext.getCmp('tree_w2').hide();
                                                     
                                                     this.loadGeoJson();

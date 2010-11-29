@@ -215,6 +215,14 @@
         listeners: {
             'load': function(store) {
                 store.isLoaded = true;
+                
+                if (!symbol.form.findField('level').getValue()) {
+					if (this.isLoaded) {
+						var data = this.getAt(this.getTotalCount()-1).data;
+						symbol.organisationUnitSelection.setValues(null, null, null, data.level, data.name);
+						symbol.form.findField('level').setValue(data.name);
+					}
+				}
                 // Ext.getCmp('level_cb').mode = 'local';
             }
         }
@@ -2384,6 +2392,12 @@
         listeners: {
             'expand': function() {
                 GLOBAL.vars.activePanel.setPoint();
+                
+                if (!this.form.findField('level').getValue()) {
+					if (!GLOBAL.stores.organisationUnitLevel.isLoaded) {
+						GLOBAL.stores.organisationUnitLevel.load();
+					}
+				}
             }
         }
     });
