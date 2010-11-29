@@ -13,6 +13,8 @@
 	
 		<property name="name" unique="true"/>
 		
+		<property name="featureType"/>
+		
 		<property name="mapValueType"/>
 		
 		<many-to-one name="indicatorGroup" class="org.hisp.dhis.indicator.IndicatorGroup" 

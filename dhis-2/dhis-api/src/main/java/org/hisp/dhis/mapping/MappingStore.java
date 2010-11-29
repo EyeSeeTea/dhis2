@@ -87,6 +87,8 @@ public interface MappingStore
 
     Collection<MapView> getAllMapViews();
 
+    Collection<MapView> getMapViewsByFeatureType( String featureType );
+
     // -------------------------------------------------------------------------
     // MapLayer
     // -------------------------------------------------------------------------

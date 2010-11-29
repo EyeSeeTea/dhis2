@@ -45,6 +45,8 @@ public class MapView
     private int id;
 
     private String name;
+    
+    private String featureType;
 
     private String mapValueType;
 
@@ -94,13 +96,14 @@ public class MapView
     {
     }
 
-    public MapView( String name, String mapValueType, IndicatorGroup indicatorGroup, Indicator indicator,
+    public MapView( String name, String featureType, String mapValueType, IndicatorGroup indicatorGroup, Indicator indicator,
         DataElementGroup dataElementGroup, DataElement dataElement, String mapDateType, PeriodType periodType,
         Period period, String startDate, String endDate, OrganisationUnit parentOrganisationUnit,
         OrganisationUnitLevel organisationUnitLevel, String mapLegendType, Integer method, Integer classes, String bounds,
         String colorLow, String colorHigh, MapLegendSet mapLegendSet, String longitude, String latitude, int zoom )
     {
         this.name = name;
+        this.featureType = featureType;
         this.mapValueType = mapValueType;
         this.indicatorGroup = indicatorGroup;
         this.indicator = indicator;
@@ -189,6 +192,16 @@ public class MapView
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    public String getFeatureType()
+    {
+        return featureType;
+    }
+
+    public void setFeatureType( String featureType )
+    {
+        this.featureType = featureType;
     }
 
     public String getMapValueType()

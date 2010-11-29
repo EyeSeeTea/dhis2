@@ -536,7 +536,7 @@ public class DefaultMappingService
         mappingStore.updateMapView( mapView );
     }
 
-    public void addOrUpdateMapView( String name, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
+    public void addOrUpdateMapView( String name, String featureType, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
         Integer dataElementGroupId, Integer dataElementId, String periodTypeName, Integer periodId, String startDate,
         String endDate, Integer parentOrganisationUnitId, Integer organisationUnitLevel, String mapLegendType,
         Integer method, Integer classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId,
@@ -579,6 +579,7 @@ public class DefaultMappingService
         if ( mapView != null )
         {
             mapView.setName( name );
+            mapView.setFeatureType( featureType );
             mapView.setMapValueType( mapValueType );
             mapView.setIndicatorGroup( indicatorGroup );
             mapView.setIndicator( indicator );
@@ -606,7 +607,7 @@ public class DefaultMappingService
         }
         else
         {
-            mapView = new MapView( name, mapValueType, indicatorGroup, indicator, dataElementGroup, dataElement,
+            mapView = new MapView( name, featureType, mapValueType, indicatorGroup, indicator, dataElementGroup, dataElement,
                 mapDateType, periodType, period, startDate, endDate, parent, level, mapLegendType, method, classes,
                 bounds, colorLow, colorHigh, mapLegendSet, longitude, latitude, zoom );
 
@@ -637,6 +638,19 @@ public class DefaultMappingService
     public Collection<MapView> getAllMapViews()
     {
         Collection<MapView> mapViews = mappingStore.getAllMapViews();
+
+        for ( MapView mapView : mapViews )
+        {
+            mapView.getParentOrganisationUnit().setLevel(
+                organisationUnitService.getLevelOfOrganisationUnit( mapView.getParentOrganisationUnit() ) );
+        }
+        
+        return mapViews;
+    }
+
+    public Collection<MapView> getMapViewsByFeatureType( String featureType )
+    {
+        Collection<MapView> mapViews = mappingStore.getMapViewsByFeatureType( featureType );
 
         for ( MapView mapView : mapViews )
         {

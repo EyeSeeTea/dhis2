@@ -60,7 +60,7 @@ public interface MappingService
     final String ORGANISATION_UNIT_SELECTION_TYPE_PARENT = "parent";
 
     final String ORGANISATION_UNIT_SELECTION_TYPE_LEVEL = "level";
-
+    
     // -------------------------------------------------------------------------
     // IndicatorMapValue
     // -------------------------------------------------------------------------
@@ -150,7 +150,7 @@ public interface MappingService
 
     void updateMapView( MapView mapView );
 
-    void addOrUpdateMapView( String name, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
+    void addOrUpdateMapView( String name, String featureType, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
         Integer dataElementGroupId, Integer dataElementId, String periodTypeName, Integer periodId, String startDate,
         String endDate, Integer parentOrganisationUnitId, Integer organisationUnitLevelId, String mapLegendType,
         Integer method, Integer classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId,
@@ -163,6 +163,8 @@ public interface MappingService
     MapView getMapViewByName( String name );
 
     Collection<MapView> getAllMapViews();
+    
+    Collection<MapView> getMapViewsByFeatureType( String featureType );
 
     // -------------------------------------------------------------------------
     // MapLayer

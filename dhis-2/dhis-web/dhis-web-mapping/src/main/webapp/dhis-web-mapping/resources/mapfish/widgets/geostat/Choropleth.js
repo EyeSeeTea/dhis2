@@ -97,7 +97,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             
             GLOBAL.vars.parameter = false;
             GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-            Ext.getCmp('mapdatetype_cb').setValue(GLOBAL.vars.mapDateType.value);
             
             function mapViewStoreCallback() {
                 this.form.findField('mapview').setValue(this.mapView.id);
@@ -227,7 +226,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             selectOnFocus: true,
 			labelSeparator: GLOBAL.conf.labelseparator,
             width: GLOBAL.conf.combo_width,
-            store: GLOBAL.stores.mapView,
+            store: GLOBAL.stores.polygonMapView,
             listeners: {
                 'select': {
                     scope: this,
@@ -1372,6 +1371,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     getFormValues: function() {
         return {
+			featureType: GLOBAL.conf.map_feature_type_multipolygon,
             mapValueType: this.form.findField('mapvaluetype').getValue(),
             indicatorGroupId: this.form.findField('indicatorgroup').getValue() || null,
             indicatorId: this.form.findField('indicator').getValue() || null,
@@ -1390,6 +1390,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             colorLow: this.legend.value == GLOBAL.conf.map_legend_type_automatic ? this.form.findField('startcolor').getValue() : null,
             colorHigh: this.legend.value == GLOBAL.conf.map_legend_type_automatic ? this.form.findField('endcolor').getValue() : null,
             mapLegendSetId: this.form.findField('maplegendset').getValue() || null,
+            radiusLow: null,
+            radiusHigh: null,
             longitude: GLOBAL.vars.map.getCenter().lon,
             latitude: GLOBAL.vars.map.getCenter().lat,
             zoom: parseInt(GLOBAL.vars.map.getZoom())
