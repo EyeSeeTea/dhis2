@@ -834,7 +834,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_bounds,
 			labelSeparator: GLOBAL.conf.labelseparator,
             emptyText: i18n_comma_separated_values,
-            isFormField: true,
             width: GLOBAL.conf.combo_width,
             hidden: true
         },
@@ -876,7 +875,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_low_color,
 			labelSeparator: GLOBAL.conf.labelseparator,
             allowBlank: false,
-            isFormField: true,
             width: GLOBAL.conf.combo_width,
             value: "#FFFF00"
         },
@@ -887,9 +885,26 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_high_color,
 			labelSeparator: GLOBAL.conf.labelseparator,
             allowBlank: false,
-            isFormField: true,
             width: GLOBAL.conf.combo_width,
             value: "#FF0000"
+        },
+        
+        { html: '<div class="thematic-br">' },
+        
+        {
+            xtype: 'numberfield',
+            name: 'radiuslow',
+            fieldLabel: 'Low radius',
+			labelSeparator: GLOBAL.conf.labelseparator,
+            width: GLOBAL.conf.combo_number_width_small
+        },
+        
+        {
+            xtype: 'numberfield',
+            name: 'radiushigh',
+            fieldLabel: 'High radius',
+			labelSeparator: GLOBAL.conf.labelseparator,
+            width: GLOBAL.conf.combo_number_width_small
         },
         
         { html: '<div class="thematic-br">' },
@@ -897,9 +912,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'button',
             text: i18n_refresh,
-            isFormField: true,
+            style: 'width: 100px',
             fieldLabel: '',
-            labelSeparator: '',
+            isFormField: true,
+            labelSeparator: GLOBAL.conf.labelseparator,
             scope: this,
             handler: function() {
                 if (this.formValidation.validateForm(true)) {
@@ -1330,8 +1346,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             colorLow: this.legend.value == GLOBAL.conf.map_legend_type_automatic ? this.form.findField('startcolor').getValue() : null,
             colorHigh: this.legend.value == GLOBAL.conf.map_legend_type_automatic ? this.form.findField('endcolor').getValue() : null,
             mapLegendSetId: this.form.findField('maplegendset').getValue() || null,
-            radiusLow: this.form.findField('radiusLow').getValue() || null,
-            radiusHigh: this.form.findField('radiusHigh').getValue() || null,
+            radiusLow: this.form.findField('radiuslow').getValue() || null,
+            radiusHigh: this.form.findField('radiushigh').getValue() || null,
             longitude: GLOBAL.vars.map.getCenter().lon,
             latitude: GLOBAL.vars.map.getCenter().lat,
             zoom: parseInt(GLOBAL.vars.map.getZoom())
