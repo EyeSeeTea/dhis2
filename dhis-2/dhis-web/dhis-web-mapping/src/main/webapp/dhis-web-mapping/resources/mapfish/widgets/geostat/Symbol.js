@@ -896,7 +896,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             name: 'radiuslow',
             fieldLabel: 'Low radius',
 			labelSeparator: GLOBAL.conf.labelseparator,
-            width: GLOBAL.conf.combo_number_width_small
+            width: GLOBAL.conf.combo_number_width_small,
+            value: 5
         },
         
         {
@@ -904,7 +905,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             name: 'radiushigh',
             fieldLabel: 'High radius',
 			labelSeparator: GLOBAL.conf.labelseparator,
-            width: GLOBAL.conf.combo_number_width_small
+            width: GLOBAL.conf.combo_number_width_small,
+            value: 20
         },
         
         { html: '<div class="thematic-br">' },
@@ -1297,6 +1299,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     }
                     return false;
                 }
+            }
+            
+            if (!scope.form.findField('radiuslow').getValue() || !scope.form.findField('radiushigh').getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, i18n_form_is_not_complete);
+                }
+                return false;
             }
             
             return true;
