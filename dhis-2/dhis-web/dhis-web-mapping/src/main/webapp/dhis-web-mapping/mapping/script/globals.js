@@ -326,24 +326,18 @@ GLOBAL.vars = {
     parameter: null,
     
     activePanel: {
-        value: null,
+        value: GLOBAL.conf.thematicMap,
         setPolygon: function() {
             this.value = GLOBAL.conf.thematicMap;
         },
         setPoint: function() {
             this.value = GLOBAL.conf.thematicMap2;
         },
-        setAssignment: function() {
-            this.value = GLOBAL.conf.organisationUnitAssignment;
-        },
         isPolygon: function() {
             return this.value == GLOBAL.conf.thematicMap;
         },
         isPoint: function() {
             return this.value == GLOBAL.conf.thematicMap2;
-        },
-        isAssignment: function() {
-            return this.value == GLOBAL.conf.organisationUnitAssignment;
         }
     },
     

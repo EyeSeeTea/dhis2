@@ -2709,8 +2709,6 @@
         ]
     });
 	
-	GLOBAL.vars.activePanel.setPolygon();
-
 	GLOBAL.vars.map.addControl(new OpenLayers.Control.MousePosition({
         displayClass: 'void', 
         div: $('mouseposition'), 

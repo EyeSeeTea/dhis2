@@ -87,34 +87,34 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         this.createSelectFeatures();
         
         if (GLOBAL.vars.parameter) {
-            this.mapView = GLOBAL.vars.parameter.mapView;
-            this.updateValues = true;
-            this.legend = {
-                value: this.mapView.mapLegendType,
-                method: this.mapView.method || this.legend.method,
-                classes: this.mapView.classes || this.legend.classes
-            };
-            
-            GLOBAL.vars.parameter = false;
-            GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-
-            Ext.getCmp('mapdatetype_cb').setValue(GLOBAL.vars.mapDateType.value);
-            
-            function mapViewStoreCallback() {
-                this.form.findField('mapview').setValue(this.mapView.id);
-                this.valueType.value = this.mapView.mapValueType;
-                this.form.findField('mapvaluetype').setValue(this.valueType.value);
-                this.setMapView();
-            }
-            
-            if (GLOBAL.stores.mapView.isLoaded) {
-                mapViewStoreCallback.call(this);
-            }
-            else {
-                GLOBAL.stores.mapView.load({scope: this, callback: function() {
-                    mapViewStoreCallback.call(this);
-                }});
-            }
+			if (GLOBAL.vars.parameter.mapView.featureType == GLOBAL.conf.map_feature_type_point) {
+				this.mapView = GLOBAL.vars.parameter.mapView;
+				this.updateValues = true;
+				this.legend = {
+					value: this.mapView.mapLegendType,
+					method: this.mapView.method || this.legend.method,
+					classes: this.mapView.classes || this.legend.classes
+				};
+console.log(GLOBAL.vars.activePanel);
+				GLOBAL.vars.activePanel.setPoint();
+				GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
+				
+				function mapViewStoreCallback() {
+					this.form.findField('mapview').setValue(this.mapView.id);
+					this.valueType.value = this.mapView.mapValueType;
+					this.form.findField('mapvaluetype').setValue(this.valueType.value);
+					this.setMapView();
+				}
+				
+				if (GLOBAL.stores.pointMapView.isLoaded) {
+					mapViewStoreCallback.call(this);
+				}
+				else {
+					GLOBAL.stores.pointMapView.load({scope: this, callback: function() {
+						mapViewStoreCallback.call(this);
+					}});
+				}
+			}
         }
         
 		mapfish.widgets.geostat.Symbol.superclass.initComponent.apply(this);
@@ -241,8 +241,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         this.legend.classes = this.mapView.classes || this.legend.classes;
 
                         GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-
+                        GLOBAL.vars.mapDateType.value = this.mapView.mapDateType;
                         Ext.getCmp('mapdatetype_cb').setValue(GLOBAL.vars.mapDateType.value);
+
                         this.valueType.value = this.mapView.mapValueType;
                         this.form.findField('mapvaluetype').setValue(this.valueType.value);
                         this.setMapView();
@@ -914,9 +915,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'button',
             text: i18n_refresh,
-            style: 'width: 100px',
-            fieldLabel: '',
             isFormField: true,
+            fieldLabel: GLOBAL.conf.emptytext,
             labelSeparator: GLOBAL.conf.labelseparator,
             scope: this,
             handler: function() {
@@ -1488,6 +1488,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         };
 
         this.coreComp = new mapfish.GeoStat.Symbol(this.map, coreOptions);
+        
+        if (GLOBAL.vars.parameter) {
+			choropleth.collapse();
+			this.expand();
+			GLOBAL.vars.parameter = false;
+		}
     }
 });
 

@@ -92,7 +92,7 @@ mapfish.GeoStat = OpenLayers.Class({
         this.layer.removeFeatures(this.layer.features);
         this.layer.addFeatures(format.read(doc));
         this.requestSuccess(request);
-
+console.log(GLOBAL.vars.activePanel);
         if (GLOBAL.vars.activePanel.isPolygon()) {
             if (!choropleth.formValidation.validateForm()) {
                 GLOBAL.vars.mask.hide();
@@ -347,7 +347,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
                 }
 			}
 			
-			method = GLOBAL.vars.activePanel.isAssignment() ? mapfish.GeoStat.Distribution.CLASSIFY_BY_EQUAL_INTERVALS : mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;
+			method = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;
 		}
         
         var classification = null;

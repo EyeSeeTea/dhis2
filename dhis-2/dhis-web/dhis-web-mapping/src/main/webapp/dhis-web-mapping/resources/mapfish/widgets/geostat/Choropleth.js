@@ -85,34 +85,36 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.createItems();
         
         this.createSelectFeatures();
-        
+
         if (GLOBAL.vars.parameter) {
-            this.mapView = GLOBAL.vars.parameter.mapView;
-            this.updateValues = true;
-            this.legend = {
-                value: this.mapView.mapLegendType,
-                method: this.mapView.method || this.legend.method,
-                classes: this.mapView.classes || this.legend.classes
-            };
-            
-            GLOBAL.vars.parameter = false;
-            GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-            
-            function mapViewStoreCallback() {
-                this.form.findField('mapview').setValue(this.mapView.id);
-                this.valueType.value = this.mapView.mapValueType;
-                this.form.findField('mapvaluetype').setValue(this.valueType.value);
-                this.setMapView();
-            }
-            
-            if (GLOBAL.stores.mapView.isLoaded) {
-                mapViewStoreCallback.call(this);
-            }
-            else {
-                GLOBAL.stores.mapView.load({scope: this, callback: function() {
-                    mapViewStoreCallback.call(this);
-                }});
-            }
+			if (GLOBAL.vars.parameter.mapView.featureType == GLOBAL.conf.map_feature_type_multipolygon) {
+				this.mapView = GLOBAL.vars.parameter.mapView;
+				this.updateValues = true;
+				this.legend = {
+					value: this.mapView.mapLegendType,
+					method: this.mapView.method || this.legend.method,
+					classes: this.mapView.classes || this.legend.classes
+				};
+				
+				GLOBAL.vars.parameter = false;
+				GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
+				
+				function mapViewStoreCallback() {
+					this.form.findField('mapview').setValue(this.mapView.id);
+					this.valueType.value = this.mapView.mapValueType;
+					this.form.findField('mapvaluetype').setValue(this.valueType.value);
+					this.setMapView();
+				}
+				
+				if (GLOBAL.stores.polygonMapView.isLoaded) {
+					mapViewStoreCallback.call(this);
+				}
+				else {
+					GLOBAL.stores.polygonMapView.load({scope: this, callback: function() {
+						mapViewStoreCallback.call(this);
+					}});
+				}
+			}
         }
         
 		mapfish.widgets.geostat.Choropleth.superclass.initComponent.apply(this);
@@ -314,7 +316,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'combo',
             name: 'indicator',
-            fieldLabel: i18n_indicator ,
+            fieldLabel: i18n_indicator,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -894,7 +896,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_bounds,
 			labelSeparator: GLOBAL.conf.labelseparator,
             emptyText: i18n_comma_separated_values,
-            isFormField: true,
             width: GLOBAL.conf.combo_width,
             hidden: true
         },
@@ -936,7 +937,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_low_color,
 			labelSeparator: GLOBAL.conf.labelseparator,
             allowBlank: false,
-            isFormField: true,
             width: GLOBAL.conf.combo_width,
             value: "#FFFF00"
         },
@@ -947,7 +947,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             fieldLabel: i18n_high_color,
 			labelSeparator: GLOBAL.conf.labelseparator,
             allowBlank: false,
-            isFormField: true,
             width: GLOBAL.conf.combo_width,
             value: "#FF0000"
         },
@@ -958,8 +957,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             xtype: 'button',
             text: i18n_refresh,
             isFormField: true,
-            fieldLabel: '',
-            labelSeparator: '',
+            fieldLabel: GLOBAL.conf.emptytext,
+            labelSeparator: GLOBAL.conf.labelseparator,
             scope: this,
             handler: function() {
                 if (this.formValidation.validateForm(true)) {
@@ -1040,6 +1039,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     prepareMapViewValueType: function() {
         var obj = {};
+
         if (this.valueType.isIndicator()) {
             this.form.findField('indicatorgroup').showField();
             this.form.findField('indicator').showField();
@@ -1482,9 +1482,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             }
         }
     },
-    
+
     applyValues: function() {
-        var options = {
+		var options = {
             indicator: 'value',
             method: this.form.findField('method').getValue(),
             numClasses: this.form.findField('classes').getValue(),
