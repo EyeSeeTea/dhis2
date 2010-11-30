@@ -233,7 +233,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        this.mapView = GLOBAL.stores.mapView.getAt(GLOBAL.stores.mapView.find('id', cb.getValue())).data;
+                        this.mapView = GLOBAL.stores.pointMapView.getAt(GLOBAL.stores.pointMapView.find('id', cb.getValue())).data;
                         this.updateValues = true;
                         
                         this.legend.value = this.mapView.mapLegendType;
@@ -1449,14 +1449,17 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     applyValues: function() {
-        var options = {
+		var options = {
             indicator: 'value',
             method: this.form.findField('method').getValue(),
             numClasses: this.form.findField('classes').getValue(),
-            colors: this.getColors()
-        };
-       
-        this.coreComp.applyClassification(options);
+            colors: this.getColors(),
+            minSize: parseInt(this.form.findField('radiuslow').getValue()),
+            maxSize: parseInt(this.form.findField('radiushigh').getValue())
+		};
+			
+		this.coreComp.updateOptions(options);       
+        this.coreComp.applyClassification();
         this.classificationApplied = true;
         
         GLOBAL.vars.mask.hide();
