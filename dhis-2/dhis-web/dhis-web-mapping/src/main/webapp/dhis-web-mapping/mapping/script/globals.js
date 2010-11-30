@@ -326,7 +326,7 @@ GLOBAL.vars = {
     parameter: null,
     
     activePanel: {
-        value: GLOBAL.conf.thematicMap,
+        value: null,
         setPolygon: function() {
             this.value = GLOBAL.conf.thematicMap;
         },

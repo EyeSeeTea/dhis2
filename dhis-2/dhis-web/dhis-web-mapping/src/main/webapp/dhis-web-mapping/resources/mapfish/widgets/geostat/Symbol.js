@@ -95,8 +95,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 					method: this.mapView.method || this.legend.method,
 					classes: this.mapView.classes || this.legend.classes
 				};
-console.log(GLOBAL.vars.activePanel);
-				GLOBAL.vars.activePanel.setPoint();
+
 				GLOBAL.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
 				
 				function mapViewStoreCallback() {
@@ -1200,6 +1199,8 @@ console.log(GLOBAL.vars.activePanel);
         
         this.form.findField('boundary').setValue(this.mapView.parentOrganisationUnitName);
         this.form.findField('level').setValue(this.mapView.organisationUnitLevelName);
+
+        GLOBAL.vars.activePanel.setPoint();
         this.loadGeoJson();
     },
 	

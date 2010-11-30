@@ -1239,6 +1239,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         GLOBAL.stores.organisationUnitLevel.load();
         this.form.findField('boundary').setValue(this.mapView.parentOrganisationUnitName);
         this.form.findField('level').setValue(this.mapView.organisationUnitLevelName);
+        
+        GLOBAL.vars.activePanel.setPolygon();
         this.loadGeoJson();
     },
 	
