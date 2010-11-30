@@ -542,6 +542,8 @@
 						success: function(r) {
 							Ext.message.msg(true, i18n_favorite + ' <span class="x-msg-hl">' + name + '</span> ' + i18n_deleted);
                             GLOBAL.stores.mapView.load();
+                            Ext.getCmp('view_cb').clearValue();
+                            Ext.getCmp('view2_cb').clearValue();
                             if (v == choropleth.form.findField('mapview').getValue()) {
                                 choropleth.form.findField('mapview').clearValue();
                             }

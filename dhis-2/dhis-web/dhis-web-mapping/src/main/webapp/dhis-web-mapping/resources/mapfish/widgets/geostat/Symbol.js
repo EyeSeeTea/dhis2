@@ -1164,6 +1164,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             this.form.findField('maplegendset').setValue(this.mapView.mapLegendSetId);
             this.applyPredefinedLegend(true);
         }
+        
+        this.form.findField('radiuslow').setValue(this.mapView.radiusLow);
+        this.form.findField('radiushigh').setValue(this.mapView.radiusHigh);
 
         if (this.legend.value == GLOBAL.conf.map_legend_type_automatic) {
             this.form.findField('method').setValue(this.mapView.method);
@@ -1338,14 +1341,14 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         return {
 			featureType: GLOBAL.conf.map_feature_type_point,
             mapValueType: this.form.findField('mapvaluetype').getValue(),
-            indicatorGroupId: this.form.findField('indicatorgroup').getValue() || null,
-            indicatorId: this.form.findField('indicator').getValue() || null,
-            dataElementGroupId: this.form.findField('dataelementgroup').getValue() || null,
-            dataElementId: this.form.findField('dataelement').getValue() || null,
-            periodTypeId: this.form.findField('periodtype').getValue() || null,
-            periodId: this.form.findField('period').getValue() || null,
-            startDate: this.form.findField('startdate').getValue() || null,
-            endDate: this.form.findField('enddate').getValue() || null,
+            indicatorGroupId: this.form.findField('indicatorgroup').getValue(),
+            indicatorId: this.form.findField('indicator').getValue(),
+            dataElementGroupId: this.form.findField('dataelementgroup').getValue(),
+            dataElementId: this.form.findField('dataelement').getValue(),
+            periodTypeId: this.form.findField('periodtype').getValue(),
+            periodId: this.form.findField('period').getValue(),
+            startDate: this.form.findField('startdate').getValue(),
+            endDate: this.form.findField('enddate').getValue(),
             parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
             organisationUnitLevel: this.organisationUnitSelection.level.level,
             mapLegendType: this.form.findField('maplegendtype').getValue(),
@@ -1354,12 +1357,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             bounds: this.legend.value == GLOBAL.conf.map_legend_type_automatic && this.legend.method == GLOBAL.conf.classify_with_bounds ? this.form.findField('bounds').getValue() : null,
             colorLow: this.legend.value == GLOBAL.conf.map_legend_type_automatic ? this.form.findField('startcolor').getValue() : null,
             colorHigh: this.legend.value == GLOBAL.conf.map_legend_type_automatic ? this.form.findField('endcolor').getValue() : null,
-            mapLegendSetId: this.form.findField('maplegendset').getValue() || null,
-            radiusLow: this.form.findField('radiuslow').getValue() || null,
-            radiusHigh: this.form.findField('radiushigh').getValue() || null,
+            mapLegendSetId: this.form.findField('maplegendset').getValue(),
+            radiusLow: this.form.findField('radiuslow').getValue(),
+            radiusHigh: this.form.findField('radiushigh').getValue(),
             longitude: GLOBAL.vars.map.getCenter().lon,
             latitude: GLOBAL.vars.map.getCenter().lat,
-            zoom: parseInt(GLOBAL.vars.map.getZoom())
+            zoom: parseFloat(GLOBAL.vars.map.getZoom())
         };
     },
     
@@ -1447,7 +1450,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             }
         }
     },
-    
+
     applyValues: function() {
 		var options = {
             indicator: 'value',
@@ -1457,7 +1460,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             minSize: parseInt(this.form.findField('radiuslow').getValue()),
             maxSize: parseInt(this.form.findField('radiushigh').getValue())
 		};
-			
+
 		this.coreComp.updateOptions(options);       
         this.coreComp.applyClassification();
         this.classificationApplied = true;
