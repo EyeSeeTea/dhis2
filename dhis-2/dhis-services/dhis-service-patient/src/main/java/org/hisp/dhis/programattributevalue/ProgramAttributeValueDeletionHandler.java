@@ -1,5 +1,3 @@
-package org.hisp.dhis.concept;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,72 +25,75 @@ package org.hisp.dhis.concept;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
+package org.hisp.dhis.programattributevalue;
+
+import java.util.Collection;
+
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramAttribute;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * A Concept Name is a short name which is used as an attribute name
- * when representing a data value in xml which does not use
- * category-option-combo, eg. <DataElement='3' AGE='2' SEX='1' Value='23' />
- * 
- * SDMX-HD is one such case.
- * 
- * @author Dang Duy Hieu
- * @version $Id Concept.java Aug 25, 2010$
+ * @author Chau Thu Tran
+ * @version $Id ProgramAttributeValueDeletionHandler.java 2010-11-30 14:06:12Z $
  */
-public class Concept
-    extends IdentifiableObject
+
+public class ProgramAttributeValueDeletionHandler
+    extends DeletionHandler
 {
-    public static String DEFAULT_CONCEPT_NAME = "default";
-    
     // -------------------------------------------------------------------------
-    // Constructors
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public Concept()
+    private ProgramAttributeValueService programAttributeValueService;
+
+    public void setProgramAttributeValueService( ProgramAttributeValueService programAttributeValueService )
     {
+        this.programAttributeValueService = programAttributeValueService;
     }
 
-    public Concept( String name )
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
-        this.name = name;
+        this.programInstanceService = programInstanceService;
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public int hashCode()
+    public String getClassName()
     {
-        return name.hashCode();
+        return ProgramAttributeValue.class.getSimpleName();
     }
 
     @Override
-    public boolean equals( Object o )
+    public void deleteProgram( Program program )
     {
-        if ( this == o )
+        Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( program );
+
+        for ( ProgramInstance programInstance : programInstances )
         {
-            return true;
+            programAttributeValueService.deleteProgramAttributeValues( programInstance );
         }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof Concept) )
-        {
-            return false;
-        }
-
-        final Concept other = (Concept) o;
-
-        return name.equals( other.getName() );
     }
 
-    @Override
-    public String toString()
+    public void deleteProgramAttribute( ProgramAttribute programAttribute )
     {
-        return "[" + name + "]";
+        Collection<ProgramAttributeValue> attributeValues = programAttributeValueService
+            .getProgramAttributeValues( programAttribute );
+
+        if ( attributeValues != null && attributeValues.size() > 0 )
+        {
+            for ( ProgramAttributeValue attributeValue : attributeValues )
+            {
+                programAttributeValueService.deleteProgramAttributeValue( attributeValue );
+            }
+        }
     }
 }

@@ -490,7 +490,7 @@
       <dependency>
         <groupId>com.h2database</groupId>
         <artifactId>h2</artifactId>
-        <version>1.2.144</version>
+        <version>1.2.145</version>
       </dependency>
       <dependency>
         <groupId>com.ibatis</groupId>
@@ -557,7 +557,7 @@
       <dependency>
         <groupId>net.sf.jasperreports</groupId>
         <artifactId>jasperreports</artifactId>
-        <version>3.7.2</version>
+        <version>3.7.6</version>
         <exclusions>
           <exclusion>
             <groupId>xalan</groupId>

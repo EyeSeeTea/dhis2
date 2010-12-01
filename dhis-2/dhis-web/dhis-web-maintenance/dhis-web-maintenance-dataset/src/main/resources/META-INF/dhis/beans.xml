@@ -45,8 +45,15 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="dataElementService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementService"/>
 		</property>
-		<property name="dataElementCategoryService">
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataset.action.section.GetSectionOptionsAction"
+		class="org.hisp.dhis.dataset.action.section.GetSectionOptionsAction" scope="prototype">
+		<property name="categoryService">
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryService"/>
+		</property>	
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 	</bean>
 	
@@ -55,17 +62,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="sectionService">
 			<ref bean="org.hisp.dhis.dataset.SectionService"/>
-		</property>
-	</bean>
-	
-	<bean id="org.hisp.dhis.dataset.action.section.SortOrderSection"
-		class="org.hisp.dhis.dataset.action.section.SortOrderSection"
-		scope="prototype">
-		<property name="sectionService">
-			<ref bean="org.hisp.dhis.dataset.SectionService"/>
-		</property>
-		<property name="dataSetService">
-			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
 		</property>
 	</bean>
 	
@@ -133,6 +129,22 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			<ref bean="org.hisp.dhis.dataelement.DataElementCategoryService"/>
 		</property>		
 	</bean>
+	
+	<bean id="org.hisp.dhis.dataset.action.section.SaveSectionSortOrderAction"
+		class="org.hisp.dhis.dataset.action.section.SaveSectionSortOrderAction"
+		scope="prototype">
+		<property name="sectionService">
+			<ref bean="org.hisp.dhis.dataset.SectionService"/>
+		</property>
+	</bean>
+	
+	<bean id="org.hisp.dhis.dataset.action.section.GetSectionListSortOrderAction"
+		class="org.hisp.dhis.dataset.action.section.GetSectionListSortOrderAction"
+		scope="prototype">
+		<property name="dataSetService">
+			<ref bean="org.hisp.dhis.dataset.DataSetService"/>
+		</property>
+	</bean>		
 	
 	<!-- DataSet -->	
 	

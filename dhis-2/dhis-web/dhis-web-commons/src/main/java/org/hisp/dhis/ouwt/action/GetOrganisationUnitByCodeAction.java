@@ -27,6 +27,8 @@ package org.hisp.dhis.ouwt.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
@@ -35,28 +37,28 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $Id: GetOrganisationUnitByNameAction.java 5282 2010-08-31 18:41:06Z
- *          $
  */
 public class GetOrganisationUnitByCodeAction
     implements Action
 {
+    private static final Log log = LogFactory.getLog( GetOrganisationUnitByCodeAction.class );
+    
     // --------------------------------------------------------------------------
     // Dependencies
     // --------------------------------------------------------------------------
+
+    private OrganisationUnitSelectionManager selectionManager;
+    
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
 
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
     }
 
     // --------------------------------------------------------------------------
@@ -85,19 +87,26 @@ public class GetOrganisationUnitByCodeAction
     public String execute()
         throws Exception
     {
-        message = "";
+        log.debug( "Searching organisation unit for code: " + code );
         
         OrganisationUnit unit = organisationUnitService.getOrganisationUnitByCode( code );
         
+        if ( unit == null )
+        {
+            unit = organisationUnitService.getOrganisationUnitByNameIgnoreCase( code );
+        }
+        
         if ( unit != null )
         {
-            message = unit.getId() + "";
+            log.debug( "Found organisation unit: " + unit );
             
             selectionManager.setSelectedOrganisationUnit( unit );
             
+            message = String.valueOf( unit.getId() );
+            
             return SUCCESS;
         }
-
+        
         return INPUT;
     }
 }
