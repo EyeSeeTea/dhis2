@@ -96,11 +96,18 @@ public class SVGDocument
         
         if ( indicator2 == null )
         {
-            String indicator2_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"30\" font-size=\"12\"><tspan>"
+            String indicator2_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"100\" font-size=\"12\"><tspan>"
                 + StringEscapeUtils.escapeXml( indicator ) + "</tspan></text></g>";
 
-            String period2_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"45\" font-size=\"12\"><tspan>"
+            String period2_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"115\" font-size=\"12\"><tspan>"
                 + StringEscapeUtils.escapeXml( this.period ) + "</tspan></text></g>";
+
+            svg_ = svg_.replaceFirst( "</svg>", indicator2_ + period2_ + "</svg>" );
+        }
+
+        if ( this.includeLegends )
+        {
+            svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript2( 30, 115 ) + "</svg>" );
         }
 
         return new StringBuffer( svg_ );

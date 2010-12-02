@@ -829,7 +829,6 @@
 						document.getElementById('widthField').value = Ext.getCmp('exportimagewidth_cb').getValue();
 						document.getElementById('heightField').value = Ext.getCmp('exportimageheight_cb').getValue();
 						document.getElementById('includeLegendsField').value = Ext.getCmp('exportimageincludelegend_chb').getValue();
-						document.getElementById('legendsField').value = GLOBAL.util.getLegendsJSON();
 
 						exportForm.submit();
 						Ext.getCmp('exportimagetitle_tf').reset();

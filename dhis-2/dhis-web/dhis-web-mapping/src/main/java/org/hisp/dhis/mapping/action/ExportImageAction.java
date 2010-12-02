@@ -89,16 +89,16 @@ public class ExportImageAction
         this.title = title;
     }
 
-    private Integer indicator;
+    private String indicator;
 
-    public void setIndicator( Integer indicator )
+    public void setIndicator( String indicator )
     {
         this.indicator = indicator;
     }
     
-    private Integer indicator2;
+    private String indicator2;
 
-    public void setIndicator2( Integer indicator2 )
+    public void setIndicator2( String indicator2 )
     {
         this.indicator2 = indicator2;
     }
@@ -122,6 +122,13 @@ public class ExportImageAction
     public void setLegends( String legends )
     {
         this.legends = legends;
+    }
+
+    private String legends2;
+
+    public void setLegends2( String legends2 )
+    {
+        this.legends2 = legends2;
     }
 
     private boolean includeLegends;
@@ -165,32 +172,23 @@ public class ExportImageAction
         {
             log.info( "Export map from request" );
             
-            Indicator _indicator = indicatorService.getIndicator( indicator );
-            
-            DataElement _dataElement = dataElementService.getDataElement( indicator );
-            
             svgDocument = new SVGDocument();
             
             svgDocument.setTitle( title );
-            svgDocument.setSvg( svg );
-            
-            if ( _indicator != null )
-            {
-                svgDocument.setIndicator( _indicator );
-                svgDocument.setDataElement( null );
-            }
-            
-            else
-            {
-                svgDocument.setIndicator( null );
-                svgDocument.setDataElement( _dataElement );
-            }
-            
+            svgDocument.setSvg( svg );            
+            svgDocument.setIndicator( indicator );
             svgDocument.setPeriod( period );
             svgDocument.setLegends( legends );
             svgDocument.setIncludeLegends( includeLegends );
             svgDocument.setWidth( width );
             svgDocument.setHeight( height );
+            
+            if ( period2 == null || indicator2 == null || legends2 == null )
+            {
+                svgDocument.setIndicator2( indicator2 );
+                svgDocument.setPeriod2( period2 );
+                svgDocument.setLegends2( legends2 );
+            }
 
             SessionUtils.setSessionVar( SVGDOCUMENT, svgDocument );
         }
