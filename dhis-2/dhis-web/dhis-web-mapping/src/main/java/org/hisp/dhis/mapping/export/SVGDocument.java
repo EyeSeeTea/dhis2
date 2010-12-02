@@ -51,13 +51,17 @@ public class SVGDocument
     private String svg;
 
     private String legends;
+    
+    private String legends2;
 
     private String period;
-
-    private Indicator indicator;
     
-    private DataElement dataElement;
+    private String period2;
 
+    private String indicator;
+    
+    private String indicator2;
+    
     private boolean includeLegends;
 
     private int width;
@@ -70,13 +74,11 @@ public class SVGDocument
 
     public StringBuffer getSVGForImage()
     {
-        String indicatorName = this.indicator != null ? this.indicator.getName() : this.dataElement.getName();
-
         String title_ = "<g id=\"title\" style=\"display: block; visibility: visible;\"><text id=\"title\" x=\"30\" y=\"15\" font-size=\"14\" font-weight=\"bold\"><tspan>"
             + StringEscapeUtils.escapeXml( this.title ) + "</tspan></text></g>";
 
         String indicator_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"30\" font-size=\"12\"><tspan>"
-            + StringEscapeUtils.escapeXml( indicatorName ) + "</tspan></text></g>";
+            + StringEscapeUtils.escapeXml( indicator ) + "</tspan></text></g>";
 
         String period_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"45\" font-size=\"12\"><tspan>"
             + StringEscapeUtils.escapeXml( this.period ) + "</tspan></text></g>";
@@ -90,6 +92,15 @@ public class SVGDocument
         if ( this.includeLegends )
         {
             svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 30, 45 ) + "</svg>" );
+        }
+        
+        if ( indicator2 == null )
+        {
+            String indicator2_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"30\" font-size=\"12\"><tspan>"
+                + StringEscapeUtils.escapeXml( indicator ) + "</tspan></text></g>";
+
+            String period2_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"45\" font-size=\"12\"><tspan>"
+                + StringEscapeUtils.escapeXml( this.period ) + "</tspan></text></g>";
         }
 
         return new StringBuffer( svg_ );
@@ -185,6 +196,38 @@ public class SVGDocument
         return result;
     }
 
+    private String getLegendScript2( int x, int y )
+    {
+        String result = "<g id='legend'>";
+
+        JSONObject legend;
+
+        JSONObject json = (JSONObject) JSONSerializer.toJSON( this.legends );
+
+        JSONArray jsonLegends = json.getJSONArray( "legends" );
+
+        for ( int i = 0; i < jsonLegends.size(); i++ )
+        {
+            legend = jsonLegends.getJSONObject( i );
+            
+            String label = StringEscapeUtils.escapeXml( legend.getString( "label" ) );
+            
+            String color = StringEscapeUtils.escapeXml( legend.getString( "color" ) );
+            
+            result += "<rect x='" + x + "' y='" + (y + 15) + "' height='15' width='30' fill='" + color
+                + "' stroke='#000000' stroke-width='1'/>";
+
+            result += "<text id=\"indicator\" x='" + (x + 40) + "' y='" + (y + 27) + "' font-size=\"12\"><tspan>"
+                + label + "</tspan></text>";
+
+            y += 15;
+        }
+
+        result += "</g>";
+
+        return result;
+    }
+
     @Override
     public String toString()
     {
@@ -232,6 +275,16 @@ public class SVGDocument
         this.legends = legends;
     }
 
+    public String getLegends2()
+    {
+        return legends2;
+    }
+
+    public void setLegends2( String legends2 )
+    {
+        this.legends2 = legends2;
+    }
+
     public String getPeriod()
     {
         return period;
@@ -242,24 +295,34 @@ public class SVGDocument
         this.period = period;
     }
 
-    public Indicator getIndicator()
+    public String getPeriod2()
+    {
+        return period2;
+    }
+
+    public void setPeriod2( String period2 )
+    {
+        this.period2 = period2;
+    }
+
+    public String getIndicator()
     {
         return indicator;
     }
 
-    public void setIndicator( Indicator indicator )
+    public void setIndicator( String indicator )
     {
         this.indicator = indicator;
     }
 
-    public DataElement getDataElement()
+    public String getIndicator2()
     {
-        return dataElement;
+        return indicator;
     }
 
-    public void setDataElement( DataElement dataElement )
+    public void setIndicator2( String indicator2 )
     {
-        this.dataElement = dataElement;
+        this.indicator2 = indicator2;
     }
 
     public int getWidth()

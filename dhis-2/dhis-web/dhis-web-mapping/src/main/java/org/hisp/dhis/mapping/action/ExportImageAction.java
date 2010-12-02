@@ -95,12 +95,26 @@ public class ExportImageAction
     {
         this.indicator = indicator;
     }
+    
+    private Integer indicator2;
+
+    public void setIndicator2( Integer indicator2 )
+    {
+        this.indicator2 = indicator2;
+    }
 
     private String period;
 
     public void setPeriod( String period )
     {
         this.period = period;
+    }
+
+    private String period2;
+
+    public void setPeriod2( String period2 )
+    {
+        this.period2 = period2;
     }
 
     private String legends;
