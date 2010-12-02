@@ -757,9 +757,10 @@
                     if (Ext.getCmp('exportimagelayers_cb').getValue() == 1) {
 						if (choropleth.formValidation.validateForm()) {
 							values = choropleth.formValues.getImageExportValues.call(choropleth);
-							document.getElementById('periodField').value = values.dateValue;  
+							document.getElementById('layerField').value = 1;
+							document.getElementById('periodField').value = values.dateValue;
 							document.getElementById('indicatorField').value = values.mapValueTypeValue;
-							document.getElementById('legendsField').value = GLOBAL.util.getLegendsJSON(choropleth);
+							document.getElementById('legendsField').value = GLOBAL.util.getLegendsJSON.call(choropleth);
 							svgElement = document.getElementsByTagName('svg')[0];
 							svg = svgElement.parentNode.innerHTML;
 						}
@@ -771,9 +772,10 @@
 					else if (Ext.getCmp('exportimagelayers_cb').getValue() == 2) {
 						if (symbol.formValidation.validateForm()) {
 							values = symbol.formValues.getImageExportValues.call(symbol);
+							document.getElementById('layerField').value = 2;
 							document.getElementById('periodField').value = values.dateValue;  
 							document.getElementById('indicatorField').value = values.mapValueTypeValue;
-							document.getElementById('legendsField').value = GLOBAL.util.getLegendsJSON(symbol);
+							document.getElementById('legendsField').value = GLOBAL.util.getLegendsJSON.call(symbol);
 							svgElement = document.getElementsByTagName('svg')[1];
 							svg = svgElement.parentNode.innerHTML;
 						}
@@ -785,15 +787,17 @@
 					else if (Ext.getCmp('exportimagelayers_cb').getValue() == 3) {
 						if (choropleth.formValidation.validateForm()) {
 							if (symbol.formValidation.validateForm()) {
+								document.getElementById('layerField').value = 3;
+								
 								values = choropleth.formValues.getImageExportValues.call(choropleth);
 								document.getElementById('periodField').value = values.dateValue;
 								document.getElementById('indicatorField').value = values.mapValueTypeValue;
-								document.getElementById('legendsField').value = GLOBAL.util.getLegendsJSON(choropleth);
+								document.getElementById('legendsField').value = GLOBAL.util.getLegendsJSON.call(choropleth);
 								
 								values = symbol.formValues.getImageExportValues.call(symbol);
 								document.getElementById('periodField2').value = values.dateValue;
 								document.getElementById('indicatorField2').value = values.mapValueTypeValue;
-								document.getElementById('legendsField2').value = GLOBAL.util.getLegendsJSON(symbol);
+								document.getElementById('legendsField2').value = GLOBAL.util.getLegendsJSON.call(symbol);
 								
 								svgElement = document.getElementsByTagName('svg')[0];
 								var str1 = svgElement.parentNode.innerHTML;

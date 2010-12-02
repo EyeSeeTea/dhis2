@@ -240,7 +240,7 @@ GLOBAL.util = {
         for (var i = 0; i < mapValues.length; i++) {
             json += '{';
             json += '"organisation": "' + mapValues[i].orgUnitId + '",';
-            json += '"value": "' + mapValues[i].value + '" ';
+            json += '"value": "' + mapValues[i].value + '"';
             json += i < mapValues.length - 1 ? '},' : '}';
         }
         json += ']';
@@ -248,15 +248,15 @@ GLOBAL.util = {
         return json;
     },
 
-    getLegendsJSON: function(widget) {
+    getLegendsJSON: function() {
         var json = '{';
         json += '"legends":';
         json += '[';
-        for(var i = 0; i < widget.imageLegend.length; i++) {
+        for(var i = 0; i < this.imageLegend.length; i++) {
             json += '{';
-            json += '"label": "' + widget.imageLegend[i].label + '",';
-            json += '"color": "' + widget.imageLegend[i].color + '" ';
-            json += i < widget.imageLegend.length-1 ? '},' : '}';
+            json += '"label": "' + this.imageLegend[i].label + '",';
+            json += '"color": "' + this.imageLegend[i].color + '"';
+            json += i < this.imageLegend.length-1 ? '},' : '}';
         }
         json += ']';
         json += '}';

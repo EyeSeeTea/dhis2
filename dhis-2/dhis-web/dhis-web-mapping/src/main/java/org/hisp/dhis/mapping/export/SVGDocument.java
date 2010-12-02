@@ -49,6 +49,8 @@ public class SVGDocument
     private String title;
 
     private String svg;
+    
+    private Integer layer;
 
     private String legends;
     
@@ -74,40 +76,61 @@ public class SVGDocument
 
     public StringBuffer getSVGForImage()
     {
-        String title_ = "<g id=\"title\" style=\"display: block; visibility: visible;\"><text id=\"title\" x=\"30\" y=\"15\" font-size=\"14\" font-weight=\"bold\"><tspan>"
-            + StringEscapeUtils.escapeXml( this.title ) + "</tspan></text></g>";
-
-        String indicator_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"30\" font-size=\"12\"><tspan>"
-            + StringEscapeUtils.escapeXml( indicator ) + "</tspan></text></g>";
-
-        String period_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"45\" font-size=\"12\"><tspan>"
-            + StringEscapeUtils.escapeXml( this.period ) + "</tspan></text></g>";
-
         String svg_ = doctype + this.svg;
-
         svg_ = svg_.replaceFirst( "<svg", "<svg " + namespace );
 
-        svg_ = svg_.replaceFirst( "</svg>", title_ + indicator_ + period_ + "</svg>" );
+        String title_ = "<g id=\"title\" style=\"display: block; visibility: visible;\"><text id=\"title\" x=\"30\" y=\"20\" font-size=\"16\" font-weight=\"bold\"><tspan>"
+            + StringEscapeUtils.escapeXml( this.title ) + "</tspan></text></g>";
 
-        if ( this.includeLegends )
+        if ( this.layer != 3 ) // Polygon or point layer
         {
-            svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 30, 45 ) + "</svg>" );
+            String indicator_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"35\" font-size=\"12\"><tspan>"
+                + StringEscapeUtils.escapeXml( this.indicator ) + "</tspan></text></g>";
+    
+            String period_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"50\" font-size=\"12\"><tspan>"
+                + StringEscapeUtils.escapeXml( this.period ) + "</tspan></text></g>";
+    
+            svg_ = svg_.replaceFirst( "</svg>", title_ + indicator_ + period_ + "</svg>" );
+
+            if ( this.includeLegends )
+            {
+                svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 30, 45 ) + "</svg>" );
+            }
         }
         
-        if ( indicator2 == null )
+        else if ( this.layer == 3 ) // Both layers
         {
-            String indicator2_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"100\" font-size=\"12\"><tspan>"
-                + StringEscapeUtils.escapeXml( indicator ) + "</tspan></text></g>";
-
-            String period2_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"115\" font-size=\"12\"><tspan>"
+            String heading = "<g id=\"heading\" style=\"display: block; visibility: visible;\"><text id=\"heading\" x=\"30\" y=\"50\" font-size=\"12\" font-weight=\"bold\"><tspan>"
+                + "Polygons</tspan></text></g>";
+            
+            String indicator_ = "<g id=\"indicator\" style=\"display: block; visibility: visible;\"><text id=\"indicator\" x=\"30\" y=\"65\" font-size=\"12\"><tspan>"
+                + StringEscapeUtils.escapeXml( this.indicator ) + "</tspan></text></g>";
+    
+            String period_ = "<g id=\"period\" style=\"display: block; visibility: visible;\"><text id=\"period\" x=\"30\" y=\"80\" font-size=\"12\"><tspan>"
                 + StringEscapeUtils.escapeXml( this.period ) + "</tspan></text></g>";
+    
+            svg_ = svg_.replaceFirst( "</svg>", title_ + heading + indicator_ + period_ + "</svg>" );
 
-            svg_ = svg_.replaceFirst( "</svg>", indicator2_ + period2_ + "</svg>" );
-        }
+            if ( this.includeLegends )
+            {
+                svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 30, 75 ) + "</svg>" );
+            }
 
-        if ( this.includeLegends )
-        {
-            svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript2( 30, 115 ) + "</svg>" );
+            String heading2 = "<g id=\"heading2\" style=\"display: block; visibility: visible;\"><text id=\"heading2\" x=\"30\" y=\"220\" font-size=\"12\" font-weight=\"bold\"><tspan>"
+                + "Points</tspan></text></g>";
+            
+            String indicator2_ = "<g id=\"indicator2\" style=\"display: block; visibility: visible;\"><text id=\"indicator2\" x=\"30\" y=\"235\" font-size=\"12\"><tspan>"
+                + StringEscapeUtils.escapeXml( this.indicator2 ) + "</tspan></text></g>";
+
+            String period2_ = "<g id=\"period2\" style=\"display: block; visibility: visible;\"><text id=\"period2\" x=\"30\" y=\"250\" font-size=\"12\"><tspan>"
+                + StringEscapeUtils.escapeXml( this.period2 ) + "</tspan></text></g>";
+
+            svg_ = svg_.replaceFirst( "</svg>", heading2 + indicator2_ + period2_ + "</svg>" );
+
+            if ( this.includeLegends )
+            {
+                svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript2( 30, 245 ) + "</svg>" );
+            }
         }
 
         return new StringBuffer( svg_ );
@@ -176,7 +199,7 @@ public class SVGDocument
         String result = "<g id='legend'>";
 
         JSONObject legend;
-
+        
         JSONObject json = (JSONObject) JSONSerializer.toJSON( this.legends );
 
         JSONArray jsonLegends = json.getJSONArray( "legends" );
@@ -205,11 +228,11 @@ public class SVGDocument
 
     private String getLegendScript2( int x, int y )
     {
-        String result = "<g id='legend'>";
+        String result = "<g id='legend2'>";
 
         JSONObject legend;
-
-        JSONObject json = (JSONObject) JSONSerializer.toJSON( this.legends );
+        
+        JSONObject json = (JSONObject) JSONSerializer.toJSON( this.legends2 );
 
         JSONArray jsonLegends = json.getJSONArray( "legends" );
 
@@ -270,6 +293,16 @@ public class SVGDocument
     {
         this.svg = svg;
 
+    }
+
+    public Integer getLayer()
+    {
+        return layer;
+    }
+
+    public void setLayer( Integer layer )
+    {
+        this.layer = layer;
     }
 
     public String getLegends()

@@ -89,6 +89,13 @@ public class ExportImageAction
         this.title = title;
     }
 
+    private Integer layer;
+
+    public void setLayer( Integer layer )
+    {
+        this.layer = layer;
+    }    
+
     private String indicator;
 
     public void setIndicator( String indicator )
@@ -158,9 +165,11 @@ public class ExportImageAction
     protected String execute( HttpServletResponse response, OutputStream out )
         throws Exception
     {
-        log.info( "Exporting image, title: " + title + ", indicator: " + indicator + ", period: " + period + ", width: " + width + ", height: " + height );
+        log.info( "\n\n" + "Exporting image: \n" + " title: " + title + ", indicator: " + indicator + ", period: " + period + ", width: " + width + ", height: " + height);
         
-        log.info( "Legends: " + legends );
+        log.info( "\n\n" + "Legends: \n " + this.legends);
+        
+        log.info( "\n\n" + "Legends2: \n " + this.legends2);
         
         if ( svg == null || title == null || indicator == null || period == null || width == null || height == null )
         {
@@ -174,26 +183,27 @@ public class ExportImageAction
             
             svgDocument = new SVGDocument();
             
-            svgDocument.setTitle( title );
-            svgDocument.setSvg( svg );            
-            svgDocument.setIndicator( indicator );
-            svgDocument.setPeriod( period );
-            svgDocument.setLegends( legends );
-            svgDocument.setIncludeLegends( includeLegends );
-            svgDocument.setWidth( width );
-            svgDocument.setHeight( height );
+            svgDocument.setTitle( this.title );
+            svgDocument.setSvg( this.svg );
+            svgDocument.setLayer( this.layer );
+            svgDocument.setIndicator( this.indicator );
+            svgDocument.setPeriod( this.period );
+            svgDocument.setLegends( this.legends );
+            svgDocument.setIncludeLegends( this.includeLegends );
+            svgDocument.setWidth( this.width );
+            svgDocument.setHeight( this.height );
             
-            if ( period2 == null || indicator2 == null || legends2 == null )
+            if ( this.layer == 3 )
             {
-                svgDocument.setIndicator2( indicator2 );
-                svgDocument.setPeriod2( period2 );
-                svgDocument.setLegends2( legends2 );
+                svgDocument.setPeriod2( this.period2 );
+                svgDocument.setIndicator2( this.indicator2 );
+                svgDocument.setLegends2( this.legends2 );
             }
-
+            
             SessionUtils.setSessionVar( SVGDOCUMENT, svgDocument );
         }
         
-        SVGUtils.convertToPNG( svgDocument.getSVGForImage(), out, width, height );
+        SVGUtils.convertToPNG( svgDocument.getSVGForImage(), out, this.width, this.height );
 
         return SUCCESS;
     }
