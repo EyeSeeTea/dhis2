@@ -228,12 +228,14 @@ public class DefaultDataMartEngine
         Collection<Period> periods = periodService.getPeriods( periodIds );
         Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnits( organisationUnitIds );
         Collection<CalculatedDataElement> calculatedDataElements = dataElementService.getCalculatedDataElements( dataElementIds );
+        Collection<DataElement> nonCalculateddataElements = dataElementService.getDataElements( dataElementIds );
+        nonCalculateddataElements.removeAll( calculatedDataElements );
         
         // ---------------------------------------------------------------------
         // Filter and get operands
         // ---------------------------------------------------------------------
 
-        final Set<Integer> nonCalculatedDataElementIds = filterCalculatedDataElementIds( dataElementIds, false );
+        final Collection<Integer> nonCalculatedDataElementIds = ConversionUtils.getIdentifiers( DataElement.class, nonCalculateddataElements );
 
         final Set<Integer> dataElementInIndicatorIds = getDataElementIdsInIndicators( indicators );
         final Set<Integer> dataElementInCalculatedDataElementIds = getDataElementIdsInCalculatedDataElements( calculatedDataElements );
@@ -397,27 +399,6 @@ public class DefaultDataMartEngine
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Sorts calculated data elements from non-calculated based on the given
-     * collection of identifiers and flag.
-     */
-    private Set<Integer> filterCalculatedDataElementIds( final Collection<Integer> dataElementIds, boolean calculated )
-    {
-        final Set<Integer> identifiers = new HashSet<Integer>();
-
-        for ( final Integer id : dataElementIds )
-        {
-            final DataElement element = dataElementService.getDataElement( id );
-
-            if ( (element instanceof CalculatedDataElement) == calculated )
-            {
-                identifiers.add( id );
-            }
-        }
-
-        return identifiers;
-    }
 
     /**
      * Returns all data element identifiers included in the indicators in the
