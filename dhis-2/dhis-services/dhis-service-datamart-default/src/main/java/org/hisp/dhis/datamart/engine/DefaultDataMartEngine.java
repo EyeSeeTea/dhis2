@@ -33,7 +33,6 @@ import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 import static org.hisp.dhis.datamart.util.ParserUtil.getDataElementIdsInExpression;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,9 +53,11 @@ import org.hisp.dhis.datamart.calculateddataelement.CalculatedDataElementDataMar
 import org.hisp.dhis.datamart.crosstab.CrossTabService;
 import org.hisp.dhis.datamart.dataelement.DataElementDataMart;
 import org.hisp.dhis.datamart.indicator.IndicatorDataMart;
+import org.hisp.dhis.datamart.util.ParserUtil;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -220,14 +221,23 @@ public class DefaultDataMartEngine
         log.info( "Deleted existing aggregated data: " + TimeUtils.getHMS() );
 
         // ---------------------------------------------------------------------
+        // Get objects
+        // ---------------------------------------------------------------------
+
+        Collection<Indicator> indicators = indicatorService.getIndicators( indicatorIds );
+        Collection<Period> periods = periodService.getPeriods( periodIds );
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnits( organisationUnitIds );
+        Collection<CalculatedDataElement> calculatedDataElements = dataElementService.getCalculatedDataElements( dataElementIds );
+        Collection<DataElement> nonCalculatedDataElements = dataElementService.getDataElements( dataElementIds );
+        nonCalculatedDataElements.removeAll( calculatedDataElements );
+        
+        // ---------------------------------------------------------------------
         // Filter and get operands
         // ---------------------------------------------------------------------
 
-        final Set<Integer> nonCalculatedDataElementIds = filterCalculatedDataElementIds( dataElementIds, false );
-        final Set<Integer> calculatedDataElementIds = filterCalculatedDataElementIds( dataElementIds, true );
-
-        final Set<Integer> dataElementInIndicatorIds = getDataElementIdsInIndicators( indicatorIds );
-        final Set<Integer> dataElementInCalculatedDataElementIds = getDataElementIdsInCalculatedDataElements( calculatedDataElementIds );
+        final Collection<Integer> nonCalculatedDataElementIds = ConversionUtils.getIdentifiers( DataElement.class, nonCalculatedDataElements );
+        final Set<Integer> dataElementInIndicatorIds = getDataElementIdsInIndicators( indicators );
+        final Set<Integer> dataElementInCalculatedDataElementIds = getDataElementIdsInCalculatedDataElements( calculatedDataElements );
 
         final Set<Integer> allDataElementIds = new HashSet<Integer>();
         allDataElementIds.addAll( nonCalculatedDataElementIds );
@@ -243,13 +253,13 @@ public class DefaultDataMartEngine
         final Collection<DataElementOperand> nonCalculatedDataElementOperands = categoryService
             .getOperandsByIds( nonCalculatedDataElementIds );
 
-        final Collection<DataElementOperand> sumIntDataElementOperands = filterOperands(
+        final Collection<DataElementOperand> sumIntDataElementOperands = ParserUtil.filterOperands(
             nonCalculatedDataElementOperands, VALUE_TYPE_INT, AGGREGATION_OPERATOR_SUM );
-        final Collection<DataElementOperand> averageIntDataElementOperands = filterOperands(
+        final Collection<DataElementOperand> averageIntDataElementOperands = ParserUtil.filterOperands(
             nonCalculatedDataElementOperands, VALUE_TYPE_INT, AGGREGATION_OPERATOR_AVERAGE );
-        final Collection<DataElementOperand> sumBoolDataElementOperands = filterOperands(
+        final Collection<DataElementOperand> sumBoolDataElementOperands = ParserUtil.filterOperands(
             nonCalculatedDataElementOperands, VALUE_TYPE_BOOL, AGGREGATION_OPERATOR_SUM );
-        final Collection<DataElementOperand> averageBoolDataElementOperands = filterOperands(
+        final Collection<DataElementOperand> averageBoolDataElementOperands = ParserUtil.filterOperands(
             nonCalculatedDataElementOperands, VALUE_TYPE_BOOL, AGGREGATION_OPERATOR_AVERAGE );
 
         log.info( "Filtered data elements: " + TimeUtils.getHMS() );
@@ -278,8 +288,10 @@ public class DefaultDataMartEngine
         Collection<Integer> childrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren(
             organisationUnitIds );
 
+        Collection<Integer> intersectingPeriodIds = ConversionUtils.getIdentifiers( Period.class, periodService.getIntersectionPeriods( periods ) );
+        
         final Collection<DataElementOperand> emptyOperands = crossTabService.populateCrossTabTable(
-            allDataElementOperands, getIntersectingIds( periodIds ), childrenIds, key );
+            allDataElementOperands, intersectingPeriodIds, childrenIds, key );
         
         log.info( "Populated crosstab table: " + TimeUtils.getHMS() );
 
@@ -291,7 +303,7 @@ public class DefaultDataMartEngine
         crossTabService.trimCrossTabTable( emptyOperands, key );
 
         log.info( "Trimmed crosstab table: " + TimeUtils.getHMS() );
-        
+
         // ---------------------------------------------------------------------
         // Data element export
         // ---------------------------------------------------------------------
@@ -300,7 +312,7 @@ public class DefaultDataMartEngine
 
         if ( sumIntDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( sumIntDataElementOperands, periodIds, organisationUnitIds,
+            count += dataElementDataMart.exportDataValues( sumIntDataElementOperands, periods, organisationUnits,
                 sumIntAggregator, key );
 
             log.info( "Exported values for data element operands with sum aggregation operator of type number ("
@@ -309,8 +321,8 @@ public class DefaultDataMartEngine
 
         if ( averageIntDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periodIds,
-                organisationUnitIds, averageIntAggregator, key );
+            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periods,
+                organisationUnits, averageIntAggregator, key );
 
             log.info( "Exported values for data element operands with average aggregation operator of type number ("
                 + averageIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
@@ -318,17 +330,16 @@ public class DefaultDataMartEngine
 
         if ( averageIntDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periodIds,
-                organisationUnitIds, averageIntSingleValueAggregator, key );
+            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periods,
+                organisationUnits, averageIntSingleValueAggregator, key );
 
-            log
-                .info( "Exported values for data element operands with average aggregation operator with single value of type number ("
+            log.info( "Exported values for data element operands with average aggregation operator with single value of type number ("
                     + averageIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
         }
 
         if ( sumBoolDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( sumBoolDataElementOperands, periodIds, organisationUnitIds,
+            count += dataElementDataMart.exportDataValues( sumBoolDataElementOperands, periods, organisationUnits,
                 sumBoolAggregator, key );
 
             log.info( "Exported values for data element operands with sum aggregation operator of type yes/no ("
@@ -337,8 +348,8 @@ public class DefaultDataMartEngine
 
         if ( averageBoolDataElementOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( averageBoolDataElementOperands, periodIds,
-                organisationUnitIds, averageBoolAggregator, key );
+            count += dataElementDataMart.exportDataValues( averageBoolDataElementOperands, periods,
+                organisationUnits, averageBoolAggregator, key );
 
             log.info( "Exported values for data element operands with average aggregation operator of type yes/no ("
                 + averageBoolDataElementOperands.size() + "): " + TimeUtils.getHMS() );
@@ -350,12 +361,12 @@ public class DefaultDataMartEngine
         // Indicator export
         // ---------------------------------------------------------------------
 
-        if ( indicatorIds != null && indicatorIds.size() > 0 )
+        if ( indicators != null && indicators.size() > 0 )
         {
-            count += indicatorDataMart.exportIndicatorValues( indicatorIds, periodIds, organisationUnitIds,
+            count += indicatorDataMart.exportIndicatorValues( indicators, periods, organisationUnits,
                 dataElementInIndicatorOperands, key );
 
-            log.info( "Exported values for indicators (" + indicatorIds.size() + "): " + TimeUtils.getHMS() );
+            log.info( "Exported values for indicators (" + indicators.size() + "): " + TimeUtils.getHMS() );
         }
 
         state.setMessage( "exporting_data_for_calculated_data_elements" );
@@ -364,12 +375,12 @@ public class DefaultDataMartEngine
         // Calculated data element export
         // ---------------------------------------------------------------------
 
-        if ( calculatedDataElementIds != null && calculatedDataElementIds.size() > 0 )
+        if ( calculatedDataElements != null && calculatedDataElements.size() > 0 )
         {
-            count += calculatedDataElementDataMart.exportCalculatedDataElements( calculatedDataElementIds, periodIds,
-                organisationUnitIds, dataElementInCalculatedDataElementOperands, key );
+            count += calculatedDataElementDataMart.exportCalculatedDataElements( calculatedDataElements, periods,
+                organisationUnits, dataElementInCalculatedDataElementOperands, key );
 
-            log.info( "Exported values for calculated data elements (" + calculatedDataElementIds.size() + "): "
+            log.info( "Exported values for calculated data elements (" + calculatedDataElements.size() + "): "
                 + TimeUtils.getHMS() );
         }
 
@@ -389,38 +400,15 @@ public class DefaultDataMartEngine
     // -------------------------------------------------------------------------
 
     /**
-     * Sorts calculated data elements from non-calculated based on the given
-     * collection of identifiers and flag.
-     */
-    private Set<Integer> filterCalculatedDataElementIds( final Collection<Integer> dataElementIds, boolean calculated )
-    {
-        final Set<Integer> identifiers = new HashSet<Integer>();
-
-        for ( final Integer id : dataElementIds )
-        {
-            final DataElement element = dataElementService.getDataElement( id );
-
-            if ( (element instanceof CalculatedDataElement) == calculated )
-            {
-                identifiers.add( id );
-            }
-        }
-
-        return identifiers;
-    }
-
-    /**
      * Returns all data element identifiers included in the indicators in the
      * given identifier collection.
      */
-    private Set<Integer> getDataElementIdsInIndicators( final Collection<Integer> indicatorIds )
+    private Set<Integer> getDataElementIdsInIndicators( final Collection<Indicator> indicators )
     {
-        final Set<Integer> identifiers = new HashSet<Integer>( indicatorIds.size() );
+        final Set<Integer> identifiers = new HashSet<Integer>( indicators.size() );
 
-        for ( final Integer id : indicatorIds )
+        for ( final Indicator indicator : indicators )
         {
-            final Indicator indicator = indicatorService.getIndicator( id );
-
             identifiers.addAll( getDataElementIdsInExpression( indicator.getNumerator() ) );
             identifiers.addAll( getDataElementIdsInExpression( indicator.getDenominator() ) );
         }
@@ -432,13 +420,13 @@ public class DefaultDataMartEngine
      * Returns all data element identifiers included in the calculated data
      * elements in the given identifier collection.
      */
-    private Set<Integer> getDataElementIdsInCalculatedDataElements( final Collection<Integer> calculatedDataElementIds )
+    private Set<Integer> getDataElementIdsInCalculatedDataElements( final Collection<CalculatedDataElement> calculatedDataElements )
     {
         final Set<Integer> identifiers = new HashSet<Integer>();
 
-        for ( final Integer id : calculatedDataElementIds )
+        for ( final CalculatedDataElement calculatedDataElement : calculatedDataElements )
         {
-            final Set<DataElement> dataElements = expressionService.getDataElementsInCalculatedDataElement( id );
+            final Set<DataElement> dataElements = expressionService.getDataElementsInCalculatedDataElement( calculatedDataElement );
 
             if ( dataElements != null )
             {
@@ -447,46 +435,5 @@ public class DefaultDataMartEngine
         }
 
         return identifiers;
-    }
-
-    /**
-     * Returns the identifiers of the periods in the given collection including
-     * all intersecting periods.
-     */
-    private Collection<Integer> getIntersectingIds( final Collection<Integer> periodIds )
-    {
-        final Set<Integer> identifiers = new HashSet<Integer>( periodIds.size() );
-
-        for ( final Integer id : periodIds )
-        {
-            final Period period = periodService.getPeriod( id );
-
-            final Collection<Period> periods = periodService.getIntersectingPeriods( period.getStartDate(), period
-                .getEndDate() );
-
-            identifiers.addAll( ConversionUtils.getIdentifiers( Period.class, periods ) );
-        }
-
-        return identifiers;
-    }
-
-    /**
-     * Filters the data element operands based on the value type.
-     */
-    private Collection<DataElementOperand> filterOperands( Collection<DataElementOperand> operands, String valueType,
-        String aggregationOperator )
-    {
-        final Collection<DataElementOperand> filtered = new ArrayList<DataElementOperand>();
-
-        for ( DataElementOperand operand : operands )
-        {
-            if ( operand.getValueType().equals( valueType )
-                && operand.getAggregationOperator().equals( aggregationOperator ) )
-            {
-                filtered.add( operand );
-            }
-        }
-
-        return filtered;
     }
 }

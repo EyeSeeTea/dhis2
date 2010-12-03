@@ -43,7 +43,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
 import org.hisp.dhis.datamart.aggregation.dataelement.DataElementAggregator;
 import org.hisp.dhis.datamart.crosstab.CrossTabService;
@@ -52,7 +51,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 
 /**
@@ -67,13 +65,6 @@ public class DefaultCalculatedDataElementDataMart
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
-    }
     
     private OrganisationUnitService organisationUnitService;
 
@@ -109,13 +100,6 @@ public class DefaultCalculatedDataElementDataMart
     {
         this.crossTabService = crossTabService;
     }    
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
     
     private DataElementCategoryService categoryService;
 
@@ -142,20 +126,16 @@ public class DefaultCalculatedDataElementDataMart
     // CalculatedDataElementDataMart implementation
     // -------------------------------------------------------------------------
 
-    public int exportCalculatedDataElements( final Collection<Integer> calculatedDataElementIds, final Collection<Integer> periodIds,
-        final Collection<Integer> organisationUnitIds, final Collection<DataElementOperand> operands, String key )
+    public int exportCalculatedDataElements( final Collection<CalculatedDataElement> calculatedDataElements, final Collection<Period> periods,
+        final Collection<OrganisationUnit> organisationUnits, final Collection<DataElementOperand> operands, String key )
     {
         final Map<DataElementOperand, Integer> operandIndexMap = crossTabService.getOperandIndexMap( operands, key );
-        
-        final Collection<DataElement> calculatedDataElements = dataElementService.getDataElements( calculatedDataElementIds );       
-        final Collection<Period> periods = periodService.getPeriods( periodIds );
-        final Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnits( organisationUnitIds );
         
         final DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
         
         final BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
 
-        final OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnitIds );
+        final OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy().prepareChildren( organisationUnits );
         
         int count = 0;
 

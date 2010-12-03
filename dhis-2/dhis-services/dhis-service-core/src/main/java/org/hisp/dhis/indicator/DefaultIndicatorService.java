@@ -251,6 +251,26 @@ public class DefaultIndicatorService
         return i18n( i18nService, indicatorTypeStore.getByName( name ) );
     }    
 
+    public int getIndicatorTypeCount()
+    {
+        return indicatorTypeStore.getCount();
+    }
+
+    public int getIndicatorTypeCountByName( String name )
+    {
+        return indicatorTypeStore.getCountByName( name );
+    }
+
+    public Collection<IndicatorType> getIndicatorTypesBetween( int first, int max )
+    {
+        return i18n( i18nService, indicatorTypeStore.getBetween( first, max ) );
+    }
+
+    public Collection<IndicatorType> getIndicatorTypesBetweenByName( String name, int first, int max )
+    {
+        return i18n( i18nService, indicatorTypeStore.getBetweenByName( name, first, max ) );
+    }
+
     // -------------------------------------------------------------------------
     // IndicatorGroup
     // -------------------------------------------------------------------------
@@ -335,6 +355,26 @@ public class DefaultIndicatorService
         return groups;       
     }
 
+    public int getIndicatorGroupCount()
+    {
+        return indicatorGroupStore.getCount();
+    }
+
+    public int getIndicatorGroupCountByName( String name )
+    {
+        return indicatorGroupStore.getCountByName( name );
+    }
+
+    public Collection<IndicatorGroup> getIndicatorGroupsBetween( int first, int max )
+    {
+        return i18n( i18nService, indicatorGroupStore.getBetween( first, max ) );
+    }
+
+    public Collection<IndicatorGroup> getIndicatorGroupsBetweenByName( String name, int first, int max )
+    {
+        return i18n( i18nService, indicatorGroupStore.getBetweenByName( name, first, max ) );
+    }
+
     // -------------------------------------------------------------------------
     // IndicatorGroupSet
     // -------------------------------------------------------------------------
@@ -388,6 +428,26 @@ public class DefaultIndicatorService
                     return identifiers.contains( object.getId() );
                 }
             } );     
+    }
+
+    public int getIndicatorGroupSetCountByName( String name )
+    {
+        return indicatorGroupSetStore.getCountByName( name );
+    }
+
+    public int getIndicatorGroupSetCount()
+    {
+        return indicatorGroupSetStore.getCount();
+    }
+
+    public Collection<IndicatorGroupSet> getIndicatorGroupSetsBetween( int first, int max )
+    {
+        return i18n( i18nService, indicatorGroupSetStore.getBetween( first, max ) );
+    }
+
+    public Collection<IndicatorGroupSet> getIndicatorGroupSetsBetweenByName( String name, int first, int max )
+    {
+        return i18n( i18nService, indicatorGroupSetStore.getBetweenByName( name, first, max ) );
     }
 
 }

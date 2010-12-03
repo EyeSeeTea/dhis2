@@ -29,6 +29,8 @@ package org.hisp.dhis.indicator;
 
 import java.util.Collection;
 
+import org.hisp.dhis.dataelement.DataElementGroupSet;
+
 /**
  * @author Lars Helge Overland
  * @version $Id$
@@ -91,6 +93,14 @@ public interface IndicatorService
 
     IndicatorType getIndicatorTypeByName( String name );
 
+    Collection<IndicatorType> getIndicatorTypesBetween( int first, int max );
+    
+    Collection<IndicatorType> getIndicatorTypesBetweenByName( String name, int first, int max );
+    
+    int getIndicatorTypeCount();
+    
+    int getIndicatorTypeCountByName( String name );
+
     // -------------------------------------------------------------------------
     // IndicatorGroup
     // -------------------------------------------------------------------------
@@ -113,6 +123,14 @@ public interface IndicatorService
     
     Collection<IndicatorGroup> getGroupsContainingIndicator( Indicator indicator );
 
+    Collection<IndicatorGroup> getIndicatorGroupsBetween( int first, int max );
+    
+    Collection<IndicatorGroup> getIndicatorGroupsBetweenByName( String name, int first, int max );
+    
+    int getIndicatorGroupCount();
+    
+    int getIndicatorGroupCountByName( String name );
+
     // -------------------------------------------------------------------------
     // IndicatorGroupSet
     // -------------------------------------------------------------------------
@@ -130,4 +148,12 @@ public interface IndicatorService
     Collection<IndicatorGroupSet> getAllIndicatorGroupSets();
     
     Collection<IndicatorGroupSet> getIndicatorGroupSets( Collection<Integer> identifiers );
+    
+    Collection<IndicatorGroupSet> getIndicatorGroupSetsBetween( int first, int max );
+    
+    Collection<IndicatorGroupSet> getIndicatorGroupSetsBetweenByName( String name, int first, int max );
+    
+    int getIndicatorGroupSetCount();
+    
+    int getIndicatorGroupSetCountByName( String name );
 }

@@ -481,6 +481,7 @@
 			<param name="page">/dhis-web-maintenance-datadictionary/indicatorGroup.vm</param>
 			<param name="menu">/dhis-web-maintenance-datadictionary/menu.vm</param>
 			<param name="javascripts">javascript/indicatorGroup.js</param>
+			<param name="stylesheets">../dhis-web-commons/paging/paging.css</param>	
 		</action>
 
 		<action name="removeIndicatorGroup"
@@ -547,6 +548,7 @@
 			<param name="page">/dhis-web-maintenance-datadictionary/indicatorGroupSet.vm</param>
 			<param name="menu">/dhis-web-maintenance-datadictionary/menu.vm</param>
 			<param name="javascripts">javascript/indicatorGroupSet.js</param>
+			<param name="stylesheets">../dhis-web-commons/paging/paging.css</param>	
 		</action>
 
 		<action name="openAddIndicatorGroupSet"
@@ -605,7 +607,8 @@
 			class="org.hisp.dhis.dd.action.indicatortype.GetIndicatorTypeListAction">
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-datadictionary/indicatorType.vm</param>
-			<param name="menu">/dhis-web-maintenance-datadictionary/menu.vm</param>			
+			<param name="menu">/dhis-web-maintenance-datadictionary/menu.vm</param>		
+			<param name="stylesheets">../dhis-web-commons/paging/paging.css</param>	
 		</action>
 
 		<action name="getIndicatorType"
@@ -678,6 +681,7 @@
 			<param name="page">/dhis-web-maintenance-datadictionary/dataDictionary.vm</param>
 			<param name="menu">/dhis-web-maintenance-datadictionary/menu.vm</param>
 			<param name="javascripts">javascript/dataDictionary.js</param>
+			<param name="stylesheets">../dhis-web-commons/paging/paging.css</param>	
 		</action>
 
 		<action name="getDataDictionary"
