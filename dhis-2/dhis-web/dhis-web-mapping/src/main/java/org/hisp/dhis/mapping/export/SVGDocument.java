@@ -34,6 +34,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.indicator.Indicator;
 
+import sun.rmi.runtime.Log;
+
 /**
  * @author Tran Thanh Tri
  * @version $Id$
@@ -51,6 +53,8 @@ public class SVGDocument
     private String svg;
     
     private Integer layer;
+    
+    private Integer imageLegendRows;
 
     private String legends;
     
@@ -79,7 +83,7 @@ public class SVGDocument
         String svg_ = doctype + this.svg;
         svg_ = svg_.replaceFirst( "<svg", "<svg " + namespace );
 
-        String title_ = "<g id=\"title\" style=\"display: block; visibility: visible;\"><text id=\"title\" x=\"30\" y=\"20\" font-size=\"16\" font-weight=\"bold\"><tspan>"
+        String title_ = "<g id=\"title\" style=\"display: block; visibility: visible;\"><text id=\"title\" x=\"30\" y=\"20\" font-size=\"18\" font-weight=\"bold\"><tspan>"
             + StringEscapeUtils.escapeXml( this.title ) + "</tspan></text></g>";
 
         if ( this.layer != 3 ) // Polygon or point layer
@@ -115,21 +119,21 @@ public class SVGDocument
             {
                 svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript( 30, 75 ) + "</svg>" );
             }
-
-            String heading2 = "<g id=\"heading2\" style=\"display: block; visibility: visible;\"><text id=\"heading2\" x=\"30\" y=\"220\" font-size=\"12\" font-weight=\"bold\"><tspan>"
+            
+            String heading2 = "<g id=\"heading2\" style=\"display: block; visibility: visible;\"><text id=\"heading2\" x=\"30\" y=\"" + (120 + 15 * this.imageLegendRows) + "\" font-size=\"12\" font-weight=\"bold\"><tspan>"
                 + "Points</tspan></text></g>";
             
-            String indicator2_ = "<g id=\"indicator2\" style=\"display: block; visibility: visible;\"><text id=\"indicator2\" x=\"30\" y=\"235\" font-size=\"12\"><tspan>"
+            String indicator2_ = "<g id=\"indicator2\" style=\"display: block; visibility: visible;\"><text id=\"indicator2\" x=\"30\" y=\"" + (135 + 15 * this.imageLegendRows) + "\" font-size=\"12\"><tspan>"
                 + StringEscapeUtils.escapeXml( this.indicator2 ) + "</tspan></text></g>";
 
-            String period2_ = "<g id=\"period2\" style=\"display: block; visibility: visible;\"><text id=\"period2\" x=\"30\" y=\"250\" font-size=\"12\"><tspan>"
+            String period2_ = "<g id=\"period2\" style=\"display: block; visibility: visible;\"><text id=\"period2\" x=\"30\" y=\"" + (150 + 15 * this.imageLegendRows) + "\" font-size=\"12\"><tspan>"
                 + StringEscapeUtils.escapeXml( this.period2 ) + "</tspan></text></g>";
 
             svg_ = svg_.replaceFirst( "</svg>", heading2 + indicator2_ + period2_ + "</svg>" );
 
             if ( this.includeLegends )
             {
-                svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript2( 30, 245 ) + "</svg>" );
+                svg_ = svg_.replaceFirst( "</svg>", this.getLegendScript2( 30, (145 + 15 * this.imageLegendRows) ) + "</svg>" );
             }
         }
 
@@ -303,6 +307,16 @@ public class SVGDocument
     public void setLayer( Integer layer )
     {
         this.layer = layer;
+    }
+
+    public Integer getImageLegendRows()
+    {
+        return imageLegendRows;
+    }
+
+    public void setImageLegendRows( Integer imageLegendRows )
+    {
+        this.imageLegendRows = imageLegendRows;
     }
 
     public String getLegends()

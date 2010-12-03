@@ -94,7 +94,14 @@ public class ExportImageAction
     public void setLayer( Integer layer )
     {
         this.layer = layer;
-    }    
+    }
+    
+    private Integer imageLegendRows;
+
+    public void setImageLegendRows( Integer imageLegendRows )
+    {
+        this.imageLegendRows = imageLegendRows;
+    }
 
     private String indicator;
 
@@ -165,12 +172,6 @@ public class ExportImageAction
     protected String execute( HttpServletResponse response, OutputStream out )
         throws Exception
     {
-        log.info( "\n\n" + "Exporting image: \n" + " title: " + title + ", indicator: " + indicator + ", period: " + period + ", width: " + width + ", height: " + height);
-        
-        log.info( "\n\n" + "Legends: \n " + this.legends);
-        
-        log.info( "\n\n" + "Legends2: \n " + this.legends2);
-        
         if ( svg == null || title == null || indicator == null || period == null || width == null || height == null )
         {
             log.info( "Export map from session" );
@@ -195,6 +196,7 @@ public class ExportImageAction
             
             if ( this.layer == 3 )
             {
+                svgDocument.setImageLegendRows( this.imageLegendRows );
                 svgDocument.setPeriod2( this.period2 );
                 svgDocument.setIndicator2( this.indicator2 );
                 svgDocument.setLegends2( this.legends2 );

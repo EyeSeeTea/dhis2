@@ -788,6 +788,7 @@
 						if (choropleth.formValidation.validateForm()) {
 							if (symbol.formValidation.validateForm()) {
 								document.getElementById('layerField').value = 3;
+								document.getElementById('imageLegendRowsField').value = choropleth.imageLegend.length;
 								
 								values = choropleth.formValues.getImageExportValues.call(choropleth);
 								document.getElementById('periodField').value = values.dateValue;
