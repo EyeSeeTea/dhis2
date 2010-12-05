@@ -186,8 +186,7 @@ public class DataElementOperand
         formula = formula.replaceAll( "[\\[\\]]", "" ); //TODO fix
         
         final int dataElementId = Integer.parseInt( formula.substring( 0, formula.indexOf( SEPARATOR ) ) );
-        final int categoryOptionComboId = Integer.parseInt( formula.substring( formula.indexOf( SEPARATOR ) + 1,
-            formula.length() ) );
+        final int categoryOptionComboId = Integer.parseInt( formula.substring( formula.indexOf( SEPARATOR ) + 1, formula.length() ) );
 
         return new DataElementOperand( dataElementId, categoryOptionComboId );
     }
