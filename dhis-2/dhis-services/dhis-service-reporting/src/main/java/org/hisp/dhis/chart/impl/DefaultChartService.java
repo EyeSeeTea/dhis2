@@ -27,9 +27,9 @@ package org.hisp.dhis.chart.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.chart.Chart.DIMENSION_INDICATOR;
 import static org.hisp.dhis.chart.Chart.DIMENSION_ORGANISATIONUNIT;
 import static org.hisp.dhis.chart.Chart.DIMENSION_PERIOD;
-import static org.hisp.dhis.chart.Chart.DIMENSION_INDICATOR;
 import static org.hisp.dhis.chart.Chart.SIZE_NORMAL;
 import static org.hisp.dhis.chart.Chart.TYPE_BAR;
 import static org.hisp.dhis.chart.Chart.TYPE_LINE;
