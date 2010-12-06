@@ -55,6 +55,11 @@ import org.hisp.dhis.system.util.MathUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * The expression is a string describing a formula containing data element ids and
+ * category option combo ids. The formula can potentially contain references to
+ * category totals (also called sub-totals) and data element totals (also called
+ * totals).
+ * 
  * @author Margrethe Store
  * @author Lars Helge Overland
  * @version $Id: DefaultExpressionService.java 6463 2008-11-24 12:05:46Z larshelg $
@@ -66,12 +71,11 @@ public class DefaultExpressionService
     private static final Log log = LogFactory.getLog( DefaultExpressionService.class );
     
     private static final String NULL_REPLACEMENT = "0";
-    private static final String FORMULA_EXPRESSION = "(\\[\\d+\\" + SEPARATOR + "\\d+\\])";
-    private static final String DESCRIPTION_EXPRESSION = "\\[.+?\\" + SEPARATOR + ".+?\\]";
     private static final String SPACE = " ";
     
+    private static final String FORMULA_EXPRESSION = "\\[.+?\\]";
+    
     private final Pattern FORMULA_PATTERN = Pattern.compile( FORMULA_EXPRESSION );
-    private final Pattern DESCRIPTION_PATTERN = Pattern.compile( DESCRIPTION_EXPRESSION );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -152,11 +156,6 @@ public class DefaultExpressionService
         return expressionString != null ? calculateExpression( expressionString ) : null;
     }    
     
-    public Set<DataElement> getDataElementsInCalculatedDataElement( CalculatedDataElement calculatedDataElement )
-    {
-        return calculatedDataElement != null ? getDataElementsInExpression( calculatedDataElement.getExpression().getExpression() ) : null;
-    }
-
     public Set<DataElement> getDataElementsInExpression( String expression )
     {
         Set<DataElement> dataElementsInExpression = null;
@@ -169,7 +168,7 @@ public class DefaultExpressionService
             
             while ( matcher.find() )
             {
-                final DataElement dataElement = dataElementService.getDataElement( getOperand( matcher.group() ).getDataElementId() );
+                final DataElement dataElement = dataElementService.getDataElement( DataElementOperand.getOperand( matcher.group() ).getDataElementId() );
 
                 if ( dataElement != null )
                 {
@@ -192,8 +191,8 @@ public class DefaultExpressionService
             while ( matcher.find() )
             {
                 String match = matcher.group();
-
-                final DataElementOperand operand = getOperand( match );
+                
+                final DataElementOperand operand = DataElementOperand.getOperand( match );
                 
                 final Integer mappedDataElementId = dataElementMapping.get( operand.getDataElementId() );
                 final Integer mappedCategoryOptionComboId = categoryOptionComboMapping.get( operand.getOptionComboId() );
@@ -236,7 +235,7 @@ public class DefaultExpressionService
 
             while ( matcher.find() )
             {
-                operandsInExpression.add( getOperand( matcher.group() ) );
+                operandsInExpression.add( DataElementOperand.getOperand( matcher.group() ) );
             }
         }
 
@@ -250,56 +249,39 @@ public class DefaultExpressionService
             return EXPRESSION_IS_EMPTY;
         }
         
-        StringBuffer buffer = new StringBuffer();
+        final StringBuffer buffer = new StringBuffer();
         
-        final Matcher matcher = DESCRIPTION_PATTERN.matcher( formula );
-
-        int dataElementId = -1;
-        int categoryOptionComboId = -1;
+        final Matcher matcher = FORMULA_PATTERN.matcher( formula );
 
         while ( matcher.find() )
         {
-            String match = matcher.group();
-
-            match = match.replaceAll( "[\\[\\]]", "" );
-
-            final String dataElementIdString = match.substring( 0, match.indexOf( SEPARATOR ) );
-            final String categoryOptionComboIdString = match.substring( match.indexOf( SEPARATOR ) + 1, match.length() );
-
+            DataElementOperand operand = null;
+            
             try
             {
-                dataElementId = Integer.parseInt( dataElementIdString );
+                operand = DataElementOperand.getOperand( matcher.group() );
             }
             catch ( NumberFormatException ex )
             {
-                return DATAELEMENT_ID_NOT_NUMERIC;
+                return ID_NOT_NUMERIC;
             }
 
-            try
-            {
-                categoryOptionComboId = Integer.parseInt( categoryOptionComboIdString );
-            }
-            catch ( NumberFormatException ex )
-            {
-                return CATEGORYOPTIONCOMBO_ID_NOT_NUMERIC;
-            }
-
-            if ( !dataElementService.dataElementExists( dataElementId  ) )
+            if ( !dataElementService.dataElementExists( operand.getDataElementId()  ) )
             {
                 return DATAELEMENT_DOES_NOT_EXIST;
             }
 
-            if ( !dataElementService.dataElementCategoryOptionComboExists( categoryOptionComboId ) )
+            if ( !operand.isTotal() && !dataElementService.dataElementCategoryOptionComboExists( operand.getOptionComboId() ) )
             {
                 return CATEGORYOPTIONCOMBO_DOES_NOT_EXIST;
             }
 
             // -----------------------------------------------------------------
-            // Replacing the operand with 1 in order to later be able to verify
+            // Replacing the operand with 1.1 in order to later be able to verify
             // that the formula is mathematically valid
             // -----------------------------------------------------------------
 
-            matcher.appendReplacement( buffer, "1.0" );
+            matcher.appendReplacement( buffer, "1.1" );
         }
         
         matcher.appendTail( buffer );
@@ -320,13 +302,13 @@ public class DefaultExpressionService
         {
             buffer = new StringBuffer();
 
-            final Matcher matcher = DESCRIPTION_PATTERN.matcher( formula );
+            final Matcher matcher = FORMULA_PATTERN.matcher( formula );
 
             while ( matcher.find() )
             {
                 String replaceString = matcher.group();
                 
-                final DataElementOperand operand = getOperand( replaceString );
+                final DataElementOperand operand = DataElementOperand.getOperand( replaceString );
                 
                 final DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
                 final DataElementCategoryOptionCombo categoryOptionCombo = 
@@ -419,7 +401,7 @@ public class DefaultExpressionService
             {
                 String replaceString = matcher.group();
 
-                final DataElementOperand operand = getOperand( replaceString );
+                final DataElementOperand operand = DataElementOperand.getOperand( replaceString );
                 
                 String value = null;
               
@@ -449,19 +431,4 @@ public class DefaultExpressionService
 
         return buffer != null ? buffer.toString() : null;
     }
-    
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-    
-    private DataElementOperand getOperand( String formula )
-    {
-        formula = formula.replaceAll( "[\\[\\]]", "" );
-        
-        final int dataElementId = Integer.parseInt( formula.substring( 0, formula.indexOf( SEPARATOR ) ) );
-        final int categoryOptionComboId = Integer.parseInt( formula.substring( formula.indexOf( SEPARATOR ) + 1, formula.length() ) );
-        
-        return new DataElementOperand( dataElementId, categoryOptionComboId ); 
-    }
-
 }

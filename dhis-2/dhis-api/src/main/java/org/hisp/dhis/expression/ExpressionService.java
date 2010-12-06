@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.period.Period;
@@ -50,8 +49,7 @@ public interface ExpressionService
     
     final String VALID = "valid";
     final String EXPRESSION_IS_EMPTY = "expression_is_empty";
-    final String DATAELEMENT_ID_NOT_NUMERIC = "dataelement_id_not_numeric";
-    final String CATEGORYOPTIONCOMBO_ID_NOT_NUMERIC = "category_option_combo_id_not_numeric";
+    final String ID_NOT_NUMERIC = "id_not_numeric";
     final String DATAELEMENT_DOES_NOT_EXIST = "data_element_does_not_exist";
     final String CATEGORYOPTIONCOMBO_DOES_NOT_EXIST = "category_option_combo_does_not_exist";
     final String EXPRESSION_NOT_WELL_FORMED = "expression_not_well_formed";
@@ -108,14 +106,6 @@ public interface ExpressionService
      *         DataElement, Source, and Period.
      */
     Double getExpressionValue( Expression expression, Period period, Source source, boolean nullIfNoValues, boolean aggregate );
-    
-    /**
-     * Returns all DataElements associated with the CalculatedDataElement.
-     * 
-     * @param id the CalculatedDataElement identifier.
-     * @return a Set of DataElements.
-     */
-    Set<DataElement> getDataElementsInCalculatedDataElement( CalculatedDataElement calculatedDataElement );
     
     /**
      * Returns all DataElements included in the given expression string.

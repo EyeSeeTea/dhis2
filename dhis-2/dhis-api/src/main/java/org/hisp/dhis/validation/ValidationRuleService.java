@@ -235,5 +235,22 @@ public interface ValidationRuleService
      * 
      * @param name the name of the ValidationRuleGroup.
      */
-    ValidationRuleGroup getValidationRuleGroupByName( String name );    
+    ValidationRuleGroup getValidationRuleGroupByName( String name );  
+    
+    Collection<ValidationRule> getValidationRulesBetween( int first, int max );
+    
+    Collection<ValidationRule> getValidationRulesBetweenByName( String name, int first, int max );
+    
+    int getValidationRuleCount();
+    
+    int getValidationRuleCountByName( String name );
+    
+    Collection<ValidationRuleGroup> getValidationRuleGroupsBetween( int first, int max );
+    
+    Collection<ValidationRuleGroup> getValidationRuleGroupsBetweenByName( String name, int first, int max );
+    
+    int getValidationRuleGroupCount();
+    
+    int getValidationRuleGroupCountByName( String name );
+
 }

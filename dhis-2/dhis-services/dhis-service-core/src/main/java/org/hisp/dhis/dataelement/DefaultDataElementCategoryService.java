@@ -39,7 +39,6 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.period.TwoYearlyPeriodType;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
@@ -389,44 +388,47 @@ public class DefaultDataElementCategoryService
         return categoryCombo.getOptionCombos().iterator().next();
     }
 
-    public Collection<DataElementOperand> getOperandsByIds( Collection<Integer> dataElementIdentifiers )
+    public Collection<DataElementOperand> populateOperands( Collection<DataElementOperand> operands )
     {
-        Collection<DataElement> dataElements = dataElementService.getDataElements( dataElementIdentifiers );
-
-        return getOperands( dataElements );
+        for ( DataElementOperand operand : operands )
+        {
+            DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
+            DataElementCategoryOptionCombo categoryOptionCombo = getDataElementCategoryOptionCombo( operand.getOptionComboId() );
+            
+            operand.updateProperties( dataElement, categoryOptionCombo );
+        }
+        
+        return operands;
     }
-
+    
     public Collection<DataElementOperand> getOperands( Collection<DataElement> dataElements )
     {
         Collection<DataElementOperand> operands = new ArrayList<DataElementOperand>();
 
         for ( DataElement dataElement : dataElements )
         {
-            Set<DataElementCategoryOptionCombo> categoryOptionCombos = dataElement.getCategoryCombo().getOptionCombos();
-
-            int frequencyOrder = dataElement.getPeriodType() != null ? dataElement.getPeriodType().getFrequencyOrder()
-                : TwoYearlyPeriodType.FREQUENCY_ORDER; // Assume lowest
-            // frequency if no
-            // PeriodType
-
-            if ( categoryOptionCombos.size() > 1 && !(dataElement instanceof CalculatedDataElement) )
+            for ( DataElementCategoryOptionCombo categoryOptionCombo : dataElement.getCategoryCombo().getOptionCombos() )
             {
-                for ( DataElementCategoryOptionCombo optionCombo : categoryOptionCombos )
-                {
-                    DataElementOperand operand = new DataElementOperand( dataElement.getId(), optionCombo.getId(),
-                        dataElement.getName() + optionCombo.getName(), dataElement.getType(), dataElement
-                            .getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ),
-                        frequencyOrder );
+                DataElementOperand operand = new DataElementOperand();
+                operand.updateProperties( dataElement, categoryOptionCombo );
 
-                    operands.add( operand );
-                }
+                operands.add( operand );
             }
-            else
+        }
+
+        return operands;
+    }
+
+    public Collection<DataElementOperand> getFullOperands( Collection<DataElement> dataElements )
+    {
+        Collection<DataElementOperand> operands = new ArrayList<DataElementOperand>();
+
+        for ( DataElement dataElement : dataElements )
+        {
+            for ( DataElementCategoryOptionCombo categoryOptionCombo : dataElement.getCategoryCombo().getOptionCombos() )
             {
-                DataElementOperand operand = new DataElementOperand( dataElement.getId(), categoryOptionCombos
-                    .iterator().next().getId(), dataElement.getName(), dataElement.getType(), dataElement
-                    .getAggregationOperator(), new ArrayList<Integer>( dataElement.getAggregationLevels() ),
-                    frequencyOrder );
+                DataElementOperand operand = new DataElementOperand( dataElement, categoryOptionCombo );
+                operand.updateProperties( dataElement, categoryOptionCombo );
 
                 operands.add( operand );
             }
@@ -666,43 +668,5 @@ public class DefaultDataElementCategoryService
         }
 
         return optionsMap;
-    }
-
-    @Override
-    public Collection<DataElementOperand> getFullOperands( Collection<DataElement> dataElements )
-    {
-        Collection<DataElementOperand> operands = new ArrayList<DataElementOperand>();
-
-        for ( DataElement dataElement : dataElements )
-        {
-            Set<DataElementCategoryOptionCombo> categoryOptionCombos = dataElement.getCategoryCombo().getOptionCombos();
-            
-            if ( categoryOptionCombos.size() > 1 && !(dataElement instanceof CalculatedDataElement) )
-            {
-                for ( DataElementCategoryOptionCombo optionCombo : categoryOptionCombos )
-                {
-
-                    DataElementOperand operand = new DataElementOperand();
-                    operand.setDataElement( dataElement );
-                    operand.setCategoryOptionCombo( optionCombo );
-                    operand.updateProperties();
-
-                    operands.add( operand );
-                }
-            }
-            else
-            {
-
-                DataElementOperand operand = new DataElementOperand();
-                operand.setDataElement( dataElement );
-                operand.setCategoryOptionCombo( categoryOptionCombos.iterator().next() );
-                operand.updateProperties();
-
-                operands.add( operand );
-
-            }
-        }
-
-        return operands;
     }
 }
