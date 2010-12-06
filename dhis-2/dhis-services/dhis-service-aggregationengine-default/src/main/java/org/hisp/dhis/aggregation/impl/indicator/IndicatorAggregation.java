@@ -41,6 +41,7 @@ import org.hisp.dhis.aggregation.impl.cache.AggregationCache;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -162,30 +163,19 @@ public class IndicatorAggregation
             
             while ( matcher.find() )
             {
-                String replaceString = matcher.group().replaceAll( "[\\[\\]]", "" );
+                String match = matcher.group().replaceAll( "[\\[\\]]", "" );
                 
-                String dataElementIdString = replaceString.substring( 0, replaceString.indexOf( SEPARATOR ) );                
-                String optionComboIdString = replaceString.substring( replaceString.indexOf( SEPARATOR ) + 1, replaceString.length() );
+                DataElementOperand operand = DataElementOperand.getOperand( match );
                 
-                int dataElementId = Integer.parseInt( dataElementIdString );
-                int optionComboId = Integer.parseInt( optionComboIdString );             
+                DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
                 
-                DataElement dataElement = dataElementService.getDataElement( dataElementId );
-                
-                DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
+                DataElementCategoryOptionCombo optionCombo = !operand.isTotal() ? categoryService.getDataElementCategoryOptionCombo( operand.getOptionComboId() ) : null;
 
                 Double aggregatedValue = aggregationCache.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );                
                 
-                if ( aggregatedValue == null )
-                {
-                    replaceString = NULL_REPLACEMENT;
-                }
-                else
-                {
-                    replaceString = String.valueOf( aggregatedValue );
-                }
-
-                matcher.appendReplacement( buffer, replaceString );
+                match = aggregatedValue == null ? NULL_REPLACEMENT : String.valueOf( aggregatedValue );
+                
+                matcher.appendReplacement( buffer, match );
             }
 
             matcher.appendTail( buffer );
