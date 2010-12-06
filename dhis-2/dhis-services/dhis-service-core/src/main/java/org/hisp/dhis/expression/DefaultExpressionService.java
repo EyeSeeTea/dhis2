@@ -71,11 +71,6 @@ public class DefaultExpressionService
 {
     private static final Log log = LogFactory.getLog( DefaultExpressionService.class );
     
-    private static final String NULL_REPLACEMENT = "0";
-    private static final String SPACE = " ";
-    
-    private static final String FORMULA_EXPRESSION = "\\[.+?\\]";
-    
     private final Pattern FORMULA_PATTERN = Pattern.compile( FORMULA_EXPRESSION );
 
     // -------------------------------------------------------------------------
@@ -307,9 +302,9 @@ public class DefaultExpressionService
 
             while ( matcher.find() )
             {
-                String replaceString = matcher.group();
+                String match = matcher.group();
                 
-                final DataElementOperand operand = DataElementOperand.getOperand( replaceString );
+                final DataElementOperand operand = DataElementOperand.getOperand( match );
                 
                 final DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
                 final DataElementCategoryOptionCombo categoryOptionCombo = 
@@ -327,14 +322,14 @@ public class DefaultExpressionService
                         + operand.getOptionComboId() );
                 }
 
-                replaceString = dataElement.getName();
+                match = dataElement.getName();
                 
                 if ( !categoryOptionCombo.isDefault() )
                 {
-                    replaceString += SPACE + categoryOptionCombo.getName();
+                    match += SPACE + categoryOptionCombo.getName();
                 }
 
-                matcher.appendReplacement( buffer, replaceString );
+                matcher.appendReplacement( buffer, match );
             }
 
             matcher.appendTail( buffer );
@@ -400,9 +395,7 @@ public class DefaultExpressionService
             
             while ( matcher.find() )
             {
-                String match = matcher.group();
-                
-                final DataElementOperand operand = DataElementOperand.getOperand( match );
+                final DataElementOperand operand = DataElementOperand.getOperand( matcher.group() );
 
                 if ( operand.isTotal() )
                 {
@@ -441,9 +434,9 @@ public class DefaultExpressionService
 
             while ( matcher.find() )
             {
-                String replaceString = matcher.group();
+                String match = matcher.group();
 
-                final DataElementOperand operand = DataElementOperand.getOperand( replaceString );
+                final DataElementOperand operand = DataElementOperand.getOperand( match );
                 
                 String value = null;
               
@@ -463,9 +456,9 @@ public class DefaultExpressionService
                     return null;
                 }
                 
-                replaceString = ( value == null ) ? NULL_REPLACEMENT : value;
+                match = ( value == null ) ? NULL_REPLACEMENT : value;
                 
-                matcher.appendReplacement( buffer, replaceString );
+                matcher.appendReplacement( buffer, match );
             }
 
             matcher.appendTail( buffer );

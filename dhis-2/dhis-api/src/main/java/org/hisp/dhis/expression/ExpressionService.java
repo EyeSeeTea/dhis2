@@ -53,6 +53,11 @@ public interface ExpressionService
     final String DATAELEMENT_DOES_NOT_EXIST = "data_element_does_not_exist";
     final String CATEGORYOPTIONCOMBO_DOES_NOT_EXIST = "category_option_combo_does_not_exist";
     final String EXPRESSION_NOT_WELL_FORMED = "expression_not_well_formed";
+
+    final String NULL_REPLACEMENT = "0";
+    final String SPACE = " ";
+    
+    final String FORMULA_EXPRESSION = "\\[.+?\\]";
     
     /**
      * Adds a new Expression to the database.
