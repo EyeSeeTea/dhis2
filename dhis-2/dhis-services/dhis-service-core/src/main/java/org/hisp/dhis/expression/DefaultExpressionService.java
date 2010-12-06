@@ -27,7 +27,7 @@ package org.hisp.dhis.expression;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.expression.Expression.SEPARATOR;
+import static org.hisp.dhis.expression.Expression.*;
 import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 
 import java.util.Collection;
@@ -44,6 +44,7 @@ import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -211,7 +212,7 @@ public class DefaultExpressionService
                 }
                 else
                 {
-                    match = "[" + mappedDataElementId + SEPARATOR + mappedCategoryOptionComboId + "]";
+                    match = EXP_OPEN + mappedDataElementId + SEPARATOR + mappedCategoryOptionComboId + EXP_CLOSE;
                 }
                 
                 matcher.appendReplacement( convertedFormula, match );
@@ -320,7 +321,7 @@ public class DefaultExpressionService
                         + operand.getDataElementId() );
                 }
 
-                if ( categoryOptionCombo == null )
+                if ( !operand.isTotal() && categoryOptionCombo == null )
                 {
                     throw new IllegalArgumentException( "Identifier does not reference a category option combo: "
                         + operand.getOptionComboId() );
@@ -370,7 +371,7 @@ public class DefaultExpressionService
 
                 for ( DataElement dataElement : caclulatedDataElementsInExpression )
                 {
-                    if ( replaceString.startsWith( "[" + dataElement.getId() + SEPARATOR ) )
+                    if ( replaceString.startsWith( EXP_OPEN + dataElement.getId() + SEPARATOR ) )
                     {
                         replaceString = ((CalculatedDataElement) dataElement).getExpression().getExpression();
 
@@ -387,6 +388,47 @@ public class DefaultExpressionService
         return buffer != null ? buffer.toString() : null;
     }
 
+    public String explodeExpression( String expression )
+    {
+        StringBuffer buffer = null;
+        
+        if ( expression != null )
+        {
+            final Matcher matcher = FORMULA_PATTERN.matcher( expression );
+            
+            buffer = new StringBuffer();
+            
+            while ( matcher.find() )
+            {
+                String match = matcher.group();
+                
+                final DataElementOperand operand = DataElementOperand.getOperand( match );
+
+                if ( operand.isTotal() )
+                {
+                    StringBuilder replace = new StringBuilder();
+                    
+                    DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
+                    
+                    DataElementCategoryCombo categoryCombo = dataElement.getCategoryCombo();
+                    
+                    for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryCombo.getOptionCombos() )
+                    {
+                        replace.append( EXP_OPEN ).append( dataElement.getId() ).append( SEPARATOR ).append( categoryOptionCombo.getId() ).append( EXP_CLOSE ).append( "+" );
+                    }
+                    
+                    replace.deleteCharAt( replace.length() - 1 );
+                    
+                    matcher.appendReplacement( buffer, replace.toString() );
+                }
+            }
+            
+            matcher.appendTail( buffer );
+        }
+        
+        return buffer != null ? buffer.toString() : null;
+    }
+    
     public String generateExpression( String expression, Period period, Source source, boolean nullIfNoValues, boolean aggregated )
     {
         StringBuffer buffer = null;

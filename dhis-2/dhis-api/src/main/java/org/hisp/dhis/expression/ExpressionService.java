@@ -174,6 +174,15 @@ public interface ExpressionService
     String replaceCDEsWithTheirExpression( String expression );
     
     /**
+     * Replaces references to data element totals with references to all
+     * category option combos in the category combo for that data element.
+     * 
+     * @param expression the expression to explode.
+     * @return the exploded expression string.
+     */
+    String explodeExpression( String expression );
+    
+    /**
      * Converts an expression on the form [34] + [23], where the numbers are 
      * IDs of DataElements, to the form 200 + 450, where the numbers are the 
      * values of the DataValues registered for the Period and Source. "0" is
