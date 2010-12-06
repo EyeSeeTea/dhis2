@@ -205,6 +205,9 @@
 .x-btn .icon-help {
 	background-image:url(../../../images/help2.png);
 }
+.x-btn .icon-admin {
+	background-image:url(../../../images/settings.png);
+}
 .aa_med button {
 	color:#333;
     padding-bottom:2px;
@@ -320,6 +323,12 @@
 	font:bold 11px arial;
 	color:#111;
 }
+#window-admin-title {
+	padding:0 0 3px 21px;
+	background:url('../../../images/settings.png') no-repeat 0 0 transparent;
+	font:bold 11px arial;
+	color:#111;
+}
 #window-maplayer-title {
 	padding:0 0 3px 0px;
 	font:bold 11px arial;
@@ -346,7 +355,7 @@
 	color:#333;
 }
 .x-panel-header {
-    font-family: lucida sans unicode,ubuntu,arial,tahoma;
+    font-family:lucida sans unicode,ubuntu,arial,tahoma;
 }
 
 /* Msg */

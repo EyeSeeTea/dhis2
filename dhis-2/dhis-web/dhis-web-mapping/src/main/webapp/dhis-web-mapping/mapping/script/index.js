@@ -1987,7 +1987,7 @@
     
     var adminWindow = new Ext.Window({
         id: 'admin_w',
-        title: '<span class="panel-title">Administrator settings</span>',
+        title: '<span id="window-admin-title">Administrator settings</span>',
         layout: 'accordion',
         defaults: {bodyStyle:'padding:8px; border:0px'},
         width: 250,
