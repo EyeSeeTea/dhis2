@@ -358,6 +358,11 @@
     font-family:lucida sans unicode,ubuntu,arial,tahoma;
 }
 
+/* Ext TabPanel */
+.x-tab-panel-body {
+    border-color:#ffffff;
+}
+
 /* Msg */
 .x-msg-hl {
 	font-weight:bold;
