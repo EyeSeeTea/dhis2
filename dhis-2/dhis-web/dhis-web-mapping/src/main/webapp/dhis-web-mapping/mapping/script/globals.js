@@ -14,16 +14,15 @@ GLOBAL.conf = {
 	output: '&outputformat=json&version=1.0.0',
 	
 //	Help strings
-
+    
+    setup: 'gisSetup',
 	thematicMap: 'gisThematicMap',
     thematicMap2: 'gisThematicMap2',
-	mapRegistration: 'gisMap',
-	organisationUnitAssignment: 'gisMapOrganisationUnitRelation',
     overlayRegistration: 'gisOverlay',
 	administration: 'gisAdministration',
 	favorites: 'gisFavoriteMapView',
 	legendSets: 'gisLegendSet',
-	pdfprint: 'gisPdfPrint',
+    imageExport: 'gisImageExport',
 
 //  Layout
 

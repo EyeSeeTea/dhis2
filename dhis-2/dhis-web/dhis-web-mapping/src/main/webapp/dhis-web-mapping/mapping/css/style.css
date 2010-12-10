@@ -1,4 +1,4 @@
-32/* Gray-extend theme overrides */
+/* Gray-extend theme overrides */
 .ext-gecko .x-window-body .x-form-item {
 	overflow:hidden;
 }
@@ -375,7 +375,7 @@
 }
 #help h3 {
 	padding:8px 0 0 0;
-	font:bold 11px ubuntu,arial;
+	font:bold 11px arial;
 	color:#333;
 	letter-spacing:0px;
 }

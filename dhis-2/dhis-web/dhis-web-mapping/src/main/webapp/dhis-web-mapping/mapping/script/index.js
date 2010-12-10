@@ -901,61 +901,40 @@
 		bodyStyle: 'border:0px solid #fff',
         items:
         [
-            { html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
-            new Ext.form.TextField({id:'predefinedmaplegendname_tf',isFormField:true,hideLabel:true,emptyText:GLOBAL.conf.emptytext,width:GLOBAL.conf.combo_width}),
-            { html: '<div class="window-field-label">'+i18n_start_value+'</div>' },
-            new Ext.form.TextField({id:'predefinedmaplegendstartvalue_tf',isFormField:true,hideLabel:true,emptyText:GLOBAL.conf.emptytext,width:GLOBAL.conf.combo_number_width,minListWidth:GLOBAL.conf.combo_number_width}),
-            { html: '<div class="window-field-label">'+i18n_end_value+'</div>' },
-            new Ext.form.TextField({id:'predefinedmaplegendendvalue_tf',isFormField:true,hideLabel:true,emptyText:GLOBAL.conf.emptytext,width:GLOBAL.conf.combo_number_width,minListWidth:GLOBAL.conf.combo_number_width}),
-            { html: '<div class="window-field-label">'+i18n_color+'</div>' },
-            new Ext.ux.ColorField({id:'predefinedmaplegendcolor_cp',isFormField:true,hideLabel:true,allowBlank:false,width:GLOBAL.conf.combo_width,minListWidth:GLOBAL.conf.combo_width,value:"#FFFF00"}),
-            {
-                xtype: 'button',
-                id: 'newpredefinedmaplegend_b',
-				hideLabel: true,
-                text: i18n_register,
-				cls: 'window-button',
-                handler: function() {
-                    var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
-					var mlsv = parseFloat(Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue());
-					var mlev = parseFloat(Ext.getCmp('predefinedmaplegendendvalue_tf').getValue());
-                    var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
-                    
-                    if (!Ext.isNumber(parseFloat(mlsv)) || !Ext.isNumber(mlev)) {
-                        Ext.message.msg(false, 'Input invalid');
-                        return;
-                    }
-					
-					if (!mln || !mlsv || !mlev || !mlc) {
-                        Ext.message.msg(false, i18n_form_is_not_complete);
-                        return;
-                    }
-                    
-                    if (!GLOBAL.util.validateInputNameLength(mln)) {
-                        Ext.message.msg(false, i18n_name + ': ' + i18n_max + ' 25 ' + i18n_characters);
-                        return;
-                    }
-                    
-                    if (GLOBAL.stores.predefinedMapLegend.find('name', mln) !== -1) {
-                        Ext.message.msg(false, i18n_legend + '<span class="x-msg-hl">' + mln + '</span> ' + i18n_already_exists);
-                        return;
-                    }
-                    
-                    Ext.Ajax.request({
-                        url: GLOBAL.conf.path_mapping + 'addOrUpdateMapLegend' + GLOBAL.conf.type,
-                        method: 'POST',
-                        params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc},
-                        success: function(r) {
-                            Ext.message.msg(true, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
-                            GLOBAL.stores.predefinedMapLegend.load();
-                            Ext.getCmp('predefinedmaplegendname_tf').reset();
-                            Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
-                            Ext.getCmp('predefinedmaplegendendvalue_tf').reset();
-                            Ext.getCmp('predefinedmaplegendcolor_cp').reset();
-                        }
-                    });
-                }
-            }
+            //{ html: '<div class="window-field-label-first">'+i18n_display_name+'</div>' },
+            new Ext.form.TextField({
+                id: 'predefinedmaplegendname_tf',
+                emptyText: GLOBAL.conf.emptytext,
+                labelSeparator: GLOBAL.conf.labelseparator,
+                fieldLabel: i18n_display_name,
+                width: GLOBAL.conf.combo_width_fieldset
+            }),
+            //{ html: '<div class="window-field-label">'+i18n_start_value+'</div>' },
+            new Ext.form.TextField({
+                id: 'predefinedmaplegendstartvalue_tf',
+                emptyText: GLOBAL.conf.emptytext,
+                labelSeparator: GLOBAL.conf.labelseparator,
+                fieldLabel: i18n_start_value,
+                width: GLOBAL.conf.combo_width_fieldset
+            }),
+            //{ html: '<div class="window-field-label">'+i18n_end_value+'</div>' },
+            new Ext.form.TextField({
+                id: 'predefinedmaplegendendvalue_tf',
+                emptyText: GLOBAL.conf.emptytext,
+                labelSeparator: GLOBAL.conf.labelseparator,
+                fieldLabel: i18n_end_value,
+                width: GLOBAL.conf.combo_width_fieldset
+            }),
+            //{ html: '<div class="window-field-label">'+i18n_color+'</div>' },
+            new Ext.ux.ColorField({
+                id: 'predefinedmaplegendcolor_cp',
+                emptyText: GLOBAL.conf.emptytext,
+                labelSeparator: GLOBAL.conf.labelseparator,
+                fieldLabel: i18n_color,
+                allowBlank:false,
+                width:GLOBAL.conf.combo_width_fieldset,
+                value:"#FFFF00"
+            })
         ]	
     });
 	
@@ -1376,6 +1355,53 @@
 					}
 				]
 			}
+        ],
+        bbar: [
+            '->',
+            new Ext.Button({
+                id: 'newpredefinedmaplegend_b',
+                text: i18n_register,
+                handler: function() {
+                    var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
+					var mlsv = parseFloat(Ext.getCmp('predefinedmaplegendstartvalue_tf').getValue());
+					var mlev = parseFloat(Ext.getCmp('predefinedmaplegendendvalue_tf').getValue());
+                    var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
+                    
+                    if (!Ext.isNumber(parseFloat(mlsv)) || !Ext.isNumber(mlev)) {
+                        Ext.message.msg(false, 'Input invalid');
+                        return;
+                    }
+					
+					if (!mln || !mlsv || !mlev || !mlc) {
+                        Ext.message.msg(false, i18n_form_is_not_complete);
+                        return;
+                    }
+                    
+                    if (!GLOBAL.util.validateInputNameLength(mln)) {
+                        Ext.message.msg(false, i18n_name + ': ' + i18n_max + ' 25 ' + i18n_characters);
+                        return;
+                    }
+                    
+                    if (GLOBAL.stores.predefinedMapLegend.find('name', mln) !== -1) {
+                        Ext.message.msg(false, i18n_legend + '<span class="x-msg-hl">' + mln + '</span> ' + i18n_already_exists);
+                        return;
+                    }
+                    
+                    Ext.Ajax.request({
+                        url: GLOBAL.conf.path_mapping + 'addOrUpdateMapLegend' + GLOBAL.conf.type,
+                        method: 'POST',
+                        params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc},
+                        success: function(r) {
+                            Ext.message.msg(true, i18n_legend + ' <span class="x-msg-hl">' + mln + '</span> ' + i18n_was_registered);
+                            GLOBAL.stores.predefinedMapLegend.load();
+                            Ext.getCmp('predefinedmaplegendname_tf').reset();
+                            Ext.getCmp('predefinedmaplegendstartvalue_tf').reset();
+                            Ext.getCmp('predefinedmaplegendendvalue_tf').reset();
+                            Ext.getCmp('predefinedmaplegendcolor_cp').reset();
+                        }
+                    });
+                }
+            })
         ]
     });
 	
@@ -1396,8 +1422,8 @@
         title: '<span id="window-help-title">'+i18n_help+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
-		width: 629,
-		height: 430, 
+		width: 500,
+		height: 380, 
         items:
         [
             {
@@ -1411,64 +1437,50 @@
                     tabchange: function(panel, tab)
                     {
                         if (tab.id == 'help0') {
-							getHelpText(GLOBAL.conf.thematicMap, tab.id);
+							getHelpText(GLOBAL.conf.setup, tab.id);
                         }
                         else if (tab.id == 'help1') {
-							getHelpText(GLOBAL.conf.mapRegistration, tab.id);
+							getHelpText(GLOBAL.conf.thematicMap, tab.id);
                         }
                         else if (tab.id == 'help2') {
-                            getHelpText(GLOBAL.conf.organisationUnitAssignment, tab.id);
-                        }
-						if (tab.id == 'help3') { 
                             getHelpText(GLOBAL.conf.overlayRegistration, tab.id);
                         }
-                        else if (tab.id == 'help4') {
+						if (tab.id == 'help3') { 
                             getHelpText(GLOBAL.conf.administration, tab.id);
                         }
-                        else if (tab.id == 'help5') {
+                        else if (tab.id == 'help4') {
                             getHelpText(GLOBAL.conf.favorites, tab.id);
                         }
-						else if (tab.id == 'help6') {
+                        else if (tab.id == 'help5') {
                             getHelpText(GLOBAL.conf.legendSets, tab.id);
-                        }
-						else if (tab.id == 'help7') {
-                            getHelpText(GLOBAL.conf.pdfprint, tab.id);
                         }
                     }
                 },
                 items:
                 [
                     {
-                        title: '<span class="panel-tab-title">' + i18n_thematic_map + '</span>',
+                        title: '<span class="panel-tab-title">Setup</span>',
                         id: 'help0'
                     },
                     {
-                        title: '<span class="panel-tab-title">' + i18n_map + '</span>',
+                        title: '<span class="panel-tab-title">' + i18n_thematic_map + '</span>',
                         id: 'help1'
                     },
                     {
-                        title: '<span class="panel-tab-title">' + i18n_assignment + '</span>',
+                        title: '<span class="panel-tab-title">' + i18n_overlays + '</span>',
                         id: 'help2'
                     },
                     {
-                        title: '<span class="panel-tab-title">' + i18n_overlays + '</span>',
+                        title: '<span class="panel-tab-title">' + i18n_administrator + '</span>',
                         id: 'help3'
                     },
                     {
-                        title: '<span class="panel-tab-title">' + i18n_administrator + '</span>',
+                        title: '<span class="panel-tab-title">' + i18n_favorite + '</span>',
                         id: 'help4'
                     },
                     {
-                        title: '<span class="panel-tab-title">' + i18n_favorite + '</span>',
-                        id: 'help5'
-                    },
-                    {
                         title: '<span class="panel-tab-title">' + i18n_legendset + '</span>',
-                        id: 'help6'
-                    },
-                    {
-                        title: '<span class="panel-tab-title">PDF print</span>',
-                        id: 'help7'
+                        id: 'help5'
                     }
                 ]
             }
@@ -2470,9 +2482,9 @@
         }
     });
     
-    mapping = new mapfish.widgets.geostat.Mapping({});
+    //mapping = new mapfish.widgets.geostat.Mapping({});
 	
-	/* Section: map toolbar */  
+	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
 		text: i18n_map,
 		style: 'font:bold 11px arial; color:#333;'
