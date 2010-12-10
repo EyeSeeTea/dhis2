@@ -257,14 +257,17 @@
 /* Ext Window */
 .window-info {
 	padding:0 0 8px 0;
-	font:normal 11px lucida sans unicode,ubuntu,arial;
-	color:#333;
+	font:bold 11px lucida sans unicode,arial;
+	color:#444;
 }
 .window-info-grey {
 	padding:5px 0px 0px 8px;
-	font:normal 11px lucida sans unicode,ubuntu,arial;
+	font:normal 11px lucida sans unicode,arial;
 	color:#333;
     background-color:#f8f8f8;
+}
+.window-p {
+    padding:4px 0;
 }
 .window-field-label-first {
 	padding:0 0 3px 3px;
@@ -272,7 +275,7 @@
 	color:#888;
 }
 .window-field-label {
-	padding:6px 0 2px 3px;
+	padding:6px 0 3px 4px;
 	font:normal 11px lucida sans unicode,ubuntu,arial;
 	color:#888;	
 }

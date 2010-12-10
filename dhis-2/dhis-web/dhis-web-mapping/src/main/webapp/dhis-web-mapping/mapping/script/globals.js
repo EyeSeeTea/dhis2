@@ -17,7 +17,6 @@ GLOBAL.conf = {
     
     setup: 'gisSetup',
 	thematicMap: 'gisThematicMap',
-    thematicMap2: 'gisThematicMap2',
     overlayRegistration: 'gisOverlay',
 	administration: 'gisAdministration',
 	favorites: 'gisFavoriteMapView',
@@ -28,12 +27,12 @@ GLOBAL.conf = {
 
     west_width: 270, // viewport west
     gridpanel_width: 270 - 15,
-    multiselect_width: 210,
+    multiselect_width: 219,
 	combo_width: 150,
 	combo_width_fieldset: 112,
 	combo_list_width_fieldset: 112 + 17,
 	combo_number_width: 65,
-	combo_number_width_small: 30,
+	combo_number_width_small: 40,
     
 	emptytext: '',
 	labelseparator: '',
@@ -105,8 +104,7 @@ GLOBAL.util = {
     validateInputNameLength: function(name) {
         return (name.length <= 25);
     },
-
-    /* Decide multiselect height based on screen resolution */
+    
     getMultiSelectHeight: function() {
         var h = screen.height;
         return h <= 800 ? 220 :
