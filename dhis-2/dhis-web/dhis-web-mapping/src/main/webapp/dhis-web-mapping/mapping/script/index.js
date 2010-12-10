@@ -116,7 +116,7 @@
 	var indicatorStore = new Ext.data.JsonStore({
         url: GLOBAL.conf.path_mapping + 'getAllIndicators' + GLOBAL.conf.type,
         root: 'indicators',
-        fields: ['id','name','shortName'],
+        fields: ['id', 'shortName'],
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -1043,6 +1043,9 @@
         listeners: {
             expand: function() {
                 predefinedMapLegendSetWindow.setHeight(Ext.isChrome ? 348:346);
+            },
+            collapse: function() {
+                predefinedMapLegendSetWindow.setHeight(123);
             }
         }
     });
@@ -1200,6 +1203,9 @@
         listeners: {
             expand: function() {
                 predefinedMapLegendSetWindow.setHeight((GLOBAL.util.getMultiSelectHeight() / 2) + (Ext.isChrome ? 299:295));
+            },
+            collapse: function() {
+                predefinedMapLegendSetWindow.setHeight(123);
             }
         }
     });
@@ -1249,7 +1255,7 @@
                     new Ext.ux.Multiselect({
                         id: 'predefinedmaplegendsetindicator_ms',
                         hideLabel:true,
-                        dataFields: ['id', 'name', 'shortName'],
+                        dataFields: ['id', 'shortName'],
                         valueField: 'id',
                         displayField: 'shortName',
                         width:GLOBAL.conf.multiselect_width,
@@ -1317,6 +1323,9 @@
                 if (!GLOBAL.stores.indicator.isLoaded) {
                     GLOBAL.stores.indicator.load();
                 }
+            },
+            collapse: function() {
+                predefinedMapLegendSetWindow.setHeight(123);
             }
         }
     });
@@ -1434,6 +1443,9 @@
                 if (!GLOBAL.stores.dataElement.isLoaded) {
                     GLOBAL.stores.dataElement.load();
                 }
+            },
+            collapse: function() {
+                predefinedMapLegendSetWindow.setHeight(123);
             }
         }
     });
@@ -1455,7 +1467,12 @@
                     assignPredefinedMapLegendSetDataElementPanel
                 ]
             })
-        ]
+        ],
+        listeners: {
+            afterrender: function() {
+                predefinedMapLegendSetWindow.setHeight(Ext.isChrome ? 348:346);
+            }
+        }
     });
 			
     /* Section: help */
