@@ -117,7 +117,6 @@
         url: GLOBAL.conf.path_mapping + 'getAllIndicators' + GLOBAL.conf.type,
         root: 'indicators',
         fields: ['id','name','shortName'],
-        sortInfo: {field: 'shortName', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -165,8 +164,7 @@
     var dataElementStore = new Ext.data.JsonStore({
         url: GLOBAL.conf.path_mapping + 'getAllDataElements' + GLOBAL.conf.type,
         root: 'dataElements',
-        fields: ['id','name','shortName'],
-        sortInfo: {field: 'shortName', direction: 'ASC'},
+        fields: ['id', 'shortName'],
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -1315,6 +1313,10 @@
         listeners: {
             expand: function() {
                 predefinedMapLegendSetWindow.setHeight(GLOBAL.util.getMultiSelectHeight() + (Ext.isChrome ? 243:240));
+                
+                if (!GLOBAL.stores.indicator.isLoaded) {
+                    GLOBAL.stores.indicator.load();
+                }
             }
         }
     });
@@ -1364,7 +1366,7 @@
                     new Ext.ux.Multiselect({
                         id: 'predefinedmaplegendsetdataelement_ms',
                         hideLabel: true,
-                        dataFields: ['id', 'name', 'shortName'],
+                        dataFields: ['id', 'shortName'],
                         valueField: 'id',
                         displayField: 'shortName',
                         width: GLOBAL.conf.multiselect_width,
@@ -1428,6 +1430,10 @@
         listeners: {
             expand: function() {
                 predefinedMapLegendSetWindow.setHeight(GLOBAL.util.getMultiSelectHeight() + (Ext.isChrome ? 241:238));
+                
+                if (!GLOBAL.stores.dataElement.isLoaded) {
+                    GLOBAL.stores.dataElement.load();
+                }
             }
         }
     });
@@ -2639,12 +2645,6 @@
                 if (!GLOBAL.stores.predefinedMapLegend.isLoaded) {
                     GLOBAL.stores.predefinedMapLegend.load();
                 }
-                if (!GLOBAL.stores.indicator.isLoaded) {
-                    GLOBAL.stores.indicator.load();
-                }
-                if (!GLOBAL.stores.dataElement.isLoaded) {
-                    GLOBAL.stores.dataElement.load();
-                }                
 			}
 		}
 	});
