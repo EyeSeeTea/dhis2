@@ -208,6 +208,13 @@
 .x-btn .icon-admin {
 	background-image:url(../../../images/settings.png);
 }
+.x-btn .icon-add {
+	background-image:url(../../../images/add.png);
+    padding-left:
+}
+.x-btn .icon-remove {
+	background-image:url(../../../images/remove.png);
+}
 .aa_med button {
 	color:#333;
     padding-bottom:2px;
@@ -218,7 +225,7 @@
 }
 .x-btn-text-icon .x-btn-icon-small-left .x-btn-text {
     padding-bottom:2px;
-    padding-left:17px;
+    padding-left:18px;
 }
 .x-btn-text-icon .x-btn-icon-small-left .x-btn-text {
     height:15px;
