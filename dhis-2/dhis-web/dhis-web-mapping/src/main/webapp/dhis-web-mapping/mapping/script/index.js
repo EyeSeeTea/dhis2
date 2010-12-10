@@ -1319,57 +1319,117 @@
         }
     });
     
-    var assignPredefinedMapLegendSetDataElementPanel = new Ext.form.FormPanel({
+    var assignPredefinedMapLegendSetDataElementPanel = new Ext.Panel({
         id: 'assignpredefinedmaplegendsetdataelement_p',
         title: i18n_dataelements,
-        bodyStyle: 'padding: 8px',
         items: [
-            {html: '<div class="window-info">Assign data elements to legend set</div>'},
-            new Ext.form.ComboBox({
-                id: 'predefinedmaplegendsetdataelement_cb',
-                editable: false,
-                valueField: 'id',
-                displayField: 'name',
-                mode: 'remote',
-                forceSelection: true,
-                triggerAction: 'all',
-                selectOnFocus: true,
-                emptyText: GLOBAL.conf.emptytext,
-                labelSeparator: GLOBAL.conf.labelseparator,
-                fieldLabel: i18n_legendset,
-                width: GLOBAL.conf.combo_width_fieldset,
-                minListWidth: GLOBAL.conf.combo_width_fieldset,
-                store: GLOBAL.stores.predefinedMapLegendSet,
-                listeners:{
-                    'select': {
-                        fn: function(cb, record) {
-                            var dataElements = record.data.dataElements || [];
-                            var dataElementString = '';
+            new Ext.form.FormPanel({
+                bodyStyle: 'padding: 8px 8px 5px 8px',
+                items: [
+                    {html: '<div class="window-info">Assign data elements to legend set</div>'},
+                    new Ext.form.ComboBox({
+                        id: 'predefinedmaplegendsetdataelement_cb',
+                        editable: false,
+                        valueField: 'id',
+                        displayField: 'name',
+                        mode: 'remote',
+                        forceSelection: true,
+                        triggerAction: 'all',
+                        selectOnFocus: true,
+                        emptyText: GLOBAL.conf.emptytext,
+                        labelSeparator: GLOBAL.conf.labelseparator,
+                        fieldLabel: i18n_legendset,
+                        width: GLOBAL.conf.combo_width_fieldset,
+                        minListWidth: GLOBAL.conf.combo_width_fieldset,
+                        store: GLOBAL.stores.predefinedMapLegendSet,
+                        listeners:{
+                            'select': {
+                                fn: function(cb, record) {
+                                    var dataElements = record.data.dataElements || [];
+                                    var dataElementString = '';
 
-                            for (var i = 0; i < dataElements.length; i++) {
-                                dataElementString += dataElements[i];
-                                if (i < dataElements.length-1) {
-                                    dataElementString += ',';
+                                    for (var i = 0; i < dataElements.length; i++) {
+                                        dataElementString += dataElements[i];
+                                        if (i < dataElements.length-1) {
+                                            dataElementString += ',';
+                                        }
+                                    }
+                                    
+                                    Ext.getCmp('predefinedmaplegendsetdataelement_ms').setValue(dataElementString);
                                 }
                             }
-                            
-                            Ext.getCmp('predefinedmaplegendsetdataelement_ms').setValue(dataElementString);
-                        }
-                    }
-                }					
+                        }					
+                    }),
+                    {html: '<div class="window-field-label">' + i18n_dataelements + '</div>'},
+                    new Ext.ux.Multiselect({
+                        id: 'predefinedmaplegendsetdataelement_ms',
+                        hideLabel: true,
+                        dataFields: ['id', 'name', 'shortName'],
+                        valueField: 'id',
+                        displayField: 'shortName',
+                        width: GLOBAL.conf.multiselect_width,
+                        height: GLOBAL.util.getMultiSelectHeight(),
+                        store: GLOBAL.stores.dataElement
+                    })
+                ]
             }),
-            {html: '<div class="window-field-label">' + i18n_dataelements + '</div>'},
-			new Ext.ux.Multiselect({
-                id: 'predefinedmaplegendsetdataelement_ms',
-                hideLabel: true,
-                dataFields: ['id', 'name', 'shortName'],
-                valueField: 'id',
-                displayField: 'shortName',
-                width: GLOBAL.conf.multiselect_width,
-                height: GLOBAL.util.getMultiSelectHeight(),
-                store: GLOBAL.stores.dataElement
+            new Ext.form.FormPanel({
+                items: [
+                    new Ext.Toolbar({
+                        style: 'padding-top:4px',
+                        items: [
+                            '->',
+                            new Ext.Button({
+                                id: 'assignpredefinedmaplegendsetdataelement_b',
+                                text: i18n_assign,
+                                iconCls: 'icon-assign',
+                                handler: function() {
+                                    var ls = Ext.getCmp('predefinedmaplegendsetdataelement_cb').getValue();
+                                    var lsrw = Ext.getCmp('predefinedmaplegendsetdataelement_cb').getRawValue();
+                                    var lims = Ext.getCmp('predefinedmaplegendsetdataelement_ms').getValue();
+                                    
+                                    if (!ls) {
+                                        Ext.message.msg(false, i18n_please_select_a_legend_set);
+                                        return;
+                                    }
+                                    
+                                    if (!lims) {
+                                        Ext.message.msg(false, i18n_please_select_at_least_one_indicator);
+                                        return;
+                                    }
+                                    
+                                    var array = [];
+                                    array = lims.split(',');
+                                    var params = '?dataElements=' + array[0];
+                                    
+                                    if (array.length > 1) {
+                                        for (var i = 1; i < array.length; i++) {
+                                            array[i] = '&dataElements=' + array[i];
+                                            params += array[i];
+                                        }
+                                    }
+                                    
+                                    Ext.Ajax.request({
+                                        url: GLOBAL.conf.path_mapping + 'assignDataElementsToMapLegendSet.action' + params,
+                                        method: 'POST',
+                                        params: {id: ls},
+                                        success: function(r) {
+                                            Ext.message.msg(true, i18n_legendset+' <span class="x-msg-hl">' + lsrw + '</span> ' + i18n_was_updated);
+                                            GLOBAL.stores.predefinedMapLegendSet.load();
+                                        }
+                                    });
+                                }
+                            })
+                        ]
+                    })
+                ]
             })
-        ]
+        ],
+        listeners: {
+            expand: function() {
+                predefinedMapLegendSetWindow.setHeight(GLOBAL.util.getMultiSelectHeight() + (Ext.isChrome ? 241:238));
+            }
+        }
     });
 	
 	var predefinedMapLegendSetWindow = new Ext.Window({
