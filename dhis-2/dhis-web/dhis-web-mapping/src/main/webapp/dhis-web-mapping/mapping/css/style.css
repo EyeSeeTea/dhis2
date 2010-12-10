@@ -272,12 +272,12 @@
 .window-field-label-first {
 	padding:0 0 3px 3px;
 	font:normal 11px lucida sans unicode,ubuntu,arial;
-	color:#888;
+	color:#777;
 }
 .window-field-label {
 	padding:6px 0 3px 4px;
 	font:normal 11px lucida sans unicode,ubuntu,arial;
-	color:#888;	
+	color:#777;	
 }
 .window-field-nolabel {
 	padding:14px 0 0 0;
