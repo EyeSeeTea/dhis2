@@ -51,7 +51,7 @@
 }
 .ux-mselect-item {
 	font:10px lucida sans unicode,ubuntu,tahoma,arial,helvetica,sans-serif;
-	padding:1px;
+	padding:1px 1px 1px 3px;
 }
 .x-box-mc {
 	font-family:ubuntu,arial,tahoma,helvetica;
@@ -208,12 +208,24 @@
 .x-btn .icon-admin {
 	background-image:url(../../../images/settings.png);
 }
+.x-btn .icon-exit {
+	background-image:url(../../../images/exit.png);
+}
 .x-btn .icon-add {
 	background-image:url(../../../images/add.png);
     padding-left:
 }
 .x-btn .icon-remove {
 	background-image:url(../../../images/remove.png);
+}
+.x-btn .icon-assign {
+	background-image:url(../../../images/assign2.png);
+}
+.x-btn .icon-assign {
+	background-image:url(../../../images/accept.png);
+}
+.x-btn .icon-export {
+	background-image:url(../../../images/export2.png);
 }
 .aa_med button {
 	color:#333;
@@ -225,7 +237,7 @@
 }
 .x-btn-text-icon .x-btn-icon-small-left .x-btn-text {
     padding-bottom:2px;
-    padding-left:18px;
+    padding-left:19px;
 }
 .x-btn-text-icon .x-btn-icon-small-left .x-btn-text {
     height:15px;
