@@ -574,32 +574,6 @@
 			},
             {
                 xtype: 'button',
-                id: 'dashboardview_b',
-                iconCls: 'icon-assign',
-				hideLabel: true,
-				text: i18n_add,
-				handler: function() {
-					var v = Ext.getCmp('favorite_cb').getValue();
-					var rv = Ext.getCmp('favorite_cb').getRawValue();
-					
-					if (!v) {
-						Ext.message.msg(false, i18n_please_select_a_map_view);
-						return;
-					}
-					
-					Ext.Ajax.request({
-						url: GLOBAL.conf.path_mapping + 'addMapViewToDashboard' + GLOBAL.conf.type,
-						method: 'POST',
-						params: {id:v},
-						success: function(r) {
-							Ext.message.msg(true, i18n_favorite + ' <span class="x-msg-hl">' + rv + '</span> ' + i18n_added_to_dashboard);
-                            Ext.getCmp('favorite_cb').clearValue();
-						}
-					});
-				}
-            },
-            {
-                xtype: 'button',
                 id: 'deleteview_b',
                 iconCls: 'icon-remove',
 				hideLabel: true,
@@ -631,7 +605,33 @@
 						}
 					});
 				}
-			}
+			},
+            {
+                xtype: 'button',
+                id: 'dashboardview_b',
+                iconCls: 'icon-assign',
+				hideLabel: true,
+				text: i18n_add,
+				handler: function() {
+					var v = Ext.getCmp('favorite_cb').getValue();
+					var rv = Ext.getCmp('favorite_cb').getRawValue();
+					
+					if (!v) {
+						Ext.message.msg(false, i18n_please_select_a_map_view);
+						return;
+					}
+					
+					Ext.Ajax.request({
+						url: GLOBAL.conf.path_mapping + 'addMapViewToDashboard' + GLOBAL.conf.type,
+						method: 'POST',
+						params: {id:v},
+						success: function(r) {
+							Ext.message.msg(true, i18n_favorite + ' <span class="x-msg-hl">' + rv + '</span> ' + i18n_added_to_dashboard);
+                            Ext.getCmp('favorite_cb').clearValue();
+						}
+					});
+				}
+            }
         ]
     });
 	
