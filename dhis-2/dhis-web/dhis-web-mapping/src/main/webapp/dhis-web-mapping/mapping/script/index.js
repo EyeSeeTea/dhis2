@@ -747,11 +747,6 @@
                             xtype: 'arraystore',
                             fields: ['id', 'layer'],
                             data: [[1, 'Polygon layer'], [2, 'Point layer'], [3, 'Both']]
-                        },
-                        listeners: {
-                            render: function() {
-                                alert(1);
-                            }
                         }
                     },
                     {
