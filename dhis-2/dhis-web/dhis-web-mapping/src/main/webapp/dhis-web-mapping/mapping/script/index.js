@@ -704,101 +704,88 @@
         ]
     });
 	
-	/* Section: export map */
-	var exportImagePanel = new Ext.form.FormPanel({
-        id: 'export_image_p',        
-        items:
-        [
-			{
-				xtype: 'textfield',
-				id: 'exportimagetitle_tf',
-				fieldLabel: i18n_title,
-				labelSeparator: GLOBAL.conf.labelseparator,
-				editable: true,
-				valueField: 'id',
-				displayField: 'text',
-				width: GLOBAL.conf.combo_width_fieldset,
-				mode: 'local',
-				triggerAction: 'all'
-			},
-			{
-				xtype: 'combo',
-				id: 'exportimagelayers_cb',
-				fieldLabel: 'Layers',
-				labelSeparator: GLOBAL.conf.labelseparator,
-				editable: false,
-				valueField: 'id',
-				displayField: 'layer',
-				width: GLOBAL.conf.combo_width_fieldset,
-				minListWidth: GLOBAL.conf.combo_width_fieldset,
-				mode: 'local',
-				triggerAction: 'all',
-				value: 1,
-				store: new Ext.data.ArrayStore({
-					fields: ['id', 'layer'],
-					data: [[1, 'Polygon layer'], [2, 'Point layer'], [3, 'Both']]
-				})					
-			},
-			{
-				xtype: 'combo',
-				id: 'exportimagewidth_cb',
-				fieldLabel: 'Width',
-				labelSeparator: GLOBAL.conf.labelseparator,
-				editable: true,
-				emptyText: 'Custom px',
-				valueField: 'width',
-				displayField: 'text',
-				width: GLOBAL.conf.combo_width_fieldset,
-				minListWidth: GLOBAL.conf.combo_width_fieldset,
-				mode: 'local',
-				triggerAction: 'all',
-				store: new Ext.data.ArrayStore({
-					fields: ['width', 'text'],
-					data: [[800, 'Small'], [1190, 'Medium'], [1920, 'Large']]
-				})
-			},
-			{
-				xtype: 'combo',
-				id: 'exportimageheight_cb',
-				fieldLabel: 'Height',
-				labelSeparator: GLOBAL.conf.labelseparator,
-				editable: true,
-				emptyText: 'Custom px',
-				valueField: 'height',
-				displayField: 'text',
-				width: GLOBAL.conf.combo_width_fieldset,
-				minListWidth: GLOBAL.conf.combo_width_fieldset,
-				mode: 'local',
-				triggerAction: 'all',
-				store: new Ext.data.ArrayStore({
-					fields: ['height', 'text'],
-					data: [[600, 'Small'], [880, 'Medium'], [1200, 'Large']]
-				})
-			},
-			{
-				xtype: 'checkbox',
-				id: 'exportimageincludelegend_chb',
-				fieldLabel: i18n_include_legend,
-				labelSeparator: '',				
-				isFormField: true,
-				checked: true
-			}
-		]
-	});
-	
+	/* Section: export map */	
 	var exportImageWindow = new Ext.Window({
         id: 'exportimage_w',
         title: '<span id="window-image-title">Image export</span>',
         layout: 'fit',
         closeAction: 'hide',
-        defaults: {bodyStyle:'padding:8px'},
 		width: GLOBAL.conf.window_width,
         height: 220,
         items: [
-            new Ext.Panel({
+            new Ext.form.FormPanel({
+                bodyStyle: 'padding:8px',
                 items: [
                     {html: '<div class="window-info">Export thematic map to PNG</div>'},
-                    exportImagePanel
+                    new Ext.form.TextField({
+                        id: 'exportimagetitle_tf',
+                        fieldLabel: i18n_title,
+                        labelSeparator: GLOBAL.conf.labelseparator,
+                        editable: true,
+                        valueField: 'id',
+                        displayField: 'text',
+                        width: GLOBAL.conf.combo_width_fieldset,
+                        mode: 'local',
+                        triggerAction: 'all'
+                    }),
+                    new Ext.form.ComboBox({
+                        id: 'exportimagelayers_cb',
+                        fieldLabel: 'Layers',
+                        labelSeparator: GLOBAL.conf.labelseparator,
+                        editable: false,
+                        valueField: 'id',
+                        displayField: 'layer',
+                        width: GLOBAL.conf.combo_width_fieldset,
+                        minListWidth: GLOBAL.conf.combo_width_fieldset,
+                        mode: 'local',
+                        triggerAction: 'all',
+                        value: 1,
+                        store: new Ext.data.ArrayStore({
+                            fields: ['id', 'layer'],
+                            data: [[1, 'Polygon layer'], [2, 'Point layer'], [3, 'Both']]
+                        })
+                    }),
+                    new Ext.form.ComboBox({
+                        id: 'exportimagewidth_cb',
+                        fieldLabel: 'Width',
+                        labelSeparator: GLOBAL.conf.labelseparator,
+                        editable: true,
+                        emptyText: 'Custom px',
+                        valueField: 'width',
+                        displayField: 'text',
+                        width: GLOBAL.conf.combo_width_fieldset,
+                        minListWidth: GLOBAL.conf.combo_width_fieldset,
+                        mode: 'local',
+                        triggerAction: 'all',
+                        store: new Ext.data.ArrayStore({
+                            fields: ['width', 'text'],
+                            data: [[800, 'Small'], [1190, 'Medium'], [1920, 'Large']]
+                        })
+                    }),
+                    new Ext.form.ComboBox({
+                        id: 'exportimageheight_cb',
+                        fieldLabel: 'Height',
+                        labelSeparator: GLOBAL.conf.labelseparator,
+                        editable: true,
+                        emptyText: 'Custom px',
+                        valueField: 'height',
+                        displayField: 'text',
+                        width: GLOBAL.conf.combo_width_fieldset,
+                        minListWidth: GLOBAL.conf.combo_width_fieldset,
+                        mode: 'local',
+                        triggerAction: 'all',
+                        store: new Ext.data.ArrayStore({
+                            fields: ['height', 'text'],
+                            data: [[600, 'Small'], [880, 'Medium'], [1200, 'Large']]
+                        })
+                    }),
+                    new Ext.form.Checkbox({
+                        id: 'exportimageincludelegend_chb',
+                        fieldLabel: i18n_include_legend,
+                        labelSeparator: '',				
+                        isFormField: true,
+                        checked: true
+                    })
                 ]
             })
         ],
