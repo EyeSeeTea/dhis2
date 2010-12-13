@@ -22,7 +22,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-maintenance-organisationunit/organisationUnit.vm</param>
 			<param name="menu">/dhis-web-maintenance-organisationunit/menuWithTree.vm</param>
-			<param name="menuTreeHeight">358</param>
+			<param name="menuTreeHeight">328</param>
 			<param name="javascripts">
 					../dhis-web-commons/ouwt/ouwt.js,
 					javascript/organisationUnit.js
@@ -293,7 +293,22 @@
 			class="org.hisp.dhis.oum.action.organisationunitlevel.SaveOrganisationUnitLevelsAction">
 			<result name="success" type="redirect">index.action</result>
 		</action>
-
+		
+		<!-- OrganisationUnit Search -->
+		
+		<action name="organisationUnitSearch"
+			class="org.hisp.dhis.oum.action.search.SearchOrganisationUnitsAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-maintenance-organisationunit/organisationUnitSearch.vm</param>
+			<param name="menu">/dhis-web-maintenance-organisationunit/menu.vm</param>
+			<param name="javascripts">javascript/organisationUnitSearch.js</param>
+		</action>
+		
+		<action name="getOrganisationUnitDetails"
+			class="org.hisp.dhis.oum.action.search.GetOrganisationUnitDetailsAction">
+			<result name="success" type="velocity">/dhis-web-maintenance-organisationunit/organisationUnitDetails.vm</result>
+		</action>
+		
 	</package>
 
 </struts>

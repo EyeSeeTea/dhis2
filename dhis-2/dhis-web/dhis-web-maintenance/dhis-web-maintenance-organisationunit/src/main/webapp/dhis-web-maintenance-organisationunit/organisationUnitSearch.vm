@@ -1,0 +1,91 @@
+
+<h3>$i18n.getString( "org_unit_search_management" )</h3>
+
+<form action="organisationUnitSearch.action" method="get">
+<table>
+<tr>
+<th>$i18n.getString( "criteria" )</th>
+<th>$i18n.getString( "options" )</th>
+</tr>
+
+<tr>
+<td>$i18n.getString( "name" )</th>
+<td><input type="text" name="name" style="width:325px" value="$!{name}"></td>
+</tr>
+
+#foreach( $groupSet in $groupSets )
+<tr>
+<td>$encoder.htmlEncode( $groupSet.name )</td>
+<td>
+  <select name="groupId" style="width:325px">
+  <option value="0">[ $i18n.getString( "any" ) ]</option>
+    #foreach( $group in $groupSet.organisationUnitGroups )
+    <option value="$group.id"
+    #if( $groupId && $groupId.contains( $group.id ) )selected="selected"#end
+    >$encoder.htmlEncode( $group.name )</option>
+    #end
+  </select>
+</td>
+</tr>
+#end
+
+<tr>
+<td style="height:10px" colspan="2"></td>
+</tr>
+<tr>
+
+<td></td>
+<td><input type="submit" value="$i18n.getString( 'search' )" style="width:100px">
+<input type="button" onclick="window.location.href='organisationUnitSearch.action'" value="$i18n.getString( 'clear' )" style="width:100px"></td>
+
+<tr>
+<td style="height:15px" colspan="2"></td>
+</tr>
+<tr>
+
+</tr>
+
+</table>
+</form>
+
+#if ( $organisationUnits )
+
+<h4>$i18n.getString( "found" ) $organisationUnits.size() $i18n.getString( "organisation_units" )</h4>
+
+<table class="listTable" style="width:90%">
+<thead>
+<tr>
+<th style="min-width:300px">$i18n.getString( "name" )</th>
+#foreach( $groupSet in $groupSets )
+<th>$encoder.htmlEncode( $groupSet.name )</th>
+#end
+<th class="{sorter: false}" style="width:24px"></th>
+</tr>
+</thead>
+
+<tbody id="list">
+#foreach( $unit in $organisationUnits )
+<tr>
+<td>$encoder.htmlEncode( $unit.name )</td>
+#foreach( $groupSet in $groupSets )
+<td>$!unit.getGroupNameInGroupSet( $groupSet )</td>
+#end
+<td><a href="#" onclick="showOrgUnitDetails( '${unit.id}' )"><img src="../images/information.png" alt="$i18n.getString( 'show_details' )"/></a></td>
+</tr>
+#end
+</tbody>
+
+</table>
+
+#end
+
+<div id="organisationUnitDetails"></div>
+
+<script type="text/javascript">
+
+$( document ).ready( function() {	
+	tableSorter( 'listTable' );	
+	initOrgUnitDetails();
+} );
+
+</script>

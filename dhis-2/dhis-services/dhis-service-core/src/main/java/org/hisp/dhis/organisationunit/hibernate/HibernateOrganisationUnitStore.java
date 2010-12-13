@@ -28,15 +28,19 @@ package org.hisp.dhis.organisationunit.hibernate;
  */
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitStore;
@@ -132,6 +136,54 @@ public class HibernateOrganisationUnitStore
         String hql = "from OrganisationUnit o where o.groups.size = 0";
         
         return sessionFactory.getCurrentSession().createQuery( hql ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String name, Collection<OrganisationUnitGroup> groups )
+    {
+        name = StringUtils.trimToNull( name );
+        groups = CollectionUtils.isEmpty( groups ) ? null : groups;
+        
+        if ( name == null && groups == null )
+        {
+            return new HashSet<OrganisationUnit>();
+        }
+        
+        StringBuilder hql = new StringBuilder( "from OrganisationUnit o where" );
+        
+        if ( name != null )
+        {
+            hql.append(  " lower(name) like :name and" );
+        }
+        
+        if ( groups != null )
+        {
+            for ( int i = 0; i < groups.size(); i++ )
+            {
+                hql.append( " :g" ).append( i ).append( " in elements( o.groups ) and" );
+            }
+        }
+
+        hql.delete( hql.length() - " and".length(), hql.length() );
+        
+        Query query = sessionFactory.getCurrentSession().createQuery( hql.toString() );
+        
+        if ( name != null )
+        {
+            query.setString( "name", "%" + name.toLowerCase() + "%" );
+        }
+        
+        if ( groups != null )
+        {
+            int i = 0;
+            
+            for ( OrganisationUnitGroup group : groups )
+            {
+                query.setEntity( "g" + i++, group );
+            }
+        }
+        
+        return query.list();        
     }
 
     // -------------------------------------------------------------------------
