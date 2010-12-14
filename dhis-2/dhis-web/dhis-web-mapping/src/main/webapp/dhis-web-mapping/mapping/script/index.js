@@ -2314,22 +2314,27 @@
         vectorLayerOptionsWindow.show();
     }
 	
-	var layerTreeConfig = [{
-        nodeType: 'gx_baselayercontainer',
-        singleClickExpand: true,
-        expanded: true,
-        text: 'Base layers',
-		iconCls: 'icon-background'
-    }, {
-        nodeType: 'gx_overlaylayercontainer',
-        singleClickExpand: true
-    }, {
-        nodeType: 'gx_layer',
-        layer: 'Polygon layer'
-    }, {
-        nodeType: 'gx_layer',
-        layer: 'Point layer'
-    }];       
+	var layerTreeConfig = [
+        {
+            nodeType: 'gx_baselayercontainer',
+            singleClickExpand: true,
+            expanded: true,
+            text: 'Base layers',
+            iconCls: 'icon-background'
+        },
+        {
+            nodeType: 'gx_overlaylayercontainer',
+            singleClickExpand: true
+        },
+        {
+            nodeType: 'gx_layer',
+            layer: 'Polygon layer'
+        },
+        {
+            nodeType: 'gx_layer',
+            layer: 'Point layer'
+        }
+    ];       
     
     var layerTree = new Ext.tree.TreePanel({
         title: '<span class="panel-title">' + i18n_map_layers + '</span>',
@@ -2345,8 +2350,8 @@
                 {
                     text: 'Show WMS legend',
                     iconCls: 'menu-layeroptions-wmslegend',
-                    handler: function(b, e) {
-                        var layer = b.parentMenu.contextNode.layer;
+                    handler: function(item, e) {
+                        var layer = item.parentMenu.contextNode.layer;
 
                         var frs = layer.getFullRequestString({
                             REQUEST: "GetLegendGraphic",
@@ -2359,7 +2364,6 @@
                             FORMAT: 'image/png'
                         });
                         
-
                         var wmsLayerLegendWindow = new Ext.Window({
                             title: 'WMS Legend: <span style="font-weight:normal;">' + layer.name + '</span>',
                             items: [
@@ -2403,18 +2407,140 @@
                 }
             ]
         }),
+        contextMenuVector: new Ext.menu.Menu({
+            featureStore: new Ext.data.ArrayStore({
+                mode: 'local',
+                idProperty: 'id',
+                fields: ['id','name'],
+                sortInfo: {field: 'name', direction: 'ASC'},
+                data: []
+            }),                
+            showLocateFeatureWindow: function(cm) {
+                var layer = GLOBAL.vars.map.getLayersByName(cm.contextNode.attributes.layer)[0];
+
+                var data = [];
+                for (var i = 0; i < layer.features.length; i++) {
+                    data.push([layer.features[i].data.id || i, layer.features[i].data.name]);
+                }
+                
+                if (data.length) {
+                    var featureStore = new Ext.data.ArrayStore({
+                        mode: 'local',
+                        idProperty: 'id',
+                        fields: ['id','name'],
+                        sortInfo: {field: 'name', direction: 'ASC'},
+                        autoDestroy: true,
+                        data: data
+                    });
+                    
+                    var locateFeatureWindow = new Ext.Window({
+                        id: 'locatefeature_w',
+                        title: 'Locate features',
+                        layout: 'fit',
+                        width: GLOBAL.conf.window_width,
+                        height: GLOBAL.util.getMultiSelectHeight() + 145,
+                        items: [
+                            {
+                                xtype: 'panel',
+                                bodyStyle:'padding:8px',
+                                items: [
+                                    { html: '<div class="window-field-label-first">' + i18n_highlight_color + '</div>' },
+                                    {
+                                        xtype: 'colorfield',
+                                        id: 'highlightcolor_cf',
+                                        labelSeparator: GLOBAL.conf.labelseparator,
+                                        allowBlank: false,
+                                        width: GLOBAL.conf.combo_width,
+                                        value: "#0000FF"
+                                    },
+                                    { html: '<div class="window-field-label">' + i18n_feature_filter + '</div>' },
+                                    {
+                                        xtype: 'textfield',
+                                        id: 'locatefeature_tf',
+                                        enableKeyEvents: true,
+                                        listeners: {
+                                            'keyup': function(tf) {
+                                                featureStore.filter('name', tf.getValue(), true, false);
+                                            }
+                                        }
+                                    },
+                                    { html: '<div class="window-field-nolabel"></div>' },
+                                    {
+                                        xtype: 'grid',
+                                        id: 'featuregrid_gp',
+                                        height: GLOBAL.util.getMultiSelectHeight(),
+                                        cm: new Ext.grid.ColumnModel({
+                                            columns: [{id: 'name', header: 'Features', dataIndex: 'name', width: 250}]
+                                        }),
+                                        sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+                                        viewConfig: {forceFit: true},
+                                        sortable: true,
+                                        autoExpandColumn: 'name',
+                                        store: featureStore,
+                                        listeners: {
+                                            'cellclick': {
+                                                fn: function(g, ri, ci, e) {
+                                                    layer.redraw();
+                                                    
+                                                    var id, feature;
+                                                    id = g.getStore().getAt(ri).data.id;
+                                                    
+                                                    for (var i = 0; i < layer.features.length; i++) {
+                                                        if (layer.features[i].data.id == id) {
+                                                            feature = layer.features[i];
+                                                            break;
+                                                        }
+                                                    }
+                                                    
+                                                    var color = Ext.getCmp('highlightcolor_cf').getValue();
+                                                    var symbolizer;
+                                                    
+                                                    if (feature.attributes.featureType == GLOBAL.conf.map_feature_type_multipolygon ||
+                                                        feature.attributes.featureType == GLOBAL.conf.map_feature_type_polygon) {
+                                                        symbolizer = new OpenLayers.Symbolizer.Polygon({
+                                                            'strokeColor': color,
+                                                            'fillColor': color
+                                                        });
+                                                    }
+                                                    else if (feature.attributes.featureType == GLOBAL.conf.map_feature_type_point) {
+                                                        symbolizer = new OpenLayers.Symbolizer.Point({
+                                                            'pointRadius': 7,
+                                                            'fillColor': color
+                                                        });
+                                                    }
+                                                    
+                                                    layer.drawFeature(feature,symbolizer);
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        listeners: {
+                            'hide': function() {
+                                layer.redraw();
+                            }
+                        }
+                    });
+                    
+                    locateFeatureWindow.show();
+                }
+                else {
+                    Ext.message.msg(false, 'No features rendered');
+                }
+            },
+            items: [
+                {
+                    text: 'Locate feature',
+                    iconCls: 'menu-layeroptions-locate',
+                    handler: function(item, e) {
+                        item.parentMenu.showLocateFeatureWindow(item.parentMenu);
+                    }
+                }
+            ]
+        }),
 		listeners: {
-			//'click': function(n) {
-                //if (n.parentNode.attributes.text == 'Base layers') {
-                    //showWMSLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer.name)[0]);
-                //}
-                //else if (n.parentNode.attributes.text == 'Overlays') {
-                    //showVectorLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer.name)[0], GLOBAL.conf.map_layer_type_overlay);
-                //}
-                //else if (n.isLeaf()) {
-                    //showVectorLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer)[0]);
-                //}
-			//},
             'contextmenu': function(node, e) {
                 if (node.attributes.text != 'Base layers' && node.attributes.text != 'Overlays') {
                     node.select();
@@ -2431,6 +2557,11 @@
                         cmo.showAt(e.getXY());
                     }
                     
+                    else {
+                        var cmv = node.getOwnerTree().contextMenuVector;
+                        cmv.contextNode = node;
+                        cmv.showAt(e.getXY());
+                    }
                 }
             }
 		},
