@@ -1946,120 +1946,121 @@
     GLOBAL.vars.map.addLayers([choroplethLayer, symbolLayer]);
         
     /* Section: layer options */
-    function showWMSLayerOptions(layer) {
-        if (Ext.getCmp('baselayeroptions_w')) {
-            Ext.getCmp('baselayeroptions_w').destroy();
-        }
+    
+    //function showWMSLayerOptions(layer) {
+        //if (Ext.getCmp('baselayeroptions_w')) {
+            //Ext.getCmp('baselayeroptions_w').destroy();
+        //}
         
-        var baseLayerOptionsWindow = new Ext.Window({
-            id: 'baselayeroptions_w',
-            title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
-            width: 180,
-            items: [
-                {
-                    xtype: 'menu',
-                    id: 'baselayeroptions_m',
-                    floating: false,
-                    items: [
-                        {
-                            text: 'Show WMS legend',
-                            iconCls: 'menu-layeroptions-wmslegend',
-                            listeners: {
-                                'click': {
-                                    fn: function() {
-                                        baseLayerOptionsWindow.destroy();
+        //var baseLayerOptionsWindow = new Ext.Window({
+            //id: 'baselayeroptions_w',
+            //title: 'Options: <span style="font-weight:normal;">' + layer.name + '</span>',
+            //width: 180,
+            //items: [
+                //{
+                    //xtype: 'menu',
+                    //id: 'baselayeroptions_m',
+                    //floating: false,
+                    //items: [
+                        //{
+                            //text: 'Show WMS legend',
+                            //iconCls: 'menu-layeroptions-wmslegend',
+                            //listeners: {
+                                //'click': {
+                                    //fn: function() {
+                                        //baseLayerOptionsWindow.destroy();
                                         
-                                        var frs = layer.getFullRequestString({
-                                            REQUEST: "GetLegendGraphic",
-                                            WIDTH: null,
-                                            HEIGHT: null,
-                                            EXCEPTIONS: "application/vnd.ogc.se_xml",
-                                            LAYERS: layer.params.LAYERS,
-                                            LAYER: layer.params.LAYERS,
-                                            SRS: null,
-                                            FORMAT: 'image/png'
-                                        });
+                                        //var frs = layer.getFullRequestString({
+                                            //REQUEST: "GetLegendGraphic",
+                                            //WIDTH: null,
+                                            //HEIGHT: null,
+                                            //EXCEPTIONS: "application/vnd.ogc.se_xml",
+                                            //LAYERS: layer.params.LAYERS,
+                                            //LAYER: layer.params.LAYERS,
+                                            //SRS: null,
+                                            //FORMAT: 'image/png'
+                                        //});
 
-                                        var wmsLayerLegendWindow = new Ext.Window({
-                                            title: 'WMS Legend: <span style="font-weight:normal;">' + layer.name + '</span>',
-                                            items: [
-                                                {
-                                                    xtype: 'panel',
-                                                    html: '<img src="' + frs + '">'
-                                                }
-                                            ]
-                                        });
-                                        wmsLayerLegendWindow.setPagePosition(Ext.getCmp('east').x - 500, Ext.getCmp('center').y + 50);
-                                        wmsLayerLegendWindow.show();
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            text: 'Opacity',
-                            iconCls: 'menu-layeroptions-opacity',
-                            menu: { 
-                                items: [
-                                    {
-                                        text: '0.1',
-                                        iconCls: 'menu-layeroptions-opacity-10',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.1); } } }
-                                    },
-                                    {
-                                        text: '0.2',
-                                        iconCls: 'menu-layeroptions-opacity-20',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.2); } } }
-                                    },
-                                    {
-                                        text: '0.3',
-                                        iconCls: 'menu-layeroptions-opacity-30',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.3); } } }
-                                    },
-                                    {
-                                        text: '0.4',
-                                        iconCls: 'menu-layeroptions-opacity-40',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.4); } } }
-                                    },
-                                    {
-                                        text: '0.5',
-                                        iconCls: 'menu-layeroptions-opacity-50',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.5); } } }
-                                    },
-                                    {
-                                        text: '0.6',
-                                        iconCls: 'menu-layeroptions-opacity-60',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.6); } } }
-                                    },
-                                    {
-                                        text: '0.7',
-                                        iconCls: 'menu-layeroptions-opacity-70',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.7); } } }
-                                    },
-                                    {
-                                        text: '0.8',
-                                        iconCls: 'menu-layeroptions-opacity-80',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.8); } } }
-                                    },
-                                    {
-                                        text: '0.9',
-                                        iconCls: 'menu-layeroptions-opacity-90',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(0.9); } } }
-                                    },
-                                    {
-                                        text: '1.0',
-                                        iconCls: 'menu-layeroptions-opacity-100',
-                                        listeners: { 'click': { fn: function() { layer.setOpacity(1.0); } } }
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
-            ]
-        });
-        baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 206, Ext.getCmp('center').y + 50);
-        baseLayerOptionsWindow.show();
-    }
+                                        //var wmsLayerLegendWindow = new Ext.Window({
+                                            //title: 'WMS Legend: <span style="font-weight:normal;">' + layer.name + '</span>',
+                                            //items: [
+                                                //{
+                                                    //xtype: 'panel',
+                                                    //html: '<img src="' + frs + '">'
+                                                //}
+                                            //]
+                                        //});
+                                        //wmsLayerLegendWindow.setPagePosition(Ext.getCmp('east').x - 500, Ext.getCmp('center').y + 50);
+                                        //wmsLayerLegendWindow.show();
+                                    //}
+                                //}
+                            //}
+                        //},
+                        //{
+                            //text: 'Opacity',
+                            //iconCls: 'menu-layeroptions-opacity',
+                            //menu: { 
+                                //items: [
+                                    //{
+                                        //text: '0.1',
+                                        //iconCls: 'menu-layeroptions-opacity-10',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.1); } } }
+                                    //},
+                                    //{
+                                        //text: '0.2',
+                                        //iconCls: 'menu-layeroptions-opacity-20',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.2); } } }
+                                    //},
+                                    //{
+                                        //text: '0.3',
+                                        //iconCls: 'menu-layeroptions-opacity-30',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.3); } } }
+                                    //},
+                                    //{
+                                        //text: '0.4',
+                                        //iconCls: 'menu-layeroptions-opacity-40',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.4); } } }
+                                    //},
+                                    //{
+                                        //text: '0.5',
+                                        //iconCls: 'menu-layeroptions-opacity-50',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.5); } } }
+                                    //},
+                                    //{
+                                        //text: '0.6',
+                                        //iconCls: 'menu-layeroptions-opacity-60',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.6); } } }
+                                    //},
+                                    //{
+                                        //text: '0.7',
+                                        //iconCls: 'menu-layeroptions-opacity-70',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.7); } } }
+                                    //},
+                                    //{
+                                        //text: '0.8',
+                                        //iconCls: 'menu-layeroptions-opacity-80',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.8); } } }
+                                    //},
+                                    //{
+                                        //text: '0.9',
+                                        //iconCls: 'menu-layeroptions-opacity-90',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(0.9); } } }
+                                    //},
+                                    //{
+                                        //text: '1.0',
+                                        //iconCls: 'menu-layeroptions-opacity-100',
+                                        //listeners: { 'click': { fn: function() { layer.setOpacity(1.0); } } }
+                                    //}
+                                //]
+                            //}
+                        //}
+                    //]
+                //}
+            //]
+        //});
+        //baseLayerOptionsWindow.setPagePosition(Ext.getCmp('east').x - 206, Ext.getCmp('center').y + 50);
+        //baseLayerOptionsWindow.show();
+    //}
     
 
     function showVectorLayerOptions(layer, type) {
@@ -2339,21 +2340,100 @@
             nodeType: 'async',
             children: layerTreeConfig
         },
-		listeners: {
-			'click': {
-				fn: function(n) {
-					if (n.parentNode.attributes.text == 'Base layers') {
-						showWMSLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer.name)[0]);
-					}
-                    else if (n.parentNode.attributes.text == 'Overlays') {
-                        showVectorLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer.name)[0], GLOBAL.conf.map_layer_type_overlay);
+        contextMenuBaselayer: new Ext.menu.Menu({
+            items: [
+                {
+                    text: 'Show WMS legend',
+                    iconCls: 'menu-layeroptions-wmslegend',
+                    handler: function(b, e) {
+                        var layer = b.parentMenu.contextNode.layer;
+
+                        var frs = layer.getFullRequestString({
+                            REQUEST: "GetLegendGraphic",
+                            WIDTH: null,
+                            HEIGHT: null,
+                            EXCEPTIONS: "application/vnd.ogc.se_xml",
+                            LAYERS: layer.params.LAYERS,
+                            LAYER: layer.params.LAYERS,
+                            SRS: null,
+                            FORMAT: 'image/png'
+                        });
+                        
+
+                        var wmsLayerLegendWindow = new Ext.Window({
+                            title: 'WMS Legend: <span style="font-weight:normal;">' + layer.name + '</span>',
+                            items: [
+                                {
+                                    xtype: 'panel',
+                                    html: '<img src="' + frs + '">'
+                                }
+                            ]
+                        });
+                        wmsLayerLegendWindow.setPagePosition(Ext.getCmp('east').x - 500, Ext.getCmp('center').y + 50);
+                        wmsLayerLegendWindow.show();
                     }
-					else if (n.isLeaf()) {
-                        showVectorLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer)[0]);
-					}
-				}
-			}
-		},					
+                },
+                {
+                    text: 'Opacity',
+                    iconCls: 'menu-layeroptions-opacity',
+                    menu: { 
+                        items: GLOBAL.conf.opacityItems,
+                        listeners: {
+                            'itemclick': function(item) {
+                                item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
+                            }
+                        }
+                    }
+                }
+            ]
+        }),
+        contextMenuOverlay: new Ext.menu.Menu({
+            items: [
+                {
+                    text: 'Opacity',
+                    iconCls: 'menu-layeroptions-opacity',
+                    menu: { 
+                        items: GLOBAL.conf.opacityItems,
+                        listeners: {
+                            'itemclick': function(item) {
+                                item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
+                            }
+                        }
+                    }
+                }
+            ]
+        }),
+		listeners: {
+			//'click': function(n) {
+                //if (n.parentNode.attributes.text == 'Base layers') {
+                    //showWMSLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer.name)[0]);
+                //}
+                //else if (n.parentNode.attributes.text == 'Overlays') {
+                    //showVectorLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer.name)[0], GLOBAL.conf.map_layer_type_overlay);
+                //}
+                //else if (n.isLeaf()) {
+                    //showVectorLayerOptions(GLOBAL.vars.map.getLayersByName(n.attributes.layer)[0]);
+                //}
+			//},
+            'contextmenu': function(node, e) {
+                if (node.attributes.text != 'Base layers' && node.attributes.text != 'Overlays') {
+                    node.select();
+                    
+                    if (node.parentNode.attributes.text == 'Base layers') {
+                        var cmb = node.getOwnerTree().contextMenuBaselayer;
+                        cmb.contextNode = node;
+                        cmb.showAt(e.getXY());
+                    }
+                    
+                    else if (node.parentNode.attributes.text == 'Overlays') {
+                        var cmo = node.getOwnerTree().contextMenuOverlay;
+                        cmo.contextNode = node;
+                        cmo.showAt(e.getXY());
+                    }
+                    
+                }
+            }
+		},
         bbar: new Ext.StatusBar({
 			id: 'maplayers_sb',
 			items:
