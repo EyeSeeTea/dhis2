@@ -2214,39 +2214,7 @@
                             }
                         },
                         
-                        {
-                            text: 'Show/hide labels',
-                            iconCls: 'menu-layeroptions-labels',
-                            listeners: {
-                                'click': {
-                                    fn: function() {
-                                        if (type != GLOBAL.conf.map_layer_type_overlay) {
-                                            if (layer.features.length > 0) {
-                                                if (layer.name == 'Polygon layer') {
-                                                    if (GLOBAL.vars.activePanel.isPolygon()) {
-                                                        GLOBAL.util.toggleFeatureLabels(choropleth);
-                                                    }
-                                                    else {
-                                                        Ext.message.msg(false, 'Please use <span class="x-msg-hl">Point layer</span> options');
-                                                    }
-                                                }
-                                                else if (layer.name == 'Point layer') {
-                                                    if (GLOBAL.vars.activePanel.isPoint()) {
-                                                        GLOBAL.util.toggleFeatureLabels(symbol);
-                                                    }
-                                                    else {
-                                                        Ext.message.msg(false, 'Please use <span class="x-msg-hl">Polygon layer</span> options');
-                                                    }
-                                                }
-                                            }
-                                            else {
-                                                Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + ' </span>' + i18n_has_no_orgunits);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
+                        
                         
                         {
                             text: 'Opacity',
@@ -2408,13 +2376,6 @@
             ]
         }),
         contextMenuVector: new Ext.menu.Menu({
-            featureStore: new Ext.data.ArrayStore({
-                mode: 'local',
-                idProperty: 'id',
-                fields: ['id','name'],
-                sortInfo: {field: 'name', direction: 'ASC'},
-                data: []
-            }),                
             showLocateFeatureWindow: function(cm) {
                 var layer = GLOBAL.vars.map.getLayersByName(cm.contextNode.attributes.layer)[0];
 
@@ -2432,6 +2393,10 @@
                         autoDestroy: true,
                         data: data
                     });
+                    
+                    if (Ext.getCmp('locatefeature_w')) {
+                        Ext.getCmp('locatefeature_w').destroy();
+                    }
                     
                     var locateFeatureWindow = new Ext.Window({
                         id: 'locatefeature_w',
@@ -2527,7 +2492,7 @@
                     locateFeatureWindow.show();
                 }
                 else {
-                    Ext.message.msg(false, 'No features rendered');
+                    Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
                 }
             },
             items: [
@@ -2537,7 +2502,26 @@
                     handler: function(item, e) {
                         item.parentMenu.showLocateFeatureWindow(item.parentMenu);
                     }
-                }
+                },
+                {
+                    text: 'Show/hide labels',
+                    iconCls: 'menu-layeroptions-labels',
+                    handler: function(item, e) {
+                        var layer = GLOBAL.vars.map.getLayersByName(item.parentMenu.contextNode.attributes.layer)[0];
+                        
+                        if (layer.features.length) {
+                            if (layer.name == 'Polygon layer') {
+                                GLOBAL.util.toggleFeatureLabels(choropleth);
+                            }
+                            else if (layer.name == 'Point layer') {
+                                GLOBAL.util.toggleFeatureLabels(symbol);
+                            }
+                        }
+                        else {
+                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
+                        }
+                    }
+                },
             ]
         }),
 		listeners: {
