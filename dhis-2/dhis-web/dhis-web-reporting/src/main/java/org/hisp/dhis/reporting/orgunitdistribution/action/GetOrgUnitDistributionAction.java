@@ -1,4 +1,4 @@
-package org.hisp.dhis.oum.action.search;
+package org.hisp.dhis.reporting.orgunitdistribution.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -28,82 +28,66 @@ package org.hisp.dhis.oum.action.search;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupSetNameComparator;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.springframework.util.CollectionUtils;
+import org.hisp.dhis.orgunitdistribution.OrgUnitDistributionService;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
  */
-public class SearchOrganisationUnitsAction
+public class GetOrgUnitDistributionAction
     implements Action
 {
-    private static final int ANY = 0;
-
+    private static final Comparator<OrganisationUnitGroupSet> GROUPSET_COMPARATOR = new OrganisationUnitGroupSetNameComparator();
+    
+    private static final Log log = LogFactory.getLog( GetOrgUnitDistributionAction.class );
+    
     // -------------------------------------------------------------------------
-    // Depdencies
+    // Dependencies
     // -------------------------------------------------------------------------
 
     private OrganisationUnitGroupService organisationUnitGroupService;
-
+    
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
-    private OrganisationUnitService organisationUnitService;
+    private OrgUnitDistributionService distributionService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setDistributionService( OrgUnitDistributionService distributionService )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.distributionService = distributionService;
     }
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input and output
-    // -------------------------------------------------------------------------
-
-    private String name;
     
-    public String getName()
+    private SelectionTreeManager selectionTreeManager;
+
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        return name;
+        this.selectionTreeManager = selectionTreeManager;
     }
 
-    public void setName( String name )
-    {
-        this.name = name;
-    }
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
-    private Collection<Integer> groupId = new HashSet<Integer>();
+    private Integer groupSetId;
 
-    public Collection<Integer> getGroupId()
+    public void setGroupSetId( Integer groupSetId )
     {
-        return groupId;
-    }
-
-    public void setGroupId( Collection<Integer> groupId )
-    {
-        this.groupId = groupId;
+        this.groupSetId = groupSetId;
     }
 
     // -------------------------------------------------------------------------
@@ -111,24 +95,24 @@ public class SearchOrganisationUnitsAction
     // -------------------------------------------------------------------------
 
     private List<OrganisationUnitGroupSet> groupSets;
-
+    
     public List<OrganisationUnitGroupSet> getGroupSets()
     {
         return groupSets;
     }
     
-    private Collection<OrganisationUnit> organisationUnits;
-
-    public Collection<OrganisationUnit> getOrganisationUnits()
-    {
-        return organisationUnits;
-    }
+    private OrganisationUnitGroupSet selectedGroupSet;
     
-    private OrganisationUnit selectedOrganisationUnit;
-
-    public OrganisationUnit getSelectedOrganisationUnit()
+    public OrganisationUnitGroupSet getSelectedGroupSet()
     {
-        return selectedOrganisationUnit;
+        return selectedGroupSet;
+    }
+
+    private Grid distribution;
+    
+    public Grid getDistribution()
+    {
+        return distribution;
     }
 
     // -------------------------------------------------------------------------
@@ -136,37 +120,21 @@ public class SearchOrganisationUnitsAction
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Assemble groups and get search result
-        // ---------------------------------------------------------------------
-
-        selectedOrganisationUnit = selectionManager.getSelectedOrganisationUnit();
+        groupSets = new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService.getAllOrganisationUnitGroupSets() );
         
-        if ( StringUtils.isNotBlank( name ) || !CollectionUtils.isEmpty( groupId ) )
+        Collections.sort( groupSets, GROUPSET_COMPARATOR );        
+        
+        OrganisationUnit selectedOrganisationUnit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
+        
+        if ( groupSetId != null && groupSetId > 0 )
         {
-            Collection<OrganisationUnitGroup> groups = new HashSet<OrganisationUnitGroup>();
+            selectedGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( groupSetId );
             
-            for ( Integer id : groupId )
-            {
-                if ( id != ANY )
-                {
-                    OrganisationUnitGroup group = organisationUnitGroupService.getOrganisationUnitGroup( id );
-                    groups.add( group );
-                }
-            }
-    
-            organisationUnits = organisationUnitService.getOrganisationUnitsByNameAndGroups( name, groups, selectedOrganisationUnit );
+            log.info( "Get distribution for group set: " + selectedGroupSet + " and organisation unit: " + selectedOrganisationUnit );
+        
+            distribution = distributionService.getOrganisationUnitDistribution( selectedGroupSet, selectedOrganisationUnit, false );
         }
-        
-        // ---------------------------------------------------------------------
-        // Get group sets
-        // ---------------------------------------------------------------------
-
-        groupSets = new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService.getCompulsoryOrganisationUnitGroupSets() );
-        
-        Collections.sort( groupSets, new OrganisationUnitGroupSetNameComparator() );
         
         return SUCCESS;
     }

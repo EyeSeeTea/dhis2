@@ -142,4 +142,12 @@ public interface ReportTableService
      * @return true if the report table has been generated, false it not.
      */
     boolean reportTableIsGenerated( int id );
+    
+    Collection<ReportTable> getReportTablesBetween( int first, int max );
+    
+    Collection<ReportTable> getReportTablesBetweenByName( String name, int first, int max );
+    
+    int getReportTableCount();
+    
+    int getReportTableCountByName( String name );
 }

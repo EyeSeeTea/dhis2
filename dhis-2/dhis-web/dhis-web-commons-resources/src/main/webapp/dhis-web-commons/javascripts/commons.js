@@ -375,7 +375,7 @@ function setFieldValue( fieldId, value )
  */
 function getFieldValue( fieldId )
 {
-	if ( getTypeById( fieldId ) == 'select-multiple' )
+	if ( getTypeById( fieldId, 'multiple' ) )
 	{
 		return jQuery("#" + fieldId).val()[0];
 	}
@@ -389,9 +389,9 @@ function getFieldValue( fieldId )
  * @param fieldId the identifier of the element.
  * @return the type of the element with the given identifier.
  */
-function getTypeById( fieldId )
+function getTypeById( fieldId, attribute )
 {
-	return byId(fieldId).type;	
+	return jQuery("#" + fieldId).attr( attribute );
 }
 
 /**
@@ -1278,4 +1278,9 @@ function isNegativeNumber( value )
 function isZeroNumber( value )
 {
 	return isNumber( value ) && parseFloat( value ) == 0;
+}
+
+function getRandomNumber()
+{
+	return Math.floor( 1000000 * Math.random() );
 }

@@ -75,4 +75,13 @@ public interface DocumentService
      * @return the Document.
      */
     Document getDocumentByName( String name );
+    
+    Collection<Document> getDocumentsBetween( int first, int max );
+    
+    Collection<Document> getDocumentsBetweenByName( String name, int first, int max );
+    
+    int getDocumentCount();
+    
+    int getDocumentCountByName( String name );
+
 }

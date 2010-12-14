@@ -27,6 +27,8 @@ package org.hisp.dhis.reporting.chart.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,15 +36,14 @@ import java.util.List;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.chart.comparator.ChartTitleComparator;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class GetAllChartsAction
-    implements Action
+    extends ActionPagingSupport<Chart>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -56,8 +57,20 @@ public class GetAllChartsAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
+    
+    private String key;
+    
+    public String getKey()
+    {
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
 
     private List<Chart> charts;
 
@@ -72,7 +85,18 @@ public class GetAllChartsAction
     
     public String execute()
     {
-        charts = new ArrayList<Chart>( chartService.getAllCharts() );
+        if ( isNotBlank( key ) )
+        {
+            this.paging = createPaging( chartService.getChartCountByName( key ) );
+            
+            charts = new ArrayList<Chart>( chartService.getChartsBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+        }
+        else
+        {
+            this.paging = createPaging( chartService.getChartCount() );
+
+            charts = new ArrayList<Chart>( chartService.getChartsBetween( paging.getStartPos(), paging.getPageSize() ) );
+        }
         
         Collections.sort( charts, new ChartTitleComparator() );
         

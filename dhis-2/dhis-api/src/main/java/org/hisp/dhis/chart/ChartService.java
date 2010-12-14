@@ -73,4 +73,13 @@ public interface ChartService
     Chart getChartByTitle( String name );
     
     Collection<Chart> getCharts( final Collection<Integer> identifiers );
+    
+    Collection<Chart> getChartsBetween( int first, int max );
+    
+    Collection<Chart> getChartsBetweenByName( String name, int first, int max );
+    
+    int getChartCount();
+    
+    int getChartCountByName( String name );
+
 }
