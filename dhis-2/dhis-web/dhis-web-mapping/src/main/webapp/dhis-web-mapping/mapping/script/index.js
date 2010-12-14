@@ -2522,6 +2522,18 @@
                         }
                     }
                 },
+                {
+                    text: 'Opacity',
+                    iconCls: 'menu-layeroptions-opacity',
+                    menu: { 
+                        items: GLOBAL.conf.opacityItems,
+                        listeners: {
+                            'itemclick': function(item) {
+                                item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
+                            }
+                        }
+                    }
+                }
             ]
         }),
 		listeners: {
