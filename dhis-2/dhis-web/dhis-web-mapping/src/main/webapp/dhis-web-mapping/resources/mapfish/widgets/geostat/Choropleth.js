@@ -692,52 +692,40 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                                         }
                                                     }
                                                 ]
-                                            },
+                                            }
+                                        ],
+                                        bbar: [
+                                            '->',
                                             {
-                                                xtype: 'panel',
-                                                layout: 'column',
-                                                items: [
-                                                    {
-                                                        xtype: 'button',
-                                                        text: i18n_select,
-                                                        columnWidth: .5,
-                                                        scope: this,
-                                                        handler: function() {
-                                                            var node = this.form.findField('boundary').selectedNode;
-                                                            if (!node || !Ext.getCmp('level_cb').getValue()) {
-                                                                return;
-                                                            }
-                                                            if (node.attributes.level > this.form.findField('level').level) {
-                                                                Ext.message.msg(false, 'Level is higher than boundary level');
-                                                                return;
-                                                            }
-                                                            
-                                                            if (Ext.getCmp('locatefeature_w')) {
-                                                                Ext.getCmp('locatefeature_w').destroy();
-                                                            }
-                                                            
-                                                            this.form.findField('mapview').clearValue();
-                                                            this.updateValues = true;
-                                                            this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
-                                                                this.form.findField('level').level, this.form.findField('level').levelName);
-                                                                
-                                                            this.form.findField('boundary').setValue(node.attributes.text);
-                                                            this.form.findField('level').setValue(this.form.findField('level').levelName);
-                                                            Ext.getCmp('tree_w').hide();
-                                                            
-                                                            this.loadGeoJson();
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'button',
-                                                        text: i18n_cancel,
-                                                        columnWidth: .5,
-                                                        scope: this,
-                                                        handler: function() {
-                                                            Ext.getCmp('tree_w').hide();
-                                                        }
+                                                xtype: 'button',
+                                                text: i18n_select,
+                                                iconCls: 'icon-assign',
+                                                scope: this,
+                                                handler: function() {
+                                                    var node = this.form.findField('boundary').selectedNode;
+                                                    if (!node || !Ext.getCmp('level_cb').getValue()) {
+                                                        return;
                                                     }
-                                                ]
+                                                    if (node.attributes.level > this.form.findField('level').level) {
+                                                        Ext.message.msg(false, 'Level is higher than boundary level');
+                                                        return;
+                                                    }
+                                                    
+                                                    if (Ext.getCmp('locatefeature_w')) {
+                                                        Ext.getCmp('locatefeature_w').destroy();
+                                                    }
+                                                    
+                                                    this.form.findField('mapview').clearValue();
+                                                    this.updateValues = true;
+                                                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
+                                                        this.form.findField('level').level, this.form.findField('level').levelName);
+                                                        
+                                                    this.form.findField('boundary').setValue(node.attributes.text);
+                                                    this.form.findField('level').setValue(this.form.findField('level').levelName);
+                                                    Ext.getCmp('tree_w').hide();
+                                                    
+                                                    this.loadGeoJson();
+                                                }
                                             }
                                         ]
                                     });
