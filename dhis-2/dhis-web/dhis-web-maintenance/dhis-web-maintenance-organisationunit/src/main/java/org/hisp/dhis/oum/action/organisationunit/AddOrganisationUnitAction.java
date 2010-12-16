@@ -35,7 +35,6 @@ import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.jfree.util.Log;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -50,7 +49,7 @@ public class AddOrganisationUnitAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private I18nFormat format;
 
     public void setFormat( I18nFormat format )
