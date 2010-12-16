@@ -116,13 +116,6 @@ public class AddOrganisationUnitAction
     {
         this.coordinates = coordinates;
     }
-    
-    private String featureType;
-
-    public void setFeatureType( String featureType )
-    {
-        this.featureType = featureType;
-    }
 
     private String url;
 
@@ -180,7 +173,6 @@ public class AddOrganisationUnitAction
         code = nullIfEmpty( code );
         comment = nullIfEmpty( comment );
         coordinates = nullIfEmpty( coordinates );
-        featureType = nullIfEmpty( featureType );
         url = nullIfEmpty( url );
         
         contactPerson = nullIfEmpty( contactPerson );
@@ -213,7 +205,6 @@ public class AddOrganisationUnitAction
         OrganisationUnit organisationUnit = new OrganisationUnit( name, shortName, code, date, null, true, comment );
 
         organisationUnit.setCoordinates( coordinates );
-        organisationUnit.setFeatureType( featureType );
         organisationUnit.setUrl( url );
         organisationUnit.setParent( parent );
         organisationUnit.setContactPerson( contactPerson );

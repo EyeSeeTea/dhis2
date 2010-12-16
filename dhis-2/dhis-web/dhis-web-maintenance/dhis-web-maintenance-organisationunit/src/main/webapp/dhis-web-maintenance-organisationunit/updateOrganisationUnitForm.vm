@@ -33,11 +33,11 @@
 	</tr>
 	<tr>
 		<td><label for="name">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-		<td><input type="text" id="name" name="name" maxlength="160" value="$!encoder.htmlEncode( $organisationUnit.name )" onchange="nameChanged()" style="width:20em" class="{validate:{required:true,minlength:2}}"/></td>
+		<td><input type="text" id="name" name="name" maxlength="160" value="$encoder.htmlEncode( $organisationUnit.name )" onchange="nameChanged()" style="width:20em" class="{validate:{required:true,minlength:2}}"/></td>
 	</tr>
 	<tr>
 		<td><label for="shortName">$i18n.getString( "short_name" )</label></td>
-		<td><input type="text" id="shortName" name="shortName" maxlength="25" value="$!encoder.htmlEncode( $organisationUnit.shortName )" style="width:20em" class="{validate:{required:true,minlength:2}}"/></td>
+		<td><input type="text" id="shortName" name="shortName" maxlength="25" value="$encoder.htmlEncode( $organisationUnit.shortName )" style="width:20em" class="{validate:{required:true,minlength:2}}"/></td>
 	</tr>
 	<tr>
 		<td><label for="code">$i18n.getString( "code" )</label></td>

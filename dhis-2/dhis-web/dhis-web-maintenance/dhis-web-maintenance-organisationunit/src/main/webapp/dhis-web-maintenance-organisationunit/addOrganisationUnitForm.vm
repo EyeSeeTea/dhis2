@@ -1,11 +1,11 @@
 <script>
 	jQuery(document).ready(	function(){
-		validation( 'addOrganisationUnitForm' );
+		validation( 'addOrganisationUnitForm' );	
 		
 		checkValueIsExist( "name", "validateOrganisationUnit.action");
 		checkValueIsExist( "code", "validateOrganisationUnit.action");
 		
-		datePickerValid( 'openingDate', false );
+		datePickerValid( 'openingDate', false );			
 	});
 </script>
 
@@ -84,5 +84,5 @@
 	nameField.select();
 	nameField.focus();
 	var adding_the_org_unit_failed = '$encoder.jsEscape( $i18n.getString( "adding_the_org_unit_failed" ) , "'" )';
-    
+	
 </script>
