@@ -447,7 +447,7 @@
 	}
 	addOverlaysToMap(true);
 			
-	/* Section: mapview */    
+	/* Section: mapview */
 	var favoriteWindow = new Ext.Window({
         id: 'favorite_w',
         title: '<span id="window-favorites-title">' + i18n_favorites + '</span>',
@@ -2293,7 +2293,7 @@
         }
     });
     
-    mapping = new mapfish.widgets.geostat.Mapping({});
+    //mapping = new mapfish.widgets.geostat.Mapping({});    
 	
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
