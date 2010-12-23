@@ -669,6 +669,23 @@ function getParamString( elementId )
 }
 
 /**
+ * Returns a query string with all element values in the select list and
+ * the specified param.
+ */
+function getParamString( elementId, param )
+{
+    var result = "";
+	var list = jQuery( "#" + elementId ).children();
+	
+	list.each( function( i, item ){
+		result += param + "=" + item.value;
+		result += (i < list.length-1) ? "&" : "";
+	});
+	
+	return result;
+}
+
+/**
  * Creates an option and adds it to the list.
  * 
  * @param list the list.
