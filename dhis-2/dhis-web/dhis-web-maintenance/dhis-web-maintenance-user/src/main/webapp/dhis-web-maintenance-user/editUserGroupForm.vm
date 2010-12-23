@@ -1,19 +1,21 @@
-<h3>$i18n.getString( "add_usergroup" )</h3>
 
-<form id="addUserGroupForm" name="addUserGroupForm" action = " addUserGroup.action"  method="post" onSubmit=" return addValidation()" >
+<h3>$i18n.getString( "edit_user_group" )</h3>
+
+<form id="editUserGroupForm" name="editUserGroupForm" action="updateUserGroup.action" method="post" onsubmit="return editValidation();" >
+	
+  <input type="hidden" name="userGroupId" id="userGroupId" value="$userGroupId" />
   <table id="detailsList">
     <col/> ## Labels
     <col/> ## Input
     <thead>
       <tr>
-        <th colspan="2">$i18n.getString( "usergroup_details" )</th>
+        <th colspan="2">$i18n.getString( "user_group_details" )</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-        <td><input type="text" id="name" name="name" onchange="nameChanged()" style="width:20em" maxlength="150" 
-            class="{validate:{required:true,minlength:4,alphanumericwithbasicpuncspaces:true,firstletteralphabet:false}}"/>
+        <td><input type="text" id="name" name="name" value ="$encoder.htmlEncode( $group.name )" onchange="nameChanged()" style="width:20em" maxlength="150" />
         </td>
       </tr>
       <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -24,7 +26,7 @@
     <tr>
         <th>$i18n.getString( "available_users" )</th><td></td>
         <th>$i18n.getString( "group_members" )
-            <select id="memberValidator" multiple="multiple" style="display:none" class="{validate:{required:true}}"/>
+            <select id="memberValidator" multiple="multiple" style="display:none"/>
         </th>
     </tr>
     <tr>        
@@ -49,8 +51,12 @@
         </td>
     
         <td>
-            <select id="groupMembers" name="groupMembers" size="2" multiple="multiple" style="min-width:25em; height:25em" ondblclick="moveSelectedById( 'groupMembers', 'availableUsers' )" />
+            <select id="groupMembers" name="groupMembers" size="2"value = "$group.name" multiple="multiple" style="min-width:25em; height:25em" ondblclick="moveSelectedById( 'groupMembers', 'availableUsers' )" />
+             #foreach( $user in $groupMembers )
+                    <option value="$user.id">$encoder.htmlEncode( $user.name )</option>
+                #end
         </td>
+       
     </tr>
     <tr>
         <td></td>
@@ -59,33 +65,38 @@
     </tr>
 </table>
 
-<p><input type="submit" value="$i18n.getString( 'add' )" style="width:10em"/><input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='getAllUserGroups.action'" style="width:10em"/></p>
+<p><input type="submit" value="$i18n.getString( 'save' )" style="width:10em"/><input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='getAllUserGroups.action'" style="width:10em"/></p>
 
 </form>
-
 <script type="text/javascript">
+   function editValidation ()
+{
+    var k =0 ;
+    var xyz=document.getElementById("name");
+    var abc =document.getElementById("groupMembers");
+    var c  = abc.length ;
 	
-	
+    if( xyz.value == "") {
+    	alert ("please select name ");alert(' xyz.value is empty');
+		return false;
+    }
+    else if ( c <=0 ){
+		alert("please select at least one member");
+		return false ;
+    }else{
+    	if (c >0 )
+		{
+			/* for( k =0;k<=c;k++)
+			{alert('k : ' + k);
+			alert('abc.options[k] : ' + abc.options[k]);
+				abc.options[k].selected = true ;    
+			}*/
+			
+			selectAllById("groupMembers");
+		}
+	}
+   
+    return true;
+}
 
-	
-	
-    var i18n_select_dataelement_group = '$encoder.jsEscape( $i18n.getString( "select_User_group" ) , "'")';
-    var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete_data_element_group" ) , "'")';
-    var i18n_member_of = '$encoder.jsEscape( $i18n.getString( "member_of" ) , "'")';
-    var i18n_update_success = '$encoder.jsEscape( $i18n.getString( "update_success" ) , "'")';
-
-    var dataElementGroups = new Object();
-    #foreach( $dataElementGroup in $dataElementGroups )
-        dataElementGroups['$dataElementGroup.id'] = '$encoder.jsEscape( $dataElementGroup.name, "'" )';
-    #end
-
-    var availableDataElements = new Object();
-    #foreach( $dataElement in $dataElements )
-        availableDataElements['$dataElement.id'] = '$encoder.jsEscape( $dataElement.name, "'" )';
-    #end
-    var selectedDataElements = new Object();
-
-    initAllList();
 </script>
-
-
