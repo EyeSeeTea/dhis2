@@ -354,7 +354,7 @@ GLOBAL.vars = {
     
     topLevelUnit: null,
     
-    locateFeatureWindow: null,
-    
-    selectFeatureWindow: null
+    user: {
+		isAdmin: false
+	}
 };
