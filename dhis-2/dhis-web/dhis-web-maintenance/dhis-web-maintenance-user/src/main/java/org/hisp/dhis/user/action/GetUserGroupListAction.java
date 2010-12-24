@@ -1,15 +1,17 @@
-package org.hisp.dhis.mobile.user.action;
+package org.hisp.dhis.user.action;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Action;
 
-public class ValidateUserGroupAction
-    extends ActionSupport
+public class GetUserGroupListAction
+    implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -25,9 +27,12 @@ public class ValidateUserGroupAction
     // Parameters
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private List<UserGroup> userGroupList;
 
-    private String name;
+    public List<UserGroup> getUserGroupList()
+    {
+        return userGroupList;
+    }
 
     // -------------------------------------------------------------------------
     // Action Implementation
@@ -36,12 +41,9 @@ public class ValidateUserGroupAction
     public String execute()
         throws Exception
     {
-        UserGroup group = userGroupService.getUserGroupByName( name );
+
+        userGroupList = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
         
-        if( (id==null && group!= null ) || ( id!= null && id!= group.getId())){
-            
-            return INPUT;
-        }
         return SUCCESS;
     }
 
