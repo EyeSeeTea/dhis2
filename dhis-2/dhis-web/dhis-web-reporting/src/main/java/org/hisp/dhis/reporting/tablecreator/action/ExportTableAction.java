@@ -1,4 +1,4 @@
-package org.hisp.dhis.reporting.reportviewer.action;
+package org.hisp.dhis.reporting.tablecreator.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,31 +27,36 @@ package org.hisp.dhis.reporting.reportviewer.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.OutputStream;
+import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.reporttable.ReportTableService;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.hisp.dhis.report.Report;
-import org.hisp.dhis.report.ReportService;
-import org.hisp.dhis.util.ContextUtils;
-import org.hisp.dhis.util.StreamActionSupport;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
-public class GetReportDesignAction
-    extends StreamActionSupport
+public class ExportTableAction
+    implements Action
 {
+    private static final String DEFAULT_TYPE = "html";
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ReportService reportService;
-        
-    public void setReportService( ReportService reportService )
+    private ReportTableService reportTableService;
+
+    public void setReportTableService( ReportTableService reportTableService )
     {
-        this.reportService = reportService;
+        this.reportTableService = reportTableService;
+    }
+    
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     // -------------------------------------------------------------------------
@@ -65,29 +70,34 @@ public class GetReportDesignAction
         this.id = id;
     }
 
+    private String type;
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Output
+    // -------------------------------------------------------------------------
+
+    private Grid grid;
+
+    public Grid getGrid()
+    {
+        return grid;
+    }
+
+    // -------------------------------------------------------------------------
+    // Result implementation
     // -------------------------------------------------------------------------
 
     @Override
-    protected String execute( HttpServletResponse response, OutputStream out ) throws Exception
+    public String execute()
+        throws Exception
     {
-        Report report = reportService.getReport( id );
+        grid = reportTableService.getPrettyReportTableGrid( id, format );
         
-        out.write( report.getDesignContent().getBytes() );
-        
-        return SUCCESS;    
-    }
-
-    @Override
-    protected String getContentType()
-    {
-        return ContextUtils.CONTENT_TYPE_XML;
-    }
-
-    @Override
-    protected String getFilename()
-    {
-        return "report.jrxml";
-    }
+        return type != null ? type : DEFAULT_TYPE;
+    }    
 }
