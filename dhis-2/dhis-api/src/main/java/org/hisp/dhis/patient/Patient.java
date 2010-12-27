@@ -60,6 +60,8 @@ public class Patient
     private String middleName;
 
     private String lastName;
+    
+    private String fullName;
 
     private String gender;
 
@@ -418,9 +420,14 @@ public class Patient
         setBirthDate( todayCalendar.getTime() );
     }
 
+    public void setFullName( String fullName )
+    {
+        this.fullName = fullName;
+    }
+
     public String getFullName()
     {
-        return firstName + " " + middleName + " " + lastName;
+        return fullName;
     }
 
     public String getBloodGroup()
