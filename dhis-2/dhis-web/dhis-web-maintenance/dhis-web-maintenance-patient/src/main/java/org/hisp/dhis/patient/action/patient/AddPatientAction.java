@@ -169,7 +169,7 @@ public class AddPatientAction
         patient.setUnderAge( underAge );
         patient.setOrganisationUnit( organisationUnit );
 
-        if ( dobType == 'V' || dobType == 'D' )
+        if ( dobType == Patient.DOB_TYPE_VERIFIED || dobType == Patient.DOB_TYPE_DECLARED)
         {
             birthDate = birthDate.trim();
             patient.setBirthDate( format.parseDate( birthDate ) );
