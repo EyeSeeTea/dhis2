@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.csv.util;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -31,7 +31,7 @@ package org.hisp.dhis.importexport.csv.util;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class CsvUtil
+public class CsvUtils
 {
     public static final String SEPARATOR = ",";
     public static final byte[] SEPARATOR_B = SEPARATOR.getBytes();
@@ -42,7 +42,8 @@ public class CsvUtil
     private static final String EMPTY = "";
     
     /**
-     * Encodes the given value to a CSV acceptable value.
+     * Encodes the given value to a CSV acceptable value. Returns the empty string
+     * if argument is null.
      * 
      * @param value the value.
      * @return the CSV encoded value.
@@ -53,7 +54,8 @@ public class CsvUtil
     }
 
     /**
-     * Encodes the given value to a CSV acceptable value.
+     * Encodes the given value to a CSV acceptable value. Returns the empty string
+     * if argument is null.
      * 
      * @param value the value.
      * @return the CSV encoded value.

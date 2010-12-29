@@ -27,18 +27,13 @@ package org.hisp.dhis.reporting.orgunitdistribution.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupSetNameComparator;
 import org.hisp.dhis.orgunitdistribution.OrgUnitDistributionService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
@@ -50,9 +45,9 @@ import com.opensymphony.xwork2.Action;
 public class GetOrgUnitDistributionAction
     implements Action
 {
-    private static final Comparator<OrganisationUnitGroupSet> GROUPSET_COMPARATOR = new OrganisationUnitGroupSetNameComparator();
-    
     private static final Log log = LogFactory.getLog( GetOrgUnitDistributionAction.class );
+    
+    private static final String DEFAULT_TYPE = "html";
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -89,30 +84,23 @@ public class GetOrgUnitDistributionAction
     {
         this.groupSetId = groupSetId;
     }
+    
+    private String type;
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private List<OrganisationUnitGroupSet> groupSets;
+    private Grid grid;
     
-    public List<OrganisationUnitGroupSet> getGroupSets()
+    public Grid getGrid()
     {
-        return groupSets;
-    }
-    
-    private OrganisationUnitGroupSet selectedGroupSet;
-    
-    public OrganisationUnitGroupSet getSelectedGroupSet()
-    {
-        return selectedGroupSet;
-    }
-
-    private Grid distribution;
-    
-    public Grid getDistribution()
-    {
-        return distribution;
+        return grid;
     }
 
     // -------------------------------------------------------------------------
@@ -121,21 +109,19 @@ public class GetOrgUnitDistributionAction
 
     public String execute()
     {
-        groupSets = new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService.getAllOrganisationUnitGroupSets() );
+        type = StringUtils.defaultIfEmpty( type, DEFAULT_TYPE );
         
-        Collections.sort( groupSets, GROUPSET_COMPARATOR );        
-        
-        OrganisationUnit selectedOrganisationUnit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
+        OrganisationUnit unit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
         
         if ( groupSetId != null && groupSetId > 0 )
         {
-            selectedGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( groupSetId );
+            OrganisationUnitGroupSet groupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( groupSetId );
             
-            log.info( "Get distribution for group set: " + selectedGroupSet + " and organisation unit: " + selectedOrganisationUnit );
+            log.info( "Get distribution for group set: " + groupSet + " and organisation unit: " + unit );
         
-            distribution = distributionService.getOrganisationUnitDistribution( selectedGroupSet, selectedOrganisationUnit, false );
+            grid = distributionService.getOrganisationUnitDistribution( groupSet, unit, false );
         }
         
-        return SUCCESS;
+        return type;
     }
 }

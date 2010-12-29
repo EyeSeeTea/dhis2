@@ -115,6 +115,7 @@ public class AddProgramAction
 
         program.setName( name );
         program.setDescription( description );
+        program.setVersion( new Integer( 1 ) );
         program.setDateOfEnrollmentDescription( dateOfEnrollmentDescription );
         program.setDateOfIncidentDescription( dateOfIncidentDescription );
         program.setMinDaysAllowedInputData( minDaysAllowedInputData );

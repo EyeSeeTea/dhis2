@@ -1,5 +1,3 @@
-package org.hisp.dhis.reporttable;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,90 +25,87 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.importexport.importer;
+
+import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.dataentryform.DataEntryFormService;
+import org.hisp.dhis.importexport.GroupMemberType;
+import org.hisp.dhis.importexport.ImportParams;
+import org.hisp.dhis.importexport.Importer;
+import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+
 /**
- * The ReportTableColumn objec represents a customziable column header for a
- * ReportTable, including a more meaningful name and the ability to hide it in a
- * view.
+ * @author Chau Thu Tran
  * 
- * @author Lars Helge Overland
- * @version $Id$
+ * @version $ID: DataEntryFormImporter.java Dec 16, 2010 2:36:05 PM $
  */
-public class ReportTableColumn
+public class DataEntryFormImporter
+    extends AbstractImporter<DataEntryForm>
+    implements Importer<DataEntryForm>
 {
-    private int id;
-    
-    private String name;
-    
-    private String header;
-    
-    private boolean hidden;
+
+    protected DataEntryFormService dataEntryFormService;
+
+    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
+    {
+        this.dataEntryFormService = dataEntryFormService;
+    }
 
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
-
-    public ReportTableColumn()
-    {   
-    }
     
-    public ReportTableColumn( String name, String header, boolean hidden )
+    public DataEntryFormImporter(  )
     {
-        this.name = name;
-        this.header = header;
-        this.hidden = hidden;
+    }
+
+    public DataEntryFormImporter( DataEntryFormService dataEntryFormService )
+    {
+        this.dataEntryFormService = dataEntryFormService;
     }
 
     // -------------------------------------------------------------------------
-    // equals
+    // Override methods
     // -------------------------------------------------------------------------
 
     @Override
-    public String toString()
+    public void importObject( DataEntryForm object, ImportParams params )
     {
-        return "[" + name + ", " + header + "]";
-    }
-    
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
+        NameMappingUtil.addDataEntryFormMapping( object.getId(), object.getName() );
+        
+        read( object, GroupMemberType.NONE, params );
     }
 
-    public void setId( int id )
+    @Override
+    protected void importUnique( DataEntryForm object )
     {
-        this.id = id;
+        dataEntryFormService.addDataEntryForm( object );
     }
 
-    public String getName()
+    @Override
+    protected void importMatching( DataEntryForm object, DataEntryForm match )
     {
-        return name;
+        match.setName( object.getName() );
+        match.setHtmlCode( object.getHtmlCode() );
+
+        dataEntryFormService.updateDataEntryForm( match );
     }
 
-    public void setName( String name )
+    @Override
+    protected DataEntryForm getMatching( DataEntryForm object )
     {
-        this.name = name;
+        return dataEntryFormService.getDataEntryFormByName( object.getName() );
     }
 
-    public String getHeader()
+    @Override
+    protected boolean isIdentical( DataEntryForm object, DataEntryForm existing )
     {
-        return header;
+        if ( object.getName().equals( existing.getName() ) )
+        {
+            return true;
+        }
+
+        return false;
     }
 
-    public void setHeader( String header )
-    {
-        this.header = header;
-    }
-
-    public boolean isHidden()
-    {
-        return hidden;
-    }
-
-    public void setHidden( boolean hidden )
-    {
-        this.hidden = hidden;
-    }
 }

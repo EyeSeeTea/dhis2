@@ -1,5 +1,3 @@
-package org.hisp.dhis.reporting.tablecreator.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,83 +25,76 @@ package org.hisp.dhis.reporting.tablecreator.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+package org.hisp.dhis.jdbc.batchhandler;
 
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.reporttable.ReportTableColumn;
-import org.hisp.dhis.reporttable.ReportTableService;
-
-import com.opensymphony.xwork2.Action;
+import org.amplecode.quick.JdbcConfiguration;
+import org.amplecode.quick.batchhandler.AbstractBatchHandler;
+import org.hisp.dhis.dataentryform.DataEntryForm;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version $ID: DataEntryFormBatchHandler.java Dec 17, 2010 10:15:18 AM $
  */
-public class GetDisplayTableOptionsAction
-    implements Action
+public class DataEntryFormBatchHandler
+extends AbstractBatchHandler<DataEntryForm>
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Constructor
+    // -------------------------------------------------------------------------
+ 
+    public DataEntryFormBatchHandler( JdbcConfiguration config )
+    {
+        super( config, true, true );
+    }
+
+    // -------------------------------------------------------------------------
+    // AbstractBatchHandler implementation
     // -------------------------------------------------------------------------
 
-    private ReportTableService reportTableService;
-
-    public void setReportTableService( ReportTableService reportTableService )
+    protected void setTableName()
     {
-        this.reportTableService = reportTableService;
+        statementBuilder.setTableName( "dataentryform" );
     }
     
-    private I18nFormat format;
-
-    public void setFormat( I18nFormat format )
+    @Override
+    protected void setAutoIncrementColumn()
     {
-        this.format = format;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
+        statementBuilder.setAutoIncrementColumn( "dataentryformid" );
     }
     
-    private ReportTable reportTable;
-
-    public ReportTable getReportTable()
+    @Override
+    protected void setIdentifierColumns()
     {
-        return reportTable;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private List<ReportTableColumn> columns;
-
-    public List<ReportTableColumn> getColumns()
-    {
-        return columns;
+        statementBuilder.setIdentifierColumn( "dataentryformid" );
     }
     
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    @Override
+    protected void setIdentifierValues( DataEntryForm dataEntryForm )
+    {        
+        statementBuilder.setIdentifierValue( dataEntryForm.getId() );
+    }
+    
+    protected void setUniqueColumns()
     {
-        reportTable = reportTableService.getReportTable( id );
-        
-        reportTable.setRelativePeriods( reportTable.getRelatives().getRelativePeriods( 1, format, true ) ); //TODO check
-        reportTable.setI18nFormat( format );
-        reportTable.init();
-        
-        columns = reportTable.getFilledDisplayColumns();
-        
-        return SUCCESS;
+        statementBuilder.setUniqueColumn( "name" );
+    }
+    
+    protected void setUniqueValues( DataEntryForm dataEntryForm )
+    {        
+        statementBuilder.setUniqueValue( dataEntryForm.getName() );
+    }
+    
+    protected void setColumns()
+    {
+        statementBuilder.setColumn( "name" );
+        statementBuilder.setColumn( "htmlcode" );
+    }
+    
+    protected void setValues( DataEntryForm dataEntryForm )
+    {        
+        statementBuilder.setValue( dataEntryForm.getName() );
+        statementBuilder.setValue( dataEntryForm.getHtmlCode() );
     }
 }
+

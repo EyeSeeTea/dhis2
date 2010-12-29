@@ -62,6 +62,8 @@ public class DefaultOrgUnitDistributionService
     private static final Comparator<OrganisationUnit> ORGUNIT_COMPARATOR = new OrganisationUnitNameComparator();
     private static final Comparator<OrganisationUnitGroup> ORGUNIT_GROUP_COMPARATOR = new OrganisationUnitGroupNameComparator();
 
+    private static final String TITLE_SEP = " - ";
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -90,14 +92,14 @@ public class DefaultOrgUnitDistributionService
                 
         Grid grid = getOrganisationUnitDistribution( groupSet, organisationUnit, true );
         
-        Assert.isTrue( grid != null && grid.getHeight() == 2 );
+        Assert.isTrue( grid != null && grid.getHeight() == 1 );
         
         for ( int i = 1; i < grid.getWidth(); i++ ) // Skip name column
         {
-            categoryValues.put( grid.getRow( 0 ).get( i ), Double.valueOf( grid.getRow( 1 ).get( i ) ) );
+            categoryValues.put( grid.getHeaders().get( i ), Double.valueOf( grid.getRow( 0 ).get( i ) ) );
         }
         
-        String title = groupSet.getName() + " - " + organisationUnit.getName();
+        String title = groupSet.getName() + TITLE_SEP + organisationUnit.getName();
         
         JFreeChart chart = chartService.getJFreeChart( title, PlotOrientation.VERTICAL, CategoryLabelPositions.DOWN_45, categoryValues );
         
@@ -110,7 +112,7 @@ public class DefaultOrgUnitDistributionService
     public Grid getOrganisationUnitDistribution( OrganisationUnitGroupSet groupSet, OrganisationUnit organisationUnit, boolean organisationUnitOnly  )
     {
         Grid grid = new ListGrid();
-        grid.nextRow();
+        grid.setTitle( groupSet.getName() + TITLE_SEP + organisationUnit.getName() );
         
         List<OrganisationUnit> units = organisationUnitOnly ? Arrays.asList( organisationUnit ) : new ArrayList<OrganisationUnit>( organisationUnit.getChildren() );
         List<OrganisationUnitGroup> groups = new ArrayList<OrganisationUnitGroup>( groupSet.getOrganisationUnitGroups() );
@@ -118,21 +120,21 @@ public class DefaultOrgUnitDistributionService
         Collections.sort( units, ORGUNIT_COMPARATOR );
         Collections.sort( groups, ORGUNIT_GROUP_COMPARATOR );
         
-        grid.addValue( "" ); // First header row column is empty
+        grid.addHeader( null ); // First header row column is empty
         
-        for ( OrganisationUnitGroup group : groups ) // Header row
+        for ( OrganisationUnitGroup group : groups )
         {
-            grid.addValue( group.getName() );
+            grid.addHeader( group.getName() );
         }
         
-        for ( OrganisationUnit unit : units ) // Rows
+        for ( OrganisationUnit unit : units )
         {            
             grid.nextRow();
             grid.addValue( unit.getName() );
             
             Collection<OrganisationUnit> subTree = organisationUnitService.getOrganisationUnitWithChildren( unit.getId() ); 
             
-            for ( OrganisationUnitGroup group : groups ) // Columns
+            for ( OrganisationUnitGroup group : groups )
             {
                 Collection<OrganisationUnit> result = CollectionUtils.intersection( subTree, group.getMembers() );
                 

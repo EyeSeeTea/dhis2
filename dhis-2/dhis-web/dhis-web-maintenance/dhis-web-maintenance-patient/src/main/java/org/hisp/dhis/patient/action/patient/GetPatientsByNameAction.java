@@ -1,5 +1,3 @@
-package org.hisp.dhis.reporting.tablecreator.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,94 +24,82 @@ package org.hisp.dhis.reporting.tablecreator.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.patient.action.patient;
 
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.common.ServiceProvider;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.ExportService;
+import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id: NoAction.java 3229 2007-04-10 17:41:29Z stianast $
+ * @author Chau Thu Tran
+ * @version $ID : GetPatientsByNameAction.java Dec 23, 2010 9:14:34 AM $
  */
-public class GetTableDataExportAction
+public class GetPatientsByNameAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ServiceProvider<ExportService> serviceProvider;
-
-    public void setServiceProvider( ServiceProvider<ExportService> serviceProvider )
-    {
-        this.serviceProvider = serviceProvider;
-    }
-
-    private I18nFormat format;
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
+    private PatientService patientService;
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String firstName;
 
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-    
-    private String exportFormat;
+    private String middleName;
 
-    public void setExportFormat( String exportFormat )
-    {
-        this.exportFormat = exportFormat;
-    }
+    private String lastName;
+
+    private List<Patient> patients;
 
     // -------------------------------------------------------------------------
-    // Output
+    // Getter && Setter
     // -------------------------------------------------------------------------
 
-    private InputStream inputStream;
-
-    public InputStream getInputStream()
+    public void setPatientService( PatientService patientService )
     {
-        return inputStream;
+        this.patientService = patientService;
     }
-    
-    private String fileName;
 
-    public String getFileName()
+    public void setFirstName( String firstName )
     {
-        return fileName;
+        this.firstName = firstName;
+    }
+
+    public void setMiddleName( String middleName )
+    {
+        this.middleName = middleName;
+    }
+
+    public void setLastName( String lastName )
+    {
+        this.lastName = lastName;
+    }
+
+    public List<Patient> getPatients()
+    {
+        return patients;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    public String execute() throws Exception
+    public String execute()
     {
-        ExportService exportService = serviceProvider.provide( exportFormat );
+        String fullName = StringUtils.join( new String[] { firstName, middleName, lastName }, ' ' );
         
-        ExportParams params = new ExportParams();
-        
-        params.getReportTables().add( id );
-        params.setFormat( format );
-        
-        inputStream = exportService.exportData( params );
-        
-        fileName = "ReportTable.zip";
-        
+        patients = new ArrayList<Patient>( patientService.getPatients( fullName ) );
+
         return SUCCESS;
     }
+
 }
