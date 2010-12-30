@@ -291,6 +291,7 @@ public interface PeriodService
      */
     PeriodType getPeriodTypeByName( String name );
     
+    
     /**
      * Returns a PeriodType represented by the given Class.
      * 

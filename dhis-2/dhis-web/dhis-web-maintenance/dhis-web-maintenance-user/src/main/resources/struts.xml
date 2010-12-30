@@ -24,6 +24,7 @@
 	  <param name="menuTreeHeight">404</param>
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/user.js,javascript/filterTable.js</param>
       <interceptor-ref name="organisationUnitTreeStack"/>
+	  <param name="stylesheets">../dhis-web-commons/paging/paging.css</param>
     </action>
     
     <action name="alluser" class="org.hisp.dhis.user.action.GetUserListAction">
@@ -34,11 +35,6 @@
 	  <param name="stylesheets">../dhis-web-commons/paging/paging.css</param>
       <interceptor-ref name="organisationUnitTreeStack"/>
     </action>
-    
-    <action name="searchUser"
-			class="org.hisp.dhis.user.action.GetUserListAction" method="searchUserByName">		
-			<result name="success" type="velocity">/dhis-web-maintenance-user/searchUser.vm</result>
-		</action>
 		
     <action name="getUser" class="org.hisp.dhis.user.action.GetUserAction">
       <result name="success" type="velocity-xml">/dhis-web-maintenance-user/responseUser.vm</result>
@@ -151,6 +147,7 @@
     </action>
 
     <!--Delete current user-->
+    
     <action name="deleteCurrentUser" class="org.hisp.dhis.user.action.DeleteCurrentUserAction">
       <!--<result name="error" type="velocity">/dhis-web-maintenance-user/responseError.vm</result>-->
       <result name="input" type="velocity">/main.vm</result>
@@ -191,7 +188,7 @@
 
   <action name="editUserGroupForm" class="org.hisp.dhis.user.action.EditUserGroupFormAction">
     <result name="success" type="velocity">/main.vm</result>
-    <param name="page">/dhis-web-maintenance-user/editUserGroupForm.vm</param>
+    <param name="page">/dhis-web-maintenance-user/updateUserGroupForm.vm</param>
     <param name="menu">/dhis-web-maintenance-user/menu.vm</param>
     <param name="stylesheets">css/receiveImportPage.css</param>
   </action>
@@ -201,13 +198,15 @@
       getAllUserGroups.action</result>
   </action>
 
-  <action name="removeUserGroup" class="org.hisp.dhis.user.action.RemoveUserGroupAction">
-
-    <!-- <result name="success" type="redirect">getAllUserGroups.action</result> -->
-    <result name="success" type="velocity">
-      /dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-    <!--<param name ="javascripts">javascript/user.js</param> -->
+  <action name="removeUserGroup" class="org.hisp.dhis.user.action.RemoveUserGroupAction">  
+    <result name="success" type="velocity">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>    
   </action>
+  
+    <action name="validateUserGroup" class="org.hisp.dhis.user.action.ValidateUserGroupAction">
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	  <result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+	  <param name="onExceptionReturn">plainTextError</param>
+    </action>
     
   </package>
 </struts>

@@ -283,11 +283,6 @@ public class DefaultReportService
         String path = System.getenv( "DHIS2_HOME" ) + File.separator + raFolderName + File.separator
             + report.getXmlTemplateName();
 
-        if ( path == null )
-        {
-            System.out.println( "DHIS2_HOME is not set" );
-        }
-
         try
         {
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -596,6 +591,7 @@ public class DefaultReportService
                 {
                     Double aggregatedValue = aggregationService.getAggregatedDataValue( dataElement, optionCombo,
                         startDate, endDate, organisationUnit );
+                    System.out.println( dataElement.getId() + " : " + optionCombo.getId() + " : " + startDate + " : " + endDate + " : " + organisationUnit + " : " + aggregatedValue);
                     if ( aggregatedValue == null )
                     {
                         replaceString = NULL_REPLACEMENT;
@@ -611,8 +607,8 @@ public class DefaultReportService
                 {
                     deFlag1 = 1;
                     PeriodType dePeriodType = getDataElementPeriodType( dataElement );
-                    List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType(
-                        dePeriodType, startDate, endDate ) );
+                    //List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType( dePeriodType, startDate, endDate ) );
+                    List<Period> periodList = new ArrayList<Period>( periodService.getPeriodsBetweenDates( dePeriodType, startDate, endDate ) );
                     Period tempPeriod = new Period();
                     if ( periodList == null || periodList.isEmpty() )
                     {
@@ -648,7 +644,7 @@ public class DefaultReportService
             }
 
             matcher.appendTail( buffer );
-
+            
             if ( deFlag1 == 0 )
             {
                 double d = 0.0;
@@ -756,7 +752,8 @@ public class DefaultReportService
                 {
 
                     PeriodType dePeriodType = getDataElementPeriodType( dataElement );
-                    List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType( dePeriodType, startDate, endDate ) );
+                    //List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType( dePeriodType, startDate, endDate ) );
+                    List<Period> periodList = new ArrayList<Period>( periodService.getPeriodsBetweenDates( dePeriodType, startDate, endDate ) );
 
                     if ( periodList == null || periodList.isEmpty() )
                     {
@@ -786,7 +783,8 @@ public class DefaultReportService
                 {
                     deFlag1 = 1;
                     PeriodType dePeriodType = getDataElementPeriodType( dataElement );
-                    List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType( dePeriodType, startDate, endDate ) );
+                    //List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType( dePeriodType, startDate, endDate ) );
+                    List<Period> periodList = new ArrayList<Period>( periodService.getPeriodsBetweenDates( dePeriodType, startDate, endDate ) );
                     Period tempPeriod = new Period();
                     if ( periodList == null || periodList.isEmpty() )
                     {
@@ -929,8 +927,8 @@ public class DefaultReportService
                     deFlag1 = 1;
                     deFlag2 = 0;
                     PeriodType dePeriodType = getDataElementPeriodType( dataElement );
-                    List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType(
-                        dePeriodType, startDate, endDate ) );
+                    //List<Period> periodList = new ArrayList<Period>( periodService.getIntersectingPeriodsByPeriodType( dePeriodType, startDate, endDate ) );
+                    List<Period> periodList = new ArrayList<Period>( periodService.getPeriodsBetweenDates( dePeriodType, startDate, endDate ) );
                     Period tempPeriod = new Period();
                     if ( periodList == null || periodList.isEmpty() )
                     {

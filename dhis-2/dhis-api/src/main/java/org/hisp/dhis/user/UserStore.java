@@ -74,7 +74,8 @@ public interface UserStore
     Collection<User> getAllUsers();
 
     /**
-     * Returns a Collection of the Users associated with the given OrganisationUnit.
+     * Returns a Collection of the Users associated with the given
+     * OrganisationUnit.
      * 
      * @param organisationUnit the OrganisationUnit.
      * @return a Collection of Users.
@@ -82,7 +83,8 @@ public interface UserStore
     Collection<User> getUsersByOrganisationUnit( OrganisationUnit organisationUnit );
 
     /**
-     * Returns a Collection of the Users which are not associated with any OrganisationUnits.
+     * Returns a Collection of the Users which are not associated with any
+     * OrganisationUnits.
      * 
      * @return a Collection of Users.
      */
@@ -102,17 +104,18 @@ public interface UserStore
      * @param user the User to delete.
      */
     void deleteUser( User user );
-    
-    Collection<UserCredentials> searchUsersByName( String key );
-  
-    Collection<UserCredentials> getUsersBetween( int first, int max );
-    
-    Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
-    
+
     int getUserCount();
-    
+
     int getUserCountByName( String name );
 
+    int getUsersWithoutOrganisationUnitCount();
+
+    int getUsersWithoutOrganisationUnitCountByName( String name );
+
+    int getUsersByOrganisationUnitCount( OrganisationUnit orgUnit );
+
+    int getUsersByOrganisationUnitCountByName( OrganisationUnit orgUnit, String name );
 
     // -------------------------------------------------------------------------
     // UserCredentials
@@ -142,13 +145,14 @@ public interface UserStore
     UserCredentials getUserCredentials( User user );
 
     /**
-     * Retrieves the UserCredentials associated with the User with the given name.
+     * Retrieves the UserCredentials associated with the User with the given
+     * name.
      * 
      * @param username the name of the User.
      * @return the UserCredentials.
      */
     UserCredentials getUserCredentialsByUsername( String username );
-    
+
     /**
      * Retrieves all UserCredentials.
      * 
@@ -162,6 +166,21 @@ public interface UserStore
      * @param userCredentials the UserCredentials.
      */
     void deleteUserCredentials( UserCredentials userCredentials );
+
+    Collection<UserCredentials> searchUsersByName( String key );
+
+    Collection<UserCredentials> getUsersBetween( int first, int max );
+
+    Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
+
+    Collection<UserCredentials> getUsersWithoutOrganisationUnitBetween( int first, int max );
+
+    Collection<UserCredentials> getUsersWithoutOrganisationUnitBetweenByName( String name, int first, int max );
+
+    Collection<UserCredentials> getUsersByOrganisationUnitBetween( OrganisationUnit orgUnit, int first, int max );
+
+    Collection<UserCredentials> getUsersByOrganisationUnitBetweenByName( OrganisationUnit orgUnit, String name,
+        int first, int max );
 
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
@@ -189,7 +208,7 @@ public interface UserStore
      * @return the UserAuthorityGroup.
      */
     UserAuthorityGroup getUserAuthorityGroup( int id );
-    
+
     /**
      * Retrieves the UserAuthorityGroup with the given name.
      * 
@@ -199,6 +218,13 @@ public interface UserStore
     UserAuthorityGroup getUserAuthorityGroupByName( String name );
 
     /**
+     * Deletes a UserAuthorityGroup.
+     * 
+     * @param userAuthorityGroup the UserAuthorityGroup to delete.
+     */
+    void deleteUserAuthorityGroup( UserAuthorityGroup userAuthorityGroup );
+
+    /**
      * Retrieves all UserAuthorityGroups.
      * 
      * @return a Collectio of UserAuthorityGroups.
@@ -206,11 +232,18 @@ public interface UserStore
     Collection<UserAuthorityGroup> getAllUserAuthorityGroups();
 
     /**
-     * Deletes a UserAuthorityGroup.
+     * Retrieves all UserAuthorityGroups.
      * 
-     * @param userAuthorityGroup the UserAuthorityGroup to delete.
+     * @return a Collectio of UserAuthorityGroups.
      */
-    void deleteUserAuthorityGroup( UserAuthorityGroup userAuthorityGroup );
+    Collection<UserAuthorityGroup> getUserRolesBetween( int first, int max );
+
+    /**
+     * Retrieves all UserAuthorityGroups.
+     * 
+     * @return a Collectio of UserAuthorityGroups.
+     */
+    Collection<UserAuthorityGroup> getUserRolesBetweenByName( String name, int first, int max );
 
     // -------------------------------------------------------------------------
     // UserSettings
@@ -255,12 +288,12 @@ public interface UserStore
      */
     void deleteUserSetting( UserSetting userSetting );
 
-    Collection<UserAuthorityGroup> getUserRolesBetween( int first, int max );
-    
-    Collection<UserAuthorityGroup> getUserRolesBetweenByName( String name, int first, int max );
-    
+    // -------------------------------------------------------------------------
+    // UserRole
+    // -------------------------------------------------------------------------
+
     int getUserRoleCount();
-    
+
     int getUserRoleCountByName( String name );
 
 }

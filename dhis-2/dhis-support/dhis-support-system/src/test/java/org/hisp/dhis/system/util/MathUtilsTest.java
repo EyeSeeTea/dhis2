@@ -31,6 +31,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.hisp.dhis.system.util.MathUtils.expressionIsTrue;
+import static org.hisp.dhis.expression.Operator.*;
 
 import org.junit.Test;
 
@@ -40,23 +41,17 @@ import org.junit.Test;
  */
 public class MathUtilsTest
 {
-    private static final String OPERATOR_EQUAL = "==";
-    private static final String OPERATOR_NOT_EQUAL = "!=";
-    private static final String OPERATOR_GREATER = ">";
-    private static final String OPERATOR_GREATER_EQUAL = ">=";
-    private static final String OPERATOR_LESSER = "<";
-    private static final String OPERATOR_LESSER_EQUAL = "<=";
     
     @Test
     public void testExpressionIsTrue()
     {
-        assertFalse( expressionIsTrue( 20.0, OPERATOR_EQUAL, 10.0 ) );
-        assertTrue( expressionIsTrue( 20.0, OPERATOR_NOT_EQUAL, 10.0 ) );
-        assertTrue( expressionIsTrue( 20.0, OPERATOR_GREATER, 10.0 ) );
-        assertTrue( expressionIsTrue( 20.0, OPERATOR_GREATER_EQUAL, 20.0 ) );
-        assertFalse( expressionIsTrue( 30.0, OPERATOR_LESSER, 15.0 ) );
-        assertTrue( expressionIsTrue( 40.0, OPERATOR_LESSER_EQUAL, 50.0 ) );
-        assertFalse( expressionIsTrue( 0.0, OPERATOR_GREATER_EQUAL, 20.0 ) );
+        assertFalse( expressionIsTrue( 20.0, equal_to, 10.0 ) );
+        assertTrue( expressionIsTrue( 20.0, not_equal_to, 10.0 ) );
+        assertTrue( expressionIsTrue( 20.0, greater_than, 10.0 ) );
+        assertTrue( expressionIsTrue( 20.0, greater_than_or_equal_to, 20.0 ) );
+        assertFalse( expressionIsTrue( 30.0, less_than, 15.0 ) );
+        assertTrue( expressionIsTrue( 40.0, less_than_or_equal_to, 50.0 ) );
+        assertFalse( expressionIsTrue( 0.0, greater_than_or_equal_to, 20.0 ) );
     }
     
     @Test

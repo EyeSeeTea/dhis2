@@ -237,6 +237,21 @@ public class GenerateRoutineReportAnalyserResultAction
         }
 
         System.out.println( orgUnitList.get( 0 ).getName()+ " : " + selReportObj.getName()+" : Report Generation Start Time is : " + new Date() );
+
+        OrganisationUnitGroup orgUnitGroup = null;
+        
+        List<OrganisationUnit> orgGroupMembers = null;
+
+        if ( organisationUnitGroupId.equalsIgnoreCase( "ALL" ) || organisationUnitGroupId.equalsIgnoreCase( "Selected_Only" ) )
+        {
+            
+        }
+        else
+        {
+            orgUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( Integer.parseInt( organisationUnitGroupId ) );
+            orgGroupMembers = new ArrayList<OrganisationUnit>( orgUnitGroup.getMembers() );
+        }
+
         
         selectedPeriod = periodService.getPeriod( availablePeriods );
 
@@ -704,33 +719,21 @@ public class GenerateRoutineReportAnalyserResultAction
                     {
                         if ( organisationUnitGroupId.equalsIgnoreCase( "ALL" ) )
                         {
-                           // System.out.println( "Inside organisation Unit Group " + organisationUnitGroupId );
-                            //System.out.println( tempStr + ":" + deCodeString + ",start date:" + tempStartDate.getTime() + " ,end date :" + tempEndDate.getTime() + " , org unit :" + currentOrgUnit + " , report model: " + reportModelTB );
                             tempStr = reportService.getResultDataValue( deCodeString, tempStartDate.getTime(), tempEndDate.getTime(), currentOrgUnit, reportModelTB );
-                           // System.out.println( tempStr );
                         }
                         else if ( organisationUnitGroupId.equalsIgnoreCase( "Selected_Only" ) )
                         {
-                            //System.out.println( "Inside organisation Unit Group " + organisationUnitGroupId );
                             tempStr = reportService.getIndividualResultDataValue( deCodeString, tempStartDate.getTime(), tempEndDate.getTime(), currentOrgUnit, reportModelTB );
                         }
                         else
                         {
-                            OrganisationUnitGroup orgUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( Integer.parseInt( organisationUnitGroupId ) );
+                            List<OrganisationUnit> orgUnitList = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitWithChildren( currentOrgUnit.getId() ) );
                             
-                            //System.out.println( "Inside organisation Unit Group " + orgUnitGroup.getName() );
-                            List<OrganisationUnit> orgGroupMembers = new ArrayList<OrganisationUnit>( orgUnitGroup.getMembers() );
-                            //System.out.println( "Size of  Group member :  " + orgGroupMembers.size() );
-                            
-                            List<OrganisationUnit> orgUnitList = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitWithChildren( ouIDTB ) );
-                            
-                            //System.out.println( "Size of  Child member :  " + orgUnitList.size() );
-                            orgGroupMembers.retainAll( orgUnitList );
-                            //System.out.println( "Size of  member after retain :  " + orgGroupMembers.size() );
+                            orgUnitList.retainAll( orgGroupMembers );
                             
                             double temp = 0.0;
                             double value = 0.0;
-                            for ( OrganisationUnit unit : orgGroupMembers )
+                            for ( OrganisationUnit unit : orgUnitList )
                             {
                                 tempStr = reportService.getResultDataValue( deCodeString, tempStartDate.getTime(), tempEndDate.getTime(), unit, reportModelTB );
 

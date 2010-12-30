@@ -45,6 +45,7 @@ import jxl.format.VerticalAlignment;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.WritableCellFormat;
+import jxl.write.WritableFont;
 import jxl.write.WritableImage;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
@@ -52,6 +53,9 @@ import jxl.write.WritableWorkbook;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.config.ConfigurationService;
 import org.hisp.dhis.config.Configuration_IN;
+import org.hisp.dhis.expression.ExpressionService;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorService;
 
 import com.keypoint.PngEncoder;
 import com.opensymphony.xwork2.Action;
@@ -64,6 +68,10 @@ import com.opensymphony.xwork2.ActionContext;
  */
 public class ExportIndicatorToExcelAction implements Action
 {
+    //private static final FontRecord FontRecord = null;
+
+   // private static final FontRecord Font = null;
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -80,6 +88,20 @@ public class ExportIndicatorToExcelAction implements Action
     public void setConfigurationService( ConfigurationService configurationService )
     {
         this.configurationService = configurationService;
+    }
+    
+    private ExpressionService expressionService;
+
+    public void setExpressionService( ExpressionService expressionService )
+    {
+        this.expressionService = expressionService;
+    }
+    
+    private IndicatorService indicatorService;
+
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
     }
     
     // -------------------------------------------------------------------------
@@ -156,7 +178,7 @@ public class ExportIndicatorToExcelAction implements Action
     {   
         int tempCol1 = 0;
         int tempRow1 = 1;
-        int tempCol2 = 0;
+       // int tempCol2 = 0;
         
         ActionContext ctx = ActionContext.getContext();
         HttpServletRequest req = (HttpServletRequest) ctx.get( ServletActionContext.HTTP_REQUEST );                        
@@ -224,7 +246,7 @@ public class ExportIndicatorToExcelAction implements Action
             tempRow1 = 0;
         }
         tempCol1 = 0;
-        tempCol2 = 0;
+        //tempCol2 = 0;
         tempRow1++;
         WritableCellFormat wCellformat1 = new WritableCellFormat();                            
         wCellformat1.setBorder( Border.ALL, BorderLineStyle.THIN );
@@ -235,9 +257,127 @@ public class ExportIndicatorToExcelAction implements Action
         WritableCellFormat wCellformat2 = new WritableCellFormat();                            
         wCellformat2.setBorder( Border.ALL, BorderLineStyle.THIN );
         wCellformat2.setAlignment( Alignment.CENTRE );
-        wCellformat2.setVerticalAlignment( VerticalAlignment.CENTRE );
+        wCellformat2.setVerticalAlignment( VerticalAlignment.TOP);
         wCellformat2.setBackground( Colour.GRAY_25 );                
         wCellformat2.setWrap( true );
+        
+        /*
+        WritableCellFormat wCellformat3 = new WritableCellFormat();                            
+        wCellformat3.setBorder( Border.ALL, BorderLineStyle.THIN );
+        wCellformat3.setAlignment( Alignment.CENTRE );
+        wCellformat3.setVerticalAlignment( VerticalAlignment.CENTRE );
+        wCellformat3.setBackground( Colour.BLACK );                
+        wCellformat3.setWrap( true );
+       // wCellformat3.setFont( WritableFont.BOLD );
+        //wCellformat3.WritableFont();
+        */
+        
+        WritableFont wfobj2 = new WritableFont( WritableFont.ARIAL, 10, WritableFont.BOLD );
+        WritableCellFormat wcf = new WritableCellFormat( wfobj2 );
+        wcf.setBorder( Border.ALL, BorderLineStyle.THIN );
+        wcf.setAlignment( Alignment.CENTRE );
+        //wcf.setShrinkToFit(true);
+        wcf.setVerticalAlignment( VerticalAlignment.CENTRE );
+        wcf.setWrap( true );
+        
+        
+        sheet0.addCell( new Label( tempCol1, tempRow1, "Indicators", wCellformat2) );
+        sheet0.addCell( new Label( tempCol1+1, tempRow1, "", wCellformat2) );
+       
+       // System.out.println(tempCol1);
+        tempCol1++;
+        
+        //System.out.println(tempCol1);
+        for(int i=0; i< categories1.length; i++)
+        {   
+            sheet0.addCell( new Label( tempCol1+1, tempRow1, categories1[i], wCellformat2) );
+            tempCol1++;
+        }
+       
+        tempRow1 = tempRow1+1;
+        int tempRowValue = 0;
+        for(int j=0; j< series1.length; j++)
+        {
+            //int temp =0;
+            tempCol1 = 0;
+            sheet0.mergeCells( tempCol1 , tempRow1, tempCol1, tempRow1+2 ); 
+            sheet0.addCell( new Label( tempCol1, tempRow1, series1[j], wCellformat2) );
+            
+            int tempNumCol = 1;
+            
+            sheet0.addCell( new Label( tempNumCol, tempRow1, "Num", wCellformat2) );
+            tempNumCol =  tempNumCol+1;
+            for( int k=0;k<categories1.length;k++ )
+            {
+               // tempCol1 = 0;
+                sheet0.addCell( new Number( tempNumCol, tempRow1, numDataArray[j][k], wCellformat1 ) );
+                tempNumCol++;
+            }
+            int tempDenumCol = 1;
+            
+            sheet0.addCell( new Label( tempDenumCol, tempRow1+1, "Den", wCellformat2) );
+            
+            tempDenumCol = tempDenumCol+1;
+            for( int k=0;k<categories1.length;k++ )
+            { 
+              //  tempRow1 = 0;
+               sheet0.addCell( new Number( tempDenumCol, tempRow1+1, denumDataArray[j][k], wCellformat1 ) );
+               tempDenumCol++;
+           }
+           int tempValueCol = 1;
+          
+           
+           sheet0.addCell( new Label( tempValueCol, tempRow1+2, "Val", wCellformat2) );
+           tempValueCol = tempValueCol+1;
+            
+            for( int k=0;k<categories1.length;k++ )
+            { 
+                //tempRow1 = 0;
+                sheet0.addCell( new Number( tempValueCol, tempRow1+2, data1[j][k], wcf ) );
+                tempValueCol++;
+            }
+           
+           tempRow1 = tempRow1+3;
+           tempRow1++;
+           tempRowValue = tempRow1++;
+           //temp = tempRowValue;
+          // System.out.println( "Row Count inside loop : " + tempRowValue );
+           
+        }
+        tempRow1 = tempRowValue;
+        
+        //tempRow1 = temp;
+        //System.out.println( "Row Count outSide Loop : " + tempRow1 );
+        tempRow1 = tempRow1+2;
+        sheet0.addCell( new Label( tempCol1, tempRow1, "Indicators Names", wCellformat2) );
+        
+        sheet0.mergeCells( tempCol1+1 , tempRow1, tempCol1 + 2, tempRow1 );
+        sheet0.addCell( new Label( tempCol1+1, tempRow1, "Formula", wCellformat2) );
+        
+        sheet0.addCell( new Label( tempCol1+3, tempRow1, "Numerator DataElements", wCellformat2) );
+        sheet0.addCell( new Label( tempCol1+4, tempRow1, "Denominator DataElements", wCellformat2) );
+        
+        tempRow1 = tempRow1+1;
+        
+        for(int j=0; j< series1.length; j++)
+        {
+            Indicator indicator =  indicatorService.getIndicatorByName( series1[j] );
+            
+            sheet0.addCell( new Label( tempCol1, tempRow1, indicator.getName(), wCellformat1 ) );
+            String formula = indicator.getNumeratorDescription() + "/" +  indicator.getDenominatorDescription();
+            
+            sheet0.addCell( new Label( tempCol1+1, tempRow1,formula , wCellformat1 ) );
+            String factor = "X" + indicator.getIndicatorType().getFactor();
+            
+            sheet0.addCell( new Label( tempCol1+2, tempRow1, factor, wCellformat1) );
+            sheet0.addCell( new Label( tempCol1+3, tempRow1, expressionService.getExpressionDescription( indicator.getNumerator()), wCellformat1 ) );
+            sheet0.addCell( new Label( tempCol1+4, tempRow1, expressionService.getExpressionDescription( indicator.getDenominator() ), wCellformat1 ) );
+            
+            tempRow1++;
+        }
+        
+        
+        /*        
         
         sheet0.mergeCells( tempCol1 , tempRow1, tempCol1, tempRow1+1 );
         sheet0.addCell( new Label( tempCol1, tempRow1, "Indicators", wCellformat2) );
@@ -283,7 +423,10 @@ public class ExportIndicatorToExcelAction implements Action
             
             tempRow1++;
         }
-       
+ 
+ */       
+// 23/12/2010
+        
        // tempCol1++;
 
     //cell1 = sheet0.getWritableCell(tempCol1, tempRow1);

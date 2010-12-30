@@ -27,37 +27,36 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
-import org.hisp.dhis.user.UserStore;
+import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.comparator.UsernameComparator;
-
-import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
  * @version $Id: GetOrgunitUserListAction.java 5549 2008-08-20 05:23:35Z abyot $
  */
 public class GetOrgunitUserListAction
-    implements Action
+    extends ActionPagingSupport<User>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserStore userStore;
+    private UserService userService;
 
-    public void setUserStore( UserStore userStore )
+    public void setUserService( UserService userService )
     {
-        this.userStore = userStore;
+        this.userService = userService;
     }
 
     private OrganisationUnitSelectionManager selectionManager;
@@ -78,6 +77,18 @@ public class GetOrgunitUserListAction
         return userCredentialsList;
     }
 
+    private String key;
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
+    public String getKey()
+    {
+        return key;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -85,26 +96,41 @@ public class GetOrgunitUserListAction
     public String execute()
         throws Exception
     {
-        userCredentialsList = new ArrayList<UserCredentials>();
-
-        Collection<User> users = new HashSet<User>();
-
         OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        if ( organisationUnit == null )
+        if ( isNotBlank( key ) ) // Filter on key only if set
         {
-            users = userStore.getUsersWithoutOrganisationUnit();
+            if ( organisationUnit == null )
+            {
+                this.paging = createPaging( userService.getUsersWithoutOrganisationUnitCountByName( key ) );
+                
+                userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersWithoutOrganisationUnitBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+            }
+            else 
+            {
+                this.paging = createPaging( userService.getUsersByOrganisationUnitCountByName( organisationUnit, key ) );
+                
+                userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersByOrganisationUnitBetweenByName( organisationUnit, key, paging.getStartPos(), paging.getPageSize() ) );
+                
+            }
         }
         else
         {
-            users = userStore.getUsersByOrganisationUnit( organisationUnit );
+            if ( organisationUnit == null )
+            {
+                this.paging = createPaging( userService.getUsersWithoutOrganisationUnitCount(  ) );
+                
+                userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersWithoutOrganisationUnitBetween( paging.getStartPos(), paging.getPageSize() ) );
+            }
+            else 
+            {
+                this.paging = createPaging( userService.getUsersByOrganisationUnitCount( organisationUnit ) );
+                
+                userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersByOrganisationUnitBetween( organisationUnit, paging.getStartPos(), paging.getPageSize() ) );
+                
+            }
         }
-
-        for ( User user : users )
-        {
-            userCredentialsList.add( userStore.getUserCredentials( user ) );
-        }
-
+        
         Collections.sort( userCredentialsList, new UsernameComparator() );
 
         return SUCCESS;

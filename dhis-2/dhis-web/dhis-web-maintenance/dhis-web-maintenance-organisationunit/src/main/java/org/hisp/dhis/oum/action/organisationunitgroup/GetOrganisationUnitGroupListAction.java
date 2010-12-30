@@ -27,6 +27,8 @@ package org.hisp.dhis.oum.action.organisationunitgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,15 +36,14 @@ import java.util.List;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupNameComparator;
-
-import com.opensymphony.xwork2.ActionSupport;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
 /**
  * @author Torgeir Lorange Ostby
  * @version $Id: GetOrganisationUnitGroupListAction.java 1898 2006-09-22 12:06:56Z torgeilo $
  */
 public class GetOrganisationUnitGroupListAction
-    extends ActionSupport
+    extends ActionPagingSupport<OrganisationUnitGroup>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -56,7 +57,7 @@ public class GetOrganisationUnitGroupListAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
     private List<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
@@ -66,6 +67,18 @@ public class GetOrganisationUnitGroupListAction
         return organisationUnitGroups;
     }
 
+    private String key;
+    
+    public String getKey()
+    {
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -73,8 +86,18 @@ public class GetOrganisationUnitGroupListAction
     public String execute()
         throws Exception
     {
-        organisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService
-            .getAllOrganisationUnitGroups() );
+        if ( isNotBlank( key ) ) // Filter on key only if set
+        {
+            this.paging = createPaging( organisationUnitGroupService.getOrganisationUnitGroupCountByName( key ) );
+            
+            organisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService.getOrganisationUnitGroupsBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+        }
+        else
+        {
+            this.paging = createPaging( organisationUnitGroupService.getOrganisationUnitGroupCount() );
+            
+            organisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService.getOrganisationUnitGroupsBetween( paging.getStartPos(), paging.getPageSize() ) );
+        }
 
         Collections.sort( organisationUnitGroups, new OrganisationUnitGroupNameComparator() );
 
