@@ -1,4 +1,4 @@
-package org.hisp.dhis.user.action;
+package org.hisp.dhis.caseentry.state;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,76 +27,83 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.user.UserGroup;
-import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.period.Period;
 
 import com.opensymphony.xwork2.Action;
 
-public class GetUserGroupListAction
-    extends ActionPagingSupport<UserGroup>
+/**
+ * @author Torgeir Lorange Ostby
+ * @version $Id: NextPeriodsAction.java 2966 2007-03-03 14:38:20Z torgeilo $ *
+ * @modifier Dang Duy Hieu
+ * @since 2009-10-14
+ */
+public class NextPeriodsAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserGroupService userGroupService;
+    private PeriodGenericManager periodGenericManager;
 
-    public void setUserGroupService( UserGroupService userGroupService )
+    public void setPeriodGenericManager( PeriodGenericManager periodGenericManager )
     {
-        this.userGroupService = userGroupService;
+        this.periodGenericManager = periodGenericManager;
     }
 
     // -------------------------------------------------------------------------
-    // Parameters
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private List<UserGroup> userGroupList;
+    private boolean startField;
 
-    public List<UserGroup> getUserGroupList()
+    public void setStartField( boolean startField )
     {
-        return userGroupList;
+        this.startField = startField;
     }
 
-    private String key;
+    private List<Period> periods;
+
+    public List<Period> getPeriods()
+    {
+        return periods;
+    }
+
+    private Integer index;
+
+    public void setIndex( Integer index )
+    {
+        this.index = index;
+    }
     
-    public String getKey()
-    {
-        return key;
-    }
-
-    public void setKey( String key )
-    {
-        this.key = key;
-    }
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        if ( isNotBlank( key ) ) // Filter on key only if set
+        String selectedPeriodKey = "";
+        String basePeriodKey = "";
+
+        if ( startField )
         {
-            this.paging = createPaging( userGroupService.getUserGroupCountByName( key ) );
-            
-            userGroupList = new ArrayList<UserGroup>( userGroupService.getUserGroupsBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+            selectedPeriodKey = PeriodGenericManager.SESSION_KEY_SELECTED_PERIOD_INDEX_START;
+            basePeriodKey = PeriodGenericManager.SESSION_KEY_BASE_PERIOD_START;
         }
         else
         {
-            this.paging = createPaging( userGroupService.getUserGroupCount() );
-            
-            userGroupList = new ArrayList<UserGroup>( userGroupService.getUserGroupsBetween( paging.getStartPos(), paging.getPageSize() ) );
+            selectedPeriodKey = PeriodGenericManager.SESSION_KEY_SELECTED_PERIOD_INDEX_END;
+            basePeriodKey = PeriodGenericManager.SESSION_KEY_BASE_PERIOD_END;
         }
         
-//        userGroupList = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
-        
+        periodGenericManager.setSelectedPeriodIndex( selectedPeriodKey, index );
+        periodGenericManager.nextPeriodSpan(selectedPeriodKey, basePeriodKey);
+
+        periods = periodGenericManager.getPeriodList(selectedPeriodKey, basePeriodKey);
+
         return SUCCESS;
     }
 }
