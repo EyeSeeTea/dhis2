@@ -289,7 +289,7 @@ GLOBAL.util = {
     }
 };
 
-GLOBAL.vars = {    
+GLOBAL.vars = {
     map: null,
     
     parameter: null,
@@ -356,5 +356,11 @@ GLOBAL.vars = {
     
     user: {
 		isAdmin: false
+	}
+};
+
+GLOBAL.func = {
+	storeLoadListener: function() {
+		this.isLoaded = true;
 	}
 };

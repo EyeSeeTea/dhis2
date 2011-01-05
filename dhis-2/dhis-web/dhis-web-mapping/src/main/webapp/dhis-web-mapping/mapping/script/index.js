@@ -32,9 +32,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -51,9 +49,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -70,9 +66,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
 
@@ -85,9 +79,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -120,9 +112,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
   
@@ -134,9 +124,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -181,9 +169,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
         
@@ -194,9 +180,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -207,9 +191,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });    
     
@@ -222,9 +204,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -258,9 +238,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -273,9 +251,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -286,9 +262,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -297,9 +271,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -312,9 +284,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -327,9 +297,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });
     
@@ -339,9 +307,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-            }
+            'load': GLOBAL.func.storeLoadListener
         }
     });	
     
