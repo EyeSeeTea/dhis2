@@ -432,9 +432,5 @@
 			<param name="requiredAuthorities">F_SQLVIEW_MANAGEMENT</param>
 		</action>
 		
-		<action name="getResourceProperties" class="org.hisp.dhis.dataadmin.action.sqlview.GetResourcePropertiesAction">
-		  <result name="success" type="velocity-json">/dhis-web-maintenance-dataadmin/jsonResourceProperties.vm</result>
-		</action>
-		
 	</package>
 </struts>

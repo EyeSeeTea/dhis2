@@ -63,8 +63,6 @@ public interface SqlViewService
 
     Collection<String> getAllSqlViewNames();
 
-    Collection<String> getAllResourceProperties( String resourceTableName );
-
     boolean isViewTableExists( String viewTableName );
 
     boolean createAllViewTables();

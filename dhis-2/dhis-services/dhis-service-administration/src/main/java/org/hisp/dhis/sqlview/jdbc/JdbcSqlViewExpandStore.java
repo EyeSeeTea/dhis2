@@ -30,7 +30,6 @@ package org.hisp.dhis.sqlview.jdbc;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
@@ -40,7 +39,6 @@ import java.util.regex.Pattern;
 
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
-import org.hisp.dhis.sqlview.ResourceTableNameMap;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewExpandStore;
 import org.hisp.dhis.sqlview.SqlViewTable;
@@ -118,38 +116,6 @@ public class JdbcSqlViewExpandStore
 
         return viewersName;
 
-    }
-
-    @Override
-    public Collection<String> getAllResourceProperties( String resourceTableName )
-    {
-        final StatementHolder holder = statementManager.getHolder();
-        Set<String> propertiesName = new HashSet<String>();
-
-        try
-        {
-            ResultSet rs = holder.getStatement().executeQuery(
-                PREFIX_SELECT_QUERY + ResourceTableNameMap.getResourceNameByAlias( resourceTableName ) + " LIMIT 1" );
-            ResultSetMetaData rsmd = rs.getMetaData();
-
-            int countCols = rsmd.getColumnCount();
-
-            for ( int i = 1; i <= countCols; i++ )
-            {
-                propertiesName.add( rsmd.getColumnName( i ) );
-            }
-
-        }
-        catch ( SQLException e )
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            holder.close();
-        }
-
-        return propertiesName;
     }
 
     @Override

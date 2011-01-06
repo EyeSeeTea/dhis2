@@ -158,12 +158,6 @@ public class DefaultSqlViewService
     }
 
     @Override
-    public Collection<String> getAllResourceProperties( String resourceTableName )
-    {
-        return sqlViewExpandStore.getAllResourceProperties( resourceTableName );
-    }
-
-    @Override
     public String testSqlGrammar( String sql )
     {
         return sqlViewExpandStore.testSqlGrammar( sql );
