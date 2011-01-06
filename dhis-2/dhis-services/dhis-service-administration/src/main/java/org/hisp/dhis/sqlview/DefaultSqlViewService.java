@@ -170,12 +170,6 @@ public class DefaultSqlViewService
     }
 
     @Override
-    public String setUpJoinQuery( Collection<String> tables )
-    {
-        return sqlViewExpandStore.setUpJoinQuery( tables );
-    }
-
-    @Override
     public void dropViewTable( String sqlViewTableName )
     {
         sqlViewExpandStore.dropViewTable( sqlViewTableName );

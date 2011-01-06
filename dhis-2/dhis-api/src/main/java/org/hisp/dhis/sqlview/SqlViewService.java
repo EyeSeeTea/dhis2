@@ -78,6 +78,4 @@ public interface SqlViewService
     SqlViewTable getDataSqlViewTable( String viewTableName );
 
     String testSqlGrammar( String sql );
-
-    String setUpJoinQuery( Collection<String> tableList );
 }

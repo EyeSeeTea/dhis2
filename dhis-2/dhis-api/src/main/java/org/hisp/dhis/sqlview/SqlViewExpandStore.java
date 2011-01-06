@@ -29,6 +29,4 @@ public interface SqlViewExpandStore
     String setUpViewTableName( String input );
 
     String testSqlGrammar( String sql );
-
-    String setUpJoinQuery( Collection<String> tables );
 }
