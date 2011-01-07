@@ -194,19 +194,56 @@ public class TableAlteror
         }
 
         executeSql( "ALTER TABLE section DROP CONSTRAINT section_name_key" );
-
         executeSql( "UPDATE patientattribute set inheritable=false where inheritable is null" );
-
         executeSql( "UPDATE dataelement set numbertype='number' where numbertype is null and valuetype='int'" );
 
        // revert prepare aggregateXXXValue tables for offline diffs
 
         executeSql( "ALTER TABLE aggregateddatavalue DROP COLUMN modified");
-
         executeSql( "ALTER TABLE aggregatedindicatorvalue DROP COLUMN modified ");
-        
         executeSql( "UPDATE indicatortype SET indicatornumber=false WHERE indicatornumber is null" );
         
+        // remove outdated relative periods
+        
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last3months" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last6months" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last9months" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last12months" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN sofarthisyear" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN sofarthisfinancialyear" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last3to6months" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last6to9months" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last9to12months" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN last12individualmonths" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN individualmonthsthisyear" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN individualquartersthisyear" );
+
+        executeSql( "ALTER TABLE chart DROP COLUMN last3months" );
+        executeSql( "ALTER TABLE chart DROP COLUMN last6months" );
+        executeSql( "ALTER TABLE chart DROP COLUMN last9months" );
+        executeSql( "ALTER TABLE chart DROP COLUMN last12months" );
+        executeSql( "ALTER TABLE chart DROP COLUMN sofarthisyear" );
+        executeSql( "ALTER TABLE chart DROP COLUMN sofarthisfinancialyear" );
+        executeSql( "ALTER TABLE chart DROP COLUMN last3to6months" );
+        executeSql( "ALTER TABLE chart DROP COLUMN last6to9months" );
+        executeSql( "ALTER TABLE chart DROP COLUMN last9to12months" );
+        executeSql( "ALTER TABLE chart DROP COLUMN last12individualmonths" );
+        executeSql( "ALTER TABLE chart DROP COLUMN individualmonthsthisyear" );
+        executeSql( "ALTER TABLE chart DROP COLUMN individualquartersthisyear" );
+
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last3months" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last6months" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last9months" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last12months" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN sofarthisyear" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN sofarthisfinancialyear" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last3to6months" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last6to9months" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last9to12months" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN last12individualmonths" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN individualmonthsthisyear" );
+        executeSql( "ALTER TABLE datamartexport DROP COLUMN individualquartersthisyear" );
+
         log.info( "Tables updated" );
     }
 
