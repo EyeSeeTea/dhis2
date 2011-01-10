@@ -53,6 +53,17 @@ public interface AggregatedDataValueStore
     Double getAggregatedDataValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit );
     
     /**
+     * Gets the aggregated value from the datamart table for the given parameters.
+     * 
+     * @param dataElement The DataElement identifier.
+     * @param categoryOptionCombo The DataElementCategoryOptionCombo identifier.
+     * @param periods The collection of Periods.
+     * @param organisationUnit The OrganisationUnit identifier.
+     * @return the aggregated value.
+     */
+    Double getAggregatedDataValue( int dataElement, int categoryOptionCombo, Collection<Integer> periodIds, int organisationUnit );
+    
+    /**
      * Gets a collection of AggregatedDataValues.
      * 
      * @param dataElementId the DataElement identifier.
@@ -80,6 +91,15 @@ public interface AggregatedDataValueStore
      * @throws AggregationStoreException
      */
     int deleteAggregatedDataValues();
+
+        /**
+     * Returns values for children of an orgunit at a particular level
+     * @param orgunit the root organisationunit
+     * @param level the level to retrieve values at
+     * @param periods the period to retrieve values for
+     * @return an iterator type object for retrieving the values
+     */
+    public StoreIterator<AggregatedDataValue> getAggregatedDataValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods);
 
     // ----------------------------------------------------------------------
     // AggregatedDataMapValue
@@ -155,7 +175,7 @@ public interface AggregatedDataValueStore
      * @param periods the period to retrieve values for
      * @return an iterator type object for retrieving the values
      */
-    public AggregatedDataValueStoreIterator getAggregateDataValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods);
+    public StoreIterator<AggregatedIndicatorValue> getAggregatedIndicatorValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods);
 
 
     // ----------------------------------------------------------------------

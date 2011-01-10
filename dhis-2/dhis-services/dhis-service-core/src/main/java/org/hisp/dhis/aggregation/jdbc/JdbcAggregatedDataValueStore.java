@@ -1,6 +1,5 @@
 package org.hisp.dhis.aggregation.jdbc;
 
-import org.hisp.dhis.aggregation.AggregatedDataValueStoreIterator;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
@@ -15,12 +14,14 @@ import java.util.Map;
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.amplecode.quick.mapper.ObjectMapper;
+import org.amplecode.quick.mapper.RowMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.aggregation.AggregatedDataValueStore;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
+import org.hisp.dhis.aggregation.StoreIterator;
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -89,6 +90,19 @@ public class JdbcAggregatedDataValueStore
         return statementManager.getHolder().queryForDouble( sql );
     }
 
+    public Double getAggregatedDataValue( int dataElement, int categoryOptionCombo, Collection<Integer> periodIds, int organisationUnit )
+    {
+        final String sql =
+            "SELECT SUM(value) " +
+            "FROM aggregateddatavalue " +
+            "WHERE dataelementid = " + dataElement + " " +
+            "AND categoryoptioncomboid = " + categoryOptionCombo + " " +
+            "AND periodid IN ( " + getCommaDelimitedString( periodIds ) + " ) " +
+            "AND organisationunitid = " + organisationUnit;
+        
+        return statementManager.getHolder().queryForDouble( sql );
+    }
+    
     public Double getAggregatedDataValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit )
     {
         if ( dimensionOption.getDimensionType().equals( DimensionType.CATEGORY ) )
@@ -140,7 +154,7 @@ public class JdbcAggregatedDataValueStore
     }
 
     @Override
-    public AggregatedDataValueStoreIterator getAggregateDataValuesAtLevel(OrganisationUnit rootOrgunit, OrganisationUnitLevel level, Collection<Period> periods)
+    public StoreIterator<AggregatedDataValue> getAggregatedDataValuesAtLevel(OrganisationUnit rootOrgunit, OrganisationUnitLevel level, Collection<Period> periods)
     {
         final StatementHolder holder = statementManager.getHolder();
 
@@ -166,11 +180,13 @@ public class JdbcAggregatedDataValueStore
 
             final ResultSet resultSet = statement.executeQuery( sql );
 
-            return new JdbcAggregatedDataValueStoreIterator(resultSet, holder);
+            RowMapper<AggregatedDataValue> rm = new AggregatedDataValueRowMapper();
+            
+            return new JdbcStoreIterator<AggregatedDataValue>(resultSet, holder, rm);
         }
         catch ( SQLException ex )
         {
-            throw new RuntimeException( "Failed to get aggregated data value", ex );
+            throw new RuntimeException( "Failed to get aggregated data values", ex );
         }
         finally
         {
@@ -318,6 +334,47 @@ public class JdbcAggregatedDataValueStore
     {
         return statementManager.getHolder().executeUpdate( "DELETE FROM aggregatedindicatorvalue" );
     }
+
+    @Override
+    public StoreIterator<AggregatedIndicatorValue> getAggregatedIndicatorValuesAtLevel(OrganisationUnit rootOrgunit, OrganisationUnitLevel level, Collection<Period> periods)
+    {
+        final StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            int rootlevel = rootOrgunit.getLevel();
+
+            String periodids = getCommaDelimitedString( getIdentifiers(Period.class, periods));
+
+            final String sql =
+                "SELECT aiv.* " +
+                "FROM aggregatedindicatorvalue AS aiv " +
+                "INNER JOIN _orgunitstructure AS ous on aiv.organisationunitid=ous.organisationunitid " +
+                "WHERE aiv.level = " + level.getLevel() +
+                " AND ous.idlevel" + rootlevel + "=" + rootOrgunit.getId() +
+                " AND aiv.periodid IN (" + periodids + ") ";
+
+            log.info("sql: " + sql);
+
+            Statement statement = holder.getStatement();
+
+            statement.setFetchSize(FETCH_SIZE);
+
+            final ResultSet resultSet = statement.executeQuery( sql );
+
+            RowMapper<AggregatedIndicatorValue> rm = new AggregatedIndicatorValueRowMapper();
+            return new JdbcStoreIterator<AggregatedIndicatorValue>(resultSet, holder, rm);
+        }
+        catch ( SQLException ex )
+        {
+            throw new RuntimeException( "Failed to get aggregated indicator values", ex );
+        }
+        finally
+        {
+            // holder.close();
+        }
+    }
+
 
     // -------------------------------------------------------------------------
     // AggregatedIndicatorMapValue

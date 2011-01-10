@@ -27,11 +27,6 @@ package org.hisp.dhis.datamart.engine;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
-import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -52,7 +47,6 @@ import org.hisp.dhis.datamart.calculateddataelement.CalculatedDataElementDataMar
 import org.hisp.dhis.datamart.crosstab.CrossTabService;
 import org.hisp.dhis.datamart.dataelement.DataElementDataMart;
 import org.hisp.dhis.datamart.indicator.IndicatorDataMart;
-import org.hisp.dhis.datamart.util.ParserUtil;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
@@ -241,7 +235,7 @@ public class DefaultDataMartEngine
         }
         
         // ---------------------------------------------------------------------
-        // Filter and get operands
+        // Get operands
         // ---------------------------------------------------------------------
         
         Collection<DataElementOperand> nonCalculatedOperands = categoryService.getOperands( nonCalculatedDataElements );
@@ -252,15 +246,6 @@ public class DefaultDataMartEngine
         allOperands.addAll( nonCalculatedOperands );
         allOperands.addAll( indicatorOperands );
         allOperands.addAll( calculatedOperands );
-
-        final Collection<DataElementOperand> sumIntDataElementOperands = ParserUtil.filterOperands(
-            nonCalculatedOperands, VALUE_TYPE_INT, AGGREGATION_OPERATOR_SUM );
-        final Collection<DataElementOperand> averageIntDataElementOperands = ParserUtil.filterOperands(
-            nonCalculatedOperands, VALUE_TYPE_INT, AGGREGATION_OPERATOR_AVERAGE );
-        final Collection<DataElementOperand> sumBoolDataElementOperands = ParserUtil.filterOperands(
-            nonCalculatedOperands, VALUE_TYPE_BOOL, AGGREGATION_OPERATOR_SUM );
-        final Collection<DataElementOperand> averageBoolDataElementOperands = ParserUtil.filterOperands(
-            nonCalculatedOperands, VALUE_TYPE_BOOL, AGGREGATION_OPERATOR_AVERAGE );
 
         log.info( "Filtered data elements: " + TimeUtils.getHMS() );
 
@@ -281,78 +266,56 @@ public class DefaultDataMartEngine
             return 0;
         }
 
-        log.info( "Validated crosstab table: " + TimeUtils.getHMS() );
-
         state.setMessage( "crosstabulating_data" );
 
-        Collection<Integer> childrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren(
-            organisationUnitIds );
-
+        Collection<Integer> childrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnitIds );
         Collection<Integer> intersectingPeriodIds = ConversionUtils.getIdentifiers( Period.class, periodService.getIntersectionPeriods( periods ) );
         
-        final Collection<DataElementOperand> emptyOperands = crossTabService.populateCrossTabTable(
-            allOperands, intersectingPeriodIds, childrenIds, key );
-        
+        Collection<DataElementOperand> operandsWithData = crossTabService.populateAndTrimCrossTabTable( allOperands, intersectingPeriodIds, childrenIds, key );
+
         log.info( "Populated crosstab table: " + TimeUtils.getHMS() );
 
-        if ( emptyOperands == null )
+        if ( operandsWithData == null )
         {
-           return 0;
+            return 0;
         }
         
-        crossTabService.trimCrossTabTable( emptyOperands, key );
+        // ---------------------------------------------------------------------
+        // Remove operands without data
+        // ---------------------------------------------------------------------
 
-        log.info( "Trimmed crosstab table: " + TimeUtils.getHMS() );
-
+        nonCalculatedOperands.retainAll( operandsWithData );
+        indicatorOperands.retainAll( operandsWithData );
+        calculatedOperands.retainAll( operandsWithData );
+        allOperands.retainAll( operandsWithData );
+        
         // ---------------------------------------------------------------------
         // Data element export
         // ---------------------------------------------------------------------
 
         state.setMessage( "exporting_data_for_data_elements" );
 
-        if ( sumIntDataElementOperands.size() > 0 )
+        if ( nonCalculatedOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( sumIntDataElementOperands, periods, organisationUnits,
-                sumIntAggregator, key );
+            count += dataElementDataMart.exportDataValues( nonCalculatedOperands, periods, organisationUnits, sumIntAggregator, key );
 
-            log.info( "Exported values for data element operands with sum aggregation operator of type number ("
-                + sumIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
-        }
+            log.info( "Exported values for data element operands with sum aggregation operator of type number: " + TimeUtils.getHMS() );
+            
+            count += dataElementDataMart.exportDataValues( nonCalculatedOperands, periods, organisationUnits, averageIntAggregator, key );
 
-        if ( averageIntDataElementOperands.size() > 0 )
-        {
-            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periods,
-                organisationUnits, averageIntAggregator, key );
+            log.info( "Exported values for data element operands with average aggregation operator of type number: " + TimeUtils.getHMS() );
+            
+            count += dataElementDataMart.exportDataValues( nonCalculatedOperands, periods, organisationUnits, averageIntSingleValueAggregator, key );
 
-            log.info( "Exported values for data element operands with average aggregation operator of type number ("
-                + averageIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
-        }
+            log.info( "Exported values for data element operands with average aggregation operator with single value of type number: " + TimeUtils.getHMS() );
+            
+            count += dataElementDataMart.exportDataValues( nonCalculatedOperands, periods, organisationUnits, sumBoolAggregator, key );
 
-        if ( averageIntDataElementOperands.size() > 0 )
-        {
-            count += dataElementDataMart.exportDataValues( averageIntDataElementOperands, periods,
-                organisationUnits, averageIntSingleValueAggregator, key );
+            log.info( "Exported values for data element operands with sum aggregation operator of type yes/no: " + TimeUtils.getHMS() );
+            
+            count += dataElementDataMart.exportDataValues( nonCalculatedOperands, periods, organisationUnits, averageBoolAggregator, key );
 
-            log.info( "Exported values for data element operands with average aggregation operator with single value of type number ("
-                    + averageIntDataElementOperands.size() + "): " + TimeUtils.getHMS() );
-        }
-
-        if ( sumBoolDataElementOperands.size() > 0 )
-        {
-            count += dataElementDataMart.exportDataValues( sumBoolDataElementOperands, periods, organisationUnits,
-                sumBoolAggregator, key );
-
-            log.info( "Exported values for data element operands with sum aggregation operator of type yes/no ("
-                + sumBoolDataElementOperands.size() + "): " + TimeUtils.getHMS() );
-        }
-
-        if ( averageBoolDataElementOperands.size() > 0 )
-        {
-            count += dataElementDataMart.exportDataValues( averageBoolDataElementOperands, periods,
-                organisationUnits, averageBoolAggregator, key );
-
-            log.info( "Exported values for data element operands with average aggregation operator of type yes/no ("
-                + averageBoolDataElementOperands.size() + "): " + TimeUtils.getHMS() );
+            log.info( "Exported values for data element operands with average aggregation operator of type yes/no: " + TimeUtils.getHMS() );
         }
 
         state.setMessage( "exporting_data_for_indicators" );
@@ -365,7 +328,7 @@ public class DefaultDataMartEngine
         {
             count += indicatorDataMart.exportIndicatorValues( indicators, periods, organisationUnits, indicatorOperands, key );
 
-            log.info( "Exported values for indicators (" + indicators.size() + "): " + TimeUtils.getHMS() );
+            log.info( "Exported values for indicators: " + TimeUtils.getHMS() );
         }
 
         state.setMessage( "exporting_data_for_calculated_data_elements" );
@@ -378,7 +341,7 @@ public class DefaultDataMartEngine
         {
             count += calculatedDataElementDataMart.exportCalculatedDataElements( calculatedDataElements, periods, organisationUnits, calculatedOperands, key );
 
-            log.info( "Exported values for calculated data elements (" + calculatedDataElements.size() + "): " + TimeUtils.getHMS() );
+            log.info( "Exported values for calculated data elements: " + TimeUtils.getHMS() );
         }
 
         crossTabService.dropCrossTabTable( key );

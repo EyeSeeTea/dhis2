@@ -28,27 +28,31 @@ package org.hisp.dhis.aggregation;
  */
 
 /**
- * @interface AggregatedDataValueStoreIterator
- * Provides an object for processing a collection of Aggregateddatavalues, such
- *  as from a jdbc resultset
+ * @interface StoreIterator
+ * Provides an object for processing a collection of Objects, such
+ *  as from a jdbc resultset with a rowmapper
  *
  * @author bobj
  */
-public interface AggregatedDataValueStoreIterator {
+public interface StoreIterator<T> {
 
     // ----------------------------------------------------------------------
-    // AggregatedDataValueStoreIterator
+    // StoreIterator
     // ----------------------------------------------------------------------
 
     /**
-     * Gets the next AggregatedDataValue
+     * Gets the next object
      *
-     * @return the aggregated value or null.
+     * @return the object or null.
      */
-    AggregatedDataValue next();
+    T next();
 
     /**
      * Close any underlying resources
+     *
+     * Note: if you do not iterate through the entire resultset, ie. until next()
+     *  returns NULL, you have the responsibility to call close() in order to release
+     *  the underlying resultset, connection etc
      *
      */
     void close();

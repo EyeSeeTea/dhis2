@@ -40,6 +40,17 @@ import org.hisp.dhis.datamart.CrossTabDataValue;
 public interface CrossTabService
 {
     String ID = CrossTabService.class.getName();
+
+    /**
+     * Creates, populates and trims the crosstab table.
+     * 
+     * @param operands the collection of DataElementOperands.
+     * @param periodIds the collection of Period identifiers.
+     * @param organisationUnitIds the collection of OrganisationUnit identifiers.
+     * @return the DataElementOperands where data exists.
+     */
+    Collection<DataElementOperand> populateAndTrimCrossTabTable( final Collection<DataElementOperand> operands,
+        final Collection<Integer> periodIds, final Collection<Integer> organisationUnitIds, String key );
     
     /**
      * Creates and populates the crosstab table.
@@ -60,9 +71,9 @@ public interface CrossTabService
     /**
      * Trims the crosstab table.
      * 
-     * @param emptyOperands the DataElementOperands without data.
+     * @param operands the DataElementOperands with data.
      */
-    void trimCrossTabTable( Collection<DataElementOperand> emptyOperands, String key );
+    void trimCrossTabTable( Collection<DataElementOperand> operands, String key );
 
     /**
      * Provides a Map with information about the crosstab table where the key is

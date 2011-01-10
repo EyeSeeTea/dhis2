@@ -53,6 +53,11 @@ public class DefaultAggregatedDataValueService
         return aggregatedDataValueStore.getAggregatedDataValue( dataElement.getId(), categoryOptionCombo.getId(), period.getId(), organisationUnit.getId() );
     }
 
+    public Double getAggregatedValue( int dataElement, int categoryOptionCombo, Collection<Integer> periodIds, int organisationUnit )
+    {
+        return aggregatedDataValueStore.getAggregatedDataValue( dataElement, categoryOptionCombo, periodIds, organisationUnit );
+    }
+    
     public Double getAggregatedValue( DataElement dataElement, DimensionOption dimensionOption, Period period, OrganisationUnit organisationUnit )
     {
         return aggregatedDataValueStore.getAggregatedDataValue( dataElement, dimensionOption, period, organisationUnit );
@@ -73,9 +78,9 @@ public class DefaultAggregatedDataValueService
         return aggregatedDataValueStore.deleteAggregatedDataValues();
     }
 
-    public AggregatedDataValueStoreIterator getAggregateDataValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods)
+    public StoreIterator<AggregatedDataValue> getAggregateDataValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods)
     {
-       return aggregatedDataValueStore.getAggregateDataValuesAtLevel(orgunit, level, periods);
+       return aggregatedDataValueStore.getAggregatedDataValuesAtLevel(orgunit, level, periods);
     }
 
     // -------------------------------------------------------------------------
@@ -121,6 +126,11 @@ public class DefaultAggregatedDataValueService
         return aggregatedDataValueStore.deleteAggregatedIndicatorValues();
     }
 
+    @Override
+    public StoreIterator<AggregatedIndicatorValue> getAggregateIndicatorValuesAtLevel( OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods )
+    {
+        return aggregatedDataValueStore.getAggregatedIndicatorValuesAtLevel( orgunit, level, periods );
+    }
     // -------------------------------------------------------------------------
     // AggregatedIndicatorMapValue
     // -------------------------------------------------------------------------
@@ -158,4 +168,5 @@ public class DefaultAggregatedDataValueService
     {
         return aggregatedDataValueStore.getDataValueMap( periodId, sourceId );
     }
+
 }

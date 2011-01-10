@@ -76,6 +76,18 @@ public interface AggregatedDataValueService
     Double getAggregatedValue( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit organisationUnit );
     
     /**
+     * Gets the aggregated value from the datamart table for the given parameters.
+     * 
+     * @param dataElement The DataElement identifier.
+     * @param categoryOptionCombo The DataElementCategoryOptionCombo identifier.
+     * @param periods The collection of Periods.
+     * @param organisationUnit The OrganisationUnit identifier.
+     * @return the aggregated value.
+     */
+    Double getAggregatedValue( int dataElement, int categoryOptionCombo, Collection<Integer> periodIds, int organisationUnit );
+    
+    
+    /**
      * Gets a collection of AggregatedDataValues.
      * 
      * @param dataElementId the DataElement identifier.
@@ -106,13 +118,13 @@ public interface AggregatedDataValueService
 
 
     /**
-     * Returns values for children of an orgunit at a particular level
+     * Returns agg data values for children of an orgunit at a particular level
      * @param orgunit the root organisationunit
      * @param level the level to retrieve values at
      * @param periods the periods to retrieve values for
      * @return an iterator type object for retrieving the values
      */
-    public AggregatedDataValueStoreIterator getAggregateDataValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods);
+    public StoreIterator<AggregatedDataValue> getAggregateDataValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods);
 
     // ----------------------------------------------------------------------
     // AggregatedDataMapValue
@@ -179,6 +191,15 @@ public interface AggregatedDataValueService
      * @throws AggregationStoreException
      */
     int deleteAggregatedIndicatorValues();
+
+    /**
+     * Returns agg indicator values for children of an orgunit at a particular level
+     * @param orgunit the root organisationunit
+     * @param level the level to retrieve values at
+     * @param periods the periods to retrieve values for
+     * @return an iterator type object for retrieving the values
+     */
+    public StoreIterator<AggregatedIndicatorValue> getAggregateIndicatorValuesAtLevel(OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods);
 
     // ----------------------------------------------------------------------
     // AggregatedIndicatorMapValue
