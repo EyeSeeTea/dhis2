@@ -26,63 +26,94 @@
  */
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.program.ProgramAttribute;
+import org.hisp.dhis.program.ProgramAttributeService;
+import org.hisp.dhis.program.ProgramInstance;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ID : GetPatientsByNameAction.java Dec 23, 2010 9:14:34 AM $
+ * @version $ID : RemoveEnrollmentSelectAction.java Jan 11, 2011 10:00:55 AM $
  */
-public class GetPatientsByNameAction
+public class RemoveEnrollmentSelectAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
+    private ProgramAttributeService programAttributeService;
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private String fullName;
+    private Integer id;
 
-    private List<Patient> patients;
+    private Integer programId;
 
-    // -------------------------------------------------------------------------
-    // Getter && Setter
-    // -------------------------------------------------------------------------
+    private ProgramInstance programInstance;
 
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
-
-    public void setFullName( String fullName )
-    {
-        this.fullName = fullName;
-    }
+    private Collection<ProgramAttribute> programAttributes;
     
-    public List<Patient> getPatients()
+
+    // -------------------------------------------------------------------------
+    // Getter
+    // -------------------------------------------------------------------------
+
+    public void setProgramAttributeService( ProgramAttributeService programAttributeService )
     {
-        return patients;
+        this.programAttributeService = programAttributeService;
+    }
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setProgramId( Integer programId )
+    {
+        this.programId = programId;
+    }
+
+    public ProgramInstance getProgramInstance()
+    {
+        return programInstance;
+    }
+
+    public void setProgramInstance( ProgramInstance programInstance )
+    {
+        this.programInstance = programInstance;
+    }
+
+    public Integer getProgramId()
+    {
+        return programId;
+    }
+
+    public Collection<ProgramAttribute> getProgramAttributes()
+    {
+        return programAttributes;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Implementation Action
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
+        throws Exception
     {
-        patients = new ArrayList<Patient>( patientService.getPatients( fullName ) );
-
+        programAttributes = programAttributeService.getAllProgramAttributes();
+        
         return SUCCESS;
     }
 
