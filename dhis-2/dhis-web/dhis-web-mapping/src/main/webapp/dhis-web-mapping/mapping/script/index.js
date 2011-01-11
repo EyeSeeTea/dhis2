@@ -1833,8 +1833,6 @@
                 xtype: 'form',
                 title: 'Date type',
                 bodyStyle: 'padding:8px',
-                disabled: G.system.aggregationStrategy == G.conf.aggregation_strategy_batch,
-                collapsed: G.system.aggregationStrategy == G.conf.aggregation_strategy_batch,
                 items: [
                     {html: '<div class="window-info">Set thematic map date type</div>'},
                     {
@@ -1842,6 +1840,7 @@
                         id: 'mapdatetype_cb',
                         fieldLabel: G.i18n.date_type,
                         labelSeparator: G.conf.labelseparator,
+						disabled: G.system.aggregationStrategy == G.conf.aggregation_strategy_batch,
                         editable: false,
                         valueField: 'value',
                         displayField: 'text',
