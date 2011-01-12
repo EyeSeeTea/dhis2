@@ -1,5 +1,3 @@
-package org.hisp.dhis.dataset.action.pivotassociation;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,51 +24,63 @@ package org.hisp.dhis.dataset.action.pivotassociation;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.patient.action.caseaggregation;
 
-import java.util.List;
-
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.caseaggregation.CaseAggregationConditionService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $ID : GetAggConditionDescriptionAction.java Jan 11, 2011 9:14:19 PM
+ *          $
  */
-public class GetOrganisationUnitLevelsAction
+public class GetAggConditionDescriptionAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitService organisationUnitService;
+    private CaseAggregationConditionService aggregationConditionService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    private String condition;
+
+    private String description;
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    public void setAggregationConditionService( CaseAggregationConditionService aggregationConditionService )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.aggregationConditionService = aggregationConditionService;
     }
-    
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
 
-    private List<OrganisationUnitLevel> levels;
-
-    public List<OrganisationUnitLevel> getLevels()
+    public String getDescription()
     {
-        return levels;
+        return description;
     }
-    
+
+    public void setCondition( String condition )
+    {
+        this.condition = condition;
+    }
+
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Implementation Action
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
+        throws Exception
     {
-        levels = organisationUnitService.getOrganisationUnitLevels();
-        
+        description = aggregationConditionService.getConditionDescription( condition );
+
         return SUCCESS;
     }
 }
