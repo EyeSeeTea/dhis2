@@ -6,12 +6,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.databrowser.DataBrowserStore;
 import org.hisp.dhis.databrowser.DataBrowserTable;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.TimeUtils;
+
+
 
 /**
  * @author joakibj, martinwa, briane, eivinhb
@@ -38,6 +41,12 @@ public class StatementManagerDataBrowserStore
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+    private StatementBuilder statementBuilder ;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
     }
 
     // -------------------------------------------------------------------------
@@ -318,21 +327,13 @@ public class StatementManagerDataBrowserStore
         List<Integer> betweenPeriods )
     {
         StatementHolder holder = statementManager.getHolder();
-        StringBuffer sqlsb = new StringBuffer();
-
+        String sql = statementBuilder.queryDataElementStructureForOrgUnitBetweenPeriods();
         try
         {
-            sqlsb.append( "(SELECT de.dataelementid, de.name AS DataElement " );
-            sqlsb.append( "FROM dataelement AS de " );
-            sqlsb.append( "INNER JOIN datavalue AS dv ON (de.dataelementid = dv.dataelementid) " );
-            sqlsb.append( "INNER JOIN datasetmembers AS dsm ON (de.dataelementid = dsm.dataelementid) " );
-            sqlsb.append( "INNER JOIN organisationunit AS o ON (dv.sourceid = o.organisationunitid) " );
-            sqlsb.append( "WHERE o.organisationunitid = '" + orgUnitId + "' " );
-            sqlsb.append( "GROUP BY de.dataelementid, de.name " );
-            sqlsb.append( "ORDER BY de.name) " );
 
+            
             TimeUtils.start();
-            ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
+            ResultSet resultSet = getScrollableResult( sql, holder );
 
             table.setQueryTime( TimeUtils.getMillis() );
             TimeUtils.stop();
@@ -343,7 +344,7 @@ public class StatementManagerDataBrowserStore
         }
         catch ( SQLException e )
         {
-            throw new RuntimeException( "Failed to get aggregated data value\n" + sqlsb.toString(), e );
+            throw new RuntimeException( "Failed to get aggregated data value\n" + sql , e );
         }
         finally
         {
@@ -540,29 +541,12 @@ public class StatementManagerDataBrowserStore
         StatementHolder holder = statementManager.getHolder();
 
         Integer numResults = 0;
-        StringBuffer sqlsb = new StringBuffer();
-
-        int i = 0;
-        for ( Integer periodId : betweenPeriodIds )
-        {
-            i++;
-
-            sqlsb.append( "(SELECT de.dataelementid, de.name AS DataElement, COUNT(dv.value) AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
-            sqlsb.append( "FROM dataelement AS de " );
-            sqlsb.append( "INNER JOIN datavalue AS dv ON (de.dataelementid = dv.dataelementid) " );
-            sqlsb.append( "INNER JOIN organisationunit As o ON (dv.sourceid = o.organisationunitid) " );
-            sqlsb.append( "JOIN period p ON (dv.periodid = p.periodid) " );
-            sqlsb.append( "WHERE o.organisationunitid = '" + orgUnitId + "' " );
-            sqlsb.append( "AND dv.periodid = '" + periodId + "' " );
-            sqlsb.append( "GROUP BY de.dataelementid, de.name, p.periodid, p.startDate) " );
-
-            sqlsb.append( i == betweenPeriodIds.size() ? "ORDER BY ColumnHeader" : " UNION " );
-        }
+        String sqlsb = statementBuilder.queryCountDataElementsForOrgUnitBetweenPeriods(orgUnitId, betweenPeriodIds);
 
         try
         {
             TimeUtils.start();
-            ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
+            ResultSet resultSet = getScrollableResult( sqlsb, holder );
             table.addQueryTime( TimeUtils.getMillis() );
             TimeUtils.stop();
 
@@ -572,7 +556,7 @@ public class StatementManagerDataBrowserStore
         }
         catch ( SQLException e )
         {
-            throw new RuntimeException( "Failed to get aggregated data value\n" + sqlsb.toString(), e );
+            throw new RuntimeException( "Failed to get aggregated data value\n" + sqlsb, e );
         }
         finally
         {
@@ -659,7 +643,7 @@ public class StatementManagerDataBrowserStore
              */
             sb.append( " SELECT a.parentid,a.name AS organisationunit,COUNT(*),p.periodid,p.startdate AS columnheader" );
             sb.append( " FROM datavalue dv" );
-            sb.append( " INNER JOIN (SELECT DISTINCT x.parentid,x.childid,ou.name FROM(" + descendantQuery + ")x" );
+            sb.append( " INNER JOIN (SELECT DISTINCT x.parentid,x.childid,ou.name FROM(" + descendantQuery + ") x" );
             sb.append( " INNER JOIN organisationunit ou ON x.parentid=ou.organisationunitid) a ON dv.sourceid=a.childid" );
             sb.append( " INNER JOIN period p ON dv.periodid=p.periodid" );
             sb.append( " WHERE dv.periodid=" + periodid );
