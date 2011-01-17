@@ -28,9 +28,8 @@ package org.hisp.dhis.reporttable;
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -77,6 +76,7 @@ public class ReportTable
 
     public static final String REPORTING_MONTH_COLUMN_NAME = "reporting_month_name";
     public static final String PARAM_ORGANISATIONUNIT_COLUMN_NAME = "param_organisationunit_name";
+    public static final String ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME = "organisation_unit_is_parent";
     
     public static final String SEPARATOR = "_";
     public static final String SPACE = " ";
@@ -90,17 +90,23 @@ public class ReportTable
     public static final String TOTAL_COLUMN_PRETTY_PREFIX = "Total ";
     
     public static final String REGRESSION_COLUMN_PREFIX = "regression_";
-
-    public static final List<String> DB_COLUMNS = Arrays.asList( DATAELEMENT_ID, CATEGORYCOMBO_ID, 
-        INDICATOR_ID, DATASET_ID, PERIOD_ID, ORGANISATIONUNIT_ID, REPORTING_MONTH_COLUMN_NAME, PARAM_ORGANISATIONUNIT_COLUMN_NAME );
     
     public static final Map<String, String> PRETTY_COLUMNS = new HashMap<String, String>() { {
+        put( DATAELEMENT_ID, "Data element ID" );
         put( DATAELEMENT_NAME, "Data element" );
+        put( CATEGORYCOMBO_ID, "Category combination ID" );
         put( CATEGORYCOMBO_NAME, "Category combination" );
+        put( INDICATOR_ID, "Indicator ID" );
         put( INDICATOR_NAME, "Indicator" );
+        put( DATASET_ID, "Data set ID" );
         put( DATASET_NAME, "Data set" );
-        put( PERIOD_NAME, "Period" );
-        put( ORGANISATIONUNIT_NAME, "Organisation unit" );
+        put( PERIOD_ID, "Period ID" );
+        put( PERIOD_NAME, "Period" );        
+        put( ORGANISATIONUNIT_ID, "Organisation unit ID" );
+        put( ORGANISATIONUNIT_NAME, "Organisation unit" );        
+        put( REPORTING_MONTH_COLUMN_NAME, "Reporting month" );
+        put( PARAM_ORGANISATIONUNIT_COLUMN_NAME, "Organisation unit parameter" );        
+        put( ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, "Organisation unit is parent" );
     } };
     
     private static final String EMPTY_REPLACEMENT = "_";
@@ -546,7 +552,7 @@ public class ReportTable
         else
         {
             crossTabPeriods.add( null );
-            reportPeriods = new ArrayList<Period>( new HashSet<Period>( allPeriods ) ); // Remove potential duplicates from relative periods / params
+            reportPeriods = new ArrayList<Period>( removeDuplicates( allPeriods ) ); // Remove potential duplicates from relative periods / params
             indexColumns.add( PERIOD_ID );
             indexNameColumns.add( PERIOD_NAME );
         }
@@ -560,7 +566,7 @@ public class ReportTable
         else
         {
             crossTabUnits.add( null );
-            reportUnits = new ArrayList<OrganisationUnit>( new HashSet<OrganisationUnit>( allUnits ) ); // Remove potential duplicates from params
+            reportUnits = new ArrayList<OrganisationUnit>( removeDuplicates( allUnits ) ); // Remove potential duplicates from params
             indexColumns.add( ORGANISATIONUNIT_ID );
             indexNameColumns.add( ORGANISATIONUNIT_NAME );
         }
@@ -653,8 +659,6 @@ public class ReportTable
             dimensionType = dimensionSet.getDimensionType().name();
             categoryCombo = dimensionType.equals( DimensionType.CATEGORY.name() ) ? (DataElementCategoryCombo)dimensionSet : null;
             dataElementGroupSets = dimensionType.equals( DimensionType.DATAELEMENTGROUPSET.name() ) ? (List<DataElementGroupSet>)dimensionSet.getDimensions() : null;
-            
-            verify( dimensionType != null, "Dimension type cannot be null" );
         }
     }
     
@@ -994,6 +998,26 @@ public class ReportTable
         }
         
         return string;
+    }
+
+    /**
+     * Removes duplicates from the given list while maintaining the order.
+     */
+    private <T> List<T> removeDuplicates( List<T> list )
+    {
+        final List<T> temp = new ArrayList<T>( list );
+        Collections.reverse( temp );        
+        list.clear();
+        
+        for ( T object : temp )
+        {
+            if ( !list.contains( object ) )
+            {
+                list.add( object );
+            }
+        }
+        
+        return list;
     }
     
     /**

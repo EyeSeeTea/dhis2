@@ -31,22 +31,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementOperandNameComparator;
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.FilterUtils;
 
 /**
  * @author Lars Helge Overland
  */
 public class GetOperandsAction
-    implements Action
+    extends ActionPagingSupport<DataElementOperand>
 {
+    private static Filter<DataElement> AGGREGATABLE_FILTER = new AggregatableDataElementFilter();
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -82,6 +86,13 @@ public class GetOperandsAction
     {
         this.id = id;
     }
+    
+    private String key;
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
 
     private Integer dataSetId;
 
@@ -98,7 +109,7 @@ public class GetOperandsAction
     }
 
     private boolean includeTotals = false;
-    
+
     public void setIncludeTotals( boolean includeTotals )
     {
         this.includeTotals = includeTotals;
@@ -119,30 +130,38 @@ public class GetOperandsAction
     {
         List<DataElement> dataElements = new ArrayList<DataElement>();
 
-        if ( id == null )
+        if ( id != null )
         {
-            dataElements = new ArrayList<DataElement>( dataElementService.getAggregateableDataElements() );
+            dataElements = new ArrayList<DataElement>( dataElementService.getDataElementGroup( id ).getMembers() );
+        }
+        else if ( !StringUtils.isEmpty( key ) )
+        {
+            dataElements = new ArrayList<DataElement>( dataElementService.getDataElementsLikeName( key ) );
+        }
+        else if ( dataSetId != null )
+        {
+            dataElements = new ArrayList<DataElement>( dataSetService.getDataSet( dataSetId ).getDataElements() );
         }
         else
         {
-            dataElements = new ArrayList<DataElement>( dataElementService.getDataElementsByGroupId( id ) );
-        }
-
-        if ( dataSetId != null )
-        {
-            DataSet dataSet = dataSetService.getDataSet( dataSetId );
-
-            dataElements.retainAll( dataSet.getDataElements() );
+            dataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
         }
 
         if ( aggregationOperator != null )
         {
-            dataElements.retainAll( dataElementService.getDataElementsByAggregationOperator( aggregationOperator ) );
+            FilterUtils.filter( dataElements, AGGREGATABLE_FILTER );
         }
 
         operands = new ArrayList<DataElementOperand>( dataElementCategoryService.getOperands( dataElements, includeTotals ) );
 
         Collections.sort( operands, new DataElementOperandNameComparator() );
+
+        if ( this.usepaging )
+        {
+            this.paging = createPaging( operands.size() );
+
+            operands = operands.subList( paging.getStartPos(), paging.getEndPos() );
+        }
 
         return SUCCESS;
     }

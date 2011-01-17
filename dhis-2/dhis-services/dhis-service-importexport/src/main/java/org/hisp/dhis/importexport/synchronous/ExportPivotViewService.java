@@ -47,12 +47,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.system.util.MathUtils;
 
 /**
  * Exports pivot view synchronously (using calling thread)
  *
  * TODO: use exportparams and abstract service
- * TODO: implement indicator and width-wise queries
  *
  * @author bobj
  */
@@ -62,6 +62,9 @@ public class ExportPivotViewService {
 
     // service can export either aggregated datavalues or aggregated indicator values
     public enum RequestType { DATAVALUE, INDICATORVALUE };
+
+    // precision to use when formatting double values
+    public static int PRECISION = 5;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -144,13 +147,14 @@ public class ExportPivotViewService {
 
         AggregatedDataValue adv = Iterator.next();
 
+        writer.write("# period, orgunit, dataelement, catoptcombo, value\n");
         while (adv != null)
         {
             // process adv ..
             int periodId = adv.getPeriodId();
             String period = periodService.getPeriod( periodId).getIsoDate();
 
-            writer.write( period + ",");
+            writer.write( "'" + period + "',");
             writer.write( adv.getOrganisationUnitId() + ",");
             writer.write( adv.getDataElementId() + ",");
             writer.write( adv.getCategoryOptionComboId() + ",");
@@ -172,20 +176,19 @@ public class ExportPivotViewService {
 
         AggregatedIndicatorValue aiv = Iterator.next();
 
+        writer.write("# period, orgunit, indicator, factor, numerator, denominator\n");
         while (aiv != null)
         {
             // process adv ..
             int periodId = aiv.getPeriodId();
             String period = periodService.getPeriod( periodId).getIsoDate();
 
-            writer.write( period + ",");
+            writer.write( "'" + period + "',");
             writer.write( aiv.getOrganisationUnitId() + ",");
             writer.write( aiv.getIndicatorId() + ",");
-            writer.write( aiv.getFactor() + ",");
-            writer.write( aiv.getNumeratorValue() + ",");
-            writer.write( aiv.getDenominatorValue() + ",");
-            writer.write( aiv.getAnnualized() + ",");
-            writer.write( aiv.getValue() + "\n");
+            writer.write( MathUtils.roundToString( aiv.getFactor(), PRECISION) + ",");
+            writer.write( MathUtils.roundToString(aiv.getNumeratorValue(), PRECISION) + ",");
+            writer.write( MathUtils.roundToString(aiv.getDenominatorValue(), PRECISION) + "\n");
 
             aiv = Iterator.next();
         }

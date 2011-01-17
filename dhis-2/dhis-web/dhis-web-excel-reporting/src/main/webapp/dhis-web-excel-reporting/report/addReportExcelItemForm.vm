@@ -1,9 +1,8 @@
 <script>
 	jQuery(document).ready(function(){	
-		validation( 'reportItem', function( form ){ 			
-			validateAddReportExcelItem( form );			
-		});				
-		changeItemType();
+		validation( 'reportItem', function( form ){
+			validateAddReportExcelItem( form );
+		});
 	});
 	
 	var category = $reportExcel.isCategory();
@@ -66,7 +65,7 @@
 		</tr>	
 		<tr>
 			<td><label>$i18n.getString('sheet_no')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-			<td><input type="text" id="sheetNo" name="sheetNo"  style="width:20em" class="{validate:{required:true,number:true}}"/></td>
+			<td><input type="text" id="sheetNo" name="sheetNo" style="width:20em" class="{validate:{required:true,number:true}}"/></td>
 		</tr>
 		<tr>
 			<td><label>$i18n.getString('row')<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>

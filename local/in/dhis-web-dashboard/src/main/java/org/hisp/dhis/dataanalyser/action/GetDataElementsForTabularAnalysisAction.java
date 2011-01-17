@@ -112,6 +112,7 @@ public class GetDataElementsForTabularAnalysisAction implements Action
 
         if ( id == null || id == ALL )
         {
+            System.out.println("The id is null");
             dataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
         } 
         else
@@ -152,8 +153,7 @@ public class GetDataElementsForTabularAnalysisAction implements Action
                     DataElement de = deIterator.next();
 
                     DataElementCategoryCombo dataElementCategoryCombo = de.getCategoryCombo();
-                    List<DataElementCategoryOptionCombo> optionCombos = new ArrayList<DataElementCategoryOptionCombo>(
-                        dataElementCategoryCombo.getOptionCombos() );
+                    List<DataElementCategoryOptionCombo> optionCombos = new ArrayList<DataElementCategoryOptionCombo>( dataElementCategoryCombo.getOptionCombos() );
 
                     Iterator<DataElementCategoryOptionCombo> optionComboIterator = optionCombos.iterator();
                     while ( optionComboIterator.hasNext() )
