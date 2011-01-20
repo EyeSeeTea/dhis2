@@ -4,7 +4,6 @@ function organisationUnitSelected( orgUnits )
     window.location.href = 'patient.action';    
 }
 
-
 selection.setListenerFunction( organisationUnitSelected );
 
 //------------------------------------------------------------------------------
@@ -59,8 +58,7 @@ function programEnrollmentValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        setHeaderMessage( message );
     }
 }
 
@@ -74,9 +72,16 @@ function saveDueDate( programStageInstanceId, programStageInstanceName )
 	
 	var dateOfIncident = new Date(byId('dateOfIncident').value);
 	var dueDate = new Date(field.value);
+	
+	if( !isDate(dueDate,dateFormat) ){
+		field.style.backgroundColor = '#FFCC00';
+		alert(i18n_date_invalid);
+		return;
+	}
+	
 	if(dueDate < dateOfIncident){
 		field.style.backgroundColor = '#FFCC00';
-		alert(i18n_due_date_invalid);
+		alert( i18n_date_less_incident );
 		return;
 	}
 	
@@ -262,8 +267,7 @@ function searchValidationCompleted( messageElement )
 	}
 	else if ( type == 'input' )
 	{
-		document.getElementById( 'message' ).innerHTML = message;
-		document.getElementById( 'message' ).style.display = 'block';
+		setHeaderMessage( message );
 	}
 }
 
@@ -333,8 +337,7 @@ function addValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        setHeaderMessage( message );
     }
     else if( type == 'duplicate' )
     {
@@ -382,8 +385,7 @@ function updateValidationCompleted( messageElement )
     }
     else if ( type == 'input' )
     {
-        document.getElementById( 'message' ).innerHTML = message;
-        document.getElementById( 'message' ).style.display = 'block';
+        setHeaderMessage( message );
     }
     else if( type == 'duplicate' )
     {

@@ -69,4 +69,24 @@ public class PaginatedList<T>
         
         return page;
     }
+    
+    /**
+     * Sets the current page position to the first page.
+     */
+    public void reset()
+    {
+        fromIndex = 0;
+    }
+    
+    /**
+     * Returns the number of pages in the list.
+     */
+    public int pageCount()
+    {
+        int c = size();        
+        int r = c / pageSize;
+        int m = c % pageSize;
+        
+        return m == 0 ? r : ( r + 1 );
+    }
 }

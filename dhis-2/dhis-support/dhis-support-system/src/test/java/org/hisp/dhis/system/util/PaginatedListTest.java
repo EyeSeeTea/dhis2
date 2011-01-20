@@ -72,4 +72,32 @@ public class PaginatedListTest
         
         assertNull( page );
     }
+    
+    @Test
+    public void testPageCount()
+    {
+        PaginatedList<String> list = new PaginatedList<String>( Arrays.asList( "A", "B", "C" ), 2 );
+        
+        assertEquals( 2, list.pageCount() );
+        
+        list = new PaginatedList<String>( Arrays.asList( "A", "B", "C", "D" ), 2 );
+        
+        assertEquals( 2, list.pageCount() );
+
+        list = new PaginatedList<String>( Arrays.asList( "A", "B", "C", "D", "E" ), 2 );
+        
+        assertEquals( 3, list.pageCount() );
+    }
+    
+    @Test
+    public void testReset()
+    {
+        PaginatedList<String> list = new PaginatedList<String>( Arrays.asList( "A", "B", "C" ), 2 );
+        
+        assertTrue( list.nextPage().contains( "A" ) );
+        
+        list.reset();
+
+        assertTrue( list.nextPage().contains( "A" ) );        
+    }
 }

@@ -239,6 +239,18 @@ public class DefaultDataMartEngine
         log.info( "Filtered data elements, number of operands: " + allOperands.size() + ", " + TimeUtils.getHMS() );
 
         // ---------------------------------------------------------------------
+        // Remove operands without data
+        // ---------------------------------------------------------------------
+
+        allOperands = new HashSet<DataElementOperand>( crossTabService.getOperandsWithData( allOperands ) );
+
+        nonCalculatedOperands.retainAll( allOperands );
+        indicatorOperands.retainAll( allOperands );
+        calculatedOperands.retainAll( allOperands );
+        
+        log.info( "Number of operands with data: " + allOperands.size() + ", "+ TimeUtils.getHMS() );
+
+        // ---------------------------------------------------------------------
         // Create and trim crosstabtable
         // ---------------------------------------------------------------------
 
@@ -254,15 +266,7 @@ public class DefaultDataMartEngine
             return 0;
         }
 
-        log.info( "Number of crosstab tables: " + keys.size() + ", number of operands with data: " + allOperands.size() + ", " + TimeUtils.getHMS() );
-
-        // ---------------------------------------------------------------------
-        // Remove operands without data
-        // ---------------------------------------------------------------------
-
-        nonCalculatedOperands.retainAll( allOperands );
-        indicatorOperands.retainAll( allOperands );
-        calculatedOperands.retainAll( allOperands );
+        log.info( "Number of crosstab tables: " + keys.size() + ", " + TimeUtils.getHMS() );
 
         // ---------------------------------------------------------------------
         // Delete existing aggregated data
@@ -315,7 +319,7 @@ public class DefaultDataMartEngine
         {
             count += indicatorDataMart.exportIndicatorValues( indicators, periods, organisationUnits, indicatorOperands, keys );
 
-            log.info( "Exported values for indicators: " + TimeUtils.getHMS() );
+            log.info( "Exported values for indicators (" + indicators.size() + "): " + TimeUtils.getHMS() );
         }
 
         state.setMessage( "exporting_data_for_calculated_data_elements" );
@@ -328,8 +332,12 @@ public class DefaultDataMartEngine
         {
             count += calculatedDataElementDataMart.exportCalculatedDataElements( calculatedDataElements, periods, organisationUnits, calculatedOperands, keys );
 
-            log.info( "Exported values for calculated data elements: " + TimeUtils.getHMS() );
+            log.info( "Exported values for calculated data elements (" + calculatedDataElements.size() + "): " + TimeUtils.getHMS() );
         }
+
+        // ---------------------------------------------------------------------
+        // Drop crosstab tables
+        // ---------------------------------------------------------------------
 
         for ( String key : keys )
         {
