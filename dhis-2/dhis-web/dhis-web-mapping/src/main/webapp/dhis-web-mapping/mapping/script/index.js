@@ -4,7 +4,10 @@
 	Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
 	
-	G.vars.map = new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation(),new OpenLayers.Control.ArgParser(),new OpenLayers.Control.Attribution()]});
+	G.vars.map = new OpenLayers.Map({
+        controls: [new OpenLayers.Control.MouseToolbar()],
+        displayProjection: new OpenLayers.Projection("EPSG:4326")
+    });
 	G.vars.mask = new Ext.LoadMask(Ext.getBody(),{msg:G.i18n.loading,msgCls:'x-mask-loading2'});
     G.vars.parameter = G.util.getUrlParam('view') ? {id: G.util.getUrlParam('view')} : {id: null};
 
@@ -338,8 +341,9 @@
 	
 	/* Add base layers */	
 	function addBaseLayersToMap(init) {
-		G.vars.map.addLayers([new OpenLayers.Layer.WMS('World', 'http://labs.metacarta.com/wms/vmap0', {layers: 'basic'})]);
-		G.vars.map.layers[0].setVisibility(false);
+		G.vars.map.addLayer(new OpenLayers.Layer.OSM.Osmarender("OSM Osmarender"));
+		G.vars.map.addLayer(new OpenLayers.Layer.OSM.Mapnik("OSM Mapnik"));
+		G.vars.map.addLayer(new OpenLayers.Layer.OSM.CycleMap("OSM CycleMap"));
         
         if (init) {
             var layers = G.vars.parameter.baseLayers || [];
@@ -395,6 +399,8 @@
                             'format': new OpenLayers.Format.GeoJSON()
                         })
                     });
+					
+					overlay.features = G.util.getTransformedFeatureArray(overlay.features);
                     
                     overlay.events.register('loadstart', null, loadStart);
                     overlay.events.register('loadend', null, loadEnd);
@@ -2339,29 +2345,11 @@
 		}
 	});
 	
-	var exportExcelButton = new Ext.Button({
-		iconCls: 'icon-excel',
-		tooltip: G.i18n.export_map_as_excel,
-		handler: function() {
-			var x = Ext.getCmp('center').x + 15;
-			var y = Ext.getCmp('center').y + 41;   
-			
-			exportExcelWindow.setPosition(x,y);
-
-			if (exportExcelWindow.visible) {
-				exportExcelWindow.hide();
-			}
-			else {
-				exportExcelWindow.show();
-			}
-		}
-	});
-	
 	var predefinedMapLegendSetButton = new Ext.Button({
 		iconCls: 'icon-predefinedlegendset',
 		tooltip: G.i18n.create_predefined_legend_sets,
 		disabled: !G.user.isAdmin,
-		handler: function() {			
+		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			predefinedMapLegendSetWindow.setPosition(x,y);
