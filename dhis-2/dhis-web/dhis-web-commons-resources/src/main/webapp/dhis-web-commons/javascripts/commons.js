@@ -433,10 +433,10 @@ function setRadioValue( radioName, value )
  */
 function setMessage( message )
 {
-	if ( (message != "") && (message != null) )
+	if ( message && message != '' )
 	{
-		$( '#message' ).html( message );
-		$( '#message' ).slideDown( 'fast' );
+		byId( 'message' ).innerHTML = message;
+		byId( 'message' ).style.display = 'block';
 	}
 }
 
@@ -455,7 +455,7 @@ function setWaitMessage( message )
  */
 function hideMessage()
 {
-	$( '#message' ).slideUp( 'fast' );
+	byId( 'message' ).style.display = 'none';
 }
 
 /**
@@ -738,7 +738,6 @@ function removeItem( itemId, itemName, confirmation, action )
     
     if ( result )
     {
-		setWaitMessage( i18n_process );
     	$.postJSON(
     	    action,
     	    {
@@ -761,7 +760,6 @@ function removeItem( itemId, itemName, confirmation, action )
     	    	{ 
 					showWarningMessage( json.message );
     	    	}
-				hideMessage();
     	    }
     	);
     }
@@ -827,8 +825,7 @@ function datePickerjQuery( jQueryString )
 		buttonImageOnly: true,
 		constrainInput: true		
 	});
-	s = jQuery( jQueryString );		
-	if( s.val()=='' ) s.val( getCurrentDate() );		
+		
 }
 
 /**

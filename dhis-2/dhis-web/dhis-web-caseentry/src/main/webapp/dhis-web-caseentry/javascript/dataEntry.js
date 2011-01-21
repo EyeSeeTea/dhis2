@@ -1,19 +1,3 @@
-function setupDataEntryCalendar( id )
-{	
-	jQuery("#" + id).datepicker(
-	{
-		dateFormat:dateFormat,
-		changeMonth: true,
-		changeYear: true,			
-		monthNamesShort: monthNames,
-		dayNamesMin: dayNamesMin,
-		showOn: 'button',
-		buttonImage: '../images/calendar.png',
-		buttonImageOnly: true
-	});	
-	
-}
-
 function viewPrgramStageRecords( programStageInstanceId ) 
 {
 	var url = 'viewProgramStageRecords.action?programStageInstanceId=' + programStageInstanceId;
@@ -1014,6 +998,20 @@ function saveDateCustom(  this_ )
         }
     }
 	
+	var incidentDate = new Date( jQuery('#dueDate').val() );
+	var inputtedDate = new Date(jQuery(this_).val());
+	if( inputtedDate < incidentDate )
+	{
+		jQuery(this_).css({
+                "background-color":"#ffcc00"
+            });
+            window.alert( i18n_date_less_incident_date );
+		  
+            jQuery(this_).focus();
+
+            return;
+	}
+	
     var valueSaver = new CustomValueSaver( data.dataElementId, jQuery(this_).val(), providedByAnotherFacility, '#ccffcc', '' );
     valueSaver.setProgramStageId( data.programStageId );
     valueSaver.setType(data.dataElementType);
@@ -1080,13 +1078,16 @@ jQuery(document).ready(function(){
             function(){
                 //				jQuery(this).siblings("td").removeClass("focusCell");
                 var childrens = jQuery(this).children("input[name='entryfield'],select[name='entryselect']");
-                if( jQuery(childrens[0]).is(":disabled")) {
+                
+				if( jQuery(childrens[0]).is(":disabled")) {
                     //					jQuery(this).addClass("focusCell");
                     DRAG_DIV.showData(jQuery(childrens[0]).metadata({
                         "type":"attr",
                         "name":"data"
                     }));
                 }
+				
+				
             },
             function(){
             //				if( currentFocus )
