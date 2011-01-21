@@ -917,8 +917,8 @@
                                                 return;
                                             }
                                             
-                                            if (G.stores.predefinedMapLegend.find('name', mln) !== -1) {
-                                                Ext.message.msg(false, G.i18n.legend + '<span class="x-msg-hl">' + mln + '</span> ' + G.i18n.already_exists);
+                                            if (G.stores.predefinedMapLegend.findExact('name', mln) !== -1) {
+                                                Ext.message.msg(false, G.i18n.legend + ' <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.already_exists);
                                                 return;
                                             }
                                             
