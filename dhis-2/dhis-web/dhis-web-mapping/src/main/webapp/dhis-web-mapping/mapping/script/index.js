@@ -8,9 +8,10 @@
         controls: [new OpenLayers.Control.MouseToolbar()],
         displayProjection: new OpenLayers.Projection("EPSG:4326")
     });
+	G.vars.map.overlays = [];
 	G.vars.mask = new Ext.LoadMask(Ext.getBody(),{msg:G.i18n.loading,msgCls:'x-mask-loading2'});
     G.vars.parameter = G.util.getUrlParam('view') ? {id: G.util.getUrlParam('view')} : {id: null};
-
+	
     Ext.Ajax.request({
         url: G.conf.path_mapping + 'initialize' + G.conf.type,
         method: 'POST',
@@ -400,12 +401,12 @@
                         })
                     });
 					
-					overlay.features = G.util.getTransformedFeatureArray(overlay.features);
-                    
                     overlay.events.register('loadstart', null, loadStart);
                     overlay.events.register('loadend', null, loadEnd);
                     overlay.isOverlay = true;
                     G.vars.map.addLayer(overlay);
+					G.vars.map.getLayersByName(r[i].data.name)[0].setZIndex(10000);
+					G.vars.map.overlays.push(r[i].data.name);
                 }
             }
         }
@@ -1618,43 +1619,60 @@
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                         return;
                     }
-                    
-                    if (G.stores.overlay.find('name', mln) !== -1) {
-                        Ext.message.msg(false, G.i18n.name + ' <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.is_already_in_use);
-                        return;
-                    }
-                        
-                    Ext.Ajax.request({
-                        url: G.conf.path_mapping + 'addOrUpdateMapLayer' + G.conf.type,
+					
+					Ext.Ajax.request({
+						url: G.conf.path_mapping + 'getMapLayersByType' + G.conf.type,
                         method: 'POST',
-                        params: {name: mln, type: 'overlay', mapSource: mlmsf, fillColor: mlfc, fillOpacity: mlfo, strokeColor: mlsc, strokeWidth: mlsw},
+                        params: {type: 'overlay'},
                         success: function(r) {
-                            Ext.message.msg(true, 'Overlay <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.registered);
-                            G.stores.overlay.load();
-                    
-                            G.vars.map.addLayer(
-                                new OpenLayers.Layer.Vector(mln, {
-                                    'visibility': false,
-                                    'styleMap': new OpenLayers.StyleMap({
-                                        'default': new OpenLayers.Style(
-                                            OpenLayers.Util.applyDefaults(
-                                                {'fillColor': mlfc, 'fillOpacity': mlfo, 'strokeColor': mlsc, 'strokeWidth': mlsw},
-                                                OpenLayers.Feature.Vector.style['default']
-                                            )
-                                        )
-                                    }),
-                                    'strategies': [new OpenLayers.Strategy.Fixed()],
-                                    'protocol': new OpenLayers.Protocol.HTTP({
-                                        'url': G.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + mlmsf,
-                                        'format': new OpenLayers.Format.GeoJSON()
-                                    })
-                                })
-                            );
-                            
-                            Ext.getCmp('maplayername_tf').reset();
-                            Ext.getCmp('maplayermapsourcefile_cb').clearValue();
-                        }
-                    });
+							var overlays = Ext.util.JSON.decode(r.responseText).mapLayers;
+							
+							for (var i = 0; i < overlays.length; i++) {
+								if (overlays[i].mapSource == mlmsf) {
+									Ext.message.msg(false, 'Map source <span class="x-msg-hl">' + mlmsf + '</span> ' + G.i18n.is_already_in_use);
+									return;
+								}
+							}
+							
+							Ext.Ajax.request({
+								url: G.conf.path_mapping + 'addOrUpdateMapLayer' + G.conf.type,
+								method: 'POST',
+								params: {name: mln, type: 'overlay', mapSource: mlmsf, fillColor: mlfc, fillOpacity: mlfo, strokeColor: mlsc, strokeWidth: mlsw},
+								success: function(r) {
+									Ext.message.msg(true, 'Overlay <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.registered);
+									G.stores.overlay.load();
+									
+									var overlay = new OpenLayers.Layer.Vector(mln, {
+										'visibility': false,
+										'styleMap': new OpenLayers.StyleMap({
+											'default': new OpenLayers.Style(
+												OpenLayers.Util.applyDefaults(
+													{'fillColor': mlfc, 'fillOpacity': mlfo, 'strokeColor': mlsc, 'strokeWidth': mlsw},
+													OpenLayers.Feature.Vector.style['default']
+												)
+											)
+										}),
+										'strategies': [new OpenLayers.Strategy.Fixed()],
+										'protocol': new OpenLayers.Protocol.HTTP({
+											'url': G.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + mlmsf,
+											'format': new OpenLayers.Format.GeoJSON()
+										})
+									});
+									
+									if (G.vars.map.getLayersByName(mln).length) {
+										G.vars.map.getLayersByName(mln)[0].destroy();
+									}
+									
+									G.vars.map.addLayer(overlay);
+									G.vars.map.getLayersByName(mln)[0].setZIndex(10000);
+									G.vars.map.overlays.push(mln);
+									
+									Ext.getCmp('maplayername_tf').reset();
+									Ext.getCmp('maplayermapsourcefile_cb').clearValue();
+								}
+							});
+						}
+					});
                 }
             },
             {
@@ -1674,7 +1692,7 @@
                     Ext.Ajax.request({
                         url: G.conf.path_mapping + 'deleteMapLayer' + G.conf.type,
                         method: 'POST',
-                        params: {id:ml},
+                        params: {id: ml},
                         success: function(r) {
                             Ext.message.msg(true, 'Overlay <span class="x-msg-hl">' + mln + '</span> '+ G.i18n.deleted);
                             G.stores.overlay.load();
@@ -1683,6 +1701,12 @@
                     });
                     
                     G.vars.map.getLayersByName(mln)[0].destroy();
+					
+					for (var i = 0; i < G.vars.map.overlays.length; i++) {
+						if (G.vars.map.getLayersByName(G.vars.map.overlays[i]).length) {
+							G.vars.map.getLayersByName(G.vars.map.overlays[i])[0].setZIndex(10000);
+						}
+					}
                 }
             }
         ]
@@ -1922,7 +1946,7 @@
         
     var layerTree = new Ext.tree.TreePanel({
         title: '<span class="panel-title">' + G.i18n.map_layers + '</span>',
-        enableDD: true,
+        enableDD: false,
         bodyStyle: 'padding-bottom:5px;',
         rootVisible: false,
         root: {
@@ -2263,8 +2287,6 @@
         }
     });
     
-    //mapping = new mapfish.widgets.geostat.Mapping({});    
-	
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
 		text: G.i18n.map,
@@ -2547,45 +2569,6 @@
     }));
     
     G.vars.map.addControl(new OpenLayers.Control.ZoomBox());
-    
-    function toggleSelectFeatures(e) {
-        if (G.stores.overlay.find('name', e.layer.name) !== -1) {
-            var names = G.stores.overlay.collect('name');
-            var visibleOverlays = false;
-            
-            for (var i = 0; i < names.length; i++) {
-                if (G.vars.map.getLayersByName(names[i])[0].visibility) {
-                    visibleOverlays = true;
-                }
-            }
-            
-            var widget = G.vars.activePanel.isPolygon() ? choropleth : symbol;
-            
-            if (visibleOverlays) {
-                widget.selectFeatures.deactivate();
-            }
-            else {
-                widget.selectFeatures.activate();
-            }
-        }
-    }
-	
-	G.vars.map.events.on({
-        changelayer: function(e) {
-            if (e.layer.name != 'Polygon layer' && e.layer.name != 'Point layer') {
-                if (e.property == 'visibility') {
-                    if (!G.stores.overlay.isLoaded) {
-                        G.stores.overlay.load({callback: function() {
-                            toggleSelectFeatures(e);
-                        }});
-                    }
-                    else {
-                        toggleSelectFeatures(e);
-                    }
-                }
-            }
-        }
-    });
             
     Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
     
