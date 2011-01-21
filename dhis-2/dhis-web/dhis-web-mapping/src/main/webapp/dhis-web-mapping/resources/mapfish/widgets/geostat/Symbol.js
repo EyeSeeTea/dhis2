@@ -1345,7 +1345,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     formValues: {
-		getAllFormValues: function() {
+		getAllValues: function() {
 			return {
 				featureType: G.conf.map_feature_type_point,
 				mapValueType: this.form.findField('mapvaluetype').getValue(),

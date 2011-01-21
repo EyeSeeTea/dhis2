@@ -495,7 +495,7 @@
                         if (!symbol.formValidation.validateForm(true)) {
                             return;
                         }
-                        formValues = symbol.getFormValues();
+                        formValues = symbol.formValues.getAllValues.call(symbol);
                     }
                     
                     if (G.stores.mapView.find('name', vn) !== -1) {
@@ -711,6 +711,9 @@
                 iconCls: 'icon-export',
 				text: G.i18n.export_,
 				handler: function() {
+				
+console.log(document.getElementsByTagName('svg'));
+				
                     var values, svgElement, svg;
                     if (Ext.getCmp('exportimagelayers_cb').getValue() == 1) {
 						if (choropleth.formValidation.validateForm()) {
@@ -719,7 +722,7 @@
 							document.getElementById('periodField').value = values.dateValue;
 							document.getElementById('indicatorField').value = values.mapValueTypeValue;
 							document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
-							svgElement = document.getElementsByTagName('svg')[0];
+							svgElement = document.getElementsByTagName('svg')[2];
 							svg = svgElement.parentNode.innerHTML;
 						}
 						else {
@@ -1975,7 +1978,7 @@
         },
         contextMenuBaselayer: new Ext.menu.Menu({
             items: [
-                {
+                /*{
                     text: 'Show WMS legend',
                     iconCls: 'menu-layeroptions-wmslegend',
                     handler: function(item, e) {
@@ -2004,7 +2007,7 @@
                         wmsLayerLegendWindow.setPagePosition(Ext.getCmp('east').x - 500, Ext.getCmp('center').y + 50);
                         wmsLayerLegendWindow.show();
                     }
-                },
+                },*/
                 {
                     text: 'Opacity',
                     iconCls: 'menu-layeroptions-opacity',
@@ -2227,7 +2230,7 @@
             }
 		},
         bbar: [
-            {
+/*            {
                 xtype: 'button',
                 id: 'baselayers_b',
                 text: 'Base layers',
@@ -2236,7 +2239,7 @@
                     Ext.getCmp('baselayers_w').setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
                     Ext.getCmp('baselayers_w').show();
                 }
-            },
+            },*/
             {
                 xtype: 'button',
                 id: 'overlays_b',
