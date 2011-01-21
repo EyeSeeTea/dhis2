@@ -711,94 +711,100 @@
                 iconCls: 'icon-export',
 				text: G.i18n.export_,
 				handler: function() {
-				
-console.log(document.getElementsByTagName('svg'));
-				
-                    var values, svgElement, svg;
-                    if (Ext.getCmp('exportimagelayers_cb').getValue() == 1) {
-						if (choropleth.formValidation.validateForm()) {
-							values = choropleth.formValues.getImageExportValues.call(choropleth);
-							document.getElementById('layerField').value = 1;
-							document.getElementById('periodField').value = values.dateValue;
-							document.getElementById('indicatorField').value = values.mapValueTypeValue;
-							document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
-							svgElement = document.getElementsByTagName('svg')[2];
-							svg = svgElement.parentNode.innerHTML;
-						}
-						else {
-							Ext.message.msg(false, 'Polygon layer not rendered');
-							return;
-						}
-					}
-					else if (Ext.getCmp('exportimagelayers_cb').getValue() == 2) {
-						if (symbol.formValidation.validateForm()) {
-							values = symbol.formValues.getImageExportValues.call(symbol);
-							document.getElementById('layerField').value = 2;
-							document.getElementById('periodField').value = values.dateValue;  
-							document.getElementById('indicatorField').value = values.mapValueTypeValue;
-							document.getElementById('legendsField').value = G.util.getLegendsJSON.call(symbol);
-							svgElement = document.getElementsByTagName('svg')[1];
-							svg = svgElement.parentNode.innerHTML;
-						}
-						else {
-							Ext.message.msg(false, 'Point layer not rendered');
-							return;
-						}
-					}
-					else if (Ext.getCmp('exportimagelayers_cb').getValue() == 3) {
-						if (choropleth.formValidation.validateForm()) {
-							if (symbol.formValidation.validateForm()) {
-								document.getElementById('layerField').value = 3;
-								document.getElementById('imageLegendRowsField').value = choropleth.imageLegend.length;
-								
-								values = choropleth.formValues.getImageExportValues.call(choropleth);
-								document.getElementById('periodField').value = values.dateValue;
-								document.getElementById('indicatorField').value = values.mapValueTypeValue;
-								document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
-								
-								values = symbol.formValues.getImageExportValues.call(symbol);
-								document.getElementById('periodField2').value = values.dateValue;
-								document.getElementById('indicatorField2').value = values.mapValueTypeValue;
-								document.getElementById('legendsField2').value = G.util.getLegendsJSON.call(symbol);
-								
-								svgElement = document.getElementsByTagName('svg')[0];
-								var str1 = svgElement.parentNode.innerHTML;
-								str1 = svgElement.parentNode.innerHTML.replace('</svg>');
-								var str2 = document.getElementsByTagName('svg')[1].parentNode.innerHTML;
-								str2 = str2.substring(str2.indexOf('>')+1);
-								svg = str1 + str2;
+					Ext.Ajax.request({
+						url: G.conf.path_mapping + 'getMapLayersByType' + G.conf.type,
+                        method: 'POST',
+                        params: {type: 'overlay'},
+                        success: function(r) {
+							var count = Ext.util.JSON.decode(r.responseText).mapLayers.length;
+							var values, svgElement, svg;
+							
+							if (Ext.getCmp('exportimagelayers_cb').getValue() == 1) {
+								if (choropleth.formValidation.validateForm()) {
+									values = choropleth.formValues.getImageExportValues.call(choropleth);
+									document.getElementById('layerField').value = 1;
+									document.getElementById('periodField').value = values.dateValue;
+									document.getElementById('indicatorField').value = values.mapValueTypeValue;
+									document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
+									svgElement = document.getElementsByTagName('svg')[count];
+									svg = svgElement.parentNode.innerHTML;
+								}
+								else {
+									Ext.message.msg(false, 'Polygon layer not rendered');
+									return;
+								}
+							}
+							else if (Ext.getCmp('exportimagelayers_cb').getValue() == 2) {
+								if (symbol.formValidation.validateForm()) {
+									values = symbol.formValues.getImageExportValues.call(symbol);
+									document.getElementById('layerField').value = 2;
+									document.getElementById('periodField').value = values.dateValue;  
+									document.getElementById('indicatorField').value = values.mapValueTypeValue;
+									document.getElementById('legendsField').value = G.util.getLegendsJSON.call(symbol);
+									svgElement = document.getElementsByTagName('svg')[count+1];
+									svg = svgElement.parentNode.innerHTML;
+								}
+								else {
+									Ext.message.msg(false, 'Point layer not rendered');
+									return;
+								}
+							}
+							else if (Ext.getCmp('exportimagelayers_cb').getValue() == 3) {
+								if (choropleth.formValidation.validateForm()) {
+									if (symbol.formValidation.validateForm()) {
+										document.getElementById('layerField').value = 3;
+										document.getElementById('imageLegendRowsField').value = choropleth.imageLegend.length;
+										
+										values = choropleth.formValues.getImageExportValues.call(choropleth);
+										document.getElementById('periodField').value = values.dateValue;
+										document.getElementById('indicatorField').value = values.mapValueTypeValue;
+										document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
+										
+										values = symbol.formValues.getImageExportValues.call(symbol);
+										document.getElementById('periodField2').value = values.dateValue;
+										document.getElementById('indicatorField2').value = values.mapValueTypeValue;
+										document.getElementById('legendsField2').value = G.util.getLegendsJSON.call(symbol);
+										
+										svgElement = document.getElementsByTagName('svg')[count];
+										var str1 = svgElement.parentNode.innerHTML;
+										str1 = svgElement.parentNode.innerHTML.replace('</svg>');
+										var str2 = document.getElementsByTagName('svg')[count+1].parentNode.innerHTML;
+										str2 = str2.substring(str2.indexOf('>')+1);
+										svg = str1 + str2;
+									}
+									else {
+										Ext.message.msg(false, 'Point layer not rendered');
+										return;
+									}
+								}
+								else {
+									Ext.message.msg(false, 'Polygon layer not rendered');
+									return;
+								}
+							}
+
+							var title = Ext.getCmp('exportimagetitle_tf').getValue();
+							
+							if (!title) {
+								Ext.message.msg(false, G.i18n.form_is_not_complete);
 							}
 							else {
-								Ext.message.msg(false, 'Point layer not rendered');
-								return;
+								var exportForm = document.getElementById('exportForm');
+								exportForm.action = '../exportImage.action';
+								exportForm.target = '_blank';
+								
+								document.getElementById('titleField').value = title;
+								document.getElementById('viewBoxField').value = svgElement.getAttribute('viewBox');  
+								document.getElementById('svgField').value = svg;  
+								document.getElementById('widthField').value = Ext.getCmp('exportimagewidth_cb').getValue();
+								document.getElementById('heightField').value = Ext.getCmp('exportimageheight_cb').getValue();
+								document.getElementById('includeLegendsField').value = Ext.getCmp('exportimageincludelegend_chb').getValue();
+
+								exportForm.submit();
+								Ext.getCmp('exportimagetitle_tf').reset();
 							}
 						}
-						else {
-							Ext.message.msg(false, 'Polygon layer not rendered');
-							return;
-						}
-					}
-
-					var title = Ext.getCmp('exportimagetitle_tf').getValue();
-					
-					if (!title) {
-						Ext.message.msg(false, G.i18n.form_is_not_complete);
-					}
-					else {
-						var exportForm = document.getElementById('exportForm');
-						exportForm.action = '../exportImage.action';
-						exportForm.target = '_blank';
-						
-						document.getElementById('titleField').value = title;
-						document.getElementById('viewBoxField').value = svgElement.getAttribute('viewBox');  
-						document.getElementById('svgField').value = svg;  
-						document.getElementById('widthField').value = Ext.getCmp('exportimagewidth_cb').getValue();
-						document.getElementById('heightField').value = Ext.getCmp('exportimageheight_cb').getValue();
-						document.getElementById('includeLegendsField').value = Ext.getCmp('exportimageincludelegend_chb').getValue();
-
-						exportForm.submit();
-						Ext.getCmp('exportimagetitle_tf').reset();
-					}
+					});
 				}
             }
         ]    
