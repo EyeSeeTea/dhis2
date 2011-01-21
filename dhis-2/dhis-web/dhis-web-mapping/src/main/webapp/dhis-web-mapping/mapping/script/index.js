@@ -1409,8 +1409,8 @@
         title: '<span id="window-help-title">'+G.i18n.help+'</span>',
 		layout: 'fit',
         closeAction: 'hide',
-		width: 556,
-		height: 236, 
+		width: 579,
+		height: 290,
         items: [
             {
                 xtype: 'tabpanel',
@@ -1423,31 +1423,31 @@
                     tabchange: function(panel, tab) {
                         if (tab.id == 'help0') {
 							setHelpText(G.conf.thematicMap, tab);
-                            helpWindow.setHeight(Ext.isChrome ? 242:223);
+                            helpWindow.setHeight(290);
                         }
                         else if (tab.id == 'help1') {
 							setHelpText(G.conf.favorites, tab);
-                            helpWindow.setHeight(Ext.isChrome ? 146:135);
+                            helpWindow.setHeight(290);
                         }
                         else if (tab.id == 'help2') {
                             setHelpText(G.conf.legendSets, tab);
-                            helpWindow.setHeight(Ext.isChrome ? 161:150);
+                            helpWindow.setHeight(290);
                         }
 						if (tab.id == 'help3') { 
                             setHelpText(G.conf.imageExport, tab);
-                            helpWindow.setHeight(Ext.isChrome ? 235:215);
+                            helpWindow.setHeight(290);
                         }
                         else if (tab.id == 'help4') {
                             setHelpText(G.conf.administration, tab);
-                            helpWindow.setHeight(Ext.isChrome ? 161:149);
+                            helpWindow.setHeight(290);
                         }
                         else if (tab.id == 'help5') {
                             setHelpText(G.conf.overlayRegistration, tab);
-                            helpWindow.setHeight(Ext.isChrome ? 398:367);
+                            helpWindow.setHeight(530);
                         }
                         else if (tab.id == 'help6') {
                             setHelpText(G.conf.setup, tab);
-                            helpWindow.setHeight(Ext.isChrome ? 537:485);
+                            helpWindow.setHeight(530);
                         }
                     }
                 },
