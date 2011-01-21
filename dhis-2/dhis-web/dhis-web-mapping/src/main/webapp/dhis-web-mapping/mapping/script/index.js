@@ -498,7 +498,7 @@
                         formValues = symbol.formValues.getAllValues.call(symbol);
                     }
                     
-                    if (G.stores.mapView.find('name', vn) !== -1) {
+                    if (G.stores.mapView.findExact('name', vn) !== -1) {
                         Ext.message.msg(false, G.i18n.there_is_already_a_map_view_called + ' <span class="x-msg-hl">' + vn + '</span>');
                         return;
                     }
@@ -568,7 +568,8 @@
 						params: {id: v},
 						success: function(r) {
 							Ext.message.msg(true, G.i18n.favorite + ' <span class="x-msg-hl">' + rw + '</span> ' + G.i18n.deleted);
-                            G.stores.mapView.load();
+                            G.stores.polygonMapView.load();
+							G.stores.pointMapView.load();
                             Ext.getCmp('favorite_cb').clearValue();
                             if (v == choropleth.form.findField('mapview').getValue()) {
                                 choropleth.form.findField('mapview').clearValue();
