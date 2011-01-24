@@ -66,16 +66,16 @@ public abstract class ActionPagingSupport<T>
         return paging;
     }
 
-    protected boolean usepaging;
+    protected boolean usePaging = false;
 
-    public boolean isUsepaging()
+    public boolean isUsePaging()
     {
-        return usepaging;
+        return usePaging;
     }
 
-    public void setUsepaging( boolean usepaging )
+    public void setUsePaging( boolean usePaging )
     {
-        this.usepaging = usepaging;
+        this.usePaging = usePaging;
     }
 
     @SuppressWarnings( "unchecked" )
