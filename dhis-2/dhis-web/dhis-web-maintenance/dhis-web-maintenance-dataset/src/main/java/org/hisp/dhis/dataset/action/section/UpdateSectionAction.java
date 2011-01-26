@@ -66,25 +66,26 @@ public class UpdateSectionAction
     {
         this.dataSetService = dataSetService;
     }
+    
     // -------------------------------------------------------------------------
-    // Input & output
+    // Input
     // -------------------------------------------------------------------------
 
     private Integer sectionId;
-
-    private String sectionName;
-
-    private List<String> selectedList;
 
     public void setSectionId( Integer sectionId )
     {
         this.sectionId = sectionId;
     }
 
+    private String sectionName;
+
     public void setSectionName( String sectionName )
     {
         this.sectionName = sectionName;
     }
+
+    private List<String> selectedList = new ArrayList<String>();
 
     public void setSelectedList( List<String> selectedList )
     {
@@ -102,24 +103,21 @@ public class UpdateSectionAction
 
         Section section = sectionService.getSection( sectionId.intValue() );
 
-        if ( selectedList == null )
-        {
-            selectedList = new ArrayList<String>();
-        }
-
         for ( String id : selectedList )
         {
             DataElement d = dataElementService.getDataElement( Integer.parseInt( id ) );
             dataElements.add( d );
         }
-
+        
         section.setDataElements( dataElements );
         section.setName( sectionName );
 
         sectionService.updateSection( section );
 
         DataSet dataSet = section.getDataSet();
-        if(dataSet.getMobile() != null && dataSet.getMobile()){
+
+        if ( dataSet.getMobile() != null && dataSet.getMobile() ) // TODO Hack
+        {
             dataSet.setVersion( dataSet.getVersion() + 1 );
             dataSetService.updateDataSet( dataSet );
         }

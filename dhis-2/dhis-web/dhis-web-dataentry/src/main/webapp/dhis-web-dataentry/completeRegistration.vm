@@ -1,33 +1,6 @@
 <input type="hidden" id="curLocaleCode" value="$locale.getLanguage()_$locale.getCountry()"/>
 <hr style="clear:both">
-<table>
-  <tr>
-    <td><input type="button" id="completeButton" name="completeButton" value="$i18n.getString( 'complete' )" onclick="validateCompleteDataSet()"#if( $registration ) disabled="disabled"#end></td>
-    <td><input type="button" id="undoButton" name="undoButton" value="$i18n.getString( 'undo' )" onclick="undoCompleteDataSet()"#if( !$registration ) disabled="disabled"#end></td>
-    <td><input type="text" id="dateField" name="dateField" value="$!format.formatDate( $registrationDate )" style="width:160px"#if( $registration ) disabled="disabled"#end class="{validate:{required:true,dateISO:true}}"></td>
-    <td><div id="dateDiv" name="dateDiv" #if( $registration ) style="display:none"#else style="display:inline"#end>
-  </tr>
-</table>
+<input type="button" id="completeButton" name="completeButton" value="$i18n.getString( 'complete' )" onclick="validateCompleteDataSet()" style="width:120px"#if( $registration ) disabled="disabled"#end>
+<input type="button" id="undoButton" name="undoButton" value="$i18n.getString( 'incomplete' )" onclick="undoCompleteDataSet()" style="width:120px"#if( !$registration ) disabled="disabled"#end>
+<input type="button" value="$i18n.getString( 'run_validation' )" onclick="javascript:validate()" style="width:120px"><br>
 <span id="message"></span>
-<script type="text/javascript">
-   jQuery(document).ready(function(){
-		datePicker( 'dateField' );
-   });
-</script>
-
-<script type="text/javascript">
-    var calculatedDataElementMap = {
-		#set( $count = 1 )
-		#foreach( $cde in $calculatedDataElementMap.keySet() )
-		  #set( $innerCount = 1 )
-		  #set( $factorMap = $calculatedDataElementMap.get($cde) )
-		  $cde.id : {
-		  #foreach ( $de in $factorMap.keySet() )
-			$de.id : $factorMap.get($de) #if ( $innerCount < $factorMap.size() ),#end
-			#set( $innerCount = $innerCount + 1 )
-		  #end
-		  } #if ( $count < $calculatedDataElementMap.size() ),#end
-		  #set( $count = $count + 1 )
-		#end
-    }
-</script>

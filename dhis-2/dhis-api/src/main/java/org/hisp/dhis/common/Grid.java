@@ -95,9 +95,9 @@ public interface Grid
     int getVisibleWidth();
 
     /**
-     * Adds a new row to the grid and moves the cursor accordingly.
+     * Adds a new row the the grid and moves the cursor accordingly.
      */
-    Grid nextRow();
+    Grid addRow();
 
     /**
      * Adds the value to the end of the current row.
