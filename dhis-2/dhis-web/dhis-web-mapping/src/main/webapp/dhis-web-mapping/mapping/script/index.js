@@ -37,6 +37,7 @@
         ],
         autoLoad: false,
         isLoaded: false,
+        sortInfo: {field: 'userId', direction: 'ASC'},
         listeners: {
             'load': G.func.storeLoadListener
         }
@@ -46,12 +47,12 @@
         url: G.conf.path_mapping + 'getMapViewsByFeatureType' + G.conf.type,
         baseParams: {featureType: G.conf.map_feature_type_multipolygon},
         root: 'mapViews',
-        fields: [ 'id', 'name', 'featureType', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
+        fields: [ 'id', 'name', 'userId', 'featureType', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
             'mapDateType', 'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName',
             'parentOrganisationUnitLevel', 'organisationUnitLevel', 'organisationUnitLevelName', 'mapLegendType', 'method', 'classes',
             'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'longitude', 'latitude', 'zoom'
         ],
-        sortInfo: {field: 'name', direction: 'ASC'},
+        sortInfo: {field: 'userId', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -63,12 +64,12 @@
         url: G.conf.path_mapping + 'getMapViewsByFeatureType' + G.conf.type,
         baseParams: {featureType: G.conf.map_feature_type_point},
         root: 'mapViews',
-        fields: [ 'id', 'name', 'featureType', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
+        fields: [ 'id', 'name', 'userId', 'featureType', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
             'mapDateType', 'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName',
             'parentOrganisationUnitLevel', 'organisationUnitLevel', 'organisationUnitLevelName', 'mapLegendType', 'method', 'classes',
             'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'radiusLow', 'radiusHigh', 'longitude', 'latitude', 'zoom'
         ],
-        sortInfo: {field: 'name', direction: 'ASC'},
+        sortInfo: {field: 'userId', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
         listeners: {
