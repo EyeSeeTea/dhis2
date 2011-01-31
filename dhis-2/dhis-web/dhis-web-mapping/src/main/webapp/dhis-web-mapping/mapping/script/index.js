@@ -232,7 +232,6 @@
 						symbol.form.findField('level').setValue(data.name);
 					}
 				}
-                // Ext.getCmp('level_cb').mode = 'local';
             }
         }
     });
@@ -343,7 +342,6 @@
 	
 	/* Add base layers */	
 	function addBaseLayersToMap(init) {
-        
         if (init) {
             var osmarender = new OpenLayers.Layer.OSM.Osmarender("OSM Osmarender");
             osmarender.layerType = G.conf.map_layer_type_baselayer;
@@ -356,24 +354,6 @@
             var cyclemap = new OpenLayers.Layer.OSM.Osmarender("OSM CycleMap");
             cyclemap.layerType = G.conf.map_layer_type_baselayer;
             G.vars.map.addLayer(cyclemap);
-            
-            //var layers = G.vars.parameter.baseLayers || [];
-			//if (layers.length) {
-				//for (var i = 0; i < layers.length; i++) {
-					//G.vars.map.addLayers([new OpenLayers.Layer.WMS(layers[i].data.name, layers[i].data.mapSource, {layers: layers[i].data.layer})]);
-					//G.vars.map.layers[G.vars.map.layers.length-1].setVisibility(false);
-				//}
-			//}
-        }
-        else {
-            //G.stores.baseLayer.load({callback: function(r) {
-                //if (r.length) {
-                    //for (var i = 0; i < r.length; i++) {
-                        //G.vars.map.addLayers([new OpenLayers.Layer.WMS(r[i].data.name, r[i].data.mapSource, {layers: r[i].data.layer})]);
-                        //G.vars.map.layers[G.vars.map.layers.length-1].setVisibility(false);
-                    //}
-                //}
-            //}});
         }
 	}
 	addBaseLayersToMap(true);

@@ -220,26 +220,6 @@ G.util = {
         widget.applyValues();
     },
 
-    toggleFeatureLabelsAssignment: function() {
-        function activateLabels(scope) {
-            mapping.layer.styleMap = scope.labels.getActivatedOpenLayersStyleMap();
-            mapping.labels = true;
-        }
-        function deactivateLabels(scope) {
-            mapping.layer.styleMap = scope.labels.getDeactivatedOpenLayersStyleMap();
-            mapping.labels = false;
-        }
-        
-        if (mapping.labels) {
-            deactivateLabels(this);
-        }
-        else {
-            activateLabels(this);
-        }
-        
-        mapping.classify(false, true);
-    },
-
     /* Sort values */
     sortByValue: function(a,b) {
         return b.value-a.value;
