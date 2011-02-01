@@ -2517,7 +2517,7 @@
     }));
     
     G.vars.map.addControl(new OpenLayers.Control.PanPanel({
-        slideFactor: 80
+        slideFactor: 100
     }));
     
 	}});
