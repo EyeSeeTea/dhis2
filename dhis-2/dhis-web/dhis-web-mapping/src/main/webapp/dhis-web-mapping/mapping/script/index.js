@@ -2316,7 +2316,9 @@
 		iconCls: 'icon-admin',
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
-		handler: function() {      
+		handler: function() {
+console.log(G.vars.map.layers);
+console.log(document.getElementsByTagName('svg'));
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			adminWindow.setPosition(x,y);
@@ -2474,10 +2476,18 @@
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_overlay, G.conf.defaultLayerOpacity);
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_thematic, G.conf.defaultLayerOpacity);
                 
+                var svg = document.getElementsByTagName('svg');
+                
                 if (!Ext.isIE) {
-                    polygonLayer.svgId = document.getElementsByTagName('svg')[0].id;
-                    pointLayer.svgId = document.getElementsByTagName('svg')[1].id;
+                    polygonLayer.svgId = svg[0].id;
+                    pointLayer.svgId = svg[1].id;
                 }
+                
+                for (var i = 0, j = 2; i < G.vars.map.layers.length; i++) {
+                    if (G.vars.map.layers[i].layerType == G.conf.map_layer_type_overlay) {
+                        G.vars.map.layers[i].svgId = svg[j++];
+                    }
+                }                
             
                 Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
                 
