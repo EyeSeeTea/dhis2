@@ -637,25 +637,6 @@
                     },
                     {
                         xtype: 'combo',
-                        id: 'exportimagelayers_cb',
-                        fieldLabel: 'Layers',
-                        labelSeparator: G.conf.labelseparator,
-                        editable: false,
-                        valueField: 'id',
-                        displayField: 'layer',
-                        width: G.conf.combo_width_fieldset,
-                        minListWidth: G.conf.combo_width_fieldset,
-                        mode: 'local',
-                        triggerAction: 'all',
-                        value: 1,
-                        store: {
-                            xtype: 'arraystore',
-                            fields: ['id', 'layer'],
-                            data: [[1, 'Polygon layer'], [2, 'Point layer'], [3, 'Both']]
-                        }
-                    },
-                    {
-                        xtype: 'combo',
                         id: 'exportimagewidth_cb',
                         fieldLabel: 'Width',
                         labelSeparator: G.conf.labelseparator,
@@ -711,98 +692,91 @@
                 iconCls: 'icon-export',
 				text: G.i18n.export_,
 				handler: function() {
-					Ext.Ajax.request({
-						url: G.conf.path_mapping + 'getMapLayersByType' + G.conf.type,
-                        method: 'POST',
-                        params: {type: 'overlay'},
-                        success: function(r) {
-							var values, svgElement, svg;
+                    var values, svgElement, svg;
+                    
+                    if (polygonLayer.visibility && pointLayer.visibility) {
+                        if (choropleth.formValidation.validateForm()) {
+                            if (symbol.formValidation.validateForm()) {
+                                document.getElementById('layerField').value = 3;
+                                document.getElementById('imageLegendRowsField').value = choropleth.imageLegend.length;
+                                
+                                values = choropleth.formValues.getImageExportValues.call(choropleth);
+                                document.getElementById('periodField').value = values.dateValue;
+                                document.getElementById('indicatorField').value = values.mapValueTypeValue;
+                                document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
+                                
+                                values = symbol.formValues.getImageExportValues.call(symbol);
+                                document.getElementById('periodField2').value = values.dateValue;
+                                document.getElementById('indicatorField2').value = values.mapValueTypeValue;
+                                document.getElementById('legendsField2').value = G.util.getLegendsJSON.call(symbol);
+                                
+                                svgElement = document.getElementById(polygonLayer.svgId);
+                                var str1 = svgElement.parentNode.innerHTML;
+                                str1 = svgElement.parentNode.innerHTML.replace('</svg>');
+                                var str2 = document.getElementById(pointLayer.svgId).parentNode.innerHTML;
+                                str2 = str2.substring(str2.indexOf('>')+1);
+                                svg = str1 + str2;
+                            }
+                            else {
+                                Ext.message.msg(false, 'Point layer not rendered');
+                                return;
+                            }
+                        }
+                        else {
+                            Ext.message.msg(false, 'Polygon layer not rendered');
+                            return;
+                        }
+                    }
+                    else if (polygonLayer.visibility) {
+                        if (choropleth.formValidation.validateForm()) {
+                            values = choropleth.formValues.getImageExportValues.call(choropleth);
+                            document.getElementById('layerField').value = 1;
+                            document.getElementById('periodField').value = values.dateValue;
+                            document.getElementById('indicatorField').value = values.mapValueTypeValue;
+                            document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
+                            svgElement = document.getElementById(polygonLayer.svgId);
+                            svg = svgElement.parentNode.innerHTML;
+                        }
+                        else {
+                            Ext.message.msg(false, 'Polygon layer not rendered');
+                            return;
+                        }
+                    }
+                    else if (pointLayer.visibility) {
+                        if (symbol.formValidation.validateForm()) {
+                            values = symbol.formValues.getImageExportValues.call(symbol);
+                            document.getElementById('layerField').value = 2;
+                            document.getElementById('periodField').value = values.dateValue;  
+                            document.getElementById('indicatorField').value = values.mapValueTypeValue;
+                            document.getElementById('legendsField').value = G.util.getLegendsJSON.call(symbol);
+                            svgElement = document.getElementById(pointLayer.svgId);
+                            svg = svgElement.parentNode.innerHTML;
+                        }
+                        else {
+                            Ext.message.msg(false, 'Point layer not rendered');
+                            return;
+                        }
+                    }
 
-							if (Ext.getCmp('exportimagelayers_cb').getValue() == 1) {
-								if (choropleth.formValidation.validateForm()) {
-									values = choropleth.formValues.getImageExportValues.call(choropleth);
-									document.getElementById('layerField').value = 1;
-									document.getElementById('periodField').value = values.dateValue;
-									document.getElementById('indicatorField').value = values.mapValueTypeValue;
-									document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
-									svgElement = document.getElementById(polygonLayer.svgId);
-									svg = svgElement.parentNode.innerHTML;
-								}
-								else {
-									Ext.message.msg(false, 'Polygon layer not rendered');
-									return;
-								}
-							}
-							else if (Ext.getCmp('exportimagelayers_cb').getValue() == 2) {
-								if (symbol.formValidation.validateForm()) {
-									values = symbol.formValues.getImageExportValues.call(symbol);
-									document.getElementById('layerField').value = 2;
-									document.getElementById('periodField').value = values.dateValue;  
-									document.getElementById('indicatorField').value = values.mapValueTypeValue;
-									document.getElementById('legendsField').value = G.util.getLegendsJSON.call(symbol);
-									svgElement = document.getElementById(pointLayer.svgId);
-									svg = svgElement.parentNode.innerHTML;
-								}
-								else {
-									Ext.message.msg(false, 'Point layer not rendered');
-									return;
-								}
-							}
-							else if (Ext.getCmp('exportimagelayers_cb').getValue() == 3) {
-								if (choropleth.formValidation.validateForm()) {
-									if (symbol.formValidation.validateForm()) {
-										document.getElementById('layerField').value = 3;
-										document.getElementById('imageLegendRowsField').value = choropleth.imageLegend.length;
-										
-										values = choropleth.formValues.getImageExportValues.call(choropleth);
-										document.getElementById('periodField').value = values.dateValue;
-										document.getElementById('indicatorField').value = values.mapValueTypeValue;
-										document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
-										
-										values = symbol.formValues.getImageExportValues.call(symbol);
-										document.getElementById('periodField2').value = values.dateValue;
-										document.getElementById('indicatorField2').value = values.mapValueTypeValue;
-										document.getElementById('legendsField2').value = G.util.getLegendsJSON.call(symbol);
-										
-										svgElement = document.getElementById(polygonLayer.svgId);
-										var str1 = svgElement.parentNode.innerHTML;
-										str1 = svgElement.parentNode.innerHTML.replace('</svg>');
-										var str2 = document.getElementById(pointLayer.svgId).parentNode.innerHTML;
-										str2 = str2.substring(str2.indexOf('>')+1);
-										svg = str1 + str2;
-									}
-									else {
-										Ext.message.msg(false, 'Point layer not rendered');
-										return;
-									}
-								}
-								else {
-									Ext.message.msg(false, 'Polygon layer not rendered');
-									return;
-								}
-							}
+                    var title = Ext.getCmp('exportimagetitle_tf').getValue();
+                    
+                    if (!title) {
+                        Ext.message.msg(false, G.i18n.form_is_not_complete);
+                    }
+                    else {
+                        var exportForm = document.getElementById('exportForm');
+                        exportForm.action = '../exportImage.action';
+                        
+                        document.getElementById('titleField').value = title;
+                        document.getElementById('viewBoxField').value = svgElement.getAttribute('viewBox');  
+                        document.getElementById('svgField').value = svg;  
+                        document.getElementById('widthField').value = Ext.getCmp('exportimagewidth_cb').getValue();
+                        document.getElementById('heightField').value = Ext.getCmp('exportimageheight_cb').getValue();
+                        document.getElementById('includeLegendsField').value = Ext.getCmp('exportimageincludelegend_chb').getValue();
 
-							var title = Ext.getCmp('exportimagetitle_tf').getValue();
-							
-							if (!title) {
-								Ext.message.msg(false, G.i18n.form_is_not_complete);
-							}
-							else {
-								var exportForm = document.getElementById('exportForm');
-								exportForm.action = '../exportImage.action';
-								
-								document.getElementById('titleField').value = title;
-								document.getElementById('viewBoxField').value = svgElement.getAttribute('viewBox');  
-								document.getElementById('svgField').value = svg;  
-								document.getElementById('widthField').value = Ext.getCmp('exportimagewidth_cb').getValue();
-								document.getElementById('heightField').value = Ext.getCmp('exportimageheight_cb').getValue();
-								document.getElementById('includeLegendsField').value = Ext.getCmp('exportimageincludelegend_chb').getValue();
-
-								exportForm.submit();
-								Ext.getCmp('exportimagetitle_tf').reset();
-							}
-						}
-					});
+                        exportForm.submit();
+                        Ext.getCmp('exportimagetitle_tf').reset();
+                    }
 				}
             }
         ]    
@@ -2317,8 +2291,6 @@
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
 		handler: function() {
-console.log(G.vars.map.layers);
-console.log(document.getElementsByTagName('svg'));
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			adminWindow.setPosition(x,y);
@@ -2487,7 +2459,7 @@ console.log(document.getElementsByTagName('svg'));
                     if (G.vars.map.layers[i].layerType == G.conf.map_layer_type_overlay) {
                         G.vars.map.layers[i].svgId = svg[j++];
                     }
-                }                
+                }
             
                 Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
                 
@@ -2499,6 +2471,12 @@ console.log(document.getElementsByTagName('svg'));
                 
                 choropleth.prepareMapViewLegend();
                 symbol.prepareMapViewLegend();
+                
+                G.vars.map.events.register('addlayer', null, function(e) {
+                    var svg = document.getElementsByTagName('svg');
+                    e.layer.svgId = svg[svg.length-1].id;
+                });
+                               
             }
         }
     });
