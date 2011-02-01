@@ -3,7 +3,7 @@
 	Ext.override(Ext.form.Field,{showField:function(){this.show();this.container.up('div.x-form-item').setDisplayed(true);},hideField:function(){this.hide();this.container.up('div.x-form-item').setDisplayed(false);}});
 	Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
-	
+    
 	G.vars.map = new OpenLayers.Map({
         controls: [new OpenLayers.Control.MouseToolbar()],
         displayProjection: new OpenLayers.Projection("EPSG:4326")
@@ -19,8 +19,7 @@
         success: function(r) {
             var init = Ext.util.JSON.decode(r.responseText);
             G.vars.parameter.mapView = init.mapView;
-            G.vars.parameter.baseLayers = init.baseLayers;
-            G.vars.parameter.overlays = init.overlays;
+            G.user.initOverlays = init.overlays;
             G.user.isAdmin = init.security.isAdmin;
             G.system.aggregationStrategy = init.systemSettings.aggregationStrategy;
             G.vars.mapDateType.value = G.system.aggregationStrategy == G.conf.aggregation_strategy_batch ?
@@ -378,7 +377,7 @@
         }
         
         if (init) {
-            add(G.vars.parameter.overlays);
+            add(G.user.initOverlays);
         }
         else {
             G.stores.overlay.load({callback: function(r) {
@@ -2479,11 +2478,11 @@
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_thematic, G.conf.defaultLayerOpacity);
                 
                 if (!Ext.isIE) {
-                    polygonLayer.svgId = G.vars.parameter.overlays.length ?
-                        document.getElementsByTagName('svg')[G.vars.parameter.overlays.length].id : document.getElementsByTagName('svg')[0].id;
+                    polygonLayer.svgId = G.user.initOverlays.length ?
+                        document.getElementsByTagName('svg')[G.user.initOverlays.length].id : document.getElementsByTagName('svg')[0].id;
                     
-                    pointLayer.svgId = G.vars.parameter.overlays.length ?
-                        document.getElementsByTagName('svg')[G.vars.parameter.overlays.length + 1].id : document.getElementsByTagName('svg')[1].id;
+                    pointLayer.svgId = G.user.initOverlays.length ?
+                        document.getElementsByTagName('svg')[G.user.initOverlays.length + 1].id : document.getElementsByTagName('svg')[1].id;
                 }
             
                 Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
