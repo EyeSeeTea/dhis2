@@ -2316,9 +2316,7 @@
 		iconCls: 'icon-admin',
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
-		handler: function() {
-console.log(G.vars.map.layers);
-console.log(document.getElementsByTagName('svg'));            
+		handler: function() {      
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			adminWindow.setPosition(x,y);
