@@ -339,24 +339,59 @@
         overlay: overlayStore
     };
 	
-	/* Add base layers */	
-	function addBaseLayersToMap(init) {
-        if (init) {
-            var osmarender = new OpenLayers.Layer.OSM.Osmarender("OSM Osmarender");
-            osmarender.layerType = G.conf.map_layer_type_baselayer;
-            G.vars.map.addLayer(osmarender);
-            
-            var mapnik = new OpenLayers.Layer.OSM.Osmarender("OSM Mapnik");
-            mapnik.layerType = G.conf.map_layer_type_baselayer;
-            G.vars.map.addLayer(mapnik);
-            
-            var cyclemap = new OpenLayers.Layer.OSM.Osmarender("OSM CycleMap");
-            cyclemap.layerType = G.conf.map_layer_type_baselayer;
-            G.vars.map.addLayer(cyclemap);
-        }
-	}
-	addBaseLayersToMap(true);
+	/* Thematic layers */
+    polygonLayer = new OpenLayers.Layer.Vector('Polygon layer', {
+        'visibility': false,
+        'displayInLayerSwitcher': false,
+        'styleMap': new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style(
+                OpenLayers.Util.applyDefaults(
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
+                    OpenLayers.Feature.Vector.style['default']
+                )
+            ),
+            'select': new OpenLayers.Style(
+                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+            )
+        })
+    });
     
+    polygonLayer.layerType = G.conf.map_layer_type_thematic;
+    G.vars.map.addLayer(polygonLayer);
+    
+    pointLayer = new OpenLayers.Layer.Vector('Point layer', {
+        'visibility': false,
+        'displayInLayerSwitcher': false,
+        'styleMap': new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style(
+                OpenLayers.Util.applyDefaults(
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
+                    OpenLayers.Feature.Vector.style['default']
+                )
+            ),
+            'select': new OpenLayers.Style(
+                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+            )
+        })
+    });
+    
+    pointLayer.layerType = G.conf.map_layer_type_thematic;
+    G.vars.map.addLayer(pointLayer);
+    
+    /* Init base layers */	
+    var osmarender = new OpenLayers.Layer.OSM.Osmarender("OSM Osmarender");
+    osmarender.layerType = G.conf.map_layer_type_baselayer;
+    G.vars.map.addLayer(osmarender);
+    
+    var mapnik = new OpenLayers.Layer.OSM.Osmarender("OSM Mapnik");
+    mapnik.layerType = G.conf.map_layer_type_baselayer;
+    G.vars.map.addLayer(mapnik);
+    
+    var cyclemap = new OpenLayers.Layer.OSM.Osmarender("OSM CycleMap");
+    cyclemap.layerType = G.conf.map_layer_type_baselayer;
+    G.vars.map.addLayer(cyclemap);
+    
+    /* Init overlays */
 	function addOverlaysToMap(init) {
         function add(r) {
             if (r.length) {                
@@ -366,12 +401,13 @@
                         G.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + r[i].data.mapSource
                     );
                     
+                    overlay.layerType = G.conf.map_layer_type_overlay;
+                    
                     overlay.events.register('loadstart', null, G.func.loadStart);
                     overlay.events.register('loadend', null, G.func.loadEnd);
                     
                     G.vars.map.addLayer(overlay);
 					G.vars.map.getLayersByName(r[i].data.name)[0].setZIndex(G.conf.defaultLayerZIndex);
-                    G.vars.map.getLayersByName(r[i].data.name)[0].layerType = G.conf.map_layer_type_overlay;
                 }
             }
         }
@@ -1871,45 +1907,6 @@
             }			
         ]
     });
-	
-	/* Section: layers */
-    polygonLayer = new OpenLayers.Layer.Vector('Polygon layer', {
-        'visibility': false,
-        'displayInLayerSwitcher': false,
-        'styleMap': new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style(
-                OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
-                    OpenLayers.Feature.Vector.style['default']
-                )
-            ),
-            'select': new OpenLayers.Style(
-                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
-            )
-        })
-    });
-    
-    polygonLayer.layerType = G.conf.map_layer_type_thematic;
-    
-    pointLayer = new OpenLayers.Layer.Vector('Point layer', {
-        'visibility': false,
-        'displayInLayerSwitcher': false,
-        'styleMap': new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style(
-                OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
-                    OpenLayers.Feature.Vector.style['default']
-                )
-            ),
-            'select': new OpenLayers.Style(
-                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
-            )
-        })
-    });
-    
-    pointLayer.layerType = G.conf.map_layer_type_thematic;
-    
-    G.vars.map.addLayers([polygonLayer, pointLayer]);
         
     var layerTree = new Ext.tree.TreePanel({
         title: '<span class="panel-title">' + G.i18n.map_layers + '</span>',
@@ -2320,6 +2317,8 @@
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
 		handler: function() {
+console.log(G.vars.map.layers);
+console.log(document.getElementsByTagName('svg'));            
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			adminWindow.setPosition(x,y);
@@ -2478,11 +2477,8 @@
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_thematic, G.conf.defaultLayerOpacity);
                 
                 if (!Ext.isIE) {
-                    polygonLayer.svgId = G.user.initOverlays.length ?
-                        document.getElementsByTagName('svg')[G.user.initOverlays.length].id : document.getElementsByTagName('svg')[0].id;
-                    
-                    pointLayer.svgId = G.user.initOverlays.length ?
-                        document.getElementsByTagName('svg')[G.user.initOverlays.length + 1].id : document.getElementsByTagName('svg')[1].id;
+                    polygonLayer.svgId = document.getElementsByTagName('svg')[0].id;
+                    pointLayer.svgId = document.getElementsByTagName('svg')[1].id;
                 }
             
                 Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
