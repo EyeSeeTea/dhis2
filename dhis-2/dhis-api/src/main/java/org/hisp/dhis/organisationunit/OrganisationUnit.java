@@ -89,6 +89,8 @@ public class OrganisationUnit
     
     private transient boolean currentParent;
     
+    private transient String groupName;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -537,5 +539,15 @@ public class OrganisationUnit
     public void setCurrentParent( boolean currentParent )
     {
         this.currentParent = currentParent;
+    }
+
+    public String getGroupName()
+    {
+        return groupName;
+    }
+
+    public void setGroupName( String groupName )
+    {
+        this.groupName = groupName;
     }
 }
