@@ -111,7 +111,7 @@ public class GetGeoJsonAction
             {
                 if ( organisationUnit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
                 {
-                    organisationUnit.setGroupName( organisationUnit.getGroupNameInGroupSet( organisationUnitGroupService
+                    organisationUnit.setType( organisationUnit.getGroupNameInGroupSet( organisationUnitGroupService
                         .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE ) ) );
                 }
             }
