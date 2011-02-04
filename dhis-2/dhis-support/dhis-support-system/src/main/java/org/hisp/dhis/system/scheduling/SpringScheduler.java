@@ -1,4 +1,4 @@
-package org.hisp.dhis.datamart.task;
+package org.hisp.dhis.system.scheduling;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,13 +27,12 @@ package org.hisp.dhis.datamart.task;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.datamart.DataMartScheduler;
-import org.hisp.dhis.datamart.DataMartService;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -41,21 +40,16 @@ import org.springframework.scheduling.support.CronTrigger;
 /**
  * @author Lars Helge Overland
  */
-public class SpringDataMartScheduler
-    implements DataMartScheduler
+public class SpringScheduler
+    implements Scheduler
 {
-    private ScheduledFuture<?> scheduledFuture = null; // Gives class state but no better way to handle this?
+    private static final Log log = LogFactory.getLog( SpringScheduler.class );
+    
+    private Map<String, ScheduledFuture<?>> futures = new HashMap<String, ScheduledFuture<?>>();
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private DataMartService dataMartService;
-    
-    public void setDataMartService( DataMartService dataMartService )
-    {
-        this.dataMartService = dataMartService;
-    }
 
     private TaskScheduler taskScheduler;
 
@@ -71,61 +65,68 @@ public class SpringDataMartScheduler
         this.taskExecutor = taskExecutor;
     }
 
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
-
-    private IndicatorService indicatorService;
-
-    public void setIndicatorService( IndicatorService indicatorService )
-    {
-        this.indicatorService = indicatorService;
-    }
-
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     // -------------------------------------------------------------------------
-    // DataMartSceduler implementation
+    // Sceduler implementation
     // -------------------------------------------------------------------------
 
-    public void executeDataMartExport()
+    public void executeTask( Runnable task )
     {
-        DataMartTask task = new DataMartTask( dataMartService, dataElementService, indicatorService, organisationUnitService );
-        
         taskExecutor.execute( task );
     }
     
-    public void scheduleDataMartExport()
+    public boolean scheduleTask( Runnable task, String cronExpr )
     {
-        DataMartTask task = new DataMartTask( dataMartService, dataElementService, indicatorService, organisationUnitService );
+        String key = task != null ? task.getClass().getName() : null;
         
-        scheduledFuture = taskScheduler.schedule( task, new CronTrigger( CRON_NIGHTLY ) );        
+        if ( key != null && !futures.containsKey( key ) )
+        {
+            ScheduledFuture<?> future = taskScheduler.schedule( task, new CronTrigger( cronExpr ) );
+            
+            futures.put( key, future );
+            
+            log.info( "Sceduled task of type: " + key );
+            
+            return true;
+        }
+        
+        return false;
     }
     
-    public boolean stopDataMartExport()
+    public boolean stopTask( Class<? extends Runnable> taskClass )
     {
-        return scheduledFuture != null ? scheduledFuture.cancel( true ) : false;
-    }
-    
-    public String getDataMartExportStatus()
+        String key = taskClass != null ? taskClass.getName() : null;
+        
+        if ( key != null )
+        {
+            ScheduledFuture<?> future = futures.get( key );
+            
+            boolean result = future != null ? future.cancel( true ) : false;
+            
+            futures.remove( key );
+            
+            log.info( "Stopped task of type: " + taskClass.getName() );
+            
+            return result;
+        }
+        
+        return false;
+    }    
+
+    public String getTaskStatus( Class<? extends Runnable> taskClass )
     {
-        if ( scheduledFuture == null )
+        String key = taskClass != null ? taskClass.getName() : null;
+        
+        ScheduledFuture<?> future = futures.get( key );
+        
+        if ( future == null )
         {
             return STATUS_NOT_STARTED;
         }
-        else if ( scheduledFuture.isCancelled() )
+        else if ( future.isCancelled() )
         {
             return STATUS_STOPPED;
         }
-        else if ( scheduledFuture.isDone() )
+        else if ( future.isDone() )
         {
             return STATUS_DONE;
         }

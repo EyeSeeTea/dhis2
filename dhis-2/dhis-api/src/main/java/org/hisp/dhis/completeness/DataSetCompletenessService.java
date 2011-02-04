@@ -34,6 +34,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.external.configuration.NoConfigurationFoundException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.RelativePeriods;
 
 /**
  * @author Lars Helge Overland
@@ -46,12 +47,19 @@ public interface DataSetCompletenessService
     /**
      * 
      * @param dataSetIds
+     * @param relatives
+     * @param organisationUnitIds
+     */
+    void exportDataSetCompleteness( Collection<Integer> dataSetIds, RelativePeriods relatives, Collection<Integer> organisationUnitIds );
+    
+    /**
+     * 
+     * @param dataSetIds
      * @param periodIds
      * @param organisationUnitIds
-     * @param reportTableId
      */
     void exportDataSetCompleteness( Collection<Integer> dataSetIds, 
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, Integer reportTableId );
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
     
     /**
      * Returns a Collection of DataSetCompletenessResults. The DataSetCompletenessResult
@@ -106,4 +114,14 @@ public interface DataSetCompletenessService
      */
     DataSetCompletenessConfiguration getConfiguration()
         throws NoConfigurationFoundException;
+    
+    /**
+     * Creates an index on the aggregateddatasetcompleteness table.
+     */
+    void createIndex();
+
+    /**
+     * Drops the index on the aggregateddatasetcompleteness table.
+     */
+    void dropIndex();
 }

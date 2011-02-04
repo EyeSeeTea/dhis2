@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
@@ -52,7 +53,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.source.Source;
+import org.hisp.dhis.system.util.ConversionUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -161,8 +164,20 @@ public abstract class AbstractDataSetCompletenessService
     // DataSetCompleteness
     // -------------------------------------------------------------------------
 
+    public void exportDataSetCompleteness( Collection<Integer> dataSetIds, RelativePeriods relatives, Collection<Integer> organisationUnitIds )
+    {
+        if ( relatives != null )
+        {
+            List<Period> periods = relatives.getRelativePeriods( 1, null, false );
+            
+            Collection<Integer> periodIds = ConversionUtils.getIdentifiers( Period.class, periodService.reloadPeriods( periods ) );
+            
+            exportDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
+        }
+    }
+    
     public void exportDataSetCompleteness( Collection<Integer> dataSetIds, 
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, Integer reportTableId )
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds )
     {
         log.info( "Data completeness export process started" );
         
@@ -196,7 +211,6 @@ public abstract class AbstractDataSetCompletenessService
                     aggregatedResult.setPeriodId( period.getId() );
                     aggregatedResult.setPeriodName( period.getName() );
                     aggregatedResult.setOrganisationUnitId( unit.getId() );
-                    aggregatedResult.setReportTableId( reportTableId );
                     
                     for ( final Period intersectingPeriod : intersectingPeriods )
                     {
@@ -351,5 +365,19 @@ public abstract class AbstractDataSetCompletenessService
         {
             return null;
         }
+    }
+    
+    // -------------------------------------------------------------------------
+    // Index
+    // -------------------------------------------------------------------------
+
+    public void createIndex()
+    {
+        completenessStore.createIndex();
+    }
+    
+    public void dropIndex()
+    {
+        completenessStore.dropIndex();
     }
 }

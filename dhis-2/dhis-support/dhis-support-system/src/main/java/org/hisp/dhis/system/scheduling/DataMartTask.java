@@ -1,4 +1,4 @@
-package org.hisp.dhis.datamart.task;
+package org.hisp.dhis.system.scheduling;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -30,8 +30,6 @@ package org.hisp.dhis.datamart.task;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datamart.DataMartService;
@@ -48,8 +46,6 @@ import org.hisp.dhis.system.util.ConversionUtils;
 public class DataMartTask
     implements Runnable
 {
-    private static final Log log = LogFactory.getLog( DataMartTask.class );
-    
     private DataMartService dataMartService;
  
     private DataElementService dataElementService;
@@ -74,9 +70,7 @@ public class DataMartTask
         Collection<Integer> indicatorIds = ConversionUtils.getIdentifiers( Indicator.class, indicatorService.getAllIndicators() );
         Collection<Integer> organisationUnitIds = ConversionUtils.getIdentifiers( OrganisationUnit.class, organisationUnitService.getAllOrganisationUnits() );
         
-        RelativePeriods relatives = new RelativePeriods( false, true, true, true, false, false, false );
-        
-        log.info( "Starting scheduled data mart task" );
+        RelativePeriods relatives = new RelativePeriods( false, true, true, true, true, true, true );
         
         dataMartService.export( dataElementIds, indicatorIds, new HashSet<Integer>(), organisationUnitIds, relatives, true );
     }

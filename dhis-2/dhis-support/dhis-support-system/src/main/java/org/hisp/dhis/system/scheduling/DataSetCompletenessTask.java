@@ -1,4 +1,4 @@
-package org.hisp.dhis.datamart.action;
+package org.hisp.dhis.system.scheduling;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,45 +27,44 @@ package org.hisp.dhis.datamart.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.datamart.DataMartScheduler.STATUS_RUNNING;
+import java.util.Collection;
 
-import org.hisp.dhis.datamart.DataMartScheduler;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.completeness.DataSetCompletenessService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.system.util.ConversionUtils;
 
 /**
  * @author Lars Helge Overland
  */
-public class ScheduleExportAction
-    implements Action
+public class DataSetCompletenessTask
+    implements Runnable
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    private DataSetCompletenessService completenessService;
+    
+    private DataSetService dataSetService;
+    
+    private OrganisationUnitService organisationUnitService;
 
-    private DataMartScheduler dataMartScheduler;
-
-    public void setDataMartScheduler( DataMartScheduler dataMartScheduler )
+    public DataSetCompletenessTask( DataSetCompletenessService completenessService, 
+        DataSetService dataSetService, OrganisationUnitService organisationUnitService )
     {
-        this.dataMartScheduler = dataMartScheduler;
+        this.completenessService = completenessService;
+        this.dataSetService = dataSetService;
+        this.organisationUnitService = organisationUnitService;
     }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
+    
     @Override
-    public String execute()
+    public void run()
     {
-        if ( dataMartScheduler.getDataMartExportStatus().equals( STATUS_RUNNING ) )
-        {
-            dataMartScheduler.stopDataMartExport();
-        }
-        else
-        {
-            dataMartScheduler.scheduleDataMartExport();
-        }
+        Collection<Integer> dataSetIds = ConversionUtils.getIdentifiers( DataSet.class, dataSetService.getAllDataSets() );
+        Collection<Integer> organisationUnitIds = ConversionUtils.getIdentifiers( OrganisationUnit.class, organisationUnitService.getAllOrganisationUnits() );
+
+        RelativePeriods relatives = new RelativePeriods( false, true, true, true, true, true, true );
         
-        return SUCCESS;
+        completenessService.exportDataSetCompleteness( dataSetIds, relatives, organisationUnitIds );        
     }
 }
