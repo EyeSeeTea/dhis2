@@ -11,7 +11,7 @@ import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.databrowser.DataBrowserStore;
 import org.hisp.dhis.databrowser.DataBrowserTable;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.system.util.TimeUtils;
+import org.hisp.dhis.system.util.Timer;
 
 /**
  * @author joakibj, martinwa, briane, eivinhb
@@ -27,6 +27,8 @@ public class StatementManagerDataBrowserStore
     // -------------------------------------------------------------------------
 
     private StatementManager statementManager;
+    private Timer timer = new Timer();
+    
 
     public void setStatementManager( StatementManager statementManager )
     {
@@ -66,11 +68,13 @@ public class StatementManagerDataBrowserStore
             sqlsb.append( "ORDER BY counts_of_aggregated_values DESC)" );
 
             table = new DataBrowserTable();
-            TimeUtils.start();
+
+            timer.start();
+           
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
 
-            table.setQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.setQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
 
@@ -110,10 +114,10 @@ public class StatementManagerDataBrowserStore
 
             table = new DataBrowserTable();
 
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.setQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.setQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
             table.addColumnName( "drilldown_data_element_group" );
@@ -152,10 +156,10 @@ public class StatementManagerDataBrowserStore
 
             table = new DataBrowserTable();
 
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.setQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.setQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
             table.addColumnName( "drilldown_orgunit_group" );
@@ -189,10 +193,10 @@ public class StatementManagerDataBrowserStore
             sqlsb.append( "WHERE dsm.datasetid = '" + dataSetId + "' " );
             sqlsb.append( "ORDER BY de.name) " );
 
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.addQueryTime( timer.getMilliSec() );
+        
             table.incrementQueryCount();
 
             table.createStructure( resultSet );
@@ -226,10 +230,10 @@ public class StatementManagerDataBrowserStore
             sqlsb.append( "GROUP BY deg.dataelementgroupid, deg.name " );
             sqlsb.append( "ORDER BY deg.name ASC) " );
 
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.setQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.setQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
             table.addColumnName( "drilldown_data_element_group" );
@@ -260,11 +264,10 @@ public class StatementManagerDataBrowserStore
             sqlsb.append( "GROUP BY de.dataelementid, de.name " );
             sqlsb.append( "ORDER BY de.name) " );
 
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
 
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.addQueryTime( timer.getMilliSec() );
             table.incrementQueryCount();
 
             table.addColumnName( "drilldown_data_element" );
@@ -293,10 +296,10 @@ public class StatementManagerDataBrowserStore
             sqlsb.append( "WHERE o.parentid = '" + orgUnitParent + "' " );
             sqlsb.append( "ORDER BY o.name)" );
 
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.addQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
 
@@ -331,12 +334,9 @@ public class StatementManagerDataBrowserStore
             sqlsb.append( "GROUP BY de.dataelementid, de.name " );
             sqlsb.append( "ORDER BY de.name) " );
 
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-
-            table.setQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
-
+            table.setQueryTime( timer.getMilliSec() );
             table.incrementQueryCount();
             table.addColumnName( "drilldown_data_element" );
             table.createStructure( resultSet );
@@ -382,10 +382,10 @@ public class StatementManagerDataBrowserStore
 
         try
         {
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.addQueryTime( timer.getMilliSec() );
+           
 
             table.incrementQueryCount();
 
@@ -429,10 +429,10 @@ public class StatementManagerDataBrowserStore
 
         try
         {
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.addQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
 
@@ -478,10 +478,10 @@ public class StatementManagerDataBrowserStore
 
         try
         {
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.addQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
 
@@ -511,16 +511,16 @@ public class StatementManagerDataBrowserStore
 
         try
         {
-            TimeUtils.start();
+            timer.start();
 
             ResultSet resultSet = this.getScrollableResult( sqlsbDescentdants.toString(), holder );
 
-            table.addQueryTime( TimeUtils.getMillis() );
+            table.addQueryTime( timer.getMilliSec() );
             table.incrementQueryCount();
 
             numResults = table.addColumnToAllRows( resultSet );
 
-            TimeUtils.stop();
+            
         }
         catch ( Exception e )
         {
@@ -561,10 +561,10 @@ public class StatementManagerDataBrowserStore
 
         try
         {
-            TimeUtils.start();
+            timer.start();
             ResultSet resultSet = getScrollableResult( sqlsb.toString(), holder );
-            table.addQueryTime( TimeUtils.getMillis() );
-            TimeUtils.stop();
+            table.addQueryTime( timer.getMilliSec() );
+            
 
             table.incrementQueryCount();
 
