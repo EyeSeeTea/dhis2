@@ -201,6 +201,19 @@
                     </distributionFileList>
                 </folder>
             </folderList>
+            <parameterList>
+                <passwordParameter>
+                    <name>pg_super_passwrd</name>
+                    <title>Please entre the Postgresql superuser password</title>
+                    <description></description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>postgres</default>
+                    <allowEmptyValue>1</allowEmptyValue>
+                    <descriptionRetype></descriptionRetype>
+                    <width>20</width>
+                </passwordParameter>
+            </parameterList>
             <postInstallationActionList>
                 <runProgram>
                     <explanation>Installing Postgresql</explanation>
