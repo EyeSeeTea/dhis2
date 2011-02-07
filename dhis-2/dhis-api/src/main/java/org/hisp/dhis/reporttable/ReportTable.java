@@ -828,27 +828,15 @@ public class ReportTable
      * Generates a column identifier based on the internal identifiers of the
      * argument objects. Null arguments are ignored in the identifier. 
      */
-    private static String getColumnIdentifier( IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit )
+    private static String getColumnIdentifier( IdentifiableObject... objects )
     {
         StringBuffer buffer = new StringBuffer();
 
-        if ( metaObject != null )
+        for ( IdentifiableObject object : objects )
         {
-            buffer.append( metaObject.getId() + SEPARATOR );
+            buffer.append( object != null ? ( object.getId() + SEPARATOR ) : EMPTY );
         }
-        if ( categoryOptionCombo != null )
-        {
-            buffer.append( categoryOptionCombo.getId() + SEPARATOR );
-        }
-        if ( period != null )
-        {
-            buffer.append( period.getId() + SEPARATOR );
-        }
-        if ( unit != null )
-        {
-            buffer.append( unit.getId() + SEPARATOR );
-        }
-
+        
         return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SEPARATOR ) ) : buffer.toString();
     }
     
