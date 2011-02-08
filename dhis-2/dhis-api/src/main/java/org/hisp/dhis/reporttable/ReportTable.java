@@ -424,6 +424,7 @@ public class ReportTable
     {
         verify( nonEmptyLists( dataElements, indicators, dataSets ) == 1, "One of dataelements, indicators, and datasets size must be larger than 0" );
         verify( !( doIndicators && doPeriods && doUnits ), "Cannot crosstab on all dimensions" );
+        verify( i18nFormat != null, "I18n format must be set" );
         
         // ---------------------------------------------------------------------
         // Init tableName, allPeriods and allUnits
@@ -443,7 +444,7 @@ public class ReportTable
 
         for ( Period period : allPeriods )
         {
-            if ( period.getName() == null && i18nFormat != null )
+            if ( period.getName() == null )
             {
                 period.setName( i18nFormat.formatPeriod( period ) );
             }
@@ -780,9 +781,7 @@ public class ReportTable
         }
         if ( period != null )
         {
-            String periodName = format == null ? period.getName() : format.formatPeriod( period );
-            
-            buffer.append( periodName + SPACE );
+            buffer.append( format.formatPeriod( period ) + SPACE );
         }
         if ( unit != null )
         {
