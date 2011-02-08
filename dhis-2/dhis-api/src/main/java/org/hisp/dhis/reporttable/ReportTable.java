@@ -444,9 +444,9 @@ public class ReportTable
 
         for ( Period period : allPeriods )
         {
-            if ( period.getName() == null )
+            if ( period.getName() == null ) // Crosstabulated relative periods
             {
-                period.setName( i18nFormat.formatPeriod( period ) );
+                period.setName( i18nFormat.formatPeriod( period ) ); // Static periods + indexed relative periods
             }
         }
         
@@ -599,25 +599,6 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Tests whether this report table has report parameters for dimensions which
-     * are on columns.
-     */
-    public boolean hasDynamicColumns()
-    {
-        if ( doUnits && reportParams != null && ( reportParams.isParamOrganisationUnit() || reportParams.isParamParentOrganisationUnit() ) )
-        {
-            return true;
-        }
-        
-        if ( doPeriods && reportParams != null && reportParams.isParamReportingMonth() )
-        {
-            return true;
-        }
-        
-        return false;
-    }
     
     /**
      * Returns a list of names of all columns for this ReportTable.
