@@ -424,6 +424,7 @@ public class ReportTable
     {
         verify( nonEmptyLists( dataElements, indicators, dataSets ) == 1, "One of dataelements, indicators, and datasets size must be larger than 0" );
         verify( !( doIndicators && doPeriods && doUnits ), "Cannot crosstab on all dimensions" );
+        verify( i18nFormat != null, "I18n format must be set" );
         
         // ---------------------------------------------------------------------
         // Init tableName, allPeriods and allUnits
@@ -443,9 +444,10 @@ public class ReportTable
 
         for ( Period period : allPeriods )
         {
-            if ( period.getName() == null && i18nFormat != null )
+            if ( period.getName() == null ) // Crosstabulated relative periods
             {
-                period.setName( i18nFormat.formatPeriod( period ) );
+                period.setName( i18nFormat.formatPeriod( period ) ); // Static periods + indexed relative periods
+                period.setShortName( i18nFormat.formatPeriod( period ) );
             }
         }
         
@@ -555,7 +557,7 @@ public class ReportTable
                     for ( OrganisationUnit unit : crossTabUnits )
                     {
                         String columnName = getColumnName( indicator, categoryOptionCombo, period, unit, i18nFormat );
-                        String prettyColumnName = getPrettyColumnName( indicator, categoryOptionCombo, period, unit, i18nFormat );
+                        String prettyColumnName = getPrettyColumnName( indicator, categoryOptionCombo, period, unit );
                         String columnIdentifier = getColumnIdentifier( indicator, categoryOptionCombo, period, unit );
                         
                         if ( columnName != null && !columnName.isEmpty() )
@@ -598,25 +600,6 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Tests whether this report table has report parameters for dimensions which
-     * are on columns.
-     */
-    public boolean hasDynamicColumns()
-    {
-        if ( doUnits && reportParams != null && ( reportParams.isParamOrganisationUnit() || reportParams.isParamParentOrganisationUnit() ) )
-        {
-            return true;
-        }
-        
-        if ( doPeriods && reportParams != null && reportParams.isParamReportingMonth() )
-        {
-            return true;
-        }
-        
-        return false;
-    }
     
     /**
      * Returns a list of names of all columns for this ReportTable.
@@ -762,33 +745,15 @@ public class ReportTable
         return list != null && list.size() > 0;
     }
     
-    /**
-     * Generates a pretty-print column name based on short-names of the argument
-     * objects. Null arguments are ignored in the name.
-     */
-    private static String getPrettyColumnName( IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit, I18nFormat format )
+    private static String getPrettyColumnName( IdentifiableObject... objects )
     {
         StringBuffer buffer = new StringBuffer();
         
-        if ( metaObject != null )
+        for ( IdentifiableObject object : objects )
         {
-            buffer.append( metaObject.getShortName() + SPACE );
+            buffer.append( object != null ? ( object.getShortName() + SPACE ) : EMPTY );
         }
-        if ( categoryOptionCombo != null )
-        {
-            buffer.append( categoryOptionCombo.getShortName() + SPACE );
-        }
-        if ( period != null )
-        {
-            String periodName = format == null ? period.getName() : format.formatPeriod( period );
-            
-            buffer.append( periodName + SPACE );
-        }
-        if ( unit != null )
-        {
-            buffer.append( unit.getShortName() + SPACE );
-        }
-
+        
         return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SPACE ) ) : buffer.toString();
     }
     
@@ -810,9 +775,7 @@ public class ReportTable
         }
         if ( period != null )
         {
-            String periodName = period.getName() != null ? period.getName() : format.formatPeriod( period );
-            
-            buffer.append( periodName + SEPARATOR );
+            buffer.append( period.getName() + SEPARATOR );
         }
         if ( unit != null )
         {
