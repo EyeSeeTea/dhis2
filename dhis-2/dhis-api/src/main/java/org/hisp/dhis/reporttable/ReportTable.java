@@ -611,15 +611,6 @@ public class ReportTable
     // -------------------------------------------------------------------------
            
     /**
-     * Generates a pretty-print name of the argument column name.
-     */
-    private String prettyPrintColumn( String column )
-    {
-        column = column.replaceAll( "_", " " );
-        return column.substring( 0, 1 ).toUpperCase() + column.substring( 1, column.length() );
-    }
-    
-    /**
      * Tests whether this ReportTable contains regression columns.
      */
     public boolean isRegression()
