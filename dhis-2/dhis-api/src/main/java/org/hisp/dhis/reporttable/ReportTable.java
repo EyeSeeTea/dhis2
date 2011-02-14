@@ -685,6 +685,22 @@ public class ReportTable
     {
         return CLASS_ID_MAP.get( object.getClass() ) + object.getId();
     }
+
+    /**
+     * Generates an identifier based on the IdentifiableObject classes and object
+     * identifiers.
+     */
+    public static String getIdentifier( IdentifiableObject[] objects )
+    {
+        StringBuilder builder = new StringBuilder();
+        
+        for ( IdentifiableObject object : objects )
+        {
+            builder.append( getIdentifier( object ) );
+        }
+        
+        return builder.toString();
+    }
     
     // -------------------------------------------------------------------------
     // Supportive methods
