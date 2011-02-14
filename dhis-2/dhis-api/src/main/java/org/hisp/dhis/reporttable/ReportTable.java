@@ -609,41 +609,11 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
-    
-    /**
-     * Returns a list of names of all columns for this ReportTable.
-     */
-    public List<String> getAllColumns()
-    {
-        List<String> columns = new ArrayList<String>();
-        
-        columns.addAll( getIndexColumns() );
-        columns.addAll( getIndexNameColumns() );
-        columns.add( ReportTable.REPORTING_MONTH_COLUMN_NAME );
-        columns.add( ReportTable.PARAM_ORGANISATIONUNIT_COLUMN_NAME );
-        columns.addAll( getCrossTabColumns() );
-        columns.addAll( getCategoryOptionColumns() );
-        
-        if ( doTotal() )
-        {
-            columns.add( TOTAL_COLUMN_NAME );
-        }
-        
-        if ( isRegression() )
-        {
-            for ( String regressionColumn : getCrossTabColumns() )
-            {
-                columns.add( REGRESSION_COLUMN_PREFIX + regressionColumn );
-            }
-        }
-        
-        return columns;
-    }
-    
+           
     /**
      * Generates a pretty-print name of the argument column name.
      */
-    public String prettyPrintColumn( String column )
+    private String prettyPrintColumn( String column )
     {
         column = column.replaceAll( "_", " " );
         return column.substring( 0, 1 ).toUpperCase() + column.substring( 1, column.length() );

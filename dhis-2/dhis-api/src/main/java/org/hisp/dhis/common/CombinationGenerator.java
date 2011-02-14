@@ -121,4 +121,20 @@ public class CombinationGenerator
         
         return current;
     }
+    
+    /**
+     * Method for getting a String identifier representing the given array of
+     * IdentifiableObjects. The identifier is on the format [canonical classname][id]*
+     */
+    public static String getCombinationIdentifier( IdentifiableObject[] objects )
+    {
+        StringBuilder identifier = new StringBuilder();
+        
+        for ( IdentifiableObject object : objects )
+        {
+            identifier.append( object.getClass().getCanonicalName() + object.getId() );
+        }
+        
+        return identifier.toString();
+    }
 }
