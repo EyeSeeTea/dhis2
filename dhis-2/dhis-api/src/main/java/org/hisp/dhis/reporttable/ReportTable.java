@@ -565,7 +565,7 @@ public class ReportTable
                 {
                     for ( OrganisationUnit unit : crossTabUnits )
                     {
-                        String columnName = getColumnName( indicator, categoryOptionCombo, period, unit, i18nFormat );
+                        String columnName = getColumnName( indicator, categoryOptionCombo, period, unit );
                         String prettyColumnName = getPrettyColumnName( indicator, categoryOptionCombo, period, unit );
                         String columnIdentifier = getColumnIdentifier( indicator, categoryOptionCombo, period, unit );
                         
@@ -685,22 +685,6 @@ public class ReportTable
     {
         return CLASS_ID_MAP.get( object.getClass() ) + object.getId();
     }
-
-    /**
-     * Generates an identifier based on the IdentifiableObject classes and object
-     * identifiers.
-     */
-    public static String getIdentifier( IdentifiableObject[] objects )
-    {
-        StringBuilder builder = new StringBuilder();
-        
-        for ( IdentifiableObject object : objects )
-        {
-            builder.append( getIdentifier( object ) );
-        }
-        
-        return builder.toString();
-    }
     
     // -------------------------------------------------------------------------
     // Supportive methods
@@ -739,7 +723,11 @@ public class ReportTable
     {
         return list != null && list.size() > 0;
     }
-    
+
+    /**
+     * Generates a pretty column name based on short-names of the argument objects. 
+     * Null arguments are ignored in the name.
+     */
     private static String getPrettyColumnName( IdentifiableObject... objects )
     {
         StringBuffer buffer = new StringBuffer();
@@ -756,32 +744,27 @@ public class ReportTable
      * Generates a column name based on short-names of the argument objects. Null 
      * arguments are ignored in the name.
      */
-    private static String getColumnName( IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit, I18nFormat format )
+    private static String getColumnName( IdentifiableObject... objects )
     {
         StringBuffer buffer = new StringBuffer();
         
-        if ( metaObject != null )
+        for ( IdentifiableObject object : objects )
         {
-            buffer.append( metaObject.getShortName() + SEPARATOR );
-        }
-        if ( categoryOptionCombo != null )
-        {
-            buffer.append( categoryOptionCombo.getShortName() + SEPARATOR );
-        }
-        if ( period != null )
-        {
-            buffer.append( period.getName() + SEPARATOR );
-        }
-        if ( unit != null )
-        {
-            buffer.append( unit.getShortName() + SEPARATOR );
+            if ( object != null && object instanceof Period )
+            {
+                buffer.append( object.getName() + SEPARATOR ); // Relative periods must have with static names when crosstabbed, those are populated on name property
+            }
+            else
+            {
+                buffer.append( object != null ? ( object.getShortName() + SEPARATOR ) : EMPTY );
+            }
         }
 
         String column = databaseEncode( buffer.toString() );
         
         return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : column;
     }
-        
+    
     /**
      * Generates a column identifier based on the internal identifiers of the
      * argument objects. Null arguments are ignored in the identifier. 
