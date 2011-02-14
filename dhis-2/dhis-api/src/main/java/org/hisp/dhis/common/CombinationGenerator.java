@@ -27,6 +27,9 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hisp.dhis.common.IdentifiableObject;
 
 /**
@@ -46,10 +49,35 @@ public class CombinationGenerator
         indexes[no-1]--; // Rewind last index to simplify looping
     }
     
-    public void getCombinations()
+    /**
+     * Returns an array of arrays with combinations of IdentifiableObjects.
+     */
+    public List<IdentifiableObject[]> getCombinations()
     {
-        IdentifiableObject[][] combinations = new IdentifiableObject[no][];
+        List<IdentifiableObject[]> combinations = new ArrayList<IdentifiableObject[]>();
         
+        while ( hasNext() )
+        {
+            combinations.add( getNext() );
+        }
+        
+        return combinations;
+    }
+    
+    /**
+     * Indicates whether there are more combinations to be returned.
+     */
+    public boolean hasNext()
+    {
+        for ( int i = no - 1; i >= 0; i-- )
+        {
+            if ( indexes[i] < objects[i].length - 1 ) // Not at last position in array
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -69,7 +97,10 @@ public class CombinationGenerator
             }
             else // At last position in array, reset index to 0 and continue to increment next array
             {
-                indexes[i] = 0;
+                if ( hasNext() )
+                {
+                    indexes[i] = 0;
+                }
             }
         }
         
