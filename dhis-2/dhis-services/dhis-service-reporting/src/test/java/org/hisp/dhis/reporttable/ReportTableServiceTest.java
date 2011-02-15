@@ -224,7 +224,7 @@ public class ReportTableServiceTest
         indicatorB = createIndicator( 'B', indicatorType );
         
         indicatorIdA = indicatorService.addIndicator( indicatorA );
-        indicatorIdA = indicatorService.addIndicator( indicatorB );
+        indicatorIdB = indicatorService.addIndicator( indicatorB );
                 
         indicators.add( indicatorA );
         indicators.add( indicatorB );

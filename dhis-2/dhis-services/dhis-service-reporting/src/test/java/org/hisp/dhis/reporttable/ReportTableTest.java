@@ -27,18 +27,15 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.hisp.dhis.reporttable.ReportTable.getColumnIdentifier;
-import static org.hisp.dhis.reporttable.ReportTable.getColumnName;
-import static org.hisp.dhis.reporttable.ReportTable.getIdentifier;
+import static junit.framework.Assert.*;
+import static org.hisp.dhis.reporttable.ReportTable.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -208,7 +205,7 @@ public class ReportTableTest
     // -------------------------------------------------------------------------
 
     @Test
-    public void testGetColumnIdentifier()
+    public void testGetColumnIdentifierA()
     {
         IdentifiableObject[] a1 = { unitA, periodA };
         IdentifiableObject[] a2 = { indicatorA };
@@ -220,7 +217,7 @@ public class ReportTableTest
         assertNotNull( getColumnIdentifier( b1, b2 ) );
         assertEquals( getColumnIdentifier( a1, a2 ), getColumnIdentifier( b1, b2 ) );
         
-        Integer identifier = getColumnIdentifier( getIdentifier( unitA.getClass(), unitA.getId() ), 
+        String identifier = getColumnIdentifier( getIdentifier( unitA.getClass(), unitA.getId() ), 
             getIdentifier( periodA.getClass(), periodA.getId() ), getIdentifier( indicatorA.getClass(), indicatorA.getId() ) );
         
         assertEquals( getColumnIdentifier( a1, a2 ), identifier );
@@ -229,6 +226,24 @@ public class ReportTableTest
             getIdentifier( indicatorA.getClass(), indicatorA.getId() ), getIdentifier( unitA.getClass(), unitA.getId() ) );
         
         assertEquals( getColumnIdentifier( b1, b2 ), identifier );
+    }
+
+    @Test
+    public void testGetColumnIdentifierB()
+    {
+        String a1 = getIdentifier( Indicator.class, 1 );
+        String a2 = getIdentifier( DataElement.class, 2 );
+        
+        assertEquals( INDICATOR_ID + 1, a1 );
+        assertEquals( DATAELEMENT_ID + 2, a2 );
+        
+        String b1 = getIdentifier( Indicator.class, 2 );
+        String b2 = getIdentifier( DataElement.class, 1 );
+        
+        assertEquals( INDICATOR_ID + 2, b1 );
+        assertEquals( DATAELEMENT_ID + 1, b2 );
+        
+        assertFalse( getColumnIdentifier( a1, a2 ).equals( getColumnIdentifier( b1, b2 ) ) );        
     }
     
     @Test

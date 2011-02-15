@@ -133,13 +133,13 @@ public class JDBCReportTableManager
         }
     }
     
-    public Map<Integer, Double> getAggregatedValueMap( ReportTable reportTable )
+    public Map<String, Double> getAggregatedValueMap( ReportTable reportTable )
     {
         //TODO move agg value methods to agg datavalueservice and move this method to service layer
         
         StatementHolder holder = statementManager.getHolder();
         
-        Map<Integer, Double> map = new HashMap<Integer, Double>();
+        Map<String, Double> map = new HashMap<String, Double>();
         
         String dataElementIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( DataElement.class, reportTable.getDataElements() ) );
         String indicatorIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( Indicator.class, reportTable.getIndicators() ) );
@@ -159,7 +159,7 @@ public class JDBCReportTableManager
                 
                 while ( resultSet.next() )
                 {
-                    Integer id = getColumnIdentifier( getIdentifier( DataElement.class, resultSet.getInt( 1 ) ),
+                    String id = getColumnIdentifier( getIdentifier( DataElement.class, resultSet.getInt( 1 ) ),
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ), getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
                     
                     map.put( id, resultSet.getDouble( 4 ) ); 
@@ -175,9 +175,10 @@ public class JDBCReportTableManager
                 
                 while ( resultSet.next() )
                 {
-                    Integer id = getColumnIdentifier( getIdentifier( Indicator.class, resultSet.getInt( 1 ) ),
+                    System.out.println( resultSet.getInt( 1 ) + " " + resultSet.getInt( 2 ) + " " + resultSet.getInt( 3 ) );
+                    String id = getColumnIdentifier( getIdentifier( Indicator.class, resultSet.getInt( 1 ) ),
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ), getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
-                    
+                    System.out.println( "ID " + id);
                     map.put( id, resultSet.getDouble( 4 ) ); 
                 }
             }
@@ -191,7 +192,7 @@ public class JDBCReportTableManager
                 
                 while ( resultSet.next() )
                 {
-                    Integer id = getColumnIdentifier( getIdentifier( DataSet.class, resultSet.getInt( 1 ) ),
+                    String id = getColumnIdentifier( getIdentifier( DataSet.class, resultSet.getInt( 1 ) ),
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ), getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
                     
                     map.put( id, resultSet.getDouble( 4 ) ); 

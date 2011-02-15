@@ -55,6 +55,7 @@ import org.hisp.dhis.importexport.ImportService;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.importexport.util.ImportExportUtils;
 import org.hisp.dhis.period.WeeklyPeriodType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -135,6 +136,7 @@ public class DataValueSetServiceTest
     // -------------------------------------------------------------------------
 
     @Test
+    @Ignore
     public void testJaxb()
         throws JAXBException, IOException
     {
@@ -161,6 +163,7 @@ public class DataValueSetServiceTest
     }
 
     @Test
+    @Ignore
     public void simpleMapping()
         throws Exception
     {
@@ -180,6 +183,7 @@ public class DataValueSetServiceTest
     }
 
     @Test
+    @Ignore
     public void missingThingsFromInput()
     {
 
@@ -231,6 +235,7 @@ public class DataValueSetServiceTest
     }
 
     @Test
+    @Ignore
     public void testUpdate()
     {
         long before = new Date().getTime();

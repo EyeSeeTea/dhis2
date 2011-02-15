@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
@@ -49,6 +50,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
 
 /**
  * The ReportTable object represents a customizable database table. It has features
@@ -395,6 +397,7 @@ public class ReportTable
         allPeriods.addAll( periods );
         allPeriods.addAll( relativePeriods );
         allPeriods = removeDuplicates( allPeriods );
+        Collections.sort( allPeriods, new AscendingPeriodComparator() );
         
         allUnits.addAll( units );
         allUnits.addAll( relativeUnits );
@@ -432,8 +435,7 @@ public class ReportTable
             if ( period.getName() == null ) // Crosstabulated relative periods
             {
                 period.setName( i18nFormat.formatPeriod( period ) ); // Static periods + indexed relative periods
-                period.setShortName( i18nFormat.formatPeriod( period ) );
-                
+                period.setShortName( i18nFormat.formatPeriod( period ) );                
             }
         }
         
@@ -690,35 +692,42 @@ public class ReportTable
      * Generates a column identifier based on the internal identifiers of the
      * argument objects.
      */
-    public static Integer getColumnIdentifier( IdentifiableObject[] objects1, IdentifiableObject[] objects2 )
+    public static String getColumnIdentifier( IdentifiableObject[] objects1, IdentifiableObject[] objects2 )
     {
-        Set<IdentifiableObject> objects = new HashSet<IdentifiableObject>(); 
-        objects.addAll( Arrays.asList( objects1 ) );
-        objects.addAll( Arrays.asList( objects2 ) );
+        List<String> identifiers = new ArrayList<String>();
         
-        Set<String> identifiers = new HashSet<String>();
-        
-        for ( IdentifiableObject object : objects )
+        for ( IdentifiableObject object : objects1 )
         {
             identifiers.add( getIdentifier( object.getClass(), object.getId() ) );
         }
         
-        return identifiers.hashCode();
+        for ( IdentifiableObject object : objects2 )
+        {
+            identifiers.add( getIdentifier( object.getClass(), object.getId() ) );
+        }
+        
+        Collections.sort( identifiers ); // Sort since we don't know the order of the objects
+        
+        return StringUtils.join( identifiers, SEPARATOR );
     }
     
     /**
      * Generates a column identifier based on the argument identifiers.
      */
-    public static Integer getColumnIdentifier( String... identifiers )
+    public static String getColumnIdentifier( String... identifiers )
     {
-        Set<String> set = new HashSet<String>();
-        set.addAll( Arrays.asList( identifiers ) );
-        return set.hashCode();
+        List<String> ids = Arrays.asList( identifiers );
+        
+        Collections.sort( ids ); // Sort since we don't know the order of the objects
+        
+        return StringUtils.join( identifiers, SEPARATOR );
     }
 
     public static String getIdentifier( Class<? extends IdentifiableObject> clazz, int id )
     {
-        return CLASS_ID_MAP.get( clazz ) + id;
+        String t = CLASS_ID_MAP.get( clazz ) + id;
+        
+        return t;
     }
         
     // -------------------------------------------------------------------------

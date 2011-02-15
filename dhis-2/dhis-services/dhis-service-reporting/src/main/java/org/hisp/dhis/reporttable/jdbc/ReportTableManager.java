@@ -58,7 +58,7 @@ public interface ReportTableManager
      */
     void removeReportTable( ReportTable reportTable );
     
-    Map<Integer, Double> getAggregatedValueMap( ReportTable reportTable );
+    Map<String, Double> getAggregatedValueMap( ReportTable reportTable );
     
     /**
      * Returns an AggregatedValueMap.
