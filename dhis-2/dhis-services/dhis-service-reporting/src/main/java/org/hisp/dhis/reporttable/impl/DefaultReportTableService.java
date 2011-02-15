@@ -443,8 +443,6 @@ public class DefaultReportTableService
         Grid grid = new ListGrid().setTitle( reportTable.getName() ).setSubtitle( subtitle ).setTable( reportTable.getExistingTableName() );
         
         final Map<String, Double> map = reportTableManager.getAggregatedValueMap( reportTable );
-
-        System.out.println( "MAP " + map);
         
         // -----------------------------------------------------------------
         // Headers

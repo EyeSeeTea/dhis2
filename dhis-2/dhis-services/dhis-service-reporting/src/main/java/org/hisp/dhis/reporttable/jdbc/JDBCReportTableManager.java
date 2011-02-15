@@ -175,10 +175,9 @@ public class JDBCReportTableManager
                 
                 while ( resultSet.next() )
                 {
-                    System.out.println( resultSet.getInt( 1 ) + " " + resultSet.getInt( 2 ) + " " + resultSet.getInt( 3 ) );
                     String id = getColumnIdentifier( getIdentifier( Indicator.class, resultSet.getInt( 1 ) ),
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ), getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
-                    System.out.println( "ID " + id);
+                    
                     map.put( id, resultSet.getDouble( 4 ) ); 
                 }
             }
