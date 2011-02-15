@@ -41,16 +41,20 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.statement.CreateReportTableStatement;
-import org.hisp.dhis.reporttable.statement.GetReportTableDataStatement;
 import org.hisp.dhis.reporttable.statement.RemoveReportTableStatement;
 import org.hisp.dhis.reporttable.statement.ReportTableStatement;
 import org.hisp.dhis.system.grid.ListGrid;
+import org.hisp.dhis.system.util.ConversionUtils;
+import org.hisp.dhis.system.util.TextUtils;
 
 /**
  * @author Lars Helge Overland
@@ -129,6 +133,83 @@ public class JDBCReportTableManager
         }
     }
     
+    public Map<Integer, Double> getAggregatedValueMap( ReportTable reportTable )
+    {
+        //TODO move agg value methods to agg datavalueservice and move this method to service layer
+        
+        StatementHolder holder = statementManager.getHolder();
+        
+        Map<Integer, Double> map = new HashMap<Integer, Double>();
+        
+        String dataElementIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( DataElement.class, reportTable.getDataElements() ) );
+        String indicatorIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( Indicator.class, reportTable.getIndicators() ) );
+        String dataSetIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( DataSet.class, reportTable.getDataSets() ) );
+        String periodIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( Period.class, reportTable.getAllPeriods() ) );
+        String unitIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( OrganisationUnit.class, reportTable.getAllUnits() ) );
+
+        try
+        {
+            if ( reportTable.getDataElements().size() > 0 )
+            {
+                final String sql = "SELECT dataelementid, periodid, organisationunitid, SUM(value) FROM aggregateddatavalue " +
+                    "WHERE dataelementid IN (" + dataElementIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ") " +
+                    "GROUP BY dataelementid, periodid, organisationunitid"; // Sum of category option combos
+                
+                ResultSet resultSet = holder.getStatement().executeQuery( sql );
+                
+                while ( resultSet.next() )
+                {
+                    Integer id = getColumnIdentifier( getIdentifier( DataElement.class, resultSet.getInt( 1 ) ),
+                        getIdentifier( Period.class, resultSet.getInt( 2 ) ), getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
+                    
+                    map.put( id, resultSet.getDouble( 4 ) ); 
+                }
+            }
+            
+            if ( reportTable.getIndicators().size() > 0 )
+            {
+                final String sql = "SELECT indicatorid, periodid, organisationunitid, value FROM aggregatedindicatorvalue " +
+                    "WHERE indicatorid IN (" + indicatorIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ")";
+            
+                ResultSet resultSet = holder.getStatement().executeQuery( sql );
+                
+                while ( resultSet.next() )
+                {
+                    Integer id = getColumnIdentifier( getIdentifier( Indicator.class, resultSet.getInt( 1 ) ),
+                        getIdentifier( Period.class, resultSet.getInt( 2 ) ), getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
+                    
+                    map.put( id, resultSet.getDouble( 4 ) ); 
+                }
+            }
+            
+            if ( reportTable.getDataSets().size() > 0 )
+            {
+                final String sql = "SELECT datasetid, periodid, organisationunitid, value FROM aggregateddatasetcompleteness " +
+                    "WHERE datasetid IN (" + dataSetIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ")";
+            
+                ResultSet resultSet = holder.getStatement().executeQuery( sql );
+                
+                while ( resultSet.next() )
+                {
+                    Integer id = getColumnIdentifier( getIdentifier( DataSet.class, resultSet.getInt( 1 ) ),
+                        getIdentifier( Period.class, resultSet.getInt( 2 ) ), getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
+                    
+                    map.put( id, resultSet.getDouble( 4 ) ); 
+                }
+            }
+            
+            return map;
+        }
+        catch ( Exception ex )
+        {
+            throw new RuntimeException( "Failed to get aggregated value map", ex );
+        }
+        finally
+        {
+            holder.close();
+        }
+    }
+    /*
     public Map<String, Double> getAggregatedValueMap( ReportTable reportTable,
         IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit )
     {
@@ -184,7 +265,9 @@ public class JDBCReportTableManager
             holder.close();
         }
     }
+    */
     
+    /*
     public Grid getReportTableGrid( ReportTable reportTable )
     {
         StatementHolder holder = statementManager.getHolder();
@@ -259,4 +342,5 @@ public class JDBCReportTableManager
             holder.close();
         }
     }
+    */
 }
