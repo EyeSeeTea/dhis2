@@ -180,7 +180,9 @@ public abstract class DhisConvenienceTest
         final Calendar calendar = Calendar.getInstance();
 
         calendar.clear();
-        calendar.set( year, month - 1, day );
+        calendar.set( Calendar.YEAR, year );
+        calendar.set( Calendar.MONTH, month - 1 );
+        calendar.set( Calendar.DAY_OF_MONTH, day );
 
         return calendar.getTime();
     }
