@@ -312,7 +312,6 @@ public class DefaultReportTableService
         
         reportTable = initDynamicMetaObjects( reportTable, reportingPeriod, organisationUnitId, format );
         
-        //return reportTableManager.getReportTableGrid( reportTable );
         return getGrid( reportTable );
     }
     
