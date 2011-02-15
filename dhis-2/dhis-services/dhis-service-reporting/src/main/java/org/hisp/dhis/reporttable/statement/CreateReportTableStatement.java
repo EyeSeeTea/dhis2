@@ -27,10 +27,11 @@ package org.hisp.dhis.reporttable.statement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.reporttable.ReportTable.REGRESSION_COLUMN_PREFIX;
+import static org.hisp.dhis.reporttable.ReportTable.*;
 
 import java.util.Iterator;
 
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.reporttable.ReportTable;
 
@@ -103,15 +104,17 @@ public class CreateReportTableStatement
         // Crosstab
         // ---------------------------------------------------------------------
 
-        for ( String column : reportTable.getCrossTabColumns() )
+        //for ( String column : reportTable.getCrossTabColumns() )
+        for ( IdentifiableObject[] column : reportTable.getColumns() )
         {
-            buffer.append( column + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
+            buffer.append( getColumnName( column ) + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
         }
 
         // ---------------------------------------------------------------------
         // Total
         // ---------------------------------------------------------------------
 
+        /* //TODO fix
         if ( reportTable.doTotal() )
         {
             for ( String column : reportTable.getCategoryOptionColumns() )
@@ -120,7 +123,7 @@ public class CreateReportTableStatement
             }
             
             buffer.append( ReportTable.TOTAL_COLUMN_NAME + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
-        }
+        }*/
         
         // ---------------------------------------------------------------------
         // Regression
@@ -128,9 +131,10 @@ public class CreateReportTableStatement
 
         if ( reportTable.isRegression() )
         {
-            for ( String column : reportTable.getCrossTabColumns() )
+            //for ( String column : reportTable.getCrossTabColumns() )
+            for ( IdentifiableObject[] column : reportTable.getColumns() )
             {
-                buffer.append( REGRESSION_COLUMN_PREFIX + column + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
+                buffer.append( REGRESSION_COLUMN_PREFIX + getColumnName( column ) + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
             }            
         }
 

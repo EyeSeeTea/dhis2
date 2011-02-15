@@ -28,19 +28,20 @@ package org.hisp.dhis.reporttable;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -124,7 +125,7 @@ public class ReportTable
         put( MODE_DATASETS, DATASET_NAME );
     } };
 
-    private static final Map<Class<?>, String> CLASS_ID_MAP = new HashMap<Class<?>, String>() { {
+    public static final Map<Class<? extends IdentifiableObject>, String> CLASS_ID_MAP = new HashMap<Class<? extends IdentifiableObject>, String>() { {
         put( Indicator.class, INDICATOR_ID );
         put( DataElement.class, DATAELEMENT_ID );
         put( DataElementCategoryOptionCombo.class, CATEGORYCOMBO_ID );
@@ -132,6 +133,8 @@ public class ReportTable
         put( Period.class, PERIOD_ID );
         put( OrganisationUnit.class, ORGANISATIONUNIT_ID );
     } };
+    
+    private static final IdentifiableObject[] IRT = new IdentifiableObject[0];
     
     // -------------------------------------------------------------------------
     // Persisted properties
@@ -235,47 +238,15 @@ public class ReportTable
      * Static OrganisationUnits and relative OrganisationUnits.
      */
     private List<OrganisationUnit> allUnits = new ArrayList<OrganisationUnit>();
-    
-    /**
-     * Indicators that will be crosstabulated on the columns axis. Indicators 
-     * comprises dataelements, indicators, datasets.
-     */
-    private List<IdentifiableObject> crossTabIndicators = new ArrayList<IdentifiableObject>();
 
     /**
-     * CategoryCombos that will be crosstabulated on the columns axis. Optional dimension.
+     * All Indicatrs, including DateElements, Indicators and DataSets.
      */
-    private List<DataElementCategoryOptionCombo> crossTabCategoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
-    
-    /**
-     * Periods that will be crosstabulated on the columns axis. Mandatory dimension.
-     */
-    private List<Period> crossTabPeriods = new ArrayList<Period>();
-    
-    /**
-     * OrganisationUnits that will be crosstabulated on the columns axis. Mandatory dimension.
-     */
-    private List<OrganisationUnit> crossTabUnits = new ArrayList<OrganisationUnit>();
-    
-    /**
-     * Indicators that will be present on the rows axis.
-     */
-    private List<IdentifiableObject> reportIndicators = new ArrayList<IdentifiableObject>();
+    private List<IdentifiableObject> allIndicators = new ArrayList<IdentifiableObject>();
 
-    /**
-     * CategoryOptionCombos that will be present on the rows axis. Optional dimension.
-     */
-    private List<DataElementCategoryOptionCombo> reportCategoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
+    private List<IdentifiableObject[]> columns = new ArrayList<IdentifiableObject[]>();
     
-    /**
-     * Periods that will be present on the rows axis. Mandatory dimension.
-     */
-    private List<Period> reportPeriods = new ArrayList<Period>();
-    
-    /**
-     * OrganisationUnits that will be present on the rows axis. Mandatory dimension.
-     */
-    private List<OrganisationUnit> reportUnits = new ArrayList<OrganisationUnit>();
+    private List<IdentifiableObject[]> rows = new ArrayList<IdentifiableObject[]>();
     
     /**
      * Names of the columns used to query the datavalue table and as index columns
@@ -287,27 +258,6 @@ public class ReportTable
      * Names of the columns holding entry names used to query the datavalue table.
      */
     private List<String> indexNameColumns = new ArrayList<String>();
-    
-    /**
-     * Names of the columns which should be retrieved from the datavalue table.
-     */
-    private List<String> selectColumns = new ArrayList<String>();
-    
-    /**
-     * Generated names for crosstabulated columns in the report table.
-     */
-    private List<String> crossTabColumns = new ArrayList<String>();
-    
-    /**
-     * Generated pretty-print names for crosstabulated columns in the report table,
-     * where key is column name and value is pretty column name.
-     */
-    private Map<String, String> prettyCrossTabColumns = new LinkedHashMap<String, String>();
-    
-    /**
-     * Generated unique identifiers used to retrieve the corresponding value from the datavalue table. 
-     */
-    private List<String> crossTabIdentifiers = new ArrayList<String>();
     
     /**
      * The I18nFormat used for internationalization of ie. periods.
@@ -328,16 +278,6 @@ public class ReportTable
      * The category option combos derived from the dimension set.
      */
     private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
-    
-    /**
-     * The dimension options.
-     */
-    private List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
-
-    /**
-     * The dimension option column names.
-     */
-    private List<String> categoryOptionColumns = new ArrayList<String>();
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -436,16 +376,52 @@ public class ReportTable
         verify( i18nFormat != null, "I18n format must be set" );
         
         // ---------------------------------------------------------------------
-        // Init tableName, allPeriods and allUnits
+        // Init dimensions
+        // ---------------------------------------------------------------------
+
+        if ( isDimensional() )
+        {
+            categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( categoryCombo.getOptionCombos() );
+            
+            verify( nonEmptyLists( categoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
+        }
+
+        // ---------------------------------------------------------------------
+        // Init tableName, allPeriods, allUnits, allIndicators
         // ---------------------------------------------------------------------
 
         this.tableName = generateTableName( name );
         
         allPeriods.addAll( periods );
         allPeriods.addAll( relativePeriods );
+        allPeriods = removeDuplicates( allPeriods );
         
         allUnits.addAll( units );
         allUnits.addAll( relativeUnits );
+        allUnits = removeDuplicates( allUnits );
+
+        allIndicators.addAll( dataElements );
+        allIndicators.addAll( indicators );
+        allIndicators.addAll( dataSets );
+                
+        columns = new CombinationGenerator( getArrays( true ) ).getCombinations();
+        rows = new CombinationGenerator( getArrays( false ) ).getCombinations();
+        
+        if ( !isDoIndicators() )
+        {
+            indexColumns.add( INDICATOR_ID );
+            indexNameColumns.add( INDICATOR_NAME );
+        }
+        if ( !isDoPeriods() )
+        {
+            indexColumns.add( PERIOD_ID );
+            indexNameColumns.add( PERIOD_NAME );
+        }
+        if ( !isDoUnits() )
+        {
+            indexColumns.add( ORGANISATIONUNIT_ID );
+            indexNameColumns.add( ORGANISATIONUNIT_NAME );
+        }
 
         // ---------------------------------------------------------------------
         // Set name on periods
@@ -457,24 +433,14 @@ public class ReportTable
             {
                 period.setName( i18nFormat.formatPeriod( period ) ); // Static periods + indexed relative periods
                 period.setShortName( i18nFormat.formatPeriod( period ) );
+                
             }
-        }
-        
-        // ---------------------------------------------------------------------
-        // Init dimensions
-        // ---------------------------------------------------------------------
-
-        if ( isDimensional() )
-        {
-            categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( categoryCombo.getOptionCombos() );
-            
-            verify( nonEmptyLists( categoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
         }
         
         // ---------------------------------------------------------------------
         // Init indexColumns and selectColumns
         // ---------------------------------------------------------------------
-
+/*
         if ( isDoIndicators() )
         {
             crossTabIndicators = new ArrayList<IdentifiableObject>();
@@ -565,7 +531,7 @@ public class ReportTable
                 {
                     for ( OrganisationUnit unit : crossTabUnits )
                     {
-                        String columnName = getColumnName( indicator, categoryOptionCombo, period, unit, i18nFormat );
+                        String columnName = getColumnName( indicator, categoryOptionCombo, period, unit );
                         String prettyColumnName = getPrettyColumnName( indicator, categoryOptionCombo, period, unit );
                         String columnIdentifier = getColumnIdentifier( indicator, categoryOptionCombo, period, unit );
                         
@@ -603,52 +569,13 @@ public class ReportTable
             }
             
             verify( nonEmptyLists( categoryOptions, categoryOptionColumns ) == 2, "Category options size must be larger than 0" );
-        }
+        }*/
     }
 
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
-    
-    /**
-     * Returns a list of names of all columns for this ReportTable.
-     */
-    public List<String> getAllColumns()
-    {
-        List<String> columns = new ArrayList<String>();
-        
-        columns.addAll( getIndexColumns() );
-        columns.addAll( getIndexNameColumns() );
-        columns.add( ReportTable.REPORTING_MONTH_COLUMN_NAME );
-        columns.add( ReportTable.PARAM_ORGANISATIONUNIT_COLUMN_NAME );
-        columns.addAll( getCrossTabColumns() );
-        columns.addAll( getCategoryOptionColumns() );
-        
-        if ( doTotal() )
-        {
-            columns.add( TOTAL_COLUMN_NAME );
-        }
-        
-        if ( isRegression() )
-        {
-            for ( String regressionColumn : getCrossTabColumns() )
-            {
-                columns.add( REGRESSION_COLUMN_PREFIX + regressionColumn );
-            }
-        }
-        
-        return columns;
-    }
-    
-    /**
-     * Generates a pretty-print name of the argument column name.
-     */
-    public String prettyPrintColumn( String column )
-    {
-        column = column.replaceAll( "_", " " );
-        return column.substring( 0, 1 ).toUpperCase() + column.substring( 1, column.length() );
-    }
-    
+           
     /**
      * Tests whether this ReportTable contains regression columns.
      */
@@ -706,28 +633,119 @@ public class ReportTable
             isDimensional() && mode.equals( MODE_DATAELEMENTS );
     }
     
-    /**
-     * Returns a List containing index and select columns.
-     */
-    public List<String> getIndexAndSelectColumns()
+    public List<String> getColumnNames()
     {
-        List<String> columns = new ArrayList<String>( indexColumns );
-        columns.addAll( selectColumns );
+        List<String> columns = new ArrayList<String>();
+        
+        for ( IdentifiableObject[] column : getColumns() )
+        {
+            columns.add( getColumnName( column ) );
+        }
+        
         return columns;
     }
-
+    
     /**
-     * Generates an identifier based on the IdentifiableObject class and object
-     * identifier.
+     * Generates a pretty column name based on short-names of the argument objects. 
+     * Null arguments are ignored in the name.
      */
-    public static String getIdentifier( IdentifiableObject object )
+    public static String getPrettyColumnName( IdentifiableObject... objects )
     {
-        return CLASS_ID_MAP.get( object.getClass() ) + object.getId();
+        StringBuffer buffer = new StringBuffer();
+        
+        for ( IdentifiableObject object : objects )
+        {
+            buffer.append( object != null ? ( object.getShortName() + SPACE ) : EMPTY );
+        }
+        
+        return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SPACE ) ) : buffer.toString();
     }
     
+    /**
+     * Generates a column name based on short-names of the argument objects. Null 
+     * arguments are ignored in the name.
+     */
+    public static String getColumnName( IdentifiableObject... objects )
+    {
+        StringBuffer buffer = new StringBuffer();
+        
+        for ( IdentifiableObject object : objects )
+        {
+            if ( object != null && object instanceof Period )
+            {
+                buffer.append( object.getName() + SEPARATOR ); // Relative periods must have static names when crosstabbed which are set on name property
+            }
+            else
+            {
+                buffer.append( object != null ? ( object.getShortName() + SEPARATOR ) : EMPTY );
+            }
+        }
+
+        String column = databaseEncode( buffer.toString() );
+        
+        return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : column;
+    }
+    
+    /**
+     * Generates a column identifier based on the internal identifiers of the
+     * argument objects.
+     */
+    public static Integer getColumnIdentifier( IdentifiableObject[] objects1, IdentifiableObject[] objects2 )
+    {
+        Set<IdentifiableObject> objects = new HashSet<IdentifiableObject>(); 
+        objects.addAll( Arrays.asList( objects1 ) );
+        objects.addAll( Arrays.asList( objects2 ) );
+        
+        Set<String> identifiers = new HashSet<String>();
+        
+        for ( IdentifiableObject object : objects )
+        {
+            identifiers.add( getIdentifier( object.getClass(), object.getId() ) );
+        }
+        
+        return identifiers.hashCode();
+    }
+    
+    /**
+     * Generates a column identifier based on the argument identifiers.
+     */
+    public static Integer getColumnIdentifier( String... identifiers )
+    {
+        Set<String> set = new HashSet<String>();
+        set.addAll( Arrays.asList( identifiers ) );
+        return set.hashCode();
+    }
+
+    public static String getIdentifier( Class<? extends IdentifiableObject> clazz, int id )
+    {
+        return CLASS_ID_MAP.get( clazz ) + id;
+    }
+        
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    private IdentifiableObject[][] getArrays( boolean crosstab )
+    {
+        List<IdentifiableObject[]> arrays = new ArrayList<IdentifiableObject[]>();
+        
+        if ( ( doIndicators && crosstab ) || ( !doIndicators && !crosstab ) )
+        {
+            arrays.add( allIndicators.toArray( IRT ) );
+        }
+        
+        if ( ( doPeriods && crosstab ) || ( !doPeriods && !crosstab ) )
+        {
+            arrays.add( allPeriods.toArray( IRT ) );
+        }
+        
+        if ( ( doUnits && crosstab ) || ( !doUnits && !crosstab ) )
+        {
+            arrays.add( allUnits.toArray( IRT ) );
+        }
+        
+        return arrays.toArray( new IdentifiableObject[0][] );
+    }
 
     /**
      * Generates a prefixed, database encoded name.
@@ -761,64 +779,6 @@ public class ReportTable
     private static boolean listIsNonEmpty( List<?> list )
     {
         return list != null && list.size() > 0;
-    }
-    
-    private static String getPrettyColumnName( IdentifiableObject... objects )
-    {
-        StringBuffer buffer = new StringBuffer();
-        
-        for ( IdentifiableObject object : objects )
-        {
-            buffer.append( object != null ? ( object.getShortName() + SPACE ) : EMPTY );
-        }
-        
-        return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SPACE ) ) : buffer.toString();
-    }
-    
-    /**
-     * Generates a column name based on short-names of the argument objects. Null 
-     * arguments are ignored in the name.
-     */
-    private static String getColumnName( IdentifiableObject metaObject, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit, I18nFormat format )
-    {
-        StringBuffer buffer = new StringBuffer();
-        
-        if ( metaObject != null )
-        {
-            buffer.append( metaObject.getShortName() + SEPARATOR );
-        }
-        if ( categoryOptionCombo != null )
-        {
-            buffer.append( categoryOptionCombo.getShortName() + SEPARATOR );
-        }
-        if ( period != null )
-        {
-            buffer.append( period.getName() + SEPARATOR );
-        }
-        if ( unit != null )
-        {
-            buffer.append( unit.getShortName() + SEPARATOR );
-        }
-
-        String column = databaseEncode( buffer.toString() );
-        
-        return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : column;
-    }
-        
-    /**
-     * Generates a column identifier based on the internal identifiers of the
-     * argument objects. Null arguments are ignored in the identifier. 
-     */
-    private static String getColumnIdentifier( IdentifiableObject... objects )
-    {
-        StringBuffer buffer = new StringBuffer();
-
-        for ( IdentifiableObject object : objects )
-        {
-            buffer.append( object != null ? ( getIdentifier( object ) + SEPARATOR ) : EMPTY );
-        }
-        
-        return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SEPARATOR ) ) : buffer.toString();
     }
     
     /**
@@ -1152,56 +1112,6 @@ public class ReportTable
         i18nFormat = format;
     }
 
-    public List<IdentifiableObject> getReportIndicators()
-    {
-        return reportIndicators;
-    }
-
-    public List<DataElementCategoryOptionCombo> getReportCategoryOptionCombos()
-    {
-        return reportCategoryOptionCombos;
-    }
-
-    public List<Period> getReportPeriods()
-    {
-        return reportPeriods;
-    }
-
-    public List<OrganisationUnit> getReportUnits()
-    {
-        return reportUnits;
-    }
-    
-    public List<String> getIndexColumns()
-    {
-        return indexColumns;
-    }
-
-    public List<String> getIndexNameColumns()
-    {
-        return indexNameColumns;
-    }
-
-    public List<String> getSelectColumns()
-    {
-        return selectColumns;
-    }
-
-    public List<String> getCrossTabColumns()
-    {
-        return crossTabColumns;
-    }
-
-    public Map<String, String> getPrettyCrossTabColumns()
-    {
-        return prettyCrossTabColumns;
-    }
-
-    public List<String> getCrossTabIdentifiers()
-    {
-        return crossTabIdentifiers;
-    }
-
     public String getReportingMonthName()
     {
         return reportingMonthName;
@@ -1222,13 +1132,23 @@ public class ReportTable
         this.organisationUnitName = organisationUnitName;
     }
 
-    public List<DataElementCategoryOption> getCategoryOptions()
+    public List<IdentifiableObject[]> getColumns()
     {
-        return categoryOptions;
+        return columns;
     }
-    
-    public List<String> getCategoryOptionColumns()
+
+    public List<IdentifiableObject[]> getRows()
     {
-        return categoryOptionColumns;
+        return rows;
+    }
+
+    public List<String> getIndexColumns()
+    {
+        return indexColumns;
+    }
+
+    public List<String> getIndexNameColumns()
+    {
+        return indexNameColumns;
     }
 }

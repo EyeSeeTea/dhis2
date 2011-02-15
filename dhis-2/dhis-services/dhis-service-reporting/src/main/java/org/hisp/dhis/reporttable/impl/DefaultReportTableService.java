@@ -28,6 +28,7 @@ package org.hisp.dhis.reporttable.impl;
  */
 
 import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+import static org.hisp.dhis.reporttable.ReportTable.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,16 +37,16 @@ import java.util.Map;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -218,7 +219,7 @@ public class DefaultReportTableService
             // crosstab columns, since they come last in the report table.
             // -----------------------------------------------------------------
 
-            int numberOfColumns = reportTable.getCrossTabIdentifiers().size();
+            int numberOfColumns = reportTable.getColumns().size(); // TODO test
             int startColumnIndex = grid.getWidth() - numberOfColumns;
         
             addRegressionToGrid( grid, startColumnIndex, numberOfColumns );
@@ -311,7 +312,8 @@ public class DefaultReportTableService
         
         reportTable = initDynamicMetaObjects( reportTable, reportingPeriod, organisationUnitId, format );
         
-        return reportTableManager.getReportTableGrid( reportTable );
+        //return reportTableManager.getReportTableGrid( reportTable );
+        return getGrid( reportTable );
     }
     
     @Transactional
@@ -435,14 +437,82 @@ public class DefaultReportTableService
         return grid;
     }
     
+    private Grid getGrid( ReportTable reportTable )
+    {
+        String subtitle = StringUtils.trimToEmpty( reportTable.getOrganisationUnitName() ) + SPACE + StringUtils.trimToEmpty( reportTable.getReportingMonthName() );
+        
+        Grid grid = new ListGrid().setTitle( reportTable.getName() ).setSubtitle( subtitle ).setTable( reportTable.getExistingTableName() );
+        
+        final Map<Integer, Double> map = reportTableManager.getAggregatedValueMap( reportTable );
+
+        // -----------------------------------------------------------------
+        // Headers
+        // -----------------------------------------------------------------
+
+        for ( String column : reportTable.getIndexColumns() )
+        {
+            grid.addHeader( new GridHeader( PRETTY_COLUMNS.get( column ), column, Integer.class.getName(), true, true ) ); // Index columns
+        }
+        
+        for ( String column : reportTable.getIndexNameColumns() )
+        {
+            grid.addHeader( new GridHeader( PRETTY_COLUMNS.get( column ), column, String.class.getName(), false, true ) ); // Index name columns
+        }
+
+        grid.addHeader( new GridHeader( PRETTY_COLUMNS.get( REPORTING_MONTH_COLUMN_NAME ), REPORTING_MONTH_COLUMN_NAME, String.class.getName(), true, true ) );
+        grid.addHeader( new GridHeader( PRETTY_COLUMNS.get( PARAM_ORGANISATIONUNIT_COLUMN_NAME ), PARAM_ORGANISATIONUNIT_COLUMN_NAME, String.class.getName(), true, true ) );
+        grid.addHeader( new GridHeader( PRETTY_COLUMNS.get( ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME ), ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, String.class.getName(), true, true ) );
+                
+        for ( IdentifiableObject[] column : reportTable.getColumns() )
+        {
+            grid.addHeader( new GridHeader( getPrettyColumnName( column ), getColumnName( column ), Double.class.getName(), false, false ) );
+        }
+        
+        // TODO Totals...
+            
+        // -----------------------------------------------------------------
+        // Values
+        // -----------------------------------------------------------------
+
+        for ( IdentifiableObject[] row : reportTable.getRows() )
+        {
+            grid.addRow();
+            
+            for ( IdentifiableObject object : row ) // TODO change order and get one loop?
+            {
+                grid.addValue( String.valueOf( object.getId() ) ); // Index columns
+            }
+            
+            for ( IdentifiableObject object : row )
+            {
+                grid.addValue( object.getShortName() ); // Index name columns
+            }
+            
+            grid.addValue( reportTable.getReportingMonthName() ); // Reporting month param
+            grid.addValue( reportTable.getOrganisationUnitName() ); // Organisation unit param
+            grid.addValue( String.valueOf( 0 ) ); //TODO fix unit.isCurrentParent
+            
+            for ( IdentifiableObject[] column : reportTable.getColumns() )
+            {
+                grid.addValue( parseAndReplaceNull( map.get( getColumnIdentifier( row, column ) ) ) ); // Values
+            }
+            
+            // TODO Total categories...
+        }
+        
+        return grid;
+    }
+    
     /**
      * Creates a grid representing the data in the report table.
      * 
      * @param reportTable the report table.
      * @return a grid.
      */
+    /*
     private Grid getGrid( ReportTable reportTable )
     {
+        aggregatedDataValueService.getagg
         final Grid grid = new ListGrid();
         
         for ( final IdentifiableObject metaObject : reportTable.getReportIndicators() )
@@ -572,7 +642,7 @@ public class DefaultReportTableService
         }
         
         return grid;
-    }
+    }*/
     
     /**
      * Converts the given Double to String or replaces with default value if null.
