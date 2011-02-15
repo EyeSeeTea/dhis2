@@ -237,12 +237,12 @@ public class ReportTableTest
         IdentifiableObject[] a1 = { unitA, periodC };
         
         assertNotNull( getColumnName( a1 ) );
-        assertEquals( "shortnamea_reporting_month", getColumnName( a1 ) );
+        assertEquals( "organisationunitshorta_reporting_month", getColumnName( a1 ) );
         
         IdentifiableObject[] a2 = { unitB, periodD };
 
         assertNotNull( getColumnName( a2 ) );
-        assertEquals( "shortnameb_year", getColumnName( a2 ) );        
+        assertEquals( "organisationunitshortb_year", getColumnName( a2 ) );        
     }
     
     @Test
@@ -295,10 +295,10 @@ public class ReportTableTest
         assertNotNull( columnNames );        
         assertEquals( 8, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea_reporting_month" ) );
-        assertTrue( columnNames.contains( "shortnamea_year" ) );
-        assertTrue( columnNames.contains( "shortnameb_reporting_month" ) );
-        assertTrue( columnNames.contains( "shortnameb_year" ) );
+        assertTrue( columnNames.contains( "indicatorshorta_reporting_month" ) );
+        assertTrue( columnNames.contains( "indicatorshorta_year" ) );
+        assertTrue( columnNames.contains( "indicatorshortb_reporting_month" ) );
+        assertTrue( columnNames.contains( "indicatorshortb_year" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -353,8 +353,8 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 2, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnameb" ) );
+        assertTrue( columnNames.contains( "organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "organisationunitshortb" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -423,10 +423,10 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 4, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea_shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnamea_shortnameb" ) );
-        assertTrue( columnNames.contains( "shortnameb_shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnameb_shortnameb" ) );
+        assertTrue( columnNames.contains( "indicatorshorta_organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "indicatorshorta_organisationunitshortb" ) );
+        assertTrue( columnNames.contains( "indicatorshortb_organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "indicatorshortb_organisationunitshortb" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -476,10 +476,10 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 8, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea_year" ) );
-        assertTrue( columnNames.contains( "shortnamea_reporting_month" ) );
-        assertTrue( columnNames.contains( "shortnameb_year" ) );
-        assertTrue( columnNames.contains( "shortnameb_reporting_month" ) );
+        assertTrue( columnNames.contains( "dataelementshorta_year" ) );
+        assertTrue( columnNames.contains( "dataelementshorta_reporting_month" ) );
+        assertTrue( columnNames.contains( "dataelementshortb_year" ) );
+        assertTrue( columnNames.contains( "dataelementshortb_reporting_month" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -520,8 +520,8 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 2, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnameb" ) );
+        assertTrue( columnNames.contains( "organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "organisationunitshortb" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -560,10 +560,10 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 4, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea_shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnamea_shortnameb" ) );
-        assertTrue( columnNames.contains( "shortnameb_shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnameb_shortnameb" ) );
+        assertTrue( columnNames.contains( "dataelementshorta_organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "dataelementshorta_organisationunitshortb" ) );
+        assertTrue( columnNames.contains( "dataelementshortb_organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "dataelementshortb_organisationunitshortb" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -744,10 +744,10 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 8, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea_year" ) );
-        assertTrue( columnNames.contains( "shortnamea_reporting_month" ) );
-        assertTrue( columnNames.contains( "shortnameb_year" ) );
-        assertTrue( columnNames.contains( "shortnameb_reporting_month" ) );
+        assertTrue( columnNames.contains( "datasetshorta_year" ) );
+        assertTrue( columnNames.contains( "datasetshorta_reporting_month" ) );
+        assertTrue( columnNames.contains( "datasetshortb_year" ) );
+        assertTrue( columnNames.contains( "datasetshortb_reporting_month" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -788,8 +788,8 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 2, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnameb" ) );
+        assertTrue( columnNames.contains( "organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "organisationunitshortb" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
@@ -828,10 +828,10 @@ public class ReportTableTest
         assertNotNull( columnNames );
         assertEquals( 4, columnNames.size() );
         
-        assertTrue( columnNames.contains( "shortnamea_shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnamea_shortnameb" ) );
-        assertTrue( columnNames.contains( "shortnameb_shortnamea" ) );
-        assertTrue( columnNames.contains( "shortnameb_shortnameb" ) );
+        assertTrue( columnNames.contains( "datasetshorta_organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "datasetshorta_organisationunitshortb" ) );
+        assertTrue( columnNames.contains( "datasetshortb_organisationunitshorta" ) );
+        assertTrue( columnNames.contains( "datasetshortb_organisationunitshortb" ) );
         
         List<IdentifiableObject[]> rows = reportTable.getRows();
         
