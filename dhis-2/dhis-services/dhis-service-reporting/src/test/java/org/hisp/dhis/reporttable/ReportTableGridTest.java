@@ -328,16 +328,32 @@ public class ReportTableGridTest
         int id = reportTableService.saveReportTable( reportTable );
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
-    
+
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 5 ) );
         assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 6 ) );
         assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 7 ) );
         assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 8 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 9 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 10 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 11 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 12 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 13 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 14 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 15 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 16 ) );
         
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 5 ) );
         assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 6 ) );
         assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 7 ) );
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 8 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 9 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 10 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 11 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 12 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 13 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 14 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 15 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 16 ) );
     }
     
     @Test
@@ -523,7 +539,21 @@ public class ReportTableGridTest
     }
 
     @Test
-    public void testGetMultipleReportTableC()
+    public void testGetMultiReportTableA()
+    {
+        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+            dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
+            null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
+        
+        
+    }    
+    
+    @Test
+    public void testGetMultiReportTableC()
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
             dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
