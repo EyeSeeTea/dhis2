@@ -95,7 +95,7 @@ public class CombinationGenerator<T>
             }
             else // At last position in array, reset index to 0 and continue to increment next array
             {
-                if ( hasNext() )
+                if ( hasNext() ) // Don't reset if at end
                 {
                     indexes[i] = 0;
                 }
