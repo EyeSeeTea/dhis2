@@ -371,8 +371,7 @@ public class ReportTable
 
     public void init()
     {
-        verify( nonEmptyLists( dataElements, indicators, dataSets ) == 1, "One of dataelements, indicators, and datasets size must be larger than 0" );
-        verify( !( doIndicators && doPeriods && doUnits ), "Cannot crosstab on all dimensions" );
+        verify( nonEmptyLists( dataElements, indicators, dataSets ) > 0, "One of dataelements, indicators, and datasets size must be larger than 0" );
         verify( i18nFormat != null, "I18n format must be set" );
         
         // ---------------------------------------------------------------------
