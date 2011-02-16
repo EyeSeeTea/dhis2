@@ -333,27 +333,11 @@ public class ReportTableGridTest
         assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 6 ) );
         assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 7 ) );
         assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 8 ) );
-        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 9 ) );
-        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 10 ) );
-        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 11 ) );
-        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 12 ) );
-        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 13 ) );
-        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 14 ) );
-        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 15 ) );
-        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 16 ) );
         
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 5 ) );
         assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 6 ) );
         assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 7 ) );
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 8 ) );
-        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 9 ) );
-        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 10 ) );
-        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 11 ) );
-        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 12 ) );
-        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 13 ) );
-        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 14 ) );
-        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 15 ) );
-        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 16 ) );
     }
     
     @Test
@@ -548,9 +532,83 @@ public class ReportTableGridTest
         int id = reportTableService.saveReportTable( reportTable );
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
+
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 5 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 6 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 7 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 8 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 9 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 10 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 11 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 12 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 13 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 14 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 15 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 16 ) );
         
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 5 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 6 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 7 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 8 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 9 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 10 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 11 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 12 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 13 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 14 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 15 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 16 ) );        
+    }
+    
+    @Test
+    public void testGetMultiReportTableB()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
+            dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
         
-    }    
+        System.out.println( grid );
+        
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 7 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 1 ).get( 7 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 2 ).get( 7 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 2 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 3 ).get( 7 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 3 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 4 ).get( 7 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 4 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 5 ).get( 7 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 5 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 6 ).get( 7 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 6 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 7 ).get( 7 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 7 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 8 ).get( 7 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 8 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 9 ).get( 7 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 9 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 10 ).get( 7 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 10 ).get( 8 ) );
+        
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 11 ).get( 7 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 11 ).get( 8 ) );
+    }
     
     @Test
     public void testGetMultiReportTableC()
