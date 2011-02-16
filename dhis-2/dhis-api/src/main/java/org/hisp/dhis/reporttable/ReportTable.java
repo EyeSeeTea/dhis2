@@ -135,6 +135,7 @@ public class ReportTable
     } };
     
     private static final IdentifiableObject[] IRT = new IdentifiableObject[0];
+    private static final String[] SRT = new String[0];
     
     // -------------------------------------------------------------------------
     // Persisted properties
@@ -682,10 +683,10 @@ public class ReportTable
     }
     
     /**
-     * Generates a column identifier based on the internal identifiers of the
+     * Generates a grid identifier based on the internal identifiers of the
      * argument objects.
      */
-    public static String getColumnIdentifier( List<IdentifiableObject> objects1, List<IdentifiableObject> objects2 )
+    public static String getIdentifier( List<IdentifiableObject> objects1, List<IdentifiableObject> objects2 )
     {
         List<String> identifiers = new ArrayList<String>();
         
@@ -699,30 +700,29 @@ public class ReportTable
             identifiers.add( getIdentifier( object.getClass(), object.getId() ) );
         }
         
-        Collections.sort( identifiers ); // Sort since we don't know the order of the objects
+        return getIdentifier( identifiers.toArray( SRT ) );
+    }
+    
+    /**
+     * Generates a grid column identifier based on the argument identifiers.
+     */
+    public static String getIdentifier( String... identifiers )
+    {
+        List<String> ids = Arrays.asList( identifiers );
+        
+        Collections.sort( ids ); // Sort since the order should not be significant
         
         return StringUtils.join( identifiers, SEPARATOR );
     }
     
     /**
-     * Generates a column identifier based on the argument identifiers.
+     * Returns a grid identifier based on the argument class and id.
      */
-    public static String getColumnIdentifier( String... identifiers )
-    {
-        List<String> ids = Arrays.asList( identifiers );
-        
-        Collections.sort( ids ); // Sort since we don't know the order of the objects
-        
-        return StringUtils.join( identifiers, SEPARATOR );
-    }
-    
     public static String getIdentifier( Class<? extends IdentifiableObject> clazz, int id )
     {
-        String t = CLASS_ID_MAP.get( clazz ) + id;
-        
-        return t;
+        return CLASS_ID_MAP.get( clazz ) + id;
     }
-            
+        
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -773,14 +773,6 @@ public class ReportTable
         }
         
         return nonEmpty;
-    }
-    
-    /**
-     * Tests whether the argument list is not null and has no elements.
-     */
-    private static boolean listIsNonEmpty( List<?> list )
-    {
-        return list != null && list.size() > 0;
     }
     
     /**

@@ -27,7 +27,6 @@ package org.hisp.dhis.reporttable.jdbc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.reporttable.ReportTable.getColumnIdentifier;
 import static org.hisp.dhis.reporttable.ReportTable.getIdentifier;
 
 import java.sql.ResultSet;
@@ -170,7 +169,7 @@ public class JDBCReportTableManager
 
                 while ( resultSet.next() )
                 {
-                    String id = getColumnIdentifier( getIdentifier( DataElement.class, resultSet.getInt( 1 ) ),
+                    String id = getIdentifier( getIdentifier( DataElement.class, resultSet.getInt( 1 ) ),
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ),
                         getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
 
@@ -191,7 +190,7 @@ public class JDBCReportTableManager
 
                 while ( resultSet.next() )
                 {
-                    String id = getColumnIdentifier( getIdentifier( Indicator.class, resultSet.getInt( 1 ) ),
+                    String id = getIdentifier( getIdentifier( Indicator.class, resultSet.getInt( 1 ) ),
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ),
                         getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
 
@@ -212,7 +211,7 @@ public class JDBCReportTableManager
 
                 while ( resultSet.next() )
                 {
-                    String id = getColumnIdentifier( getIdentifier( DataSet.class, resultSet.getInt( 1 ) ),
+                    String id = getIdentifier( getIdentifier( DataSet.class, resultSet.getInt( 1 ) ),
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ),
                         getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
 

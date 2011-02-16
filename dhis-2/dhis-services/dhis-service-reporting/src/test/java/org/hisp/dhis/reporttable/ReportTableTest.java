@@ -33,7 +33,6 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.hisp.dhis.reporttable.ReportTable.DATAELEMENT_ID;
 import static org.hisp.dhis.reporttable.ReportTable.INDICATOR_ID;
-import static org.hisp.dhis.reporttable.ReportTable.getColumnIdentifier;
 import static org.hisp.dhis.reporttable.ReportTable.getColumnName;
 import static org.hisp.dhis.reporttable.ReportTable.getIdentifier;
 
@@ -221,19 +220,19 @@ public class ReportTableTest
         List<IdentifiableObject> b1 = getList( periodA );
         List<IdentifiableObject> b2 = getList( indicatorA, unitA );
         
-        assertNotNull( getColumnIdentifier( a1, a2 ) );
-        assertNotNull( getColumnIdentifier( b1, b2 ) );
-        assertEquals( getColumnIdentifier( a1, a2 ), getColumnIdentifier( b1, b2 ) );
+        assertNotNull( getIdentifier( a1, a2 ) );
+        assertNotNull( getIdentifier( b1, b2 ) );
+        assertEquals( getIdentifier( a1, a2 ), getIdentifier( b1, b2 ) );
         
-        String identifier = getColumnIdentifier( getIdentifier( unitA.getClass(), unitA.getId() ), 
+        String identifier = getIdentifier( getIdentifier( unitA.getClass(), unitA.getId() ), 
             getIdentifier( periodA.getClass(), periodA.getId() ), getIdentifier( indicatorA.getClass(), indicatorA.getId() ) );
         
-        assertEquals( getColumnIdentifier( a1, a2 ), identifier );
+        assertEquals( getIdentifier( a1, a2 ), identifier );
 
-        identifier = getColumnIdentifier( getIdentifier( periodA.getClass(), periodA.getId() ), 
+        identifier = getIdentifier( getIdentifier( periodA.getClass(), periodA.getId() ), 
             getIdentifier( indicatorA.getClass(), indicatorA.getId() ), getIdentifier( unitA.getClass(), unitA.getId() ) );
         
-        assertEquals( getColumnIdentifier( b1, b2 ), identifier );
+        assertEquals( getIdentifier( b1, b2 ), identifier );
     }
 
     @Test
@@ -251,7 +250,7 @@ public class ReportTableTest
         assertEquals( INDICATOR_ID + 2, b1 );
         assertEquals( DATAELEMENT_ID + 1, b2 );
         
-        assertFalse( getColumnIdentifier( a1, a2 ).equals( getColumnIdentifier( b1, b2 ) ) );        
+        assertFalse( getIdentifier( a1, a2 ).equals( getIdentifier( b1, b2 ) ) );        
     }
     
     @Test

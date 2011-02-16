@@ -384,8 +384,8 @@ public class DefaultReportTableService
         {
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
             organisationUnit.setCurrentParent( true );
-            reportTable.getRelativeUnits().add( organisationUnit );
             reportTable.getRelativeUnits().addAll( new ArrayList<OrganisationUnit>( organisationUnit.getChildren() ) );
+            reportTable.getRelativeUnits().add( organisationUnit );
             reportTable.setOrganisationUnitName( organisationUnit.getName() );
             
             log.info( "Parent organisation unit: " + organisationUnit.getName() );
@@ -397,11 +397,8 @@ public class DefaultReportTableService
 
         if ( reportTable.getReportParams() != null && reportTable.getReportParams().isParamOrganisationUnit() )
         {
-            OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-            
-            List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
-            organisationUnits.add( organisationUnit );
-            reportTable.getRelativeUnits().addAll( organisationUnits );
+            OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );            
+            reportTable.getRelativeUnits().add( organisationUnit );
             reportTable.setOrganisationUnitName( organisationUnit.getName() );
             
             log.info( "Organisation unit: " + organisationUnit.getName() );
@@ -494,13 +491,13 @@ public class DefaultReportTableService
                 grid.addValue( object.getShortName() ); // Index name columns
             }
             
-            grid.addValue( reportTable.getReportingMonthName() ); // Reporting month param
-            grid.addValue( reportTable.getOrganisationUnitName() ); // Organisation unit param
-            grid.addValue( String.valueOf( 0 ) ); //TODO fix unit.isCurrentParent
+            grid.addValue( reportTable.getReportingMonthName() );
+            grid.addValue( reportTable.getOrganisationUnitName() );
+            grid.addValue( isCurrentParent( row ) ? String.valueOf( 1 ) : String.valueOf( 0 ) );
             
             for ( List<IdentifiableObject> column : reportTable.getColumns() )
             {
-                grid.addValue( parseAndReplaceNull( map.get( getColumnIdentifier( row, column ) ) ) ); // Values
+                grid.addValue( parseAndReplaceNull( map.get( getIdentifier( row, column ) ) ) ); // Values
             }
             
             // TODO Total categories...
@@ -651,10 +648,28 @@ public class DefaultReportTableService
     }*/
     
     /**
+     * Checks whether the given List of IdentifiableObjects contains an object
+     * which is an OrganisationUnit and has the currentParent property set to true.
+     * 
+     * @param objects the List of IdentifiableObjects.
+     */
+    private boolean isCurrentParent( List<IdentifiableObject> objects )
+    {
+        for ( IdentifiableObject object : objects )
+        {
+            if ( object != null && object instanceof OrganisationUnit && ((OrganisationUnit)object).isCurrentParent() )
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Converts the given Double to String or replaces with default value if null.
      * 
      * @param value the Double.
-     * @return the String.
      */
     private String parseAndReplaceNull( Double value )
     {
