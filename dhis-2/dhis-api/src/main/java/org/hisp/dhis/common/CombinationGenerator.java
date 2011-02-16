@@ -30,8 +30,6 @@ package org.hisp.dhis.common;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.common.IdentifiableObject;
-
 /**
  * @author Lars Helge Overland
  */
@@ -128,7 +126,7 @@ public class CombinationGenerator
         
         return builder.append( "]" ).toString();
     }
-    
+        
     /**
      * Returns an array with values from the current index of each array in ranges.
      */

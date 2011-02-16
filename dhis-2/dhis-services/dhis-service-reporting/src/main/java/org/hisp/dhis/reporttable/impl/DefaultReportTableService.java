@@ -246,9 +246,20 @@ public class DefaultReportTableService
         log.info( "Populated report table: " + reportTable.getTableName() );
     }
 
+    @Transactional
     public void removeReportTable( ReportTable reportTable )
     {
         reportTableManager.removeReportTable( reportTable );
+    }
+
+    @Transactional
+    public Grid getReportTableGrid( int id, I18nFormat format, Integer reportingPeriod, Integer organisationUnitId )
+    {
+        ReportTable reportTable = getReportTable( id );
+        
+        reportTable = initDynamicMetaObjects( reportTable, reportingPeriod, organisationUnitId, format );
+
+        return getGrid( reportTable );
     }
     
     // -------------------------------------------------------------------------
@@ -306,16 +317,6 @@ public class DefaultReportTableService
     }
 
     @Transactional
-    public Grid getReportTableGrid( int id, I18nFormat format, Integer reportingPeriod, Integer organisationUnitId )
-    {
-        ReportTable reportTable = getReportTable( id );
-        
-        reportTable = initDynamicMetaObjects( reportTable, reportingPeriod, organisationUnitId, format );
-
-        return getGrid( reportTable );
-    }
-    
-    @Transactional
     public Collection<ReportTable> getReportTablesBetweenByName( String name, int first, int max )
     {
         return reportTableStore.getBetweenByName( name, first, max );
@@ -356,9 +357,9 @@ public class DefaultReportTableService
     private ReportTable initDynamicMetaObjects( ReportTable reportTable, Integer reportingPeriod, 
         Integer organisationUnitId, I18nFormat format )
     {
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Reporting period report parameter / current reporting period
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
         if ( reportTable.getReportParams() != null && reportTable.getReportParams().isParamReportingMonth() )
         {             
@@ -375,9 +376,9 @@ public class DefaultReportTableService
             log.info( "Reporting period date default: " + reportTable.getReportingMonthName() );
         }
 
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Parent organisation unit report parameter
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
         if ( reportTable.getReportParams() != null && reportTable.getReportParams().isParamParentOrganisationUnit() )
         {
@@ -390,9 +391,9 @@ public class DefaultReportTableService
             log.info( "Parent organisation unit: " + organisationUnit.getName() );
         }
 
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Organisation unit report parameter
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
         if ( reportTable.getReportParams() != null && reportTable.getReportParams().isParamOrganisationUnit() )
         {
@@ -406,9 +407,9 @@ public class DefaultReportTableService
             log.info( "Organisation unit: " + organisationUnit.getName() );
         }
 
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Set properties and initalize
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
         reportTable.setI18nFormat( format );
         reportTable.init();
@@ -436,6 +437,12 @@ public class DefaultReportTableService
         return grid;
     }
     
+    /**
+     * Generates a grid based on the given report table.
+     * 
+     * @param reportTable the report table.
+     * @return a grid.
+     */
     private Grid getGrid( ReportTable reportTable )
     {
         String subtitle = StringUtils.trimToEmpty( reportTable.getOrganisationUnitName() ) + SPACE + StringUtils.trimToEmpty( reportTable.getReportingMonthName() );
@@ -444,9 +451,9 @@ public class DefaultReportTableService
         
         final Map<String, Double> map = reportTableManager.getAggregatedValueMap( reportTable );
         
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Headers
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
         for ( String column : reportTable.getIndexColumns() )
         {
@@ -468,10 +475,10 @@ public class DefaultReportTableService
         }
         
         // TODO Totals...
-            
-        // -----------------------------------------------------------------
+        
+        // ---------------------------------------------------------------------
         // Values
-        // -----------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
         for ( IdentifiableObject[] row : reportTable.getRows() )
         {

@@ -244,8 +244,14 @@ public class ReportTable
      */
     private List<IdentifiableObject> allIndicators = new ArrayList<IdentifiableObject>();
 
+    /**
+     * All crosstabulated columns.
+     */
     private List<IdentifiableObject[]> columns = new ArrayList<IdentifiableObject[]>();
     
+    /**
+     * All rows.
+     */
     private List<IdentifiableObject[]> rows = new ArrayList<IdentifiableObject[]>();
     
     /**
@@ -707,7 +713,7 @@ public class ReportTable
         
         return StringUtils.join( identifiers, SEPARATOR );
     }
-
+    
     public static String getIdentifier( Class<? extends IdentifiableObject> clazz, int id )
     {
         String t = CLASS_ID_MAP.get( clazz ) + id;
