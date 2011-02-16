@@ -31,10 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,7 +112,7 @@ public class ReportTable
     private static final String EMPTY = "";    
     private static final String TABLE_PREFIX = "_report_";
     private static final String REGEX_NUMERIC = "([0-9]*)";
-
+/*
     private static final Map<String, String> MODE_ID_MAP = new HashMap<String, String>() { {
         put( MODE_INDICATORS, INDICATOR_ID );
         put( MODE_DATAELEMENTS, DATAELEMENT_ID );
@@ -126,7 +124,7 @@ public class ReportTable
         put( MODE_DATAELEMENTS, DATAELEMENT_NAME );
         put( MODE_DATASETS, DATASET_NAME );
     } };
-
+*/
     public static final Map<Class<? extends IdentifiableObject>, String> CLASS_ID_MAP = new HashMap<Class<? extends IdentifiableObject>, String>() { {
         put( Indicator.class, INDICATOR_ID );
         put( DataElement.class, DATAELEMENT_ID );
@@ -383,8 +381,7 @@ public class ReportTable
 
         if ( isDimensional() )
         {
-            categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( categoryCombo.getOptionCombos() );
-            
+            categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( categoryCombo.getOptionCombos() );            
             verify( nonEmptyLists( categoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
         }
 
@@ -393,20 +390,22 @@ public class ReportTable
         // ---------------------------------------------------------------------
 
         this.tableName = generateTableName( name );
-        
-        allPeriods.addAll( periods );
-        allPeriods.addAll( relativePeriods );
-        allPeriods = removeDuplicates( allPeriods );
-        Collections.sort( allPeriods, new AscendingPeriodComparator() );
-        
-        allUnits.addAll( units );
-        allUnits.addAll( relativeUnits );
-        allUnits = removeDuplicates( allUnits );
 
         allIndicators.addAll( dataElements );
         allIndicators.addAll( indicators );
         allIndicators.addAll( dataSets );
                 
+        allPeriods.addAll( periods );
+        allPeriods.addAll( relativePeriods );
+        allPeriods = removeDuplicates( allPeriods );
+        Collections.sort( allPeriods, new AscendingPeriodComparator() );
+
+        setNames( allPeriods );
+        
+        allUnits.addAll( units );
+        allUnits.addAll( relativeUnits );
+        allUnits = removeDuplicates( allUnits );
+
         columns = new CombinationGenerator( getArrays( true ) ).getCombinations();
         rows = new CombinationGenerator( getArrays( false ) ).getCombinations();
         
@@ -426,19 +425,6 @@ public class ReportTable
             indexNameColumns.add( ORGANISATIONUNIT_NAME );
         }
 
-        // ---------------------------------------------------------------------
-        // Set name on periods
-        // ---------------------------------------------------------------------
-
-        for ( Period period : allPeriods )
-        {
-            if ( period.getName() == null ) // Crosstabulated relative periods
-            {
-                period.setName( i18nFormat.formatPeriod( period ) ); // Static periods + indexed relative periods
-                period.setShortName( i18nFormat.formatPeriod( period ) );                
-            }
-        }
-        
         // ---------------------------------------------------------------------
         // Init indexColumns and selectColumns
         // ---------------------------------------------------------------------
@@ -729,7 +715,7 @@ public class ReportTable
         
         return t;
     }
-        
+            
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -842,6 +828,22 @@ public class ReportTable
         
         return string;
     }
+    
+    /**
+     * Sets the name and short name properties on the given Periods which don't have
+     * the name property already set.
+     */
+    private void setNames( List<Period> periods )
+    {
+        for ( Period period : periods )
+        {
+            if ( period.getName() == null ) // Crosstabulated relative periods
+            {
+                period.setName( i18nFormat.formatPeriod( period ) ); // Static periods + indexed relative periods
+                period.setShortName( i18nFormat.formatPeriod( period ) );                
+            }
+        }        
+    }
 
     /**
      * Removes duplicates from the given list while maintaining the order.
@@ -849,7 +851,6 @@ public class ReportTable
     private static <T> List<T> removeDuplicates( List<T> list )
     {
         final List<T> temp = new ArrayList<T>( list );
-        Collections.reverse( temp );        
         list.clear();
         
         for ( T object : temp )

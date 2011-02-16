@@ -108,6 +108,28 @@ public class CombinationGenerator
     }
     
     /**
+     * Generates a String representation from the List of IdentifiableObject arrays.
+     */
+    public static String toString( List<IdentifiableObject[]> objects )
+    {
+        StringBuilder builder = new StringBuilder( "[" );
+        
+        for ( IdentifiableObject[] array : objects )
+        {
+            builder.append( "[" );
+            
+            for ( IdentifiableObject object : array )
+            {
+                builder.append( "[" ).append( object.getId() ).append( "," ).append( object.getName() ).append( "]" );
+            }
+            
+            builder.append( "]" );
+        }
+        
+        return builder.append( "]" ).toString();
+    }
+    
+    /**
      * Returns an array with values from the current index of each array in ranges.
      */
     private IdentifiableObject[] getCurrent()
