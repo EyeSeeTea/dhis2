@@ -33,13 +33,13 @@ import java.util.List;
 /**
  * @author Lars Helge Overland
  */
-public class CombinationGenerator
+public class CombinationGenerator<T>
 {
-    private IdentifiableObject[][] objects; // Array of object arrays
+    private T[][] objects; // Array of object arrays
     private int[] indexes; // Current index for each array
     private int no; // No of arrays
     
-    public CombinationGenerator( IdentifiableObject[]... objects )
+    public CombinationGenerator( T[]... objects )
     {
         this.objects = objects;
         this.indexes = new int[objects.length];
@@ -48,11 +48,11 @@ public class CombinationGenerator
     }
     
     /**
-     * Returns an List of Lists with combinations of IdentifiableObjects.
+     * Returns an List of Lists with combinations of objects.
      */
-    public List<List<IdentifiableObject>> getCombinations()
+    public List<List<T>> getCombinations()
     {
-        List<List<IdentifiableObject>> combinations = new ArrayList<List<IdentifiableObject>>();
+        List<List<T>> combinations = new ArrayList<List<T>>();
         
         while ( hasNext() )
         {
@@ -81,9 +81,9 @@ public class CombinationGenerator
     /**
      * Returns the next combination. Returns null if there are no more combinations.
      */
-    public List<IdentifiableObject> getNext()
+    public List<T> getNext()
     {
-        List<IdentifiableObject> current = null;
+        List<T> current = null;
         
         for ( int i = no - 1; i >= 0; i-- )
         {
@@ -104,35 +104,13 @@ public class CombinationGenerator
         
         return current;
     }
-    
-    /**
-     * Generates a String representation from the List of IdentifiableObject arrays.
-     */
-    public static String toString( List<IdentifiableObject[]> objects )
-    {
-        StringBuilder builder = new StringBuilder( "[" );
-        
-        for ( IdentifiableObject[] array : objects )
-        {
-            builder.append( "[" );
             
-            for ( IdentifiableObject object : array )
-            {
-                builder.append( "[" ).append( object.getId() ).append( "," ).append( object.getName() ).append( "]" );
-            }
-            
-            builder.append( "]" );
-        }
-        
-        return builder.append( "]" ).toString();
-    }
-        
     /**
-     * Returns an array with values from the current index of each array in ranges.
+     * Returns a List with values from the current index of each List.
      */
-    private List<IdentifiableObject> getCurrent()
+    private List<T> getCurrent()
     {
-        List<IdentifiableObject> current = new ArrayList<IdentifiableObject>( no );
+        List<T> current = new ArrayList<T>( no );
         
         for ( int i = 0; i < no; i++ )
         {

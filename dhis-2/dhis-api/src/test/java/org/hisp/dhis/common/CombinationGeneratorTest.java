@@ -53,7 +53,7 @@ public class CombinationGeneratorTest
         IdentifiableObject[] a1 = {a,b,c,d};
         IdentifiableObject[] a2 = {a,b,c};
         
-        CombinationGenerator generator = new CombinationGenerator( a1, a2 );
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1, a2 );
         
         assertTrue( equals( generator.getNext(), a, a ) );
         assertTrue( equals( generator.getNext(), a, b ) );
@@ -77,7 +77,7 @@ public class CombinationGeneratorTest
         IdentifiableObject[] a2 = {a,b};
         IdentifiableObject[] a3 = {a,b,c};
 
-        CombinationGenerator generator = new CombinationGenerator( a1, a2, a3 );
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1, a2, a3 );
         
         assertTrue( equals( generator.getNext(), a, a, a ) );
         assertTrue( equals( generator.getNext(), a, a, b ) );
@@ -99,7 +99,7 @@ public class CombinationGeneratorTest
     {
         IdentifiableObject[] a1 = {a,b};
         
-        CombinationGenerator generator = new CombinationGenerator( a1 );
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1 );
         
         assertTrue( equals( generator.getNext(), a ) );
         assertTrue( equals( generator.getNext(), b ) );
@@ -113,7 +113,7 @@ public class CombinationGeneratorTest
         IdentifiableObject[] a1 = {a,b,c,d};
         IdentifiableObject[] a2 = {a,b,c};
         
-        CombinationGenerator generator = new CombinationGenerator( a1, a2 );
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1, a2 );
         
         for ( int i = 0; i < 11; i++ )
         {
@@ -138,7 +138,7 @@ public class CombinationGeneratorTest
         IdentifiableObject[] a2 = {a,b};
         IdentifiableObject[] a3 = {a,b,c};
 
-        CombinationGenerator generator = new CombinationGenerator( a1, a2, a3 );
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1, a2, a3 );
         
         while ( generator.hasNext() )
         {
@@ -158,7 +158,7 @@ public class CombinationGeneratorTest
         IdentifiableObject[] a1 = {a,b,c,d};
         IdentifiableObject[] a2 = {a,b,c};
         
-        CombinationGenerator generator = new CombinationGenerator( a1, a2 );
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1, a2 );
         
         List<List<IdentifiableObject>> objects = generator.getCombinations();
         
@@ -184,7 +184,7 @@ public class CombinationGeneratorTest
         IdentifiableObject[] a2 = {a,b};
         IdentifiableObject[] a3 = {a,b,c};
 
-        CombinationGenerator generator = new CombinationGenerator( a1, a2, a3 );
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1, a2, a3 );
 
         List<List<IdentifiableObject>> objects = generator.getCombinations();
 

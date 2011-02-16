@@ -29,11 +29,6 @@ package org.hisp.dhis.reporttable.jdbc;
 
 import java.util.Map;
 
-import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.reporttable.ReportTable;
 
 /**

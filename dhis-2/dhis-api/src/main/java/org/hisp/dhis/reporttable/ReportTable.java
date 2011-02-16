@@ -411,19 +411,21 @@ public class ReportTable
         allUnits.addAll( relativeUnits );
         allUnits = removeDuplicates( allUnits );
 
-        columns = new CombinationGenerator( getArrays( true ) ).getCombinations();
-        rows = new CombinationGenerator( getArrays( false ) ).getCombinations();
+        columns = new CombinationGenerator<IdentifiableObject>( getArrays( true ) ).getCombinations();
+        rows = new CombinationGenerator<IdentifiableObject>( getArrays( false ) ).getCombinations();
         
         if ( !isDoIndicators() )
         {
             indexColumns.add( INDICATOR_ID );
             indexNameColumns.add( INDICATOR_NAME );
         }
+        
         if ( !isDoPeriods() )
         {
             indexColumns.add( PERIOD_ID );
             indexNameColumns.add( PERIOD_NAME );
         }
+        
         if ( !isDoUnits() )
         {
             indexColumns.add( ORGANISATIONUNIT_ID );

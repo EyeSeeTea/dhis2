@@ -571,8 +571,6 @@ public class ReportTableGridTest
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
         
-        System.out.println( grid );
-        
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 7 ) );
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 8 ) );
         
