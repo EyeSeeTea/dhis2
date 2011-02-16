@@ -521,4 +521,17 @@ public class ReportTableGridTest
         assertEquals( String.valueOf( 17.0 ), grid.getRow( 1 ).get( 7 ) );
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 8 ) );
     }
+    
+    public void testGetMultipleReportTableA()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
+            dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
+
+        System.out.println( grid );
+    }
 }
