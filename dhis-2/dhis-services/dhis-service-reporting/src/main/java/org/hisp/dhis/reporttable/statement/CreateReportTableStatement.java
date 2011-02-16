@@ -30,6 +30,7 @@ package org.hisp.dhis.reporttable.statement;
 import static org.hisp.dhis.reporttable.ReportTable.*;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.jdbc.StatementBuilder;
@@ -105,7 +106,7 @@ public class CreateReportTableStatement
         // ---------------------------------------------------------------------
 
         //for ( String column : reportTable.getCrossTabColumns() )
-        for ( IdentifiableObject[] column : reportTable.getColumns() )
+        for ( List<IdentifiableObject> column : reportTable.getColumns() )
         {
             buffer.append( getColumnName( column ) + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
         }
@@ -132,7 +133,7 @@ public class CreateReportTableStatement
         if ( reportTable.isRegression() )
         {
             //for ( String column : reportTable.getCrossTabColumns() )
-            for ( IdentifiableObject[] column : reportTable.getColumns() )
+            for ( List<IdentifiableObject> column : reportTable.getColumns() )
             {
                 buffer.append( REGRESSION_COLUMN_PREFIX + getColumnName( column ) + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
             }            

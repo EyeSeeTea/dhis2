@@ -469,7 +469,7 @@ public class DefaultReportTableService
         grid.addHeader( new GridHeader( PRETTY_COLUMNS.get( PARAM_ORGANISATIONUNIT_COLUMN_NAME ), PARAM_ORGANISATIONUNIT_COLUMN_NAME, String.class.getName(), true, true ) );
         grid.addHeader( new GridHeader( PRETTY_COLUMNS.get( ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME ), ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, String.class.getName(), true, true ) );
                 
-        for ( IdentifiableObject[] column : reportTable.getColumns() )
+        for ( List<IdentifiableObject> column : reportTable.getColumns() )
         {
             grid.addHeader( new GridHeader( getPrettyColumnName( column ), getColumnName( column ), Double.class.getName(), false, false ) );
         }
@@ -480,7 +480,7 @@ public class DefaultReportTableService
         // Values
         // ---------------------------------------------------------------------
 
-        for ( IdentifiableObject[] row : reportTable.getRows() )
+        for ( List<IdentifiableObject> row : reportTable.getRows() )
         {
             grid.addRow();
             
@@ -498,7 +498,7 @@ public class DefaultReportTableService
             grid.addValue( reportTable.getOrganisationUnitName() ); // Organisation unit param
             grid.addValue( String.valueOf( 0 ) ); //TODO fix unit.isCurrentParent
             
-            for ( IdentifiableObject[] column : reportTable.getColumns() )
+            for ( List<IdentifiableObject> column : reportTable.getColumns() )
             {
                 grid.addValue( parseAndReplaceNull( map.get( getColumnIdentifier( row, column ) ) ) ); // Values
             }

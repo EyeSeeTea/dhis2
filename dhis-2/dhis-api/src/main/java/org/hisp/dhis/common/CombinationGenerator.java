@@ -48,11 +48,11 @@ public class CombinationGenerator
     }
     
     /**
-     * Returns an array of arrays with combinations of IdentifiableObjects.
+     * Returns an List of Lists with combinations of IdentifiableObjects.
      */
-    public List<IdentifiableObject[]> getCombinations()
+    public List<List<IdentifiableObject>> getCombinations()
     {
-        List<IdentifiableObject[]> combinations = new ArrayList<IdentifiableObject[]>();
+        List<List<IdentifiableObject>> combinations = new ArrayList<List<IdentifiableObject>>();
         
         while ( hasNext() )
         {
@@ -81,9 +81,9 @@ public class CombinationGenerator
     /**
      * Returns the next combination. Returns null if there are no more combinations.
      */
-    public IdentifiableObject[] getNext()
+    public List<IdentifiableObject> getNext()
     {
-        IdentifiableObject[] current = null;
+        List<IdentifiableObject> current = null;
         
         for ( int i = no - 1; i >= 0; i-- )
         {
@@ -130,13 +130,13 @@ public class CombinationGenerator
     /**
      * Returns an array with values from the current index of each array in ranges.
      */
-    private IdentifiableObject[] getCurrent()
+    private List<IdentifiableObject> getCurrent()
     {
-        IdentifiableObject[] current = new IdentifiableObject[no];
+        List<IdentifiableObject> current = new ArrayList<IdentifiableObject>( no );
         
         for ( int i = 0; i < no; i++ )
         {
-            current[i] = objects[i][indexes[i]];
+            current.add( objects[i][indexes[i]] );
         }
         
         return current;

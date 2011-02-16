@@ -247,12 +247,12 @@ public class ReportTable
     /**
      * All crosstabulated columns.
      */
-    private List<IdentifiableObject[]> columns = new ArrayList<IdentifiableObject[]>();
+    private List<List<IdentifiableObject>> columns = new ArrayList<List<IdentifiableObject>>();
     
     /**
      * All rows.
      */
-    private List<IdentifiableObject[]> rows = new ArrayList<IdentifiableObject[]>();
+    private List<List<IdentifiableObject>> rows = new ArrayList<List<IdentifiableObject>>();
     
     /**
      * Names of the columns used to query the datavalue table and as index columns
@@ -630,7 +630,7 @@ public class ReportTable
     {
         List<String> columns = new ArrayList<String>();
         
-        for ( IdentifiableObject[] column : getColumns() )
+        for ( List<IdentifiableObject> column : getColumns() )
         {
             columns.add( getColumnName( column ) );
         }
@@ -642,7 +642,7 @@ public class ReportTable
      * Generates a pretty column name based on short-names of the argument objects. 
      * Null arguments are ignored in the name.
      */
-    public static String getPrettyColumnName( IdentifiableObject... objects )
+    public static String getPrettyColumnName( List<IdentifiableObject> objects )
     {
         StringBuffer buffer = new StringBuffer();
         
@@ -658,7 +658,7 @@ public class ReportTable
      * Generates a column name based on short-names of the argument objects. Null 
      * arguments are ignored in the name.
      */
-    public static String getColumnName( IdentifiableObject... objects )
+    public static String getColumnName( List<IdentifiableObject> objects )
     {
         StringBuffer buffer = new StringBuffer();
         
@@ -683,7 +683,7 @@ public class ReportTable
      * Generates a column identifier based on the internal identifiers of the
      * argument objects.
      */
-    public static String getColumnIdentifier( IdentifiableObject[] objects1, IdentifiableObject[] objects2 )
+    public static String getColumnIdentifier( List<IdentifiableObject> objects1, List<IdentifiableObject> objects2 )
     {
         List<String> identifiers = new ArrayList<String>();
         
@@ -1147,12 +1147,12 @@ public class ReportTable
         this.organisationUnitName = organisationUnitName;
     }
 
-    public List<IdentifiableObject[]> getColumns()
+    public List<List<IdentifiableObject>> getColumns()
     {
         return columns;
     }
 
-    public List<IdentifiableObject[]> getRows()
+    public List<List<IdentifiableObject>> getRows()
     {
         return rows;
     }

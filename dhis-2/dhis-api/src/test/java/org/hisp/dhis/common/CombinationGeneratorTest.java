@@ -160,7 +160,7 @@ public class CombinationGeneratorTest
         
         CombinationGenerator generator = new CombinationGenerator( a1, a2 );
         
-        List<IdentifiableObject[]> objects = generator.getCombinations();
+        List<List<IdentifiableObject>> objects = generator.getCombinations();
         
         assertEquals( 12, objects.size() );
         assertTrue( equals( objects.get( 0 ), a, a ) );
@@ -186,7 +186,7 @@ public class CombinationGeneratorTest
 
         CombinationGenerator generator = new CombinationGenerator( a1, a2, a3 );
 
-        List<IdentifiableObject[]> objects = generator.getCombinations();
+        List<List<IdentifiableObject>> objects = generator.getCombinations();
 
         assertEquals( 12, objects.size() );
         assertTrue( equals( objects.get( 0 ), a, a, a ) );
@@ -204,8 +204,8 @@ public class CombinationGeneratorTest
         assertNull( generator.getNext() );
     }
       
-    private static boolean equals( IdentifiableObject[] array, IdentifiableObject... integers )
+    private static boolean equals( List<IdentifiableObject> objects, IdentifiableObject... integers )
     {
-        return Arrays.asList( array ).equals( Arrays.asList( integers ) );
+        return objects.equals( Arrays.asList( integers ) );
     }
 }
