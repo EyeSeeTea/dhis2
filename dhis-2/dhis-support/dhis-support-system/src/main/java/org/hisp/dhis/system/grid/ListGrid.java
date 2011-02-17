@@ -316,7 +316,7 @@ public class ListGrid
         
         if ( columnIndex < 0 || columnIndex >= getWidth() )
         {
-            throw new IllegalArgumentException( "Column index is out of range: " + columnIndex );
+            return this; // Silently ignore
         }
         
         Collections.sort( grid, new GridRowComparator( columnIndex, descending ) );
