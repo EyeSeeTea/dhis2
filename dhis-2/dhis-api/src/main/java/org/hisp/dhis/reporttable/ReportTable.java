@@ -643,6 +643,11 @@ public class ReportTable
             arrays.add( categoryOptionCombos.toArray( IRT ) );
         }
         
+        if ( arrays.size() == 0 )
+        {
+            arrays.add( new IdentifiableObject[0] ); // Add empty if none
+        }
+        
         return arrays.toArray( new IdentifiableObject[0][] );
     }
 
