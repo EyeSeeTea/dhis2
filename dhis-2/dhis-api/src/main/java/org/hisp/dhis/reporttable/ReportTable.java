@@ -722,7 +722,7 @@ public class ReportTable
     {
         return CLASS_ID_MAP.get( clazz ) + id;
     }
-        
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -744,6 +744,11 @@ public class ReportTable
         if ( ( doUnits && crosstab ) || ( !doUnits && !crosstab ) )
         {
             arrays.add( allUnits.toArray( IRT ) );
+        }
+        
+        if ( isDimensional() && crosstab ) // Must be crosstab if exists
+        {
+            arrays.add( categoryOptionCombos.toArray( IRT ) );
         }
         
         return arrays.toArray( new IdentifiableObject[0][] );

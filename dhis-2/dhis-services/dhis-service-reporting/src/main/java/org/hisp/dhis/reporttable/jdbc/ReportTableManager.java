@@ -53,26 +53,10 @@ public interface ReportTableManager
      */
     void removeReportTable( ReportTable reportTable );
     
+    /**
+     * Generates a map with a key identifiying the dimensions of each value.
+     * 
+     * @param reportTable the ReportTable for which to create the value map.
+     */
     Map<String, Double> getAggregatedValueMap( ReportTable reportTable );
-    
-    /**
-     * Returns an AggregatedValueMap.
-     * 
-     * @param reportTable the ReportTable.
-     * @param indicator the Indicator.
-     * @param categoryOptionCombo the DataElementCategoryOptionCombo.
-     * @param period the Period.
-     * @param unit the OrganisationUnit.
-     * @return a Map with String as keys and Double as values.
-     */
-    //Map<String, Double> getAggregatedValueMap( ReportTable reportTable, IdentifiableObject indicator, DataElementCategoryOptionCombo categoryOptionCombo, Period period, OrganisationUnit unit );
-    
-    /**
-     * Instantiates and populates a Grid populated with data from the given 
-     * ReportTable.
-     * 
-     * @param reportTable the ReportTable.
-     * @return a Grid.
-     */
-    //Grid getReportTableGrid( ReportTable reportTable );    
 }

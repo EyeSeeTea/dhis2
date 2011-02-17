@@ -38,6 +38,7 @@ import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.jdbc.StatementBuilder;
@@ -166,11 +167,11 @@ public class JDBCReportTableManager
                     map.put( id, resultSet.getDouble( 4 ) );
                 }
             }
-
+            
             if ( reportTable.getIndicators().size() > 0 )
             {
-                final String sql = "SELECT indicatorid, periodid, organisationunitid, value FROM aggregatedindicatorvalue "
-                    + "WHERE indicatorid IN (" + indicatorIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ")";
+                final String sql = "SELECT indicatorid, periodid, organisationunitid, value FROM aggregatedindicatorvalue " + 
+                    "WHERE indicatorid IN (" + indicatorIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ")";
 
                 ResultSet resultSet = holder.getStatement().executeQuery( sql );
 
@@ -186,8 +187,8 @@ public class JDBCReportTableManager
 
             if ( reportTable.getDataSets().size() > 0 )
             {
-                final String sql = "SELECT datasetid, periodid, organisationunitid, value FROM aggregateddatasetcompleteness "
-                    + "WHERE datasetid IN (" + dataSetIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ")";
+                final String sql = "SELECT datasetid, periodid, organisationunitid, value FROM aggregateddatasetcompleteness " + 
+                    "WHERE datasetid IN (" + dataSetIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ")";
 
                 ResultSet resultSet = holder.getStatement().executeQuery( sql );
 
@@ -197,6 +198,24 @@ public class JDBCReportTableManager
                         getIdentifier( Period.class, resultSet.getInt( 2 ) ),
                         getIdentifier( OrganisationUnit.class, resultSet.getInt( 3 ) ) );
 
+                    map.put( id, resultSet.getDouble( 4 ) );
+                }
+            }
+            
+            if ( reportTable.isDimensional() )
+            {
+                final String sql = "SELECT dataelementid, categoryoptioncomboid, periodid, organisationunitid, value FROM aggregateddatavalue " + 
+                    "WHERE dataelementid IN (" + dataElementIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ")";
+
+                ResultSet resultSet = holder.getStatement().executeQuery( sql );
+    
+                while ( resultSet.next() )
+                {
+                    String id = getIdentifier( getIdentifier( DataElement.class, resultSet.getInt( 1 ) ),
+                        getIdentifier( DataElementCategoryOptionCombo.class, resultSet.getInt( 2 ) ),
+                        getIdentifier( Period.class, resultSet.getInt( 3 ) ),
+                        getIdentifier( OrganisationUnit.class, resultSet.getInt( 4 ) ) );
+    
                     map.put( id, resultSet.getDouble( 4 ) );
                 }
             }

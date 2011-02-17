@@ -117,6 +117,7 @@ public class ReportTableGridTest
     private int dataElementIdB;
     
     private int categoryOptionComboIdA;
+    private int categoryOptionComboIdB;
     
     private int indicatorIdA;
     private int indicatorIdB;
@@ -193,6 +194,7 @@ public class ReportTableGridTest
         categoryOptionComboB = categoryOptionCombosIterator.next();
         
         categoryOptionComboIdA = categoryOptionComboA.getId();
+        categoryOptionComboIdB = categoryOptionComboB.getId();
                 
         categoryOptionCombos.add( categoryOptionComboA );        
         categoryOptionCombos.add( categoryOptionComboB );
@@ -522,6 +524,33 @@ public class ReportTableGridTest
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 8 ) );
     }
 
+    @Test
+    public void testGetCategoryComboReportTableB()
+    {
+        BatchHandler<AggregatedDataValue> dataValueBatchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
+        
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 11 ) );
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 12 ) );
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 13 ) );
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 14 ) );
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 15 ) );
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 16 ) );
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 17 ) );
+        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 18 ) );  
+        
+        dataValueBatchHandler.flush();
+        
+        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            categoryComboA, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
+        
+        System.out.println( grid );
+    }
+    
     @Test
     public void testGetMultiReportTableA()
     {

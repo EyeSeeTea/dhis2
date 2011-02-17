@@ -564,6 +564,67 @@ public class ReportTableTest
         assertNotNull( rows );
         assertEquals( 4, rows.size() );
     }
+    
+    @Test
+    public void testCategoryComboReportTableA()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_DATAELEMENTS, false,
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            categoryCombo, true, true, false, relatives, null, i18nFormat, "january_2000" );
+        
+        reportTable.init();
+        
+        List<String> indexColumns = reportTable.getIndexColumns();
+
+        assertNotNull( indexColumns );
+        assertEquals( 1, indexColumns.size() );
+        assertTrue( indexColumns.contains( ReportTable.ORGANISATIONUNIT_ID ) );
+        
+        List<String> indexNameColumns = reportTable.getIndexNameColumns();
+        
+        assertNotNull( indexNameColumns );
+        assertEquals( 1, indexNameColumns.size() );
+        assertTrue( indexNameColumns.contains( ReportTable.ORGANISATIONUNIT_NAME ) );
+
+        List<List<IdentifiableObject>> columns = reportTable.getColumns();
+        
+        assertNotNull( columns );
+        assertEquals( 16, columns.size() );
+        
+        Iterator<List<IdentifiableObject>> iterator = columns.iterator();
+        
+        assertEquals( getList( dataElementA, periodA, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementA, periodA, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementA, periodB, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementA, periodB, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementA, periodC, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementA, periodC, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementA, periodD, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementA, periodD, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementB, periodA, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementB, periodA, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementB, periodB, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementB, periodB, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementB, periodC, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementB, periodC, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementB, periodD, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementB, periodD, categoryOptionComboB ), iterator.next() );
+        
+        List<String> columnNames = reportTable.getColumnNames();
+        
+        assertNotNull( columnNames );
+        assertEquals( 16, columnNames.size() );
+        
+        List<List<IdentifiableObject>> rows = reportTable.getRows();
+        
+        assertNotNull( rows );
+        assertEquals( 2, rows.size() );
+
+        iterator = rows.iterator();
+        
+        assertEquals( getList( unitA ), iterator.next() );
+        assertEquals( getList( unitB ), iterator.next() );
+    }
 /*
     @Test
     public void testDataElementWithCategoryOptionReportTableA()
