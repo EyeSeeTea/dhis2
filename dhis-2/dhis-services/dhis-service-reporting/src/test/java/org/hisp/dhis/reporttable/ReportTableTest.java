@@ -625,6 +625,35 @@ public class ReportTableTest
         assertEquals( getList( unitA ), iterator.next() );
         assertEquals( getList( unitB ), iterator.next() );
     }
+    
+    @Test
+    public void testCategoryComboReportTableB()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_DATAELEMENTS, false,
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            categoryCombo, false, false, true, relatives, null, i18nFormat, "january_2000" );
+
+        reportTable.init();
+        
+        List<String> indexColumns = reportTable.getIndexColumns();
+
+        assertNotNull( indexColumns );
+        assertEquals( 2, indexColumns.size() );
+        assertTrue( indexColumns.contains( ReportTable.INDICATOR_ID ) );
+        assertTrue( indexColumns.contains( ReportTable.PERIOD_ID ) );
+
+        List<String> indexNameColumns = reportTable.getIndexNameColumns();
+
+        assertNotNull( indexNameColumns );
+        assertEquals( 2, indexNameColumns.size() );
+        assertTrue( indexNameColumns.contains( ReportTable.INDICATOR_NAME ) );
+        assertTrue( indexNameColumns.contains( ReportTable.PERIOD_NAME ) );
+
+        List<List<IdentifiableObject>> columns = reportTable.getColumns();
+
+        assertNotNull( columns );
+        assertEquals( 8, columns.size() );
+    }
 /*
     @Test
     public void testDataElementWithCategoryOptionReportTableA()
