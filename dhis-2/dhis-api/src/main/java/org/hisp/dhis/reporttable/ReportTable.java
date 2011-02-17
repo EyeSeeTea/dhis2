@@ -407,17 +407,6 @@ public class ReportTable
         }
     }
 
-    /**
-     * Adds an empty list of IdentifiableObjects to the given list if empty.
-     */
-    private void addIfEmpty( List<List<IdentifiableObject>> list )
-    {
-        if ( list != null && list.size() == 0 )
-        {
-            list.add( Arrays.asList( new IdentifiableObject[0] ) );
-        }
-    }
-    
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
@@ -666,6 +655,17 @@ public class ReportTable
     private static String generateTableName( String name )
     {
         return TABLE_PREFIX + databaseEncode( name );
+    }
+
+    /**
+     * Adds an empty list of IdentifiableObjects to the given list if empty.
+     */
+    private void addIfEmpty( List<List<IdentifiableObject>> list )
+    {
+        if ( list != null && list.size() == 0 )
+        {
+            list.add( Arrays.asList( new IdentifiableObject[0] ) );
+        }
     }
     
     /**

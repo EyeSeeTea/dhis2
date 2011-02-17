@@ -165,6 +165,13 @@ public interface Grid
     Grid removeColumn( GridHeader header );
     
     /**
+     * Limits the grid from top by the given argument number.
+     * 
+     * @param limit the top limit.
+     */
+    Grid limitGrid( int limit );
+    
+    /**
      * Adds a regression column to the grid. Column must hold numeric data.
      * 
      * @param columnIndex the index of the base column.

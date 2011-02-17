@@ -301,6 +301,13 @@ public class ListGrid
         return this;
     }
     
+    public Grid limitGrid( int limit )
+    {
+        grid = grid.subList( 0, limit );
+        
+        return this;
+    }
+    
     public Grid addRegressionColumn( int columnIndex )
     {
         verifyGridState();
