@@ -212,7 +212,7 @@ public class ReportTableTest
     // -------------------------------------------------------------------------
 
     @Test
-    public void testGetColumnIdentifierA()
+    public void testGetIdentifierA()
     {
         List<IdentifiableObject> a1 = getList( unitA, periodA );
         List<IdentifiableObject> a2 = getList( indicatorA );
@@ -236,7 +236,7 @@ public class ReportTableTest
     }
 
     @Test
-    public void testGetColumnIdentifierB()
+    public void testGetIdentifierB()
     {
         String a1 = getIdentifier( Indicator.class, 1 );
         String a2 = getIdentifier( DataElement.class, 2 );
@@ -251,6 +251,23 @@ public class ReportTableTest
         assertEquals( DATAELEMENT_ID + 1, b2 );
         
         assertFalse( getIdentifier( a1, a2 ).equals( getIdentifier( b1, b2 ) ) );        
+    }
+    
+    @Test
+    public void testGetIdentifierC()
+    {
+        List<IdentifiableObject> a1 = getList( dataElementA, periodA, categoryOptionComboA );
+        List<IdentifiableObject> a2 = getList( unitA );
+        
+        String b1 = getIdentifier( DataElement.class,'A' );
+        String b2 = getIdentifier( Period.class, 'A' );
+        String b3 = getIdentifier( DataElementCategoryOptionCombo.class, 'A' );
+        String b4 = getIdentifier( OrganisationUnit.class, 'A' );
+        
+        String a = getIdentifier( a1, a2 );
+        String b = getIdentifier( b1, b2, b3, b4 );
+        
+        assertEquals( a, b );
     }
     
     @Test

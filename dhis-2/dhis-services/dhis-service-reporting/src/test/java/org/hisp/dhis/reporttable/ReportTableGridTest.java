@@ -187,11 +187,9 @@ public class ReportTableGridTest
         
         categoryService.generateOptionCombos( categoryComboA );
 
-        Iterator<DataElementCategoryOptionCombo> categoryOptionCombosIterator = categoryService.getAllDataElementCategoryOptionCombos().iterator();
-        
-        categoryOptionCombosIterator.next(); // Omit default
-        categoryOptionComboA = categoryOptionCombosIterator.next();
-        categoryOptionComboB = categoryOptionCombosIterator.next();
+        Iterator<DataElementCategoryOptionCombo> iter = categoryComboA.getOptionCombos().iterator();
+        categoryOptionComboA = iter.next();
+        categoryOptionComboB = iter.next();
         
         categoryOptionComboIdA = categoryOptionComboA.getId();
         categoryOptionComboIdB = categoryOptionComboB.getId();
