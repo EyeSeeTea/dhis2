@@ -141,7 +141,7 @@ public class ReportTable
     /**
      * Whether the ReportTable contains regression columns.
      */
-    private Boolean regression;
+    private boolean regression;
 
     /**
      * The list of DataElements the ReportTable contains.
@@ -176,17 +176,17 @@ public class ReportTable
     /**
      * Whether to crosstabulate on the Indicator dimension, which also represents DataElements and DataSets.
      */
-    private Boolean doIndicators;
+    private boolean doIndicators;
     
     /**
      * Whether to crosstabulate on the Period dimension.
      */
-    private Boolean doPeriods;
+    private boolean doPeriods;
     
     /**
      * Whether to crosstabulate on the OrganisationUnit dimension.
      */
-    private Boolean doUnits;
+    private boolean doUnits;
 
     /**
      * The RelativePeriods of the ReportTable.
@@ -374,9 +374,9 @@ public class ReportTable
         allPeriods.addAll( periods );
         allPeriods.addAll( relativePeriods );
         allPeriods = removeDuplicates( allPeriods );
-        Collections.sort( allPeriods, new AscendingPeriodComparator() );
-
-        setNames( allPeriods );
+        
+        Collections.sort( allPeriods, new AscendingPeriodComparator() ); // Sort periods ascending
+        setNames( allPeriods ); // Set names on periods
         
         allUnits.addAll( units );
         allUnits.addAll( relativeUnits );
@@ -407,15 +407,7 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
-           
-    /**
-     * Tests whether this ReportTable contains regression columns.
-     */
-    public boolean isRegression()
-    {
-        return regression != null && regression;
-    }
-    
+        
     /**
      * Updates the existing table name with the current name.
      */
@@ -424,30 +416,6 @@ public class ReportTable
         this.existingTableName = generateTableName( name );
     }
     
-    /**
-     * Tests whether the Indicator dimension will be crosstabulated for this ReportTable.
-     */
-    public boolean isDoIndicators()
-    {
-        return doIndicators != null && doIndicators;
-    }
-
-    /**
-     * Tests whether the Period dimension will be crosstabulated for this ReportTable.
-     */
-    public boolean isDoPeriods()
-    {
-        return doPeriods != null && doPeriods;
-    }
-
-    /**
-     * Tests whether the OrganisationUnit dimension will be crosstabulated for this ReportTable.
-     */
-    public boolean isDoUnits()
-    {
-        return doUnits != null && doUnits;
-    }
-
     /**
      * Tests whether this ReportTable is multi-dimensional.
      */
@@ -812,17 +780,17 @@ public class ReportTable
     {
         this.existingTableName = existingTableName;
     }
-
-    public Boolean getRegression()
+    
+    public boolean isRegression()
     {
         return regression;
     }
 
-    public void setRegression( Boolean regression )
+    public void setRegression( boolean regression )
     {
         this.regression = regression;
     }
-    
+
     public List<DataElement> getDataElements()
     {
         return dataElements;
@@ -893,36 +861,36 @@ public class ReportTable
         this.categoryCombo = categoryCombo;
     }
 
-    public Boolean getDoIndicators()
+    public boolean isDoIndicators()
     {
         return doIndicators;
     }
 
-    public void setDoIndicators( Boolean doIndicators )
+    public void setDoIndicators( boolean doIndicators )
     {
         this.doIndicators = doIndicators;
     }
-    
-    public Boolean getDoPeriods()
+
+    public boolean isDoPeriods()
     {
         return doPeriods;
     }
 
-    public void setDoPeriods( Boolean doPeriods )
+    public void setDoPeriods( boolean doPeriods )
     {
         this.doPeriods = doPeriods;
     }
 
-    public Boolean getDoUnits()
+    public boolean isDoUnits()
     {
         return doUnits;
     }
 
-    public void setDoUnits( Boolean doUnits )
+    public void setDoUnits( boolean doUnits )
     {
         this.doUnits = doUnits;
     }
-    
+
     public RelativePeriods getRelatives()
     {
         return relatives;
