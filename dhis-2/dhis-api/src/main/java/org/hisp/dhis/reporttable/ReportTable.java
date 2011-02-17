@@ -346,7 +346,7 @@ public class ReportTable
 
     public void init()
     {
-        verify( nonEmptyLists( dataElements, indicators, dataSets ) > 0, "Must contain dataelements, indicators, or datasets" );
+        verify( nonEmptyLists( dataElements, indicators, dataSets ) > 0, "Must contain dataelements, indicators or datasets" );
         verify( nonEmptyLists( periods, relativePeriods ) > 0, "Must contain periods or relative periods" );
         verify( nonEmptyLists( units, relativeUnits ) > 0, "Must contain organisation units or relative organisation units" );
         verify( i18nFormat != null, "I18n format must be set" );
@@ -385,6 +385,9 @@ public class ReportTable
         columns = new CombinationGenerator<IdentifiableObject>( getArrays( true ) ).getCombinations();
         rows = new CombinationGenerator<IdentifiableObject>( getArrays( false ) ).getCombinations();
         
+        addIfEmpty( columns ); // Allow for all or none crosstab dimensions
+        addIfEmpty( rows );
+        
         if ( !isDoIndicators() )
         {
             indexColumns.add( INDICATOR_ID );
@@ -404,6 +407,17 @@ public class ReportTable
         }
     }
 
+    /**
+     * Adds an empty list of IdentifiableObjects to the given list if empty.
+     */
+    private void addIfEmpty( List<List<IdentifiableObject>> list )
+    {
+        if ( list != null && list.size() == 0 )
+        {
+            list.add( Arrays.asList( new IdentifiableObject[0] ) );
+        }
+    }
+    
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
@@ -445,7 +459,7 @@ public class ReportTable
             buffer.append( object != null ? ( object.getShortName() + SPACE ) : EMPTY );
         }
         
-        return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SPACE ) ) : buffer.toString();
+        return buffer.length() > 0 ? buffer.substring( 0, buffer.lastIndexOf( SPACE ) ) : TOTAL_COLUMN_PRETTY_NAME;
     }
     
     /**
@@ -470,7 +484,7 @@ public class ReportTable
 
         String column = databaseEncode( buffer.toString() );
         
-        return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : column;
+        return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : TOTAL_COLUMN_NAME;
     }
 
     /**
@@ -529,9 +543,9 @@ public class ReportTable
         
         Collections.sort( ids ); // Sort to remove the significance of the order
         
-        return StringUtils.join( identifiers, SEPARATOR );
+        return StringUtils.join( ids, SEPARATOR );
     }
-        
+    
     /**
      * Returns a grid identifier based on the argument class and id.
      */
@@ -641,11 +655,6 @@ public class ReportTable
         if ( isDimensional() && crosstab ) // Must be crosstab if exists
         {
             arrays.add( categoryOptionCombos.toArray( IRT ) );
-        }
-        
-        if ( arrays.size() == 0 )
-        {
-            arrays.add( new IdentifiableObject[0] ); // Add empty if none
         }
         
         return arrays.toArray( new IdentifiableObject[0][] );

@@ -43,8 +43,12 @@ public class CombinationGenerator<T>
     {
         this.objects = objects;
         this.indexes = new int[objects.length];
-        this.no = objects.length;        
-        indexes[no-1]--; // Rewind last index to simplify looping
+        this.no = objects.length;
+        
+        if ( no > 0 )
+        {
+            indexes[no-1]--; // Rewind last index to simplify looping
+        }
     }
     
     /**

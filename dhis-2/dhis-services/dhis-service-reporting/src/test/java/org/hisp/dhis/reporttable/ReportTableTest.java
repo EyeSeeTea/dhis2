@@ -467,6 +467,66 @@ public class ReportTableTest
         assertEquals( getList( periodC ), iterator.next() );
         assertEquals( getList( periodD ), iterator.next() );
     }
+    
+    @Test
+    public void testIndicatorReportTableColumnsOnly()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
+            new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            null, true, true, true, relatives, null, i18nFormat, "january_2000" );
+
+        reportTable.init();
+        
+        List<String> indexColumns = reportTable.getIndexColumns();
+
+        assertNotNull( indexColumns );
+        assertEquals( 0, indexColumns.size() );
+        
+        List<String> indexNameColumns = reportTable.getIndexNameColumns();
+
+        assertNotNull( indexNameColumns );
+        assertEquals( 0, indexNameColumns.size() );
+        
+        List<List<IdentifiableObject>> columns = reportTable.getColumns();
+        
+        assertNotNull( columns );
+        assertEquals( 16, columns.size() );
+        
+        List<List<IdentifiableObject>> rows = reportTable.getRows();
+
+        assertNotNull( rows );
+        assertEquals( 1, rows.size() );
+    }
+
+    @Test
+    public void testIndicatorReportTableRowsOnly()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
+            new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            null, false, false, false, relatives, null, i18nFormat, "january_2000" );
+
+        reportTable.init();
+        
+        List<String> indexColumns = reportTable.getIndexColumns();
+
+        assertNotNull( indexColumns );
+        assertEquals( 3, indexColumns.size() );
+        
+        List<String> indexNameColumns = reportTable.getIndexNameColumns();
+
+        assertNotNull( indexNameColumns );
+        assertEquals( 3, indexNameColumns.size() );
+        
+        List<List<IdentifiableObject>> columns = reportTable.getColumns();
+        
+        assertNotNull( columns );
+        assertEquals( 1, columns.size() );
+        
+        List<List<IdentifiableObject>> rows = reportTable.getRows();
+
+        assertNotNull( rows );
+        assertEquals( 16, rows.size() );
+    }
 
     @Test
     public void testDataElementReportTableA()
