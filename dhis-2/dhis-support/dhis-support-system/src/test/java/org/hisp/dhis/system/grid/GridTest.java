@@ -233,6 +233,42 @@ public class GridTest
     }
     
     @Test
+    public void testSortA()
+    {
+        Grid grid = new ListGrid();
+        
+        grid.addRow().addValue( "1" ).addValue( "a" );
+        grid.addRow().addValue( "2" ).addValue( "b" );
+        grid.addRow().addValue( "3" ).addValue( "c" );
+        
+        grid.sortGrid( 2, true );
+
+        List<String> rowA = grid.getRow( 0 );
+        assertTrue( rowA.contains( "c" ) );
+
+        List<String> rowB = grid.getRow( 1 );
+        assertTrue( rowB.contains( "b" ) );        
+    }
+
+    @Test
+    public void testSortB()
+    {
+        Grid grid = new ListGrid();
+        
+        grid.addRow().addValue( "3" ).addValue( "a" );
+        grid.addRow().addValue( "2" ).addValue( "b" );
+        grid.addRow().addValue( "1" ).addValue( "c" );
+        
+        grid.sortGrid( 1, false );
+
+        List<String> rowA = grid.getRow( 0 );
+        assertTrue( rowA.contains( "1" ) );
+
+        List<String> rowB = grid.getRow( 1 );
+        assertTrue( rowB.contains( "2" ) );        
+    }
+    
+    @Test
     public void testAddRegressionColumn()
     {
         grid = new ListGrid();        
