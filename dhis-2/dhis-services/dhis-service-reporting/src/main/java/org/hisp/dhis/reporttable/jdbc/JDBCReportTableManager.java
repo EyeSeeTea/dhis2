@@ -225,14 +225,17 @@ public class JDBCReportTableManager
             {
                 for ( DataElementCategoryOption categoryOption : reportTable.getCategoryCombo().getCategoryOptions() )
                 {
+                    System.out.println( "catop " + categoryOption );
+                    System.out.println( "catop " +  categoryOption.getCategoryOptionCombos() );
+                    System.out.println( "catop s " +  categoryOption.getCategoryOptionCombos().size() );
                     String cocIds = TextUtils.getCommaDelimitedString( 
-                        ConversionUtils.getIdentifiers( DataElementCategoryOption.class, categoryOption.getCategoryOptionCombos() ) );
+                        ConversionUtils.getIdentifiers( DataElementCategoryOptionCombo.class, categoryOption.getCategoryOptionCombos() ) );
                     
                     final String sql = "SELECT dataelementid, periodid, organisationunitid, SUM(value) FROM aggregateddatavalue " +
                         "WHERE dataelementid IN (" + dataElementIds + ") AND categoryoptioncomboid IN (" + cocIds +
                         ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds +
                         ") GROUP BY dataelementid, periodid, organisationunitid"; // Sum of category option combos
-                    
+                    System.out.println( "sql " + sql );
                     ResultSet resultSet = holder.getStatement().executeQuery( sql );
                     
                     while ( resultSet.next() )
@@ -243,6 +246,7 @@ public class JDBCReportTableManager
                             getIdentifier( DataElementCategoryOption.class, categoryOption.getId() ) );
         
                         map.put( id, resultSet.getDouble( 4 ) );
+                        System.out.println( id + ", " + resultSet.getDouble( 4 ) );
                     }
                 }
             }

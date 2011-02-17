@@ -206,6 +206,18 @@ public class ReportTableTest
     {
         return Arrays.asList( objects );
     }
+
+    private static List<String> getColumnNames( List<List<IdentifiableObject>> cols )
+    {
+        List<String> columns = new ArrayList<String>();
+        
+        for ( List<IdentifiableObject> column : cols )
+        {
+            columns.add( getColumnName( column ) );
+        }
+        
+        return columns;
+    }
     
     // -------------------------------------------------------------------------
     // Tests
@@ -321,7 +333,7 @@ public class ReportTableTest
         assertEquals( getList( indicatorB, periodC ), iterator.next() );
         assertEquals( getList( indicatorB, periodD ), iterator.next() );
             
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );        
         assertEquals( 8, columnNames.size() );
@@ -375,7 +387,7 @@ public class ReportTableTest
         assertEquals( getList( unitA ), iterator.next() );
         assertEquals( getList( unitB ), iterator.next() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 2, columnNames.size() );
@@ -433,7 +445,7 @@ public class ReportTableTest
         assertEquals( getList( indicatorB, unitA ), iterator.next() );
         assertEquals( getList( indicatorB, unitB ), iterator.next() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 4, columnNames.size() );
@@ -482,7 +494,7 @@ public class ReportTableTest
         assertNotNull( columns );
         assertEquals( 8, columns.size() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 8, columnNames.size() );
@@ -526,7 +538,7 @@ public class ReportTableTest
         assertNotNull( columns );
         assertEquals( 2, columns.size() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 2, columnNames.size() );
@@ -566,7 +578,7 @@ public class ReportTableTest
         assertNotNull( columns );
         assertEquals( 4, columns.size() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 4, columnNames.size() );
@@ -627,7 +639,7 @@ public class ReportTableTest
         assertEquals( getList( dataElementB, periodD, categoryOptionComboA ), iterator.next() );
         assertEquals( getList( dataElementB, periodD, categoryOptionComboB ), iterator.next() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 16, columnNames.size() );
@@ -678,7 +690,7 @@ public class ReportTableTest
         assertEquals( getList( unitB, categoryOptionComboA ), iterator.next() );
         assertEquals( getList( unitB, categoryOptionComboB ), iterator.next() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 4, columnNames.size() );
@@ -737,7 +749,7 @@ public class ReportTableTest
         assertEquals( getList( dataElementB, unitB, categoryOptionComboA ), iterator.next() );
         assertEquals( getList( dataElementB, unitB, categoryOptionComboB ), iterator.next() );
 
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 8, columnNames.size() );
@@ -781,7 +793,7 @@ public class ReportTableTest
         assertNotNull( columns );
         assertEquals( 8, columns.size() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 8, columnNames.size() );
@@ -825,7 +837,7 @@ public class ReportTableTest
         assertNotNull( columns );
         assertEquals( 2, columns.size() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 2, columnNames.size() );
@@ -865,7 +877,7 @@ public class ReportTableTest
         assertNotNull( columns );
         assertEquals( 4, columns.size() );
         
-        List<String> columnNames = reportTable.getColumnNames();
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
         
         assertNotNull( columnNames );
         assertEquals( 4, columnNames.size() );

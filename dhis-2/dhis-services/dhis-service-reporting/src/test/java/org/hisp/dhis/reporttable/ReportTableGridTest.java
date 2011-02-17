@@ -28,8 +28,11 @@ package org.hisp.dhis.reporttable;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
@@ -191,6 +194,9 @@ public class ReportTableGridTest
         categoryOptionComboA = iter.next();
         categoryOptionComboB = iter.next();
         
+        categoryOptionComboA.getCategoryOptions().iterator().next().setCategoryOptionCombos( getSet( categoryOptionComboA ) ); // Inverse association not set before transaction is committed
+        categoryOptionComboB.getCategoryOptions().iterator().next().setCategoryOptionCombos( getSet( categoryOptionComboB ) );
+        
         categoryOptionComboIdA = categoryOptionComboA.getId();
         categoryOptionComboIdB = categoryOptionComboB.getId();
 
@@ -312,6 +318,11 @@ public class ReportTableGridTest
     public boolean emptyDatabaseAfterTest()
     {
         return true;
+    }
+    
+    private Set<DataElementCategoryOptionCombo> getSet( DataElementCategoryOptionCombo c )
+    {
+        return new HashSet<DataElementCategoryOptionCombo>( Arrays.asList( c ) );
     }
 
     // -------------------------------------------------------------------------
@@ -677,39 +688,53 @@ public class ReportTableGridTest
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
 
-        System.out.println( grid );
-        
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 9 ) );
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 10 ) );
-        assertEquals( String.valueOf( 22.0 ), grid.getRow( 0 ).get( 11 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 11 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 12 ) );
+        assertEquals( String.valueOf( 22.0 ), grid.getRow( 0 ).get( 13 ) );
 
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 9 ) );
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 10 ) );
-        assertEquals( String.valueOf( 24.0 ), grid.getRow( 1 ).get( 11 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 11 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 12 ) );
+        assertEquals( String.valueOf( 24.0 ), grid.getRow( 1 ).get( 13 ) );
 
         assertEquals( String.valueOf( 13.0 ), grid.getRow( 2 ).get( 9 ) );
         assertEquals( String.valueOf( 13.0 ), grid.getRow( 2 ).get( 10 ) );
-        assertEquals( String.valueOf( 26.0 ), grid.getRow( 2 ).get( 11 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 2 ).get( 11 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 2 ).get( 12 ) );
+        assertEquals( String.valueOf( 26.0 ), grid.getRow( 2 ).get( 13 ) );
 
         assertEquals( String.valueOf( 14.0 ), grid.getRow( 3 ).get( 9 ) );
         assertEquals( String.valueOf( 14.0 ), grid.getRow( 3 ).get( 10 ) );
-        assertEquals( String.valueOf( 28.0 ), grid.getRow( 3 ).get( 11 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 3 ).get( 11 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 3 ).get( 12 ) );
+        assertEquals( String.valueOf( 28.0 ), grid.getRow( 3 ).get( 13 ) );
         
         assertEquals( String.valueOf( 15.0 ), grid.getRow( 4 ).get( 9 ) );
         assertEquals( String.valueOf( 15.0 ), grid.getRow( 4 ).get( 10 ) );
-        assertEquals( String.valueOf( 30.0 ), grid.getRow( 4 ).get( 11 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 4 ).get( 11 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 4 ).get( 12 ) );
+        assertEquals( String.valueOf( 30.0 ), grid.getRow( 4 ).get( 13 ) );
 
         assertEquals( String.valueOf( 16.0 ), grid.getRow( 5 ).get( 9 ) );
         assertEquals( String.valueOf( 16.0 ), grid.getRow( 5 ).get( 10 ) );
-        assertEquals( String.valueOf( 32.0 ), grid.getRow( 5 ).get( 11 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 5 ).get( 11 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 5 ).get( 12 ) );
+        assertEquals( String.valueOf( 32.0 ), grid.getRow( 5 ).get( 13 ) );
 
         assertEquals( String.valueOf( 17.0 ), grid.getRow( 6 ).get( 9 ) );
         assertEquals( String.valueOf( 17.0 ), grid.getRow( 6 ).get( 10 ) );
-        assertEquals( String.valueOf( 34.0 ), grid.getRow( 6 ).get( 11 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 6 ).get( 11 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 6 ).get( 12 ) );
+        assertEquals( String.valueOf( 34.0 ), grid.getRow( 6 ).get( 13 ) );
 
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 7 ).get( 9 ) );
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 7 ).get( 10 ) );
-        assertEquals( String.valueOf( 36.0 ), grid.getRow( 7 ).get( 11 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 7 ).get( 11 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 7 ).get( 12 ) );
+        assertEquals( String.valueOf( 36.0 ), grid.getRow( 7 ).get( 13 ) );
     }
     
     @Test

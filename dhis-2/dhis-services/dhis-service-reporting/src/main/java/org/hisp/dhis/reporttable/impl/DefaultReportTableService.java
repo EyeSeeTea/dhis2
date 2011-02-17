@@ -27,8 +27,18 @@ package org.hisp.dhis.reporttable.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.reporttable.ReportTable.ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.PARAM_ORGANISATIONUNIT_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.PRETTY_COLUMNS;
+import static org.hisp.dhis.reporttable.ReportTable.REPORTING_MONTH_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.SPACE;
+import static org.hisp.dhis.reporttable.ReportTable.TOTAL_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.TOTAL_COLUMN_PRETTY_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.databaseEncode;
+import static org.hisp.dhis.reporttable.ReportTable.getColumnName;
+import static org.hisp.dhis.reporttable.ReportTable.getIdentifier;
+import static org.hisp.dhis.reporttable.ReportTable.getPrettyColumnName;
 import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
-import static org.hisp.dhis.reporttable.ReportTable.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,13 +50,13 @@ import org.amplecode.quick.BatchHandlerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -129,13 +139,6 @@ public class DefaultReportTableService
     public void setDataMartService( DataMartService dataMartService )
     {
         this.dataMartService = dataMartService;
-    }
-
-    private AggregatedDataValueService aggregatedDataValueService;
-    
-    public void setAggregatedDataValueService( AggregatedDataValueService aggregatedDataValueService )
-    {
-        this.aggregatedDataValueService = aggregatedDataValueService;
     }
 
     private DataSetCompletenessService completenessService;
@@ -472,10 +475,13 @@ public class DefaultReportTableService
         
         if ( reportTable.doTotal() )
         {
-            grid.addHeader( new GridHeader( "Total", "Total", String.class.getName(), false, true ) );
+            for ( DataElementCategoryOption categoryOption : reportTable.getCategoryCombo().getCategoryOptions() ) // TOTO skip if only one category?
+            {
+                grid.addHeader( new GridHeader( categoryOption.getShortName(), databaseEncode( categoryOption.getShortName() ), String.class.getName(), false, false ) );
+            }
+            
+            grid.addHeader( new GridHeader( TOTAL_COLUMN_PRETTY_NAME, TOTAL_COLUMN_NAME, String.class.getName(), false, false ) );
         }
-        
-        // TODO Totals...
         
         // ---------------------------------------------------------------------
         // Values
@@ -501,159 +507,23 @@ public class DefaultReportTableService
             
             for ( List<IdentifiableObject> column : reportTable.getColumns() )
             {
-                grid.addValue( parseAndReplaceNull( map.get( getIdentifier( row, column ) ) ) ); // Values
+                grid.addValue( toString( map.get( getIdentifier( row, column ) ) ) ); // Values
             }
             
             if ( reportTable.doTotal() )
             {
-                grid.addValue( parseAndReplaceNull( map.get( getIdentifier( row ) ) ) ); // Only category option combo is crosstab when total, row identifier will return total
+                for ( DataElementCategoryOption categoryOption : reportTable.getCategoryCombo().getCategoryOptions() )
+                {
+                    grid.addValue( toString( map.get( getIdentifier( row, DataElementCategoryOption.class, categoryOption.getId() ) ) ) );
+                }
+                
+                grid.addValue( toString( map.get( getIdentifier( row ) ) ) ); // Only category option combo is crosstab when total, row identifier will return total
             }
             // TODO Total categories...
         }
         
         return grid;
     }
-    
-    /**
-     * Creates a grid representing the data in the report table.
-     * 
-     * @param reportTable the report table.
-     * @return a grid.
-     */
-    /*
-    private Grid getGrid( ReportTable reportTable )
-    {
-        aggregatedDataValueService.getagg
-        final Grid grid = new ListGrid();
-        
-        for ( final IdentifiableObject metaObject : reportTable.getReportIndicators() )
-        {
-            for ( final DataElementCategoryOptionCombo categoryOptionCombo : reportTable.getReportCategoryOptionCombos() )
-            {
-                for ( final Period period : reportTable.getReportPeriods() )
-                {
-                    for ( final OrganisationUnit unit : reportTable.getReportUnits() )
-                    {
-                        grid.addRow();
-                        
-                        // -----------------------------------------------------
-                        // Identifier
-                        // -----------------------------------------------------
-                        
-                        if ( reportTable.getIndexColumns().contains( ReportTable.INDICATOR_ID ) )
-                        {
-                            grid.addValue( String.valueOf( metaObject.getId() ) );
-                        }
-                        
-                        if ( reportTable.getIndexColumns().contains( ReportTable.DATAELEMENT_ID ) )
-                        {
-                            grid.addValue( String.valueOf( metaObject.getId() ) );
-                        }
-                        
-                        if ( reportTable.getIndexColumns().contains( ReportTable.DATASET_ID ) )
-                        {
-                            grid.addValue( String.valueOf( metaObject.getId() ) );
-                        }
-                        
-                        if ( reportTable.getIndexColumns().contains( ReportTable.CATEGORYCOMBO_ID ) )
-                        {
-                            grid.addValue( String.valueOf( categoryOptionCombo.getId() ) );
-                        }
-                        
-                        if ( reportTable.getIndexColumns().contains( ReportTable.PERIOD_ID ) )
-                        {
-                            grid.addValue( String.valueOf( period.getId() ) );
-                        }
-                        
-                        if ( reportTable.getIndexColumns().contains( ReportTable.ORGANISATIONUNIT_ID ) )
-                        {
-                            grid.addValue( String.valueOf( unit.getId() ) );
-                        }
-                        
-                        // -----------------------------------------------------
-                        // Name
-                        // -----------------------------------------------------
-    
-                        if ( reportTable.getIndexNameColumns().contains( ReportTable.INDICATOR_NAME ) )
-                        {
-                            grid.addValue( metaObject.getShortName() );
-                        }
-                        
-                        if ( reportTable.getIndexNameColumns().contains( ReportTable.DATAELEMENT_NAME ) )
-                        {
-                            grid.addValue( metaObject.getShortName() );
-                        }
-
-                        if ( reportTable.getIndexNameColumns().contains( ReportTable.DATASET_NAME ) )
-                        {
-                            grid.addValue( metaObject.getShortName() );
-                        }
-                        
-                        if ( reportTable.getIndexNameColumns().contains( ReportTable.CATEGORYCOMBO_NAME ) )
-                        {
-                            grid.addValue( categoryOptionCombo.getShortName() );
-                        }
-                        
-                        if ( reportTable.getIndexNameColumns().contains( ReportTable.PERIOD_NAME ) )
-                        {
-                            grid.addValue( period.getName() );
-                        }
-                        
-                        if ( reportTable.getIndexNameColumns().contains( ReportTable.ORGANISATIONUNIT_NAME ) )
-                        {
-                            grid.addValue( unit.getShortName() );
-                        }
-                        
-                        // -----------------------------------------------------
-                        // Param reporting month name
-                        // -----------------------------------------------------
-
-                        grid.addValue( reportTable.getReportingMonthName() );
-
-                        // -----------------------------------------------------
-                        // Param organisation unit name
-                        // -----------------------------------------------------
-
-                        grid.addValue( reportTable.getOrganisationUnitName() );
-
-                        // ---------------------------------------------------------------------
-                        // Organisation unit is parent
-                        // ---------------------------------------------------------------------
-
-                        grid.addValue( unit != null && unit.isCurrentParent() ? String.valueOf( 1 ) : String.valueOf( 0 ) );
-                        
-                        // -----------------------------------------------------
-                        // Values
-                        // -----------------------------------------------------
-
-                        Map<String, Double> map = reportTableManager.getAggregatedValueMap( reportTable, metaObject, categoryOptionCombo, period, unit );
-                        
-                        for ( String identifier : reportTable.getCrossTabIdentifiers() )
-                        {
-                            grid.addValue( parseAndReplaceNull( map.get( identifier ) ) );
-                        }
-                        
-                        // -----------------------------------------------------
-                        // Total values
-                        // -----------------------------------------------------
-                        
-                        if ( reportTable.doTotal() )
-                        {
-                            for ( DataElementCategoryOption categoryOption : reportTable.getCategoryOptions() )
-                            {
-                                grid.addValue( String.valueOf( aggregatedDataValueService.
-                                    getAggregatedValue( (DataElement) metaObject, categoryOption, period, unit ) ) );
-                            }
-                            
-                            grid.addValue( String.valueOf( aggregatedDataValueService.getAggregatedValue( (DataElement) metaObject, period, unit ) ) );
-                        }
-                    }
-                }
-            }
-        }
-        
-        return grid;
-    }*/
     
     /**
      * Checks whether the given List of IdentifiableObjects contains an object
@@ -679,7 +549,7 @@ public class DefaultReportTableService
      * 
      * @param value the Double.
      */
-    private String parseAndReplaceNull( Double value )
+    private String toString( Double value )
     {
         return value != null ? String.valueOf( value ) : NULL_REPLACEMENT;
     }

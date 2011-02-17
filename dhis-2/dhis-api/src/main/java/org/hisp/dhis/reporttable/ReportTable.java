@@ -83,15 +83,8 @@ public class ReportTable
     public static final String SEPARATOR = "_";
     public static final String SPACE = " ";
     
-    /*
-    public static final String MODE_DATAELEMENTS = "dataelements";
-    public static final String MODE_INDICATORS = "indicators";
-    public static final String MODE_DATASETS = "datasets";
-*/
-    
     public static final String TOTAL_COLUMN_NAME = "total";
-    public static final String TOTAL_COLUMN_PREFIX = "total_";
-    public static final String TOTAL_COLUMN_PRETTY_PREFIX = "Total ";
+    public static final String TOTAL_COLUMN_PRETTY_NAME = "Total";
     
     public static final String REGRESSION_COLUMN_PREFIX = "regression_";
     
@@ -117,19 +110,7 @@ public class ReportTable
     private static final String EMPTY = "";    
     private static final String TABLE_PREFIX = "_report_";
     private static final String REGEX_NUMERIC = "([0-9]*)";
-/*
-    private static final Map<String, String> MODE_ID_MAP = new HashMap<String, String>() { {
-        put( MODE_INDICATORS, INDICATOR_ID );
-        put( MODE_DATAELEMENTS, DATAELEMENT_ID );
-        put( MODE_DATASETS, DATASET_ID );
-    } };
-    
-    private static final Map<String, String> MODE_NAME_MAP = new HashMap<String, String>() { {
-        put( MODE_INDICATORS, INDICATOR_NAME );
-        put( MODE_DATAELEMENTS, DATAELEMENT_NAME );
-        put( MODE_DATASETS, DATASET_NAME );
-    } };
-*/
+
     public static final Map<Class<? extends IdentifiableObject>, String> CLASS_ID_MAP = new HashMap<Class<? extends IdentifiableObject>, String>() { {
         put( Indicator.class, INDICATOR_ID );
         put( DataElement.class, DATAELEMENT_ID );
@@ -299,18 +280,6 @@ public class ReportTable
     }
     
     /**
-     * Constructor for testing purposes.
-     * 
-     * @param name the name.
-     * @param tableName the table name.
-     */
-    public ReportTable( String name, String tableName )
-    {
-        this.name = name;
-        this.tableName = tableName;
-    }
-
-    /**
      * Default constructor.
      * 
      * @param name the name.
@@ -377,7 +346,9 @@ public class ReportTable
 
     public void init()
     {
-        verify( nonEmptyLists( dataElements, indicators, dataSets ) > 0, "One of dataelements, indicators, and datasets size must be larger than 0" );
+        verify( nonEmptyLists( dataElements, indicators, dataSets ) > 0, "Must contain dataelements, indicators, or datasets" );
+        verify( nonEmptyLists( periods, relativePeriods ) > 0, "Must contain periods or relative periods" );
+        verify( nonEmptyLists( units, relativeUnits ) > 0, "Must contain organisation units or relative organisation units" );
         verify( i18nFormat != null, "I18n format must be set" );
         
         // ---------------------------------------------------------------------
@@ -431,140 +402,6 @@ public class ReportTable
             indexColumns.add( ORGANISATIONUNIT_ID );
             indexNameColumns.add( ORGANISATIONUNIT_NAME );
         }
-
-        // ---------------------------------------------------------------------
-        // Init indexColumns and selectColumns
-        // ---------------------------------------------------------------------
-/*
-        if ( isDoIndicators() )
-        {
-            crossTabIndicators = new ArrayList<IdentifiableObject>();
-            crossTabIndicators.addAll( indicators );
-            crossTabIndicators.addAll( dataElements );
-            crossTabIndicators.addAll( dataSets );
-            reportIndicators.add( null );
-            selectColumns.add( MODE_ID_MAP.get( mode ) );
-        }
-        else
-        {
-            crossTabIndicators.add( null );
-            reportIndicators = new ArrayList<IdentifiableObject>();
-            reportIndicators.addAll( indicators );
-            reportIndicators.addAll( dataElements );
-            reportIndicators.addAll( dataSets );
-            indexColumns.add( MODE_ID_MAP.get( mode ) );
-            indexNameColumns.add( MODE_NAME_MAP.get( mode ) );
-        }
-        
-        if ( isDimensional() ) // Category options will be crosstab if dimensional
-        {
-            reportCategoryOptionCombos.add( null );
-            
-            if ( listIsNonEmpty( categoryOptionCombos ) ) // Optional dimension
-            {
-                crossTabCategoryOptionCombos = categoryOptionCombos;
-                selectColumns.add( CATEGORYCOMBO_ID );
-            }
-            else
-            {
-                crossTabCategoryOptionCombos.add( null );
-            }
-        }
-        else
-        {
-            crossTabCategoryOptionCombos.add( null );
-            
-            if ( listIsNonEmpty( categoryOptionCombos ) ) // Optional dimension
-            {
-                reportCategoryOptionCombos = categoryOptionCombos;
-                indexColumns.add( CATEGORYCOMBO_ID );
-                indexNameColumns.add( CATEGORYCOMBO_NAME );
-            }
-            else
-            {
-                reportCategoryOptionCombos.add( null );
-            }
-        }
-        
-        if ( isDoPeriods() )
-        {
-            crossTabPeriods = new ArrayList<Period>( allPeriods );
-            reportPeriods.add( null );
-            selectColumns.add( PERIOD_ID );
-        }
-        else
-        {
-            crossTabPeriods.add( null );
-            reportPeriods = new ArrayList<Period>( removeDuplicates( allPeriods ) ); // Remove potential duplicates from relative periods / params
-            indexColumns.add( PERIOD_ID );
-            indexNameColumns.add( PERIOD_NAME );
-        }
-        
-        if ( isDoUnits() )
-        {
-            crossTabUnits = new ArrayList<OrganisationUnit>( allUnits );
-            reportUnits.add( null );
-            selectColumns.add( ORGANISATIONUNIT_ID );
-        }
-        else
-        {
-            crossTabUnits.add( null );
-            reportUnits = new ArrayList<OrganisationUnit>( removeDuplicates( allUnits ) ); // Remove potential duplicates from params
-            indexColumns.add( ORGANISATIONUNIT_ID );
-            indexNameColumns.add( ORGANISATIONUNIT_NAME );
-        }
-
-        // ---------------------------------------------------------------------
-        // Init crossTabColumns and crossTabIdentifiers
-        // ---------------------------------------------------------------------
-
-        for ( IdentifiableObject indicator : crossTabIndicators )
-        {
-            for ( DataElementCategoryOptionCombo categoryOptionCombo : crossTabCategoryOptionCombos )
-            {
-                for ( Period period : crossTabPeriods )
-                {
-                    for ( OrganisationUnit unit : crossTabUnits )
-                    {
-                        String columnName = getColumnName( indicator, categoryOptionCombo, period, unit );
-                        String prettyColumnName = getPrettyColumnName( indicator, categoryOptionCombo, period, unit );
-                        String columnIdentifier = getColumnIdentifier( indicator, categoryOptionCombo, period, unit );
-                        
-                        if ( columnName != null && !columnName.isEmpty() )
-                        {
-                            crossTabColumns.add( columnName );
-                            prettyCrossTabColumns.put( columnName, prettyColumnName );    
-                        }
-                        
-                        crossTabIdentifiers.add( columnIdentifier );
-                    }
-                }
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Init dimensionOptions and dimensionOptionColumns
-        // ---------------------------------------------------------------------
-
-        if ( doTotal() )
-        {
-            verify ( nonEmptyLists( categoryCombo.getCategories() ) == 1, "Category combo categories size must be larger than 0" );
-            
-            for ( DataElementCategory category : categoryCombo.getCategories() )
-            {
-                for ( DataElementCategoryOption categoryOption : category.getCategoryOptions() )
-                {
-                    String columnName = databaseEncode( TOTAL_COLUMN_PREFIX + categoryOption.getName() );
-                    String prettyColumnName = TOTAL_COLUMN_PRETTY_PREFIX + categoryOption.getName();
-                    
-                    categoryOptions.add( categoryOption );
-                    categoryOptionColumns.add( columnName );
-                    prettyCrossTabColumns.put( columnName, prettyColumnName );
-                }
-            }
-            
-            verify( nonEmptyLists( categoryOptions, categoryOptionColumns ) == 2, "Category options size must be larger than 0" );
-        }*/
     }
 
     // -------------------------------------------------------------------------
@@ -625,18 +462,6 @@ public class ReportTable
     public boolean doTotal()
     {
         return !isDoIndicators() && !isDoPeriods() && !isDoUnits() && isDimensional();
-    }
-    
-    public List<String> getColumnNames()
-    {
-        List<String> columns = new ArrayList<String>();
-        
-        for ( List<IdentifiableObject> column : getColumns() )
-        {
-            columns.add( getColumnName( column ) );
-        }
-        
-        return columns;
     }
     
     /**
@@ -709,6 +534,23 @@ public class ReportTable
         
         return getIdentifier( identifiers.toArray( SRT ) );
     }
+
+    /**
+     * Generates a grid column identifier based on the argument identifiers.
+     */
+    public static String getIdentifier( List<IdentifiableObject> objects, Class<? extends IdentifiableObject> clazz, int id )
+    {
+        List<String> identifiers = new ArrayList<String>();
+        
+        for ( IdentifiableObject object : objects )
+        {
+            identifiers.add( getIdentifier( object.getClass(), object.getId() ) );
+        }
+        
+        identifiers.add( getIdentifier( clazz, id ) );
+        
+        return getIdentifier( identifiers.toArray( SRT  ) );
+    }
     
     /**
      * Generates a grid column identifier based on the argument identifiers.
@@ -717,11 +559,11 @@ public class ReportTable
     {
         List<String> ids = Arrays.asList( identifiers );
         
-        Collections.sort( ids ); // Sort since the order should not be significant
+        Collections.sort( ids ); // Sort to remove the significance of the order
         
         return StringUtils.join( identifiers, SEPARATOR );
     }
-    
+        
     /**
      * Returns a grid identifier based on the argument class and id.
      */
@@ -752,6 +594,57 @@ public class ReportTable
     public boolean hasDataSets()
     {
         return dataSets != null && dataSets.size() > 0;
+    }
+
+    /**
+     * Database encodes the argument string. Remove non-character data from the
+     * string, prefixes the string if it starts with a numeric character and
+     * truncates the string if it is longer than 255 characters.
+     */
+    public static String databaseEncode( String string )
+    {
+        if ( string != null )
+        {
+            string = string.toLowerCase();
+            
+            string = string.replaceAll( " ", EMPTY_REPLACEMENT );
+            string = string.replaceAll( "-", EMPTY );
+            string = string.replaceAll( "<", EMPTY_REPLACEMENT + "lt" + EMPTY_REPLACEMENT );
+            string = string.replaceAll( ">", EMPTY_REPLACEMENT + "gt" + EMPTY_REPLACEMENT );
+            
+            StringBuffer buffer = new StringBuffer();
+            
+            Pattern pattern = Pattern.compile( "[a-zA-Z0-9_]" );            
+            Matcher matcher = pattern.matcher( string );
+            
+            while ( matcher.find() )
+            {
+                buffer.append( matcher.group() );
+            }
+            
+            string = buffer.toString();            
+            string = string.replaceAll( EMPTY_REPLACEMENT + "+", EMPTY_REPLACEMENT );
+
+            // -----------------------------------------------------------------
+            // Cannot start with numeric character
+            // -----------------------------------------------------------------
+
+            if ( string.length() > 0 && string.substring( 0, 1 ).matches( REGEX_NUMERIC ) )
+            {
+                string = SEPARATOR + string;
+            }
+
+            // -----------------------------------------------------------------
+            // Cannot be longer than 255 characters
+            // -----------------------------------------------------------------
+
+            if ( string.length() > 255 )
+            {
+                string = string.substring( 0, 255 );
+            }
+        }
+        
+        return string;
     }
     
     // -------------------------------------------------------------------------
@@ -809,59 +702,6 @@ public class ReportTable
         }
         
         return nonEmpty;
-    }
-    
-    /**
-     * Database encodes the argument string. Remove non-character data from the
-     * string, prefixes the string if it starts with a numeric character and
-     * truncates the string if it is longer than 255 characters.
-     */
-    private static String databaseEncode( String string )
-    {
-        if ( string != null )
-        {
-            string = string.toLowerCase();
-            
-            string = string.replaceAll( " ", EMPTY_REPLACEMENT );
-            string = string.replaceAll( "-", EMPTY );
-            string = string.replaceAll( "<", EMPTY_REPLACEMENT + "lt" + EMPTY_REPLACEMENT );
-            string = string.replaceAll( ">", EMPTY_REPLACEMENT + "gt" + EMPTY_REPLACEMENT );
-            
-            StringBuffer buffer = new StringBuffer();
-            
-            Pattern pattern = Pattern.compile( "[a-zA-Z0-9_]" );
-            
-            Matcher matcher = pattern.matcher( string );
-            
-            while ( matcher.find() )
-            {
-                buffer.append( matcher.group() );
-            }
-            
-            string = buffer.toString();
-            
-            string = string.replaceAll( EMPTY_REPLACEMENT + "+", EMPTY_REPLACEMENT );
-
-            // -----------------------------------------------------------------
-            // Cannot start with numeric character
-            // -----------------------------------------------------------------
-
-            if ( string.length() > 0 && string.substring( 0, 1 ).matches( REGEX_NUMERIC ) )
-            {
-                string = SEPARATOR + string;
-            }
-
-            // -----------------------------------------------------------------
-            // Cannot be longer than 255 characters
-            // -----------------------------------------------------------------
-
-            if ( string.length() > 255 )
-            {
-                string = string.substring( 0, 255 );
-            }
-        }
-        
-        return string;
     }
     
     /**
