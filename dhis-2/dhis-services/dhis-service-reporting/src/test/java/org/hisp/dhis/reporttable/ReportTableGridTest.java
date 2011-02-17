@@ -193,7 +193,7 @@ public class ReportTableGridTest
         
         categoryOptionComboIdA = categoryOptionComboA.getId();
         categoryOptionComboIdB = categoryOptionComboB.getId();
-                
+
         categoryOptionCombos.add( categoryOptionComboA );        
         categoryOptionCombos.add( categoryOptionComboB );
         
@@ -350,7 +350,7 @@ public class ReportTableGridTest
         int id = reportTableService.saveReportTable( reportTable );
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
-        
+
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 7 ) );
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 8 ) );
         
@@ -374,7 +374,7 @@ public class ReportTableGridTest
         int id = reportTableService.saveReportTable( reportTable );
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
-        
+
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 5 ) );
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 6 ) );
         assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 7 ) );
@@ -523,20 +523,63 @@ public class ReportTableGridTest
     }
 
     @Test
+    public void testGetCategoryComboReportTableA()
+    {
+        BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
+        
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 11 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 12 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 13 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 14 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 15 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 16 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 17 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 18 ) );  
+        
+        batchHandler.flush();
+        
+        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
+            categoryComboA, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
+        
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 5 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 6 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 7 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 0 ).get( 8 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 9 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 10 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 11 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 0 ).get( 12 ) );
+
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 5 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 6 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 7 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 8 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 9 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 1 ).get( 10 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 11 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 12 ) );
+    }
+
+    @Test
     public void testGetCategoryComboReportTableB()
     {
-        BatchHandler<AggregatedDataValue> dataValueBatchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
+        BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
         
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 11 ) );
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 12 ) );
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 13 ) );
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 14 ) );
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 15 ) );
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 16 ) );
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 17 ) );
-        dataValueBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 18 ) );  
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 11 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 12 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 13 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 14 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 15 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 16 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 17 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 18 ) );  
         
-        dataValueBatchHandler.flush();
+        batchHandler.flush();
         
         ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
@@ -546,7 +589,68 @@ public class ReportTableGridTest
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
         
-        System.out.println( grid );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 7 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 8 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 9 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 10 ) );
+        
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 1 ).get( 7 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 1 ).get( 8 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 9 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 10 ) );
+        
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 2 ).get( 7 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 2 ).get( 8 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 2 ).get( 9 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 2 ).get( 10 ) );
+
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 3 ).get( 7 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 3 ).get( 8 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 3 ).get( 9 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 3 ).get( 10 ) );
+    }
+
+    @Test
+    public void testGetCategoryComboReportTableC()
+    {
+        BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
+        
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 11 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 12 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 13 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 14 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 15 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 16 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 17 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 18 ) );  
+        
+        batchHandler.flush();
+        
+        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            categoryComboA, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
+        
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 5 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 6 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 7 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 8 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 9 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 0 ).get( 10 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 0 ).get( 11 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 0 ).get( 12 ) );
+        
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 1 ).get( 5 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 1 ).get( 6 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 7 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 1 ).get( 8 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 1 ).get( 9 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 1 ).get( 10 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 11 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 12 ) );
     }
     
     @Test

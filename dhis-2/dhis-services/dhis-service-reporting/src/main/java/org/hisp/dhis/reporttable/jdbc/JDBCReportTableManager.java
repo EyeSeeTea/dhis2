@@ -150,7 +150,7 @@ public class JDBCReportTableManager
 
         try
         {
-            if ( reportTable.getDataElements().size() > 0 )
+            if ( reportTable.getDataElements().size() > 0 && !reportTable.isDimensional() )
             {
                 final String sql = "SELECT dataelementid, periodid, organisationunitid, SUM(value) FROM aggregateddatavalue " + 
                     "WHERE dataelementid IN (" + dataElementIds + ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds + ") " + 
@@ -216,7 +216,7 @@ public class JDBCReportTableManager
                         getIdentifier( Period.class, resultSet.getInt( 3 ) ),
                         getIdentifier( OrganisationUnit.class, resultSet.getInt( 4 ) ) );
     
-                    map.put( id, resultSet.getDouble( 4 ) );
+                    map.put( id, resultSet.getDouble( 5 ) );
                 }
             }
 
