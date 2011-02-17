@@ -224,9 +224,6 @@ public class JDBCReportTableManager
             {
                 for ( DataElementCategoryOption categoryOption : reportTable.getCategoryCombo().getCategoryOptions() )
                 {
-                    System.out.println( "catop " + categoryOption );
-                    System.out.println( "catop " +  categoryOption.getCategoryOptionCombos() );
-                    System.out.println( "catop s " +  categoryOption.getCategoryOptionCombos().size() );
                     String cocIds = TextUtils.getCommaDelimitedString( 
                         ConversionUtils.getIdentifiers( DataElementCategoryOptionCombo.class, categoryOption.getCategoryOptionCombos() ) );
                     

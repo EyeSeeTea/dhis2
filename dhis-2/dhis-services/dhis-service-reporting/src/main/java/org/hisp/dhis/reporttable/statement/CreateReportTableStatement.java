@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.reporttable.ReportTable;
 
@@ -105,7 +106,6 @@ public class CreateReportTableStatement
         // Crosstab
         // ---------------------------------------------------------------------
 
-        //for ( String column : reportTable.getCrossTabColumns() )
         for ( List<IdentifiableObject> column : reportTable.getColumns() )
         {
             buffer.append( getColumnName( column ) + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
@@ -115,16 +115,15 @@ public class CreateReportTableStatement
         // Total
         // ---------------------------------------------------------------------
 
-        /* //TODO fix
         if ( reportTable.doTotal() )
         {
-            for ( String column : reportTable.getCategoryOptionColumns() )
+            for ( DataElementCategoryOption categoryOption : reportTable.getCategoryCombo().getCategoryOptions() )
             {
-                buffer.append( column + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
+                buffer.append( databaseEncode( categoryOption.getShortName() ) + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
             }
             
             buffer.append( ReportTable.TOTAL_COLUMN_NAME + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
-        }*/
+        }
         
         // ---------------------------------------------------------------------
         // Regression
@@ -132,7 +131,6 @@ public class CreateReportTableStatement
 
         if ( reportTable.isRegression() )
         {
-            //for ( String column : reportTable.getCrossTabColumns() )
             for ( List<IdentifiableObject> column : reportTable.getColumns() )
             {
                 buffer.append( REGRESSION_COLUMN_PREFIX + getColumnName( column ) + SPACE + statementBuilder.getDoubleColumnType() + SEPARATOR );
