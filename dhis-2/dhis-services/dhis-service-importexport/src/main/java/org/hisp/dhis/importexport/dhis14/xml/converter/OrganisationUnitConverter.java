@@ -111,7 +111,7 @@ public class OrganisationUnitConverter
                 
                 writer.writeElement( FIELD_ID, String.valueOf( unit.getId() ) );
                 writer.writeElement( FIELD_CODE, unit.getCode() );
-                writer.writeElement( FIELD_LEVEL, "" );
+                writer.writeElement( FIELD_LEVEL, String.valueOf(unit.getLevel()) );
                 writer.writeElement( FIELD_NAME, unit.getName() );
                 writer.writeElement( FIELD_SHORT_NAME, unit.getShortName() );
                 writer.writeElement( FIELD_VALID_FROM, String.valueOf( VALID_FROM ) );
