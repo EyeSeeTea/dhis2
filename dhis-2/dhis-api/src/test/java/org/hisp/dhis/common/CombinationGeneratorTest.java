@@ -203,6 +203,19 @@ public class CombinationGeneratorTest
         assertTrue( equals( objects.get( 11 ), b, b, c ) );
         assertNull( generator.getNext() );
     }
+    
+    @Test
+    public void testGetCombinationsC()
+    {
+        IdentifiableObject[] a1 = {};
+        
+        CombinationGenerator<IdentifiableObject> generator = new CombinationGenerator<IdentifiableObject>( a1 );
+
+        List<List<IdentifiableObject>> objects = generator.getCombinations();
+
+        assertEquals( 0, objects.size() );
+        assertNull( generator.getNext() );
+    }
       
     private static boolean equals( List<IdentifiableObject> objects, IdentifiableObject... integers )
     {
