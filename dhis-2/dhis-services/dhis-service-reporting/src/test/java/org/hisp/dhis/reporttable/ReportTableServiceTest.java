@@ -347,7 +347,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataElementReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATAELEMENTS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -361,7 +361,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataElementReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATAELEMENTS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
@@ -375,7 +375,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataElementReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATAELEMENTS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
@@ -389,7 +389,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataElementWithCategoryOptionComboReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATAELEMENTS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             categoryComboA, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -403,7 +403,7 @@ public class ReportTableServiceTest
     @Test    
     public void testCreateDataElementWithCategoryOptionComboReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATAELEMENTS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             categoryComboA, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
@@ -417,7 +417,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataElementWithCategoryOptionComboReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATAELEMENTS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             categoryComboA, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
@@ -431,7 +431,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateIndicatorReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -445,7 +445,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateIndicatorReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
@@ -459,7 +459,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateIndicatorReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
@@ -473,7 +473,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataSetReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATASETS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -487,7 +487,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataSetReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATASETS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
@@ -501,7 +501,7 @@ public class ReportTableServiceTest
     @Test
     public void testCreateDataSetReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_DATASETS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, true, false, true, relatives, null, i18nFormat, "january_2000" );
 

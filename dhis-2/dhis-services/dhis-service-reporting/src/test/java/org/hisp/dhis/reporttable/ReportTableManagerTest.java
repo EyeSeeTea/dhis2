@@ -206,7 +206,7 @@ public class ReportTableManagerTest
     @Test
     public void testCreateReportTable()
     {
-        ReportTable reportTable = new ReportTable( "Immunization", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Immunization", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -214,7 +214,7 @@ public class ReportTableManagerTest
         
         reportTableManager.createReportTable( reportTable );
         
-        reportTable = new ReportTable( "Immunization", ReportTable.MODE_DATAELEMENTS, false,
+        reportTable = new ReportTable( "Immunization", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -222,7 +222,7 @@ public class ReportTableManagerTest
         
         reportTableManager.createReportTable( reportTable );
         
-        reportTable = new ReportTable( "Immunization", ReportTable.MODE_DATAELEMENTS, false,
+        reportTable = new ReportTable( "Immunization", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -234,7 +234,7 @@ public class ReportTableManagerTest
     @Test
     public void testRemoveReportTable()
     {
-        ReportTable reportTable = new ReportTable( "Immunization", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Immunization", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -242,7 +242,7 @@ public class ReportTableManagerTest
         
         reportTableManager.removeReportTable( reportTable );
 
-        reportTable = new ReportTable( "Immunization", ReportTable.MODE_DATAELEMENTS, false,
+        reportTable = new ReportTable( "Immunization", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -250,7 +250,7 @@ public class ReportTableManagerTest
         
         reportTableManager.removeReportTable( reportTable );
 
-        reportTable = new ReportTable( "Immunization", ReportTable.MODE_DATAELEMENTS, false,
+        reportTable = new ReportTable( "Immunization", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 

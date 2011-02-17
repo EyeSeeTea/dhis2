@@ -152,7 +152,7 @@ public class ReportTableStatementTest
     @Test
     public void testCreateReportTableStatement()
     {
-        ReportTable reportTable = new ReportTable( "Immunization", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Immunization", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
         
@@ -162,7 +162,7 @@ public class ReportTableStatementTest
 
         assertNotNull( statement.getStatement() );
         
-        reportTable = new ReportTable( "Immunization", ReportTable.MODE_DATAELEMENTS, false,
+        reportTable = new ReportTable( "Immunization", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -172,7 +172,7 @@ public class ReportTableStatementTest
         
         assertNotNull( statement.getStatement() );
         
-        reportTable = new ReportTable( "Immunization", ReportTable.MODE_INDICATORS, false,
+        reportTable = new ReportTable( "Immunization", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
@@ -186,7 +186,7 @@ public class ReportTableStatementTest
     @Test
     public void testRemoveReportTableStatement()
     {
-        ReportTable reportTable = new ReportTable( "Immunization", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Immunization", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 

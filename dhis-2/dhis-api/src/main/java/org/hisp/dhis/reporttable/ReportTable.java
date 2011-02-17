@@ -41,6 +41,7 @@ import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -64,6 +65,8 @@ public class ReportTable
     public static final String DATAELEMENT_NAME = "dataelementname";
     public static final String CATEGORYCOMBO_ID = "categoryoptioncomboid";
     public static final String CATEGORYCOMBO_NAME = "categoryoptioncomboname";
+    public static final String CATEGORYOPTION_ID = "categoryoptionid";
+    public static final String CATEGORYOPTION_NAME = "categoryoptionname";
     public static final String INDICATOR_ID = "indicatorid";
     public static final String INDICATOR_NAME = "indicatorname";
     public static final String DATASET_ID = "datasetid";
@@ -80,10 +83,12 @@ public class ReportTable
     public static final String SEPARATOR = "_";
     public static final String SPACE = " ";
     
+    /*
     public static final String MODE_DATAELEMENTS = "dataelements";
     public static final String MODE_INDICATORS = "indicators";
     public static final String MODE_DATASETS = "datasets";
-
+*/
+    
     public static final String TOTAL_COLUMN_NAME = "total";
     public static final String TOTAL_COLUMN_PREFIX = "total_";
     public static final String TOTAL_COLUMN_PRETTY_PREFIX = "Total ";
@@ -129,6 +134,7 @@ public class ReportTable
         put( Indicator.class, INDICATOR_ID );
         put( DataElement.class, DATAELEMENT_ID );
         put( DataElementCategoryOptionCombo.class, CATEGORYCOMBO_ID );
+        put( DataElementCategoryOption.class, CATEGORYOPTION_ID );
         put( DataSet.class, DATASET_ID );
         put( Period.class, PERIOD_ID );
         put( OrganisationUnit.class, ORGANISATIONUNIT_ID );
@@ -150,11 +156,6 @@ public class ReportTable
      * The name of the existing database table.
      */
     private String existingTableName;
-    
-    /**
-     * The ReportTable mode, can be dataelement, indicators, datasets.
-     */
-    private String mode;
     
     /**
      * Whether the ReportTable contains regression columns.
@@ -332,7 +333,6 @@ public class ReportTable
      * @param reportingMonthName the reporting month name. Not persisted.
      */
     public ReportTable( String name,
-        String mode,
         boolean regression,
         List<DataElement> dataElements,
         List<Indicator> indicators,
@@ -353,7 +353,6 @@ public class ReportTable
         this.name = name;
         this.tableName = generateTableName( name );
         this.existingTableName = generateTableName( name );
-        this.mode = mode;
         this.regression = regression;
         this.dataElements = dataElements;
         this.indicators = indicators;
@@ -625,8 +624,7 @@ public class ReportTable
      */
     public boolean doTotal()
     {
-        return !isDoIndicators() && !isDoPeriods() && !isDoUnits() && 
-            isDimensional() && mode.equals( MODE_DATAELEMENTS );
+        return !isDoIndicators() && !isDoPeriods() && !isDoUnits() && isDimensional();
     }
     
     public List<String> getColumnNames()
@@ -681,6 +679,15 @@ public class ReportTable
         
         return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : column;
     }
+
+    /**
+     * Generates a grid identifier based on the internal identifiers of the
+     * argument objects.
+     */
+    public static String getIdentifier( List<IdentifiableObject> objects )
+    {
+        return getIdentifier( objects, new ArrayList<IdentifiableObject>() );
+    }
     
     /**
      * Generates a grid identifier based on the internal identifiers of the
@@ -721,6 +728,30 @@ public class ReportTable
     public static String getIdentifier( Class<? extends IdentifiableObject> clazz, int id )
     {
         return CLASS_ID_MAP.get( clazz ) + id;
+    }
+    
+    /**
+     * Indicates whether the report table contains data elements.
+     */
+    public boolean hasDataElements()
+    {
+        return dataElements != null && dataElements.size() > 0;
+    }
+    
+    /**
+     * Indicates whether the report table contains indicators.
+     */
+    public boolean hasIndicators()
+    {
+        return indicators != null && indicators.size() > 0;
+    }
+    
+    /**
+     * Indicates whether the report table contains data sets.
+     */
+    public boolean hasDataSets()
+    {
+        return dataSets != null && dataSets.size() > 0;
     }
     
     // -------------------------------------------------------------------------
@@ -940,16 +971,6 @@ public class ReportTable
     public void setExistingTableName( String existingTableName )
     {
         this.existingTableName = existingTableName;
-    }
-
-    public String getMode()
-    {
-        return mode;
-    }
-
-    public void setMode( String mode )
-    {
-        this.mode = mode;
     }
 
     public Boolean getRegression()

@@ -172,16 +172,15 @@ public class DefaultReportTableService
 
         if ( doDataMart )
         {
-            String mode = reportTable.getMode();
-            
-            if ( mode.equals( ReportTable.MODE_DATAELEMENTS ) || mode.equals( ReportTable.MODE_INDICATORS ) )
+            if ( reportTable.hasDataElements() || reportTable.hasIndicators() )
             {
                 dataMartService.export( getIdentifiers( DataElement.class, reportTable.getDataElements() ),
                     getIdentifiers( Indicator.class, reportTable.getIndicators() ),
                     getIdentifiers( Period.class, reportTable.getAllPeriods() ),
                     getIdentifiers( OrganisationUnit.class, reportTable.getAllUnits() ) );
             }
-            else if ( mode.equals( ReportTable.MODE_DATASETS ) )
+            
+            if ( reportTable.hasDataSets() )
             {
                 completenessService.exportDataSetCompleteness( getIdentifiers( DataSet.class, reportTable.getDataSets() ),
                     getIdentifiers( Period.class, reportTable.getAllPeriods() ),
@@ -471,6 +470,11 @@ public class DefaultReportTableService
             grid.addHeader( new GridHeader( getPrettyColumnName( column ), getColumnName( column ), Double.class.getName(), false, false ) );
         }
         
+        if ( reportTable.doTotal() )
+        {
+            grid.addHeader( new GridHeader( "Total", "Total", String.class.getName(), false, true ) );
+        }
+        
         // TODO Totals...
         
         // ---------------------------------------------------------------------
@@ -500,6 +504,10 @@ public class DefaultReportTableService
                 grid.addValue( parseAndReplaceNull( map.get( getIdentifier( row, column ) ) ) ); // Values
             }
             
+            if ( reportTable.doTotal() )
+            {
+                grid.addValue( parseAndReplaceNull( map.get( getIdentifier( row ) ) ) ); // Only category option combo is crosstab when total, row identifier will return total
+            }
             // TODO Total categories...
         }
         

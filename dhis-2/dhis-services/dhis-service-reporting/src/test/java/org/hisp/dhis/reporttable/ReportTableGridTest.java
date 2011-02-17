@@ -321,7 +321,7 @@ public class ReportTableGridTest
     @Test
     public void testGetIndicatorReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -343,7 +343,7 @@ public class ReportTableGridTest
     @Test
     public void testGetIndicatorReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -367,7 +367,7 @@ public class ReportTableGridTest
     @Test
     public void testGetIndicatorReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -389,7 +389,7 @@ public class ReportTableGridTest
     @Test
     public void testGetDataElementReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -411,7 +411,7 @@ public class ReportTableGridTest
     @Test
     public void testGetDataElementReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -435,7 +435,7 @@ public class ReportTableGridTest
     @Test
     public void testGetDataElementReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -457,7 +457,7 @@ public class ReportTableGridTest
     @Test
     public void testGetDataSetReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -479,7 +479,7 @@ public class ReportTableGridTest
     @Test
     public void testGetDataSetReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -503,7 +503,7 @@ public class ReportTableGridTest
     @Test
     public void testGetDataSetReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -538,7 +538,7 @@ public class ReportTableGridTest
         
         batchHandler.flush();
         
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             categoryComboA, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -581,7 +581,7 @@ public class ReportTableGridTest
         
         batchHandler.flush();
         
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             categoryComboA, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -626,14 +626,14 @@ public class ReportTableGridTest
         
         batchHandler.flush();
         
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             categoryComboA, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
         Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
-        
+                
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 5 ) );
         assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 6 ) );
         assertEquals( String.valueOf( 12.0 ), grid.getRow( 0 ).get( 7 ) );
@@ -652,11 +652,70 @@ public class ReportTableGridTest
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 11 ) );
         assertEquals( String.valueOf( 18.0 ), grid.getRow( 1 ).get( 12 ) );
     }
+
+    @Test
+    public void testGetCategoryComboReportTableTotal()
+    {
+        BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
+        
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 11 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 12 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 13 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 14 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdA, 8, 15 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdA, 8, unitIdB, 8, 16 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdA, 8, 17 ) );
+        batchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdB, periodIdB, 8, unitIdB, 8, 18 ) );  
+        
+        batchHandler.flush();
+        
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
+            categoryComboA, false, false, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, 0, 0 );
+
+        System.out.println( grid );
+        
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 9 ) );
+        assertEquals( String.valueOf( 11.0 ), grid.getRow( 0 ).get( 10 ) );
+        assertEquals( String.valueOf( 22.0 ), grid.getRow( 0 ).get( 11 ) );
+
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 9 ) );
+        assertEquals( String.valueOf( 12.0 ), grid.getRow( 1 ).get( 10 ) );
+        assertEquals( String.valueOf( 24.0 ), grid.getRow( 1 ).get( 11 ) );
+
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 2 ).get( 9 ) );
+        assertEquals( String.valueOf( 13.0 ), grid.getRow( 2 ).get( 10 ) );
+        assertEquals( String.valueOf( 26.0 ), grid.getRow( 2 ).get( 11 ) );
+
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 3 ).get( 9 ) );
+        assertEquals( String.valueOf( 14.0 ), grid.getRow( 3 ).get( 10 ) );
+        assertEquals( String.valueOf( 28.0 ), grid.getRow( 3 ).get( 11 ) );
+        
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 4 ).get( 9 ) );
+        assertEquals( String.valueOf( 15.0 ), grid.getRow( 4 ).get( 10 ) );
+        assertEquals( String.valueOf( 30.0 ), grid.getRow( 4 ).get( 11 ) );
+
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 5 ).get( 9 ) );
+        assertEquals( String.valueOf( 16.0 ), grid.getRow( 5 ).get( 10 ) );
+        assertEquals( String.valueOf( 32.0 ), grid.getRow( 5 ).get( 11 ) );
+
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 6 ).get( 9 ) );
+        assertEquals( String.valueOf( 17.0 ), grid.getRow( 6 ).get( 10 ) );
+        assertEquals( String.valueOf( 34.0 ), grid.getRow( 6 ).get( 11 ) );
+
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 7 ).get( 9 ) );
+        assertEquals( String.valueOf( 18.0 ), grid.getRow( 7 ).get( 10 ) );
+        assertEquals( String.valueOf( 36.0 ), grid.getRow( 7 ).get( 11 ) );
+    }
     
     @Test
     public void testGetMultiReportTableA()
     {
-        ReportTable reportTable = new ReportTable( "Prescriptions", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
             null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -694,7 +753,7 @@ public class ReportTableGridTest
     @Test
     public void testGetMultiReportTableB()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false,
+        ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
@@ -742,7 +801,7 @@ public class ReportTableGridTest
     @Test
     public void testGetMultiReportTableC()
     {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_INDICATORS, false, 
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
             null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
