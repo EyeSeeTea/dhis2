@@ -131,8 +131,7 @@ public class JDBCReportTableManager
 
     public Map<String, Double> getAggregatedValueMap( ReportTable reportTable )
     {
-        // TODO move agg value methods to agg datavalueservice and move this
-        // method to service layer
+        // TODO move agg value methods to agg datavalueservice and move this method to service layer?
 
         StatementHolder holder = statementManager.getHolder();
 
@@ -235,7 +234,7 @@ public class JDBCReportTableManager
                         "WHERE dataelementid IN (" + dataElementIds + ") AND categoryoptioncomboid IN (" + cocIds +
                         ") AND periodid IN (" + periodIds + ") AND organisationunitid IN (" + unitIds +
                         ") GROUP BY dataelementid, periodid, organisationunitid"; // Sum of category option combos
-                    System.out.println( "sql " + sql );
+                    
                     ResultSet resultSet = holder.getStatement().executeQuery( sql );
                     
                     while ( resultSet.next() )
@@ -246,7 +245,6 @@ public class JDBCReportTableManager
                             getIdentifier( DataElementCategoryOption.class, categoryOption.getId() ) );
         
                         map.put( id, resultSet.getDouble( 4 ) );
-                        System.out.println( id + ", " + resultSet.getDouble( 4 ) );
                     }
                 }
             }

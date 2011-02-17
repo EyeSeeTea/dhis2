@@ -519,7 +519,6 @@ public class DefaultReportTableService
                 
                 grid.addValue( toString( map.get( getIdentifier( row ) ) ) ); // Only category option combo is crosstab when total, row identifier will return total
             }
-            // TODO Total categories...
         }
         
         return grid;
