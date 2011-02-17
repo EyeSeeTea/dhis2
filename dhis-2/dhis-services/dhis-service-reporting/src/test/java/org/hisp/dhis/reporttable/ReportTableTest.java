@@ -652,151 +652,92 @@ public class ReportTableTest
         List<List<IdentifiableObject>> columns = reportTable.getColumns();
 
         assertNotNull( columns );
-        assertEquals( 8, columns.size() );
+        assertEquals( 4, columns.size() );
+
+        Iterator<List<IdentifiableObject>> iterator = columns.iterator();
+        
+        assertEquals( getList( unitA, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( unitA, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( unitB, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( unitB, categoryOptionComboB ), iterator.next() );
+        
+        List<String> columnNames = reportTable.getColumnNames();
+        
+        assertNotNull( columnNames );
+        assertEquals( 4, columnNames.size() );
+
+        List<List<IdentifiableObject>> rows = reportTable.getRows();
+        
+        assertNotNull( rows );
+        assertEquals( 8, rows.size() );
+
+        iterator = rows.iterator();
+        
+        assertEquals( getList( dataElementA, periodA ), iterator.next() );
+        assertEquals( getList( dataElementA, periodB ), iterator.next() );
+        assertEquals( getList( dataElementA, periodC ), iterator.next() );
+        assertEquals( getList( dataElementA, periodD ), iterator.next() );
+        assertEquals( getList( dataElementB, periodA ), iterator.next() );
+        assertEquals( getList( dataElementB, periodB ), iterator.next() );
+        assertEquals( getList( dataElementB, periodC ), iterator.next() );
+        assertEquals( getList( dataElementB, periodD ), iterator.next() );
     }
-/*
+
     @Test
-    public void testDataElementWithCategoryOptionReportTableA()
+    public void testCategoryComboReportTableC()
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_DATAELEMENTS, false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryCombo, true, true, false, relatives, null, i18nFormat, "january_2000" );
+            categoryCombo, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
         List<String> indexColumns = reportTable.getIndexColumns();
-        
+
         assertNotNull( indexColumns );
         assertEquals( 1, indexColumns.size() );
-        assertTrue( indexColumns.contains( ReportTable.ORGANISATIONUNIT_ID ) );
-        
+        assertTrue( indexColumns.contains( ReportTable.PERIOD_ID ) );
+
         List<String> indexNameColumns = reportTable.getIndexNameColumns();
 
         assertNotNull( indexNameColumns );
         assertEquals( 1, indexNameColumns.size() );
-        assertTrue( indexNameColumns.contains( ReportTable.ORGANISATIONUNIT_NAME ) );
-        
-        List<String> selectColumns = reportTable.getSelectColumns();
-        
-        assertNotNull( selectColumns );
-        assertEquals( 3, selectColumns.size() );
-        assertTrue( selectColumns.contains( ReportTable.DATAELEMENT_ID ) );
-        assertTrue( selectColumns.contains( ReportTable.CATEGORYCOMBO_ID ) );        
-        assertTrue( selectColumns.contains( ReportTable.PERIOD_ID ) );
-        
-        List<String> crossTabColumns = reportTable.getCrossTabColumns();
-        
-        assertNotNull( crossTabColumns );        
-        assertEquals( 16, crossTabColumns.size() );
-        
-        assertTrue( crossTabColumns.contains( "shortnamea_categoryoptiona_categoryoptionb_reporting_month" ) );
-        assertTrue( crossTabColumns.contains( "shortnamea_categoryoptiona_categoryoptionb_year" ) );
-        assertTrue( crossTabColumns.contains( "shortnamea_categoryoptionc_categoryoptiond_reporting_month" ) );
-        assertTrue( crossTabColumns.contains( "shortnamea_categoryoptionc_categoryoptiond_year" ) );
-        assertTrue( crossTabColumns.contains( "shortnameb_categoryoptiona_categoryoptionb_reporting_month" ) );
-        assertTrue( crossTabColumns.contains( "shortnameb_categoryoptiona_categoryoptionb_year" ) );
-        assertTrue( crossTabColumns.contains( "shortnameb_categoryoptionc_categoryoptiond_reporting_month" ) );
-        assertTrue( crossTabColumns.contains( "shortnameb_categoryoptionc_categoryoptiond_year" ) );
-        
-        List<String> crossTabIdentifiers = reportTable.getCrossTabIdentifiers();
-        
-        assertNotNull( crossTabIdentifiers );
-        assertEquals( 16, crossTabIdentifiers.size() );
+        assertTrue( indexNameColumns.contains( ReportTable.PERIOD_NAME ) );
 
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'A' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'B' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'C' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'D' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'A' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'B' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'C' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'D' ) ) );
+        List<List<IdentifiableObject>> columns = reportTable.getColumns();
+        
+        assertNotNull( columns );
+        assertEquals( 8, columns.size() );
+        
+        Iterator<List<IdentifiableObject>> iterator = columns.iterator();
+        
+        assertEquals( getList( dataElementA, unitA, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementA, unitA, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementA, unitB, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementA, unitB, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementB, unitA, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementB, unitA, categoryOptionComboB ), iterator.next() );
+        assertEquals( getList( dataElementB, unitB, categoryOptionComboA ), iterator.next() );
+        assertEquals( getList( dataElementB, unitB, categoryOptionComboB ), iterator.next() );
 
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'A' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'B' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'C' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'A' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'D' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'A' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'B' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'C' ) ) );
-        assertTrue( crossTabIdentifiers.contains( DATAELEMENT_ID + Integer.valueOf( 'B' ) + SEPARATOR + CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + PERIOD_ID + Integer.valueOf( 'D' ) ) );
+        List<String> columnNames = reportTable.getColumnNames();
         
-        assertTrue( reportTable.getReportIndicators().contains( null ) );
-        assertTrue( reportTable.getReportPeriods().contains( null ) );
-        assertTrue( reportTable.getReportUnits().size() == 2 );
+        assertNotNull( columnNames );
+        assertEquals( 8, columnNames.size() );
+
+        List<List<IdentifiableObject>> rows = reportTable.getRows();
         
-        Map<String, String> prettyCrossTabColumns = reportTable.getPrettyCrossTabColumns();
+        assertNotNull( rows );
+        assertEquals( 4, rows.size() );
+
+        iterator = rows.iterator();
         
-        assertNotNull( prettyCrossTabColumns );
-        assertEquals( 16, prettyCrossTabColumns.size() );
+        assertEquals( getList( periodA ), iterator.next() );
+        assertEquals( getList( periodB ), iterator.next() );
+        assertEquals( getList( periodC ), iterator.next() );
+        assertEquals( getList( periodD ), iterator.next() );
     }
 
-    @Test
-    public void testDataElementWithCategoryOptionReportTableB()
-    {
-        ReportTable reportTable = new ReportTable( "Embezzlement", ReportTable.MODE_DATAELEMENTS, false,
-            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryCombo, false, false, true, relatives, null, i18nFormat, "january_2000" );
-
-        reportTable.init();
-        
-        List<String> indexColumns = reportTable.getIndexColumns();
-
-        assertNotNull( indexColumns );
-        assertEquals( 2, indexColumns.size() );
-        assertTrue( indexColumns.contains( ReportTable.DATAELEMENT_ID ) );
-        assertTrue( indexColumns.contains( ReportTable.PERIOD_ID ) );        
-
-        List<String> indexNameColumns = reportTable.getIndexNameColumns();
-
-        assertNotNull( indexNameColumns );
-        assertEquals( 2, indexNameColumns.size() );
-        assertTrue( indexNameColumns.contains( ReportTable.DATAELEMENT_NAME ) );
-        assertTrue( indexNameColumns.contains( ReportTable.PERIOD_NAME ) );        
-
-        List<String> selectColumns = reportTable.getSelectColumns();
-        
-        assertNotNull( selectColumns );
-        assertEquals( 2, selectColumns.size() );
-        assertTrue( selectColumns.contains( ReportTable.CATEGORYCOMBO_ID ) );
-        assertTrue( selectColumns.contains( ReportTable.ORGANISATIONUNIT_ID ) );
-        
-        List<String> crossTabColumns = reportTable.getCrossTabColumns();
-        
-        assertNotNull( crossTabColumns );
-        assertEquals( 4, crossTabColumns.size() );
-
-        assertTrue( crossTabColumns.contains( "categoryoptiona_categoryoptionb_shortnamea" ) );
-        assertTrue( crossTabColumns.contains( "categoryoptiona_categoryoptionb_shortnameb" ) );
-        assertTrue( crossTabColumns.contains( "categoryoptionc_categoryoptiond_shortnamea" ) );
-        assertTrue( crossTabColumns.contains( "categoryoptionc_categoryoptiond_shortnameb" ) );
-
-        List<String> crossTabIdentifiers = reportTable.getCrossTabIdentifiers();
-        
-        assertNotNull( crossTabIdentifiers );
-        assertEquals( 4, crossTabIdentifiers.size() );
-        
-        assertTrue( crossTabIdentifiers.contains( CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + ORGANISATIONUNIT_ID + Integer.valueOf( 'A' ) ) );
-        assertTrue( crossTabIdentifiers.contains( CATEGORYCOMBO_ID + Integer.valueOf( 'A' ) + SEPARATOR + ORGANISATIONUNIT_ID + Integer.valueOf( 'B' ) ) );
-        assertTrue( crossTabIdentifiers.contains( CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + ORGANISATIONUNIT_ID + Integer.valueOf( 'A' ) ) );
-        assertTrue( crossTabIdentifiers.contains( CATEGORYCOMBO_ID + Integer.valueOf( 'B' ) + SEPARATOR + ORGANISATIONUNIT_ID + Integer.valueOf( 'B' ) ) );
-
-        assertTrue( reportTable.getReportIndicators().size() == 2 );
-        assertTrue( reportTable.getReportPeriods().size() == 4 );
-        assertTrue( reportTable.getReportUnits().contains( null ) );
-        
-        Map<String, String> prettyCrossTabColumns = reportTable.getPrettyCrossTabColumns();
-        
-        assertNotNull( prettyCrossTabColumns );
-        assertEquals( 4, prettyCrossTabColumns.size() );
-    }
-
-    @Test
-    public void testDataElementWithCategoryOptionReportTableC()
-    {
-        //TODO
-    }
-*/
     @Test
     public void testDataSetReportTableA()
     {
