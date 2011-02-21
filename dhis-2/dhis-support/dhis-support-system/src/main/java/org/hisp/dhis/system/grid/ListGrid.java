@@ -28,8 +28,11 @@ package org.hisp.dhis.system.grid;
  */
 
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
+import static org.hisp.dhis.system.util.MathUtils.isNumeric;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import net.sf.jasperreports.engine.JRException;
@@ -301,6 +304,32 @@ public class ListGrid
         return this;
     }
     
+    public Grid limitGrid( int limit )
+    {
+        if ( limit > 0 )
+        {
+            grid = grid.subList( 0, limit );
+        }
+        
+        return this;
+    }
+    
+    public Grid sortGrid( int columnIndex, int order )
+    {
+        columnIndex = columnIndex - 1;
+        
+        if ( columnIndex < 0 || columnIndex >= getWidth() )
+        {
+            throw new IllegalArgumentException( "Column index out of bounds: " + columnIndex );
+        }
+        
+        System.out.println( "col index: " + columnIndex + " order " + order );
+        
+        Collections.sort( grid, new GridRowComparator( columnIndex, order ) );
+        
+        return this;
+    }
+    
     public Grid addRegressionColumn( int columnIndex )
     {
         verifyGridState();
@@ -344,9 +373,9 @@ public class ListGrid
         return this;
     }
 
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // JRDataSource implementation
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     public boolean next()
         throws JRException
@@ -373,9 +402,9 @@ public class ListGrid
         return headerIndex != -1 ? getRow( currentRowReadIndex ).get( headerIndex ) : null;
     }
 
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Supportive methods
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     /**
      * Verifies that all grid rows are of the same length, and that the number
@@ -402,14 +431,14 @@ public class ListGrid
         }
     }
     
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // toString
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     @Override
     public String toString()
     {
-        StringBuffer buffer = new StringBuffer( "[" );
+        StringBuffer buffer = new StringBuffer( "[\n" );
         
         if ( headers != null && headers.size() > 0 )
         {
@@ -420,14 +449,53 @@ public class ListGrid
                 headerNames.add( header.getName() );
             }
             
-            buffer.append( headerNames );
+            buffer.append( headerNames  ).append( "\n" );
         }
         
         for ( List<String> row : grid )
         {
-            buffer.append( row );
+            buffer.append( row ).append( "\n" );
         }
         
         return buffer.append( "]" ).toString();
+    }
+
+    // -------------------------------------------------------------------------
+    // Comparator
+    // -------------------------------------------------------------------------
+
+    public static class GridRowComparator
+        implements Comparator<List<String>>
+    {
+        private int columnIndex;
+        private int order;
+
+        protected GridRowComparator( int columnIndex, int order )
+        {
+            this.columnIndex = columnIndex;
+            this.order = order;
+        }
+        
+        @Override
+        public int compare( List<String> list1, List<String> list2 )
+        {
+            if ( order == 0 || list1 == null || list2 == null )
+            {
+                return 0;
+            }
+            
+            if ( isNumeric( list1.get( columnIndex ) ) && isNumeric( list2.get( columnIndex ) ) )
+            {
+                final Double value1 = Double.valueOf( list1.get( columnIndex ) );
+                final Double value2 = Double.valueOf( list2.get( columnIndex ) );
+                
+                return order > 0 ? value2.compareTo( value1 ) : value1.compareTo( value2 );
+            }
+            
+            final String value1 = list1.get( columnIndex );
+            final String value2 = list2.get( columnIndex );
+            
+            return order > 0 ? value2.compareTo( value1 ) : value1.compareTo( value2 );
+        }
     }
 }

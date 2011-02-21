@@ -57,6 +57,6 @@ public interface DataBrowserPdfService
      * @return void
      */
     void writeDataBrowserResult( String dataBrowserTitleName, String dataBrowserFromDate, String dataBrowserToDate,
-        String dataBrowserPeriodType, String pageLayout, String fileName, int fontSize,
-        DataBrowserTable dataBrowserTable, OutputStream out, I18n i18n );
+        String dataBrowserPeriodType, String pageLayout, int fontSize, DataBrowserTable dataBrowserTable,
+        OutputStream out, I18n i18n );
 }

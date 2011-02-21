@@ -42,6 +42,7 @@ import org.hisp.dhis.period.YearlyPeriodType;
 
 public class PeriodUtil
 {
+    
     public static Period getPeriod( String periodName, PeriodType periodType )
         throws IllegalArgumentException
     {
@@ -60,8 +61,7 @@ public class PeriodUtil
                 throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName()
                     + " and name " + periodName, e );
             }
-            DailyPeriodType dailyPeriodType = new DailyPeriodType();
-            return dailyPeriodType.createPeriod( date );
+            return periodType.createPeriod( date );
 
         }
 
@@ -77,13 +77,7 @@ public class PeriodUtil
             int week = Integer.parseInt( periodName.substring( 0, dashIndex ) );
             int year = Integer.parseInt( periodName.substring( dashIndex + 1, periodName.length() ) );
 
-            Calendar cal = Calendar.getInstance();
-            cal.set( Calendar.YEAR, year );
-            cal.set( Calendar.WEEK_OF_YEAR, week );
-            cal.setFirstDayOfWeek( Calendar.MONDAY );
-
-            WeeklyPeriodType weeklyPeriodType = new WeeklyPeriodType();
-            return weeklyPeriodType.createPeriod( cal.getTime() );
+            return periodType.createPeriod(year + "W" + week);
         }
 
         if ( periodType instanceof MonthlyPeriodType )
@@ -102,8 +96,7 @@ public class PeriodUtil
             cal.set( Calendar.YEAR, year );
             cal.set( Calendar.MONTH, month );
 
-            MonthlyPeriodType monthlyPeriodType = new MonthlyPeriodType();
-            return monthlyPeriodType.createPeriod( cal.getTime() );
+            return periodType.createPeriod( cal.getTime() );
         }
 
         if ( periodType instanceof YearlyPeriodType )
@@ -111,9 +104,7 @@ public class PeriodUtil
             Calendar cal = Calendar.getInstance();
             cal.set( Calendar.YEAR, Integer.parseInt( periodName ) );
 
-            YearlyPeriodType yearlyPeriodType = new YearlyPeriodType();
-
-            return yearlyPeriodType.createPeriod( cal.getTime() );
+            return periodType.createPeriod( cal.getTime() );
         }
 
         if ( periodType instanceof QuarterlyPeriodType )
@@ -143,10 +134,9 @@ public class PeriodUtil
             cal.set( Calendar.MONTH, month );
             cal.set( Calendar.YEAR, year );
 
-            QuarterlyPeriodType quarterlyPeriodType = new QuarterlyPeriodType();
             if ( month != 0 )
             {
-                return quarterlyPeriodType.createPeriod( cal.getTime() );
+                return periodType.createPeriod( cal.getTime() );
             }
 
         }

@@ -47,7 +47,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
@@ -180,7 +179,7 @@ public class SearchAction
         return dataElementService.getAllDataElementGroups();
     }
 
-    public List<List<Integer>> getAllCounts()
+    public List<List<String>> getAllCounts()
     {
         return dataBrowserTable.getCounts();
     }
@@ -551,12 +550,14 @@ public class SearchAction
     private void convertColumnNames( DataBrowserTable dataBrowserTable )
     {
         allColumnsConverted = dataBrowserTable.getColumns();
-        PeriodType monthlyPeriodType = periodService.getPeriodTypeByName( MonthlyPeriodType.NAME );
+
+        PeriodType periodType = periodService.getPeriodTypeByName( periodTypeId );
 
         for ( MetaValue col : allColumnsConverted )
-        {
-            col.setName( dataBrowserService.convertDate( monthlyPeriodType, col.getName(), format ) );
-        }
+            {
+                   col.setName( dataBrowserService.convertDate( periodType, col.getName(), format ) );
+            }
     }
+
 
 }

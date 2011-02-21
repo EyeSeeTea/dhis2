@@ -38,7 +38,6 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
@@ -80,10 +79,10 @@ public class DefaultDataElementCategoryService
         this.dataElementCategoryComboStore = dataElementCategoryComboStore;
     }
 
-    private GenericStore<DataElementCategoryOptionCombo> dataElementCategoryOptionComboStore;
+    private GenericIdentifiableObjectStore<DataElementCategoryOptionCombo> dataElementCategoryOptionComboStore;
 
     public void setDataElementCategoryOptionComboStore(
-        GenericStore<DataElementCategoryOptionCombo> dataElementCategoryOptionComboStore )
+        GenericIdentifiableObjectStore<DataElementCategoryOptionCombo> dataElementCategoryOptionComboStore )
     {
         this.dataElementCategoryOptionComboStore = dataElementCategoryOptionComboStore;
     }
@@ -228,7 +227,7 @@ public class DefaultDataElementCategoryService
     {
         return dataElementCategoryComboStore.get( id );
     }
-
+    
     public Collection<DataElementCategoryCombo> getDataElementCategoryCombos( final Collection<Integer> identifiers )
     {
         Collection<DataElementCategoryCombo> categoryCombo = getAllDataElementCategoryCombos();
@@ -254,6 +253,11 @@ public class DefaultDataElementCategoryService
 
     public int addDataElementCategoryOptionCombo( DataElementCategoryOptionCombo dataElementCategoryOptionCombo )
     {
+        if ( dataElementCategoryOptionCombo != null && dataElementCategoryOptionCombo.getUuid() == null )
+        {
+            dataElementCategoryOptionCombo.setUuid( UUIdUtils.getUUId() );
+        }
+
         return dataElementCategoryOptionComboStore.save( dataElementCategoryOptionCombo );
     }
 
@@ -272,6 +276,12 @@ public class DefaultDataElementCategoryService
         return dataElementCategoryOptionComboStore.get( id );
     }
 
+    public DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( String uuid ) {
+        return dataElementCategoryOptionComboStore.getByUuid( uuid );
+    }
+
+
+    
     public Collection<DataElementCategoryOptionCombo> getDataElementCategoryOptionCombos(
         final Collection<Integer> identifiers )
     {
@@ -730,4 +740,5 @@ public class DefaultDataElementCategoryService
     {
         return dataElementCategoryComboStore.getBetweenByName( name, first, max );
     }
+
 }

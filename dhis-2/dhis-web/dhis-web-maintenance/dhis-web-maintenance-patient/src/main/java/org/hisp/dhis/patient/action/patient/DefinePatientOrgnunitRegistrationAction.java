@@ -1,5 +1,3 @@
-package org.hisp.dhis.reporting.completeness.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,50 +25,56 @@ package org.hisp.dhis.reporting.completeness.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.completeness.DataSetCompletenessConfiguration;
-import org.hisp.dhis.completeness.DataSetCompletenessService;
+package org.hisp.dhis.patient.action.patient;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.program.Program;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $Id DefinePatientOrgnunitRegistrationAction.java Jan 7, 2011
+ *          11:04:43 AM $
  */
-public class SetDataCompletenessConfigurationAction
+public class DefinePatientOrgnunitRegistrationAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataSetCompletenessService completenessService;
+    private SelectionTreeManager selectionTreeManager;
 
-    public void setCompletenessService( DataSetCompletenessService completenessService )
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        this.completenessService = completenessService;
+        this.selectionTreeManager = selectionTreeManager;
     }
-    
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
 
-    private int days;
+    private OrganisationUnitService organisationUnitService;
 
-    public void setDays( int days )
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
-        this.days = days;
+        this.organisationUnitService = organisationUnitService;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        DataSetCompletenessConfiguration config = new DataSetCompletenessConfiguration( days );
-        
-        completenessService.setConfiguration( config );
-        
+        Collection<OrganisationUnit> orgunits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
+
+        organisationUnitService.updateOrganisationUnits( orgunits );
+
         return SUCCESS;
     }
 }

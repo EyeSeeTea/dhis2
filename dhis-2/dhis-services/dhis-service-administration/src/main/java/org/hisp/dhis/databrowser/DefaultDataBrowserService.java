@@ -76,7 +76,7 @@ public class DefaultDataBrowserService
     {
         this.dataBrowserStore = dataBrowserStore;
     }
-
+    
     // -------------------------------------------------------------------------
     // DataBrowserService implementation
     // -------------------------------------------------------------------------
@@ -118,13 +118,9 @@ public class DefaultDataBrowserService
 
         dataBrowserStore.setStructureForOrgUnitBetweenPeriods( table, orgUnitParent, betweenPeriodIds );
 
-        Integer numResults = dataBrowserStore.setCountOrgUnitsBetweenPeriods( table, orgUnitParent, betweenPeriodIds,
+         dataBrowserStore.setCountOrgUnitsBetweenPeriods( table, orgUnitParent, betweenPeriodIds,
             maxLevel );
 
-        if ( numResults == 0 )
-        {
-            table.addZeroColumn();
-        }
 
         return table;
     }
@@ -188,13 +184,9 @@ public class DefaultDataBrowserService
 
         dataBrowserStore.setDataElementStructureForOrgUnitBetweenPeriods( table, orgUnitGroupId, betweenPeriodIds );
 
-        int numRows = dataBrowserStore.setCountDataElementsForOrgUnitBetweenPeriods( table, orgUnitGroupId,
+        dataBrowserStore.setCountDataElementsForOrgUnitBetweenPeriods( table, orgUnitGroupId,
             betweenPeriodIds );
 
-        if ( numRows == 0 )
-        {
-            table.addZeroColumn();
-        }
 
         return table;
     }

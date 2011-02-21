@@ -91,6 +91,8 @@ public class OrganisationUnit
     
     private transient String type;
     
+    private Boolean hasPatients;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -520,6 +522,16 @@ public class OrganisationUnit
     {
         this.phoneNumber = phoneNumber;
     }
+    
+    public Boolean getHasPatients()
+    {
+        return hasPatients;
+    }
+
+    public void setHasPatients( Boolean hasPatients )
+    {
+        this.hasPatients = hasPatients;
+    }
 
     public int getLevel()
     {
@@ -550,4 +562,5 @@ public class OrganisationUnit
     {
         this.type = type;
     }
+
 }

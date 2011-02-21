@@ -1,5 +1,3 @@
-package org.hisp.dhis.reporting.completeness.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,71 +25,53 @@ package org.hisp.dhis.reporting.completeness.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.completeness.DataSetCompletenessConfiguration;
-import org.hisp.dhis.completeness.DataSetCompletenessService;
-import org.hisp.dhis.external.configuration.NoConfigurationFoundException;
-import org.hisp.dhis.i18n.I18n;
+package org.hisp.dhis.patient.action.patient;
+
+import java.util.Collection;
+
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $Id GetPatientOrgnunitRegistrationAction.java Jan 7, 2011 12:53:46
+ *          PM $
  */
-public class GetDataCompletenessConfigurationAction
+public class GetPatientOrgnunitRegistrationAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataSetCompletenessService completenessService;
+    private SelectionTreeManager selectionTreeManager;
 
-    public void setCompletenessService( DataSetCompletenessService completenessService )
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        this.completenessService = completenessService;
+        this.selectionTreeManager = selectionTreeManager;
     }
 
-    private I18n i18n;
+    private OrganisationUnitService organisationUnitService;
 
-    public void setI18n( I18n i18n )
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
-        this.i18n = i18n;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private DataSetCompletenessConfiguration configuration;
-
-    public DataSetCompletenessConfiguration getConfiguration()
-    {
-        return configuration;
-    }
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
+        this.organisationUnitService = organisationUnitService;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        try
-        {
-            configuration = completenessService.getConfiguration();
-        }
-        catch ( NoConfigurationFoundException ex )
-        {
-            message = i18n.getString( "set_configuration" );
-        }
+        Collection<OrganisationUnit> orgunits = organisationUnitService.getOrganisationUnits( true );
         
+        selectionTreeManager.setSelectedOrganisationUnits( orgunits );
+
         return SUCCESS;
     }
 }

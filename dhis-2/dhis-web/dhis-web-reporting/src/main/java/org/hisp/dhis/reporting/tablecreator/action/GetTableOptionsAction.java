@@ -168,19 +168,7 @@ public class GetTableOptionsAction
     {
         this.id = id;
     }
-    
-    private String mode;
-
-    public String getMode()
-    {
-        return mode;
-    }
-
-    public void setMode( String mode )
-    {
-        this.mode = mode;
-    }
-    
+        
     private boolean dimension;
 
     public boolean isDimension()
@@ -333,8 +321,14 @@ public class GetTableOptionsAction
         // Available metadata
         // ---------------------------------------------------------------------
 
-        if ( mode != null && mode.equals( ReportTable.MODE_DATAELEMENTS ) && !dimension )
+        if ( dimension )
         {
+            categoryCombos = new ArrayList<DataElementCategoryCombo>( categoryService.getAllDataElementCategoryCombos() );
+            
+            Collections.sort( categoryCombos, new DataElementCategoryComboNameComparator() );            
+        }
+        else
+        {        
             dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
             
             Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
@@ -346,15 +340,7 @@ public class GetTableOptionsAction
             FilterUtils.filter( dataElements, new AggregatableDataElementFilter() );
             
             displayPropertyHandler.handle( dataElements );
-        }
-        else if ( mode != null && mode.equals( ReportTable.MODE_DATAELEMENTS ) && dimension )
-        {
-            categoryCombos = new ArrayList<DataElementCategoryCombo>( categoryService.getAllDataElementCategoryCombos() );
             
-            Collections.sort( categoryCombos, new DataElementCategoryComboNameComparator() );
-        }
-        else if ( mode != null && mode.equals( ReportTable.MODE_INDICATORS ) )
-        {
             indicatorGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
             
             Collections.sort( indicatorGroups, new IndicatorGroupNameComparator() );
@@ -364,12 +350,10 @@ public class GetTableOptionsAction
             Collections.sort( indicators, indicatorComparator );
             
             displayPropertyHandler.handle( indicators );
-        }
-        else if ( mode != null && mode.equals( ReportTable.MODE_DATASETS ) )
-        {
+            
             dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
             
-            Collections.sort( dataSets, new DataSetNameComparator() );            
+            Collections.sort( dataSets, new DataSetNameComparator() ); 
         }
         
         periodTypes = periodService.getAllPeriodTypes();
@@ -398,11 +382,8 @@ public class GetTableOptionsAction
         for ( int i = 0; i < AVAILABLE_REPORTING_MONTHS; i++ )
         {
             int month = i + 1;
-
-            cal.add( Calendar.MONTH, -1 );
-            
-            Period period = periodType.createPeriod( cal.getTime() );
-            
+            cal.add( Calendar.MONTH, -1 );            
+            Period period = periodType.createPeriod( cal.getTime() );            
             String periodName = format.formatPeriod( period );
             
             reportingPeriods.put( month, periodName );

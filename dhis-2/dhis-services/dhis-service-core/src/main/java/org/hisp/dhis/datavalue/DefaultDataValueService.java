@@ -63,13 +63,6 @@ public class DefaultDataValueService
         this.dataValueStore = dataValueStore;
     }
 
-    private DataValueAuditService dataValueAuditService;
-
-    public void setDataValueAuditService( DataValueAuditService dataValueAuditService )
-    {
-        this.dataValueAuditService = dataValueAuditService;
-    }
-
     // -------------------------------------------------------------------------
     // Basic DataValue
     // -------------------------------------------------------------------------
@@ -97,24 +90,18 @@ public class DefaultDataValueService
     @Transactional
     public void deleteDataValue( DataValue dataValue )
     {
-        dataValueAuditService.deleteDataValueAuditByDataValue( dataValue );
-
         dataValueStore.deleteDataValue( dataValue );
     }
 
     @Transactional
     public int deleteDataValuesBySource( Source source )
     {
-        dataValueAuditService.deleteDataValueAuditBySource( source );
-
         return dataValueStore.deleteDataValuesBySource( source );
     }
 
     @Transactional
     public int deleteDataValuesByDataElement( DataElement dataElement )
     {
-        dataValueAuditService.deleteDataValueAuditByDataElement( dataElement );
-
         return dataValueStore.deleteDataValuesByDataElement( dataElement );
     }
 
