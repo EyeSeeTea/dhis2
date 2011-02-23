@@ -58,7 +58,7 @@
 					#end
 					#end
 				</categoryDataset>
-				<bar3DPlot>
+				<bar3DPlot isShowLabels="true">
 					<plot/>
 					<itemLabel color="#000000" backgroundColor="#FFFFFF"/>
 					<categoryAxisFormat>
