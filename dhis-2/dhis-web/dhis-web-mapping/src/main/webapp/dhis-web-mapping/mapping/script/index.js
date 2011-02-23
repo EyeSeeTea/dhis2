@@ -2320,19 +2320,21 @@ console.log(Ext.getCmp('viewhistory_cb').getStore());
     var viewHistoryComboBox = new Ext.form.ComboBox({
         id: 'viewhistory_cb',
         editable: false,
-        valueField: 'label',
+        valueField: 'timestamp',
         displayField: 'label',
         mode: 'local',
         emptyText: 'History',
         triggerAction: 'all',
-        width: G.conf.combo_width,
+        width: 200,
+        minListWidth: 200,
         addRecord: function(scope) {
             var mapView = scope.formValues.getAllValues.call(scope);
             mapView.widget = scope;
-            mapView.label = G.date.getNowHMS() + ' - ' + mapView.parentOrganisationUnitName + ', ' + mapView.organisationUnitLevelName;
+            mapView.timestamp = new Date();
+            mapView.label = G.date.getNowHMS(mapView.timestamp) + ' - ' + mapView.parentOrganisationUnitName + ', ' + mapView.organisationUnitLevelName;
             
             this.getStore().each( function(r) {
-                    if (G.util.compareObjToObj(r.data, mapView, 'label')) {
+                    if (G.util.compareObjToObj(r.data, mapView, ['timestamp','label'])) {
                         this.getStore().remove(r);
                     }                    
                 }, this
@@ -2345,7 +2347,7 @@ console.log(Ext.getCmp('viewhistory_cb').getStore());
                      'periodTypeId','periodId','startDate','endDate','parentOrganisationUnitId','parentOrganisationUnitLevel',
                      'parentOrganisationUnitName','organisationUnitLevel','organisationUnitLevelName','mapLegendType','method',
                      'classes','bounds','colorLow','colorHigh','mapLegendSetId','radiusLow','radiusHigh','longitude','latitude',
-                     'zoom','widget','dateLabel'],
+                     'zoom','widget','timestamp','label'],
             data: []
         }),
         listeners: {

@@ -278,7 +278,7 @@ G.util = {
     getTransformedPointByXY: function(x, y) {
 		var p = new OpenLayers.Geometry.Point(parseFloat(x), parseFloat(y));
         return p.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-     },
+    },
 
     getTransformedFeatureArray: function(features) {
         var sourceProjection = new OpenLayers.Projection("EPSG:4326");
@@ -376,10 +376,19 @@ G.util = {
         return overlays;
     },
     
-    compareObjToObj: function(obj1, obj2, exeption) {
+    findArrayValue: function(array, value) {
+        for (var i = 0; i < array.length; i++) {
+            if (value == array[i]) {
+                return true;
+            }
+        }
+        return false;
+    },
+    
+    compareObjToObj: function(obj1, obj2, exceptions) {
         for (p in obj1) {
             if (obj1[p] !== obj2[p]) {
-                if (p != exeption) {
+                if (!G.util.findArrayValue(exceptions, p)) {
                     return false;
                 }
             }
@@ -389,12 +398,14 @@ G.util = {
 };
 
 G.date = {
-    getNowHMS: function() {    
-        var d = new Date();
-        var h = '' + d.getHours();
-        var m = '' + d.getMinutes();
-        var s = '' + d.getSeconds();        
-        return (h.length < 2 ? '0' + h : h) + ':' + (m.length < 2 ? '0' + m : m) + ':' + (s.length < 2 ? '0' + s : s);
+    getNowHMS: function(date) {
+        date = date || new Date();      
+        return G.date.getDoubleDigit(date.getHours()) + ':' + G.date.getDoubleDigit(date.getMinutes()) + ':' + G.date.getDoubleDigit(date.getSeconds());
+    },
+    
+    getDoubleDigit: function(unit) {
+        unit = '' + unit;
+        return unit.length < 2 ? '0' + unit : unit;
     }
 };
 
