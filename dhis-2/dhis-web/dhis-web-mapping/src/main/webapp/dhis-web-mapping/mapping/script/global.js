@@ -272,9 +272,7 @@ G.util = {
     },
     
     setKeepPosition: function(cb) {
-        if (!cb.keepPosition) {
-            cb.keepPosition = true;
-        }
+        cb.keepPosition = !cb.keepPosition ? true : cb.keepPosition;
     },
  
     getTransformedPointByXY: function(x, y) {
@@ -283,8 +281,10 @@ G.util = {
      },
 
     getTransformedFeatureArray: function(features) {
+        var sourceProjection = new OpenLayers.Projection("EPSG:4326");
+        var destinationProjection = new OpenLayers.Projection("EPSG:900913");
         for (var i = 0; i < features.length; i++) {
-            features[i].geometry.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+            features[i].geometry.transform(sourceProjection, destinationProjection);
         }
         return features;
     },
@@ -374,6 +374,27 @@ G.util = {
             }
         }
         return overlays;
+    },
+    
+    compareObjToObj: function(obj1, obj2, exeption) {
+        for (p in obj1) {
+            if (obj1[p] !== obj2[p]) {
+                if (p != exeption) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+};
+
+G.date = {
+    getNowHMS: function() {    
+        var d = new Date();
+        var h = '' + d.getHours();
+        var m = '' + d.getMinutes();
+        var s = '' + d.getSeconds();        
+        return (h.length < 2 ? '0' + h : h) + ':' + (m.length < 2 ? '0' + m : m) + ':' + (s.length < 2 ? '0' + s : s);
     }
 };
 
@@ -381,28 +402,6 @@ G.vars = {
     map: null,
     
     parameter: null,
-    
-    mapSourceType: {
-        value: null,
-        setDatabase: function() {
-            this.value = G.conf.map_source_type_database;
-        },
-        setGeojson: function() {
-            this.value = G.conf.map_source_type_geojson;
-        },
-        setShapefile: function() {
-            this.value = G.conf.map_source_type_shapefile;
-        },
-        isDatabase: function() {
-            return this.value == G.conf.map_source_type_database;
-        },
-        isGeojson: function() {
-            return this.value == G.conf.map_source_type_geojson;
-        },
-        isShapefile: function() {
-            return this.value == G.conf.map_source_type_shapefile;
-        }
-    },
     
     mapDateType: {
         value: null,
@@ -413,10 +412,10 @@ G.vars = {
             this.value = G.conf.map_date_type_start_end;
         },
         isFixed: function() {
-            return this.value == G.conf.map_date_type_fixed;
+            return this.value === G.conf.map_date_type_fixed;
         },
         isStartEnd: function() {
-            return this.value == G.conf.map_date_type_start_end;
+            return this.value === G.conf.map_date_type_start_end;
         }
     },
     
@@ -429,10 +428,10 @@ G.vars = {
             this.value = G.conf.thematicMap2;
         },
         isPolygon: function() {
-            return this.value == G.conf.thematicMap;
+            return this.value === G.conf.thematicMap;
         },
         isPoint: function() {
-            return this.value == G.conf.thematicMap2;
+            return this.value === G.conf.thematicMap2;
         }
     },
     

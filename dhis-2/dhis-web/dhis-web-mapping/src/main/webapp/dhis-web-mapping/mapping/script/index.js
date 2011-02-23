@@ -2284,6 +2284,21 @@
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
 		handler: function() {
+            
+    
+console.log(Ext.getCmp('viewhistory_cb').getStore());    
+    
+    return;
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			adminWindow.setPosition(x,y);
@@ -2301,7 +2316,48 @@
 			helpWindow.show();
 		}
 	});
-	
+    
+    var viewHistoryComboBox = new Ext.form.ComboBox({
+        id: 'viewhistory_cb',
+        editable: false,
+        valueField: 'label',
+        displayField: 'label',
+        mode: 'local',
+        emptyText: 'History',
+        triggerAction: 'all',
+        width: G.conf.combo_width,
+        addRecord: function(scope) {
+            var mapView = scope.formValues.getAllValues.call(scope);
+            mapView.widget = scope;
+            mapView.label = G.date.getNowHMS() + ' - ' + mapView.parentOrganisationUnitName + ', ' + mapView.organisationUnitLevelName;
+            
+            this.getStore().each( function(r) {
+                    if (G.util.compareObjToObj(r.data, mapView, 'label')) {
+                        this.getStore().remove(r);
+                    }                    
+                }, this
+            );
+            
+            this.getStore().insert(0, new Ext.data.Record(mapView));
+        },
+        store: new Ext.data.ArrayStore({
+            fields: ['featureType','mapValueType','indicatorGroupId','indicatorId','dataElementGroupId','dataElementId',
+                     'periodTypeId','periodId','startDate','endDate','parentOrganisationUnitId','parentOrganisationUnitLevel',
+                     'parentOrganisationUnitName','organisationUnitLevel','organisationUnitLevelName','mapLegendType','method',
+                     'classes','bounds','colorLow','colorHigh','mapLegendSetId','radiusLow','radiusHigh','longitude','latitude',
+                     'zoom','widget','dateLabel'],
+            data: []
+        }),
+        listeners: {
+            'select': {
+                scope: this,
+                fn: function(cb) {
+                    alert(cb.getValue());
+                }
+            }
+        }
+    });
+
 	var exitButton = new Ext.Button({
 		text: G.i18n.exit_gis,
         iconCls: 'icon-exit',
@@ -2327,6 +2383,8 @@
 			'-',
             adminButton,
 			helpButton,
+            '-',
+            viewHistoryComboBox,
 			'->',
 			exitButton,' ',' '
 		]

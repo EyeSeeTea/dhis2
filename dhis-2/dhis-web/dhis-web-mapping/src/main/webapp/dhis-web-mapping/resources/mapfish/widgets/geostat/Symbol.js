@@ -1475,6 +1475,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
 
     applyValues: function() {
+        Ext.getCmp('viewhistory_cb').addRecord(this);
+        
 		var options = {
             indicator: 'value',
             method: this.form.findField('method').getValue(),
