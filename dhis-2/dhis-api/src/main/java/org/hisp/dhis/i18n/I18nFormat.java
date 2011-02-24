@@ -169,14 +169,29 @@ public class I18nFormat
         }
         
         String typeName = period.getPeriodType().getName();
+        String startDate = "";
+        String endDate = "";
 
         String keyStartDate = "format." + typeName + ".startDate";
-        String keyEndDate = "format." + typeName + ".endDate";
-        
-        String startDate = commonFormatting( period.getStartDate(), resourceBundle.getString( keyStartDate ) );
-        String endDate = commonFormatting( period.getEndDate(), resourceBundle.getString( keyEndDate ) );
+        if  ( !resourceBundle.getString( keyStartDate ).isEmpty() )
+        {
+         startDate = commonFormatting( period.getStartDate(), resourceBundle.getString( keyStartDate ) );
+        }
 
-        return Character.toUpperCase( startDate.charAt( 0 ) ) + startDate.substring( 1 ) + endDate;
+        String keyEndDate = "format." + typeName + ".endDate";
+        if  ( !resourceBundle.getString( keyEndDate ).isEmpty() )
+        {
+        endDate = commonFormatting( period.getEndDate(), resourceBundle.getString( keyEndDate ) );
+        }
+        String formattedPeriod = startDate + endDate;
+        if  ( ! formattedPeriod.isEmpty() )
+        {
+        return Character.toUpperCase( formattedPeriod.charAt( 0 ) ) + formattedPeriod.substring( 1 );
+        }
+        else
+        {
+            return null;
+        }
     }
     
     // -------------------------------------------------------------------------

@@ -31,5 +31,10 @@
       discriminator-value="Survey"/>
     <subclass name="org.hisp.dhis.period.FinancialAprilPeriodType"
       discriminator-value="FinancialApril"/>
+    <subclass name="org.hisp.dhis.period.FiscalYearJulyPeriodType"
+      discriminator-value="FiscalYearJuly"/>
+     <subclass name="org.hisp.dhis.period.FiscalYearOctPeriodType"
+      discriminator-value="FiscalYearOct"/>
+
   </class>
 </hibernate-mapping>

@@ -64,6 +64,8 @@ public abstract class PeriodType
         periodTypes.add( new YearlyPeriodType() );
         periodTypes.add( new TwoYearlyPeriodType() );
         periodTypes.add( new FinancialAprilPeriodType() );
+        periodTypes.add( new FiscalYearJulyPeriodType() );
+        periodTypes.add( new FiscalYearOctPeriodType() );
         //periodTypes.add( new OnChangePeriodType() );
         //periodTypes.add( new SurveyPeriodType() );
         
