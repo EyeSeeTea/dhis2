@@ -1,3 +1,5 @@
+package org.hisp.dhis.period;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -25,8 +27,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.period;
-
 import static junit.framework.Assert.assertEquals;
 
 import java.util.Calendar;
@@ -38,25 +38,25 @@ import org.junit.Test;
 /**
  * @author Lars Helge Overland
  */
-
 public class FinancialAprilPeriodTypeTest
 {
     private Calendar startCal;
     private Calendar endCal;
-    private FinancialAprilPeriodType periodType;
+    private Calendar testCal;
+    private CalendarPeriodType periodType;
     
     @Before
     public void before()
     {
         startCal = PeriodType.createCalendarInstance();
         endCal = PeriodType.createCalendarInstance();
+        testCal = PeriodType.createCalendarInstance();
         periodType = new FinancialAprilPeriodType();
     }
     
     @Test
     public void testCreatePeriod()
     {
-        Calendar testCal = PeriodType.createCalendarInstance();
         testCal.set( 2009, Calendar.FEBRUARY, 15 );
 
         startCal.set( 2008, Calendar.APRIL, 1 );
@@ -79,9 +79,40 @@ public class FinancialAprilPeriodTypeTest
     }
 
     @Test
+    public void testGetNextPeriod()
+    {
+        testCal.set( 2009, Calendar.FEBRUARY, 15 );
+
+        Period period = periodType.createPeriod( testCal.getTime() );
+        
+        period = periodType.getNextPeriod( period );
+
+        startCal.set( 2009, Calendar.APRIL, 1 );
+        endCal.set( 2010, Calendar.MARCH, 31 );
+        
+        assertEquals( startCal.getTime(), period.getStartDate() );
+        assertEquals( endCal.getTime(), period.getEndDate() );
+    }
+
+    @Test
+    public void testGetPreviousPeriod()
+    {
+        testCal.set( 2009, Calendar.FEBRUARY, 15 );
+
+        Period period = periodType.createPeriod( testCal.getTime() );
+        
+        period = periodType.getPreviousPeriod( period );
+
+        startCal.set( 2007, Calendar.APRIL, 1 );
+        endCal.set( 2008, Calendar.MARCH, 31 );
+        
+        assertEquals( startCal.getTime(), period.getStartDate() );
+        assertEquals( endCal.getTime(), period.getEndDate() );
+    }
+
+    @Test
     public void testGeneratePeriods()
     {
-        Calendar testCal = PeriodType.createCalendarInstance();
         testCal.set( 2009, 1, 15 );
         
         List<Period> periods = periodType.generatePeriods( testCal.getTime() );
