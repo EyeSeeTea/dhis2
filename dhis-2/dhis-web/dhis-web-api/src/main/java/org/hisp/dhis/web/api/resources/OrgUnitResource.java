@@ -136,62 +136,7 @@ public class OrgUnitResource
     @Path( "updateDataSets" )
     public DataSetList checkUpdatedDataSet( DataSetList dataSetList, @HeaderParam( "accept-language" ) String locale )
     {
-        if ( DEBUG )
-            log.debug( "Checking updated datasets for org unit " + getUnit().getName() );
-        DataSetList updatedDataSetList = new DataSetList();
-        List<DataSet> dataSets = facilityReportingService.getMobileDataSetsForUnit( getUnit(), locale );
-        List<DataSet> currentDataSets = dataSetList.getCurrentDataSets();
-        // List<DataSet> copyCurrentDataSets = new
-        // ArrayList<DataSet>(currentDataSets.size());
-        // Collections.copy( copyCurrentDataSets, currentDataSets );
-        // check added dataset
-        for ( DataSet dataSet : dataSets )
-        {
-            if ( !currentDataSets.contains( dataSet ) )
-            {
-                if ( updatedDataSetList.getAddedDataSets() == null )
-                    updatedDataSetList.setAddedDataSets( new ArrayList<DataSet>() );
-                updatedDataSetList.getAddedDataSets().add( dataSet );
-                currentDataSets.add( dataSet );
-            }
-        }
-
-        // check deleted dataset
-        for ( DataSet dataSet : currentDataSets )
-        {
-            if ( !dataSets.contains( dataSet ) )
-            {
-                if ( updatedDataSetList.getDeletedDataSets() == null )
-                    updatedDataSetList.setDeletedDataSets( new ArrayList<DataSet>() );
-                updatedDataSetList.getDeletedDataSets().add( new DataSet( dataSet ) );
-            }
-        }
-        if ( updatedDataSetList.getDeletedDataSets() != null )
-        {
-            for ( DataSet dataSet : updatedDataSetList.getDeletedDataSets() )
-            {
-                currentDataSets.remove( dataSet );
-            }
-        }
-
-        // check modified dataset
-        Collections.sort( dataSets );
-        Collections.sort( currentDataSets );
-
-        for ( int i = 0; i < dataSets.size(); i++ )
-        {
-            if ( dataSets.get( i ).getVersion() != currentDataSets.get( i ).getVersion() )
-            {
-                if ( updatedDataSetList.getModifiedDataSets() == null )
-                    updatedDataSetList.setModifiedDataSets( new ArrayList<DataSet>() );
-                updatedDataSetList.getModifiedDataSets().add( dataSets.get( i ) );
-            }
-        }
-
-        if ( DEBUG )
-            log.debug( "Returning updated datasets for org unit " + getUnit().getName() );
-
-        return updatedDataSetList;
+        return facilityReportingService.getUpdatedDataSet( dataSetList, getUnit(), locale );
     }
 
     /**
