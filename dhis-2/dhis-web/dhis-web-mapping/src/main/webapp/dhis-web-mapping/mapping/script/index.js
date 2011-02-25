@@ -2313,6 +2313,12 @@
                 },
                 items: [],
                 listeners: {
+                    'add': function(menu) {
+                        var items = menu.items.items;
+                        var keys = menu.items.keys;
+                        items.unshift(items.pop());
+                        keys.unshift(keys.pop());
+                    },
                     'click': function(menu, item, e) {
                         var mapView = item.mapView;
                         var scope = mapView.widget;                                            
@@ -2356,6 +2362,7 @@
                 html: mapView.label,
                 mapView: mapView
             });
+console.log(this.menu.items);            
         }            
     });
 
