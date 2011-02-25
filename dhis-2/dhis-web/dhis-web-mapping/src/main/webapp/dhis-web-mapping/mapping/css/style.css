@@ -104,6 +104,12 @@
 }
 
 /* Ext Menu */
+a.x-menu-item-custom {
+    padding: 2px 12px 3px 10px;
+}
+#viewhistory_m .x-menu-list {
+    background-color:#f1f1f1;
+}
 .menu-layeroptions-locate {
     background-image:url(../../../images/magnifier.png);
 }

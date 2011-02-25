@@ -2283,16 +2283,7 @@
 		iconCls: 'icon-admin',
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
-		handler: function() {
-            
-    
-//console.log(Ext.getCmp('viewhistory_cb').getStore());    
-    
-    //return;
-    
-            
-            
-            
+		handler: function() {            
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			adminWindow.setPosition(x,y);
@@ -2310,6 +2301,45 @@
 			helpWindow.show();
 		}
 	});
+    
+    var viewhistoryButton = new Ext.Button({
+        id: 'vh_b',
+        text: 'H',
+        menu: new Ext.menu.Menu({
+            id: 'viewhistory_m',
+            defaults: {
+                itemCls: 'x-menu-item x-menu-item-custom'
+            },
+            items: [{text:'lsdkfølsdfksd'}]
+        }),
+        addMenu: function() {
+            this.menu = new Ext.menu.Menu({
+                items: [
+                    {
+                        text: 'onomatepoetikon',
+                        itemCls: "x-menu-item x-menu-item-cstm"
+                    }
+                ]
+            });
+        },
+        addRecord: function(scope) {
+            if (!this.menu) {
+                this.addMenu();
+            }
+        }
+            
+            
+    });
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     var viewHistoryComboBox = new Ext.form.ComboBox({
         id: 'viewhistory_cb',
@@ -2395,7 +2425,7 @@
             adminButton,
 			helpButton,
             '-',
-            viewHistoryComboBox,
+            viewhistoryButton,
 			'->',
 			exitButton,' ',' '
 		]
