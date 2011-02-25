@@ -2286,16 +2286,10 @@
 		handler: function() {
             
     
-console.log(Ext.getCmp('viewhistory_cb').getStore());    
+//console.log(Ext.getCmp('viewhistory_cb').getStore());    
     
-    return;
-            
-            
-            
-            
-            
-            
-            
+    //return;
+    
             
             
             
@@ -2343,7 +2337,7 @@ console.log(Ext.getCmp('viewhistory_cb').getStore());
             this.getStore().insert(0, new Ext.data.Record(mapView));
         },
         store: new Ext.data.ArrayStore({
-            fields: ['featureType','mapValueType','indicatorGroupId','indicatorId','dataElementGroupId','dataElementId',
+            fields: ['featureType','mapValueType','indicatorGroupId','indicatorId','dataElementGroupId','dataElementId','mapDateType',
                      'periodTypeId','periodId','startDate','endDate','parentOrganisationUnitId','parentOrganisationUnitLevel',
                      'parentOrganisationUnitName','organisationUnitLevel','organisationUnitLevelName','mapLegendType','method',
                      'classes','bounds','colorLow','colorHigh','mapLegendSetId','radiusLow','radiusHigh','longitude','latitude',
@@ -2352,9 +2346,24 @@ console.log(Ext.getCmp('viewhistory_cb').getStore());
         }),
         listeners: {
             'select': {
-                scope: this,
                 fn: function(cb) {
-                    alert(cb.getValue());
+                    var mapView = cb.getStore().getAt(cb.getStore().find('timestamp', cb.getValue())).data;                   
+                    var scope = mapView.widget;
+                                        
+                    scope.mapView = mapView;
+                    scope.updateValues = true;
+                    
+                    scope.legend.value = mapView.mapLegendType;
+                    scope.legend.method = mapView.method || legend.method;
+                    scope.legend.classes = mapView.classes || legend.classes;
+                    
+                    G.vars.map.setCenter(new OpenLayers.LonLat(mapView.longitude, mapView.latitude), mapView.zoom);
+                    G.vars.mapDateType.value = mapView.mapDateType;
+                    Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
+
+                    scope.valueType.value = mapView.mapValueType;
+                    scope.form.findField('mapvaluetype').setValue(scope.valueType.value);
+                    scope.setMapView();
                 }
             }
         }

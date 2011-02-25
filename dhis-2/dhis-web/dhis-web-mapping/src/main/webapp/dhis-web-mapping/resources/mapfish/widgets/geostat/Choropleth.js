@@ -1031,7 +1031,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     prepareMapViewValueType: function() {
         var obj = {};
-
         if (this.valueType.isIndicator()) {
             this.form.findField('indicatorgroup').showField();
             this.form.findField('indicator').showField();
@@ -1141,7 +1140,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         
         function valueTypeGroupStoreCallback() {
             obj.components.valueTypeGroup.setValue(this.mapView[obj.mapView.valueTypeGroup]);
-            
             obj.stores.valueType.setBaseParam(obj.mapView.valueTypeGroup, obj.components.valueTypeGroup.getValue());
             obj.stores.valueType.load({scope: this, callback: function() {
                 obj.components.valueType.setValue(this.mapView[obj.mapView.valueType]);
@@ -1372,6 +1370,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 indicatorId: this.form.findField('indicator').getValue(),
                 dataElementGroupId: this.form.findField('dataelementgroup').getValue(),
                 dataElementId: this.form.findField('dataelement').getValue(),
+                mapDateType: G.vars.mapDateType.value,
                 periodTypeId: this.form.findField('periodtype').getValue(),
                 periodId: this.form.findField('period').getValue(),
                 startDate: this.form.findField('startdate').getValue(),

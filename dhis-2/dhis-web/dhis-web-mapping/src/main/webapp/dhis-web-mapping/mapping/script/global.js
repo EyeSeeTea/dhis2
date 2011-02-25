@@ -400,7 +400,9 @@ G.util = {
 G.date = {
     getNowHMS: function(date) {
         date = date || new Date();      
-        return G.date.getDoubleDigit(date.getHours()) + ':' + G.date.getDoubleDigit(date.getMinutes()) + ':' + G.date.getDoubleDigit(date.getSeconds());
+        return G.date.getDoubleDigit(date.getHours()) + ':' +
+               G.date.getDoubleDigit(date.getMinutes()) + ':' +
+               G.date.getDoubleDigit(date.getSeconds());
     },
     
     getDoubleDigit: function(unit) {

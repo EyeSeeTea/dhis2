@@ -1360,6 +1360,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 				indicatorId: this.form.findField('indicator').getValue(),
 				dataElementGroupId: this.form.findField('dataelementgroup').getValue(),
 				dataElementId: this.form.findField('dataelement').getValue(),
+                mapDateType: G.vars.mapDateType.value,
 				periodTypeId: this.form.findField('periodtype').getValue(),
 				periodId: this.form.findField('period').getValue(),
 				startDate: this.form.findField('startdate').getValue(),
