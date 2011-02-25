@@ -2302,9 +2302,9 @@
 		}
 	});
     
-    var viewhistoryButton = new Ext.Button({
+    var viewHistoryButton = new Ext.Button({
         id: 'viewhistory_b',
-        text: 'H',
+		iconCls: 'icon-history',
         addMenu: function() {
             this.menu = new Ext.menu.Menu({
                 id: 'viewhistory_m',
@@ -2344,81 +2344,19 @@
             var mapView = scope.formValues.getAllValues.call(scope);
             mapView.widget = scope;
             mapView.timestamp = new Date();
-            mapView.label = G.date.getNowHMS(mapView.timestamp) + ' - ' + mapView.parentOrganisationUnitName + ', ' + mapView.organisationUnitLevelName;
+            mapView.label = G.date.getNowHMS(mapView.timestamp) + '&nbsp;&nbsp;&nbsp;' + mapView.parentOrganisationUnitName + ' (' + mapView.organisationUnitLevelName + ')';
 
             for (var i = 0; i < this.menu.items.items.length; i++) {
-                if (G.util.compareObjToObj(this.menu.items.items[i].mapView, mapView, ['widget','timestamp','label'])) {
+                if (G.util.compareObjToObj(this.menu.items.items[i].mapView, mapView, ['longitude','latitude','zoom','widget','timestamp','label'])) {
                     this.menu.items.items[i].destroy();
                 }
             }
             
-            this.menu.addItem({
-                text: mapView.label,
+            this.menu.addMenuItem({
+                html: mapView.label,
                 mapView: mapView
             });
         }            
-    });  
-    
-    
-    
-    
-    
-    var viewHistoryComboBox = new Ext.form.ComboBox({
-        id: 'viewhistory_cb',
-        editable: false,
-        valueField: 'timestamp',
-        displayField: 'label',
-        mode: 'local',
-        emptyText: 'History',
-        triggerAction: 'all',
-        width: 200,
-        minListWidth: 200,
-        addRecord: function(scope) {
-            var mapView = scope.formValues.getAllValues.call(scope);
-            mapView.widget = scope;
-            mapView.timestamp = new Date();
-            mapView.label = G.date.getNowHMS(mapView.timestamp) + ' - ' + mapView.parentOrganisationUnitName + ', ' + mapView.organisationUnitLevelName;
-            
-            this.getStore().each( function(r) {
-                    if (G.util.compareObjToObj(r.data, mapView, ['timestamp','label'])) {
-                        this.getStore().remove(r);
-                    }                    
-                }, this
-            );
-            
-            this.getStore().insert(0, new Ext.data.Record(mapView));
-        },
-        store: new Ext.data.ArrayStore({
-            fields: ['featureType','mapValueType','indicatorGroupId','indicatorId','dataElementGroupId','dataElementId','mapDateType',
-                     'periodTypeId','periodId','startDate','endDate','parentOrganisationUnitId','parentOrganisationUnitLevel',
-                     'parentOrganisationUnitName','organisationUnitLevel','organisationUnitLevelName','mapLegendType','method',
-                     'classes','bounds','colorLow','colorHigh','mapLegendSetId','radiusLow','radiusHigh','longitude','latitude',
-                     'zoom','widget','timestamp','label'],
-            data: []
-        }),
-        listeners: {
-            'select': {
-                fn: function(cb) {
-                    var mapView = cb.getStore().getAt(cb.getStore().find('timestamp', cb.getValue())).data;                   
-                    var scope = mapView.widget;
-                                        
-                    scope.mapView = mapView;
-                    scope.updateValues = true;
-                    
-                    scope.legend.value = mapView.mapLegendType;
-                    scope.legend.method = mapView.method || legend.method;
-                    scope.legend.classes = mapView.classes || legend.classes;
-                    
-                    G.vars.map.setCenter(new OpenLayers.LonLat(mapView.longitude, mapView.latitude), mapView.zoom);
-                    G.vars.mapDateType.value = mapView.mapDateType;
-                    Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
-
-                    scope.valueType.value = mapView.mapValueType;
-                    scope.form.findField('mapvaluetype').setValue(scope.valueType.value);
-                    scope.setMapView();
-                }
-            }
-        }
     });
 
 	var exitButton = new Ext.Button({
@@ -2447,7 +2385,7 @@
             adminButton,
 			helpButton,
             '-',
-            viewhistoryButton,
+            viewHistoryButton,
 			'->',
 			exitButton,' ',' '
 		]
