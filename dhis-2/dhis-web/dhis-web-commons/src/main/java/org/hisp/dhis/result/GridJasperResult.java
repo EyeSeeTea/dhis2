@@ -28,7 +28,6 @@ package org.hisp.dhis.result;
  */
 
 import java.io.StringWriter;
-import java.sql.Connection;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,7 +37,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
-import org.amplecode.quick.StatementManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.apache.velocity.VelocityContext;
@@ -63,17 +61,6 @@ public class GridJasperResult
     private static final String TEMPLATE = "grid.vm";
     private static final String RESOURCE_LOADER_NAME = "class";
     private static final String DEFAULT_FILENAME = "Grid";
-
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private StatementManager statementManager;
-
-    public void setStatementManager( StatementManager statementManager )
-    {
-        this.statementManager = statementManager;
-    }
 
     // -------------------------------------------------------------------------
     // Input
@@ -110,21 +97,21 @@ public class GridJasperResult
 
         String filename = CodecUtils.filenameEncode( StringUtils.defaultIfEmpty( grid.getTitle(), DEFAULT_FILENAME ) ) + ".pdf";
         
-        ContextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, true, filename, true );
+        ContextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, true, filename, false );
         
         // ---------------------------------------------------------------------
         // Write jrxml based on Velocity template
         // ---------------------------------------------------------------------
 
-        StringWriter writer = new StringWriter();
+        final StringWriter writer = new StringWriter();
         
-        VelocityEngine velocity = new VelocityEngine();
+        final VelocityEngine velocity = new VelocityEngine();
         
         velocity.setProperty( Velocity.RESOURCE_LOADER, RESOURCE_LOADER_NAME );
         velocity.setProperty( RESOURCE_LOADER_NAME + ".resource.loader.class", ClasspathResourceLoader.class.getName() );
         velocity.init();
         
-        VelocityContext context = new VelocityContext();
+        final VelocityContext context = new VelocityContext();
         
         context.put( KEY_GRID, grid );
         
@@ -138,22 +125,8 @@ public class GridJasperResult
 
         JasperReport jasperReport = JasperCompileManager.compileReport( StreamUtils.getInputStream( report ) );
         
-        Connection connection = statementManager.getHolder().getConnection();
+        JasperPrint print = JasperFillManager.fillReport( jasperReport, null, grid );
         
-        JasperPrint print = null;
-        
-        try
-        {
-            print = JasperFillManager.fillReport( jasperReport, null, connection );
-        }
-        finally
-        {        
-            connection.close();
-        }
-        
-        if ( print != null )
-        {
-            JasperExportManager.exportReportToPdfStream( print, response.getOutputStream() );
-        }
+        JasperExportManager.exportReportToPdfStream( print, response.getOutputStream() );
     }
 }

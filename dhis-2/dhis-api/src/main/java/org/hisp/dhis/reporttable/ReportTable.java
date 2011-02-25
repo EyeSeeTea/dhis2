@@ -33,8 +33,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.CombinationGenerator;
@@ -81,12 +79,9 @@ public class ReportTable
     public static final String ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME = "organisation_unit_is_parent";
     
     public static final String SEPARATOR = "_";
-    public static final String SPACE = " ";
-    
+    public static final String SPACE = " ";    
     public static final String TOTAL_COLUMN_NAME = "total";
     public static final String TOTAL_COLUMN_PRETTY_NAME = "Total";
-    
-    public static final String REGRESSION_COLUMN_PREFIX = "regression_";
     
     public static final int ASC = -1;
     public static final int DESC = 1;
@@ -110,11 +105,6 @@ public class ReportTable
         put( ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, "Organisation unit is parent" );
     } };
     
-    private static final String EMPTY_REPLACEMENT = "_";
-    private static final String EMPTY = "";    
-    private static final String TABLE_PREFIX = "_report_";
-    private static final String REGEX_NUMERIC = "([0-9]*)";
-
     public static final Map<Class<? extends IdentifiableObject>, String> CLASS_ID_MAP = new HashMap<Class<? extends IdentifiableObject>, String>() { {
         put( Indicator.class, INDICATOR_ID );
         put( DataElement.class, DATAELEMENT_ID );
@@ -124,24 +114,16 @@ public class ReportTable
         put( Period.class, PERIOD_ID );
         put( OrganisationUnit.class, ORGANISATIONUNIT_ID );
     } };
-    
+
+    private static final String EMPTY = "";
     private static final IdentifiableObject[] IRT = new IdentifiableObject[0];
-    private static final String[] SRT = new String[0];
+    private static final String[] SRT = new String[0];    
+    private static final String ILLEGAL_FILENAME_CHARS_REGEX = "[/\\?%*:|\"<>.]";
     
     // -------------------------------------------------------------------------
     // Persisted properties
     // -------------------------------------------------------------------------
 
-    /**
-     * The name of the database table corresponding to the ReportTable object name.
-     */
-    private String tableName;
-    
-    /**
-     * The name of the existing database table.
-     */
-    private String existingTableName;
-    
     /**
      * Whether the ReportTable contains regression columns.
      */
@@ -265,7 +247,7 @@ public class ReportTable
     /**
      * The I18nFormat used for internationalization of ie. periods.
      */
-    private transient I18nFormat i18nFormat;
+    private I18nFormat i18nFormat;
     
     /**
      * The name of the reporting month based on the report param.
@@ -334,8 +316,6 @@ public class ReportTable
         String reportingMonthName )
     {
         this.name = name;
-        this.tableName = generateTableName( name );
-        this.existingTableName = generateTableName( name );
         this.regression = regression;
         this.dataElements = dataElements;
         this.indicators = indicators;
@@ -363,6 +343,7 @@ public class ReportTable
         verify( nonEmptyLists( dataElements, indicators, dataSets ) > 0, "Must contain dataelements, indicators or datasets" );
         verify( nonEmptyLists( periods, relativePeriods ) > 0, "Must contain periods or relative periods" );
         verify( nonEmptyLists( units, relativeUnits ) > 0, "Must contain organisation units or relative organisation units" );
+        verify( !( doTotal() && regression ), "Cannot have regression columns with total columns" );
         verify( i18nFormat != null, "I18n format must be set" );
         
         // ---------------------------------------------------------------------
@@ -376,10 +357,8 @@ public class ReportTable
         }
 
         // ---------------------------------------------------------------------
-        // Init tableName, allPeriods, allUnits, allIndicators
+        // Init allPeriods, allUnits, allIndicators
         // ---------------------------------------------------------------------
-
-        this.tableName = generateTableName( name );
 
         allIndicators.addAll( dataElements );
         allIndicators.addAll( indicators );
@@ -413,15 +392,7 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
-    
-    /**
-     * Updates the existing table name with the current name.
-     */
-    public void updateExistingTableName()
-    {
-        this.existingTableName = generateTableName( name );
-    }
-    
+        
     /**
      * Tests whether this ReportTable is multi-dimensional.
      */
@@ -466,7 +437,7 @@ public class ReportTable
         {
             if ( object != null && object instanceof Period )
             {
-                buffer.append( object.getName() + SEPARATOR ); // Relative periods must have static names when crosstabbed which are set on name property
+                buffer.append( object.getName() + SEPARATOR ); // Relative periods must have static names when crosstabbed - which are set on name property
             }
             else
             {
@@ -474,7 +445,7 @@ public class ReportTable
             }
         }
 
-        String column = databaseEncode( buffer.toString() );
+        String column = columnEncode( buffer.toString() );
         
         return column.length() > 0 ? column.substring( 0, column.lastIndexOf( SEPARATOR ) ) : TOTAL_COLUMN_NAME;
     }
@@ -571,51 +542,15 @@ public class ReportTable
     }
 
     /**
-     * Database encodes the argument string. Remove non-character data from the
-     * string, prefixes the string if it starts with a numeric character and
-     * truncates the string if it is longer than 255 characters.
+     * Generates a string which is acceptable as a filename.
      */
-    public static String databaseEncode( String string )
+    public static String columnEncode( String string )
     {
         if ( string != null )
         {
+            string = string.replaceAll( ILLEGAL_FILENAME_CHARS_REGEX, EMPTY );
+            string = string.length() > 255 ? string.substring( 0, 255 ) : string;
             string = string.toLowerCase();
-            
-            string = string.replaceAll( " ", EMPTY_REPLACEMENT );
-            string = string.replaceAll( "-", EMPTY );
-            string = string.replaceAll( "<", EMPTY_REPLACEMENT + "lt" + EMPTY_REPLACEMENT );
-            string = string.replaceAll( ">", EMPTY_REPLACEMENT + "gt" + EMPTY_REPLACEMENT );
-            
-            StringBuffer buffer = new StringBuffer();
-            
-            Pattern pattern = Pattern.compile( "[a-zA-Z0-9_]" );            
-            Matcher matcher = pattern.matcher( string );
-            
-            while ( matcher.find() )
-            {
-                buffer.append( matcher.group() );
-            }
-            
-            string = buffer.toString();            
-            string = string.replaceAll( EMPTY_REPLACEMENT + "+", EMPTY_REPLACEMENT );
-
-            // -----------------------------------------------------------------
-            // Cannot start with numeric character
-            // -----------------------------------------------------------------
-
-            if ( string.length() > 0 && string.substring( 0, 1 ).matches( REGEX_NUMERIC ) )
-            {
-                string = SEPARATOR + string;
-            }
-
-            // -----------------------------------------------------------------
-            // Cannot be longer than 255 characters
-            // -----------------------------------------------------------------
-
-            if ( string.length() > 255 )
-            {
-                string = string.substring( 0, 255 );
-            }
         }
         
         return string;
@@ -666,14 +601,6 @@ public class ReportTable
         }
         
         return arrays.toArray( new IdentifiableObject[0][] );
-    }
-
-    /**
-     * Generates a prefixed, database encoded name.
-     */
-    private static String generateTableName( String name )
-    {
-        return TABLE_PREFIX + databaseEncode( name );
     }
 
     /**
@@ -805,26 +732,6 @@ public class ReportTable
     // Get- and set-methods for persisted properties
     // -------------------------------------------------------------------------
 
-    public String getTableName()
-    {
-        return tableName;
-    }
-    
-    public void setTableName( String tableName )
-    {
-        this.tableName = tableName;
-    }
-    
-    public String getExistingTableName()
-    {
-        return existingTableName;
-    }
-
-    public void setExistingTableName( String existingTableName )
-    {
-        this.existingTableName = existingTableName;
-    }
-    
     public boolean isRegression()
     {
         return regression;

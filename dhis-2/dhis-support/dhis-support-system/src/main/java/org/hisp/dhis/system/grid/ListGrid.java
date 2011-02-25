@@ -28,12 +28,13 @@ package org.hisp.dhis.system.grid;
  */
 
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
-import static org.hisp.dhis.system.util.MathUtils.isNumeric;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -49,6 +50,8 @@ import org.hisp.dhis.common.GridHeader;
 public class ListGrid
     implements Grid
 {
+    private static final String REGRESSION_SUFFIX = "_regression";
+    
     /**
      * The title of the grid.
      */
@@ -73,7 +76,7 @@ public class ListGrid
      * A two dimensional List which simulates a grid where the first list
      * represents rows and the second represents columns.
      */
-    private List<List<String>> grid;
+    private List<List<Object>> grid;
     
     /**
      * Indicating the current row in the grid for writing data.
@@ -86,12 +89,17 @@ public class ListGrid
     private int currentRowReadIndex = -1;
     
     /**
+     * Represents a mapping between column names and the index of the column in the grid.
+     */
+    private Map<String, Integer> columnIndexMap = new HashMap<String, Integer>();
+    
+    /**
      * Default constructor.
      */
     public ListGrid()
     {
         headers = new ArrayList<GridHeader>();
-        grid = new ArrayList<List<String>>();
+        grid = new ArrayList<List<Object>>();
     }
     
     // ---------------------------------------------------------------------
@@ -133,6 +141,15 @@ public class ListGrid
         
         return this;
     }
+
+    public Grid addHeader( GridHeader header )
+    {
+        headers.add( header );
+        
+        updateColumnIndexMap();
+        
+        return this;
+    }
     
     public List<GridHeader> getHeaders()
     {
@@ -153,14 +170,7 @@ public class ListGrid
         
         return tempHeaders;
     }
-    
-    public Grid addHeader( GridHeader header )
-    {
-        headers.add( header );
-        
-        return this;
-    }
-        
+     
     public int getHeight()
     {        
         return ( grid != null && grid.size() > 0 ) ? grid.size() : 0;
@@ -182,41 +192,41 @@ public class ListGrid
     
     public Grid addRow()
     {
-        grid.add( new ArrayList<String>() );
+        grid.add( new ArrayList<Object>() );
         
         currentRowWriteIndex++;
         
         return this;
     }
     
-    public Grid addValue( String value )
+    public Grid addValue( Object value )
     {
         grid.get( currentRowWriteIndex ).add( value );
         
         return this;
     }
     
-    public List<String> getRow( int rowIndex )
+    public List<Object> getRow( int rowIndex )
     {
         return grid.get( rowIndex );
     }
     
-    public List<List<String>> getRows()
+    public List<List<Object>> getRows()
     {
         return grid;
     }
     
-    public List<List<String>> getVisibleRows()
+    public List<List<Object>> getVisibleRows()
     {
         verifyGridState();
         
-        List<List<String>> tempGrid = new ArrayList<List<String>>();
+        List<List<Object>> tempGrid = new ArrayList<List<Object>>();
         
         if ( headers != null && headers.size() > 0 )
         {
-            for ( List<String> row : grid )
+            for ( List<Object> row : grid )
             {
-                List<String> tempRow = new ArrayList<String>();
+                List<Object> tempRow = new ArrayList<Object>();
                 
                 for ( int i = 0; i < row.size(); i++ )
                 {
@@ -233,11 +243,11 @@ public class ListGrid
         return tempGrid;
     }
         
-    public List<String> getColumn( int columnIndex )
+    public List<Object> getColumn( int columnIndex )
     {
-        List<String> column = new ArrayList<String>();
+        List<Object> column = new ArrayList<Object>();
         
-        for ( List<String> row : grid )
+        for ( List<Object> row : grid )
         {
             column.add( row.get( columnIndex ) );
         }
@@ -245,7 +255,7 @@ public class ListGrid
         return column;
     }
     
-    public String getValue( int rowIndex, int columnIndex )
+    public Object getValue( int rowIndex, int columnIndex )
     {
         if ( grid.size() < rowIndex || grid.get( rowIndex ) == null || grid.get( rowIndex ).size() < columnIndex )
         {
@@ -255,7 +265,7 @@ public class ListGrid
         return grid.get( rowIndex ).get( columnIndex );
     }
     
-    public Grid addColumn( List<String> columnValues )
+    public Grid addColumn( List<Object> columnValues )
     {
         verifyGridState();
         
@@ -284,10 +294,12 @@ public class ListGrid
             headers.remove( columnIndex );
         }
         
-        for ( List<String> row : grid )
+        for ( List<Object> row : grid )
         {
             row.remove( columnIndex );
         }
+        
+        updateColumnIndexMap();
         
         return this;
     }
@@ -323,44 +335,38 @@ public class ListGrid
             throw new IllegalArgumentException( "Column index out of bounds: " + columnIndex );
         }
         
-        System.out.println( "col index: " + columnIndex + " order " + order );
-        
         Collections.sort( grid, new GridRowComparator( columnIndex, order ) );
         
         return this;
     }
     
-    public Grid addRegressionColumn( int columnIndex )
+    public Grid addRegressionColumn( int columnIndex, boolean addHeader )
     {
         verifyGridState();
         
         SimpleRegression regression = new SimpleRegression();
         
-        List<String> column = getColumn( columnIndex );
+        List<Object> column = getColumn( columnIndex );
         
         int index = 0;
         
-        for ( String value : column )
+        for ( Object value : column )
         {
-            index++;
-            
-            if ( Double.parseDouble( value ) != 0.0 ) // 0 omitted from regression
+            if ( Double.parseDouble( String.valueOf( value ) ) != 0.0 ) // 0 omitted from regression
             {
-                regression.addData( index, Double.parseDouble( value ) );
+                regression.addData( index++, Double.parseDouble( String.valueOf(  value ) ) );
             }
         }
         
-        List<String> regressionColumn = new ArrayList<String>();
-        
-        index = 0;
+        List<Object> regressionColumn = new ArrayList<Object>();
         
         for ( int i = 0; i < column.size(); i++ )
         {
-            final double predicted = regression.predict( index++ );
+            final double predicted = regression.predict( i );
             
             if ( !Double.isNaN( predicted ) ) // Enough values must exist for regression
             {
-                regressionColumn.add( String.valueOf( getRounded( predicted, 1 ) ) );
+                regressionColumn.add( getRounded( predicted, 1 ) );
             }
             else
             {
@@ -369,6 +375,19 @@ public class ListGrid
         }
 
         addColumn( regressionColumn );
+        
+        if ( addHeader && columnIndex < headers.size() )
+        {
+            GridHeader header = headers.get( columnIndex );
+            
+            if ( header != null )
+            {
+                GridHeader regressionHeader = new GridHeader( header.getName() + REGRESSION_SUFFIX, 
+                    header.getColumn() + REGRESSION_SUFFIX, header.getType(), header.isHidden(), header.isMeta() );
+                
+                addHeader( regressionHeader );
+            }
+        }            
         
         return this;
     }
@@ -380,26 +399,22 @@ public class ListGrid
     public boolean next()
         throws JRException
     {
-        int height = getHeight();
+        boolean next = ++currentRowReadIndex < getHeight();
         
-        return ++currentRowReadIndex < height; 
+        if ( !next )
+        {
+            currentRowReadIndex = -1; // Reset and return false
+        }
+        
+        return next;
     }
     
     public Object getFieldValue( JRField field )
         throws JRException
     {
-        int headerIndex = -1;
+        Integer index = columnIndexMap.get( field.getName() );
         
-        for ( int i = 0; i < headers.size(); i++ )
-        {
-            if ( headers.get( i ).getColumn() != null && headers.get( i ).getColumn().equals( field.getName() ) )
-            {
-                headerIndex = i;
-                break;
-            }
-        }
-        
-        return headerIndex != -1 ? getRow( currentRowReadIndex ).get( headerIndex ) : null;
+        return index != null ? getRow( currentRowReadIndex ).get( index ) : null;
     }
 
     // -------------------------------------------------------------------------
@@ -414,20 +429,28 @@ public class ListGrid
     {
         Integer rowLength = null;    
     
-        for ( List<String> row : grid )
+        for ( List<Object> row : grid )
         {
             if ( rowLength != null && rowLength != row.size() )
             {
-                throw new IllegalStateException( "Grid rows do not have the same number of cells" );
+                throw new IllegalStateException( "Grid rows do not have the same number of cells, previous: " + rowLength + ", this: " + row.size() );
             }
             
             rowLength = row.size();
         }
+    }
+    
+    /**
+     * Updates the mapping between header columns and grid indexes. This method
+     * should be invoked whenever the columns are manipulated.
+     */
+    private void updateColumnIndexMap()
+    {
+        columnIndexMap.clear();
         
-        if ( rowLength != null && headers.size() != 0 && headers.size() != rowLength )
+        for ( int i = 0; i < headers.size(); i++ )
         {
-            throw new IllegalStateException( 
-                "Number of headers is not 0 and not equal to the number of columns (headers: " + headers.size() + ", cols: " + rowLength + ")" );
+            columnIndexMap.put( headers.get( i ).getColumn(), i );
         }
     }
     
@@ -452,7 +475,7 @@ public class ListGrid
             buffer.append( headerNames  ).append( "\n" );
         }
         
-        for ( List<String> row : grid )
+        for ( List<Object> row : grid )
         {
             buffer.append( row ).append( "\n" );
         }
@@ -465,7 +488,7 @@ public class ListGrid
     // -------------------------------------------------------------------------
 
     public static class GridRowComparator
-        implements Comparator<List<String>>
+        implements Comparator<List<Object>>
     {
         private int columnIndex;
         private int order;
@@ -477,23 +500,22 @@ public class ListGrid
         }
         
         @Override
-        public int compare( List<String> list1, List<String> list2 )
+        @SuppressWarnings("unchecked")
+        public int compare( List<Object> list1, List<Object> list2 )
         {
             if ( order == 0 || list1 == null || list2 == null )
             {
                 return 0;
             }
             
-            if ( isNumeric( list1.get( columnIndex ) ) && isNumeric( list2.get( columnIndex ) ) )
+            if ( list1.get( columnIndex ) == null || !( list1.get( columnIndex ) instanceof Comparable<?> ) || 
+                list2.get( columnIndex ) == null || !( list2.get( columnIndex ) instanceof Comparable<?> ) )
             {
-                final Double value1 = Double.valueOf( list1.get( columnIndex ) );
-                final Double value2 = Double.valueOf( list2.get( columnIndex ) );
-                
-                return order > 0 ? value2.compareTo( value1 ) : value1.compareTo( value2 );
+                return 0;
             }
             
-            final String value1 = list1.get( columnIndex );
-            final String value2 = list2.get( columnIndex );
+            final Comparable<Object> value1 = (Comparable<Object>) list1.get( columnIndex );
+            final Comparable<Object> value2 = (Comparable<Object>) list2.get( columnIndex );
             
             return order > 0 ? value2.compareTo( value1 ) : value1.compareTo( value2 );
         }

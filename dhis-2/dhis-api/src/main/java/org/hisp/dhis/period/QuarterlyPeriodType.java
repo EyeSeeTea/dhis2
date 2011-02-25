@@ -99,30 +99,16 @@ public class QuarterlyPeriodType
     public Period getNextPeriod( Period period )
     {
         Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.set( Calendar.MONTH, cal.get( Calendar.MONTH ) - cal.get( Calendar.MONTH ) % 3 + 3 );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.MONTH, 2 );
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-
-        return new Period( this, startDate, cal.getTime() );
+        cal.add( Calendar.MONTH, 3 );
+        return createPeriod( cal );
     }
 
     @Override
     public Period getPreviousPeriod( Period period )
     {
         Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.set( Calendar.MONTH, cal.get( Calendar.MONTH ) - cal.get( Calendar.MONTH ) % 3 - 3 );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.MONTH, 2 );
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-
-        return new Period( this, startDate, cal.getTime() );
+        cal.add( Calendar.MONTH, -3 );
+        return createPeriod( cal );
     }
 
     /**
@@ -136,19 +122,15 @@ public class QuarterlyPeriodType
         cal.set( Calendar.DAY_OF_YEAR, 1 );
 
         int year = cal.get( Calendar.YEAR );
-
-        ArrayList<Period> quarters = new ArrayList<Period>();
+        ArrayList<Period> periods = new ArrayList<Period>();
 
         while ( cal.get( Calendar.YEAR ) == year )
         {
-            Date startDate = cal.getTime();
-            cal.add( Calendar.MONTH, 2 );
-            cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-            quarters.add( new Period( this, startDate, cal.getTime() ) );
-            cal.add( Calendar.DAY_OF_YEAR, 1 );
+            periods.add( createPeriod( cal ) );
+            cal.add( Calendar.MONTH, 3 );
         }
 
-        return quarters;
+        return periods;
     }
 
     @Override
@@ -209,8 +191,6 @@ public class QuarterlyPeriodType
             default:
                 throw new IllegalArgumentException( "Not a valid quarterly starting month" );
             }
-
         }
     }
-
 }

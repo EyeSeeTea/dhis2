@@ -34,7 +34,7 @@ import static org.hisp.dhis.reporttable.ReportTable.REPORTING_MONTH_COLUMN_NAME;
 import static org.hisp.dhis.reporttable.ReportTable.SPACE;
 import static org.hisp.dhis.reporttable.ReportTable.TOTAL_COLUMN_NAME;
 import static org.hisp.dhis.reporttable.ReportTable.TOTAL_COLUMN_PRETTY_NAME;
-import static org.hisp.dhis.reporttable.ReportTable.databaseEncode;
+import static org.hisp.dhis.reporttable.ReportTable.columnEncode;
 import static org.hisp.dhis.reporttable.ReportTable.getColumnName;
 import static org.hisp.dhis.reporttable.ReportTable.getIdentifier;
 import static org.hisp.dhis.reporttable.ReportTable.getPrettyColumnName;
@@ -45,8 +45,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.amplecode.quick.BatchHandler;
-import org.amplecode.quick.BatchHandlerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +59,6 @@ import org.hisp.dhis.datamart.DataMartService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.jdbc.batchhandler.GenericBatchHandler;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -84,9 +81,10 @@ public class DefaultReportTableService
 {
     private static final Log log = LogFactory.getLog( DefaultReportTableService.class );
     
-    private static final String NULL_REPLACEMENT = "0.0";
     private static final String MODE_REPORT = "report";
     private static final String MODE_REPORT_TABLE = "table";
+    private static final String YES = "Yes";
+    private static final String NO = "No";
     
     // ---------------------------------------------------------------------
     // Dependencies
@@ -126,13 +124,6 @@ public class DefaultReportTableService
     {
         this.organisationUnitService = organisationUnitService;
     }
-
-    private BatchHandlerFactory batchHandlerFactory;
-    
-    public void setBatchHandlerFactory( BatchHandlerFactory batchHandlerFactory )
-    {
-        this.batchHandlerFactory = batchHandlerFactory;
-    }
     
     private DataMartService dataMartService;
     
@@ -153,107 +144,28 @@ public class DefaultReportTableService
     // -------------------------------------------------------------------------
 
     @Transactional
-    public void createReportTables( int id, String mode, Integer reportingPeriod, 
-        Integer organisationUnitId, boolean doDataMart, I18nFormat format )
+    public void populateReportTableDataMart( int id, String mode, Integer reportingPeriod, Integer organisationUnitId, I18nFormat format )
     {
-        for ( ReportTable reportTable : getReportTables( id, mode ) )
+        ReportTable reportTable = getReportTable( id, mode );
+        
+        reportTable = initDynamicMetaObjects( reportTable, reportingPeriod, organisationUnitId, format );
+        
+        if ( reportTable.hasDataElements() || reportTable.hasIndicators() )
         {
-            reportTable = initDynamicMetaObjects( reportTable, reportingPeriod, organisationUnitId, format );
-
-            createReportTable( reportTable, doDataMart );
+            dataMartService.export( getIdentifiers( DataElement.class, reportTable.getDataElements() ),
+                getIdentifiers( Indicator.class, reportTable.getIndicators() ),
+                getIdentifiers( Period.class, reportTable.getAllPeriods() ),
+                getIdentifiers( OrganisationUnit.class, reportTable.getAllUnits() ) );
+        }
+        
+        if ( reportTable.hasDataSets() )
+        {
+            completenessService.exportDataSetCompleteness( getIdentifiers( DataSet.class, reportTable.getDataSets() ),
+                getIdentifiers( Period.class, reportTable.getAllPeriods() ),
+                getIdentifiers( OrganisationUnit.class, reportTable.getAllUnits() ) );
         }
     }
     
-    @Transactional
-    public void createReportTable( ReportTable reportTable, boolean doDataMart )
-    {
-        log.info( "Process started for report table: " + reportTable.getName() );
-        
-        // ---------------------------------------------------------------------
-        // Exporting relevant data to data mart
-        // ---------------------------------------------------------------------
-
-        if ( doDataMart )
-        {
-            if ( reportTable.hasDataElements() || reportTable.hasIndicators() )
-            {
-                dataMartService.export( getIdentifiers( DataElement.class, reportTable.getDataElements() ),
-                    getIdentifiers( Indicator.class, reportTable.getIndicators() ),
-                    getIdentifiers( Period.class, reportTable.getAllPeriods() ),
-                    getIdentifiers( OrganisationUnit.class, reportTable.getAllUnits() ) );
-            }
-            
-            if ( reportTable.hasDataSets() )
-            {
-                completenessService.exportDataSetCompleteness( getIdentifiers( DataSet.class, reportTable.getDataSets() ),
-                    getIdentifiers( Period.class, reportTable.getAllPeriods() ),
-                    getIdentifiers( OrganisationUnit.class, reportTable.getAllUnits() ) );
-            }
-        }
-        
-        // ---------------------------------------------------------------------
-        // Creating report table
-        // ---------------------------------------------------------------------
-        
-        reportTableManager.createReportTable( reportTable );
-
-        // ---------------------------------------------------------------------
-        // Updating existing table name after deleting the database table
-        // ---------------------------------------------------------------------
-        
-        reportTable.updateExistingTableName();
-        
-        updateReportTable( reportTable );
-        
-        log.info( "Created report table: " + reportTable.getName() );
-
-        // ---------------------------------------------------------------------
-        // Creating grid
-        // ---------------------------------------------------------------------
-
-        Grid grid = getGrid( reportTable );
-
-        if ( reportTable.isRegression() )
-        {
-            // -----------------------------------------------------------------
-            // The start index of the crosstab columns is derived by
-            // subtracting the total number of columns with the number of
-            // crosstab columns, since they come last in the report table.
-            // -----------------------------------------------------------------
-
-            int numberOfColumns = reportTable.getColumns().size(); // TODO test
-            int startColumnIndex = grid.getWidth() - numberOfColumns;
-        
-            addRegressionToGrid( grid, startColumnIndex, numberOfColumns );
-            
-            log.info( "Added regression to report table: " + reportTable.getName() );
-        }
-
-        // ---------------------------------------------------------------------
-        // Populating report table from grid
-        // ---------------------------------------------------------------------
-        
-        BatchHandler<Object> batchHandler = batchHandlerFactory.createBatchHandler( GenericBatchHandler.class );
-
-        batchHandler.setTableName( reportTable.getTableName() );        
-        batchHandler.init();
-        
-        for ( List<String> row : grid.getRows() )
-        {
-            batchHandler.addObject( row );
-        }
-        
-        batchHandler.flush();       
-
-        log.info( "Populated report table: " + reportTable.getTableName() );
-    }
-
-    @Transactional
-    public void removeReportTable( ReportTable reportTable )
-    {
-        reportTableManager.removeReportTable( reportTable );
-    }
-
     @Transactional
     public Grid getReportTableGrid( int id, I18nFormat format, Integer reportingPeriod, Integer organisationUnitId )
     {
@@ -262,6 +174,20 @@ public class DefaultReportTableService
         reportTable = initDynamicMetaObjects( reportTable, reportingPeriod, organisationUnitId, format );
 
         return getGrid( reportTable );
+    }
+
+    public ReportTable getReportTable( Integer id, String mode )
+    {
+        if ( mode.equals( MODE_REPORT_TABLE ) )
+        {
+            return getReportTable( id );
+        }
+        else if ( mode.equals( MODE_REPORT ) )
+        {
+            return reportService.getReport( id ).getReportTable();
+        }
+        
+        return null;
     }
     
     // -------------------------------------------------------------------------
@@ -417,26 +343,6 @@ public class DefaultReportTableService
     }
 
     /**
-     * Adds columns with regression values to the given grid.
-     * 
-     * @param grid the grid.
-     * @param startColumnIndex the start column index.
-     * @param numberOfColumns the number of columns.
-     * @return a grid.
-     */
-    private Grid addRegressionToGrid( Grid grid, int startColumnIndex, int numberOfColumns )
-    {
-        for ( int i = 0; i < numberOfColumns; i++ )
-        {
-            int columnIndex = i + startColumnIndex;
-            
-            grid.addRegressionColumn( columnIndex );
-        }
-        
-        return grid;
-    }
-    
-    /**
      * Generates a grid based on the given report table.
      * 
      * @param reportTable the report table.
@@ -446,7 +352,7 @@ public class DefaultReportTableService
     {
         String subtitle = StringUtils.trimToEmpty( reportTable.getOrganisationUnitName() ) + SPACE + StringUtils.trimToEmpty( reportTable.getReportingMonthName() );
         
-        Grid grid = new ListGrid().setTitle( reportTable.getName() ).setSubtitle( subtitle ).setTable( reportTable.getExistingTableName() );
+        Grid grid = new ListGrid().setTitle( reportTable.getName() ).setSubtitle( subtitle );
         
         final Map<String, Double> map = reportTableManager.getAggregatedValueMap( reportTable );
         
@@ -477,7 +383,7 @@ public class DefaultReportTableService
         {
             for ( DataElementCategoryOption categoryOption : reportTable.getCategoryCombo().getCategoryOptions() ) // TOTO skip if only one category?
             {
-                grid.addHeader( new GridHeader( categoryOption.getShortName(), databaseEncode( categoryOption.getShortName() ), String.class.getName(), false, false ) );
+                grid.addHeader( new GridHeader( categoryOption.getShortName(), columnEncode( categoryOption.getShortName() ), String.class.getName(), false, false ) );
             }
             
             grid.addHeader( new GridHeader( TOTAL_COLUMN_PRETTY_NAME, TOTAL_COLUMN_NAME, String.class.getName(), false, false ) );
@@ -491,9 +397,9 @@ public class DefaultReportTableService
         {
             grid.addRow();
             
-            for ( IdentifiableObject object : row ) // TODO change order and get one loop?
+            for ( IdentifiableObject object : row )
             {
-                grid.addValue( String.valueOf( object.getId() ) ); // Index columns
+                grid.addValue( object.getId() ); // Index columns
             }
             
             for ( IdentifiableObject object : row )
@@ -503,24 +409,29 @@ public class DefaultReportTableService
             
             grid.addValue( reportTable.getReportingMonthName() );
             grid.addValue( reportTable.getOrganisationUnitName() );
-            grid.addValue( isCurrentParent( row ) ? String.valueOf( 1 ) : String.valueOf( 0 ) );
+            grid.addValue( isCurrentParent( row ) ? YES : NO );
             
             for ( List<IdentifiableObject> column : reportTable.getColumns() )
             {
-                grid.addValue( toString( map.get( getIdentifier( row, column ) ) ) ); // Values
+                grid.addValue( map.get( getIdentifier( row, column ) ) ); // Values
             }
             
             if ( reportTable.doTotal() )
             {
                 for ( DataElementCategoryOption categoryOption : reportTable.getCategoryCombo().getCategoryOptions() )
                 {
-                    grid.addValue( toString( map.get( getIdentifier( row, DataElementCategoryOption.class, categoryOption.getId() ) ) ) );
+                    grid.addValue( map.get( getIdentifier( row, DataElementCategoryOption.class, categoryOption.getId() ) ) );
                 }
                 
-                grid.addValue( toString( map.get( getIdentifier( row ) ) ) ); // Only category option combo is crosstab when total, row identifier will return total
+                grid.addValue( map.get( getIdentifier( row ) ) ); // Only category option combo is crosstab when total, row identifier will return total
             }
         }
 
+        if ( reportTable.isRegression() && !reportTable.doTotal() )
+        {
+            addRegressionToGrid( grid, reportTable.getColumns().size() );
+        }
+        
         // ---------------------------------------------------------------------
         // Sort first and then limit
         // ---------------------------------------------------------------------
@@ -535,6 +446,26 @@ public class DefaultReportTableService
             grid.limitGrid( reportTable.topLimit() );
         }
                 
+        return grid;
+    }
+
+    /**
+     * Adds columns with regression values to the given grid.
+     * 
+     * @param grid the grid.
+     * @param numberOfColumns the number of columns.
+     */
+    private Grid addRegressionToGrid( Grid grid, int numberOfColumns )
+    {
+        int startColumnIndex = grid.getWidth() - numberOfColumns;
+        
+        for ( int i = 0; i < numberOfColumns; i++ )
+        {
+            int columnIndex = i + startColumnIndex;
+            
+            grid.addRegressionColumn( columnIndex, true );
+        }
+        
         return grid;
     }
     
@@ -555,39 +486,5 @@ public class DefaultReportTableService
         }
         
         return false;
-    }
-    
-    /**
-     * Converts the given Double to String or replaces with default value if null.
-     * 
-     * @param value the Double.
-     */
-    private String toString( Double value )
-    {
-        return value != null ? String.valueOf( value ) : NULL_REPLACEMENT;
-    }
-    
-    /**
-     * If report table mode, this method will return the report table with the
-     * given identifier. If report mode, this method will return the report
-     * tables associated with the report.
-     * 
-     * @param id the identifier.
-     * @param mode the mode.
-     */
-    private Collection<ReportTable> getReportTables( Integer id, String mode )
-    {
-        Collection<ReportTable> reportTables = new ArrayList<ReportTable>();
-
-        if ( mode.equals( MODE_REPORT_TABLE ) )
-        {
-            reportTables.add( getReportTable( id ) );
-        }
-        else if ( mode.equals( MODE_REPORT ) )
-        {
-            reportTables = reportService.getReport( id ).getReportTables();
-        }
-
-        return reportTables;
     }
 }

@@ -91,7 +91,7 @@ public class GridPdfResult
 
         String filename = CodecUtils.filenameEncode( StringUtils.defaultIfEmpty( grid.getTitle(), DEFAULT_FILENAME ) ) + ".pdf";
         
-        ContextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, true, filename, true );
+        ContextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, true, filename, false );
 
         // ---------------------------------------------------------------------
         // Write PDF to output stream
@@ -115,9 +115,9 @@ public class GridPdfResult
 
         table.addCell( getEmptyCell( grid.getVisibleWidth(), 10 ) );
         
-        for ( List<String> row : grid.getVisibleRows() )
+        for ( List<Object> row : grid.getVisibleRows() )
         {
-            for ( String col : row )
+            for ( Object col : row )
             {
                 table.addCell( getTextCell( col ) );
             }

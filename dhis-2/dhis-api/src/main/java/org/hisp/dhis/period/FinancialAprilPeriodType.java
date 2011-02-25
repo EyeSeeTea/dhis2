@@ -27,139 +27,25 @@
 
 package org.hisp.dhis.period;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Chau Thu Tran
- * 
- * @version FinancialAprilPeriodType.java Nov 3, 2010 12:55:07 PM
  */
 public class FinancialAprilPeriodType
-    extends CalendarPeriodType
+    extends FinancialPeriodType
 {
-    /**
-     * The name of the FinancialAprilPeriods, which is "FinancialApril".
-     */
     public static final String NAME = "FinancialApril";
 
-    public static final int FREQUENCY_ORDER = 365;
-
-    // -------------------------------------------------------------------------
-    // PeriodType functionality
-    // -------------------------------------------------------------------------
-
+    @Override
+    protected int getBaseMonth()
+    {
+        return Calendar.APRIL;
+    }
+    
     @Override
     public String getName()
     {
         return NAME;
-    }
-
-    @Override
-    public Period createPeriod()
-    {
-        return createPeriod( createCalendarInstance() );
-    }
-
-    @Override
-    public Period createPeriod( Date date )
-    {
-        return createPeriod( createCalendarInstance( date ) );
-    }
-
-    private Period createPeriod( Calendar cal )
-    {
-        cal.set( Calendar.YEAR, cal.get( Calendar.YEAR ) + cal.get( Calendar.MONDAY ) / 7 - 1);
-        cal.set( Calendar.MONTH, Calendar.APRIL );
-        cal.set( Calendar.DATE, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.YEAR, 1 );
-        cal.set( Calendar.DAY_OF_YEAR, cal.get( Calendar.DAY_OF_YEAR ) - 1  );
-
-        return new Period( this, startDate, cal.getTime() );
-    }
-
-    @Override
-    public int getFrequencyOrder()
-    {
-        return FREQUENCY_ORDER;
-    }
-
-    // -------------------------------------------------------------------------
-    // CalendarPeriodType functionality
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Period getNextPeriod( Period period )
-    {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-
-        cal.set( Calendar.YEAR, cal.get( Calendar.YEAR ) - cal.get( Calendar.YEAR ) % 2 + 12 );
-
-        Date startDate = cal.getTime();
-        cal.add( Calendar.YEAR, 1 );
-        cal.add( Calendar.DAY_OF_YEAR, -2 );
-        return new Period( this, startDate, cal.getTime() );
-    }
-
-    @Override
-    public Period getPreviousPeriod( Period period )
-    {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.set( Calendar.YEAR, cal.get( Calendar.YEAR ) - cal.get( Calendar.YEAR ) % 2 + 2 );
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.YEAR, 1 );
-        cal.add( Calendar.DAY_OF_YEAR, -2 );
-
-        return new Period( this, startDate, cal.getTime() );
-    }
-
-    /**
-     * Generates FinancialAprilPeriods for the last 5, current and next 5 years.
-     */
-    @Override
-    public List<Period> generatePeriods( Date date )
-    {
-        ArrayList<Period> years = new ArrayList<Period>();
-
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.YEAR, cal.get( Calendar.YEAR ) + cal.get( Calendar.MONDAY ) / 7 - 11);
-        cal.set( Calendar.DAY_OF_YEAR, cal.getActualMinimum( Calendar.DAY_OF_YEAR ) + 90 );
-
-        for ( int i = 0; i < 11; ++i )
-        {
-            Date startDate = cal.getTime();
-
-            cal.add( Calendar.DAY_OF_YEAR, -1 );
-            cal.add( Calendar.YEAR, 1 );
-            years.add( new Period( this, startDate, cal.getTime() ) );
-
-            cal.add( Calendar.DAY_OF_YEAR, 1 );
-        }
-
-        return years;
-    }
-
-    @Override
-    public String getIsoDate( Period period )
-    {
-        throw new UnsupportedOperationException( "Not supported yet." );
-    }
-
-    @Override
-    public Period createPeriod( String isoDate )
-    {
-        throw new UnsupportedOperationException( "Not supported yet." );
-    }
-
-    @Override
-    public String getIsoFormat()
-    {
-        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }

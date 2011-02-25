@@ -39,7 +39,6 @@ import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.ImportException;
 import org.hisp.dhis.importexport.ImportParams;
@@ -98,7 +97,7 @@ public class DataSetMappingTest
 
         StringWriter writer = new StringWriter();
         org.hisp.dhis.dataset.DataSet dataSet = dataSetService.getDataSet( DATA_SET_UUID );
-        DataSet dxfDataSet = DataSetMapper.convert( dataSet );
+        DataSet dxfDataSet = new DataSetMapper().convert( dataSet );
         u.marshal( dxfDataSet, writer );
 
         System.out.println( writer.toString() );
@@ -109,5 +108,4 @@ public class DataSetMappingTest
     {
         return true;
     }
-
 }
