@@ -1489,7 +1489,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     },
 
     applyValues: function() {
-        Ext.getCmp('viewhistory_cb').addRecord(this);
+        Ext.getCmp('viewhistory_b').addItem(this);
         
 		var options = {
             indicator: 'value',

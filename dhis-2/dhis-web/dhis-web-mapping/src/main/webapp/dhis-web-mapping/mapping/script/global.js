@@ -91,6 +91,12 @@ G.conf = {
 
 G.util = {
     
+    expandWidget: function(widget) {
+        var collapsed = widget == choropleth ? symbol : choropleth;
+        collapsed.collapse();
+        widget.expand();
+    },
+    
     /* Detect mapview parameter in URL */
     getUrlParam: function(strParam) {
         var output = '';

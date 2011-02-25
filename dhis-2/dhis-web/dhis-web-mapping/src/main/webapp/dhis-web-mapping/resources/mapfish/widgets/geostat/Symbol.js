@@ -96,7 +96,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 					classes: this.mapView.classes || this.legend.classes
 				};
                 
-                G.vars.parameter.id = false;
 				G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
 				
 				function mapViewStoreCallback() {
@@ -1366,7 +1365,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 				startDate: this.form.findField('startdate').getValue(),
 				endDate: this.form.findField('enddate').getValue(),
 				parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
+                parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
+                parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
 				organisationUnitLevel: this.organisationUnitSelection.level.level,
+                organisationUnitLevelName: this.organisationUnitSelection.level.name,
 				mapLegendType: this.form.findField('maplegendtype').getValue(),
 				method: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('method').getValue() : null,
 				classes: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('classes').getValue() : null,
@@ -1476,7 +1478,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
 
     applyValues: function() {
-        Ext.getCmp('viewhistory_cb').addRecord(this);
+        Ext.getCmp('viewhistory_b').addItem(this);
         
 		var options = {
             indicator: 'value',
@@ -1516,8 +1518,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         this.coreComp = new mapfish.GeoStat.Symbol(this.map, coreOptions);
         
         if (G.vars.parameter.id) {
-			choropleth.collapse();
-			this.expand();
+            G.util.expandWidget(this);
 			G.vars.parameter = false;
 		}
     }

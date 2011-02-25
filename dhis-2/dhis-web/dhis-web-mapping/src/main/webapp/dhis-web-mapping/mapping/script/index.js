@@ -2283,7 +2283,7 @@
 		iconCls: 'icon-admin',
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
-		handler: function() {            
+		handler: function() {
 			var x = Ext.getCmp('center').x + 15;
 			var y = Ext.getCmp('center').y + 41;
 			adminWindow.setPosition(x,y);
@@ -2303,39 +2303,61 @@
 	});
     
     var viewhistoryButton = new Ext.Button({
-        id: 'vh_b',
+        id: 'viewhistory_b',
         text: 'H',
-        menu: new Ext.menu.Menu({
-            id: 'viewhistory_m',
-            defaults: {
-                itemCls: 'x-menu-item x-menu-item-custom'
-            },
-            items: [{text:'lsdkfølsdfksd'}]
-        }),
         addMenu: function() {
             this.menu = new Ext.menu.Menu({
-                items: [
-                    {
-                        text: 'onomatepoetikon',
-                        itemCls: "x-menu-item x-menu-item-cstm"
+                id: 'viewhistory_m',
+                defaults: {
+                    itemCls: 'x-menu-item x-menu-item-custom'
+                },
+                items: [],
+                listeners: {
+                    'click': function(menu, item, e) {
+                        var mapView = item.mapView;
+                        var scope = mapView.widget;                                            
+                        scope.mapView = mapView;
+                        scope.updateValues = true;
+                        
+                        scope.legend.value = mapView.mapLegendType;
+                        scope.legend.method = mapView.method || scope.legend.method;
+                        scope.legend.classes = mapView.classes || scope.legend.classes;
+                        
+                        G.vars.map.setCenter(new OpenLayers.LonLat(mapView.longitude, mapView.latitude), mapView.zoom);
+                        G.vars.mapDateType.value = mapView.mapDateType;
+                        Ext.getCmp('mapdatetype_cb').setValue(G.vars.mapDateType.value);
+
+                        scope.valueType.value = mapView.mapValueType;
+                        scope.form.findField('mapvaluetype').setValue(scope.valueType.value);
+                        
+                        G.util.expandWidget(scope);                        
+                        scope.setMapView();
                     }
-                ]
+                }
             });
         },
-        addRecord: function(scope) {
+        addItem: function(scope) {
             if (!this.menu) {
                 this.addMenu();
             }
-        }
+
+            var mapView = scope.formValues.getAllValues.call(scope);
+            mapView.widget = scope;
+            mapView.timestamp = new Date();
+            mapView.label = G.date.getNowHMS(mapView.timestamp) + ' - ' + mapView.parentOrganisationUnitName + ', ' + mapView.organisationUnitLevelName;
+
+            for (var i = 0; i < this.menu.items.items.length; i++) {
+                if (G.util.compareObjToObj(this.menu.items.items[i].mapView, mapView, ['widget','timestamp','label'])) {
+                    this.menu.items.items[i].destroy();
+                }
+            }
             
-            
-    });
-    
-    
-    
-    
-    
-    
+            this.menu.addItem({
+                text: mapView.label,
+                mapView: mapView
+            });
+        }            
+    });  
     
     
     
