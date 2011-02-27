@@ -242,8 +242,8 @@ public class RelativePeriods
         
         for ( Period period : relatives )
         {
-            period.setName( dynamicNames ? format.formatPeriod( period ) : periodNames[c++] );
-            period.setShortName( format.formatPeriod( period ) );
+            period.setName( dynamicNames && format != null ? format.formatPeriod( period ) : periodNames[c++] );
+            period.setShortName( format != null ? format.formatPeriod( period ) : null );
             periods.add( period );
         }
         

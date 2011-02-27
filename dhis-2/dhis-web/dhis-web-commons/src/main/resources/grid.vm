@@ -84,7 +84,7 @@
 		<band height="51" splitType="Stretch">
 			#set( $x = 10 )
 			#foreach( $header in $grid.getVisibleHeaders() )
-			#if( $header.meta )	#set( $offset = 110 ) #else	#set( $offset = 60 ) #end
+			#if( $header.meta )	#set( $offset = 110 ) #else	#set( $offset = 55 ) #end
 			<staticText>
 				<reportElement x="${x}" y="26" width="${offset}" height="20"/>
 				<textElement #if( !$header.meta )textAlignment="Center"#end>
@@ -103,7 +103,7 @@
 		<band height="21" splitType="Stretch">
 			#set( $x = 10 )
 			#foreach( $header in $grid.getVisibleHeaders() )
-			#if( $header.meta )	#set( $offset = 110 ) #else	#set( $offset = 60 ) #end
+			#if( $header.meta )	#set( $offset = 110 ) #else	#set( $offset = 55 ) #end
 			<textField>
 				<reportElement x="${x}" y="0" width="${offset}" height="20"/>
 				<textElement #if( !$header.meta )textAlignment="Center"#end>
