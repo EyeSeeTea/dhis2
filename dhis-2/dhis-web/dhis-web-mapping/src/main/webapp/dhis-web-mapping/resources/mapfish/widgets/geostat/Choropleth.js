@@ -1388,7 +1388,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 bounds: this.legend.value == G.conf.map_legend_type_automatic && this.legend.method == G.conf.classify_with_bounds ? this.form.findField('bounds').getValue() : null,
                 colorLow: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('startcolor').getValue() : null,
                 colorHigh: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('endcolor').getValue() : null,
-                mapLegendSetId: this.form.findField('maplegendset').getValue(),
+                mapLegendSetId: this.legend.value == G.conf.map_legend_type_predefined ? this.form.findField('maplegendset').getValue() : null,
                 radiusLow: null,
                 radiusHigh: null,
                 longitude: G.vars.map.getCenter().lon,
@@ -1396,8 +1396,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 zoom: parseFloat(G.vars.map.getZoom())
 			};
 		},
-		
-		getImageExportValues: function() {
+        
+        getImageExportValues: function() {
 			return {
 				mapValueTypeValue: this.form.findField('mapvaluetype').getValue() == G.conf.map_value_type_indicator ?
 					this.form.findField('indicator').getRawValue() : this.form.findField('dataelement').getRawValue(),
