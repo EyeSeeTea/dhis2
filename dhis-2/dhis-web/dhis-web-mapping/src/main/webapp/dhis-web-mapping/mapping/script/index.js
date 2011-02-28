@@ -2364,7 +2364,7 @@
                             c1 + (mapView.mapDateType == G.conf.map_date_type_fixed ? mapView.periodName : (mapView.startDate + ' - ' + mapView.endDate)) + '</span>';
             
             for (var i = 0; i < this.menu.items.items.length; i++) {
-                if (G.util.compareObjToObj(mapView, this.menu.items.items[i].mapView, ['startdate','longitude','latitude','zoom','widget','timestamp','label'])) {
+                if (G.util.compareObjToObj(mapView, this.menu.items.items[i].mapView, ['longitude','latitude','zoom','widget','timestamp','label'])) {
                     this.menu.items.items[i].destroy();
                 }
             }
