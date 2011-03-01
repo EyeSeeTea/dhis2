@@ -118,7 +118,7 @@ public class ReportTable
     private static final String EMPTY = "";
     private static final IdentifiableObject[] IRT = new IdentifiableObject[0];
     private static final String[] SRT = new String[0];    
-    private static final String ILLEGAL_FILENAME_CHARS_REGEX = "[/\\?%*:|\"<>.]";
+    private static final String ILLEGAL_FILENAME_CHARS_REGEX = "[/\\?%*:|\"'<>.]";
     
     // -------------------------------------------------------------------------
     // Persisted properties
@@ -394,7 +394,7 @@ public class ReportTable
     // -------------------------------------------------------------------------
         
     /**
-     * Tests whether this ReportTable is multi-dimensional.
+     * Indicates whether this ReportTable is multi-dimensional.
      */
     public boolean isDimensional()
     {
@@ -402,11 +402,21 @@ public class ReportTable
     }
         
     /**
-     * Tests whether a total column should be included.
+     * Indicates whether a total column should be included.
      */
     public boolean doTotal()
     {
         return !isDoIndicators() && !isDoPeriods() && !isDoUnits() && isDimensional();
+    }
+    
+    /**
+     * Indicates whether subtotal columns should be included. The category combo
+     * of the report table must have more than one category if subtotal columns
+     * will contribute.
+     */
+    public boolean doSubTotals()
+    {
+        return doTotal() && categoryCombo.getCategories() != null && categoryCombo.getCategories().size() > 1;
     }
     
     /**
@@ -548,6 +558,8 @@ public class ReportTable
     {
         if ( string != null )
         {
+            string = string.replaceAll( "<", "_lt" );
+            string = string.replaceAll( ">", "_gt" );
             string = string.replaceAll( ILLEGAL_FILENAME_CHARS_REGEX, EMPTY );
             string = string.length() > 255 ? string.substring( 0, 255 ) : string;
             string = string.toLowerCase();
