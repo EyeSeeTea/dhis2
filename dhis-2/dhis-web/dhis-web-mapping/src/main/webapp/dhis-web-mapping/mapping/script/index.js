@@ -2373,7 +2373,7 @@
                 html: mapView.label,
                 mapView: mapView
             });
-        }            
+        }
     });
 
 	var exitButton = new Ext.Button({
