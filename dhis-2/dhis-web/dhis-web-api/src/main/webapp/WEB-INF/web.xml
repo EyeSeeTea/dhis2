@@ -81,12 +81,12 @@
       <param-value>
         com.sun.jersey.api.container.filter.LoggingFilter, org.hisp.dhis.web.api.HtmlPromotingUriConnegFilter</param-value>
     </init-param>
-<!--    <init-param>-->
-<!--      <param-name>-->
-<!--        com.sun.jersey.spi.container.ContainerResponseFilters</param-name>-->
-<!--      <param-value>-->
-<!--        com.sun.jersey.api.container.filter.LoggingFilter</param-value>-->
-<!--    </init-param>-->
+    <!-- <init-param> -->
+    <!-- <param-name> -->
+    <!-- com.sun.jersey.spi.container.ContainerResponseFilters</param-name> -->
+    <!-- <param-value> -->
+    <!-- com.sun.jersey.api.container.filter.LoggingFilter</param-value> -->
+    <!-- </init-param> -->
     <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
@@ -97,5 +97,4 @@
     <servlet-name>web-api</servlet-name>
     <url-pattern>/api</url-pattern>
   </servlet-mapping>
-
 </web-app>

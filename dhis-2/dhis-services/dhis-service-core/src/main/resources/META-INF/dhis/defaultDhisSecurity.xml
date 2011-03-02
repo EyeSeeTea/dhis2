@@ -12,9 +12,12 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 		<property name="usernameSaltSource" ref="usernameSaltSource" />
 	</bean>
 
-	<sec:authentication-manager alias="authenticationManager">
-		<sec:authentication-provider ref="daoAuthenticationProvider" />
-	</sec:authentication-manager>
+	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
+		<property name="providers" ref="daoAuthenticationProvider" />
+		<property name="authenticationEventPublisher" ref="defaultAuthenticationEventPublisher" />
+	</bean>
+
+	<bean id="defaultAuthenticationEventPublisher" class="org.springframework.security.authentication.DefaultAuthenticationEventPublisher" />
 
 	<bean id="daoAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 		<property name="userDetailsService" ref="userDetailsService" />
