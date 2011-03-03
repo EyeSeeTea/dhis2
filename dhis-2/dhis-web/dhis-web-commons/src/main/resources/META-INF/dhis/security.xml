@@ -19,6 +19,11 @@
     <sec:intercept-url pattern="/favicon.ico" access="permitAll" />
     <sec:intercept-url pattern="/**" access="isAuthenticated()" />
 
+    <!-- TODO: Moved from default security, untested! -->
+    <sec:intercept-url pattern="/api/**" access="isAuthenticated()" />
+    <sec:intercept-url pattern="/api" access="isAuthenticated()" />
+    <!-- end -->
+
     <sec:custom-filter ref="automaticAccessFilter" before="LOGOUT_FILTER" />
   </sec:http>
 
