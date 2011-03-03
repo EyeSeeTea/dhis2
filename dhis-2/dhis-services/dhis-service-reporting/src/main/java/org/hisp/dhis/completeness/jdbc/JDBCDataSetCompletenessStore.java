@@ -27,8 +27,10 @@ package org.hisp.dhis.completeness.jdbc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -38,8 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.completeness.DataSetCompletenessStore;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.source.Source;
-import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.TextUtils;
 
@@ -67,6 +67,41 @@ public class JDBCDataSetCompletenessStore
     // DataSetCompletenessStore
     // -------------------------------------------------------------------------
 
+    public int getCompleteDataSetRegistrations( DataSet dataSet, Period period, Collection<Integer> relevantSources )
+    {
+        if ( relevantSources == null || relevantSources.size() == 0 )
+        {
+            return 0;
+        }        
+        
+        final String sql =
+            "SELECT COUNT(*) " +
+            "FROM completedatasetregistration " +
+            "WHERE datasetid = " + dataSet.getId() + " " +
+            "AND periodid = " + period.getId() + " " +
+            "AND sourceid IN ( " + getCommaDelimitedString( relevantSources ) + " )";
+        
+        return statementManager.getHolder().queryForInteger( sql );
+    }
+
+    public int getCompleteDataSetRegistrations( DataSet dataSet, Period period, Collection<Integer> relevantSources, Date deadline )
+    {
+        if ( relevantSources == null || relevantSources.size() == 0 )
+        {
+            return 0;
+        }        
+        
+        final String sql =
+            "SELECT COUNT(*) " +
+            "FROM completedatasetregistration " +
+            "WHERE datasetid = " + dataSet.getId() + " " +
+            "AND periodid = " + period.getId() + " " +
+            "AND sourceid IN ( " + getCommaDelimitedString( relevantSources ) + " ) " +
+            "AND date <= '" + getMediumDateString( deadline ) + "'";
+        
+        return statementManager.getHolder().queryForInteger( sql );
+    }
+    
     public double getPercentage( int dataSetId, int periodId, int organisationUnitId )
     {
         final String sql =
@@ -97,15 +132,15 @@ public class JDBCDataSetCompletenessStore
         statementManager.getHolder().executeUpdate( sql );
     }
 
-    public int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period )
+    public int getRegistrations( DataSet dataSet, Collection<Integer> children, Period period )
     {
         return getRegistrations( dataSet, children, period, null );
     }
     
-    public int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline )
+    public int getRegistrations( DataSet dataSet, Collection<Integer> children, Period period, Date deadline )
     {           
         final int compulsoryElements = dataSet.getCompulsoryDataElementOperands().size();        
-        final String childrenIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( Source.class, children ) );
+        final String childrenIds = TextUtils.getCommaDelimitedString( children );
         final String deadlineCriteria = deadline != null ? "AND lastupdated < '" + DateUtils.getMediumDateString( deadline ) + "' " : "";
         
         final String sql = 
@@ -122,9 +157,9 @@ public class JDBCDataSetCompletenessStore
         return statementManager.getHolder().queryForInteger( sql );
     }
     
-    public int getNumberOfValues( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline )
+    public int getNumberOfValues( DataSet dataSet, Collection<Integer> children, Period period, Date deadline )
     {
-        final String childrenIds = TextUtils.getCommaDelimitedString( ConversionUtils.getIdentifiers( Source.class, children ) );
+        final String childrenIds = TextUtils.getCommaDelimitedString( children );
         final String deadlineCriteria = deadline != null ? "AND lastupdated < '" + DateUtils.getMediumDateString( deadline ) + "' " : "";
         
         final String sql =
@@ -136,8 +171,42 @@ public class JDBCDataSetCompletenessStore
             "AND sourceid IN (" + childrenIds + ")";
 
         return statementManager.getHolder().queryForInteger( sql );
-    }    
+    }
+    
+    public Collection<DataSet> getDataSetsWithRegistrations( Collection<DataSet> dataSets )
+    {
+        Collection<DataSet> selection = new ArrayList<DataSet>();
+        
+        for ( DataSet dataSet : dataSets )
+        {
+            final String sql = "SELECT count(*) FROM completedatasetregistration WHERE datasetid = " + dataSet.getId();
+            
+            if ( statementManager.getHolder().queryForInteger( sql ) > 0 )
+            {
+                selection.add( dataSet );
+            }
+        }
+        
+        return selection;
+    }
 
+    public Collection<Period> getPeriodsWithRegistrations( Collection<Period> periods )
+    {
+        Collection<Period> selection = new ArrayList<Period>();
+        
+        for ( Period period : periods )
+        {
+            final String sql = "SELECT count(*) FROM completedatasetregistration WHERE periodid = " + period.getId();
+            
+            if ( statementManager.getHolder().queryForInteger( sql ) > 0 )
+            {
+                selection.add( period );
+            }
+        }
+        
+        return selection;
+    }
+    
     public void createIndex()
     {
         try

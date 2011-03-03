@@ -160,20 +160,6 @@ public class DataSetCompletenessServiceExportTest
         registrationService.saveCompleteDataSetRegistration( new CompleteDataSetRegistration( dataSetA, periodB, unitB, null ) );
         registrationService.saveCompleteDataSetRegistration( new CompleteDataSetRegistration( dataSetA, periodB, unitA, null ) );
         
-        DataSetCompletenessResult resultA = completenessService.getDataSetCompleteness( periodA, null, unitB, dataSetA );
-        DataSetCompletenessResult resultB = completenessService.getDataSetCompleteness( periodA, null, unitC, dataSetA );
-        DataSetCompletenessResult resultC = completenessService.getDataSetCompleteness( periodA, null, unitA, dataSetA );
-        DataSetCompletenessResult resultD = completenessService.getDataSetCompleteness( periodB, null, unitB, dataSetA );
-        DataSetCompletenessResult resultE = completenessService.getDataSetCompleteness( periodB, null, unitC, dataSetA );
-        DataSetCompletenessResult resultF = completenessService.getDataSetCompleteness( periodB, null, unitA, dataSetA );
-                
-        assertEquals( new DataSetCompletenessResult( unitB.getName(), 1, 1, 0 ), resultA );
-        assertEquals( new DataSetCompletenessResult( unitC.getName(), 1, 1, 0 ), resultB );
-        assertEquals( new DataSetCompletenessResult( unitA.getName(), 3, 2, 0 ), resultC );
-        assertEquals( new DataSetCompletenessResult( unitB.getName(), 1, 1, 0 ), resultD );
-        assertEquals( new DataSetCompletenessResult( unitC.getName(), 1, 0, 0 ), resultE );
-        assertEquals( new DataSetCompletenessResult( unitA.getName(), 3, 2, 0 ), resultF );
-        
         completenessService.exportDataSetCompleteness( getIdentifiers( DataSet.class, dataSets ),
             getIdentifiers( Period.class, periods ), getIdentifiers( OrganisationUnit.class, units ) );
         
@@ -184,9 +170,5 @@ public class DataSetCompletenessServiceExportTest
         assertEquals( 100.0, completenessStore.getPercentage( dataSetA.getId(), periodB.getId(), unitB.getId() ) );
         assertEquals( 0.0, completenessStore.getPercentage( dataSetA.getId(), periodB.getId(), unitC.getId() ) );
         assertEquals( 66.7, completenessStore.getPercentage( dataSetA.getId(), periodB.getId(), unitA.getId() ) );
-        
-        assertEquals( 100.0, completenessStore.getPercentage( dataSetA.getId(), periodC.getId(), unitB.getId() ) );
-        assertEquals( 50.0, completenessStore.getPercentage( dataSetA.getId(), periodC.getId(), unitC.getId() ) );
-        assertEquals( 66.7, completenessStore.getPercentage( dataSetA.getId(), periodC.getId(), unitA.getId() ) );   
     }
 }

@@ -34,10 +34,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.completeness.DataSetCompletenessResult;
@@ -49,11 +49,11 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.jdbc.batchhandler.DataSetCompletenessResultBatchHandler;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.RelativePeriods;
-import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,11 +128,11 @@ public abstract class AbstractDataSetCompletenessService
     // Abstract methods
     // -------------------------------------------------------------------------
     
-    public abstract int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period );
+    public abstract int getRegistrations( DataSet dataSet, Collection<Integer> relevantSources, Period period );
     
-    public abstract int getRegistrationsOnTime( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline );
+    public abstract int getRegistrationsOnTime( DataSet dataSet, Collection<Integer> relevantSources, Period period, Date deadline );
     
-    public abstract int getSources( DataSet dataSet, Collection<? extends Source> children );
+    public abstract int getSources( DataSet dataSet, Collection<Integer> relevantSources );
     
     // -------------------------------------------------------------------------
     // DataSetCompleteness
@@ -142,9 +142,7 @@ public abstract class AbstractDataSetCompletenessService
     {
         if ( relatives != null )
         {
-            List<Period> periods = relatives.getRelativePeriods( 1, null, false );
-            
-            Collection<Integer> periodIds = ConversionUtils.getIdentifiers( Period.class, periodService.reloadPeriods( periods ) );
+            Collection<Integer> periodIds = ConversionUtils.getIdentifiers( Period.class, periodService.reloadPeriods( relatives.getRelativePeriods( 1, null, false ) ) );
             
             exportDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
         }
@@ -155,9 +153,15 @@ public abstract class AbstractDataSetCompletenessService
     {
         log.info( "Data completeness export process started" );
         
+        completenessStore.dropIndex();
+        
+        log.info( "Dropped potential index" );
+        
         int days = (Integer) systemSettingManager.getSystemSetting( KEY_COMPLETENESS_OFFSET, DEFAULT_COMPLETENESS_OFFSET );
         
         completenessStore.deleteDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
+        
+        log.info( "Deleted existing completeness data" );
         
         BatchHandler<DataSetCompletenessResult> batchHandler = batchHandlerFactory.createBatchHandler( DataSetCompletenessResultBatchHandler.class );
         
@@ -167,52 +171,48 @@ public abstract class AbstractDataSetCompletenessService
         Collection<OrganisationUnit> units = organisationUnitService.getOrganisationUnits( organisationUnitIds );
         Collection<DataSet> dataSets = dataSetService.getDataSets( dataSetIds );
         
-        Collection<Period> intersectingPeriods = null;
-        Date deadline = null;
-        DataSetCompletenessResult result = null;
+        periods = completenessStore.getPeriodsWithRegistrations( periods );
+        dataSets = completenessStore.getDataSetsWithRegistrations( dataSets );
         
-        for ( final Period period : periods )
-        {
-            intersectingPeriods = periodService.getIntersectingPeriods( period.getStartDate(), period.getEndDate() );
-            
+        OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy();
+        hierarchy.prepareChildren( units );
+        
+        //TODO Re-implement period aggregation with sql to improve performance
+        
+        for ( final DataSet dataSet : dataSets )
+        {                
             for ( final OrganisationUnit unit : units )
             {
-                for ( final DataSet dataSet : dataSets )
+                Collection<Integer> sources = hierarchy.getChildren( unit.getId() );
+                
+                Collection<Integer> relevantSources = getRelevantSources( dataSet, sources );
+                
+                for ( final Period period : periods )
                 {
-                    final DataSetCompletenessResult aggregatedResult = new DataSetCompletenessResult();
-                    
-                    aggregatedResult.setDataSetId( dataSet.getId() );
-                    aggregatedResult.setPeriodId( period.getId() );
-                    aggregatedResult.setPeriodName( period.getName() );
-                    aggregatedResult.setOrganisationUnitId( unit.getId() );
-                    
-                    for ( final Period intersectingPeriod : intersectingPeriods )
+                    if ( period.getPeriodType() != null && dataSet.getPeriodType() != null && period.getPeriodType().equals( dataSet.getPeriodType() ) )
                     {
-                        if ( intersectingPeriod.getPeriodType().equals( dataSet.getPeriodType() ) )
+                        final Date deadline = getDeadline( period, days );
+                        
+                        final DataSetCompletenessResult result = getDataSetCompleteness( period, deadline, unit, relevantSources, dataSet );
+                        
+                        if ( result.getSources() > 0 )
                         {
-                            deadline = getDeadline( intersectingPeriod, days );
-                            
-                            result = getDataSetCompleteness( intersectingPeriod, deadline, unit, dataSet );
-                            
-                            aggregatedResult.incrementSources( result.getSources() );
-                            aggregatedResult.incrementRegistrations( result.getRegistrations() );
-                            aggregatedResult.incrementRegistrationsOnTime( result.getRegistrationsOnTime() );
+                            batchHandler.addObject( result );
                         }
-                    }
-                    
-                    if ( aggregatedResult.getSources() > 0 )
-                    {
-                        batchHandler.addObject( aggregatedResult );
                     }
                 }
             }
             
-            log.info( "Exported data completeness for period " + period.getId() );
+            log.info( "Exported completeness for data set: " + dataSet );
         }
         
         batchHandler.flush();
         
-        log.info( "Export process done" );
+        completenessStore.createIndex();
+        
+        log.info( "Created index" );
+        
+        log.info( "Completeness export process done" );
     }
     
     public Collection<DataSetCompletenessResult> getDataSetCompleteness( int periodId, int organisationUnitId )
@@ -222,23 +222,25 @@ public abstract class AbstractDataSetCompletenessService
         int days = (Integer) systemSettingManager.getSystemSetting( KEY_COMPLETENESS_OFFSET, DEFAULT_COMPLETENESS_OFFSET );        
         Date deadline = getDeadline( period, days );
         
-        final Collection<? extends Source> children = organisationUnitService.getOrganisationUnitWithChildren( organisationUnitId );
-        
-        final Collection<DataSet> dataSets = dataSetService.getDataSetsBySources( children );
+        final Collection<Integer> children = organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnitId );
+                
+        final Collection<DataSet> dataSets = dataSetService.getAllDataSets();
         
         final Collection<DataSetCompletenessResult> results = new ArrayList<DataSetCompletenessResult>();
         
         for ( final DataSet dataSet : dataSets )
         {
+            final Collection<Integer> relevantSources = getRelevantSources( dataSet, children );
+            
             final DataSetCompletenessResult result = new DataSetCompletenessResult();
             
-            result.setSources( getSources( dataSet, children ) );
+            result.setSources( getSources( dataSet, relevantSources ) );
             
             if ( result.getSources() > 0 )
             {
                 result.setName( dataSet.getName() );
-                result.setRegistrations( getRegistrations( dataSet, children, period ) );
-                result.setRegistrationsOnTime( deadline != null ? getRegistrationsOnTime( dataSet, children, period, deadline ) : 0 );
+                result.setRegistrations( getRegistrations( dataSet, relevantSources, period ) );
+                result.setRegistrationsOnTime( deadline != null ? getRegistrationsOnTime( dataSet, relevantSources, period, deadline ) : 0 );
                             
                 result.setDataSetId( dataSet.getId() );
                 result.setPeriodId( periodId );
@@ -266,22 +268,22 @@ public abstract class AbstractDataSetCompletenessService
         
         final Collection<DataSetCompletenessResult> results = new ArrayList<DataSetCompletenessResult>();
         
-        Collection<OrganisationUnit> children = null;
-        
         for ( final OrganisationUnit unit : units )
         {
-            children = organisationUnitService.getOrganisationUnitWithChildren( unit.getId() );
+            final Collection<Integer> children = organisationUnitService.getOrganisationUnitHierarchy().getChildren( unit.getId() );
+            
+            final Collection<Integer> relevantSources = getRelevantSources( dataSet, children );
             
             final DataSetCompletenessResult result = new DataSetCompletenessResult();
-            
-            result.setSources( getSources( dataSet, children ) );
+
+            result.setSources( getSources( dataSet, relevantSources ) );
             
             if ( result.getSources() > 0 )
             {
                 result.setName( unit.getName() );
-                result.setRegistrations( getRegistrations( dataSet, children, period ) );
-                result.setRegistrationsOnTime( deadline != null ? getRegistrationsOnTime( dataSet, children, period, deadline ) : 0 );
-                            
+                result.setRegistrations( getRegistrations( dataSet, relevantSources, period ) );
+                result.setRegistrationsOnTime( deadline != null ? getRegistrationsOnTime( dataSet, relevantSources, period, deadline ) : 0 );
+                
                 result.setDataSetId( dataSetId );
                 result.setPeriodId( periodId );
                 result.setOrganisationUnitId( unit.getId() );
@@ -293,24 +295,6 @@ public abstract class AbstractDataSetCompletenessService
         return results;
     }
 
-    public DataSetCompletenessResult getDataSetCompleteness( Period period, Date deadline, OrganisationUnit unit, DataSet dataSet )
-    {        
-        final Collection<OrganisationUnit> children = organisationUnitService.getOrganisationUnitWithChildren( unit.getId() );
-        
-        final DataSetCompletenessResult result = new DataSetCompletenessResult();
-        
-        result.setName( unit.getName() );
-        result.setRegistrations( getRegistrations( dataSet, children, period ) );
-        result.setRegistrationsOnTime( deadline != null ? getRegistrationsOnTime( dataSet, children, period, deadline ) : 0 );
-        result.setSources( getSources( dataSet, children ) );
-        
-        result.setDataSetId( dataSet.getId() );
-        result.setPeriodId( period.getId() );
-        result.setOrganisationUnitId( unit.getId() );
-        
-        return result;
-    }
-        
     // -------------------------------------------------------------------------
     // Index
     // -------------------------------------------------------------------------
@@ -329,6 +313,35 @@ public abstract class AbstractDataSetCompletenessService
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    private DataSetCompletenessResult getDataSetCompleteness( Period period, Date deadline, OrganisationUnit unit, Collection<Integer> relevantSources, DataSet dataSet )
+    {   
+        final DataSetCompletenessResult result = new DataSetCompletenessResult();
+        
+        result.setName( unit.getName() );
+        result.setSources( getSources( dataSet, relevantSources ) );
+        
+        if ( result.getSources() > 0 )
+        {        
+            result.setRegistrations( getRegistrations( dataSet, relevantSources, period ) );
+            result.setRegistrationsOnTime( deadline != null ? getRegistrationsOnTime( dataSet, relevantSources, period, deadline ) : 0 );
+            
+            result.setDataSetId( dataSet.getId() );
+            result.setPeriodId( period.getId() );
+            result.setPeriodName( period.getName() );
+            result.setOrganisationUnitId( unit.getId() );
+        }
+        
+        return result;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private Collection<Integer> getRelevantSources( DataSet dataSet, Collection<Integer> sources )
+    {
+        Collection<Integer> dataSetSources = ConversionUtils.getIdentifiers( OrganisationUnit.class, dataSet.getSources() );
+        
+        return CollectionUtils.intersection( dataSetSources, sources );
+    }
+    
     private Date getDeadline( Period period, int days )
     {
         Calendar cal = Calendar.getInstance();

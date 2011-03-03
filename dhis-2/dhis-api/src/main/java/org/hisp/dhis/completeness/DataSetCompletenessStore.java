@@ -32,7 +32,6 @@ import java.util.Date;
 
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.source.Source;
 
 /**
  * @author Lars Helge Overland
@@ -41,6 +40,10 @@ import org.hisp.dhis.source.Source;
 public interface DataSetCompletenessStore
 {
     String ID = DataSetCompletenessStore.class.getName();
+    
+    int getCompleteDataSetRegistrations( DataSet dataSet, Period period, Collection<Integer> relevantSources );
+    
+    int getCompleteDataSetRegistrations( DataSet dataSet, Period period, Collection<Integer> relevantSources, Date deadline );
     
     /**
      * Gets the percentage value for the datasetcompleteness with the given parameters.
@@ -66,11 +69,15 @@ public interface DataSetCompletenessStore
      */
     void deleteDataSetCompleteness();
     
-    int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period );
+    int getRegistrations( DataSet dataSet, Collection<Integer> children, Period period );
     
-    int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline );
+    int getRegistrations( DataSet dataSet, Collection<Integer> children, Period period, Date deadline );
     
-    int getNumberOfValues( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline );
+    int getNumberOfValues( DataSet dataSet, Collection<Integer> children, Period period, Date deadline );
+    
+    Collection<DataSet> getDataSetsWithRegistrations( Collection<DataSet> dataSets );
+    
+    Collection<Period> getPeriodsWithRegistrations( Collection<Period> periods );
     
     void createIndex();
     

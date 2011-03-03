@@ -111,12 +111,7 @@ public class DefaultDataMartService
     public int export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
         Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, RelativePeriods relatives )
     {
-        if ( relatives != null )
-        {
-            periodIds.addAll( getIdentifiers( Period.class, periodService.reloadPeriods( relatives.getRelativePeriods( 1, null, false ) ) ) );
-        }
-        
-        return dataMartEngine.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, false, new OutputHolderState() );
+        return export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, relatives, false );
     }
 
     @Transactional

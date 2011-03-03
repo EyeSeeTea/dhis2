@@ -30,10 +30,8 @@ package org.hisp.dhis.completeness.impl;
 import java.util.Collection;
 import java.util.Date;
 
-import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.source.Source;
 
 /**
  * @author Lars Helge Overland
@@ -41,25 +39,18 @@ import org.hisp.dhis.source.Source;
 public class RegistrationDataSetCompletenessService
     extends AbstractDataSetCompletenessService
 {
-    private CompleteDataSetRegistrationService registrationService;
-
-    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
+    public int getRegistrations( DataSet dataSet, Collection<Integer> relevantSources, Period period )
     {
-        this.registrationService = registrationService;
+        return completenessStore.getCompleteDataSetRegistrations( dataSet, period, relevantSources );
     }
 
-    public int getRegistrations( DataSet dataSet, Collection<? extends Source> children, Period period )
+    public int getRegistrationsOnTime( DataSet dataSet, Collection<Integer> relevantSources, Period period, Date deadline )
     {
-        return registrationService.getCompleteDataSetRegistrationsForDataSet( dataSet, children, period );
-    }
-
-    public int getRegistrationsOnTime( DataSet dataSet, Collection<? extends Source> children, Period period, Date deadline )
-    {
-        return registrationService.getCompleteDataSetRegistrationsForDataSet( dataSet, children, period, deadline );
+        return completenessStore.getCompleteDataSetRegistrations( dataSet, period, relevantSources, deadline );
     }
     
-    public int getSources( DataSet dataSet, Collection<? extends Source> children )
+    public int getSources( DataSet dataSet, Collection<Integer> relevantSources )
     {
-        return dataSetService.getSourcesAssociatedWithDataSet( dataSet, children );
+        return relevantSources.size();
     }
 }

@@ -372,28 +372,4 @@ public class DataSetCompletenessServiceTest
         assertTrue( results.contains( resultA ) );
         assertTrue( results.contains( resultB ) );        
     }
-
-    @Test
-    public void testGetDataSetCompletenessPeriodOrganisationUnitDataSet()
-    {
-        dataSetA.getSources().add( unitE );
-        dataSetA.getSources().add( unitF );
-        
-        dataSetIdA = dataSetService.addDataSet( dataSetA );
-        
-        registrationService.saveCompleteDataSetRegistration( new CompleteDataSetRegistration( dataSetA, periodA, unitE, onTimeA ) );
-        registrationService.saveCompleteDataSetRegistration( new CompleteDataSetRegistration( dataSetA, periodA, unitF, onTimeA ) );
-                
-        DataSetCompletenessResult resultA = completenessService.getDataSetCompleteness( periodA, tooLateA, unitB, dataSetA );
-        DataSetCompletenessResult resultB = completenessService.getDataSetCompleteness( periodA, tooLateA, unitE, dataSetA );
-        DataSetCompletenessResult resultC = completenessService.getDataSetCompleteness( periodA, tooLateA, unitG, dataSetA );
-        
-        DataSetCompletenessResult referenceA = new DataSetCompletenessResult( unitB.getName(), 2, 2, 2 );
-        DataSetCompletenessResult referenceB = new DataSetCompletenessResult( unitE.getName(), 1, 1, 1 );
-        DataSetCompletenessResult referenceC = new DataSetCompletenessResult( unitG.getName(), 0, 0, 0 );
-        
-        assertEquals( referenceA, resultA );
-        assertEquals( referenceB, resultB );
-        assertEquals( referenceC, resultC );        
-    }
 }

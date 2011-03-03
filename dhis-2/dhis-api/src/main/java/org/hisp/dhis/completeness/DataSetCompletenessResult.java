@@ -134,21 +134,6 @@ public class DataSetCompletenessResult
         return 0.0;
     }
     
-    public void incrementSources( int sources )
-    {
-        this.sources += sources;
-    }
-    
-    public void incrementRegistrations( int registrations )
-    {
-        this.registrations += registrations;
-    }
-    
-    public void incrementRegistrationsOnTime( int registrationsOnTime )
-    {
-        this.registrationsOnTime += registrationsOnTime;
-    }
-
     // -------------------------------------------------------------------------
     // HashCode, equals, and toString
     // -------------------------------------------------------------------------
@@ -197,7 +182,7 @@ public class DataSetCompletenessResult
     @Override
     public String toString()
     {
-        String toString = "[" + name + " - " + registrations + " / " + sources + "]";
+        String toString = "[Name: " + name + ", Reg: " + registrations + ", On time: " + registrationsOnTime + ", Src: " + sources + "]";
         
         return toString;
     }
