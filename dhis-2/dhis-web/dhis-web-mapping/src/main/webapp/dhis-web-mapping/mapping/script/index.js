@@ -1391,6 +1391,7 @@
             }
         }
     });
+    
 			
     /* Section: help */
 	function setHelpText(topic, tab) {
@@ -1830,56 +1831,101 @@
         height: 119,
         items: [
             {
-                xtype: 'form',
-                title: 'Date type',
-                bodyStyle: 'padding:8px',
-                labelWidth: G.conf.label_width,
+                title: 'Date',
                 items: [
-                    {html: '<div class="window-info">Set thematic map date type</div>'},
                     {
-                        xtype: 'combo',
-                        id: 'mapdatetype_cb',
-                        fieldLabel: G.i18n.date_type,
-                        labelSeparator: G.conf.labelseparator,
-						disabled: G.system.aggregationStrategy == G.conf.aggregation_strategy_batch,
-                        editable: false,
-                        valueField: 'value',
-                        displayField: 'text',
-                        mode: 'local',
-                        value: G.conf.map_date_type_fixed,
-                        triggerAction: 'all',
-                        width: G.conf.combo_width_fieldset,
-                        minListWidth: G.conf.combo_width_fieldset,
-                        store: {
-                            xtype: 'arraystore',
-                            fields: ['value', 'text'],
-                            data: [
-                                [G.conf.map_date_type_fixed, G.i18n.fixed_periods],
-                                [G.conf.map_date_type_start_end, G.i18n.start_end_dates]
-                            ]
-                        },
-                        listeners: {
-                            'select': function(cb) {
-                                if (cb.getValue() != G.vars.mapDateType.value) {
-                                    G.vars.mapDateType.value = cb.getValue();
-                                    Ext.Ajax.request({
-                                        url: G.conf.path_mapping + 'setMapUserSettings' + G.conf.type,
-                                        method: 'POST',
-                                        params: {mapDateType: G.vars.mapDateType.value},
-                                        success: function() {
-                                            Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+ G.i18n.saved_as_date_type);
-                                            choropleth.prepareMapViewDateType();
-                                            symbol.prepareMapViewDateType();
+                        xtype: 'form',
+                        bodyStyle: 'padding:8px',
+                        labelWidth: G.conf.label_width,
+                        items: [
+                            {html: '<div class="window-info">Set thematic map date type</div>'},
+                            {
+                                xtype: 'combo',
+                                id: 'mapdatetype_cb',
+                                fieldLabel: G.i18n.date_type,
+                                labelSeparator: G.conf.labelseparator,
+                                disabled: G.system.aggregationStrategy === G.conf.aggregation_strategy_batch,
+                                editable: false,
+                                valueField: 'value',
+                                displayField: 'text',
+                                mode: 'local',
+                                value: G.conf.map_date_type_fixed,
+                                triggerAction: 'all',
+                                width: G.conf.combo_width_fieldset,
+                                minListWidth: G.conf.combo_width_fieldset,
+                                store: {
+                                    xtype: 'arraystore',
+                                    fields: ['value', 'text'],
+                                    data: [
+                                        [G.conf.map_date_type_fixed, G.i18n.fixed_periods],
+                                        [G.conf.map_date_type_start_end, G.i18n.start_end_dates]
+                                    ]
+                                },
+                                listeners: {
+                                    'select': function(cb) {
+                                        if (cb.getValue() !== G.vars.mapDateType.value) {
+                                            G.vars.mapDateType.value = cb.getValue();
+                                            Ext.Ajax.request({
+                                                url: G.conf.path_mapping + 'setMapUserSettings' + G.conf.type,
+                                                method: 'POST',
+                                                params: {mapDateType: G.vars.mapDateType.value},
+                                                success: function() {
+                                                    Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+ G.i18n.saved_as_date_type);
+                                                    choropleth.prepareMapViewDateType();
+                                                    symbol.prepareMapViewDateType();
+                                                }
+                                            });
                                         }
-                                    });
+                                    }
                                 }
                             }
-                        }
+                        ]
                     }
                 ]
-            }			
+            },
+            {
+                title: 'Google Maps',
+                items: [
+                    {   
+                        xtype: 'form',
+                        bodyStyle: 'padding:8px',
+                        labelWidth: G.conf.label_width,
+                        items: [
+                            {html: '<div class="window-info">Set thematic map date type</div>'},
+                            {
+                                xtype: 'textfield',
+                                id: 'googlemapsapikey_tf',
+                                fieldLabel: G.i18n.api_key,
+                                labelSeparator: G.conf.labelseparator,
+                                width: G.conf.combo_width_fieldset,
+                                minListWidth: G.conf.combo_width_fieldset
+                            }
+                        ]
+                    },
+                    {
+                        xtype: 'form',
+                        items: [
+                            {
+                                xtype: 'toolbar',
+                                style: 'padding-top:4px',
+                                items: [
+                                    '->',
+                                    {
+                                        xtype: 'button',
+                                        id: 'setgooglekey_b',
+                                        text: G.i18n.register,
+                                        iconCls: 'icon-assign',
+                                        handler: function() {}
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
         ]
     });
+
         
     var layerTree = new Ext.tree.TreePanel({
         title: '<span class="panel-title">' + G.i18n.map_layers + '</span>',

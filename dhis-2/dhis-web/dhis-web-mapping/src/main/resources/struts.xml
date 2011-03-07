@@ -23,6 +23,14 @@
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonInitialize.vm</result>
         </action>
+        
+        <!-- Google -->
+
+        <action name="getGoogleKey"
+            class="org.hisp.dhis.mapping.action.GetGoogleKeyAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsGoogleKey.vm</result>
+        </action>
 
         <!-- UserSetting -->
 
@@ -351,7 +359,7 @@
 		
 		<!-- i18n -->
 		
-		<action name="i18nJavaScript" class="org.hisp.dhis.mapping.action.NoAction">
+		<action name="i18n" class="org.hisp.dhis.mapping.action.NoAction">
             <result name="success" type="velocity">/dhis-web-mapping/i18n.vm</result>
 		</action>
 
