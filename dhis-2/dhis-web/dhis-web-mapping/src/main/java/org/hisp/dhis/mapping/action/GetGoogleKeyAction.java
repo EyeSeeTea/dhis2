@@ -27,6 +27,7 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.mapping.MappingService.KEY_GOOGLE_MAPS;
 import org.hisp.dhis.options.SystemSettingManager;
 
 import com.opensymphony.xwork2.Action;
@@ -67,7 +68,7 @@ public class GetGoogleKeyAction
     public String execute()
         throws Exception
     {
-        key = (String) systemSettingManager.getSystemSetting( KEY_GOOGLE_MAPS_API_KEY,
+        key = (String) systemSettingManager.getSystemSetting( KEY_GOOGLE_MAPS,
             "ABQIAAAAut6AhySExnYIXm5s2OFIkxRKNzJ-_9njnryRTbvC6CtrS4sRvRREWnxwlZUa630pLuPf3nD9i4fq9w" );
 
         return SUCCESS;

@@ -66,7 +66,7 @@ public interface MappingService
     
     final String MAP_LAYER_TYPE_OVERLAY = "overlay";
     
-    final String KEY_GOOGLE_MAPS_API_KEY = "googlemapsapikey";
+    final String KEY_GOOGLE_MAPS = "googlekey";
 
     // -------------------------------------------------------------------------
     // IndicatorMapValue

@@ -1828,7 +1828,8 @@
         layout: 'accordion',
         closeAction: 'hide',
         width: G.conf.window_width,
-        height: 119,
+        height: 145,
+        minHeight: 77,
         items: [
             {
                 title: 'Date',
@@ -1881,7 +1882,15 @@
                             }
                         ]
                     }
-                ]
+                ],
+                listeners: {
+                    expand: function() {
+                        adminWindow.setHeight(Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 145 : 143);
+                    },
+                    collapse: function() {
+                        adminWindow.setHeight(77);
+                    }
+                }
             },
             {
                 title: 'Google Maps',
@@ -1891,7 +1900,7 @@
                         bodyStyle: 'padding:8px',
                         labelWidth: G.conf.label_width,
                         items: [
-                            {html: '<div class="window-info">Set thematic map date type</div>'},
+                            {html: '<div class="window-info">Set Google Maps API key</div>'},
                             {
                                 xtype: 'textfield',
                                 id: 'googlemapsapikey_tf',
@@ -1913,7 +1922,7 @@
                                     {
                                         xtype: 'button',
                                         id: 'setgooglekey_b',
-                                        text: G.i18n.register,
+                                        text: G.i18n.update,
                                         iconCls: 'icon-assign',
                                         handler: function() {}
                                     }
@@ -1921,9 +1930,22 @@
                             }
                         ]
                     }
-                ]
+                ],
+                listeners: {
+                    expand: function() {
+                        adminWindow.setHeight(Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 168 : 166);
+                    },
+                    collapse: function() {
+                        adminWindow.setHeight(77);
+                    }
+                }
             }
-        ]
+        ],
+        listeners: {
+            afterrender: function() {
+                adminWindow.setHeight(Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 145 : 143);
+            }
+        }
     });
 
         
