@@ -17,14 +17,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
 		<property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
-    
-    <!-- Google -->
-
-    <bean id="org.hisp.dhis.mapping.action.GetGoogleMapsAPIKeyAction"
-        class="org.hisp.dhis.mapping.action.GetGoogleMapsAPIKeyAction"
-        scope="prototype">
-        <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
-    </bean>
 
 	<!-- OrganisationUnit -->
 
@@ -71,6 +63,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </bean>
     
     <!-- SystemSetting -->
+
+    <bean id="org.hisp.dhis.mapping.action.GetMapSystemSettingsAction"
+        class="org.hisp.dhis.mapping.action.GetMapSystemSettingsAction"
+        scope="prototype">
+        <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
+    </bean>
 
     <bean id="org.hisp.dhis.mapping.action.SetMapSystemSettingsAction"
         class="org.hisp.dhis.mapping.action.SetMapSystemSettingsAction"

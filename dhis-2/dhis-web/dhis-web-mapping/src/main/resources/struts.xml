@@ -23,14 +23,6 @@
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonInitialize.vm</result>
         </action>
-        
-        <!-- Google -->
-
-        <action name="getGoogleKey"
-            class="org.hisp.dhis.mapping.action.GetGoogleKeyAction">
-            <result name="success" type="velocity-json">
-                /dhis-web-mapping/jsGoogleKey.vm</result>
-        </action>
 
         <!-- UserSetting -->
 
@@ -42,16 +34,22 @@
 
         <action name="setMapUserSettings"
             class="org.hisp.dhis.mapping.action.SetMapUserSettingsAction">
-            <result name="success" type="velocity-json">/dhis-web-mapping/void.vm
-            </result>
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/void.vm</result>
         </action>
         
         <!-- SystemSetting -->
 
+        <action name="getMapSystemSettings"
+            class="org.hisp.dhis.mapping.action.GetMapSystemSettingsAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsGoogleKey.vm</result>
+        </action>
+
         <action name="setMapSystemSettings"
             class="org.hisp.dhis.mapping.action.SetMapSystemSettingsAction">
-            <result name="success" type="velocity-json">/dhis-web-mapping/void.vm
-            </result>
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/void.vm</result>
         </action>
 
 		<!-- OrganisationUnit -->

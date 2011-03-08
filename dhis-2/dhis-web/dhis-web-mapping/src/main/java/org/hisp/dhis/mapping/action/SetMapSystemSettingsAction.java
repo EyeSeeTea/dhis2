@@ -27,10 +27,7 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.mapping.MappingService.KEY_GOOGLE_MAPS;
-
 import org.hisp.dhis.options.SystemSettingManager;
-import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -72,7 +69,7 @@ public class SetMapSystemSettingsAction
     {
         if ( googleKey != null )
         {
-            systemSettingManager.saveSystemSetting( KEY_GOOGLE_MAPS, googleKey );
+            systemSettingManager.saveSystemSetting( SystemSettingManager.KEY_GOOGLE_MAPS_API_KEY, googleKey );
         }
         
         return SUCCESS;

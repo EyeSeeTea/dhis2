@@ -8,8 +8,8 @@
         controls: [new OpenLayers.Control.MouseToolbar()],
         displayProjection: new OpenLayers.Projection("EPSG:4326")
     });
-
-	G.vars.mask = new Ext.LoadMask(Ext.getBody(),{msg:G.i18n.loading,msgCls:'x-mask-loading2'});
+    
+    G.vars.mask = new Ext.LoadMask(Ext.getBody(),{msg:G.i18n.loading,msgCls:'x-mask-loading2'});
     G.vars.parameter = G.util.getUrlParam('view') ? {id: G.util.getUrlParam('view')} : {id: null};
 	
     Ext.Ajax.request({
@@ -379,7 +379,7 @@
     G.vars.map.addLayer(pointLayer);
     
     /* Init base layers */
-	var gm_normal = new OpenLayers.Layer.Google("GM Default", {
+	var gm_normal = new OpenLayers.Layer.Google("Google Normal", {
 		type: G_NORMAL_MAP,
 		sphericalMercator: true,
 		maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
@@ -388,7 +388,7 @@
 	gm_normal.layerType = G.conf.map_layer_type_baselayer;
 	G.vars.map.addLayer(gm_normal);
 	
-	var gm_hybrid = new OpenLayers.Layer.Google("GM Hybrid", {
+	var gm_hybrid = new OpenLayers.Layer.Google("Google Hybrid", {
 		type: G_HYBRID_MAP,
 		sphericalMercator: true,
 		maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
