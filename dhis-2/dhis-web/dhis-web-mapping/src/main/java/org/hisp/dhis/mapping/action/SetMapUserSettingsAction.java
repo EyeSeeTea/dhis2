@@ -69,7 +69,10 @@ public class SetMapUserSettingsAction
     public String execute()
         throws Exception
     {
-        userSettingService.saveUserSetting( KEY_MAP_DATE_TYPE, mapDateType );
+        if ( mapDateType != null )
+        {
+            userSettingService.saveUserSetting( KEY_MAP_DATE_TYPE, mapDateType );
+        }
         
         return SUCCESS;
     }
