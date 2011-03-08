@@ -1924,7 +1924,21 @@
                                         id: 'setgooglekey_b',
                                         text: G.i18n.update,
                                         iconCls: 'icon-assign',
-                                        handler: function() {}
+                                        handler: function() {
+                                            if (!Ext.getCmp('googlemapsapikey_tf').getValue()) {
+                                                Ext.message.msg(false, G.i18n.form_is_not_complete);
+                                                return;
+                                            }
+                                            
+                                            Ext.Ajax.request({
+                                                url: G.conf.path_mapping + 'setMapSystemSettings' + G.conf.type,
+                                                method: 'POST',
+                                                params: {googleKey: Ext.getCmp('googlemapsapikey_tf').getValue()},
+                                                success: function(r) {
+                                                    Ext.message.msg(true, 'Google Maps API Key updated');
+                                                }
+                                            });                                                
+                                        }
                                     }
                                 ]
                             }
@@ -1933,7 +1947,7 @@
                 ],
                 listeners: {
                     expand: function() {
-                        adminWindow.setHeight(Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 168 : 166);
+                        adminWindow.setHeight(Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 169 : 166);
                     },
                     collapse: function() {
                         adminWindow.setHeight(77);

@@ -45,6 +45,14 @@
             <result name="success" type="velocity-json">/dhis-web-mapping/void.vm
             </result>
         </action>
+        
+        <!-- SystemSetting -->
+
+        <action name="setMapSystemSettings"
+            class="org.hisp.dhis.mapping.action.SetMapSystemSettingsAction">
+            <result name="success" type="velocity-json">/dhis-web-mapping/void.vm
+            </result>
+        </action>
 
 		<!-- OrganisationUnit -->
 
