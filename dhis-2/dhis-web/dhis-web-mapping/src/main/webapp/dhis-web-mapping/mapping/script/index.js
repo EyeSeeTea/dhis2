@@ -1934,7 +1934,7 @@
                                                 method: 'POST',
                                                 params: {googleKey: Ext.getCmp('googlemapsapikey_tf').getValue()},
                                                 success: function(r) {
-                                                    Ext.message.msg(true, 'Google Maps API Key updated');
+                                                    window.location.reload();
                                                 }
                                             });                                                
                                         }
@@ -1948,10 +1948,10 @@
                                                 url: G.conf.path_mapping + 'deleteMapSystemSettings' + G.conf.type,
                                                 method: 'POST',
                                                 params: {googleKey: true},
-                                                success: function(r) {
+                                                success: function() {
                                                     window.location.reload();
                                                 }
-                                            });                                                
+                                            });
                                         }
                                     }
                                 ]
