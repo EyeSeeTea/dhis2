@@ -1900,7 +1900,7 @@
                         bodyStyle: 'padding:8px',
                         labelWidth: G.conf.label_width,
                         items: [
-                            {html: '<div class="window-info">Set Google Maps API key</div>'},
+                            {html: '<div class="window-info">Update Google Maps API key</div>'},
                             {
                                 xtype: 'textfield',
                                 id: 'googlemapsapikey_tf',
@@ -1921,7 +1921,6 @@
                                     '->',
                                     {
                                         xtype: 'button',
-                                        id: 'setgooglekey_b',
                                         text: G.i18n.update,
                                         iconCls: 'icon-assign',
                                         handler: function() {
@@ -1936,6 +1935,21 @@
                                                 params: {googleKey: Ext.getCmp('googlemapsapikey_tf').getValue()},
                                                 success: function(r) {
                                                     Ext.message.msg(true, 'Google Maps API Key updated');
+                                                }
+                                            });                                                
+                                        }
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        text: 'Use localhost',
+                                        iconCls: 'icon-remove',
+                                        handler: function() {
+                                            Ext.Ajax.request({
+                                                url: G.conf.path_mapping + 'deleteMapSystemSettings' + G.conf.type,
+                                                method: 'POST',
+                                                params: {googleKey: true},
+                                                success: function(r) {
+                                                    window.location.reload();
                                                 }
                                             });                                                
                                         }

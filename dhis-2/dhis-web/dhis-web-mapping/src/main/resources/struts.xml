@@ -52,6 +52,12 @@
                 /dhis-web-mapping/void.vm</result>
         </action>
 
+        <action name="deleteMapSystemSettings"
+            class="org.hisp.dhis.mapping.action.DeleteMapSystemSettingsAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/void.vm</result>
+        </action>
+
 		<!-- OrganisationUnit -->
 
 		<action name="getAllOrganisationUnitLevels"
