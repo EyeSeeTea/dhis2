@@ -5,25 +5,23 @@
       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
+  <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
+  <bean id="usernameSaltSource" class="org.hisp.dhis.security.DefaultUsernameSaltSource" />
+
+  <bean id="userDetailsService" class="org.hisp.dhis.security.hibernate.HibernateUserDetailsService">
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+
   <bean id="org.hisp.dhis.security.PasswordManager" class="org.hisp.dhis.security.spring.SpringSecurityPasswordManager">
     <property name="passwordEncoder" ref="passwordEncoder" />
     <property name="usernameSaltSource" ref="usernameSaltSource" />
   </bean>
 
   <sec:authentication-manager alias="authenticationManager">
-    <sec:authentication-provider ref="daoAuthenticationProvider" />
+    <sec:authentication-provider user-service-ref="userDetailsService">
+      <sec:password-encoder hash="md5">
+        <sec:salt-source ref="usernameSaltSource" />
+      </sec:password-encoder>
+    </sec:authentication-provider>
   </sec:authentication-manager>
-
-  <bean id="daoAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-    <property name="userDetailsService" ref="userDetailsService" />
-    <property name="passwordEncoder" ref="passwordEncoder" />
-    <property name="saltSource" ref="usernameSaltSource" />
-  </bean>
-
-  <bean id="userDetailsService" class="org.hisp.dhis.security.hibernate.HibernateUserDetailsService">
-    <property name="sessionFactory" ref="sessionFactory" />
-  </bean>
-
-  <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
-  <bean id="usernameSaltSource" class="org.hisp.dhis.security.DefaultUsernameSaltSource" />
 </beans>
