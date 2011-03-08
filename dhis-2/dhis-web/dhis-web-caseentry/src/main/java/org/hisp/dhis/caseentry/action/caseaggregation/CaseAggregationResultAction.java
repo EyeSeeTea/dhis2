@@ -257,11 +257,12 @@ public class CaseAggregationResultAction
 
                         double resultValue = aggregationConditionService.parseConditition( condition, orgUnit, period );
 
+                        DataValue dataValue = dataValueService
+                                    .getDataValue( orgUnit, dElement, period, optionCombo );
+
                         if ( resultValue != 0 )
                         {
-                            DataValue dataValue = dataValueService
-                                .getDataValue( orgUnit, dElement, period, optionCombo );
-
+                           
                             if ( dataValue == null )
                             {
                                 dataValue = new DataValue( dElement, period, orgUnit, "" + resultValue, storedBy,
@@ -281,6 +282,16 @@ public class CaseAggregationResultAction
                                 mapDataValues.put( dataValue, i18n.getString( "updated" ) + " " + message );
                             }
 
+                        }
+                        else if ( dataValue != null )
+                        {
+                                DataValue dvalue = new DataValue( dElement, period, orgUnit, "", storedBy,
+                                    new Date(), null, optionCombo );
+                                dvalue.setValue( dataValue.getValue() + i18n.getString( "old_value" ) ); 
+                                
+                                dataValueService.deleteDataValue( dataValue );
+
+                                mapDataValues.put( dvalue, i18n.getString( "deleted" ) + " " + message );
                         }
 
                     }// PeriodList end
