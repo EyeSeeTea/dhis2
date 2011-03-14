@@ -112,6 +112,10 @@ public class UpdateIndicatorGroupAction
 
             indicatorGroup.setMembers( members );
         }
+        else
+        {
+            indicatorGroup.getMembers().clear();
+        }
 
         indicatorService.updateIndicatorGroup( indicatorGroup );
 

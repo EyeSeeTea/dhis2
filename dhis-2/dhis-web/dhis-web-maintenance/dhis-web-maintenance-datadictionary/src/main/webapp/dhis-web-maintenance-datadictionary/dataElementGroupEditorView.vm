@@ -172,12 +172,14 @@
 		{
 			var text = availableDataElements[id];
 			if( text.toLowerCase().indexOf( filter_1.toLowerCase() ) != -1)
-			{				
+			{	
 				list_1.append('<option value="' + id + '">' + text + '</option>' );
 				list_2.append('<option value="' + id + '">' + text + '</option>' );
 			}
 		}
 		
+		sortList( 'availableDataElements', 'ASC' );
+		sortList( 'availableDataElements2', 'ASC' );
 		list_1.find(":first").attr("selected", "selected");		
 		list_2.find(":first").attr("selected", "selected");		
 		
@@ -200,6 +202,8 @@
 				list_2.append('<option value="' + id + '">' + text + '</option>' );
 			}
 		}
+		sortList( 'dataElementGroups', 'ASC' );
+		sortList( 'availableGroups', 'ASC' );
 		list_1.find(":first").attr("selected", "selected");		
 		list_2.find(":first").attr("selected", "selected");	
 		

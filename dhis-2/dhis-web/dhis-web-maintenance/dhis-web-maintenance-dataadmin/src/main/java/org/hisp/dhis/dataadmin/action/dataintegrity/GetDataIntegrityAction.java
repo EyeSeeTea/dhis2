@@ -32,10 +32,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.comparator.DataElementNameComparator;
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
 import org.hisp.dhis.dataset.DataSet;
@@ -43,6 +45,7 @@ import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
 import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
 import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.comparator.IndicatorNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -91,16 +94,9 @@ public class GetDataIntegrityAction
         return dataElementsWithoutGroups;
     }
 
-    private List<DataElement> dataElementsViolatingCompulsoryGroupSets;
+    private SortedMap<DataElement, Collection<DataElementGroup>> dataElementsViolatingExclusiveGroupSets;
 
-    public List<DataElement> getDataElementsViolatingCompulsoryGroupSets()
-    {
-        return dataElementsViolatingCompulsoryGroupSets;
-    }
-
-    private List<DataElement> dataElementsViolatingExclusiveGroupSets;
-
-    public List<DataElement> getDataElementsViolatingExclusiveGroupSets()
+    public SortedMap<DataElement, Collection<DataElementGroup>> getDataElementsViolatingExclusiveGroupSets()
     {
         return dataElementsViolatingExclusiveGroupSets;
     }
@@ -154,16 +150,9 @@ public class GetDataIntegrityAction
         return invalidIndicatorDenominators;
     }
 
-    private List<Indicator> indicatorsViolatingCompulsoryGroupSets;
+    private SortedMap<Indicator, Collection<IndicatorGroup>> indicatorsViolatingExclusiveGroupSets;
 
-    public List<Indicator> getIndicatorsViolatingCompulsoryGroupSets()
-    {
-        return indicatorsViolatingCompulsoryGroupSets;
-    }
-
-    private List<Indicator> indicatorsViolatingExclusiveGroupSets;
-
-    public List<Indicator> getIndicatorsViolatingExclusiveGroupSets()
+    public SortedMap<Indicator, Collection<IndicatorGroup>> getIndicatorsViolatingExclusiveGroupSets()
     {
         return indicatorsViolatingExclusiveGroupSets;
     }
@@ -196,9 +185,9 @@ public class GetDataIntegrityAction
         return organisationUnitsViolatingCompulsoryGroupSets;
     }
 
-    private List<OrganisationUnit> organisationUnitsViolatingExclusiveGroupSets;
+    private SortedMap<OrganisationUnit, Collection<OrganisationUnitGroup>> organisationUnitsViolatingExclusiveGroupSets;
 
-    public List<OrganisationUnit> getOrganisationUnitsViolatingExclusiveGroupSets()
+    public SortedMap<OrganisationUnit, Collection<OrganisationUnitGroup>> getOrganisationUnitsViolatingExclusiveGroupSets()
     {
         return organisationUnitsViolatingExclusiveGroupSets;
     }
@@ -240,8 +229,7 @@ public class GetDataIntegrityAction
         dataElementsWithoutDataSet = new ArrayList<DataElement>( dataIntegrityService.getDataElementsWithoutDataSet() );
         dataElementsWithoutGroups = new ArrayList<DataElement>( dataIntegrityService.getDataElementsWithoutGroups() );
         dataElementsAssignedToDataSetsWithDifferentPeriodTypes = dataIntegrityService.getDataElementsAssignedToDataSetsWithDifferentPeriodTypes();
-        dataElementsViolatingCompulsoryGroupSets = new ArrayList<DataElement>( dataIntegrityService.getDataElementsViolatingCompulsoryGroupSets() );
-        dataElementsViolatingExclusiveGroupSets = new ArrayList<DataElement>( dataIntegrityService.getDataElementsViolatingExclusiveGroupSets() );
+        dataElementsViolatingExclusiveGroupSets = dataIntegrityService.getDataElementsViolatingExclusiveGroupSets();
 
         log.info( "Checked data elements" );
         
@@ -254,8 +242,7 @@ public class GetDataIntegrityAction
         indicatorsWithoutGroups = new ArrayList<Indicator>( dataIntegrityService.getIndicatorsWithoutGroups() );
         invalidIndicatorNumerators = dataIntegrityService.getInvalidIndicatorNumerators();
         invalidIndicatorDenominators = dataIntegrityService.getInvalidIndicatorDenominators();
-        indicatorsViolatingCompulsoryGroupSets = new ArrayList<Indicator>( dataIntegrityService.getIndicatorsViolatingCompulsoryGroupSets() );
-        indicatorsViolatingExclusiveGroupSets = new ArrayList<Indicator>( dataIntegrityService.getIndicatorsViolatingExclusiveGroupSets() );
+        indicatorsViolatingExclusiveGroupSets = dataIntegrityService.getIndicatorsViolatingExclusiveGroupSets();
 
         log.info( "Checked indicators" );
         
@@ -267,8 +254,7 @@ public class GetDataIntegrityAction
             .getOrganisationUnitsWithoutGroups() );
         organisationUnitsViolatingCompulsoryGroupSets = new ArrayList<OrganisationUnit>( dataIntegrityService
             .getOrganisationUnitsViolatingCompulsoryGroupSets() );
-        organisationUnitsViolatingExclusiveGroupSets = new ArrayList<OrganisationUnit>( dataIntegrityService
-            .getOrganisationUnitsViolatingExclusiveGroupSets() );
+        organisationUnitsViolatingExclusiveGroupSets = dataIntegrityService.getOrganisationUnitsViolatingExclusiveGroupSets();
         organisationUnitGroupsWithoutGroupSets = new ArrayList<OrganisationUnitGroup>( dataIntegrityService
             .getOrganisationUnitGroupsWithoutGroupSets() );
         validationRulesWithoutGroups = new ArrayList<ValidationRule>( dataIntegrityService
@@ -283,18 +269,13 @@ public class GetDataIntegrityAction
         
         Collections.sort( dataElementsWithoutDataSet, new DataElementNameComparator() );
         Collections.sort( dataElementsWithoutGroups, new DataElementNameComparator() );
-        Collections.sort( dataElementsViolatingCompulsoryGroupSets, new DataElementNameComparator() );
-        Collections.sort( dataElementsViolatingExclusiveGroupSets, new DataElementNameComparator() );
         Collections.sort( dataSetsNotAssignedToOrganisationUnits, new DataSetNameComparator() );
         Collections.sort( sectionsWithInvalidCategoryCombinations, new SectionOrderComparator() );
         Collections.sort( indicatorsWithoutGroups, new IndicatorNameComparator() );
-        Collections.sort( indicatorsViolatingCompulsoryGroupSets, new IndicatorNameComparator() );
-        Collections.sort( indicatorsViolatingExclusiveGroupSets, new IndicatorNameComparator() );
         Collections.sort( organisationUnitsWithCyclicReferences, new OrganisationUnitNameComparator() );
         Collections.sort( orphanedOrganisationUnits, new OrganisationUnitNameComparator() );
         Collections.sort( organisationUnitsWithoutGroups, new OrganisationUnitNameComparator() );
         Collections.sort( organisationUnitsViolatingCompulsoryGroupSets, new OrganisationUnitNameComparator() );
-        Collections.sort( organisationUnitsViolatingExclusiveGroupSets, new OrganisationUnitNameComparator() );
         Collections.sort( organisationUnitGroupsWithoutGroupSets, new OrganisationUnitGroupNameComparator() );
         Collections.sort( validationRulesWithoutGroups, new ValidationRuleNameComparator() );
 

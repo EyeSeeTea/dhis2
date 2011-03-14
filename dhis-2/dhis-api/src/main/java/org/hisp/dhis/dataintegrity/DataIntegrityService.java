@@ -31,9 +31,11 @@ import java.util.Collection;
 import java.util.SortedMap;
 
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.validation.ValidationRule;
@@ -65,16 +67,10 @@ public interface DataIntegrityService
     Collection<DataElement> getDataElementsWithoutGroups();
     
     /**
-     * Gets all data elements which are not members of one or more groups
-     * which enter into a compulsory group set.
-     */
-    Collection<DataElement> getDataElementsViolatingCompulsoryGroupSets();
-    
-    /**
      * Gets all data elements units which are members of more than one group
      * which enter into an exclusive group set.
      */    
-    Collection<DataElement> getDataElementsViolatingExclusiveGroupSets();
+    SortedMap<DataElement, Collection<DataElementGroup>> getDataElementsViolatingExclusiveGroupSets();
 
     /**
      * Returns all data elements which are members of data sets with different
@@ -126,16 +122,10 @@ public interface DataIntegrityService
     SortedMap<Indicator, String> getInvalidIndicatorDenominators();
     
     /**
-     * Gets all indicators which are not members of one or more groups
-     * which enter into a compulsory group set.
-     */
-    Collection<Indicator> getIndicatorsViolatingCompulsoryGroupSets();
-    
-    /**
      * Gets all indicators units which are members of more than one group
      * which enter into an exclusive group set.
      */    
-    Collection<Indicator> getIndicatorsViolatingExclusiveGroupSets();
+    SortedMap<Indicator, Collection<IndicatorGroup>> getIndicatorsViolatingExclusiveGroupSets();
     
     // -------------------------------------------------------------------------
     // OrganisationUnit
@@ -166,7 +156,7 @@ public interface DataIntegrityService
      * Gets all organisation units which are members of more than one group
      * which enter into an exclusive group set.
      */
-    Collection<OrganisationUnit> getOrganisationUnitsViolatingExclusiveGroupSets();
+    SortedMap<OrganisationUnit, Collection<OrganisationUnitGroup>> getOrganisationUnitsViolatingExclusiveGroupSets();
 
     // -------------------------------------------------------------------------
     // OrganisationUnitGroup
