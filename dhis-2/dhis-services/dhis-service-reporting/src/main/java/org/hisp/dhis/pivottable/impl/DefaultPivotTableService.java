@@ -31,17 +31,23 @@ import static org.hisp.dhis.system.util.DateUtils.getMediumDate;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
 import org.hisp.dhis.pivottable.PivotTable;
 import org.hisp.dhis.pivottable.PivotTableService;
 import org.hisp.dhis.system.util.ConversionUtils;
@@ -53,6 +59,10 @@ import org.hisp.dhis.system.util.ConversionUtils;
 public class DefaultPivotTableService
     implements PivotTableService
 {
+    private static final Comparator<IdentifiableObject> INDICATOR_COMPARATOR = new IdentifiableObjectNameComparator();
+    private static final Comparator<OrganisationUnit> ORGUNIT_COMPARATOR = new OrganisationUnitNameComparator();
+    private static final Comparator<Period> PERIOD_COMPARATOR = new AscendingPeriodComparator();
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -89,7 +99,7 @@ public class DefaultPivotTableService
     // PivotTableService implementation
     // -------------------------------------------------------------------------
 
-    public PivotTable getPivotTable( int indicatorGroupId, String periodTypeName, String startDate, String endDate, int organisationUnitId )
+    public PivotTable getPivotTable( int groupId, String periodTypeName, String startDate, String endDate, int organisationUnitId )
     {
         PeriodType periodType = PeriodType.getPeriodTypeByName( periodTypeName );
         
@@ -99,10 +109,10 @@ public class DefaultPivotTableService
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( 
             organisationUnitService.getOrganisationUnit( organisationUnitId ).getChildren() );
          
-        List<Indicator> indicators = null;
+        List<? extends Indicator> indicators = null;
         Collection<AggregatedIndicatorValue> indicatorValues = null;
         
-        if ( indicatorGroupId == -1 ) // -1 -> All
+        if ( groupId == -1 ) // -1 -> All
         {
             indicators = new ArrayList<Indicator>( indicatorService.getAllIndicators() );
             
@@ -112,7 +122,7 @@ public class DefaultPivotTableService
         }
         else
         {
-            indicators = new ArrayList<Indicator>( indicatorService.getIndicatorGroup( indicatorGroupId ).getMembers() );
+            indicators = new ArrayList<Indicator>( indicatorService.getIndicatorGroup( groupId ).getMembers() );
             
             indicatorValues = aggregatedDataValueService.getAggregatedIndicatorValues(
                 ConversionUtils.getIdentifiers( Indicator.class, indicators ),
@@ -126,6 +136,10 @@ public class DefaultPivotTableService
         pivotTable.setPeriods( periods );
         pivotTable.setOrganisationUnits( organisationUnits );
         pivotTable.setIndicatorValues( indicatorValues );
+        
+        Collections.sort( pivotTable.getIndicators(), INDICATOR_COMPARATOR );
+        Collections.sort( pivotTable.getOrganisationUnits(), ORGUNIT_COMPARATOR );
+        Collections.sort( pivotTable.getPeriods(), PERIOD_COMPARATOR );
         
         return pivotTable;
     }
