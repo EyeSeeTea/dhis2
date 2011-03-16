@@ -92,7 +92,6 @@ G.util = {
         widget.expand();
     },
     
-    /* Detect mapview parameter in URL */
     getUrlParam: function(strParam) {
         var output = '';
         var strHref = window.location.href;
@@ -110,7 +109,6 @@ G.util = {
         return unescape(output);
     },
 
-    /* Get all properties in an object */
     getKeys: function(obj) {
         var temp = [];
         for (var k in obj) {
@@ -121,7 +119,6 @@ G.util = {
         return temp;
     },
 
-    /* Input validation */
     validateInputNameLength: function(name) {
         return (name.length <= 25);
     },
@@ -140,7 +137,6 @@ G.util = {
                 h <= 1200 ? 600 : 900;
     },
 
-    /* Make map view numbers numeric */
     getNumericMapView: function(mapView) {
         mapView.id = parseFloat(mapView.id);
         mapView.indicatorGroupId = parseFloat(mapView.indicatorGroupId);
@@ -155,14 +151,12 @@ G.util = {
         return mapView;
     },
 
-    /* Get number of decimals */
     getNumberOfDecimals: function(x,dec_sep) {
         var tmp = new String();
         tmp = x;
         return tmp.indexOf(dec_sep) > -1 ? tmp.length-tmp.indexOf(dec_sep) - 1 : 0;
     },
 
-    /* Feature labels */
     labels: {    
         getActivatedOpenLayersStyleMap: function() {
             return new OpenLayers.StyleMap({
@@ -224,26 +218,8 @@ G.util = {
         widget.applyValues();
     },
 
-    /* Sort values */
     sortByValue: function(a,b) {
         return b.value-a.value;
-    },
-
-    /* Create JSON for map export */
-    getExportDataValueJSON: function(mapValues) {
-        var json = '{';
-        json += '"datavalues": ';
-        json += '[';
-        mapValues.sort(this.sortByValue);
-        for (var i = 0; i < mapValues.length; i++) {
-            json += '{';
-            json += '"organisation": "' + mapValues[i].orgUnitId + '",';
-            json += '"value": "' + mapValues[i].value + '"';
-            json += i < mapValues.length - 1 ? '},' : '}';
-        }
-        json += ']';
-        json += '}';
-        return json;
     },
 
     getLegendsJSON: function() {
@@ -417,6 +393,8 @@ G.vars = {
     
     parameter: null,
     
+    mask: null,
+    
     activePanel: {
         value: G.conf.thematicMap,
         setPolygon: function() {
@@ -431,11 +409,7 @@ G.vars = {
         isPoint: function() {
             return this.value === G.conf.thematicMap2;
         }
-    },
-    
-    mask: null,
-    
-    exportValues: null
+    }
 };
 
 G.user = {

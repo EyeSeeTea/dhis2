@@ -1448,7 +1448,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     success: function(r) {
                         var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-                        G.vars.exportValues = G.util.getExportDataValueJSON(mapvalues);
                         
                         if (!this.layer.features.length) {
                             Ext.message.msg(false, 'No coordinates found');
