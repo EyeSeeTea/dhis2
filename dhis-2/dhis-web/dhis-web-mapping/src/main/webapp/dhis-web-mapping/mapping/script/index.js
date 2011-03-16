@@ -2262,7 +2262,7 @@
                 G.vars.activePanel.setPolygon();
             },
             'afterrender': function() {
-                choropleth.layer.widget = choropleth;
+                this.layer.widget = this;
             }
         }
     });
@@ -2286,7 +2286,7 @@
 				}
             },
             'afterrender': function() {
-                symbol.layer.widget = symbol;
+                this.layer.widget = this;
             }
         }
     });
