@@ -5,6 +5,16 @@ G.conf = {
     path_mapping: '../',
     path_commons: '../../dhis-web-commons-ajax-json/',
     type: '.action',
+	
+//	Help strings
+    
+    setup: 'gisSetup',
+	thematicMap: 'gisThematicMap',
+    overlayRegistration: 'gisOverlay',
+	administration: 'gisAdministration',
+	favorites: 'gisFavoriteMapView',
+	legendSets: 'gisLegendSet',
+    imageExport: 'gisImageExport',
 
 //  Layout
 
@@ -20,7 +30,40 @@ G.conf = {
     
 	emptytext: '',
 	labelseparator: '',
+	
+//	DHIS variables
+
+	map_source_type_database: 'database',
+	map_source_type_geojson: 'geojson',
+	map_source_type_shapefile: 'shapefile',
+	map_legend_type_automatic: 'automatic',
+	map_legend_type_predefined: 'predefined',
+    map_layer_type_baselayer: 'baselayer',
+    map_layer_type_overlay: 'overlay',
+    map_layer_type_thematic: 'thematic',
+	map_value_type_indicator: 'indicator',
+	map_value_type_dataelement: 'dataelement',
+    map_date_type_fixed: 'fixed',
+    map_date_type_start_end: 'start-end',
+    map_selection_type_parent: 'parent',
+    map_selection_type_level: 'level',
+    map_feature_type_multipolygon: 'MultiPolygon',
+    map_feature_type_multipolygon_class_name: 'OpenLayers.Geometry.MultiPolygon',
+    map_feature_type_polygon: 'Polygon',
+    map_feature_type_polygon_class_name: 'OpenLayers.Geometry.Polygon',
+    map_feature_type_point: 'Point',
+    map_feature_type_point_class_name: 'OpenLayers.Geometry.Point',
+    map_view_access_level_user: 'user',
+    map_view_access_level_system: 'system',
+    aggregation_strategy_real_time: 'real_time',
+    aggregation_strategy_batch: 'batch',
     
+//  MapFish
+
+    classify_with_bounds: 1,
+    classify_by_equal_intervals: 2,
+    classify_by_quantils: 3,
+
 //  Layers
 
     opacityItems: [
@@ -35,7 +78,9 @@ G.conf = {
         {text: '0.9', iconCls: 'menu-layeroptions-opacity-90'},
         {text: '1.0', iconCls: 'menu-layeroptions-opacity-100'}
     ],
+    
     defaultLayerOpacity: 0.8,
+    
     defaultLayerZIndex: 10000
 };
 
@@ -298,8 +343,8 @@ G.util = {
     getVectorLayers: function() {
         var layers = [];
         for (var i = 0; i < G.vars.map.layers.length; i++) {
-            if (G.vars.map.layers[i].layerType == G.fnl.map_layer_type_thematic ||
-            G.vars.map.layers[i].layerType == G.fnl.map_layer_type_overlay) {
+            if (G.vars.map.layers[i].layerType == G.conf.map_layer_type_thematic ||
+            G.vars.map.layers[i].layerType == G.conf.map_layer_type_overlay) {
                 layers.push(G.vars.map.layers[i]);
             }
         }
@@ -367,78 +412,24 @@ G.date = {
     }
 };
 
-G.fnl = {
-	map_legend_type_automatic: 'automatic',
-	map_legend_type_predefined: 'predefined',
-    map_layer_type_baselayer: 'baselayer',
-    map_layer_type_overlay: 'overlay',
-    map_layer_type_thematic: 'thematic',
-	map_value_type_indicator: 'indicator',
-	map_value_type_dataelement: 'dataelement',
-    map_date_type_fixed: 'fixed',
-    map_date_type_start_end: 'start-end',
-    map_selection_type_parent: 'parent',
-    map_selection_type_level: 'level',
-    map_feature_type_multipolygon: 'MultiPolygon',
-    map_feature_type_multipolygon_class_name: 'OpenLayers.Geometry.MultiPolygon',
-    map_feature_type_polygon: 'Polygon',
-    map_feature_type_polygon_class_name: 'OpenLayers.Geometry.Polygon',
-    map_feature_type_point: 'Point',
-    map_feature_type_point_class_name: 'OpenLayers.Geometry.Point',
-    map_view_access_level_user: 'user',
-    map_view_access_level_system: 'system',
-    aggregation_strategy_real_time: 'real_time',
-    aggregation_strategy_batch: 'batch',
-
-    classify_with_bounds: 1,
-    classify_by_equal_intervals: 2,
-    classify_by_quantils: 3
-};
-
-G.help = {
-    setup: 'gisSetup',
-	thematicMap: 'gisThematicMap',
-    overlayRegistration: 'gisOverlay',
-	administration: 'gisAdministration',
-	favorites: 'gisFavoriteMapView',
-	legendSets: 'gisLegendSet',
-    imageExport: 'gisImageExport'
-};
-
 G.vars = {
     map: null,
     
     parameter: null,
     
-    mapDateType: {
-        value: null,
-        setFixed: function() {
-            this.value = G.fnl.map_date_type_fixed;
-        },
-        setStartEnd: function() {
-            this.value = G.fnl.map_date_type_start_end;
-        },
-        isFixed: function() {
-            return this.value === G.fnl.map_date_type_fixed;
-        },
-        isStartEnd: function() {
-            return this.value === G.fnl.map_date_type_start_end;
-        }
-    },
-    
     activePanel: {
-        value: G.help.thematicMap,
+        value: G.conf.thematicMap,
         setPolygon: function() {
-            this.value = G.help.thematicMap;
+            this.value = G.conf.thematicMap;
         },
         setPoint: function() {
-            this.value = G.help.thematicMap2;
+            this.value = G.conf.thematicMap2;
         },
         isPolygon: function() {
-            return this.value === G.help.thematicMap;
+            return this.value === G.conf.thematicMap;
         },
         isPoint: function() {
-            return this.value === G.help.thematicMap2;
+            return this.value === G.conf.thematicMap2;
         }
     },
     
@@ -452,7 +443,23 @@ G.user = {
 };
 
 G.system = {
-    aggregationStrategy: null
+    aggregationStrategy: null,
+    
+    mapDateType: {
+        value: null,
+        setFixed: function() {
+            this.value = G.conf.map_date_type_fixed;
+        },
+        setStartEnd: function() {
+            this.value = G.conf.map_date_type_start_end;
+        },
+        isFixed: function() {
+            return this.value === G.conf.map_date_type_fixed;
+        },
+        isStartEnd: function() {
+            return this.value === G.conf.map_date_type_start_end;
+        }
+    }
 };
 
 G.func = {
