@@ -27,55 +27,29 @@ Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
 mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 
     layer: null,
-
     format: null,
-
     url: null,
-
     featureSelection: true,
-
     nameAttribute: null,
-
     indicator: null,
-
     indicatorText: null,
-
     coreComp: null,
-
     classificationApplied: false,
-
     ready: false,
-
     border: false,
-
     loadMask: false,
-
     labelGenerator: null,
-
-    colorInterpolation: false,
-
-    newUrl: false,
-
-    legend: false,
-
-	imageLegend: false,
-
-	bounds: false,
-
-    mapView: false,
-
-    mapData: false,
-    
-    labels: false,
-    
-    valueType: false,
-    
-    selectFeatures: false,
-    
-    organisationUnitSelection: false,
-    
-    updateValues: false,
-    
+    colorInterpolation: null,
+    newUrl: null,
+    legend: null,
+	imageLegend: null,
+	bounds: null,
+    mapView: null,
+    labels: null,    
+    valueType: null,    
+    selectFeatures: null,    
+    organisationUnitSelection: null,    
+    updateValues: false,    
     isDrillDown: false,
     
     initComponent: function() {
@@ -1448,7 +1422,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     success: function(r) {
                         var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
-                        G.vars.exportValues = G.util.getExportDataValueJSON(mapvalues);
                         
                         if (!this.layer.features.length) {
                             Ext.message.msg(false, 'No coordinates found');

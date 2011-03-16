@@ -35,9 +35,7 @@ G.conf = {
         {text: '0.9', iconCls: 'menu-layeroptions-opacity-90'},
         {text: '1.0', iconCls: 'menu-layeroptions-opacity-100'}
     ],
-    
     defaultLayerOpacity: 0.8,
-    
     defaultLayerZIndex: 10000
 };
 
