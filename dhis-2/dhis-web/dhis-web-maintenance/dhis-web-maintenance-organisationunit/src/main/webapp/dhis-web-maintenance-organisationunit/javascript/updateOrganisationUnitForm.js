@@ -5,15 +5,15 @@ jQuery( document ).ready( function()
 	var rules = {
 		name : {
 			required : true,
-			rangelength : r.organisationUnit.name.length
+			range : r.organisationUnit.name.range
 		},
 		shortName : {
 			required : true,
-			rangelength : r.organisationUnit.shortName.length
+			range : r.organisationUnit.shortName.range
 		},
 		code : {
 			required : true,
-			rangelength : r.organisationUnit.code.length
+			range : r.organisationUnit.code.range
 		},
 		openingDate : {
 			required : true
@@ -29,33 +29,38 @@ jQuery( document ).ready( function()
 		},
 		url : {
 			url : true,
-			rangelength : r.organisationUnit.url.length
+			range : r.organisationUnit.url.range
 		},
 		contactPerson : {
-			rangelength : r.organisationUnit.contactPerson.length
+			range : r.organisationUnit.contactPerson.range
 		},
 		address : {
-			rangelength : r.organisationUnit.address.length
+			range : r.organisationUnit.address.range
 		},
 		email : {
 			email : true,
-			rangelength : r.organisationUnit.email.length
+			range : r.organisationUnit.email.range
 		},
 		phoneNumber : {
-			rangelength : r.organisationUnit.phoneNumber.length
+			range : r.organisationUnit.phoneNumber.range
 		}
 	};
 
-	validation2( 'updateOrganisationUnitForm', undefined, {
+	validation2( 'updateOrganisationUnitForm', function(form) {
+		selectAllById("dataSets");
+		form.submit();
+
+		/* if(validateFeatureType(this.coordinates, this.featureType)) {form.submit();} */
+	}, {
 		'rules' : rules
 	} );
 
-	jQuery( "#name" ).attr( "maxlength", r.organisationUnit.name.length );
-	jQuery( "#shortName" ).attr( "maxlength", r.organisationUnit.shortName.length );
-	jQuery( "#code" ).attr( "maxlength", r.organisationUnit.code.length );
-	jQuery( "#url" ).attr( "maxlength", r.organisationUnit.url.length );
-	jQuery( "#contactPerson" ).attr( "maxlength", r.organisationUnit.contactPerson.length );
-	jQuery( "#address" ).attr( "maxlength", r.organisationUnit.address.length );
-	jQuery( "#email" ).attr( "maxlength", r.organisationUnit.email.length );
-	jQuery( "#phoneNumber" ).attr( "maxlength", r.organisationUnit.phoneNumber.length );
+	jQuery( "#name" ).attr( "maxlength", r.organisationUnit.name.range[1] );
+	jQuery( "#shortName" ).attr( "maxlength", r.organisationUnit.shortName.range[1] );
+	jQuery( "#code" ).attr( "maxlength", r.organisationUnit.code.range[1] );
+	jQuery( "#url" ).attr( "maxlength", r.organisationUnit.url.range[1] );
+	jQuery( "#contactPerson" ).attr( "maxlength", r.organisationUnit.contactPerson.range[1] );
+	jQuery( "#address" ).attr( "maxlength", r.organisationUnit.address.range[1] );
+	jQuery( "#email" ).attr( "maxlength", r.organisationUnit.email.range[1] );
+	jQuery( "#phoneNumber" ).attr( "maxlength", r.organisationUnit.phoneNumber.range[1] );
 } );

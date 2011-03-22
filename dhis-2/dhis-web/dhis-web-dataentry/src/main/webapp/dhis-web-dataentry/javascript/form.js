@@ -196,6 +196,7 @@ function displayEntryFormCompleted()
 {
 	addEventListeners();
 	hideLoader();
+	enable( 'validationButton' );
 }
 
 function setDisplayModes()
