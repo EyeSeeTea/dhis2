@@ -2567,18 +2567,15 @@
 					},
                     {
                         title: '<span class="panel-title">' + G.i18n.map_legend_polygon + '</span>',
-                        contentEl: 'polygonlegendpanel',
+                        contentEl: 'polygonlegend',
                         anchor: '100%',
-                        autoHeight: true,
-						bodyStyle: 'padding-left: 4px;'
+                        autoHeight: true
                     },
                     {
                         title: '<span class="panel-title">' + G.i18n.map_legend_point + '</span>',
-                        contentEl: 'pointlegendpanel',
+                        contentEl: 'pointlegend',
                         anchor: '100%',
-                        minHeight: 65,
-                        autoHeight: true,
-						bodyStyle: 'padding-left: 4px;'
+                        autoHeight: true
                     }
                 ]
             },
