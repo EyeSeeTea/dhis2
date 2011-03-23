@@ -2568,14 +2568,12 @@
                     {
                         title: '<span class="panel-title">' + G.i18n.map_legend_polygon + '</span>',
                         contentEl: 'polygonlegend',
-                        anchor: '100%',
-                        autoHeight: true
+                        anchor: '100%'
                     },
                     {
                         title: '<span class="panel-title">' + G.i18n.map_legend_point + '</span>',
                         contentEl: 'pointlegend',
-                        anchor: '100%',
-                        autoHeight: true
+                        anchor: '100%'
                     }
                 ]
             },
