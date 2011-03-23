@@ -2569,7 +2569,6 @@
                         title: '<span class="panel-title">' + G.i18n.map_legend_polygon + '</span>',
                         contentEl: 'polygonlegendpanel',
                         anchor: '100%',
-                        minHeight: 65,
                         autoHeight: true,
 						bodyStyle: 'padding-left: 4px;'
                     },
@@ -2647,7 +2646,9 @@
                 G.vars.map.events.register('addlayer', null, function(e) {
                     var svg = document.getElementsByTagName('svg');
                     e.layer.svgId = svg[svg.length-1].id;
-                });               
+                });
+                
+                document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
             }
         }
     });
