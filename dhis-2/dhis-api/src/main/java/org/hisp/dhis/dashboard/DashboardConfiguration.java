@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.rss;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -28,89 +28,64 @@ package org.hisp.dhis.dashboard.rss;
  */
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class RssItem
+public class DashboardConfiguration
     implements Serializable
 {
-    private String title;
-
-    private String link;
-
-    private String date;
-
-    private String description;
+    private static final long serialVersionUID = 8829362188465214078L;
+    
+    private Map<String, String> areaItems;
 
     // -------------------------------------------------------------------------
-    // Constructors
+    // Constructor
     // -------------------------------------------------------------------------
 
-    public RssItem()
+    public DashboardConfiguration()
     {
-    }
-
-    public RssItem( String title, String link, String date, String description )
-    {
-        this.title = title;
-        this.link = link;
-        this.date = date;
-        this.description = description;
+        areaItems = new HashMap<String, String>();
     }
 
     // -------------------------------------------------------------------------
-    // Override methods
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public void setAreaItem( String area, String item )
+    {
+        areaItems.put( area, item );
+    }
+    
+    public void clearArea( String area )
+    {
+        areaItems.remove( area );
+    }
+
+    // -------------------------------------------------------------------------
+    // toString
     // -------------------------------------------------------------------------
 
     @Override
     public String toString()
     {
-        return title;
+        return areaItems != null ? areaItems.toString() : null;
     }
-
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public String getTitle()
+    public Map<String, String> getAreaItems()
     {
-        return title;
+        return areaItems;
     }
 
-    public void setTitle( String title )
+    public void setAreaItems( Map<String, String> areaItems )
     {
-        this.title = title;
-    }
-
-    public String getLink()
-    {
-        return link;
-    }
-
-    public void setLink( String link )
-    {
-        this.link = link;
-    }
-
-    public String getDate()
-    {
-        return date;
-    }
-
-    public void setDate( String date )
-    {
-        this.date = date;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
+        this.areaItems = areaItems;
     }
 }

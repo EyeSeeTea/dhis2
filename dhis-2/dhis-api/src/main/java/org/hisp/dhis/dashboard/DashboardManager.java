@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.manager;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -43,4 +43,6 @@ public interface DashboardManager
     Map<String, Object> getContent();
     
     Set<String> getContentProviderNames();
+    
+    DashboardConfiguration getConfiguration();
 }
