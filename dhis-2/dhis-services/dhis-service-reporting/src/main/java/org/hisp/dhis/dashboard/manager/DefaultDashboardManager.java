@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.dashboard.DashboardManager;
 import org.hisp.dhis.dashboard.provider.ContentProvider;
 import org.hisp.dhis.user.NoCurrentUserException;
 import org.hisp.dhis.user.UserSettingService;

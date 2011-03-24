@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.rss;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
