@@ -30,10 +30,12 @@ package org.hisp.dhis.paging;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.system.paging.Paging;
+import org.hisp.dhis.util.ContextUtils;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -78,6 +80,18 @@ public abstract class ActionPagingSupport<T>
         this.usePaging = usePaging;
     }
 
+    protected Integer getDefaultPageSize()
+    {
+        String sessionPageSize = ContextUtils.getCookieValue( ServletActionContext.getRequest(), "pageSize" );
+
+        if ( sessionPageSize != null )
+        {
+            return Integer.valueOf( sessionPageSize );
+        }
+
+        return DEFAULT_PAGE_SIZE;
+    }
+
     @SuppressWarnings( "unchecked" )
     private String getCurrentLink()
     {
@@ -102,7 +116,7 @@ public abstract class ActionPagingSupport<T>
 
     protected Paging createPaging( Integer totalRecord )
     {
-        Paging resultPaging = new Paging( getCurrentLink(), pageSize == null ? DEFAULT_PAGE_SIZE : pageSize );
+        Paging resultPaging = new Paging( getCurrentLink(), pageSize == null ? getDefaultPageSize() : pageSize );
 
         resultPaging.setCurrentPage( currentPage == null ? 0 : currentPage );
 
@@ -114,9 +128,9 @@ public abstract class ActionPagingSupport<T>
     protected List<T> getBlockElement( List<T> elementList, int startPos, int pageSize )
     {
         List<T> returnList;
-        
+
         int endPos = paging.getEndPos();
-        	
+
         returnList = elementList.subList( startPos, endPos );
 
         return returnList;
