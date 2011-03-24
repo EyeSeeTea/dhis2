@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.dashboard.DashBoardConfiguration;
 import org.hisp.dhis.dashboard.DashboardManager;
 import org.hisp.dhis.dashboard.provider.ContentProvider;
 import org.hisp.dhis.user.NoCurrentUserException;
@@ -112,11 +113,7 @@ public class DefaultDashboardManager
         return contentProviders.keySet();
     }
 
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private DashBoardConfiguration getConfiguration()
+    public DashBoardConfiguration getConfiguration()
     {
         try
         {
@@ -129,7 +126,11 @@ public class DefaultDashboardManager
             throw new RuntimeException( "Could not get configuration because no current user exists", ex );
         }
     }
-    
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
     private void setConfiguration( DashBoardConfiguration config )
     {
         try

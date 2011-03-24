@@ -43,4 +43,6 @@ public interface DashboardManager
     Map<String, Object> getContent();
     
     Set<String> getContentProviderNames();
+    
+    DashBoardConfiguration getConfiguration();
 }
