@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.importing.action;
+package org.hisp.dhis.reportexcel;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,72 +27,109 @@ package org.hisp.dhis.reportexcel.importing.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
-
-import org.hisp.dhis.reportexcel.ReportLocationManager;
-import org.hisp.dhis.reportexcel.action.ActionSupport;
-import org.hisp.dhis.reportexcel.state.SelectionManager;
-import org.hisp.dhis.system.util.StreamUtils;
+import java.io.Serializable;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id
+ * 
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
 
-public class UploadExcelFileAction
-    extends ActionSupport
+public class GenericExcelItem
+    implements Serializable
 {
+    /**
+     * The database internal identifier for this Object.
+     */
+    protected int id;
+
+    /**
+     * The row value for this Object.
+     */
+    protected int row;
+
+    /**
+     * The column value for this Object.
+     */
+    protected int column;
+
+    /**
+     * The sheet value for this Object.
+     */
+    protected int sheetNo;
+
+    /**
+     * The name of this Object.
+     */
+    protected String name;
+
+    /**
+     * The expression for this Object.
+     */
+    protected String expression;
+
     // -------------------------------------------------------------------------
-    // Dependency
+    // Getters & setters
     // -------------------------------------------------------------------------
 
-    private ReportLocationManager reportLocationManager;
-
-    public void setReportLocationManager( ReportLocationManager reportLocationManager )
+    public int getId()
     {
-        this.reportLocationManager = reportLocationManager;
+        return id;
     }
 
-    private SelectionManager selectionManager;
-
-    public void setSelectionManager( SelectionManager selectionManager )
+    public void setId( int id )
     {
-        this.selectionManager = selectionManager;
+        this.id = id;
     }
 
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private String fileName;
-
-    public void setUploadFileName( String fileName )
+    public int getRow()
     {
-        this.fileName = fileName;
+        return row;
     }
 
-    private File upload;
-
-    public void setUpload( File upload )
+    public void setRow( int row )
     {
-        this.upload = upload;
+        this.row = row;
     }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
 
-    public String execute()
-        throws Exception
+    public int getColumn()
     {
-        File directory = reportLocationManager.getReportExcelTempDirectory();
-
-        File output = new File( directory, (Math.random() * 1000) + fileName );
-
-        selectionManager.setUploadFilePath( output.getAbsolutePath() );
-
-        StreamUtils.write( upload, output );
-        
-        return SUCCESS;
+        return column;
     }
+
+    public void setColumn( int column )
+    {
+        this.column = column;
+    }
+
+    public int getSheetNo()
+    {
+        return sheetNo;
+    }
+
+    public void setSheetNo( int sheetNo )
+    {
+        this.sheetNo = sheetNo;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    public String getExpression()
+    {
+        return expression;
+    }
+
+    public void setExpression( String expression )
+    {
+        this.expression = expression;
+    }
+
 }
