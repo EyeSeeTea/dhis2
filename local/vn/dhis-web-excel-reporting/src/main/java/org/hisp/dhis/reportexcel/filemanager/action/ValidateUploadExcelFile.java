@@ -41,7 +41,7 @@ import com.opensymphony.xwork2.Action;
  * @author Dang Duy Hieu
  * @version $Id
  */
-public class ValidateUploadExcelTemplate
+public class ValidateUploadExcelFile
     implements Action
 {
     // -------------------------------------------
@@ -120,16 +120,18 @@ public class ValidateUploadExcelTemplate
             return ERROR;
         }
 
-        if ( !reportLocationManager.isFileTypeSupported( getExtension( upload.getName() ), uploadContentType ) )
+        if ( !reportLocationManager.isFileTypeSupported( getExtension( uploadFileName ), uploadContentType ) )
         {
             message = i18n.getString( "file_type_not_supported" );
 
             return ERROR;
         }
 
+        // Use for importing file
+
         if ( isDraft )
         {
-            File tempImportDirectory = reportLocationManager.getReportExcelTempDirectory();
+            File tempImportDirectory = reportLocationManager.getReportExcelTemporaryDirectory();
 
             if ( !tempImportDirectory.canRead() || !tempImportDirectory.canWrite() )
             {
@@ -140,6 +142,8 @@ public class ValidateUploadExcelTemplate
 
             return SUCCESS;
         }
+
+        // Use for excel template file management
 
         File templateDirectoryConfig = reportLocationManager.getReportExcelTemplateDirectory();
 

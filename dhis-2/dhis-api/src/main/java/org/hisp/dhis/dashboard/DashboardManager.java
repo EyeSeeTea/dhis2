@@ -1,6 +1,7 @@
-package org.hisp.dhis.reportexcel.configuration.action;
+package org.hisp.dhis.dashboard;
 
-/* Copyright (c) 2004-2010, University of Oslo
+/*
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +27,22 @@ package org.hisp.dhis.reportexcel.configuration.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * @author Tran Thanh Tri
+ * @author Lars Helge Overland
  * @version $Id$
  */
-
-public class NoAction implements Action
+public interface DashboardManager
 {
-    // ----------------------------------------------------------------------------------
-    // Action implemantation
-    // ----------------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-       
-        return SUCCESS;
-    }
-
+    void setAreaItem( String area, String item );
+    
+    void clearArea( String area );
+    
+    Map<String, Object> getContent();
+    
+    Set<String> getContentProviderNames();
+    
+    DashboardConfiguration getConfiguration();
 }

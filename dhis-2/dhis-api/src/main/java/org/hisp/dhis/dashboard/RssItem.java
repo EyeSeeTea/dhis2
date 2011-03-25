@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.importing.action;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,72 +27,92 @@ package org.hisp.dhis.reportexcel.importing.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
-
-import org.hisp.dhis.reportexcel.ReportLocationManager;
-import org.hisp.dhis.reportexcel.action.ActionSupport;
-import org.hisp.dhis.reportexcel.state.SelectionManager;
-import org.hisp.dhis.system.util.StreamUtils;
+import java.io.Serializable;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id
+ * @author Lars Helge Overland
+ * @version $Id$
  */
-
-public class UploadExcelFileAction
-    extends ActionSupport
+public class RssItem
+    implements Serializable
 {
+    private static final long serialVersionUID = 3865942196910511305L;
+
+    private String title;
+
+    private String link;
+
+    private String date;
+
+    private String description;
+
     // -------------------------------------------------------------------------
-    // Dependency
+    // Constructors
     // -------------------------------------------------------------------------
 
-    private ReportLocationManager reportLocationManager;
-
-    public void setReportLocationManager( ReportLocationManager reportLocationManager )
+    public RssItem()
     {
-        this.reportLocationManager = reportLocationManager;
     }
 
-    private SelectionManager selectionManager;
-
-    public void setSelectionManager( SelectionManager selectionManager )
+    public RssItem( String title, String link, String date, String description )
     {
-        this.selectionManager = selectionManager;
+        this.title = title;
+        this.link = link;
+        this.date = date;
+        this.description = description;
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Override methods
     // -------------------------------------------------------------------------
 
-    private String fileName;
-
-    public void setUploadFileName( String fileName )
+    @Override
+    public String toString()
     {
-        this.fileName = fileName;
+        return title;
     }
 
-    private File upload;
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
 
-    public void setUpload( File upload )
+    public String getTitle()
     {
-        this.upload = upload;
+        return title;
     }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
 
-    public String execute()
-        throws Exception
+    public void setTitle( String title )
     {
-        File directory = reportLocationManager.getReportExcelTempDirectory();
+        this.title = title;
+    }
 
-        File output = new File( directory, (Math.random() * 1000) + fileName );
+    public String getLink()
+    {
+        return link;
+    }
 
-        selectionManager.setUploadFilePath( output.getAbsolutePath() );
+    public void setLink( String link )
+    {
+        this.link = link;
+    }
 
-        StreamUtils.write( upload, output );
-        
-        return SUCCESS;
+    public String getDate()
+    {
+        return date;
+    }
+
+    public void setDate( String date )
+    {
+        this.date = date;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
     }
 }

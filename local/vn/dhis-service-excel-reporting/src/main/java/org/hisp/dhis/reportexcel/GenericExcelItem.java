@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.manager;
+package org.hisp.dhis.reportexcel;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -28,62 +28,108 @@ package org.hisp.dhis.dashboard.manager;
  */
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * @author Lars Helge Overland
+ * 
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class DashBoardConfiguration
+
+public class GenericExcelItem
     implements Serializable
 {
-    private Map<String, String> areaItems;
+    /**
+     * The database internal identifier for this Object.
+     */
+    protected int id;
+
+    /**
+     * The row value for this Object.
+     */
+    protected int row;
+
+    /**
+     * The column value for this Object.
+     */
+    protected int column;
+
+    /**
+     * The sheet value for this Object.
+     */
+    protected int sheetNo;
+
+    /**
+     * The name of this Object.
+     */
+    protected String name;
+
+    /**
+     * The expression for this Object.
+     */
+    protected String expression;
 
     // -------------------------------------------------------------------------
-    // Constructor
+    // Getters & setters
     // -------------------------------------------------------------------------
 
-    public DashBoardConfiguration()
+    public int getId()
     {
-        areaItems = new HashMap<String, String>();
+        return id;
     }
 
-    // -------------------------------------------------------------------------
-    // Logic
-    // -------------------------------------------------------------------------
-
-    public void setAreaItem( String area, String item )
+    public void setId( int id )
     {
-        areaItems.put( area, item );
-    }
-    
-    public void clearArea( String area )
-    {
-        areaItems.remove( area );
+        this.id = id;
     }
 
-    // -------------------------------------------------------------------------
-    // toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String toString()
+    public int getRow()
     {
-        return areaItems != null ? areaItems.toString() : null;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
-    public Map<String, String> getAreaItems()
-    {
-        return areaItems;
+        return row;
     }
 
-    public void setAreaItems( Map<String, String> areaItems )
+    public void setRow( int row )
     {
-        this.areaItems = areaItems;
+        this.row = row;
     }
+
+    public int getColumn()
+    {
+        return column;
+    }
+
+    public void setColumn( int column )
+    {
+        this.column = column;
+    }
+
+    public int getSheetNo()
+    {
+        return sheetNo;
+    }
+
+    public void setSheetNo( int sheetNo )
+    {
+        this.sheetNo = sheetNo;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    public String getExpression()
+    {
+        return expression;
+    }
+
+    public void setExpression( String expression )
+    {
+        this.expression = expression;
+    }
+
 }

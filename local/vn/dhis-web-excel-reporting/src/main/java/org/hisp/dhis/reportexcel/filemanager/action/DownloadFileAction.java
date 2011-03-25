@@ -27,7 +27,13 @@ package org.hisp.dhis.reportexcel.filemanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import org.hisp.dhis.reportexcel.ReportLocationManager;
 import org.hisp.dhis.reportexcel.state.SelectionManager;
@@ -39,14 +45,14 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 
-
-public class DownloadExcelTemplateFileAction
+public class DownloadFileAction
     implements Action
 {
+    private static final String PREFIX_OUTPUT_STREAM = "application/";
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private SelectionManager selectionManager;
 
@@ -62,24 +68,67 @@ public class DownloadExcelTemplateFileAction
         this.reportLocationManager = reportLocationManager;
     }
 
-    // -------------------------------------------
-    // Input
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
+    // Output & Input
+    // -------------------------------------------------------------------------
 
     private String fileName;
+
+    private InputStream inputStream;
+
+    private String outputFormat;
+
+    // -------------------------------------------------------------------------
+    // Getter & Setter
+    // -------------------------------------------------------------------------
+
+    public String getFileName()
+    {
+        return fileName;
+    }
 
     public void setFileName( String fileName )
     {
         this.fileName = fileName;
     }
 
-    @Override
+    public String getOutputFormat()
+    {
+        return outputFormat;
+    }
+
+    public void setOutputFormat( String outputFormat )
+    {
+        this.outputFormat = outputFormat;
+    }
+
+    public InputStream getInputStream()
+    {
+        return inputStream;
+    }
+
     public String execute()
         throws Exception
     {
-        File download = new File( reportLocationManager.getReportExcelTemplateDirectory(), fileName );
+        File download = null;
+        
+        if ( !isBlank( fileName ) )
+        {
+            download = new File( reportLocationManager.getReportExcelTemplateDirectory(), fileName );
+        }
+        else
+        {
+            download = new File( selectionManager.getDownloadFilePath() );
+        }
+        
+        fileName = download.getName();
 
-        selectionManager.setDownloadFilePath( download.getPath() );
+        if ( isBlank( outputFormat ) )
+        {
+            outputFormat = PREFIX_OUTPUT_STREAM + getExtension( fileName );
+        }
+
+        inputStream = new BufferedInputStream( new FileInputStream( download ) );
 
         return SUCCESS;
     }
