@@ -1,11 +1,4 @@
 <script type="text/javascript">
-	jQuery(document).ready( function() {
-		validation( 'lockingForm', function( form )
-		{
-			validateCollectiveDataLockingForm( form );
-		});
-	});
-
 	var i18n_organisation_unit_not_selected = '$encoder.jsEscape( $i18n.getString( "organisation_unit_not_selected" ) , "'")';
 	var i18n_period_not_selected = '$encoder.jsEscape( $i18n.getString( "period_not_selected" ) , "'")';
 	var i18n_dataset_not_selected = '$encoder.jsEscape( $i18n.getString( "dataset_not_selected" ) , "'")';
@@ -49,8 +42,7 @@
 							<input type="button" value="&lt;&lt;" title="$i18n.getString('remove_all')" style="width:50px" onclick="moveAllById( 'selectedPeriods', 'availablePeriods' )"/>			
 						</td>	
 						<td>
-							<select id="selectedPeriods" name="selectedPeriods" size="2" multiple="multiple" style="min-width:325px;height:11.25em" ondblclick="moveSelectedById( this.id, 'availablePeriods' )" class="{validate:{required:true}}">
-							</select>
+							<select id="selectedPeriods" name="selectedPeriods" size="2" multiple="multiple" style="min-width:325px;height:11.25em" ondblclick="moveSelectedById( this.id, 'availablePeriods' )"></select>
 						</td>
 					</tr>
 						
@@ -68,8 +60,7 @@
 							<input type="button" value="&lt;&lt;" title="$i18n.getString('remove_all')" style="width:50px" onclick="moveAllById( 'selectedDataSets', 'availableDataSets' )"/>			
 						</td>	
 						<td>
-							<select id="selectedDataSets" name="selectedDataSets" size="2" multiple="multiple" style="min-width:325px;height:11.25em" ondblclick="moveSelectedById( this.id, 'availableDataSets' )" class="{validate:{required:true}}">
-							</select>
+							<select id="selectedDataSets" name="selectedDataSets" size="2" multiple="multiple" style="min-width:325px;height:11.25em" ondblclick="moveSelectedById( this.id, 'availableDataSets' )"></select>
 						</td>
 					</tr>
 				</table>
@@ -83,7 +74,7 @@
 		<tr></tr>
 		<tr>
 			<td>
-				<input type="submit" id="lock" name="lock" onclick="setClickedButtonElementValue( true )" value="$i18n.getString( 'lock' )" style="width:10em" disabled="true"/>
+				<input type="submit" id="lock" name="lock" onclick="setClickedButtonElementValue( true )" value="$i18n.getString( 'lock' )" style="width:10em" disabled="true" />
 				#if( $auth.hasAccess( "dhis-web-maintenance-dataadmin", "collectiveDataLockingForUnlocking") )
 					<input type="submit" id="unlock" name="unlock" onclick="setClickedButtonElementValue( false )" value="$i18n.getString( 'unlock' )" style="width:10em" disabled="true"/>
 				#end	

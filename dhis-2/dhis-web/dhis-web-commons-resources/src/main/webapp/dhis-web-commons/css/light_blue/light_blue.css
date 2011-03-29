@@ -34,7 +34,7 @@ div#header
 {
   background-image: url('logo_background.png');
   background-repeat: repeat-x;
-  height: 59px;
+  height: 47px;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -49,7 +49,7 @@ img#header1
 img#header2
 {
   position: absolute;
-  top: 1px;
+  top: 0px;
   left: 35px;
 }
 
@@ -101,46 +101,42 @@ img#menuSeparator5
   color: #ffffff;
   font-weight: bold;
   text-align: center;
-  line-height: 44px;
+  line-height: 45px;
   cursor: pointer;
 }
 
 div#menuLink1
 {
   position: absolute;
-  top: 7px;
   left: 582px;
 }
 
 div#menuLink2
 {
   position: absolute;
-  top: 7px;
   left: 682px;
 }
 
 div#menuLink3
 {
   position: absolute;
-  top: 7px;
   left: 782px;
 }
 
 div#menuLink4
 {
   position: absolute;
-  top: 7px;
   left: 882px;
 }
 
 span#headerText
 {
   position: absolute;
-  top: 19px;
-  left: 228px;
+  top: 13px;
+  left: 235px;
   font-weight: lighter;
   color: white;
-  font-size: 13pt;
+  font-size: 12pt;
 }
 
 div#popupHeader 
@@ -167,21 +163,21 @@ span#popupHeaderText
 div#menuDropDown1
 {
   position: absolute;
-  top: 59px;
+  top: 47px;
   left: 580px;
 }
 
 div#menuDropDown2
 {
   position: absolute;
-  top: 59px;
+  top: 47px;
   left: 680px;
 }
 
 div#menuDropDown3
 {
   position: absolute;
-  top: 59px;
+  top: 47px;
   left: 780px;
 }
 
@@ -235,7 +231,7 @@ div#menuDropDown3
   width: 235px;
   float: left;
   position: absolute;
-  top: 59px;
+  top: 47px;
   left: 0px;
   padding-top: 6px;
   border-right: 1px solid #10375f;
@@ -365,7 +361,7 @@ div#menuDropDown3
 
 #mainPage 
 {
-  margin: 84px 10px 10px 270px;
+  margin: 72px 10px 10px 270px;
 }
 
 #popupPage 
