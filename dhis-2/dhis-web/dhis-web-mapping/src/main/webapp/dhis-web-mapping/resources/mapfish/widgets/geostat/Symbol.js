@@ -1007,8 +1007,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 						]
 					});
 					
-					var x = Ext.getCmp('center').x + 15;
-					var y = Ext.getCmp('center').y + 41;
+					var x = Ext.getCmp('center').x + G.conf.window_position_x;
+					var y = Ext.getCmp('center').y + G.conf.window_position_y;
 					w.setPosition(x,y);
 					w.show();
 					this.form.findField('boundary').treeWindow = w;
