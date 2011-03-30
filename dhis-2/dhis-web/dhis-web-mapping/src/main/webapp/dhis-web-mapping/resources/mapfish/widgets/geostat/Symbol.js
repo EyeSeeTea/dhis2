@@ -585,7 +585,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             xtype: 'textfield',
             name: 'boundary',
             fieldLabel: G.i18n.boundary,
-            editable: false,
             emptyText: G.conf.emptytext,
 			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_width,
@@ -613,13 +612,24 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             xtype: 'textfield',
             name: 'level',
             fieldLabel: G.i18n.level,
-            disabled: true,
-            disabledClass: 'combo-disabled',
-            editable: false,
             emptyText: G.conf.emptytext,
 			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_width,
-			levelComboBox: null
+            style: 'cursor:pointer',
+            levelComboBox: null,
+            listeners: {
+                'focus': {
+                    scope: this,
+                    fn: function() {
+                        if (this.form.findField('boundary').treeWindow) {
+                            this.form.findField('boundary').treeWindow.show();
+                        }
+                        else {
+							this.createSingletonCmp.treeWindow.call(this);
+                        }
+                    }
+                }
+            }
         },
         
         { html: '<div class="thematic-br">' },
@@ -878,7 +888,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 					};
 					
 					var w = new Ext.Window({
-						title: 'Boundary',
+						title: 'Boundary and level',
 						closeAction: 'hide',
 						autoScroll: true,
 						height: 'auto',
@@ -922,6 +932,40 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                                     this.form.findField('boundary').treePanel = tp;
                                                 }
                                             }
+										}
+									}
+								]
+							},
+							{
+								xtype: 'panel',
+								layout: 'form',
+								bodyStyle: 'padding:8px; background-color:#ffffff',
+                                labelWidth: G.conf.label_width,
+								items: [
+									{html: '<div class="window-info">Select organisation unit level</div>'},
+									{
+										xtype: 'combo',
+										fieldLabel: G.i18n.level,
+										editable: false,
+										valueField: 'level',
+										displayField: 'name',
+										mode: 'remote',
+										forceSelection: true,
+										triggerAction: 'all',
+										selectOnFocus: true,
+										emptyText: G.conf.emptytext,
+										labelSeparator: G.conf.labelseparator,
+										fieldLabel: 'Level',
+										width: G.conf.combo_width_fieldset,
+										minListWidth: G.conf.combo_width_fieldset,
+										store: G.stores.polygonOrganisationUnitLevel,
+										listeners: {
+											'afterrender': {
+												scope: this,
+												fn: function(cb) {
+													this.form.findField('level').levelComboBox = cb;
+												}
+											}
 										}
 									}
 								]

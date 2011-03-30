@@ -221,17 +221,7 @@
         autoLoad: false,
         isLoaded: false,
         listeners: {
-            'load': function(store) {
-                store.isLoaded = true;
-                
-                if (!symbol.form.findField('level').getValue()) {
-					if (this.isLoaded) {
-						var data = this.getAt(this.getTotalCount()-1).data;
-						symbol.organisationUnitSelection.setValues(null, null, null, data.level, data.name);
-						symbol.form.findField('level').setValue(data.name);
-					}
-				}
-            }
+            'load': G.func.storeLoadListener
         }
     });
     
@@ -305,16 +295,6 @@
             'load': G.func.storeLoadListener
         }
     });
-    
-    var userSettingStore = new Ext.data.JsonStore({
-        url: G.conf.path_mapping + 'getMapUserSettings' + G.conf.type,
-        fields: ['mapDateType'],
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-            'load': G.func.storeLoadListener
-        }
-    });	
     
     G.stores = {
 		mapView: mapViewStore,
@@ -2317,12 +2297,6 @@
         listeners: {
             'expand': function() {
                 G.vars.activePanel.setPoint();
-                
-                if (!this.form.findField('level').getValue()) {
-					if (!G.stores.organisationUnitLevel.isLoaded) {
-						G.stores.organisationUnitLevel.load();
-					}
-				}
             },
             'afterrender': function() {
                 this.layer.widget = this;
