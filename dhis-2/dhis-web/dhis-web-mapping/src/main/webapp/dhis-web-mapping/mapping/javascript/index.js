@@ -270,19 +270,6 @@
         }
     });
     
-	var baseLayerStore = new Ext.data.JsonStore({
-        url: G.conf.path_mapping + 'getMapLayersByType' + G.conf.type,
-        baseParams: {type: G.conf.map_layer_type_baselayer},
-        root: 'mapLayers',
-        fields: ['id', 'name', 'type', 'mapSource', 'layer', 'fillColor', 'fillOpacity', 'strokeColor', 'strokeWidth'],
-        sortInfo: {field: 'name', direction: 'ASC'},
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-            'load': G.func.storeLoadListener
-        }
-    });
-    
     var overlayStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getMapLayersByType' + G.conf.type,
         baseParams: {type: G.conf.map_layer_type_overlay},
@@ -315,7 +302,6 @@
         organisationUnitsAtLevel: organisationUnitsAtLevelStore,
         geojsonFiles: geojsonFilesStore,
         wmsCapabilities: wmsCapabilitiesStore,
-        baseLayer: baseLayerStore,
         overlay: overlayStore
     };
 	
