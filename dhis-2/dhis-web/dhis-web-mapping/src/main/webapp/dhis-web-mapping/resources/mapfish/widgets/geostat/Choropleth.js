@@ -917,7 +917,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 										fieldLabel: 'Level',
 										width: G.conf.combo_width_fieldset,
 										minListWidth: G.conf.combo_width_fieldset,
-										store: G.stores.polygonOrganisationUnitLevel,
+										store: G.stores.organisationUnitLevel,
 										listeners: {
 											'afterrender': {
 												scope: this,
@@ -1428,7 +1428,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.form.findField('bounds').reset();
             
             this.layer.destroyFeatures();
-            this.layer.setVisibility(false);            
+            this.layer.setVisibility(false);
         }
 	},
     
@@ -1472,7 +1472,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     parentId: this.organisationUnitSelection.parent.id,
                     level: this.organisationUnitSelection.level.level
                 };
-
+                
                 Ext.Ajax.request({
                     url: G.conf.path_mapping + dataUrl + G.conf.type,
                     method: 'POST',

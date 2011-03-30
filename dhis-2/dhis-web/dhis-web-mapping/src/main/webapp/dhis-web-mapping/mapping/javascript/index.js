@@ -225,18 +225,6 @@
         }
     });
     
-	var polygonOrganisationUnitLevelStore = new Ext.data.JsonStore({
-        url: G.conf.path_mapping + 'getOrganisationUnitLevelsByFeatureType' + G.conf.type,
-        baseParams: {featureType: G.conf.map_feature_type_multipolygon},
-        root: 'organisationUnitLevels',
-        fields: ['id', 'level', 'name'],
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-            'load': G.func.storeLoadListener
-        }
-    });
-    
 	var organisationUnitsAtLevelStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getOrganisationUnitsAtLevel' + G.conf.type,
         baseParams: {level: 1},
@@ -298,7 +286,6 @@
         predefinedMapLegend: predefinedMapLegendStore,
         predefinedMapLegendSet: predefinedMapLegendSetStore,
         organisationUnitLevel: organisationUnitLevelStore,
-        polygonOrganisationUnitLevel: polygonOrganisationUnitLevelStore,
         organisationUnitsAtLevel: organisationUnitsAtLevelStore,
         geojsonFiles: geojsonFilesStore,
         wmsCapabilities: wmsCapabilitiesStore,
