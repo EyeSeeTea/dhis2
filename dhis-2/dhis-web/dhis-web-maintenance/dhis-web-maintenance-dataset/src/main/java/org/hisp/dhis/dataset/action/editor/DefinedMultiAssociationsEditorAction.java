@@ -27,6 +27,12 @@ package org.hisp.dhis.dataset.action.editor;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.databrowser.MetaValue;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18n;
@@ -39,7 +45,7 @@ import com.opensymphony.xwork2.Action;
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class DefinedAssociationsEditorAction
+public class DefinedMultiAssociationsEditorAction
     implements Action
 {
     private static final String SEPERATE = " - ";
@@ -74,54 +80,69 @@ public class DefinedAssociationsEditorAction
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Parameters
     // -------------------------------------------------------------------------
 
     private Integer orgUnitId;
+
+    private Integer[] dataSetIds;
+
+    private Boolean[] statuses;
+
+    private boolean checked;
+
+    private Source source;
+
+    private List<MetaValue> metaItems = new ArrayList<MetaValue>();
+
+    private Map<Integer, String> itemMaps = new HashMap<Integer, String>();
+
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
     public void setOrgUnitId( Integer orgUnitId )
     {
         this.orgUnitId = orgUnitId;
     }
 
-    private Integer dataSetId;
-
-    public void setDataSetId( Integer dataSetId )
+    public void setDataSetIds( Integer[] dataSetIds )
     {
-        this.dataSetId = dataSetId;
+        this.dataSetIds = dataSetIds;
     }
 
-    private boolean assigned;
-
-    public void setAssigned( boolean assigned )
+    public void setStatuses( Boolean[] statuses )
     {
-        this.assigned = assigned;
+        this.statuses = statuses;
+    }
+
+    public boolean isChecked()
+    {
+        return checked;
+    }
+
+    public void setChecked( boolean checked )
+    {
+        this.checked = checked;
+    }
+
+    public List<MetaValue> getMetaItems()
+    {
+        return metaItems;
     }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    public Integer getOrgUnitId()
+    public Map<Integer, String> getItemMaps()
     {
-        return orgUnitId;
+        return itemMaps;
     }
 
-    public Integer getDataSetId()
+    public Source getSource()
     {
-        return dataSetId;
-    }
-
-    public boolean isAssigned()
-    {
-        return assigned;
-    }
-
-    private String title;
-
-    public String getTitle()
-    {
-        return title;
+        return source;
     }
 
     // -------------------------------------------------------------------------
@@ -131,27 +152,44 @@ public class DefinedAssociationsEditorAction
     public String execute()
         throws Exception
     {
-        DataSet dataSet = dataSetService.getDataSet( dataSetId );
-        Source source = organisationUnitService.getOrganisationUnit( orgUnitId );
+        String title = "";
 
-        title = SEPERATE + dataSet.getName() + SEPERATE + source.getName();
-
-        if ( assigned )
+        if ( checked )
         {
-            dataSet.getSources().add( source );
-
-            title = i18n.getString( "assigned" ) + SEPERATE + title;
+            title = i18n.getString( "assigned" ) + SEPERATE;
         }
         else
         {
-            dataSet.getSources().remove( source );
-
-            title = i18n.getString( "unassigned" ) + SEPERATE + title;
+            title = i18n.getString( "unassigned" ) + SEPERATE;
         }
 
-        dataSetService.updateDataSet( dataSet );
+        if ( dataSetIds.length == statuses.length )
+        {
+            source = organisationUnitService.getOrganisationUnit( orgUnitId );
+
+            for ( int i = 0; i < dataSetIds.length; i++ )
+            {
+                DataSet dataSet = dataSetService.getDataSet( dataSetIds[i] );
+
+                itemMaps.put( i, title + dataSet.getName() + SEPERATE + source.getName() );
+                
+                metaItems.add( new MetaValue( orgUnitId, dataSet.getId() + "", String.valueOf( checked ) ) );
+
+                if ( (checked && !statuses[i]) )
+                {
+                    dataSet.getSources().add( source );
+
+                    dataSetService.updateDataSet( dataSet );
+                }
+                else if ( (!checked && statuses[i]) )
+                {
+                    dataSet.getSources().remove( source );
+
+                    dataSetService.updateDataSet( dataSet );
+                }
+            }
+        }
 
         return SUCCESS;
     }
-
 }
