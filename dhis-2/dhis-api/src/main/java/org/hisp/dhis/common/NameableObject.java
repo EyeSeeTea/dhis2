@@ -1,9 +1,7 @@
 package org.hisp.dhis.common;
 
-import java.io.Serializable;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +27,13 @@ import java.io.Serializable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * @author Lars Helge Overland
- * @version $Id$
- */
-public interface ImportableObject
-    extends Serializable
+public interface NameableObject extends IdentifiableObject
 {
-    String getName();
+    public String getAlternativeName();
+
+    public String getShortName();
+
+    public String getCode();
+
+    public String getDescription();
 }

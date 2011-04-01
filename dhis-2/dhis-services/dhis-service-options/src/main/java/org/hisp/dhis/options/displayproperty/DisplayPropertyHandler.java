@@ -29,7 +29,8 @@ package org.hisp.dhis.options.displayproperty;
 
 import java.util.List;
 
-import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.NameableObject;
 
 /**
  * @author Lars Helge Overland
@@ -37,7 +38,7 @@ import org.hisp.dhis.common.IdentifiableObject;
  */
 public interface DisplayPropertyHandler
 {
-    List<? extends IdentifiableObject> handle( List<? extends IdentifiableObject> list );
+    List<? extends NameableObject> handle( List<? extends AbstractNameableObject> list );
     
-    IdentifiableObject handle( IdentifiableObject object );
+    NameableObject handle( AbstractNameableObject object );
 }

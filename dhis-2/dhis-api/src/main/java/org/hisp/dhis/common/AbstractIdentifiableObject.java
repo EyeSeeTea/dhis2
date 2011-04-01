@@ -1,4 +1,4 @@
-package org.hisp.dhis.concept;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,72 +27,80 @@ package org.hisp.dhis.concept;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
 
 /**
- * A Concept Name is a short name which is used as an attribute name
- * when representing a data value in xml which does not use
- * category-option-combo, eg. <DataElement='3' AGE='2' SEX='1' Value='23' />
- * 
- * SDMX-HD is one such case.
- * 
- * @author Dang Duy Hieu
- * @version $Id Concept.java Aug 25, 2010$
+ * @author Bob Jolliffe
+ * @version $Id$
  */
-public class Concept
-    extends AbstractIdentifiableObject
+public abstract class AbstractIdentifiableObject
+    implements IdentifiableObject
 {
-    public static String DEFAULT_CONCEPT_NAME = "default";
-    
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
+    /**
+     * The database internal identifier for this Object.
+     */
+    protected int id;
 
-    public Concept()
+    /**
+     * The Universally Unique Identifer for this Object.
+     */
+    protected String uuid;
+
+    /**
+     * The name of this Object. Required and unique.
+     */
+    protected String name;
+
+    public AbstractIdentifiableObject()
     {
     }
 
-    public Concept( String name )
+    public AbstractIdentifiableObject( int id, String uuid, String name )
+    {
+        this.id = id;
+        this.uuid = uuid;
+        this.name = name;
+    }
+
+    /* (non-Javadoc)
+     * @see org.hisp.dhis.common.IdentifiableObject#getId()
+     */
+    @Override
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    /* (non-Javadoc)
+     * @see org.hisp.dhis.common.IdentifiableObject#getUuid()
+     */
+    @Override
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid( String uuid )
+    {
+        this.uuid = uuid;
+    }
+
+    /* (non-Javadoc)
+     * @see org.hisp.dhis.common.IdentifiableObject#getName()
+     */
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
     {
         this.name = name;
     }
 
-    // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof Concept) )
-        {
-            return false;
-        }
-
-        final Concept other = (Concept) o;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
-    }
 }
