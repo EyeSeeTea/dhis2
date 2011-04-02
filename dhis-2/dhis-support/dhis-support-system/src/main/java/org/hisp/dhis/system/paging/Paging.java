@@ -73,19 +73,19 @@ public class Paging
     {
         int startPage = 1;
         
-        if ( currentPage > PAGE_OFFSET )
+        if ( currentPage > PAGE_OFFSET ) // Far enough from start, set start page
         {
             startPage = currentPage - PAGE_OFFSET;
-            
-            if ( ( getNumberOfPages() - startPage ) < PAGE_TOTAL_OFFSET )
-            {
-                startPage = getNumberOfPages() - PAGE_TOTAL_OFFSET;
-                
-                if ( startPage <= 0 )
-                {
-                    startPage = 1;
-                }
-            }
+        }
+        
+        if ( ( getNumberOfPages() - startPage ) < PAGE_TOTAL_OFFSET ) // Too close to end, decrease start page to maintain page range length
+        {
+            startPage = getNumberOfPages() - PAGE_TOTAL_OFFSET;            
+        }
+
+        if ( startPage <= 0 ) // Cannnot be 0 or less, set start page to 1
+        {
+            startPage = 1;
         }
         
         return startPage;
