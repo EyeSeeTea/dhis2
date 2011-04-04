@@ -24,16 +24,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.reportexcel.excelitemgroup.dataelementgroup.action;
+package org.hisp.dhis.reportexcel.excelitemgroup.action;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.reportexcel.DataElementGroupOrder;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 import com.opensymphony.xwork2.Action;
@@ -42,36 +40,32 @@ import com.opensymphony.xwork2.Action;
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class UpdateSortedDataElementForCategoryAction
+public class UpdateOrgUnitGroupAction
     implements Action
 {
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private ExcelItemService excelItemService;
 
-    private DataElementService dataElementService;
+    private OrganisationUnitGroupService organisationUnitGroupService;
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Input & Output
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private Integer id;
 
-    private List<String> dataElementIds = new ArrayList<String>();
+    private List<String> selectedOrganisationUnitGroups;
 
-    public String message;
-
-    public I18n i18n;
-
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Getter & Setter
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
-    public String getMessage()
+    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
-        return message;
+        this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
     public void setExcelItemService( ExcelItemService excelItemService )
@@ -79,52 +73,40 @@ public class UpdateSortedDataElementForCategoryAction
         this.excelItemService = excelItemService;
     }
 
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
-
     public void setId( Integer id )
     {
         this.id = id;
     }
 
-    public void setDataElementIds( List<String> dataElementIds )
+    public void setSelectedOrganisationUnitGroups( List<String> selectedOrganisationUnitGroups )
     {
-        this.dataElementIds = dataElementIds;
+        this.selectedOrganisationUnitGroups = selectedOrganisationUnitGroups;
     }
 
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Action implementation
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
+        ExcelItemGroup excelItemGroup = (ExcelItemGroup) excelItemService.getExcelItemGroup( id );
 
-        DataElementGroupOrder dataElementGroupOrder = excelItemService.getDataElementGroupOrder( id.intValue() );
+        List<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
 
-        List<DataElement> dataElements = new ArrayList<DataElement>();
-
-        for ( String dataElementId : this.dataElementIds )
+        for ( String oid : this.selectedOrganisationUnitGroups )
         {
+            OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService
+                .getOrganisationUnitGroup( Integer.parseInt( oid ) );
 
-            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( dataElementId ) );
-            dataElements.add( dataElement );
-
+            organisationUnitGroups.add( organisationUnitGroup );
         }
 
-        dataElementGroupOrder.setDataElements( dataElements );
+        excelItemGroup.setOrganisationUnitGroups( organisationUnitGroups );
 
-        this.message = i18n.getString( "update_sort_dataelement_success" );
-
-        excelItemService.updateDataElementGroupOrder( dataElementGroupOrder );
+        excelItemService.updateExcelItemGroup( excelItemGroup );
 
         return SUCCESS;
     }
+
 }

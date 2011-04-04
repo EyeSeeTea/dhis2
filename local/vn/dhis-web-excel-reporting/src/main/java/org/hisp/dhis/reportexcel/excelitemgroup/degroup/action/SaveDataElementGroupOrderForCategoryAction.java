@@ -1,7 +1,5 @@
-package org.hisp.dhis.reportexcel.dataentrystatus.action;
-
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +24,69 @@ package org.hisp.dhis.reportexcel.dataentrystatus.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.reportexcel.excelitemgroup.degroup.action;
 
-import org.hisp.dhis.reportexcel.ReportExcelService;
-import org.hisp.dhis.reportexcel.status.DataEntryStatus;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.reportexcel.DataElementGroupOrder;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Chau Thu Tran
  * @version $Id$
  */
-public class GetDataEntryStatusAction
+
+public class SaveDataElementGroupOrderForCategoryAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ReportExcelService reportService;
+    private ExcelItemService excelItemService;
+
+    private DataElementService dataElementService;
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Input
     // -------------------------------------------------------------------------
 
     private Integer id;
 
-    private DataEntryStatus dataStatus;
+    private String name;
+
+    private String code;
+
+    private List<String> dataElementIds = new ArrayList<String>();
 
     // -------------------------------------------------------------------------
     // Getter & Setter
     // -------------------------------------------------------------------------
 
-    public DataEntryStatus getDataStatus()
+    public void setDataElementService( DataElementService dataElementService )
     {
-        return dataStatus;
+        this.dataElementService = dataElementService;
+    }
+
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    public void setDataElementIds( List<String> dataElementIds )
+    {
+        this.dataElementIds = dataElementIds;
     }
 
     public void setId( Integer id )
@@ -67,19 +94,47 @@ public class GetDataEntryStatusAction
         this.id = id;
     }
 
-    public void setReportService( ReportExcelService reportService )
+    public Integer getId()
     {
-        this.reportService = reportService;
+        return id;
+    }
+
+    public void setCode( String code )
+    {
+        this.code = code;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
     {
-        dataStatus = reportService.getDataEntryStatus( id );
+        ExcelItemGroup excelItemGroup = (ExcelItemGroup) excelItemService.getExcelItemGroup( id );
+
+        DataElementGroupOrder dataElementGroupOrder = new DataElementGroupOrder();
+        dataElementGroupOrder.setName( name );
+        dataElementGroupOrder.setCode( code );
+
+        List<DataElement> dataElements = new ArrayList<DataElement>();
+
+        for ( String id : dataElementIds )
+        {
+            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );
+
+            dataElements.add( dataElement );
+        }
+
+        dataElementGroupOrder.setDataElements( dataElements );
+
+        List<DataElementGroupOrder> dataElementGroupOrders = excelItemGroup.getDataElementOrders();
+
+        dataElementGroupOrders.add( dataElementGroupOrder );
+
+        excelItemGroup.setDataElementOrders( dataElementGroupOrders );
+
+        excelItemService.updateExcelItemGroup( excelItemGroup );
 
         return SUCCESS;
     }

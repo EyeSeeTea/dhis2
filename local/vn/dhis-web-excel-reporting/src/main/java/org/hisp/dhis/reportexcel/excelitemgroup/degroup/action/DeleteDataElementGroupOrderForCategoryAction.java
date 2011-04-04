@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.reportexcel.excelitemgroup.dataelementgroup.action;
+package org.hisp.dhis.reportexcel.excelitemgroup.degroup.action;
 
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
@@ -38,42 +38,41 @@ import com.opensymphony.xwork2.Action;
 public class DeleteDataElementGroupOrderForCategoryAction
     implements Action
 {
-
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private ExcelItemService excelItemService;
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Input & Ouput
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private Integer id;
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Getter & Setter
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     public void setId( Integer id )
     {
         this.id = id;
     }
 
-    public void setExcelItemService(ExcelItemService excelItemService) {
-		this.excelItemService = excelItemService;
-	}
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
 
-
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Implementation Action
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
-	public String execute()
+    public String execute()
         throws Exception
     {
-		excelItemService.deleteDataElementGroupOrder( id );
-        
+        excelItemService.deleteDataElementGroupOrder( id );
+
         return SUCCESS;
     }
 

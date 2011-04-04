@@ -25,51 +25,105 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.reportexcel.category.action;
+package org.hisp.dhis.reportexcel.excelitemgroup.degroup.action;
 
-import org.hisp.dhis.reportexcel.ReportExcelService;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.reportexcel.DataElementGroupOrder;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Chau Thu Tran
  * @version $Id$
  */
-public class DeleteDataElementGroupOrderAction
+public class UpdateSortedDataElementForCategoryAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ReportExcelService reportService;
+    private ExcelItemService excelItemService;
 
-    public void setReportService( ReportExcelService reportService )
-    {
-        this.reportService = reportService;
-    }
+    private DataElementService dataElementService;
 
     // -------------------------------------------------------------------------
-    // Input & Ouput
+    // Input & Output
     // -------------------------------------------------------------------------
 
     private Integer id;
 
+    private List<String> dataElementIds = new ArrayList<String>();
+
+    public String message;
+
+    public I18n i18n;
+
     // -------------------------------------------------------------------------
     // Getter & Setter
     // -------------------------------------------------------------------------
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
 
     public void setId( Integer id )
     {
         this.id = id;
     }
 
+    public void setDataElementIds( List<String> dataElementIds )
+    {
+        this.dataElementIds = dataElementIds;
+    }
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
         throws Exception
     {
-        reportService.deleteDataElementGroupOrder( id );
+        DataElementGroupOrder dataElementGroupOrder = excelItemService.getDataElementGroupOrder( id.intValue() );
+
+        List<DataElement> dataElements = new ArrayList<DataElement>();
+
+        for ( String dataElementId : this.dataElementIds )
+        {
+
+            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( dataElementId ) );
+            dataElements.add( dataElement );
+
+        }
+
+        dataElementGroupOrder.setDataElements( dataElements );
+
+        this.message = i18n.getString( "update_sort_dataelement_success" );
+
+        excelItemService.updateDataElementGroupOrder( dataElementGroupOrder );
 
         return SUCCESS;
     }
-
 }

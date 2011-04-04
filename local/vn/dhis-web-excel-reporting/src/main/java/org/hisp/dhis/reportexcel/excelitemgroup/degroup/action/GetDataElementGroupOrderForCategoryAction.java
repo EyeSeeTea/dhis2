@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.excelitemgroup.dataelementgroup.action;
+package org.hisp.dhis.reportexcel.excelitemgroup.degroup.action;
 
 import org.hisp.dhis.reportexcel.DataElementGroupOrder;
 import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
@@ -35,46 +35,53 @@ import com.opensymphony.xwork2.Action;
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class GetDataElementGroupOrderForCategoryAction implements Action {
-	// -------------------------------------------
-	// Dependency
-	// -------------------------------------------
+public class GetDataElementGroupOrderForCategoryAction
+    implements Action
+{
+    // -------------------------------------------------------------------------
+    // Dependency
+    // -------------------------------------------------------------------------
 
-	private ExcelItemService excelItemService;
+    private ExcelItemService excelItemService;
 
-	// -------------------------------------------
-	// Input & Output
-	// -------------------------------------------
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
 
-	private Integer id;
+    private Integer id;
 
-	private DataElementGroupOrder dataElementGroupOrder;
+    private DataElementGroupOrder dataElementGroupOrder;
 
-	// -------------------------------------------
-	// Getter & Setter
-	// -------------------------------------------
+    // -------------------------------------------------------------------------
+    // Getter & Setter
+    // -------------------------------------------------------------------------
 
-	public DataElementGroupOrder getDataElementGroupOrder() {
-		return dataElementGroupOrder;
-	}
+    public DataElementGroupOrder getDataElementGroupOrder()
+    {
+        return dataElementGroupOrder;
+    }
 
-	public void setExcelItemService(ExcelItemService excelItemService) {
-		this.excelItemService = excelItemService;
-	}
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
 
-	// -------------------------------------------
-	// Action implementation
-	// -------------------------------------------
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-	public String execute() throws Exception {
+    public String execute()
+        throws Exception
+    {
 
-		dataElementGroupOrder = excelItemService.getDataElementGroupOrder(id.intValue());
+        dataElementGroupOrder = excelItemService.getDataElementGroupOrder( id.intValue() );
 
-		return SUCCESS;
-	}
+        return SUCCESS;
+    }
 
 }

@@ -24,50 +24,98 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.reportexcel.excelitemgroup.action;
 
-package org.hisp.dhis.reportexcel.category.action;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.hisp.dhis.reportexcel.ReportExcelService;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupNameComparator;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.excelitem.ExcelItemService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Chau Thu Tran
  * @version $Id$
  */
-public class DeleteDataElementGroupOrderAction
+public class OpenUpdateOrgUnitGroupForCategoryAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ReportExcelService reportService;
+    private ExcelItemService excelItemService;
 
-    public void setReportService( ReportExcelService reportService )
-    {
-        this.reportService = reportService;
-    }
+    private OrganisationUnitGroupService organisationUnitGroupService;
 
     // -------------------------------------------------------------------------
-    // Input & Ouput
+    // Input & Output
     // -------------------------------------------------------------------------
 
     private Integer id;
 
+    private List<OrganisationUnitGroup> availableOrganisationUnitGroups;
+
+    private List<OrganisationUnitGroup> selectedOrganisationUnitGroups;
+
+    private ExcelItemGroup excelItemGroup;
+
     // -------------------------------------------------------------------------
     // Getter & Setter
     // -------------------------------------------------------------------------
+
+    public void setExcelItemService( ExcelItemService excelItemService )
+    {
+        this.excelItemService = excelItemService;
+    }
+
+    public List<OrganisationUnitGroup> getSelectedOrganisationUnitGroups()
+    {
+        return selectedOrganisationUnitGroups;
+    }
+
+    public ExcelItemGroup getExcelItemGroup()
+    {
+        return excelItemGroup;
+    }
+
+    public List<OrganisationUnitGroup> getAvailableOrganisationUnitGroups()
+    {
+        return availableOrganisationUnitGroups;
+    }
+
+    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
+    {
+        this.organisationUnitGroupService = organisationUnitGroupService;
+    }
 
     public void setId( Integer id )
     {
         this.id = id;
     }
 
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
         throws Exception
     {
-        reportService.deleteDataElementGroupOrder( id );
+        this.excelItemGroup = excelItemService.getExcelItemGroup( id );
+
+        this.availableOrganisationUnitGroups = new ArrayList<OrganisationUnitGroup>( this.organisationUnitGroupService
+            .getAllOrganisationUnitGroups() );
+
+        this.selectedOrganisationUnitGroups = excelItemGroup.getOrganisationUnitGroups();
+
+        availableOrganisationUnitGroups.removeAll( selectedOrganisationUnitGroups );
+
+        Collections.sort( this.availableOrganisationUnitGroups, new OrganisationUnitGroupNameComparator() );
 
         return SUCCESS;
     }

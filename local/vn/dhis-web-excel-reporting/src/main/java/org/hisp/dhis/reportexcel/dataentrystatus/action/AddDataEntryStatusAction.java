@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportexcel.dataentrystatus.action;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,26 +40,25 @@ import com.opensymphony.xwork2.Action;
 public class AddDataEntryStatusAction
     implements Action
 {
-
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
 
     private ReportExcelService reportService;
 
     private DataSetService dataSetService;
 
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
     // Input
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
 
     private Integer dataSetId;
 
     private boolean makeDefault;
 
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
     // Getter & Setter
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
 
     public void setDataSetService( DataSetService dataSetService )
     {
@@ -80,6 +79,10 @@ public class AddDataEntryStatusAction
         this.makeDefault = makeDefault;
     }
 
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+    
     public String execute()
         throws Exception
     {
@@ -94,5 +97,4 @@ public class AddDataEntryStatusAction
 
         return SUCCESS;
     }
-
 }

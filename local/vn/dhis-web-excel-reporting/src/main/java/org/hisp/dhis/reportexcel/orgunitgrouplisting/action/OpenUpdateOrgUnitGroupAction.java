@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.organisationunitgrouplisting.action;
+package org.hisp.dhis.reportexcel.orgunitgrouplisting.action;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,20 +42,20 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class OpenUpdateOrganisationUnitGroupAction
+public class OpenUpdateOrgUnitGroupAction
     implements Action
 {
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private ReportExcelService reportService;
 
     private OrganisationUnitGroupService organisationUnitGroupService;
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Input & Output
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private Integer id;
 
@@ -65,9 +65,9 @@ public class OpenUpdateOrganisationUnitGroupAction
 
     private ReportExcelOganiztionGroupListing reportExcelOganiztionGroupListing;
 
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Getter & Setter
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     public ReportExcelOganiztionGroupListing getReportExcelOganiztionGroupListing()
     {
@@ -98,6 +98,10 @@ public class OpenUpdateOrganisationUnitGroupAction
     {
         this.id = id;
     }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception

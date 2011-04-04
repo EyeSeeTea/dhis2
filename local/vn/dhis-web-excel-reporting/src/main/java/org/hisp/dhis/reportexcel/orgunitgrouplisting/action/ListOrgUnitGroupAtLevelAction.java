@@ -24,13 +24,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.organisationunitgrouplisting.action;
+package org.hisp.dhis.reportexcel.orgunitgrouplisting.action;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.reportexcel.ReportExcelOganiztionGroupListing;
@@ -42,12 +41,12 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  * @version $Id$
  */
-public class UpdateOrganisationUnitGroupAtLevelAction
+public class ListOrgUnitGroupAtLevelAction
     implements Action
 {
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private ReportExcelService reportService;
 
@@ -63,66 +62,59 @@ public class UpdateOrganisationUnitGroupAtLevelAction
         this.organisationUnitService = organisationUnitService;
     }
 
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
-
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Input & Output
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
-    private Integer reportId;
+    private Integer id;
 
-    public void setReportId( Integer reportId )
+    public void setId( Integer id )
     {
-        this.reportId = reportId;
+        this.id = id;
     }
 
-    private Integer orgUnitGroupId;
+    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitGroupAtLevel;
 
-    public void setOrgUnitGroupId( Integer orgUnitGroupId )
+    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitGroupAtLevel()
     {
-        this.orgUnitGroupId = orgUnitGroupId;
+        return organisationUnitGroupAtLevel;
     }
 
-    private Integer levelId;
+    private List<OrganisationUnitGroup> availableOrganisationUnitGroups;
 
-    public void setLevelId( Integer levelId )
+    public List<OrganisationUnitGroup> getAvailableOrganisationUnitGroups()
     {
-        this.levelId = levelId;
+        return availableOrganisationUnitGroups;
     }
 
-    @Override
+    private List<OrganisationUnitLevel> organisationUnitLevel;
+
+    public List<OrganisationUnitLevel> getOrganisationUnitLevel()
+    {
+        return organisationUnitLevel;
+    }
+
+    private ReportExcelOganiztionGroupListing reportExcel;
+
+    public ReportExcelOganiztionGroupListing getReportExcel()
+    {
+        return reportExcel;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
         throws Exception
     {
-        ReportExcelOganiztionGroupListing reportExcel = (ReportExcelOganiztionGroupListing) reportService
-            .getReportExcel( reportId );
+        organisationUnitLevel = organisationUnitService.getOrganisationUnitLevels();
 
-        Map<OrganisationUnitGroup, OrganisationUnitLevel> orgUniGroupAtLevels = new HashMap<OrganisationUnitGroup, OrganisationUnitLevel>(
-            reportExcel.getOrganisationUnitLevels() );
+        reportExcel = (ReportExcelOganiztionGroupListing) reportService.getReportExcel( id );
 
-        OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService
-            .getOrganisationUnitGroup( orgUnitGroupId );
-
-        if ( levelId != null )
-        {
-            OrganisationUnitLevel organisationUnitLevel = organisationUnitService.getOrganisationUnitLevel( levelId );
-
-            orgUniGroupAtLevels.put( organisationUnitGroup, organisationUnitLevel );
-            
-        }else{
-            
-            orgUniGroupAtLevels.remove( organisationUnitGroup );
-            
-        }
-
-        reportExcel.setOrganisationUnitLevels( orgUniGroupAtLevels );
-
-        reportService.updateReportExcel( reportExcel );
+        availableOrganisationUnitGroups = reportExcel.getOrganisationUnitGroups();
+        
+        organisationUnitGroupAtLevel = reportExcel.getOrganisationUnitLevels();
 
         return SUCCESS;
     }
