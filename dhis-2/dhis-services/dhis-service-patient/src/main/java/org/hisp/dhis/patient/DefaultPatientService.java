@@ -118,7 +118,7 @@ public class DefaultPatientService
     }
 
     // -------------------------------------------------------------------------
-    // Patient
+    // Implementation methods
     // -------------------------------------------------------------------------
 
     @Override
@@ -455,7 +455,7 @@ public class DefaultPatientService
             patientAttributeValueService.deletePatientAttributeValue( av );
         }
 
-        if ( shouldSaveRepresentativeInformation( patient, representativeId ))
+        if ( shouldSaveRepresentativeInformation( patient, representativeId ) )
         {
             Patient representative = patientStore.get( representativeId );
 
@@ -482,12 +482,12 @@ public class DefaultPatientService
 
     private boolean shouldSaveRepresentativeInformation( Patient patient, Integer representativeId )
     {
-        if (!patient.isUnderAge()) 
+        if ( !patient.isUnderAge() )
             return false;
 
-        if (representativeId == null)
+        if ( representativeId == null )
             return false;
-        
+
         return patient.getRepresentative() == null || !patient.getRepresentative().getId().equals( representativeId );
     }
 
@@ -508,7 +508,6 @@ public class DefaultPatientService
         {
             Type type = Patient.class.getMethod( "get" + StringUtils.capitalize( property ) ).getReturnType();
 
-            // Get value
             if ( type == Integer.class || type == Integer.TYPE )
             {
                 return Integer.valueOf( value );
@@ -532,7 +531,7 @@ public class DefaultPatientService
         {
             ex.printStackTrace();
         }
-        
+
         return null;
     }
 

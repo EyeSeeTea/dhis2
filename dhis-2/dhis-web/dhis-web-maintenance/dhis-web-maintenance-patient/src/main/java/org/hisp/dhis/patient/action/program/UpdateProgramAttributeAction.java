@@ -28,16 +28,12 @@
 package org.hisp.dhis.patient.action.program;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeOption;
 import org.hisp.dhis.program.ProgramAttribute;
 import org.hisp.dhis.program.ProgramAttributeOption;
 import org.hisp.dhis.program.ProgramAttributeOptionService;
@@ -56,7 +52,7 @@ public class UpdateProgramAttributeAction
     public static final String PREFIX_ATTRIBUTE_OPTION = "attrOption";
 
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
     private ProgramAttributeService programAttributeService;
@@ -117,7 +113,7 @@ public class UpdateProgramAttributeAction
     }
 
     // -------------------------------------------------------------------------
-    // Implementation Action
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override

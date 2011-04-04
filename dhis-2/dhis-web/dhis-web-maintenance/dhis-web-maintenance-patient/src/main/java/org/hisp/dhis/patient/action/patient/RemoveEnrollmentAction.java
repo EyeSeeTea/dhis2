@@ -30,17 +30,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.patient.state.SelectedStateManager;
 import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttributeOptionService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramAttribute;
@@ -52,10 +50,6 @@ import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.programattributevalue.ProgramAttributeValue;
 import org.hisp.dhis.programattributevalue.ProgramAttributeValueService;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.apache.log4j.Level;
-import org.apache.struts2.ServletActionContext;
 
 import com.opensymphony.xwork2.Action;
 
@@ -160,10 +154,8 @@ public class RemoveEnrollmentAction
 
         ProgramInstance programInstance = programInstanceService.getProgramInstance( programInstanceId );
 
-        // Get selected patient from programInstance
         patient = programInstance.getPatient();
 
-        // Get selected program from programInstance
         Program program = programInstance.getProgram();
 
         // ---------------------------------------------------------------------
@@ -188,7 +180,10 @@ public class RemoveEnrollmentAction
 
         Set<ProgramAttribute> programAttributes = new HashSet<ProgramAttribute>();
 
+        // ---------------------------------------------------------------------
         // End-user inputs attribute value for DEAD-attribute
+        // ---------------------------------------------------------------------
+        
         boolean flag = false;
 
         if ( attributes != null && attributes.size() > 0 )
@@ -207,7 +202,6 @@ public class RemoveEnrollmentAction
                     ProgramAttributeValue attributeValue = programAttributeValueService.getProgramAttributeValue(
                         programInstance, attribute );
 
-                    // attributeValue is not exist
                     if ( attributeValue == null )
                     {
                         attributeValue = new ProgramAttributeValue();
@@ -246,11 +240,8 @@ public class RemoveEnrollmentAction
                             patientService.updatePatient( patient );
                         }
 
-                        // save values
                         programAttributeValueService.saveProgramAttributeValue( attributeValue );
-
                     }
-                    // attributeValue is exist
                     else
                     {
                         if ( ProgramAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
@@ -269,12 +260,11 @@ public class RemoveEnrollmentAction
                         }
                     }
 
-                    // update values
                     programAttributeValueService.updateProgramAttributeValue( attributeValue );
                 }
             }
         }
-        
+
         programInstance.setAttributes( programAttributes );
 
         programInstanceService.updateProgramInstance( programInstance );

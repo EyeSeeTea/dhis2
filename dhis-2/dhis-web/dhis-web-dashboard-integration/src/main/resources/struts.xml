@@ -8,10 +8,12 @@
   
   <package name="dhis-web-dashboard-integration" extends="dhis-web-commons" namespace="/dhis-web-dashboard-integration">
 
+    <!--  Dashboard -->
+
     <action name="index" class="org.hisp.dhis.dashboard.action.ProvideContentAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-dashboard-integration/mainForm.vm</param>
-      <param name="menu">/dhis-web-commons/about/menu.vm</param>
+      <param name="menu">/dhis-web-dashboard-integration/menu.vm</param>
       <param name="stylesheets">style/dashboard.css</param>
       <param name="javascripts">javascript/dropdown.js</param>
     </action>
@@ -51,6 +53,50 @@
     
     <action name="removeMapView" class="org.hisp.dhis.dashboard.action.RemoveMapViewAction">
       <result name="success" type="redirect">index.action</result>
+    </action>
+    
+    <!-- Message -->
+    
+    <action name="message" class="org.hisp.dhis.dashboard.message.action.GetMessagesAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-dashboard-integration/message.vm</param>
+      <param name="menu">/dhis-web-dashboard-integration/menu.vm</param>
+      <param name="javascripts">javascript/message.js</param>
+      <param name="stylesheets">style/dashboard.css</param>
+    </action>
+    
+    <action name="sendMessage" class="org.hisp.dhis.dashboard.message.action.SendMessageAction">
+      <result name="success" type="redirect">message.action</result>
+    </action>
+    
+    <action name="showSendMessage" class="org.hisp.dhis.dashboard.action.NoAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-dashboard-integration/sendMessage.vm</param>
+      <param name="menu">/dhis-web-dashboard-integration/menu.vm</param>
+      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/message.js</param>
+      <param name="stylesheets">style/dashboard.css</param>
+    </action>
+    
+    <action name="readMessage" class="org.hisp.dhis.dashboard.message.action.ReadMessageAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-dashboard-integration/readMessage.vm</param>
+      <param name="menu">/dhis-web-dashboard-integration/menu.vm</param>
+      <param name="javascripts">javascript/message.js</param>
+      <param name="stylesheets">style/dashboard.css</param>
+    </action>
+    
+    <action name="unreadMessage" class="org.hisp.dhis.dashboard.message.action.UnreadMessageAction">
+      <result name="success" type="redirect">message.action</result>
+    </action>
+    
+    <action name="removeMessage" class="org.hisp.dhis.dashboard.message.action.RemoveMessageAction">
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	  <result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+	  <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+    <action name="removeMessageRedirect"  class="org.hisp.dhis.dashboard.message.action.RemoveMessageAction">
+      <result name="success" type="redirect">message.action</result>
     </action>
     
   </package>

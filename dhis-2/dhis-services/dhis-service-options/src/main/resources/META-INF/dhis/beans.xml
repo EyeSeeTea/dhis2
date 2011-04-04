@@ -26,6 +26,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.options.SystemSetting"/>
     <property name="sessionFactory" ref="sessionFactory"/>
+    <property name="cacheable" value="true"/>
   </bean>
 
   <bean id="org.hisp.dhis.options.SystemSettingManager"
@@ -198,16 +199,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
           <value>green/green.css</value>
         </entry>
         <entry>
-          <key><value>openhealth</value></key>
-          <value>openhealth/openhealth.css</value>
-        </entry>
-        <entry>
           <key><value>vietnam</value></key>
           <value>vietnam/vietnam.css</value>
-        </entry>
-        <entry>
-          <key><value>vista</value></key>
-          <value>vista/vista.css</value>
         </entry>
         <entry>
           <key><value>india</value></key>

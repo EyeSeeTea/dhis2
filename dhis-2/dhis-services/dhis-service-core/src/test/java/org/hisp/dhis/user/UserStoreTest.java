@@ -31,9 +31,9 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -69,7 +69,7 @@ public class UserStoreTest
         OrganisationUnit unit2 = new OrganisationUnit( "name2", "shortName2", "organisationUnitCode2", new Date(),
             new Date(), true, "comment" );
         
-        Collection<OrganisationUnit> units1 = new HashSet<OrganisationUnit>();       
+        Set<OrganisationUnit> units1 = new HashSet<OrganisationUnit>();       
         
         units1.add(unit1);
         units1.add(unit2);
@@ -105,11 +105,11 @@ public class UserStoreTest
         assertEquals( userStore.getUser( user.getId() ).getSurname(), "User1" );
         assertEquals( userStore.getUser( user.getId() ).getFirstName(), userName );
         assertEquals( 2, userStore.getUser( user.getId() ).getOrganisationUnits().size() );
-        assertEquals( userStore.getUser( user.getId() ).getId(), 1 );
+        assertEquals( userStore.getUser( user.getId() ).getId(), id );
 
         // Test getAllUsers
         User user2 = new User();
-        Collection<OrganisationUnit> units2 = new HashSet<OrganisationUnit>();        
+        Set<OrganisationUnit> units2 = new HashSet<OrganisationUnit>();        
         units2.add(unit2);
         
         user2.setSurname( "User2" );
@@ -118,11 +118,7 @@ public class UserStoreTest
         userStore.addUser( user2 );
 
         assertEquals( userStore.getAllUsers().size(), 2 );
-        for ( int i = 1; i <= userStore.getAllUsers().size(); i++ )
-        {
-            // System.out.println( "User" + i );
-            assertEquals( userStore.getUser( i ).getSurname(), "User" + i );
-        }
+        
         assertEquals( 1, userStore.getUsersByOrganisationUnit( unit1 ).size() );
         assertEquals( 2, userStore.getUsersByOrganisationUnit( unit2 ).size() );
         assertEquals( 0, userStore.getUsersWithoutOrganisationUnit().size() );
@@ -134,7 +130,7 @@ public class UserStoreTest
         OrganisationUnit unit3 = new OrganisationUnit( "name3", "shortName3", "organisationUnitCode3", new Date(),
             new Date(), true, "comment" );        
         organisationUnitService.addOrganisationUnit( unit3 );
-        Collection<OrganisationUnit> units3 = new HashSet<OrganisationUnit>();        
+        Set<OrganisationUnit> units3 = new HashSet<OrganisationUnit>();        
         units3.add(unit3);
         
         user.setOrganisationUnits( units3 );

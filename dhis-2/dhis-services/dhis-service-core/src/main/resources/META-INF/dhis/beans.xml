@@ -5,8 +5,7 @@
 	xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
-http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
-">
+http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
 	<!-- Store definitions -->
 
@@ -120,15 +119,13 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
 	<bean id="org.hisp.dhis.dataelement.DataElementCategoryStore"
 		class="org.hisp.dhis.hibernate.HibernateGenericStore">
-		<property name="clazz"
-			value="org.hisp.dhis.dataelement.DataElementCategory" />
+		<property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategory" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
 	<bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionStore"
 		class="org.hisp.dhis.hibernate.HibernateGenericStore">
-		<property name="clazz"
-			value="org.hisp.dhis.dataelement.DataElementCategoryOption" />
+		<property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOption" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
@@ -188,15 +185,15 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
 	</bean>
 
-  <bean id="org.hisp.dhis.user.UserGroupStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
-    <property name="clazz" value="org.hisp.dhis.user.UserGroup" />
-    <property name="sessionFactory" ref="sessionFactory" />
-  </bean>
+	<bean id="org.hisp.dhis.user.UserGroupStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
+		<property name="clazz" value="org.hisp.dhis.user.UserGroup" />
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 
-  <bean id="org.hisp.dhis.validation.ValidationCriteriaStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
-    <property name="clazz" value="org.hisp.dhis.validation.ValidationCriteria" />
-    <property name="sessionFactory" ref="sessionFactory" />
-  </bean>
+	<bean id="org.hisp.dhis.validation.ValidationCriteriaStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
+		<property name="clazz" value="org.hisp.dhis.validation.ValidationCriteria" />
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 
 	<bean id="org.hisp.dhis.translation.TranslationStore"
 		class="org.hisp.dhis.translation.hibernate.HibernateTranslationStore">
@@ -211,6 +208,16 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 	<bean id="org.hisp.dhis.user.UserAuthorityGroupStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
 		<property name="clazz" value="org.hisp.dhis.user.UserAuthorityGroup" />
 		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.message.MessageStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+		<property name="clazz" value="org.hisp.dhis.message.Message"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.message.UserMessageStore" class="org.hisp.dhis.message.hibernate.HibernateUserMessageStore">
+		<property name="sessionFactory" ref="sessionFactory"/>
+		<property name="clazz" value="org.hisp.dhis.message.UserMessage"/>
 	</bean>
 	
 	<!-- Service definitions -->
@@ -421,6 +428,12 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 		class="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService">
 		<property name="aggregatedDataValueStore"
 			ref="org.hisp.dhis.aggregation.AggregatedDataValueStore"/>
+	</bean>
+	
+	<bean id="org.hisp.dhis.message.MessageService" class="org.hisp.dhis.message.DefaultMessageService">
+		<property name="messageStore" ref="org.hisp.dhis.message.MessageStore"/>
+		<property name="userMessageStore" ref="org.hisp.dhis.message.UserMessageStore"/>
+		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
 	</bean>
 	
 	<!-- Concept Name -->

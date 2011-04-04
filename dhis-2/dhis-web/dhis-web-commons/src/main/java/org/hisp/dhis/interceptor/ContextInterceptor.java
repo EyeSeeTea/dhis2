@@ -49,7 +49,7 @@ public class ContextInterceptor
     {
         this.databaseInfoProvider = databaseInfoProvider;
     }
-
+    
     @Override
     public void destroy()
     {
@@ -65,8 +65,11 @@ public class ContextInterceptor
         throws Exception
     {
         Map<String, Object> map = new HashMap<String, Object>();
+        
         map.put( KEY_IN_MEMORY_DATABASE, databaseInfoProvider.isInMemory() );
+        
         invocation.getStack().push( map );
+        
         return invocation.invoke();
     }
 }

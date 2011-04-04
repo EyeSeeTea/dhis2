@@ -27,121 +27,12 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
-
-/**
- * @author Bob Jolliffe
- * @version $Id$
- */
-public abstract class IdentifiableObject
-    implements ImportableObject, Serializable
+public interface IdentifiableObject
+    extends ImportableObject
 {
-    /**
-     * The database internal identifier for this Object.
-     */
-    protected int id;
-    
-    /**
-     * The Universally Unique Identifer for this Object. 
-     */    
-    protected String uuid;
+    public abstract int getId();
 
-    /**
-     * The name of this Object. Required and unique.
-     */
-    protected String name;
+    public abstract String getUuid();
 
-    /**
-     * An alternative name of this Object. Optional but unique.
-     */
-    protected String alternativeName;
-
-    /**
-     * An short name representing this Object. Optional but unique.
-     */
-    protected String shortName;
-
-    /**
-     * An code representing this Object. Optional but unique.
-     */
-    protected String code;
-
-    /**
-     * Description of this Object.
-     */
-    protected String description;
-
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String getUuid()
-    {
-        return uuid;
-    }
-
-    public void setUuid( String uuid )
-    {
-        this.uuid = uuid;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getAlternativeName()
-    {
-        return alternativeName;
-    }
-
-    public void setAlternativeName( String alternativeName )
-    {
-        this.alternativeName = alternativeName;
-    }
-
-    public String getShortName()
-    {
-        return shortName;
-    }
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
+    public abstract String getName();
 }

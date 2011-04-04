@@ -12,13 +12,14 @@ var headerMessageTimeout = -1;
  *            if there is not document.referrer, use this url
  */
 function referrerBack( defaultUrl ) {
-	if(document.referrer != "") {
-/*		var splitReferrer = document.referrer.split("\/");
-		var referrer = splitReferrer[splitReferrer.length-1]; */
-		location.href = referrer;
-	} else {
-		location.href = defaultUrl;
+	if(document.referrer !== undefined && document.referrer != "") {
+		if(document.referrer.indexOf("login.html") == -1) {
+			location.href = document.referrer;
+			return;
+		}
 	}
+
+	location.href = defaultUrl;
 }
 
 /**

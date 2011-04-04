@@ -53,7 +53,6 @@ import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageInstance;
@@ -82,13 +81,6 @@ public class CustomDataEntryAction
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
     }
 
     private ProgramInstanceService programInstanceService;
@@ -148,24 +140,6 @@ public class CustomDataEntryAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private String customDataEntryFormCode = null;
-
-    public String getCustomDataEntryFormCode()
-    {
-        return this.customDataEntryFormCode;
-    }
-
-    private Collection<ProgramStageDataElement> programStageDataElements;
-
-    public Collection<ProgramStageDataElement> getProgramStageDataElements()
-    {
-        return programStageDataElements;
-    }
-
-    // -------------------------------------------------------------------------
     // Input / Output
     // -------------------------------------------------------------------------
 
@@ -179,18 +153,6 @@ public class CustomDataEntryAction
     public Integer getId()
     {
         return id;
-    }
-
-    private Integer programId;
-
-    public void setProgramId( Integer programId )
-    {
-        this.programId = programId;
-    }
-
-    public Integer getProgramId()
-    {
-        return programId;
     }
 
     private Integer programStageId;
@@ -307,16 +269,30 @@ public class CustomDataEntryAction
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Output
+    // -------------------------------------------------------------------------
+
+    private String customDataEntryFormCode = null;
+
+    public String getCustomDataEntryFormCode()
+    {
+        return this.customDataEntryFormCode;
+    }
+
+    private Collection<ProgramStageDataElement> programStageDataElements;
+
+    public Collection<ProgramStageDataElement> getProgramStageDataElements()
+    {
+        return programStageDataElements;
+    }
+
+    // -------------------------------------------------------------------------
+    // Implementation Action
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Get the min/max values
-        // ---------------------------------------------------------------------
-
         Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
             organisationUnit, dataElements );
 
@@ -332,8 +308,8 @@ public class CustomDataEntryAction
         patient = patientService.getPatient( id );
 
         patientIdentifier = patientIdentifierService.getPatientIdentifier( patient );
-
-        program = programService.getProgram( programId );
+        
+        program = selectedStateManager.getSelectedProgram( );
 
         programStage = programStageService.getProgramStage( programStageId );
 
@@ -370,22 +346,18 @@ public class CustomDataEntryAction
 
         boolean cdeFormExists = (dataEntryForm != null);
 
-        // --------------------------------------------------------------
         String disabled = "";
         Map<CalculatedDataElement, Integer> calculatedValueMap = dataEntryScreenManager
             .populateValuesForCalculatedDataElements( organisationUnit, programStage, programStageInstance );
 
-        // -----------------------------------------------------------
         if ( cdeFormExists )
         {
             customDataEntryFormCode = dataEntryScreenManager.populateCustomDataEntryScreenForMultiDimensional(
-                dataEntryForm.getHtmlCode(), patientDataValues, calculatedValueMap, minMaxMap, disabled,
-                i18n, programStage, programStageInstance, organisationUnit );
-
-            //programStageDataElements = dataEntryScreenManager.getProgramStageDataElements( dataEntryForm.getHtmlCode() );
+                dataEntryForm.getHtmlCode(), patientDataValues, calculatedValueMap, minMaxMap, disabled, i18n,
+                programStage, programStageInstance, organisationUnit );
         }
-        return SUCCESS;
 
+        return SUCCESS;
     }
 
 }

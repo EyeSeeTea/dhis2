@@ -30,6 +30,7 @@ package org.hisp.dhis.user;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -62,7 +63,7 @@ public class User
      * 
      * TODO This should have been put in UserCredentials
      */
-    private Collection<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+    private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
  
     // -------------------------------------------------------------------------
     // hashCode and equals
@@ -102,6 +103,12 @@ public class User
 
         return surname.equals( other.getSurname() )
             && firstName.equals( other.getFirstName() );
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "[" + surname + " " + firstName + "]";
     }
 
     // -------------------------------------------------------------------------
@@ -192,7 +199,7 @@ public class User
         return organisationUnits;
     }
 
-    public void setOrganisationUnits( Collection<OrganisationUnit> organisationUnits )
+    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
         this.organisationUnits = organisationUnits;
     }
