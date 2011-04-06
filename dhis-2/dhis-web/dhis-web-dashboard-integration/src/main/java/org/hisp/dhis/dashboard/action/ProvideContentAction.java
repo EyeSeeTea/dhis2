@@ -37,6 +37,7 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.chart.comparator.ChartTitleComparator;
 import org.hisp.dhis.dashboard.DashboardManager;
+import org.hisp.dhis.options.UserSettingManager;
 
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
@@ -58,12 +59,19 @@ public class ProvideContentAction
     {
         this.manager = manager;
     }
-    
+
     private ChartService chartService;
 
     public void setChartService( ChartService chartService )
     {
         this.chartService = chartService;
+    }
+
+    private UserSettingManager userSettingManager;
+
+    public void setUserSettingManager( UserSettingManager userSettingManager )
+    {
+        this.userSettingManager = userSettingManager;
     }
     
     // -------------------------------------------------------------------------
@@ -76,14 +84,26 @@ public class ProvideContentAction
     {
         return providerNames;
     }
-    
+
     private List<Chart> charts;
 
     public List<Chart> getCharts()
     {
         return charts;
     }
-    
+
+    private List<Object> chartAreas = new ArrayList<Object>();
+
+    public void setChartAreas( List<Object> chartAreas )
+    {
+        this.chartAreas = chartAreas;
+    }
+
+    public List<Object> getChartAreas()
+    {
+        return chartAreas;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -91,15 +111,26 @@ public class ProvideContentAction
     public String execute()
     {
         Map<String, Object> content = manager.getContent();
-        
+
         ActionContext.getContext().getActionInvocation().getStack().push( content );
-        
+
         providerNames = manager.getContentProviderNames();
-        
+
         charts = new ArrayList<Chart>( chartService.getAllCharts() );
-        
+
         Collections.sort( charts, new ChartTitleComparator() );
-        
+
+        Object sessionChartsInDashboard = ActionContext.getContext().getActionInvocation().getStack()
+            .findString( UserSettingManager.KEY_CHARTS_IN_DASHBOARD );
+
+        Integer chartsInDashboardCount = sessionChartsInDashboard != null ? Integer
+            .valueOf( (String) sessionChartsInDashboard ) : UserSettingManager.DEFAULT_CHARTS_IN_DASHBOARD;
+
+        for ( int i = 1; i <= chartsInDashboardCount; i++ )
+        {
+            chartAreas.add( content.get( "chartArea" + i ) );
+        }
+
         return SUCCESS;
     }
 }

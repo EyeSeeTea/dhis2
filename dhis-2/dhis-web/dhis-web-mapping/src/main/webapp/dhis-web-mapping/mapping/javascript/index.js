@@ -2203,7 +2203,7 @@
                             {
                                 xtype: 'button',
                                 id: 'labelshow_b',
-                                iconCls: 'icon-labels',
+                                iconCls: 'icon-assign',
                                 hideLabel: true,
                                 text: G.i18n.toggle,
                                 handler: function() {
@@ -2230,7 +2230,7 @@
                 {
                     text: 'Locate feature',
                     iconCls: 'menu-layeroptions-locate',
-                    handler: function(item, e) {
+                    handler: function(item) {
                         item.parentMenu.showLocateFeatureWindow(item.parentMenu);
                     }
                 },
@@ -2238,7 +2238,7 @@
                     text: 'Labels',
                     iconCls: 'menu-layeroptions-labels',
                     labelsWindow: null,
-                    handler: function(item, e) {
+                    handler: function(item) {
                         item.parentMenu.showLabelWindow(item);
                     }
                 },

@@ -1,4 +1,4 @@
-package org.hisp.dhis.patient.hibernate;
+package org.hisp.dhis.interceptor;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,28 +27,54 @@ package org.hisp.dhis.patient.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hisp.dhis.patient.PatientMobileSetting;
-import org.hisp.dhis.patient.PatientMobileSettingStore;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.options.UserSettingManager;
 
-@Transactional
-public class HibernatePatientMobileSettingStore
-    extends HibernateGenericStore<PatientMobileSetting>
-    implements PatientMobileSettingStore
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.Interceptor;
+
+/**
+ * @author mortenoh
+ */
+public class UserSettingInterceptor
+    implements Interceptor
 {
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientMobileSetting> getCurrentSetting()
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private UserSettingManager userSettingManager;
+
+    public void setUserSettingManager( UserSettingManager userSettingManager )
     {
-        Session session = sessionFactory.getCurrentSession();
+        this.userSettingManager = userSettingManager;
+    }
 
-        Criteria criteria = session.createCriteria( PatientMobileSetting.class );
-        criteria.setCacheable( true );
+    // -------------------------------------------------------------------------
+    // UserSettingInterceptor implementation
+    // -------------------------------------------------------------------------
 
-        return criteria.list();
+    private static final long serialVersionUID = -3123337448714959530L;
+
+    public void destroy()
+    {
+    }
+
+    public void init()
+    {
+    }
+
+    public String intercept( ActionInvocation invocation )
+        throws Exception
+    {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        map.put( UserSettingManager.KEY_CHARTS_IN_DASHBOARD, userSettingManager.getChartsInDashboard() );
+
+        invocation.getStack().push( map );
+
+        return invocation.invoke();
     }
 }
