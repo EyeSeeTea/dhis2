@@ -2207,8 +2207,7 @@
                                 hideLabel: true,
                                 text: G.i18n.toggle,
                                 handler: function() {
-                                    var layer = G.vars.map.getLayersByName(item.parentMenu.contextNode.attributes.layer)[0];
-                                    
+                                    var layer = G.vars.map.getLayersByName(item.parentMenu.contextNode.attributes.layer)[0];                                    
                                     if (layer.features.length) {
                                         G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
                                             Ext.getCmp('labelstrong_chb').getValue(), Ext.getCmp('labelitalic_chb').getValue());
