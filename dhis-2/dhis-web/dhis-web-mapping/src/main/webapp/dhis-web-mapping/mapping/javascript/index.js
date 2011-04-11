@@ -469,10 +469,10 @@
                         params = choropleth.formValues.getAllValues.call(choropleth);
                     }
                     else if (G.vars.activePanel.isPoint()) {
-                        if (!symbol.formValidation.validateForm.apply(symbol, [true])) {
+                        if (!point.formValidation.validateForm.apply(point, [true])) {
                             return;
                         }
-                        params = symbol.formValues.getAllValues.call(symbol);
+                        params = point.formValues.getAllValues.call(point);
                     }
                     
                     params.name = vn;
@@ -531,8 +531,8 @@
                                     if (v == choropleth.form.findField('mapview').getValue()) {
                                         choropleth.form.findField('mapview').clearValue();
                                     }
-                                    if (v == symbol.form.findField('mapview').getValue()) {
-                                        symbol.form.findField('mapview').clearValue();
+                                    if (v == point.form.findField('mapview').getValue()) {
+                                        point.form.findField('mapview').clearValue();
                                     }
                                 }
                             });
@@ -665,7 +665,7 @@
                     
                     if (polygonLayer.visibility && pointLayer.visibility) {
                         if (choropleth.formValidation.validateForm.call(choropleth)) {
-                            if (symbol.formValidation.validateForm.call(symbol)) {
+                            if (point.formValidation.validateForm.call(point)) {
                                 document.getElementById('layerField').value = 3;
                                 document.getElementById('imageLegendRowsField').value = choropleth.imageLegend.length;
                                 
@@ -674,10 +674,10 @@
                                 document.getElementById('indicatorField').value = values.mapValueTypeValue;
                                 document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
                                 
-                                values = symbol.formValues.getImageExportValues.call(symbol);
+                                values = point.formValues.getImageExportValues.call(point);
                                 document.getElementById('periodField2').value = values.dateValue;
                                 document.getElementById('indicatorField2').value = values.mapValueTypeValue;
-                                document.getElementById('legendsField2').value = G.util.getLegendsJSON.call(symbol);
+                                document.getElementById('legendsField2').value = G.util.getLegendsJSON.call(point);
                                 
                                 var str1 = document.getElementById(polygonLayer.svgId).parentNode.innerHTML;
                                 var str2 = document.getElementById(pointLayer.svgId).parentNode.innerHTML;
@@ -708,12 +708,12 @@
                         }
                     }
                     else if (pointLayer.visibility) {
-                        if (symbol.formValidation.validateForm.call(symbol)) {
-                            values = symbol.formValues.getImageExportValues.call(symbol);
+                        if (point.formValidation.validateForm.call(point)) {
+                            values = point.formValues.getImageExportValues.call(point);
                             document.getElementById('layerField').value = 2;
                             document.getElementById('periodField').value = values.dateValue;  
                             document.getElementById('indicatorField').value = values.mapValueTypeValue;
-                            document.getElementById('legendsField').value = G.util.getLegendsJSON.call(symbol);
+                            document.getElementById('legendsField').value = G.util.getLegendsJSON.call(point);
                             svg = document.getElementById(pointLayer.svgId).parentNode.innerHTML;
                         }
                         else {
@@ -1833,7 +1833,7 @@
                                                 success: function() {
                                                     Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+ G.i18n.saved_as_date_type);
                                                     choropleth.prepareMapViewDateType();
-                                                    symbol.prepareMapViewDateType();
+                                                    point.prepareMapViewDateType();
                                                 }
                                             });
                                         }
@@ -2359,8 +2359,8 @@
         }
     });
 
-    symbol = new mapfish.widgets.geostat.Symbol({
-        id: 'symbol',
+    point = new mapfish.widgets.geostat.Point({
+        id: 'point',
         map: G.vars.map,
         layer: pointLayer,
 		title: '<span class="panel-title">' + G.i18n.point_layer + '</span>',
@@ -2372,15 +2372,15 @@
                 id: 'refresh',
                 qtip: 'Refresh layer',
                 handler: function() {
-                    symbol.updateValues = true;
-                    symbol.classify();
+                    point.updateValues = true;
+                    point.classify();
                 }
             },
             {
                 id: 'close',
                 qtip: 'Clear layer',
                 handler: function() {
-                    symbol.formValues.clearForm.call(symbol);
+                    point.formValues.clearForm.call(point);
                 }
             }
         ],
@@ -2429,8 +2429,8 @@
                 }
             }
             else if (G.vars.activePanel.isPoint()) {
-                if (symbol.layer.getDataExtent()) {
-                    G.vars.map.zoomToExtent(symbol.layer.getDataExtent());
+                if (point.layer.getDataExtent()) {
+                    G.vars.map.zoomToExtent(point.layer.getDataExtent());
                 }
             }
         }
@@ -2710,7 +2710,7 @@
                 },
                 items: [
                     choropleth,
-                    symbol
+                    point
                 ]
             },
             {
@@ -2745,13 +2745,13 @@
                 Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
                 
                 choropleth.prepareMapViewValueType();
-                symbol.prepareMapViewValueType();
+                point.prepareMapViewValueType();
                 
                 choropleth.prepareMapViewDateType();
-                symbol.prepareMapViewDateType();
+                point.prepareMapViewDateType();
                 
                 choropleth.prepareMapViewLegend();
-                symbol.prepareMapViewLegend();
+                point.prepareMapViewLegend();
                 
                 G.vars.map.events.register('addlayer', null, function(e) {
                     var svg = document.getElementsByTagName('svg');

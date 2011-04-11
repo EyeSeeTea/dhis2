@@ -89,7 +89,7 @@ G.conf = {
 G.util = {
     
     expandWidget: function(widget) {
-        var collapsed = widget == choropleth ? symbol : choropleth;
+        var collapsed = widget == choropleth ? point : choropleth;
         collapsed.collapse();
         widget.expand();
     },

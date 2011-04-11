@@ -18,13 +18,13 @@
  */
 
 /**
- * @requires core/GeoStat/Symbol.js
+ * @requires core/GeoStat/Point.js
  * @requires core/Color.js
  */
 
 Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
 
-mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
+mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
 
     layer: null,
 
@@ -116,7 +116,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			}
         }
         
-		mapfish.widgets.geostat.Symbol.superclass.initComponent.apply(this);
+		mapfish.widgets.geostat.Point.superclass.initComponent.apply(this);
     },
     
     setUrl: function(url) {
@@ -831,7 +831,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'numberfield',
             name: 'radiuslow',
-            fieldLabel: 'Low radius',
+            fieldLabel: 'Low point size',
 			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_number_width_small,
             allowDecimals: false,
@@ -851,7 +851,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         {
             xtype: 'numberfield',
             name: 'radiushigh',
-            fieldLabel: 'High radius',
+            fieldLabel: 'High point size',
 			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_number_width_small,
             allowDecimals: false,
@@ -1071,8 +1071,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         this.selectFeatures = new OpenLayers.Control.newSelectFeature(
             this.layer, {
                 onHoverSelect: onHoverSelect,
-                onHoverUnselect: onHoverUnselect
-                //onClickSelect: onClickSelect
+                onHoverUnselect: onHoverUnselect,
+                onClickSelect: onClickSelect
             }
         );
         
@@ -1580,7 +1580,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             maxSize: parseInt(this.form.findField('radiushigh').getValue())
 		};
 
-		this.coreComp.updateOptions(options);       
+		this.coreComp.updateOptions(options);
         this.coreComp.applyClassification();
         this.classificationApplied = true;
         
@@ -1588,7 +1588,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
     
     onRender: function(ct, position) {
-        mapfish.widgets.geostat.Symbol.superclass.onRender.apply(this, arguments);
+        mapfish.widgets.geostat.Point.superclass.onRender.apply(this, arguments);
         if (this.loadMask) {
             this.loadMask = new Ext.LoadMask(this.bwrap, this.loadMask);
             this.loadMask.show();
@@ -1606,7 +1606,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             'labelGenerator': this.labelGenerator
         };
 
-        this.coreComp = new mapfish.GeoStat.Symbol(this.map, coreOptions);
+        this.coreComp = new mapfish.GeoStat.Point(this.map, coreOptions);
         
         if (G.vars.parameter.id) {
             G.util.expandWidget(this);
@@ -1615,4 +1615,4 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     }
 });
 
-Ext.reg('symbol', mapfish.widgets.geostat.Symbol);
+Ext.reg('point', mapfish.widgets.geostat.Point);
