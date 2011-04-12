@@ -331,6 +331,25 @@
     pointLayer.layerType = G.conf.map_layer_type_thematic;
     G.vars.map.addLayer(pointLayer);
     
+    symbolLayer = new OpenLayers.Layer.Vector('Symbol layer', {
+        'visibility': false,
+        'displayInLayerSwitcher': false,
+        'styleMap': new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style(
+                OpenLayers.Util.applyDefaults(
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
+                    OpenLayers.Feature.Vector.style['default']
+                )
+            ),
+            'select': new OpenLayers.Style(
+                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+            )
+        })
+    });
+    
+    symbolLayer.layerType = G.conf.map_layer_type_thematic;
+    G.vars.map.addLayer(symbolLayer);
+    
     /* Init base layers */
     if (G_NORMAL_MAP && G_HYBRID_MAP) {
         var gm_normal = new OpenLayers.Layer.Google("Google Normal", {
@@ -1961,6 +1980,10 @@
                 {
                     nodeType: 'gx_layer',
                     layer: 'Point layer'
+                },
+                {
+                    nodeType: 'gx_layer',
+                    layer: 'Symbol layer'
                 }
             ]
         },
@@ -2393,6 +2416,24 @@
             }
         }
     });
+
+    symbol = new mapfish.widgets.geostat.Symbol({
+        id: 'symbol',
+        map: G.vars.map,
+        layer: symbolLayer,
+		title: '<span class="panel-title">Symbol layer</span>',
+        featureSelection: false,
+        legendDiv: 'symbollegend',
+        defaults: {width: 130},
+        listeners: {
+            'expand': function() {
+                G.vars.activePanel.setSymbol();
+            },
+            'afterrender': function() {
+                this.layer.widget = this;
+            }
+        }
+    });
     
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
@@ -2689,6 +2730,10 @@
                     {
                         title: '<span class="panel-title">' + G.i18n.map_legend_point + '</span>',
                         contentEl: 'pointlegend'
+                    },
+                    {
+                        title: '<span class="panel-title">Symbol legend</span>',
+                        contentEl: 'symbollegend'
                     }
                 ]
             },
@@ -2710,7 +2755,8 @@
                 },
                 items: [
                     choropleth,
-                    point
+                    point,
+                    symbol
                 ]
             },
             {
@@ -2734,9 +2780,10 @@
                 if (!Ext.isIE) {
                     polygonLayer.svgId = svg[0].id;
                     pointLayer.svgId = svg[1].id;
+                    symbolLayer.svgId = svg[2].id;
                 }
                 
-                for (var i = 0, j = 2; i < G.vars.map.layers.length; i++) {
+                for (var i = 0, j = 3; i < G.vars.map.layers.length; i++) {
                     if (G.vars.map.layers[i].layerType == G.conf.map_layer_type_overlay) {
                         G.vars.map.layers[i].svgId = svg[j++].id;
                     }

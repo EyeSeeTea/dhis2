@@ -313,6 +313,13 @@ public class OrganisationUnit
         return null;
     }
     
+    public Integer getGroupIdInGroupSet( OrganisationUnitGroupSet groupSet )
+    {
+        final OrganisationUnitGroup group = getGroupInGroupSet( groupSet );
+        
+        return group != null ? group.getId() : null;
+    }
+    
     public String getGroupNameInGroupSet( OrganisationUnitGroupSet groupSet )
     {
         final OrganisationUnitGroup group = getGroupInGroupSet( groupSet );

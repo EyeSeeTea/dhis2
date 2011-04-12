@@ -106,6 +106,12 @@ mapfish.GeoStat = OpenLayers.Class({
             }
             point.classify(false);
         }
+        else if (G.vars.activePanel.isSymbol()) {
+            if (!symbol.formValidation.validateForm.call(symbol)) {
+                G.vars.mask.hide();
+            }
+            symbol.classify(false);
+        }
     },
 
     onFailure: function(request) {
