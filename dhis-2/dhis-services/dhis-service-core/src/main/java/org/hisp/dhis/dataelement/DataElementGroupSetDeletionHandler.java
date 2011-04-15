@@ -58,20 +58,6 @@ public class DataElementGroupSetDeletionHandler
     }
 
     @Override
-    public boolean allowDeleteDataElementGroup( DataElementGroup dataElementGroup )
-    {
-        for ( DataElementGroupSet groupSet : dataElementService.getAllDataElementGroupSets() )
-        {
-            if ( groupSet.getMembers().contains( dataElementGroup ) )
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    @Override
     public void deleteDataElementGroup( DataElementGroup dataElementGroup )
     {
         for ( DataElementGroupSet groupSet : dataElementService.getAllDataElementGroupSets() )
