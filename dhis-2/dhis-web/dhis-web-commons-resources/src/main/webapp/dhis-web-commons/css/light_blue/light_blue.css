@@ -5,7 +5,7 @@
 
 * 
 {
-  font-family: arial, sans-serif;
+  font-family: LiberationSansRegular, arial, sans-serif;
   line-height: 125%;
 }
 
@@ -28,8 +28,13 @@ ul,ol
 
 a
 {
-  text-decoration:none;
-  color:#3b73b8;
+  text-decoration: none;
+  color: #3b73b8;
+}
+
+select
+{
+  padding: 1px;
 }
 
 a:hover
@@ -66,7 +71,7 @@ img#header2
 {
   position: absolute;
   top: 2px;
-  left: 35px;
+  left: 43px;
 }
 
 img#header3
@@ -113,9 +118,8 @@ img#menuSeparator5
 {
   height: 64px;
   width: 98px;
-  font-size: 12px;
+  font-size: 13px;
   color: #ffffff;
-  font-weight: bold;
   text-align: center;
   line-height: 54px;
   cursor: pointer;
@@ -148,11 +152,11 @@ div#menuLink4
 span#headerText
 {
   position: absolute;
-  top: 17px;
-  left: 235px;
+  top: 14px;
+  left: 253px;
   font-weight: lighter;
   color: white;
-  font-size: 13pt;
+  font-size: 15pt;
 }
 
 div#popupHeader 
@@ -242,7 +246,7 @@ div#menuDropDown3
 
 #leftBar
 {
-  background-color: #35699f;
+  background-color: #1f5489;
   height: 535px;
   width: 235px;
   float: left;
@@ -270,14 +274,14 @@ div#menuDropDown3
   margin-top: 16px;
   margin-right: 15px;
   margin-left: 15px;
-  background-color: #265687;
+  background-color: #4a89ba;
   padding-top: 6px;
   padding-bottom: 5px;
   padding-left: 10px;
   color: white;
   border-style: solid;
   border-width: 1px;
-  border-color: #e5e5e5;
+  border-color: #4a89ba;
   font-weight: normal;
   border-radius: 3px;
   -moz-border-radius: 3px; /* Firefox */
@@ -298,7 +302,7 @@ div#menuDropDown3
 
 #leftBarContents a:hover
 {
-  color: #D1D3FF;
+  color: #acc8de;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -364,15 +368,20 @@ div#menuDropDown3
 
 .page th, thead tr
 {
+/*
   background-image: url('head.png');
+*/
+  background-color: #cbddeb;
   background-repeat: repeat-x;
   text-align: left;
-  color: #3f5d8e;
+  color: #39547d;
+  padding:3px 0px 3px 6px;
   border-style: solid;
   border-width: 1px;
-  border-color: #99bbe8;
-  padding-left: 7px;
-  height: 19px;
+  border-color: #c8dbea;
+  font-weight: normal;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
 }
 
 #mainPage 
@@ -399,7 +408,7 @@ div#menuDropDown3
 
 .listTable td
 {
-  padding: 2px;
+  padding: 2px 2px 2px 5px;
 }
 
 .listRow
@@ -442,12 +451,26 @@ div#menuDropDown3
   padding: 15px;
   cursor: pointer;
   border: 1px solid #d5efd5;
-  border-radius: 5px;
-  -moz-border-radius: 5px; /* Firefox */
+  border-radius: 3px;
+  -moz-border-radius: 3px; /* Firefox */
 }
 
 .introItemHeader
 {
   color: #3c533c;
-  font-weight: bold;
+}
+
+/*----------------------------------------------------------------------------*/
+/* @font-face                                                                 */
+/*----------------------------------------------------------------------------*/
+
+@font-face {
+    font-family: 'LiberationSansRegular';
+    src: url('../../fonts/LiberationSans-Regular-webfont.eot');
+    src: url('../../fonts/LiberationSans-Regular-webfont.eot?#iefix') format('eot'),
+         url('../../fonts/LiberationSans-Regular-webfont.woff') format('woff'),
+         url('../../fonts/LiberationSans-Regular-webfont.ttf') format('truetype'),
+         url('../../fonts/LiberationSans-Regular-webfont.svg#webfontc8rbNdBe') format('svg');
+    font-weight: normal;
+    font-style: normal;
 }
