@@ -70,8 +70,8 @@ img#header1
 img#header2
 {
   position: absolute;
-  top: 2px;
-  left: 43px;
+  top: 6px;
+  left: 50px;
 }
 
 img#header3
@@ -271,13 +271,9 @@ div#menuDropDown3
 #leftBarContents h2
 {
   font-size: 14px;
-  margin-top: 16px;
-  margin-right: 15px;
-  margin-left: 15px;
   background-color: #4a89ba;
-  padding-top: 6px;
-  padding-bottom: 5px;
-  padding-left: 10px;
+  margin: 16px 15px 0px 15px;
+  padding: 4px 0px 3px 10px;
   color: white;
   border-style: solid;
   border-width: 1px;
@@ -368,20 +364,15 @@ div#menuDropDown3
 
 .page th, thead tr
 {
-/*
-  background-image: url('head.png');
-*/
   background-color: #cbddeb;
   background-repeat: repeat-x;
   text-align: left;
   color: #39547d;
-  padding:3px 0px 3px 6px;
+  padding:3px 0px 2px 6px;
   border-style: solid;
   border-width: 1px;
   border-color: #c8dbea;
   font-weight: normal;
-  border-radius: 3px;
-  -moz-border-radius: 3px;
 }
 
 #mainPage 
@@ -448,7 +439,7 @@ div#menuDropDown3
 	
 .introItem
 {
-  padding: 15px;
+  padding: 12px;
   cursor: pointer;
   border: 1px solid #d5efd5;
   border-radius: 3px;
