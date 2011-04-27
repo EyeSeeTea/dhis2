@@ -86,6 +86,7 @@ public class TableAlteror
         executeSql( "DROP TABLE customvalue" );
         executeSql( "DROP TABLE reporttable_displaycolumns" );
         executeSql( "DROP TABLE reportreporttables" );
+        executeSql( "DROP TABLE frequencyoverrideassociation" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
         executeSql( "ALTER TABLE reporttable DROP column dimension_type" );
         executeSql( "ALTER TABLE reporttable DROP column dimensiontype" );
@@ -118,6 +119,13 @@ public class TableAlteror
         executeSql( "ALTER TABLE map DROP COLUMN zoom" );
         executeSql( "ALTER TABLE maplayer DROP CONSTRAINT maplayer_mapsource_key" );
 
+        // extended data element
+        executeSql( "ALTER TABLE dataelement DROP CONSTRAINT fk_dataelement_extendeddataelementid" );
+        executeSql( "ALTER TABLE dataelement DROP COLUMN extendeddataelementid" );
+        executeSql( "ALTER TABLE indicator DROP CONSTRAINT fk_indicator_extendeddataelementid" );
+        executeSql( "ALTER TABLE indicator DROP COLUMN extendeddataelementid" );
+        executeSql( "DROP TABLE extendeddataelement" );
+        
         // ---------------------------------------------------------------------
         // Update tables for dimensional model
         // ---------------------------------------------------------------------

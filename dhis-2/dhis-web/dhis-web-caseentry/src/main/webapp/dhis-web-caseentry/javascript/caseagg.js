@@ -8,20 +8,17 @@ function dataSetSelected()
 	{
 		var url = 'loadPeriods.action?dataSetId=' + dataSetId;
 
-		var listStartPeriod = document.getElementById( 'sDateLB' );
-		var listEndPeriod = document.getElementById( 'eDateLB' );
-		
-	    clearList( listStartPeriod );
-		clearList( listEndPeriod );
+	    clearListById( 'sDateLB' );
+		clearListById( 'eDateLB' );
 	    
-	    addOptionToList( listStartPeriod, '', '[' + i18n_please_select + ']' );
-		addOptionToList( listEndPeriod, '', '[' + i18n_please_select + ']' );
+	    addOptionById( 'sDateLB', '', '[' + i18n_please_select + ']' );
+		addOptionById( 'eDateLB', '', '[' + i18n_please_select + ']' );
 		
 	    $.getJSON( url, function( json ) {
 			
 	    	for ( i in json.periods ) {
-	    		addOptionToList( listStartPeriod, i, json.periods[i].name );
-				addOptionToList( listEndPeriod, i, json.periods[i].name );
+	    		addOptionById( 'sDateLB', i, json.periods[i].name );
+				addOptionById( 'eDateLB', i, json.periods[i].name );
 	    	}
 	    
 			enable('previousPeriodForStartBtn');
@@ -59,7 +56,7 @@ function responseListPeriodForStartReceived( json )
 	clearListById('sDateLB');
 	
 	jQuery.each( json.periods, function(i, item ){
-		addOption('sDateLB', item.name , i );
+		addOptionById('sDateLB', item.name , i );
 	});
 }
 
@@ -80,7 +77,7 @@ function responseListPeriodForEndReceived( json )
 	clearListById('eDateLB');
 	
 	jQuery.each( json.periods, function(i, item ){
-		addOption('eDateLB', item.name , i );
+		addOptionById('eDateLB', item.name , i );
 	});
 }
 	
@@ -128,4 +125,5 @@ function viewResultDetails( orgunitId, periodId, aggregationConditionId )
 		width: 800,
         height: 400
     });
+}
 

@@ -27,12 +27,17 @@ package org.hisp.dhis.chart.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.chart.Chart.DIMENSION_INDICATOR;
 import static org.hisp.dhis.chart.Chart.DIMENSION_ORGANISATIONUNIT;
 import static org.hisp.dhis.chart.Chart.DIMENSION_PERIOD;
-import static org.hisp.dhis.chart.Chart.DIMENSION_INDICATOR;
 import static org.hisp.dhis.chart.Chart.SIZE_NORMAL;
 import static org.hisp.dhis.chart.Chart.TYPE_BAR;
 import static org.hisp.dhis.chart.Chart.TYPE_LINE;
+import static org.hisp.dhis.chart.Chart.TYPE_PIE;
+import static org.hisp.dhis.chart.Chart.TYPE_PIE3D;
+import static org.hisp.dhis.options.SystemSettingManager.AGGREGATION_STRATEGY_REAL_TIME;
+import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_AGGREGATION_STRATEGY;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_AGGREGATION_STRATEGY;
 import static org.hisp.dhis.system.util.ConversionUtils.getArray;
 
 import java.awt.Color;
@@ -70,22 +75,26 @@ import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.DatasetRenderingOrder;
+import org.jfree.chart.plot.MultiplePiePlot;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.util.TableOrder;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.hisp.dhis.options.SystemSettingManager.*;
 
 /**
  * @author Lars Helge Overland
@@ -150,7 +159,7 @@ public class DefaultChartService
     }
 
     private AggregatedDataValueService aggregatedDataValueService;
-    
+
     public void setAggregatedDataValueService( AggregatedDataValueService aggregatedDataValueService )
     {
         this.aggregatedDataValueService = aggregatedDataValueService;
@@ -162,7 +171,7 @@ public class DefaultChartService
     {
         this.systemSettingManager = systemSettingManager;
     }
-    
+
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -184,12 +193,12 @@ public class DefaultChartService
 
         if ( chart.getRelatives() != null )
         {
-            chart.setRelativePeriods( periodService.reloadPeriods( 
-                chart.getRelatives().getRelativePeriods( 1, null, false ) ) );            
+            chart.setRelativePeriods( periodService.reloadPeriods( chart.getRelatives().getRelativePeriods( 1, null,
+                false ) ) );
         }
-        
+
         User user = currentUserService.getCurrentUser();
-        
+
         if ( chart.isUserOrganisationUnit() && user != null && user.getOrganisationUnit() != null )
         {
             chart.setOrganisationUnit( user.getOrganisationUnit() );
@@ -403,7 +412,7 @@ public class DefaultChartService
 
         return renderer;
     }
-    
+
     /**
      * Returns a JFreeChart of type defined in the chart argument.
      */
@@ -423,6 +432,51 @@ public class DefaultChartService
         if ( chart.isType( TYPE_LINE ) )
         {
             plot = new CategoryPlot( dataSets[0], new CategoryAxis(), new NumberAxis(), lineRenderer );
+        }
+        else if ( chart.isType( TYPE_PIE ) || chart.isType( TYPE_PIE3D ) )
+        {
+            JFreeChart multiplePieChart = null;
+
+            if ( chart.isType( TYPE_PIE ) )
+            {
+                multiplePieChart = ChartFactory.createMultiplePieChart( chart.getTitle(), dataSets[0],
+                    TableOrder.BY_ROW, !chart.getHideLegend(), false, false );
+            }
+            else
+            {
+                multiplePieChart = ChartFactory.createMultiplePieChart3D( chart.getTitle(), dataSets[0],
+                    TableOrder.BY_ROW, !chart.getHideLegend(), false, false );
+            }
+
+            multiplePieChart.setBackgroundPaint( Color.WHITE );
+            multiplePieChart.setAntiAlias( true );
+
+            TextTitle title = multiplePieChart.getTitle();
+            title.setFont( titleFont );
+
+            LegendTitle legend = multiplePieChart.getLegend();
+            legend.setItemFont( subTitleFont );
+
+            MultiplePiePlot multiplePiePlot = (MultiplePiePlot) multiplePieChart.getPlot();
+            JFreeChart pieChart = multiplePiePlot.getPieChart();
+            pieChart.getTitle().setFont( subTitleFont );
+
+            PiePlot piePlot = (PiePlot) pieChart.getPlot();
+            piePlot.setBackgroundPaint( Color.WHITE );
+            piePlot.setShadowXOffset( 0 );
+            piePlot.setShadowYOffset( 0 );
+            piePlot.setLabelFont( new Font( "Tahoma", Font.PLAIN, 10 ) );
+            piePlot.setLabelGenerator( new StandardPieSectionLabelGenerator( "{2}" ) );
+            piePlot.setSimpleLabels( true );
+            piePlot.setIgnoreZeroValues( true );
+            piePlot.setIgnoreNullValues( true );
+
+            for ( int i = 0; i < dataSets[0].getColumnCount(); i++ )
+            {
+                piePlot.setSectionPaint( dataSets[0].getColumnKey( i ), colors[i] );
+            }
+
+            return multiplePieChart;
         }
         else
         {
@@ -473,8 +527,9 @@ public class DefaultChartService
      */
     private CategoryDataset[] getCategoryDataSet( Chart chart )
     {
-        String aggregationStrategy = (String) systemSettingManager.getSystemSetting( KEY_AGGREGATION_STRATEGY, DEFAULT_AGGREGATION_STRATEGY );
-        
+        String aggregationStrategy = (String) systemSettingManager.getSystemSetting( KEY_AGGREGATION_STRATEGY,
+            DEFAULT_AGGREGATION_STRATEGY );
+
         final DefaultCategoryDataset regularDataSet = new DefaultCategoryDataset();
         final DefaultCategoryDataset regressionDataSet = new DefaultCategoryDataset();
 
@@ -490,7 +545,6 @@ public class DefaultChartService
                 int columnIndex = 0;
 
                 if ( chart.isDimension( DIMENSION_PERIOD ) || chart.isDimension( DIMENSION_INDICATOR ) )
-
                 {
                     // ---------------------------------------------------------
                     // Regular dataset
@@ -498,9 +552,10 @@ public class DefaultChartService
 
                     for ( Period period : chart.getAllPeriods() )
                     {
-                        final Double value = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? 
-                            aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), selectedOrganisationUnit ) :
-                                aggregatedDataValueService.getAggregatedValue( indicator, period, selectedOrganisationUnit );
+                        final Double value = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? aggregationService
+                            .getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(),
+                                selectedOrganisationUnit ) : aggregatedDataValueService.getAggregatedValue( indicator,
+                            period, selectedOrganisationUnit );
 
                         if ( chart.isDimension( DIMENSION_PERIOD ) )
                         {
@@ -513,10 +568,10 @@ public class DefaultChartService
                                 chart.getFormat().formatPeriod( period ), indicator.getShortName() );
                         }
                         columnIndex++;
-                        
+
                         // Omit missing values and 0 from regression
-                        
-                        if ( value != null && value != 0.0 ) 
+
+                        if ( value != null && value != 0.0 )
                         {
                             regression.addData( columnIndex, value );
                         }
@@ -533,10 +588,10 @@ public class DefaultChartService
                         for ( Period period : chart.getAllPeriods() )
                         {
                             final double value = regression.predict( columnIndex++ );
-                            
+
                             // Enough values must exist for regression
-                            
-                            if ( !Double.isNaN( value ) ) 
+
+                            if ( !Double.isNaN( value ) )
                             {
                                 regressionDataSet.addValue( value, TREND_PREFIX + indicator.getShortName(), chart
                                     .getFormat().formatPeriod( period ) );
@@ -553,12 +608,13 @@ public class DefaultChartService
 
                     for ( OrganisationUnit unit : chart.getAllOrganisationUnits() )
                     {
-                        final Double value = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? 
-                            aggregationService.getAggregatedIndicatorValue( indicator, selectedPeriod.getStartDate(), selectedPeriod.getEndDate(), unit ) :
-                                aggregatedDataValueService.getAggregatedValue( indicator, selectedPeriod, unit );
+                        final Double value = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? aggregationService
+                            .getAggregatedIndicatorValue( indicator, selectedPeriod.getStartDate(),
+                                selectedPeriod.getEndDate(), unit ) : aggregatedDataValueService.getAggregatedValue(
+                            indicator, selectedPeriod, unit );
 
-                        regularDataSet.addValue( value != null ? value : 0, indicator.getShortName(), unit
-                            .getShortName() );
+                        regularDataSet.addValue( value != null ? value : 0, indicator.getShortName(),
+                            unit.getShortName() );
 
                         columnIndex++;
                     }

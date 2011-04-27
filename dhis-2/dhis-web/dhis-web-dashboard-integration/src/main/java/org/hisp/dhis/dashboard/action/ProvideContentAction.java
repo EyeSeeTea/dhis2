@@ -37,6 +37,7 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.chart.comparator.ChartTitleComparator;
 import org.hisp.dhis.dashboard.DashboardManager;
+import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.options.UserSettingManager;
 
 import com.opensymphony.xwork2.Action;
@@ -74,6 +75,13 @@ public class ProvideContentAction
         this.userSettingManager = userSettingManager;
     }
     
+    private MessageService messageService;
+
+    public void setMessageService( MessageService messageService )
+    {
+        this.messageService = messageService;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -94,14 +102,16 @@ public class ProvideContentAction
 
     private List<Object> chartAreas = new ArrayList<Object>();
 
-    public void setChartAreas( List<Object> chartAreas )
-    {
-        this.chartAreas = chartAreas;
-    }
-
     public List<Object> getChartAreas()
     {
         return chartAreas;
+    }
+    
+    private long messageCount;
+
+    public long getMessageCount()
+    {
+        return messageCount;
     }
 
     // -------------------------------------------------------------------------
@@ -120,17 +130,15 @@ public class ProvideContentAction
 
         Collections.sort( charts, new ChartTitleComparator() );
 
-        Object sessionChartsInDashboard = ActionContext.getContext().getActionInvocation().getStack()
-            .findString( UserSettingManager.KEY_CHARTS_IN_DASHBOARD );
-
-        Integer chartsInDashboardCount = sessionChartsInDashboard != null ? Integer
-            .valueOf( (String) sessionChartsInDashboard ) : UserSettingManager.DEFAULT_CHARTS_IN_DASHBOARD;
-
+        int chartsInDashboardCount = userSettingManager.getChartsInDashboard();
+        
         for ( int i = 1; i <= chartsInDashboardCount; i++ )
         {
-            chartAreas.add( content.get( "chartArea" + i ) );
+            chartAreas.add( content.get( DashboardManager.CHART_AREA_PREFIX + i ) );
         }
 
+        messageCount = messageService.getUnreadMessageCount();
+        
         return SUCCESS;
     }
 }

@@ -36,16 +36,10 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.mock.MockSource;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.MonthlyPeriodType;
-import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.period.WeeklyPeriodType;
-import org.hisp.dhis.period.YearlyPeriodType;
 import org.hisp.dhis.source.Source;
-import org.hisp.dhis.source.SourceStore;
 import org.junit.Test;
 
 /**
@@ -55,11 +49,7 @@ import org.junit.Test;
 public class DataSetStoreTest
     extends DhisSpringTest
 {
-    private PeriodStore periodStore;
-
     private DataSetStore dataSetStore;
-
-    private SourceStore sourceStore;
     
     private PeriodType periodType;
 
@@ -69,10 +59,6 @@ public class DataSetStoreTest
     {
         dataSetStore = (DataSetStore) getBean( DataSetStore.ID );
 
-        periodStore = (PeriodStore) getBean( PeriodStore.ID );
-
-        sourceStore = (SourceStore) getBean( SourceStore.ID );
-        
         organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
         
         periodType = PeriodType.getAvailablePeriodTypes().iterator().next();
@@ -244,57 +230,5 @@ public class DataSetStoreTest
         assertEquals( dataSets.size(), 2 );
         assertTrue( dataSets.contains( dataSetA ) );
         assertTrue( dataSets.contains( dataSetB ) );
-    }
-
-    // -------------------------------------------------------------------------
-    // FrequencyOverrideAssociation
-    // -------------------------------------------------------------------------
-
-    @Test
-    public void testFrequencyOverrideAssociation()
-        throws Exception
-    {
-        PeriodType periodType1 = periodStore.getPeriodType( YearlyPeriodType.class );
-        PeriodType periodType2 = periodStore.getPeriodType( MonthlyPeriodType.class );
-        PeriodType periodType3 = periodStore.getPeriodType( WeeklyPeriodType.class );
-
-        DataSet dataSet1 = new DataSet( "name1", periodType1 );
-        DataSet dataSet2 = new DataSet( "name2", periodType2 );
-
-        dataSetStore.addDataSet( dataSet1 );
-        dataSetStore.addDataSet( dataSet2 );
-
-        Source source1 = new MockSource( "Source1" );
-        Source source2 = new MockSource( "Source2" );
-        sourceStore.addSource( source1 );
-        sourceStore.addSource( source2 );
-
-        FrequencyOverrideAssociation association = new FrequencyOverrideAssociation( dataSet1, source1, periodType3 );
-
-        dataSetStore.addFrequencyOverrideAssociation( association );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet1 ).size(), 1 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source1 ).size(), 1 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet2 ).size(), 0 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source2 ).size(), 0 );
-
-        dataSetStore
-            .addFrequencyOverrideAssociation( new FrequencyOverrideAssociation( dataSet1, source2, periodType3 ) );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet1 ).size(), 2 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source1 ).size(), 1 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet2 ).size(), 0 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source2 ).size(), 1 );
-
-        dataSetStore
-            .addFrequencyOverrideAssociation( new FrequencyOverrideAssociation( dataSet2, source1, periodType3 ) );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet1 ).size(), 2 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source1 ).size(), 2 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet2 ).size(), 1 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source2 ).size(), 1 );
-
-        dataSetStore.deleteFrequencyOverrideAssociation( association );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet1 ).size(), 1 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source1 ).size(), 1 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsByDataSet( dataSet2 ).size(), 1 );
-        assertEquals( dataSetStore.getFrequencyOverrideAssociationsBySource( source2 ).size(), 1 );
     }
 }
