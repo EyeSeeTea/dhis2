@@ -6,6 +6,8 @@
 <hibernate-mapping>
   <class name="org.hisp.dhis.chart.Chart" table="chart">
 
+    <cache usage="read-write" />
+
     <id name="id" column="chartid">
       <generator class="native" />
     </id>
@@ -26,19 +28,26 @@
 
     <property name="regression" />
 
+    <property name="targetLine" />
+
+    <property name="targetLineValue" />
+
     <list name="indicators" table="chart_indicators">
+      <cache usage="read-write" />
       <key column="chartid" />
       <list-index column="sort_order" base="0" />
       <many-to-many column="indicatorid" class="org.hisp.dhis.indicator.Indicator" />
     </list>
 
     <list name="periods" table="chart_periods">
+      <cache usage="read-write" />
       <key column="chartid" />
       <list-index column="sort_order" base="0" />
       <many-to-many column="periodid" class="org.hisp.dhis.period.Period" />
     </list>
 
     <list name="organisationUnits" table="chart_organisationunits">
+      <cache usage="read-write" />
       <key column="chartid" />
       <list-index column="sort_order" base="0" />
       <many-to-many column="organisationunitid" class="org.hisp.dhis.organisationunit.OrganisationUnit" />

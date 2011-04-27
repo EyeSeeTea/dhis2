@@ -27,13 +27,9 @@ package org.hisp.dhis.importexport.dhis14.file.importer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.expression.Expression.SEPARATOR;
-
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.amplecode.quick.BatchHandler;
@@ -62,7 +58,6 @@ import org.hisp.dhis.importexport.ImportService;
 import org.hisp.dhis.importexport.analysis.DefaultImportAnalyser;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.dhis14.file.query.QueryManager;
-import org.hisp.dhis.importexport.dhis14.file.rowhandler.CalculatedDataElementRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataElementGroupMemberRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataElementGroupRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataElementRowHandler;
@@ -83,7 +78,6 @@ import org.hisp.dhis.importexport.dhis14.file.rowhandler.OrganisationUnitRowHand
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.PeriodRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.RoutineDataValueRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.SemiPermanentDataValueRowHandler;
-import org.hisp.dhis.importexport.dhis14.object.Dhis14CalculatedDataElementEntry;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14PeriodUtil;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.importexport.mapping.ObjectMappingGenerator;
@@ -109,7 +103,6 @@ import org.hisp.dhis.jdbc.batchhandler.OrganisationUnitBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.OrganisationUnitGroupBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.OrganisationUnitGroupMemberBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.PeriodBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.SourceBatchHandler;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -117,8 +110,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.source.Source;
-import org.hisp.dhis.system.util.AppendingHashMap;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
 
@@ -275,7 +266,6 @@ public class DefaultDhis14FileImportService
             }
 
             importDataElements( params, state );
-            importCalculatedDataElements( params, state, createCalculatedDataElementEntryMap() );
             importIndicatorTypes( params, state );
             importIndicators( params, state );
             importDataElementGroups( params, state );
@@ -348,28 +338,6 @@ public class DefaultDhis14FileImportService
         batchHandler.flush();
         
         log.info( "Imported DataElements" );
-    }
-
-    private void importCalculatedDataElements( ImportParams params, ProcessState state, Map<Integer, String> calculatedEntryMap )
-    {
-        state.setMessage( "importing_data_elements" );
-        
-        DataElementCategoryCombo categoryCombo = categoryService.
-            getDataElementCategoryComboByName( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );
-        
-        RowHandler rowHandler = new CalculatedDataElementRowHandler( importObjectService,
-            dataElementService, 
-            params,
-            categoryCombo,
-            importAnalyser,
-            expressionService,
-            calculatedEntryMap,
-            objectMappingGenerator.getDataElementMapping( params.skipMapping() ),
-            getCategoryOptionComboMapping() );
-
-        queryManager.queryWithRowhandler( "getCalculatedDataElements", rowHandler );
-
-        log.info( "Imported CalculatedDataElements" );
     }
     
     private void importIndicatorTypes( ImportParams params, ProcessState state )
@@ -541,11 +509,9 @@ public class DefaultDhis14FileImportService
     {
         state.setMessage( "importing_organisation_units" );
         
-        BatchHandler<Source> sourceBatchHandler = batchHandlerFactory.createBatchHandler( SourceBatchHandler.class ).init();
         BatchHandler<OrganisationUnit> organisationUnitBatchHandler = batchHandlerFactory.createBatchHandler( OrganisationUnitBatchHandler.class ).init();
         
         RowHandler rowHandler = new OrganisationUnitRowHandler( organisationUnitBatchHandler, 
-            sourceBatchHandler,
             importObjectService,
             organisationUnitService,
             params,
@@ -553,7 +519,6 @@ public class DefaultDhis14FileImportService
         
         queryManager.queryWithRowhandler( "getOrganisationUnits", rowHandler );
         
-        sourceBatchHandler.flush();
         organisationUnitBatchHandler.flush();
         
         log.info( "Imported OrganisationUnits" );       
@@ -803,37 +768,6 @@ public class DefaultDhis14FileImportService
     // -------------------------------------------------------------------------
 
     /**
-     * Creates a map where key is the calculated data element identifier and the
-     * value if the formula.
-     */
-    private Map<Integer, String> createCalculatedDataElementEntryMap()
-    {
-        int categoryOptionComboId = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
-        
-        List<?> calculatedDataElements = queryManager.queryForList( "getCalculatedDataElementEntries", null );
-        
-        Map<Integer, String> map = new AppendingHashMap<Integer, String>(); // Calculated data element id, formula
-        
-        //TODO factor should be double
-        
-        for ( Object element : calculatedDataElements )
-        {
-            Dhis14CalculatedDataElementEntry calculated = (Dhis14CalculatedDataElementEntry) element;
-            
-            String formula = "([" + calculated.getDataElementId() + SEPARATOR + categoryOptionComboId + "]*" + calculated.getFactor() + ")";
-            
-            if ( map.containsKey( calculated.getCalculatedDataElementId() ) )
-            {
-                formula = "+" + formula;
-            }
-            
-            map.put( calculated.getCalculatedDataElementId(), formula );
-        }
-        
-        return map;
-    }
-
-    /**
      * Returns a list of distinct period identifiers from the RoutineDataValue table,
      * ie. periods which have registered data. Could be used to avoid importing 
      * periods without data.
@@ -851,22 +785,7 @@ public class DefaultDhis14FileImportService
         
         return identifiers;
     }
-    
-    /**
-     * Returns a mapping for category option combo. Since DHIS 1.4 does not have
-     * this it will always be default.
-     */
-    private Map<Object, Integer> getCategoryOptionComboMapping()
-    {
-        Integer categoryOptionComboId = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
         
-        Map<Object, Integer> mapping = new HashMap<Object, Integer>();
-        
-        mapping.put( categoryOptionComboId, categoryOptionComboId );
-        
-        return mapping;
-    }
-    
     /**
      * Verifies that the import file is valid by checking for routine and semi
      * permanent data values out of range.

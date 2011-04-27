@@ -58,7 +58,6 @@ import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ExportPipeThread;
 import org.hisp.dhis.importexport.ExportService;
 import org.hisp.dhis.importexport.dxf.converter.AggregatedDataValueConverter;
-import org.hisp.dhis.importexport.dxf.converter.CalculatedDataElementConverter;
 import org.hisp.dhis.importexport.dxf.converter.CategoryCategoryOptionAssociationConverter;
 import org.hisp.dhis.importexport.dxf.converter.CategoryComboCategoryAssociationConverter;
 import org.hisp.dhis.importexport.dxf.converter.ChartConverter;
@@ -88,7 +87,6 @@ import org.hisp.dhis.importexport.dxf.converter.IndicatorGroupMemberConverter;
 import org.hisp.dhis.importexport.dxf.converter.IndicatorGroupSetConverter;
 import org.hisp.dhis.importexport.dxf.converter.IndicatorGroupSetMemberConverter;
 import org.hisp.dhis.importexport.dxf.converter.IndicatorTypeConverter;
-import org.hisp.dhis.importexport.dxf.converter.OlapUrlConverter;
 import org.hisp.dhis.importexport.dxf.converter.OrganisationUnitConverter;
 import org.hisp.dhis.importexport.dxf.converter.OrganisationUnitGroupConverter;
 import org.hisp.dhis.importexport.dxf.converter.OrganisationUnitGroupMemberConverter;
@@ -99,7 +97,6 @@ import org.hisp.dhis.importexport.dxf.converter.ReportConverter;
 import org.hisp.dhis.importexport.dxf.converter.ReportTableConverter;
 import org.hisp.dhis.importexport.dxf.converter.ValidationRuleConverter;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.olap.OlapURLService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
@@ -227,13 +224,6 @@ public class DefaultDXFExportService
         this.chartService = chartService;
     }
 
-    private OlapURLService olapURLService;
-
-    public void setOlapURLService( OlapURLService olapURLService )
-    {
-        this.olapURLService = olapURLService;
-    }
-
     private CompleteDataSetRegistrationService completeDataSetRegistrationService;
 
     public void setCompleteDataSetRegistrationService(
@@ -297,7 +287,6 @@ public class DefaultDXFExportService
             thread.registerXMLConverter( new CategoryComboCategoryAssociationConverter( categoryService ) );
 
             thread.registerXMLConverter( new DataElementConverter( dataElementService ) );
-            thread.registerXMLConverter( new CalculatedDataElementConverter( dataElementService ) );
             thread.registerXMLConverter( new DataElementGroupConverter( dataElementService ) );
             thread.registerXMLConverter( new DataElementGroupMemberConverter( dataElementService ) );
             thread.registerXMLConverter( new DataElementGroupSetConverter( dataElementService ) );
@@ -335,7 +324,6 @@ public class DefaultDXFExportService
             thread.registerXMLConverter( new ReportConverter( reportService ) );
             thread.registerXMLConverter( new ReportTableConverter( reportTableService ) );
             thread.registerXMLConverter( new ChartConverter( chartService ) );
-            thread.registerXMLConverter( new OlapUrlConverter( olapURLService ) );
             thread.registerXMLConverter( new CompleteDataSetRegistrationConverter( completeDataSetRegistrationService,
                 dataSetService, organisationUnitService, periodService ) );
 

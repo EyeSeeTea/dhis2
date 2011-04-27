@@ -43,9 +43,9 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.expression.ExpressionService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.CompositeCounter;
 import org.hisp.dhis.system.util.Filter;
@@ -113,7 +113,7 @@ public class DefaultValidationRuleService
     // ValidationRule business logic
     // -------------------------------------------------------------------------
 
-    public Grid getAggregateValidationResult( Collection<ValidationResult> results, List<Period> periods, List<? extends Source> sources )
+    public Grid getAggregateValidationResult( Collection<ValidationResult> results, List<Period> periods, List<OrganisationUnit> sources )
     {
         int number = validationRuleStore.getNumberOfValidationRules();
         
@@ -134,7 +134,7 @@ public class DefaultValidationRuleService
             grid.addValue( period.getName() );
         }
         
-        for ( Source source : sources )
+        for ( OrganisationUnit source : sources )
         {
             grid.addRow();
             grid.addValue( source.getName() );
@@ -150,7 +150,7 @@ public class DefaultValidationRuleService
         return grid;
     }
     
-    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources )
+    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<OrganisationUnit> sources )
     {
         Collection<Period> periods = periodService.getPeriodsBetweenDates( startDate, endDate );
         
@@ -158,7 +158,7 @@ public class DefaultValidationRuleService
 
         Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
 
-        for ( Source source : sources  )
+        for ( OrganisationUnit source : sources  )
         {
             for ( Period period : periods )
             {
@@ -169,7 +169,7 @@ public class DefaultValidationRuleService
         return validationViolations;
     }
 
-    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<? extends Source> sources, ValidationRuleGroup group )
+    public Collection<ValidationResult> validateAggregate( Date startDate, Date endDate, Collection<OrganisationUnit> sources, ValidationRuleGroup group )
     {
         Collection<Period> periods = periodService.getPeriodsBetweenDates( startDate, endDate );
         
@@ -183,7 +183,7 @@ public class DefaultValidationRuleService
         
         Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
 
-        for ( Source source : sources  )
+        for ( OrganisationUnit source : sources  )
         {
             for ( Period period : periods )
             {
@@ -194,13 +194,13 @@ public class DefaultValidationRuleService
         return validationViolations;
     }
     
-    public Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<? extends Source> sources )
+    public Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<OrganisationUnit> sources )
     {
         Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
 
         Collection<Period> relevantPeriods = periodService.getPeriodsBetweenDates( startDate, endDate );
 
-        for ( Source source : sources )
+        for ( OrganisationUnit source : sources )
         {
             Collection<ValidationRule> relevantRules = getRelevantValidationRules( source.getDataElementsInDataSets() );
                 
@@ -216,14 +216,14 @@ public class DefaultValidationRuleService
         return validationViolations;
     }
 
-    public Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<? extends Source> sources,
+    public Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<OrganisationUnit> sources,
         ValidationRuleGroup group )
     {
         Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
 
         Collection<Period> relevantPeriods = periodService.getPeriodsBetweenDates( startDate, endDate );
 
-        for ( Source source : sources )
+        for ( OrganisationUnit source : sources )
         {
             Collection<ValidationRule> relevantRules = getRelevantValidationRules( source.getDataElementsInDataSets() );
             relevantRules.retainAll( group.getMembers() );
@@ -240,7 +240,7 @@ public class DefaultValidationRuleService
         return validationViolations;
     }
 
-    public Collection<ValidationResult> validate( Date startDate, Date endDate, Source source )
+    public Collection<ValidationResult> validate( Date startDate, Date endDate, OrganisationUnit source )
     {
         Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();
 
@@ -256,7 +256,7 @@ public class DefaultValidationRuleService
         return validationViolations;
     }
 
-    public Collection<ValidationResult> validate( DataSet dataSet, Period period, Source source )
+    public Collection<ValidationResult> validate( DataSet dataSet, Period period, OrganisationUnit source )
     {
         return validateInternal( period, source, getRelevantValidationRules( dataSet.getDataElements() ), false, 0 );
     }
@@ -286,7 +286,7 @@ public class DefaultValidationRuleService
      * @param validationRules the rules to validate.
      * @returns a collection of rules that did not pass validation.
      */
-    private Collection<ValidationResult> validateInternal( final Period period, final Source source,
+    private Collection<ValidationResult> validateInternal( final Period period, final OrganisationUnit source,
         final Collection<ValidationRule> validationRules, boolean aggregate, int currentSize )
     {
         final Collection<ValidationResult> validationViolations = new HashSet<ValidationResult>();

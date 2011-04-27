@@ -39,7 +39,6 @@ import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.ImportableObject;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -67,8 +66,6 @@ import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.olap.OlapURL;
-import org.hisp.dhis.olap.OlapURLService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -186,13 +183,6 @@ public class DefaultImportObjectService<T>
         this.chartService = chartService;
     }
 
-    private OlapURLService olapURLService;
-
-    public void setOlapURLService( OlapURLService olapURLService )
-    {
-        this.olapURLService = olapURLService;
-    }
-
     private DataValueService dataValueService;
 
     public void setDataValueService( DataValueService dataValueService )
@@ -299,8 +289,7 @@ public class DefaultImportObjectService<T>
 
         if ( importObject != null )
         {
-            if ( importObject.getClassName().equals( DataElement.class.getName() )
-                || importObject.getClassName().equals( CalculatedDataElement.class.getName() ) )
+            if ( importObject.getClassName().equals( DataElement.class.getName() ) )
             {
                 DataElement element = (DataElement) importObject.getObject();
 
@@ -403,7 +392,7 @@ public class DefaultImportObjectService<T>
     {
         importObjectStore.deleteImportObjects( clazz );
 
-        if ( clazz.equals( DataElement.class ) || clazz.equals( CalculatedDataElement.class ) )
+        if ( clazz.equals( DataElement.class ) )
         {
             importObjectStore.deleteImportObjects( DataElementCategoryOptionCombo.class );
             importObjectStore.deleteImportObjects( DataElementCategoryCombo.class );
@@ -503,7 +492,7 @@ public class DefaultImportObjectService<T>
         // object.
         // ---------------------------------------------------------------------
 
-        if ( object.getClass().equals( DataElement.class ) || object.getClass().equals( CalculatedDataElement.class ) )
+        if ( object.getClass().equals( DataElement.class ) )
         {
             DataElement element = (DataElement) object;
 
@@ -605,12 +594,6 @@ public class DefaultImportObjectService<T>
 
             chart.setName( chartService.getChart( existingObjectId ).getName() );
         }
-        else if ( object.getClass().equals( OlapURL.class ) )
-        {
-            OlapURL url = (OlapURL) object;
-
-            url.setName( olapURLService.getOlapURL( existingObjectId ).getName() );
-        }
         else if ( object.getClass().equals( DataValue.class ) )
         {
             DataValue dataValue = (DataValue) object;
@@ -643,7 +626,6 @@ public class DefaultImportObjectService<T>
         importObjectManager.importCategoryCategoryOptionAssociations();
         importObjectManager.importCategoryComboCategoryAssociations();
         importObjectManager.importDataElements();
-        importObjectManager.importCalculatedDataElements();
         importObjectManager.importDataElementGroups();
         importObjectManager.importDataElementGroupMembers();
         importObjectManager.importDataElementGroupSets();
@@ -672,7 +654,6 @@ public class DefaultImportObjectService<T>
         importObjectManager.importReports();
         importObjectManager.importReportTables();
         importObjectManager.importCharts();
-        importObjectManager.importOlapURLs();
         importObjectManager.importCompleteDataSetRegistrations();
         importObjectManager.importDataValues();
 

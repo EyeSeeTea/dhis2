@@ -3,10 +3,13 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <joined-subclass name="org.hisp.dhis.organisationunit.OrganisationUnit" extends="org.hisp.dhis.source.Source"
-    table="organisationunit">
+  <class name="org.hisp.dhis.organisationunit.OrganisationUnit" table="organisationunit">
 
-    <key column="organisationunitid" />
+    <cache usage="read-write" />
+
+    <id name="id" column="organisationunitid">
+      <generator class="native" />
+    </id>
 
     <property name="uuid">
       <column name="uuid" length="40" />
@@ -17,6 +20,7 @@
     </property>
 
     <set name="children" inverse="true" cascade="save-update,delete-orphan">
+      <cache usage="read-write" />
       <key column="parentid" />
       <one-to-many class="org.hisp.dhis.organisationunit.OrganisationUnit" />
     </set>
@@ -50,6 +54,12 @@
 
     <property name="lastUpdated" />
 
+    <set name="dataSets" table="datasetsource" inverse="true">
+      <cache usage="read-write" />
+      <key column="sourceid" />
+      <many-to-many class="org.hisp.dhis.dataset.DataSet" column="datasetid" />
+    </set>
+
     <set name="groups" table="orgunitgroupmembers" inverse="true">
       <key column="organisationunitid" />
       <many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnitGroup" column="orgunitgroupid" />
@@ -74,5 +84,5 @@
 
     <property name="hasPatients" />
 
-  </joined-subclass>
+  </class>
 </hibernate-mapping>

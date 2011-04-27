@@ -37,7 +37,6 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.source.Source;
 
 /**
  * This class is used for defining the standardized DataSets. A DataSet consists
@@ -68,7 +67,7 @@ public class DataSet
     /**
      * All Sources that register data with this DataSet.
      */
-    private Set<Source> sources = new HashSet<Source>();
+    private Set<OrganisationUnit> sources = new HashSet<OrganisationUnit>();
 
     /**
      * Property indicating whether the DataSet is locked for data entry.
@@ -236,12 +235,12 @@ public class DataSet
         this.compulsoryDataElementOperands = compulsoryDataElementOperands;
     }
 
-    public Set<Source> getSources()
+    public Set<OrganisationUnit> getSources()
     {
         return sources;
     }
 
-    public void setSources( Set<Source> sources )
+    public void setSources( Set<OrganisationUnit> sources )
     {
         this.sources = sources;
     }
@@ -284,21 +283,6 @@ public class DataSet
     public Boolean getMobile() 
     {
         return mobile;
-    }
-
-    /**
-     * Use getSources() for persistence operations.
-     */
-    public Set<OrganisationUnit> getOrganisationUnits()
-    {
-        Set<OrganisationUnit> result = new HashSet<OrganisationUnit>();
-
-        for ( Source s : this.sources )
-        {
-            result.add( (OrganisationUnit) s );
-        }
-
-        return result;
     }
 
     public Integer getVersion()

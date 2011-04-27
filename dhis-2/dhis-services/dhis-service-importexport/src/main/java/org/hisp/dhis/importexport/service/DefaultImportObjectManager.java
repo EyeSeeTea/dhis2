@@ -41,7 +41,6 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -68,7 +67,6 @@ import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.importexport.ImportType;
 import org.hisp.dhis.importexport.Importer;
-import org.hisp.dhis.importexport.importer.CalculatedDataElementImporter;
 import org.hisp.dhis.importexport.importer.ChartImporter;
 import org.hisp.dhis.importexport.importer.CompleteDataSetRegistrationImporter;
 import org.hisp.dhis.importexport.importer.DataDictionaryImporter;
@@ -85,7 +83,6 @@ import org.hisp.dhis.importexport.importer.IndicatorGroupImporter;
 import org.hisp.dhis.importexport.importer.IndicatorGroupSetImporter;
 import org.hisp.dhis.importexport.importer.IndicatorImporter;
 import org.hisp.dhis.importexport.importer.IndicatorTypeImporter;
-import org.hisp.dhis.importexport.importer.OlapUrlImporter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitGroupImporter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitImporter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitLevelImporter;
@@ -132,9 +129,6 @@ import org.hisp.dhis.jdbc.batchhandler.OrganisationUnitGroupBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.OrganisationUnitGroupMemberBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.PeriodBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.ReportTableBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.SourceBatchHandler;
-import org.hisp.dhis.olap.OlapURL;
-import org.hisp.dhis.olap.OlapURLService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -147,7 +141,6 @@ import org.hisp.dhis.report.Report;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
-import org.hisp.dhis.source.Source;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.transaction.annotation.Transactional;
@@ -242,13 +235,6 @@ public class DefaultImportObjectManager
     public void setValidationRuleService( ValidationRuleService validationRuleService )
     {
         this.validationRuleService = validationRuleService;
-    }
-
-    private OlapURLService olapURLService;
-
-    public void setOlapURLService( OlapURLService olapURLService )
-    {
-        this.olapURLService = olapURLService;
     }
 
     private ExpressionService expressionService;
@@ -475,32 +461,6 @@ public class DefaultImportObjectManager
         importObjectStore.deleteImportObjects( DataElement.class );
 
         log.info( "Imported DataElements" );
-    }
-
-    @Transactional
-    public void importCalculatedDataElements()
-    {
-        Map<Object, Integer> categoryComboMapping = objectMappingGenerator.getCategoryComboMapping( false );
-        Map<Object, Integer> dataElementMapping = objectMappingGenerator.getDataElementMapping( false );
-        Map<Object, Integer> categoryOptionComboMapping = objectMappingGenerator.getCategoryOptionComboMapping( false );
-
-        Collection<ImportObject> importObjects = importObjectStore.getImportObjects( CalculatedDataElement.class );
-
-        Importer<CalculatedDataElement> importer = new CalculatedDataElementImporter( dataElementService );
-
-        for ( ImportObject importObject : importObjects )
-        {
-            CalculatedDataElement object = (CalculatedDataElement) importObject.getObject();
-            object.getCategoryCombo().setId( categoryComboMapping.get( object.getCategoryCombo().getId() ) );
-            object.getExpression().setExpression(
-                expressionService.convertExpression( object.getExpression().getExpression(), dataElementMapping,
-                    categoryOptionComboMapping ) );
-            importer.importObject( object, params );
-        }
-
-        importObjectStore.deleteImportObjects( CalculatedDataElement.class );
-
-        log.info( "Imported CalculatedDataElements" );
     }
 
     @Transactional
@@ -774,22 +734,18 @@ public class DefaultImportObjectManager
     @Transactional
     public void importOrganisationUnits()
     {
-        BatchHandler<Source> sourceBatchHandler = batchHandlerFactory.createBatchHandler( SourceBatchHandler.class )
-            .init();
         BatchHandler<OrganisationUnit> organisationUnitBatchHandler = batchHandlerFactory.createBatchHandler(
             OrganisationUnitBatchHandler.class ).init();
 
         Collection<ImportObject> importObjects = importObjectStore.getImportObjects( OrganisationUnit.class );
 
-        Importer<OrganisationUnit> importer = new OrganisationUnitImporter( organisationUnitBatchHandler,
-            sourceBatchHandler, organisationUnitService );
+        Importer<OrganisationUnit> importer = new OrganisationUnitImporter( organisationUnitBatchHandler, organisationUnitService );
 
         for ( ImportObject importObject : importObjects )
         {
             importer.importObject( (OrganisationUnit) importObject.getObject(), params );
         }
 
-        sourceBatchHandler.flush();
         organisationUnitBatchHandler.flush();
 
         importObjectStore.deleteImportObjects( OrganisationUnit.class );
@@ -1020,24 +976,7 @@ public class DefaultImportObjectManager
 
         log.info( "Imported Reports" );
     }
-
-    @Transactional
-    public void importOlapURLs()
-    {
-        Collection<ImportObject> importObjects = importObjectStore.getImportObjects( OlapURL.class );
-
-        Importer<OlapURL> importer = new OlapUrlImporter( olapURLService );
-
-        for ( ImportObject importObject : importObjects )
-        {
-            importer.importObject( (OlapURL) importObject.getObject(), params );
-        }
-
-        importObjectStore.deleteImportObjects( OlapURL.class );
-
-        log.info( "Imported OlapURLs" );
-    }
-
+    
     @Transactional
     public void importCompleteDataSetRegistrations()
     {
@@ -1073,6 +1012,9 @@ public class DefaultImportObjectManager
     @Transactional
     public void importDataValues()
     {
+        Integer importedObjects = 0;
+        Integer failedObjects = 0;
+
         BatchHandler<DataValue> batchHandler = batchHandlerFactory.createBatchHandler( DataValueBatchHandler.class )
             .init();
 
@@ -1088,20 +1030,28 @@ public class DefaultImportObjectManager
         for ( ImportDataValue importValue : importValues )
         {
             DataValue value = importValue.getDataValue();
+            try
+            {
+                value.getDataElement().setId( dataElementMapping.get( value.getDataElement().getId() ) );
+                value.getPeriod().setId( periodMapping.get( value.getPeriod().getId() ) );
+                value.getSource().setId( sourceMapping.get( value.getSource().getId() ) );
+                value.getOptionCombo().setId( categoryOptionComboMapping.get( value.getOptionCombo().getId() ) );
+                importer.importObject( value, params );
+                importedObjects++;
 
-            value.getDataElement().setId( dataElementMapping.get( value.getDataElement().getId() ) );
-            value.getPeriod().setId( periodMapping.get( value.getPeriod().getId() ) );
-            value.getSource().setId( sourceMapping.get( value.getSource().getId() ) );
-            value.getOptionCombo().setId( categoryOptionComboMapping.get( value.getOptionCombo().getId() ) );
-
-            importer.importObject( value, params );
+            } catch ( Exception e )
+            {
+                importedObjects--;
+                failedObjects++;
+                log.error( "Object import failed" + e );
+            }
         }
 
         batchHandler.flush();
 
         importDataValueService.deleteImportDataValues();
 
-        log.info( "Imported DataValues" );
+        log.info( importReport( importedObjects,failedObjects ) );
     }
 
     // -------------------------------------------------------------------------
@@ -1133,5 +1083,23 @@ public class DefaultImportObjectManager
         batchHandler.flush();
 
         importObjectStore.deleteImportObjects( type );
+    }
+
+    private String importReport(Integer importedObjects, Integer failedObjects)
+    {
+        Integer totalObjects = importedObjects + failedObjects;
+        String importReportString = "";
+        if (failedObjects > 0 )
+        {
+            importReportString = totalObjects.toString() + " values handled.\n" + importedObjects.toString() + " new values successfully imported.\n"
+                + failedObjects.toString() + " were not imported due to errors.";
+             return importReportString;
+        }
+        else
+        {
+            importReportString = importedObjects.toString() + " values were imported.";
+                return importReportString;
+        }
+
     }
 }

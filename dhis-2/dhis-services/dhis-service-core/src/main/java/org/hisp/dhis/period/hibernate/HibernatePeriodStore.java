@@ -38,10 +38,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.datavalue.DataValue;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.source.Source;
 
 /**
  * Implements the PeriodStore interface.
@@ -187,7 +187,7 @@ public class HibernatePeriodStore
 
     @SuppressWarnings( "unchecked" )
     public Collection<Period> getPeriods( Period period, Collection<DataElement> dataElements,
-        Collection<? extends Source> sources )
+        Collection<OrganisationUnit> sources )
     {
         Set<Period> periods = new HashSet<Period>();
 
@@ -211,6 +211,19 @@ public class HibernatePeriodStore
         }
 
         return periods;
+    }
+
+    public Period getPeriodFromDates( Date startDate, Date endDate, PeriodType periodType )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( Period.class );
+        criteria.add( Restrictions.eq( "startDate", startDate ) );
+        criteria.add( Restrictions.eq( "endDate", endDate ) );
+        criteria.add( Restrictions.eq( "periodType", periodType ) );
+        criteria.setCacheable( true );
+
+        return (Period) criteria.uniqueResult();
     }
 
     public Period reloadPeriod( Period period )
@@ -272,7 +285,7 @@ public class HibernatePeriodStore
 
         Criteria criteria = session.createCriteria( periodType );
 
-        return (PeriodType) criteria.uniqueResult();
+        return (PeriodType) criteria.setCacheable( true ).uniqueResult();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -280,7 +293,7 @@ public class HibernatePeriodStore
     {
         Session session = sessionFactory.getCurrentSession();
 
-        return session.createCriteria( PeriodType.class ).list();
+        return session.createCriteria( PeriodType.class ).setCacheable( true ).list();
     }
 
     // -------------------------------------------------------------------------
@@ -305,17 +318,5 @@ public class HibernatePeriodStore
         }
 
         return reloadedPeriodType;
-    }
-
-    public Period getPeriodFromDates( Date startDate, Date endDate, PeriodType periodType )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Period.class );
-        criteria.add( Restrictions.eq( "startDate", startDate ) );
-        criteria.add( Restrictions.eq( "endDate", endDate ) );
-        criteria.add( Restrictions.eq( "periodType", periodType ) );
-
-        return (Period) criteria.uniqueResult();
     }
 }

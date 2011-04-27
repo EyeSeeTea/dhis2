@@ -47,8 +47,6 @@ public interface ImportObjectManager
     
     void importDataElements();
     
-    void importCalculatedDataElements();
-    
     void importDataElementGroups();
     
     void importDataElementGroupMembers();
@@ -104,8 +102,6 @@ public interface ImportObjectManager
     void importReportTables();
     
     void importCharts();
-    
-    void importOlapURLs();
     
     void importCompleteDataSetRegistrations();
     

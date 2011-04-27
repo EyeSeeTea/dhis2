@@ -33,7 +33,10 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.hisp.dhis.expression.Expression.SEPARATOR;
-import static org.hisp.dhis.expression.Operator.*;
+import static org.hisp.dhis.expression.Operator.equal_to;
+import static org.hisp.dhis.expression.Operator.greater_than;
+import static org.hisp.dhis.expression.Operator.less_than;
+import static org.hisp.dhis.expression.Operator.less_than_or_equal_to;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,13 +60,12 @@ import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedDataValueBatchHandler;
-import org.hisp.dhis.mock.MockSource;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.source.Source;
-import org.hisp.dhis.source.SourceStore;
 import org.hisp.dhis.system.util.MathUtils;
 import org.junit.Test;
 
@@ -114,11 +116,11 @@ public class ValidationRuleServiceTest
 
     private Period periodB;
 
-    private Source sourceA;
+    private OrganisationUnit sourceA;
 
-    private Source sourceB;
+    private OrganisationUnit sourceB;
 
-    private Set<Source> sourcesA = new HashSet<Source>();
+    private Set<OrganisationUnit> sourcesA = new HashSet<OrganisationUnit>();
 
     private ValidationRule validationRuleA;
 
@@ -152,10 +154,10 @@ public class ValidationRuleServiceTest
 
         dataSetService = (DataSetService) getBean( DataSetService.ID );
 
-        sourceStore = (SourceStore) getBean( SourceStore.ID );
-
         dataValueService = (DataValueService) getBean( DataValueService.ID );
 
+        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
+        
         periodService = (PeriodService) getBean( PeriodService.ID );
 
         periodType = new MonthlyPeriodType();
@@ -198,14 +200,14 @@ public class ValidationRuleServiceTest
 
         dataSet = createDataSet( 'A', periodType );
 
-        sourceA = new MockSource( "SourceA" );
-        sourceB = new MockSource( "SourceB" );
+        sourceA = createOrganisationUnit( 'A' );
+        sourceB = createOrganisationUnit( 'B' );
 
         sourceA.getDataSets().add( dataSet );
         sourceB.getDataSets().add( dataSet );
 
-        sourceStore.addSource( sourceA );
-        sourceStore.addSource( sourceB );
+        organisationUnitService.addOrganisationUnit( sourceA );
+        organisationUnitService.addOrganisationUnit( sourceB );
 
         sourcesA.add( sourceA );
         sourcesA.add( sourceB );
@@ -260,7 +262,7 @@ public class ValidationRuleServiceTest
         periods.add( periodA );
         periods.add( periodB );
         
-        List<Source> sources = new ArrayList<Source>();
+        List<OrganisationUnit> sources = new ArrayList<OrganisationUnit>();
         sources.add( sourceA );
         sources.add( sourceB );
         

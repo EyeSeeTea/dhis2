@@ -34,7 +34,6 @@ package org.hisp.dhis.common;
 public enum Objects
 {
     DATAELEMENT,
-    CALCULATEDDATAELEMENT,
     EXTENDEDDATAELEMENT,
     DATAELEMENTGROUP,
     DATAELEMENTGROUPSET,
@@ -57,6 +56,5 @@ public enum Objects
     USER,
     REPORTTABLE,
     REPORT,
-    CHART,
-    OLAPURL
+    CHART
 }

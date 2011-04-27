@@ -27,12 +27,13 @@ package org.hisp.dhis.expression;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.expression.Expression.*;
+import static org.hisp.dhis.expression.Expression.EXP_CLOSE;
+import static org.hisp.dhis.expression.Expression.EXP_OPEN;
+import static org.hisp.dhis.expression.Expression.SEPARATOR;
 import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -42,7 +43,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -50,8 +50,8 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.source.Source;
 import org.hisp.dhis.system.util.MathUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -145,7 +145,7 @@ public class DefaultExpressionService
     // Business logic
     // -------------------------------------------------------------------------
 
-    public Double getExpressionValue( Expression expression, Period period, Source source, boolean nullIfNoValues, boolean aggregate )
+    public Double getExpressionValue( Expression expression, Period period, OrganisationUnit source, boolean nullIfNoValues, boolean aggregate )
     {
         final String expressionString = generateExpression( expression.getExpression(), period, source, nullIfNoValues, aggregate );
 
@@ -333,51 +333,6 @@ public class DefaultExpressionService
         return buffer != null ? buffer.toString() : null;
     }
 
-    public String replaceCDEsWithTheirExpression( String expression )
-    {
-        StringBuffer buffer = null;
-
-        if ( expression != null )
-        {
-            buffer = new StringBuffer();
-
-            final Set<DataElement> caclulatedDataElementsInExpression = getDataElementsInExpression( expression );
-
-            final Iterator<DataElement> iterator = caclulatedDataElementsInExpression.iterator();
-
-            while ( iterator.hasNext() )
-            {
-                if ( !(iterator.next() instanceof CalculatedDataElement) )
-                {
-                    iterator.remove();
-                }
-            }
-
-            final Matcher matcher = FORMULA_PATTERN.matcher( expression );
-
-            while ( matcher.find() )
-            {
-                String replaceString = matcher.group();
-
-                for ( DataElement dataElement : caclulatedDataElementsInExpression )
-                {
-                    if ( replaceString.startsWith( EXP_OPEN + dataElement.getId() + SEPARATOR ) )
-                    {
-                        replaceString = ((CalculatedDataElement) dataElement).getExpression().getExpression();
-
-                        break;
-                    }
-                }
-
-                matcher.appendReplacement( buffer, replaceString );
-            }
-
-            matcher.appendTail( buffer );
-        }
-
-        return buffer != null ? buffer.toString() : null;
-    }
-
     public String explodeExpression( String expression )
     {
         StringBuffer buffer = null;
@@ -417,7 +372,7 @@ public class DefaultExpressionService
         return buffer != null ? buffer.toString() : null;
     }
     
-    public String generateExpression( String expression, Period period, Source source, boolean nullIfNoValues, boolean aggregated )
+    public String generateExpression( String expression, Period period, OrganisationUnit source, boolean nullIfNoValues, boolean aggregated )
     {
         StringBuffer buffer = null;
         

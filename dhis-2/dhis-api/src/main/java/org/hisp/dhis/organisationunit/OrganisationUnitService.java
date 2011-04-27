@@ -29,10 +29,10 @@ package org.hisp.dhis.organisationunit;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
-import org.hisp.dhis.source.Source;
 
 /**
  * Defines methods for working with OrganisationUnits.
@@ -218,14 +218,6 @@ public interface OrganisationUnitService
      */
     Collection<OrganisationUnit> getOrganisationUnitsWithoutGroups();
     
-    
-    /**
-     * Convert the OrganisationUnit collection to the set of Source 
-     * 
-     * @return a Set with Source entries.
-     */
-    Set<Source> convert( Collection<OrganisationUnit> organisationUnits );
-    
     /**
      * Get the units which name are like the given name and are members of the
      * given groups. If name or groups are null or empty they are ignored in the 
@@ -248,15 +240,6 @@ public interface OrganisationUnitService
      * @return a collection of organisation units.
      */
     Collection<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String name, Collection<OrganisationUnitGroup> groups, OrganisationUnit parent, boolean limit );
-    
-    /**
-     * Get the units in tree by the collection of given roots
-     * 
-     * @param rootUnits the collection of given roots.
-     * @param unitsInTheTree the units in tree.
-     */
-    void getUnitsInTheTree( Collection<OrganisationUnit> rootUnits, Set<OrganisationUnit> unitsInTheTree );
-   
     
     // -------------------------------------------------------------------------
     // OrganisationUnitHierarchy
@@ -304,6 +287,8 @@ public interface OrganisationUnitService
     OrganisationUnitLevel getOrganisationUnitLevelByName( String name );
     
     List<OrganisationUnitLevel> getFilledOrganisationUnitLevels();
+    
+    Map<Integer, OrganisationUnitLevel> getOrganisationUnitLevelMap();
     
     int getNumberOfOrganisationUnits();
     

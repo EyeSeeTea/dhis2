@@ -40,7 +40,6 @@
 		</action>
 		
 		<action name="select" class="org.hisp.dhis.de.action.SelectAction">
-			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="customform" type="chain">customform</result>
 			<result name="sectionform" type="chain">sectionform</result>
 			<result name="defaultform" type="chain">defaultform</result>
@@ -48,17 +47,14 @@
 		</action>
 
 		<action name="customform" class="org.hisp.dhis.de.action.FormAction">
-			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="success" type="velocity">/dhis-web-dataentry/customForm.vm</result>
 		</action>
 
 		<action name="sectionform" class="org.hisp.dhis.de.action.SectionFormAction">
-			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="success" type="velocity">/dhis-web-dataentry/sectionForm.vm</result>
 		</action>
 
 		<action name="defaultform"	class="org.hisp.dhis.de.action.FormAction">
-			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="success" type="velocity">/dhis-web-dataentry/defaultForm.vm</result>
 		</action>
 
@@ -97,28 +93,27 @@
 		</action>
 
 		<action name="registerCompleteDataSet" class="org.hisp.dhis.de.action.RegisterCompleteDataSetAction">
-			<result name="success" type="velocity">/dhis-web-dataentry/responseVoid.vm</result>
-			<result name="input" type="velocity-xml">/dhis-web-dataentry/responseInput.vm</result>
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="input" type="velocity-json">../dhis-web-commons/ajax/jsonResponseInput.vm</result>
 		</action>
 
 		<action name="undoCompleteDataSet" class="org.hisp.dhis.de.action.UndoCompleteDataSetAction">
-			<result name="success" type="velocity">/dhis-web-dataentry/responseVoid.vm</result>
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+		</action>
+
+		<action name="getValidationViolations" class="org.hisp.dhis.de.action.ValidationAction">
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="input" type="velocity-json">../dhis-web-commons/ajax/jsonResponseInput.vm</result>
 		</action>
 
 		<action name="validate" class="org.hisp.dhis.de.action.ValidationAction">
 			<result name="success" type="velocity">/popup.vm</result>
-			<result name="none" type="velocity">/popup.vm</result>
+			<result name="input" type="velocity">/popup.vm</result>
 			<param name="page">/dhis-web-dataentry/validationResult.vm</param>
 		</action>
 
-		<action name="getValidationViolations" class="org.hisp.dhis.de.action.ValidationAction">
-			<result name="success" type="velocity-xml">/dhis-web-dataentry/responseSuccess.vm</result>
-			<result name="none" type="velocity-xml">/dhis-web-dataentry/responseNone.vm
-			</result>
-		</action>
-
 		<action name="markValueForFollowup" class="org.hisp.dhis.de.action.MarkForFollowupAction">
-			<result name="success" type="velocity-xml">/dhis-web-dataentry/responseSuccess.vm</result>
+			<result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 		</action>
 
 		<action name="getHistoryChart" class="org.hisp.dhis.de.action.GetHistoryChartAction">

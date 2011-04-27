@@ -107,8 +107,6 @@ import org.hisp.dhis.jdbc.batchhandler.OrganisationUnitGroupBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.OrganisationUnitGroupMemberBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.PeriodBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.ReportTableBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.SourceBatchHandler;
-import org.hisp.dhis.olap.OlapURLService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -119,7 +117,6 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
-import org.hisp.dhis.source.Source;
 import org.hisp.dhis.validation.ValidationRuleService;
 
 /**
@@ -254,13 +251,6 @@ public class DXFConverter
     public void setChartService( ChartService chartService )
     {
         this.chartService = chartService;
-    }
-
-    private OlapURLService olapURLService;
-
-    public void setOlapURLService( OlapURLService olapURLService )
-    {
-        this.olapURLService = olapURLService;
     }
 
     private AggregatedDataValueService aggregatedDataValueService;
@@ -453,19 +443,6 @@ public class DXFConverter
                 batchHandler.flush();
 
                 log.info( "Imported DataElements" );
-            }
-            else if ( reader.isStartElement( CalculatedDataElementConverter.COLLECTION_NAME ) )
-            {
-                state.setMessage( "importing_calculated_data_elements" );
-
-                XMLConverter converter = new CalculatedDataElementConverter( importObjectService, dataElementService,
-                    expressionService, objectMappingGenerator.getDataElementMapping( params.skipMapping() ),
-                    objectMappingGenerator.getCategoryComboMapping( params.skipMapping() ), objectMappingGenerator
-                        .getCategoryOptionComboMapping( params.skipMapping() ) );
-
-                converterInvoker.invokeRead( converter, reader, params );
-
-                log.info( "Imported CalculatedDataElements" );
             }
             else if ( reader.isStartElement( DataElementGroupConverter.COLLECTION_NAME ) )
             {
@@ -719,18 +696,14 @@ public class DXFConverter
             else if ( reader.isStartElement( OrganisationUnitConverter.COLLECTION_NAME ) )
             {
                 state.setMessage( "importing_organisation_units" );
-
-                BatchHandler<Source> sourceBatchHandler = batchHandlerFactory.createBatchHandler(
-                    SourceBatchHandler.class ).init();
+                
                 BatchHandler<OrganisationUnit> batchHandler = batchHandlerFactory.createBatchHandler(
                     OrganisationUnitBatchHandler.class ).init();
 
-                XMLConverter converter = new OrganisationUnitConverter( batchHandler, sourceBatchHandler,
-                    importObjectService, organisationUnitService, importAnalyser );
+                XMLConverter converter = new OrganisationUnitConverter( batchHandler, importObjectService, organisationUnitService, importAnalyser );
 
                 converterInvoker.invokeRead( converter, reader, params );
 
-                sourceBatchHandler.flush();
                 batchHandler.flush();
 
                 log.info( "Imported OrganisationUnits" );
@@ -916,16 +889,6 @@ public class DXFConverter
                 converterInvoker.invokeRead( converter, reader, params );
 
                 log.info( "Imported Charts" );
-            }
-            else if ( reader.isStartElement( OlapUrlConverter.COLLECTION_NAME ) )
-            {
-                state.setMessage( "importing_olap_urls" );
-
-                XMLConverter converter = new OlapUrlConverter( importObjectService, olapURLService );
-
-                converterInvoker.invokeRead( converter, reader, params );
-
-                log.info( "Imported OlapURLs" );
             }
             else if ( reader.isStartElement( CompleteDataSetRegistrationConverter.COLLECTION_NAME )
                 && params.isDataValues() )

@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -42,9 +41,6 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.system.util.AuditLogLevel;
-import org.hisp.dhis.system.util.AuditLogUtil;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
@@ -60,8 +56,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class HibernateUserStore
     implements UserStore
 {
-    private Logger logger = Logger.getLogger( getClass() );
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -73,13 +67,6 @@ public class HibernateUserStore
         this.sessionFactory = sessionFactory;
     }
 
-    private CurrentUserService currentUserService;
-    
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-    
     private GenericIdentifiableObjectStore<UserAuthorityGroup> userRoleStore;
     
     public GenericIdentifiableObjectStore<UserAuthorityGroup> getUserRoleStore()
@@ -100,12 +87,6 @@ public class HibernateUserStore
     {
         Session session = sessionFactory.getCurrentSession();
 
-        logger.log( AuditLogLevel.AUDIT_TRAIL, 
-            AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-            AuditLogUtil.ACTION_ADD , 
-            User.class.getSimpleName(), 
-            user.getName()) );
-        
         return (Integer) session.save( user );
     }
 
@@ -114,12 +95,6 @@ public class HibernateUserStore
         Session session = sessionFactory.getCurrentSession();
 
         session.update( user );
-        
-        logger.log( AuditLogLevel.AUDIT_TRAIL, 
-            AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-                AuditLogUtil.ACTION_EDIT , 
-                User.class.getSimpleName(), 
-                user.getName()) );
     }
 
     public User getUser( int id )
@@ -135,23 +110,6 @@ public class HibernateUserStore
         Session session = sessionFactory.getCurrentSession();
 
         return session.createQuery( "from User" ).list();
-    }
-
-    public Collection<User> getUsersByOrganisationUnit( OrganisationUnit organisationUnit )
-    {   
-        Collection<User> users = getAllUsers();
-        
-        Iterator<User> iterator = users.iterator();
-        
-        while( iterator.hasNext() )
-        {
-            if( ! iterator.next().getOrganisationUnits().contains( organisationUnit ) )
-            {
-        	iterator.remove();
-            }
-        }
-        
-        return users;
     }
 
     public Collection<User> getUsersWithoutOrganisationUnit()
@@ -182,19 +140,13 @@ public class HibernateUserStore
         return query.list();
     }
     
-
     public void deleteUser( User user )
     {
         Session session = sessionFactory.getCurrentSession();
 
         session.delete( user );
-        
-        logger.log( AuditLogLevel.AUDIT_TRAIL, 
-            AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-            AuditLogUtil.ACTION_DELETE , 
-            User.class.getSimpleName(), 
-            user.getName()) );
     }
+    
     // -------------------------------------------------------------------------
     // UserCredentials
     // -------------------------------------------------------------------------
@@ -434,23 +386,23 @@ public class HibernateUserStore
 
     public Collection<UserCredentials> getUsersByOrganisationUnitBetween( OrganisationUnit orgUnit, int first, int max )
     {
-        return getBlockUser( toUserCredentials( getUsersByOrganisationUnit( orgUnit ) ), first, max );
+        return getBlockUser( toUserCredentials( orgUnit.getUsers() ), first, max );
     }
 
     public Collection<UserCredentials> getUsersByOrganisationUnitBetweenByName( OrganisationUnit orgUnit, String name,
         int first, int max )
     {
-        return getBlockUser( findByName( toUserCredentials( getUsersByOrganisationUnit( orgUnit ) ), name ), first, max );
+        return getBlockUser( findByName( toUserCredentials( orgUnit.getUsers() ), name ), first, max );
     }
 
     public int getUsersByOrganisationUnitCount( OrganisationUnit orgUnit )
     {
-        return getUsersByOrganisationUnit( orgUnit ).size();
+        return orgUnit.getUsers().size();
     }
 
     public int getUsersByOrganisationUnitCountByName( OrganisationUnit orgUnit, String name )
     {
-        return findByName( toUserCredentials( getUsersByOrganisationUnit( orgUnit ) ), name ).size();
+        return findByName( toUserCredentials( orgUnit.getUsers() ), name ).size();
     }
 
     public Collection<UserCredentials> getUsersWithoutOrganisationUnitBetween( int first, int max )
@@ -476,6 +428,8 @@ public class HibernateUserStore
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+    
+    // TODO All this user / credentials search stuff is horrible and must be improved
     
     private Collection<UserCredentials> findByName( Collection<UserCredentials> users, String key )
     {
@@ -511,12 +465,13 @@ public class HibernateUserStore
     
     private List<UserCredentials> toUserCredentials( Collection<User> users )
     {
-        List<UserCredentials> returnUserCredentials = new ArrayList<UserCredentials>();
+        List<UserCredentials> credentials = new ArrayList<UserCredentials>();
 
         for ( User user : users )
         {
-            returnUserCredentials.add( getUserCredentials( user ) );
+            credentials.add( getUserCredentials( user ) );
         }
-        return returnUserCredentials;
+        
+        return credentials;
     }
 }

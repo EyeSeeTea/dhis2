@@ -41,7 +41,6 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
@@ -73,7 +72,6 @@ import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.message.MessageService;
-import org.hisp.dhis.olap.OlapURL;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -88,8 +86,6 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.resourcetable.ResourceTableService;
-import org.hisp.dhis.source.Source;
-import org.hisp.dhis.source.SourceStore;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
@@ -129,8 +125,6 @@ public abstract class DhisConvenienceTest
     protected SectionService sectionService;
 
     protected CompleteDataSetRegistrationService completeDataSetRegistrationService;
-
-    protected SourceStore sourceStore;
 
     protected OrganisationUnitService organisationUnitService;
 
@@ -402,32 +396,6 @@ public abstract class DhisConvenienceTest
     }
 
     /**
-     * @param uniqueCharacter A unique character to identify the object.
-     * @param expression The Expression.
-     */
-    public static CalculatedDataElement createCalculatedDataElement( char uniqueCharacter, String type,
-        String aggregationOperator, DataElementCategoryCombo categoryCombo, Expression expression )
-    {
-        CalculatedDataElement dataElement = new CalculatedDataElement();
-
-        dataElement.setUuid( BASE_UUID + uniqueCharacter );
-        dataElement.setName( "DataElement" + uniqueCharacter );
-        dataElement.setAlternativeName( "AlternativeName" + uniqueCharacter );
-        dataElement.setShortName( "ShortName" + uniqueCharacter );
-        dataElement.setCode( "Code" + uniqueCharacter );
-        dataElement.setDescription( "Description" + uniqueCharacter );
-        dataElement.setActive( true );
-        dataElement.setType( type );
-        dataElement.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
-        dataElement.setAggregationOperator( aggregationOperator );
-        dataElement.setCategoryCombo( categoryCombo );
-        dataElement.setSaved( false );
-        dataElement.setExpression( expression );
-
-        return dataElement;
-    }
-
-    /**
      * @param categoryComboUniqueIdentifier A unique character to identify the
      *        category combo.
      * @param categoryOptionUniqueIdentifiers Unique characters to identify the
@@ -689,7 +657,7 @@ public abstract class DhisConvenienceTest
      * @param value The value.
      * @param categoryOptionCombo The data element category option combo.
      */
-    public static DataValue createDataValue( DataElement dataElement, Period period, Source source, String value,
+    public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source, String value,
         DataElementCategoryOptionCombo categoryOptionCombo )
     {
         DataValue dataValue = new DataValue();
@@ -714,7 +682,7 @@ public abstract class DhisConvenienceTest
      * @param lastupdated The date.
      * @param categoryOptionCombo The data element category option combo.
      */
-    public static DataValue createDataValue( DataElement dataElement, Period period, Source source, String value,
+    public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source, String value,
         Date lastupdated, DataElementCategoryOptionCombo categoryOptionCombo )
     {
         DataValue dataValue = new DataValue();
@@ -854,16 +822,6 @@ public abstract class DhisConvenienceTest
         return chart;
     }
 
-    public static OlapURL createOlapURL( char uniqueCharacter )
-    {
-        OlapURL olapURL = new OlapURL();
-
-        olapURL.setName( "OlapURL" + uniqueCharacter );
-        olapURL.setUrl( "URL" + uniqueCharacter );
-
-        return olapURL;
-    }
-
     public static User createUser( char uniqueCharacter )
     {
         User user = new User();
@@ -972,7 +930,7 @@ public abstract class DhisConvenienceTest
      * 
      * @return a dataSetLock instance
      */
-    protected static DataSetLock createDataSetLock( DataSet dataSet, Period period, Set<Source> sources,
+    protected static DataSetLock createDataSetLock( DataSet dataSet, Period period, Set<OrganisationUnit> sources,
         String storedBy, Date timestamp )
     {
         DataSetLock dataSetLock = new DataSetLock();

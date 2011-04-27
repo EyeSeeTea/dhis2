@@ -41,7 +41,6 @@ import java.util.List;
 
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
@@ -55,7 +54,6 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.olap.OlapURL;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
@@ -432,7 +430,6 @@ public class GetPreviewOptionsAction
         throws Exception
     {
         newDataElements = importObjectService.getImportObjects( NEW, DataElement.class ).size();
-        newCalculatedDataElements = importObjectService.getImportObjects( NEW, CalculatedDataElement.class ).size();
         newDataElementGroups = importObjectService.getImportObjects( NEW, DataElementGroup.class ).size();
         newDataElementGroupSets = importObjectService.getImportObjects( NEW, DataElementGroupSet.class ).size();
         newIndicatorTypes = importObjectService.getImportObjects( NEW, IndicatorType.class ).size();
@@ -449,11 +446,9 @@ public class GetPreviewOptionsAction
         newReports = importObjectService.getImportObjects( NEW, Report.class ).size();
         newReportTables = importObjectService.getImportObjects( NEW, ReportTable.class ).size();
         newCharts = importObjectService.getImportObjects( NEW, Chart.class ).size();
-        newOlapUrls = importObjectService.getImportObjects( NEW, OlapURL.class ).size();
         newDataValues = importDataValueService.getNumberOfImportDataValues( NEW );
         
         updateDataElements = importObjectService.getImportObjects( UPDATE, DataElement.class ).size();
-        updateCalculatedDataElements = importObjectService.getImportObjects( UPDATE, CalculatedDataElement.class ).size();
         updateDataElementGroups = importObjectService.getImportObjects( UPDATE, DataElementGroup.class ).size();
         updateDataElementGroupSets = importObjectService.getImportObjects( UPDATE, DataElementGroupSet.class ).size();
         updateIndicatorTypes = importObjectService.getImportObjects( UPDATE, IndicatorType.class ).size();
@@ -470,7 +465,6 @@ public class GetPreviewOptionsAction
         updateReports = importObjectService.getImportObjects( UPDATE, Report.class ).size();
         updateReportTables = importObjectService.getImportObjects( UPDATE, ReportTable.class ).size();
         updateCharts = importObjectService.getImportObjects( UPDATE, Chart.class ).size();
-        updateOlapUrls = importObjectService.getImportObjects( UPDATE, OlapURL.class ).size();
         updateDataValues = importDataValueService.getNumberOfImportDataValues( UPDATE );
 
         // -------------------------------------------------------------------------

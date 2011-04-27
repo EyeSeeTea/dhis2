@@ -979,6 +979,8 @@ function datePickerInRange ( startdate, enddate, setCurrentStartDate, setCurrent
 			dates.not(this).datepicker("option", option, date);
 		}
 	});
+
+    $("#ui-datepicker-div").hide();
 }
 
 function getCurrentDate()
@@ -1391,6 +1393,12 @@ function deleteDivEffect()
 function changePageSize( baseLink )
 {
     var pageSize = jQuery("#sizeOfPage").val();
+    
+    if(pageSize < 1)
+    {
+    	pageSize = 1;
+    }
+    
 	var currentPage = jQuery("#jumpToPage").val();
 	jQuery.cookie("pageSize", pageSize, {path: "/"});
     window.location.href = baseLink +"pageSize=" + pageSize +"&currentPage=" +currentPage;

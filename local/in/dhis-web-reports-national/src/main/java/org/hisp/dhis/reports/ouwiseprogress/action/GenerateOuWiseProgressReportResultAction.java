@@ -2,6 +2,7 @@
 package org.hisp.dhis.reports.ouwiseprogress.action;
 
 import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -12,14 +13,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jxl.Workbook;
 import jxl.format.Alignment;
 import jxl.format.Border;
 import jxl.format.BorderLineStyle;
+import jxl.format.VerticalAlignment;
+import jxl.write.Formula;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.WritableCellFormat;
@@ -28,6 +35,10 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
 import org.amplecode.quick.StatementManager;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -37,6 +48,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.reports.ReportService;
 import org.hisp.dhis.reports.Report_in;
 import org.hisp.dhis.reports.Report_inDesign;
+import org.hisp.dhis.system.util.MathUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -46,6 +58,13 @@ public class GenerateOuWiseProgressReportResultAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private final String GENERATEAGGDATA = "generateaggdata";
+
+    private final String USEEXISTINGAGGDATA = "useexistingaggdata";
+
+    private final String USECAPTUREDDATA = "usecaptureddata";
+    
     private StatementManager statementManager;
 
     public void setStatementManager( StatementManager statementManager )
@@ -72,6 +91,20 @@ public class GenerateOuWiseProgressReportResultAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+
+    private DataSetService dataSetService;
+    
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
+    
+    private DataElementService dataElementService;
+    
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
     }
 
     private I18nFormat format;
@@ -127,11 +160,11 @@ public class GenerateOuWiseProgressReportResultAction
         this.ouIDTB = ouIDTB;
     }
 
-    private String aggRadio;
+    private String aggData;
     
-    public void setAggRadio( String aggRadio )
+    public void setAggData( String aggData )
     {
-        this.aggRadio = aggRadio;
+        this.aggData = aggData;
     }
 
     private OrganisationUnit selectedOrgUnit;
@@ -149,7 +182,7 @@ public class GenerateOuWiseProgressReportResultAction
     private Date eDate;
 
     private String raFolderName;
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -163,6 +196,10 @@ public class GenerateOuWiseProgressReportResultAction
         raFolderName = reportService.getRAFolderName();
         simpleDateFormat = new SimpleDateFormat( "MMM-yy" );
         SimpleDateFormat dayFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+
+        String colArray[] = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+                                "AA","AB","AC","AD","AE","AF","AG","AH","AI","AJ","AK","AL","AM","AN","AO","AP","AQ","AR","AS","AT","AU","AV","AW","AX","AY","AZ",
+                                "BA","BB","BC","BD","BE","BF","BG","BH","BI","BJ","BK","BL","BM","BN","BO","BP","BQ","BR","BS","BT","BU","BV","BW","BX","BY","BZ" };
 
         // Getting Report Details       
         String deCodesXMLFileName = "";
@@ -181,7 +218,11 @@ public class GenerateOuWiseProgressReportResultAction
         {
             orgUnitList = new ArrayList<OrganisationUnit>( selectedOrgUnit.getChildren() );
             Collections.sort( orgUnitList, new OrganisationUnitShortNameComparator() );
-            orgUnitList.add( selectedOrgUnit );
+            
+            if( orgUnitList == null || orgUnitList.size() == 0 )
+            {
+                orgUnitList.add( selectedOrgUnit );
+            }
         }
 
         System.out.println( selectedOrgUnit.getName()+ " : " + selReportObj.getName()+" : Report Generation Start Time is : " + new Date() );
@@ -192,7 +233,31 @@ public class GenerateOuWiseProgressReportResultAction
 
         WritableWorkbook outputReportWorkbook = Workbook.createWorkbook( new File( outputReportPath ), templateWorkbook );
         WritableFont arialBold = new WritableFont( WritableFont.ARIAL, 10, WritableFont.BOLD );
+        WritableCellFormat wCellformat = new WritableCellFormat();
+        wCellformat.setBorder( Border.ALL, BorderLineStyle.THIN );
+        wCellformat.setAlignment( Alignment.CENTRE );
+        wCellformat.setVerticalAlignment( VerticalAlignment.CENTRE );
+        wCellformat.setWrap( true );
+        
+        String dataSetIds = selReportObj.getDataSetIds();
+        Collection<Integer> dataElementIdList = new ArrayList<Integer>();
+        if( dataSetIds != null )
+        {
+            String[] partsOfDataSetIds = dataSetIds.split( "," );
+            for( int i = 0; i < partsOfDataSetIds.length; i++ )
+            {
+                DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( partsOfDataSetIds[i] ) );
+                dataElementIdList.addAll( getIdentifiers( DataElement.class, dataSet.getDataElements() ) );
+            }
+        }
+        else
+        {
+            dataElementIdList.addAll( getIdentifiers( DataElement.class, dataElementService.getAggregateableDataElements() ) );
+        }
+            
+        String dataElmentIdsByComma = getCommaDelimitedString( dataElementIdList );
 
+        
         // Period Info
         sDate = format.parseDate( startDate );
         eDate = format.parseDate( endDate );
@@ -201,8 +266,8 @@ public class GenerateOuWiseProgressReportResultAction
         
         Collection<Integer> periodIds = new ArrayList<Integer>( getIdentifiers(Period.class, periodList ) );
         
-        //String periodids = getCommaDelimitedString( getIdentifiers(Period.class, periodList ));
-
+        String periodIdsByComma = getCommaDelimitedString( periodIds );
+        
         // Getting DataValues
         List<Report_inDesign> reportDesignList = reportService.getReportDesign( deCodesXMLFileName );
         int orgUnitCount = 0;
@@ -211,6 +276,12 @@ public class GenerateOuWiseProgressReportResultAction
         while ( it.hasNext() )
         {
             OrganisationUnit currentOrgUnit = (OrganisationUnit) it.next();
+
+            Map<String, String> aggDeMap = new HashMap<String, String>();
+            if( aggData.equalsIgnoreCase( USEEXISTINGAGGDATA ) )
+            {
+                aggDeMap.putAll( reportService.getResultDataValueFromAggregateTable( currentOrgUnit.getId(), dataElmentIdsByComma, periodIdsByComma ) );
+            }
 
             int count1 = 0;
             Iterator<Report_inDesign> reportDesignIterator = reportDesignList.iterator();
@@ -222,7 +293,11 @@ public class GenerateOuWiseProgressReportResultAction
                 String deCodeString = report_inDesign.getExpression();
                 String tempStr = "";
 
-                if ( deCodeString.equalsIgnoreCase( "FACILITY" ) || deCodeString.equalsIgnoreCase( "PROGRESSIVE-ORGUNIT" ) )
+                if ( deCodeString.equalsIgnoreCase( "FACILITY" ) )                    
+                {
+                    tempStr = selectedOrgUnit.getName();
+                }
+                else if( deCodeString.equalsIgnoreCase( "PROGRESSIVE-ORGUNIT" ) )
                 {
                     tempStr = currentOrgUnit.getName();
                 }
@@ -258,13 +333,17 @@ public class GenerateOuWiseProgressReportResultAction
                 {
                     if ( sType.equalsIgnoreCase( "dataelement" ) )
                     {
-                        if( aggRadio.equalsIgnoreCase( "generateaggdata" ) )
+                        if( aggData.equalsIgnoreCase( USECAPTUREDDATA ) ) 
+                        {
+                            tempStr = reportService.getIndividualResultDataValue( deCodeString, sDate, eDate, currentOrgUnit, reportModelTB );
+                        }
+                        else if( aggData.equalsIgnoreCase( GENERATEAGGDATA ) )
                         {
                             tempStr = reportService.getResultDataValue( deCodeString, sDate, eDate, currentOrgUnit, reportModelTB );
                         }
-                        else
+                        else if( aggData.equalsIgnoreCase( USEEXISTINGAGGDATA ) )
                         {
-                            tempStr = reportService.getResultDataValueFromAggregateTable( deCodeString, periodIds, currentOrgUnit, reportModelTB );
+                            tempStr = getAggVal( deCodeString, aggDeMap );
                         }
                     }
                 }
@@ -286,21 +365,6 @@ public class GenerateOuWiseProgressReportResultAction
                         tempColNo += orgUnitCount;
                     }
 
-                    WritableCellFormat wCellformat;
-
-                    if( orgUnitCount == orgUnitList.size()-1 )
-                    {
-                        wCellformat = new WritableCellFormat( arialBold );
-                    }
-                    else
-                    {
-                        wCellformat = new WritableCellFormat();
-                    }
-                    
-                    wCellformat.setBorder( Border.ALL, BorderLineStyle.THIN );
-                    wCellformat.setAlignment( Alignment.CENTRE );
-                    wCellformat.setWrap( true );
-
                     try
                     {
                         sheet0.addCell( new Number( tempColNo, tempRowNo, Double.parseDouble( tempStr ), wCellformat ) );
@@ -314,7 +378,59 @@ public class GenerateOuWiseProgressReportResultAction
                 count1++;
             }// inner while loop end
             orgUnitCount++;
-        }// outer while loop end
+        }// outer while loop end        
+        
+        // ---------------------------------------------------------------------
+        // Writing Total Values
+        // ---------------------------------------------------------------------
+        WritableCellFormat totalCellformat = new WritableCellFormat( arialBold );
+        totalCellformat.setBorder( Border.ALL, BorderLineStyle.THIN );
+        totalCellformat.setAlignment( Alignment.CENTRE );
+        totalCellformat.setVerticalAlignment( VerticalAlignment.CENTRE );
+        totalCellformat.setWrap( true );
+        
+        Iterator<Report_inDesign> reportDesignIterator = reportDesignList.iterator();
+        while (  reportDesignIterator.hasNext() )
+        {
+            Report_inDesign reportDesign =  reportDesignIterator.next();
+            
+            String deCodeString = reportDesign.getExpression();
+
+            if( deCodeString.equalsIgnoreCase( "FACILITY" ) || 
+                deCodeString.equalsIgnoreCase( "FACILITYP" ) || 
+                deCodeString.equalsIgnoreCase( "FACILITYPP" ) ||                
+                deCodeString.equalsIgnoreCase( "MONTH-FROM" ) || 
+                deCodeString.equalsIgnoreCase( "MONTH-TO" ) ||
+                deCodeString.equalsIgnoreCase( "DATE-FROM" ) ||
+                deCodeString.equalsIgnoreCase( "DATE-TO" ) )
+            {
+                continue;
+            } 
+            
+            int tempRowNo = reportDesign.getRowno();
+            int tempColNo = reportDesign.getColno();
+            int sheetNo = reportDesign.getSheetno();
+            
+            String colStart = ""+ colArray[tempColNo];
+            String colEnd = ""+ colArray[tempColNo+orgUnitCount-1];
+            
+            String tempFormula = "SUM("+colStart+(tempRowNo+1)+":"+colEnd+(tempRowNo+1)+")";
+            
+            WritableSheet totalSheet = outputReportWorkbook.getSheet( sheetNo );
+
+            if( deCodeString.equalsIgnoreCase( "PROGRESSIVE-ORGUNIT" ) )
+            {
+                totalSheet.addCell( new Label( tempColNo+orgUnitCount, tempRowNo, selectedOrgUnit.getName(), totalCellformat ) );
+            }
+            else if( deCodeString.equalsIgnoreCase( "NA" ) )
+            {
+                totalSheet.addCell( new Label( tempColNo+orgUnitCount, tempRowNo, " ", totalCellformat ) );
+            }
+            else
+            {
+                totalSheet.addCell( new Formula( tempColNo+orgUnitCount, tempRowNo, tempFormula, totalCellformat ) );    
+            }
+        }
 
         outputReportWorkbook.write();
         outputReportWorkbook.close();
@@ -333,4 +449,57 @@ public class GenerateOuWiseProgressReportResultAction
 
         return SUCCESS;
     }
+    
+    private String getAggVal( String expression, Map<String, String> aggDeMap )
+    {
+        try
+        {
+            Pattern pattern = Pattern.compile( "(\\[\\d+\\.\\d+\\])" );
+
+            Matcher matcher = pattern.matcher( expression );
+            StringBuffer buffer = new StringBuffer();
+
+            String resultValue = "";
+
+            while ( matcher.find() )
+            {
+                String replaceString = matcher.group();
+
+                replaceString = replaceString.replaceAll( "[\\[\\]]", "" );
+
+                replaceString = aggDeMap.get( replaceString );
+                
+                if( replaceString == null )
+                {
+                    replaceString = "0";
+                }
+                
+                matcher.appendReplacement( buffer, replaceString );
+
+                resultValue = replaceString;
+            }
+
+            matcher.appendTail( buffer );
+            
+            double d = 0.0;
+            try
+            {
+                d = MathUtils.calculateExpression( buffer.toString() );
+            }
+            catch ( Exception e )
+            {
+                d = 0.0;
+                resultValue = "";
+            }
+            
+            resultValue = "" + (double) d;
+
+            return resultValue;
+        }
+        catch ( NumberFormatException ex )
+        {
+            throw new RuntimeException( "Illegal DataElement id", ex );
+        }
+    }
+
 }

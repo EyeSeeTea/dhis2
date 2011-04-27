@@ -28,7 +28,6 @@ package org.hisp.dhis.datamart.crosstab.jdbc;
  */
 
 import java.util.Collection;
-import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.CrossTabDataValue;
@@ -40,17 +39,8 @@ import org.hisp.dhis.datamart.CrossTabDataValue;
 public interface CrossTabStore
 {
     final String ID = CrossTabStore.class.getName();
-    final String TABLE_NAME = "datavaluecrosstab_";
-    final String TABLE_NAME_TRIMMED = "datavaluecrosstabtrimmed_";
-    
-    /**
-     * Filters and returns the DataElementOperands with data from the given
-     * collection of DataElementOperands.
-     * 
-     * @param operands the DataElementOperands.
-     * @return the DataElementOperands with data.
-     */
-    Collection<DataElementOperand> getOperandsWithData( Collection<DataElementOperand> operands );
+    final String TABLE_PREFIX = "datavaluecrosstab_";
+    final String TABLE_PREFIX_TRIMMED = "datavaluecrosstabtrimmed_";
     
     /**
      * Creates a crosstab table where the first column is the period identifier,
@@ -59,7 +49,7 @@ public interface CrossTabStore
      * 
      * @param operands the DataElementOperands.
      */
-    void createCrossTabTable( List<DataElementOperand> operands, String key );
+    void createCrossTabTable( Collection<DataElementOperand> operands, String key );
 
     /**
      * Drops the crosstab table.
@@ -75,7 +65,7 @@ public interface CrossTabStore
      * @return collection of CrossTabDataValues.
      */
     Collection<CrossTabDataValue> getCrossTabDataValues( Collection<DataElementOperand> operands, Collection<Integer> periodIds, 
-        Collection<Integer> sourceIds, List<String> keys );
+        Collection<Integer> sourceIds, String key );
 
     /**
      * Gets all CrossTabDataValues for the given collection of period ids and the source id.
@@ -86,5 +76,5 @@ public interface CrossTabStore
      * @return collection of CrossTabDataValues.
      */
     Collection<CrossTabDataValue> getCrossTabDataValues( Collection<DataElementOperand> operands, Collection<Integer> periodIds, 
-        int sourceId, List<String> keys );
+        int sourceId, String key );
 }

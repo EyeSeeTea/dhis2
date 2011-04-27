@@ -30,7 +30,6 @@ package org.hisp.dhis.system.deletion;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -55,7 +54,7 @@ import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.minmax.MinMaxDataElement;
-import org.hisp.dhis.olap.OlapURL;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -77,7 +76,6 @@ import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.source.Source;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
@@ -133,15 +131,6 @@ public abstract class DeletionHandler
     }
 
     public boolean allowDeleteDataElement( DataElement dataElement )
-    {
-        return true;
-    }
-
-    public void deleteCalculatedDataElement( CalculatedDataElement dataElement )
-    {
-    }
-
-    public boolean allowDeleteCalculatedDataElement( CalculatedDataElement dataElement )
     {
         return true;
     }
@@ -299,15 +288,6 @@ public abstract class DeletionHandler
         return true;
     }
 
-    public void deleteSource( Source source )
-    {
-    }
-
-    public boolean allowDeleteSource( Source source )
-    {
-        return true;
-    }
-
     public void deleteValidationRule( ValidationRule validationRule )
     {
     }
@@ -331,6 +311,15 @@ public abstract class DeletionHandler
     }
 
     public boolean allowDeleteDataEntryForm( DataEntryForm form )
+    {
+        return true;
+    }
+
+    public void deleteOrganisationUnit( OrganisationUnit unit )
+    {
+    }
+
+    public boolean allowDeleteOrganisationUnit( OrganisationUnit unit )
     {
         return true;
     }
@@ -421,15 +410,6 @@ public abstract class DeletionHandler
     }
 
     public boolean allowDeleteDataMartExport( DataMartExport dataMartExport )
-    {
-        return true;
-    }
-
-    public void deleteOlapURL( OlapURL olapURL )
-    {
-    }
-
-    public boolean allowDeleteOlapURL( OlapURL olapURL )
     {
         return true;
     }

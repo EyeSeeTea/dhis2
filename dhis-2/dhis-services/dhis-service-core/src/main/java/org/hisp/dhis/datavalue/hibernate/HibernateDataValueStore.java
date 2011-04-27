@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -40,13 +41,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.source.Source;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -110,7 +111,7 @@ public class HibernateDataValueStore
         session.delete( dataValue );
     }
 
-    public int deleteDataValuesBySource( Source source )
+    public int deleteDataValuesBySource( OrganisationUnit source )
     {
         Session session = sessionFactory.getCurrentSession();
 
@@ -130,7 +131,7 @@ public class HibernateDataValueStore
         return query.executeUpdate();
     }
 
-    public DataValue getDataValue( Source source, DataElement dataElement, Period period,
+    public DataValue getDataValue( OrganisationUnit source, DataElement dataElement, Period period,
         DataElementCategoryOptionCombo optionCombo )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -175,7 +176,7 @@ public class HibernateDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<DataValue> getDataValues( Source source, Period period )
+    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period )
     {
         Period storedPeriod = periodStore.reloadPeriod( period );
 
@@ -194,7 +195,7 @@ public class HibernateDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<DataValue> getDataValues( Source source, DataElement dataElement )
+    public Collection<DataValue> getDataValues( OrganisationUnit source, DataElement dataElement )
     {
         Session session = sessionFactory.getCurrentSession();
 
@@ -206,7 +207,7 @@ public class HibernateDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<DataValue> getDataValues( Collection<? extends Source> sources, DataElement dataElement )
+    public Collection<DataValue> getDataValues( Collection<OrganisationUnit> sources, DataElement dataElement )
     {
         Session session = sessionFactory.getCurrentSession();
 
@@ -218,7 +219,7 @@ public class HibernateDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<DataValue> getDataValues( Source source, Period period, Collection<DataElement> dataElements )
+    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements )
     {
         Period storedPeriod = periodStore.reloadPeriod( period );
 
@@ -238,7 +239,7 @@ public class HibernateDataValueStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<DataValue> getDataValues( Source source, Period period, Collection<DataElement> dataElements,
+    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements,
         Collection<DataElementCategoryOptionCombo> optionCombos )
     {
         Period storedPeriod = periodStore.reloadPeriod( period );
@@ -261,7 +262,7 @@ public class HibernateDataValueStore
 
     @SuppressWarnings( "unchecked" )
     public Collection<DataValue> getDataValues( DataElement dataElement, Period period,
-        Collection<? extends Source> sources )
+        Collection<OrganisationUnit> sources )
     {
         Period storedPeriod = periodStore.reloadPeriod( period );
 
@@ -282,7 +283,7 @@ public class HibernateDataValueStore
 
     @SuppressWarnings( "unchecked" )
     public Collection<DataValue> getDataValues( DataElement dataElement, Collection<Period> periods,
-        Collection<? extends Source> sources )
+        Collection<OrganisationUnit> sources )
     {
         Collection<Period> storedPeriods = new ArrayList<Period>();
 
@@ -308,7 +309,7 @@ public class HibernateDataValueStore
 
     @SuppressWarnings( "unchecked" )
     public Collection<DataValue> getDataValues( DataElement dataElement, DataElementCategoryOptionCombo optionCombo,
-        Collection<Period> periods, Collection<? extends Source> sources )
+        Collection<Period> periods, Collection<OrganisationUnit> sources )
     {
         Collection<Period> storedPeriods = new ArrayList<Period>();
 
@@ -375,4 +376,28 @@ public class HibernateDataValueStore
 
         return (DataValue) query.uniqueResult();
     }
+    
+    public Collection<DataElementOperand> getOperandsWithDataValues( Collection<DataElementOperand> operands )
+    {
+        final Collection<DataElementOperand> operandsWithData = new ArrayList<DataElementOperand>();
+        
+        final StatementHolder holder = statementManager.getHolder();
+        
+        for ( DataElementOperand operand : operands )
+        {
+            final String sql = 
+                "SELECT COUNT(*) FROM datavalue " + 
+                "WHERE dataelementid=" + operand.getDataElementId() + " " +
+                "AND categoryoptioncomboid=" + operand.getOptionComboId();
+            
+            Integer count = holder.queryForInteger( sql );
+            
+            if ( count != null && count > 0 )
+            {
+                operandsWithData.add( operand );
+            }
+        }
+        
+        return operandsWithData;
+    }    
 }

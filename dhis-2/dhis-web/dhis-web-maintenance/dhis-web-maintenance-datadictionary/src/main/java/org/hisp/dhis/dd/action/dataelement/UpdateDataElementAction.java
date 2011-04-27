@@ -29,27 +29,20 @@ package org.hisp.dhis.dd.action.dataelement;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.system.util.ConversionUtils;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
  * @author Torgeir Lorange Ostby
- * @author Hans S. Toemmerholt
- * @version $Id: UpdateDataElementAction.java 6216 2008-11-06 18:06:42Z eivindwa
- *          $
  */
 public class UpdateDataElementAction
     extends ActionSupport
@@ -167,27 +160,6 @@ public class UpdateDataElementAction
         this.aggregationLevels = aggregationLevels;
     }
 
-    private String saved;
-
-    public void setSaved( String saved )
-    {
-        this.saved = saved;
-    }
-
-    private List<String> dataElementIds;
-
-    public void setDataElementIds( List<String> dataElementIds )
-    {
-        this.dataElementIds = dataElementIds;
-    }
-
-    private List<Double> factors;
-
-    public void setFactors( List<Double> factors )
-    {
-        this.factors = factors;
-    }
-
     private Integer selectedCategoryComboId;
 
     public void setSelectedCategoryComboId( Integer selectedCategoryComboId )
@@ -247,58 +219,9 @@ public class UpdateDataElementAction
         dataElement.setAggregationOperator( aggregationOperator );
         dataElement.setUrl( url );
         dataElement.setCategoryCombo( categoryCombo );
-        dataElement.setAggregationLevels( new ArrayList<Integer>( ConversionUtils
-            .getIntegerCollection( aggregationLevels ) ) );
+        dataElement.setAggregationLevels( new ArrayList<Integer>( ConversionUtils.getIntegerCollection( aggregationLevels ) ) );
         dataElement.setZeroIsSignificant( zeroIsSignificant );
         
-
-        // ---------------------------------------------------------------------
-        // Calculated data element
-        // ---------------------------------------------------------------------
-
-        if ( dataElement instanceof CalculatedDataElement )
-        {
-            CalculatedDataElement calculatedDataElement = (CalculatedDataElement) dataElement;
-
-            Expression expression = calculatedDataElement.getExpression();
-
-            Set<DataElement> expressionDataElements = new HashSet<DataElement>();
-
-            String expressionString = "";
-
-            for ( int i = 0; i < dataElementIds.size(); i++ )
-            {
-                String operandId = dataElementIds.get( i );
-
-                String dataElementIdStr = operandId.substring( 0, operandId.indexOf( '.' ) );
-
-                DataElement expressionDataElement = dataElementService.getDataElement( Integer
-                    .parseInt( dataElementIdStr ) );
-
-                if ( expressionDataElement == null )
-                {
-                    continue;
-                }
-                
-                Double factor = factors.get( i );
-
-                expressionString += " + ([" + operandId + "] * " + factor + ")";
-
-                expressionDataElements.add( expressionDataElement );
-            }
-
-            if ( expressionString.length() > 3 )
-            {
-                expressionString = expressionString.substring( 3 );
-            }
-
-            expression.setExpression( expressionString );
-
-            expression.setDataElementsInExpression( expressionDataElements );
-
-            calculatedDataElement.setSaved( saved != null );
-        }
-
         Set<DataSet> dataSets = dataElement.getDataSets();
         for ( DataSet dataSet : dataSets )
         {

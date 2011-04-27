@@ -185,6 +185,14 @@ public class FacilityReportingServiceImpl
         return updatedDataSetList;
     }
 
+    public DataSetList getDataSetsForLocale( OrganisationUnit unit, String locale )
+    {
+        DataSetList dataSetList = new DataSetList();
+        List<DataSet> dataSets = this.getMobileDataSetsForUnit( unit, locale );
+        dataSetList.setModifiedDataSets( dataSets );
+        return dataSetList;
+    }
+
     public DataSet getDataSetForLocale( int dataSetId, Locale locale )
     {
         org.hisp.dhis.dataset.DataSet dataSet = dataSetService.getDataSet( dataSetId );
@@ -266,6 +274,8 @@ public class FacilityReportingServiceImpl
 
         if ( !dataSetAssociatedWithOrgUnit( unit, dataSet ) )
         {
+            log.info( "Failed to save data value set for: " + unit.getName() + ", " + dataSet.getName()
+                + " - Org unit and data set not associated." );
             throw NotAllowedException.INVALID_DATASET_ASSOCIATION;
         }
 
@@ -273,11 +283,19 @@ public class FacilityReportingServiceImpl
 
         if ( period == null )
         {
+            log.info( "Failed to save data value set for: " + unit.getName() + ", " + dataSet.getName()
+                + " - Period not found." );
             throw NotAllowedException.INVALID_PERIOD;
         }
 
+        log.info( "Recieved data value set for: " + unit.getName() + ", " + dataSet.getName()
+            + ", " + period.getIsoDate() );
+
+        
         if ( dataSetLocked( unit, dataSet, period ) )
         {
+            log.info( "Failed to save data value set: " + unit.getName() + ", " + dataSet.getName() + ", "
+                + period.getIsoDate() + " - Data value set locked." );
             throw NotAllowedException.DATASET_LOCKED;
         }
 
@@ -321,6 +339,8 @@ public class FacilityReportingServiceImpl
 
         registrationService.saveCompleteDataSetRegistration( registration );
 
+        log.info( "Saved and registered data value set as complete: " + unit.getName() + ", " + dataSet.getName()
+            + ", " + period.getIsoDate() );
     }
 
     private Map<Integer, org.hisp.dhis.dataelement.DataElement> getDataElementIdMapping(

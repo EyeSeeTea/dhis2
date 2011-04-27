@@ -1,7 +1,20 @@
 <script type="text/javascript">
+	jQuery(document).ready(function() {
+		if( jQuery("#targetLine").attr("checked") !== true )
+		{
+			jQuery("#targetLineValueTr").hide();
+		}
+	
+		jQuery("#targetLine").change(function() {
+			jQuery("#targetLineValueTr").toggle();		
+		});
+	});
+
     var i18n_must_select_at_least_one_indicator = '$encoder.jsEscape( $i18n.getString( "must_select_at_least_one_indicator" ), "'")';
     var i18n_must_select_at_least_one_unit = '$encoder.jsEscape( $i18n.getString( "must_select_at_least_one_unit" ), "'")';
     var i18n_must_select_at_least_one_period = '$encoder.jsEscape( $i18n.getString( "must_select_at_least_one_period" ), "'")';
+	var i18n_target_line_value_must_be_provided = '$encoder.jsEscape( $i18n.getString( "target_line_value_must_be_provided" ), "'")';
+	var i18n_target_line_value_must_be_number = '$encoder.jsEscape( $i18n.getString( "target_line_value_must_be_number" ), "'")';
 </script>
 
 #macro ( getHeader )
@@ -34,7 +47,9 @@
     	<td>
     		<select id="type" name="type" style="width:300px">
     			<option value="bar"#if ( $!chart.type == "bar" ) selected#end>$i18n.getString( "bar_chart" )</option>
+    			<option value="bar3d"#if ( $!chart.type == "bar3d" ) selected#end>$i18n.getString( "bar3d_chart" )</option>
     			<option value="line"#if ( $!chart.type == "line" ) selected#end>$i18n.getString( "line_chart" )</option>
+    			<option value="line3d"#if ( $!chart.type == "line3d" ) selected#end>$i18n.getString( "line3d_chart" )</option>
     			<option value="pie"#if ( $!chart.type == "pie" ) selected#end>$i18n.getString( "pie_chart" )</option>
     			<option value="pie3d"#if ( $!chart.type == "pie3d" ) selected#end>$i18n.getString( "pie3d_chart" )</option>
 		    </select>
@@ -65,6 +80,14 @@
     <tr>
         <td><label for="regression">$i18n.getString( "include_regression_line" )</label></td>
         <td><input type="checkbox" id="regression" name="regression" value="true"#if( $!chart.regression ) checked#end></td>
+    </tr>
+    <tr>
+        <td><label for="targetLine">$i18n.getString( "include_target_line" )</label></td>
+        <td><input type="checkbox" id="targetLine" name="targetLine" value="true"#if( $!chart.targetLine ) checked#end></td>
+    </tr>
+    <tr id="targetLineValueTr">
+        <td><label for="targetLineValue">$i18n.getString( "target_line_value" )</label></td>
+        <td><input type="text" id="targetLineValue" name="targetLineValue" style="width:80px" value="$!chart.targetLineValue"></td>
     </tr>
     #if ( $currentUser && $currentUser.hasOrganisationUnit() )
     <tr>

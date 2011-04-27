@@ -27,7 +27,6 @@ package org.hisp.dhis.importexport.action.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.Objects.CALCULATEDDATAELEMENT;
 import static org.hisp.dhis.common.Objects.DATADICTIONARY;
 import static org.hisp.dhis.common.Objects.DATAELEMENT;
 import static org.hisp.dhis.common.Objects.DATAELEMENTGROUP;
@@ -38,7 +37,6 @@ import static org.hisp.dhis.common.Objects.INDICATOR;
 import static org.hisp.dhis.common.Objects.INDICATORGROUP;
 import static org.hisp.dhis.common.Objects.INDICATORGROUPSET;
 import static org.hisp.dhis.common.Objects.INDICATORTYPE;
-import static org.hisp.dhis.common.Objects.OLAPURL;
 import static org.hisp.dhis.common.Objects.ORGANISATIONUNIT;
 import static org.hisp.dhis.common.Objects.ORGANISATIONUNITGROUP;
 import static org.hisp.dhis.common.Objects.ORGANISATIONUNITGROUPSET;
@@ -52,7 +50,6 @@ import java.util.Map;
 
 import org.hisp.dhis.common.Objects;
 import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.dataelement.CalculatedDataElement;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
@@ -62,7 +59,6 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.olap.OlapURL;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
@@ -83,7 +79,6 @@ public class ClassMapUtil
         classMap = new HashMap<Objects, Class<?>>();
         
         classMap.put( DATAELEMENT, DataElement.class );
-        classMap.put( CALCULATEDDATAELEMENT, CalculatedDataElement.class );
         classMap.put( DATAELEMENTGROUP, DataElementGroup.class );
         classMap.put( DATAELEMENTGROUPSET, DataElementGroupSet.class );
         classMap.put( INDICATORTYPE, IndicatorType.class );
@@ -98,7 +93,6 @@ public class ClassMapUtil
         classMap.put( ORGANISATIONUNITLEVEL, OrganisationUnitLevel.class );
         classMap.put( VALIDATIONRULE, ValidationRule.class );
         classMap.put( REPORTTABLE, ReportTable.class );
-        classMap.put( OLAPURL, OlapURL.class );
         classMap.put( DATAVALUE, DataValue.class );
     }
     
