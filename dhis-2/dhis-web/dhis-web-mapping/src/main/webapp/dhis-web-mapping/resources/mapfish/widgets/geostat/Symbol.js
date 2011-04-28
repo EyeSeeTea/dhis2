@@ -213,6 +213,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     }
                 }
             },
+            
             {
                 xtype: 'textfield',
                 name: 'level',
@@ -236,7 +237,36 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     }
                 }
             },
-            { html: '<div class="thematic-br">' }
+            
+            { html: '<div class="thematic-br">' },
+            
+            {
+                xtype: 'combo',
+                name: 'groupset',
+                fieldLabel: G.i18n.groupset,
+                typeAhead: true,
+                editable: false,
+                valueField: 'id',
+                displayField: 'name',
+                mode: 'remote',
+                forceSelection: true,
+                triggerAction: 'all',
+                emptyText: G.conf.emptytext,
+                labelSeparator: G.conf.labelseparator,
+                selectOnFocus: true,
+                width: G.conf.combo_width,
+                store: G.stores.groupSet,
+                listeners: {
+                    'select': {
+                        scope: this,
+                        fn: function(cb) {
+                            this.form.findField('group').clearValue();
+                            G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
+                            G.stores.groupsByGroupSet.load();
+                        }
+                    }
+                }
+            }
         ];
     },
     
@@ -532,12 +562,18 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 G.vars.map.zoomToExtent(this.layer.getDataExtent());
             }
             
+            var imgLink = ['dispensary.png', 'hospital.png', 'clinic.png'];
+            
+            for (var i = 0; i < this.layer.features.length; i++) {
+                this.layer.features[i].attributes.thumb = imgLink[Math.floor(Math.random()*2+1)];
+            }
+             
             this.applyValues();
         }
     },
 
     applyValues: function() {
-		var options = {indicator: 'type'};
+		var options = {indicator: 'id'};
 		this.coreComp.updateOptions(options);
         this.coreComp.applyClassification();
         this.classificationApplied = true;

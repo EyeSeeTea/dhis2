@@ -93,11 +93,19 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
         this.updateOptions(options);
         var boundsArray = this.classification.getBoundsArray();
         var rules = [];
+        //var imgLink = ['dispensary.png', 'hospital.png', 'clinic.png'];
 
         for (var i = 0; i < boundsArray.length-1; i++) {
             if (this.colorInterpolation.length > i) {
                 var rule = new OpenLayers.Rule({
-                    symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
+                    
+                    //symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
+                    
+                    symbolizer: {
+                        'pointRadius': 8,
+                        'externalGraphic': 'dispensary.png'
+                    },
+                    
                     filter: new OpenLayers.Filter.Comparison({
                         type: OpenLayers.Filter.Comparison.BETWEEN,
                         property: this.indicator,

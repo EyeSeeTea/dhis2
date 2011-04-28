@@ -39,28 +39,33 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 
     applyClassification: function(options) {
         this.updateOptions(options);
+console.log(document);        
     
         //var boundsArray = this.classification.getBoundsArray();
         
-        var boundsArray = ['Dispensary', 'Hospital', 'Private Medical Clinic'];
-        var imgLink = ['dispensary.png', 'hospital.png', 'clinic.png'];
+        //var boundsArray = ['Dispensary', 'Hospital', 'Private Medical Clinic'];
+        var boundsArray = [24000, 24300, 24500];
+        var imgLink = ['dispensary.png', 'clinic.png', 'hospital.png'];
         
         var rules = new Array(boundsArray.length);
         for (var i = 0; i < boundsArray.length; i++) {
             var rule = new OpenLayers.Rule({
+                
                 symbolizer: {
-                    'pointRadius': 12,
-                    'externalGraphic': '${' + imgLink[i] + '}'
+                    'pointRadius': 8,
+                    'externalGraphic': imgLink[i]
                 },
+                
                 filter: new OpenLayers.Filter.Comparison({
-                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
-                    property: this.indicator
+                    type: OpenLayers.Filter.Comparison.BETWEEN,
+                    property: this.indicator,
+                    lowerBoundary: boundsArray[i],
+                    upperBoundary: boundsArray[i + 1]
                 })
             });
             rules[i] = rule;
         }
-console.log(rules);        
-
+        
         this.extendStyle(rules);
         mapfish.GeoStat.prototype.applyClassification.apply(this, arguments);
     },

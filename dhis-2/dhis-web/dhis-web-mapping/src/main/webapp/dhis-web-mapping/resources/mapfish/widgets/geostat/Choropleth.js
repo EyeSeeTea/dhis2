@@ -1493,15 +1493,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             return;
                         }
 
-                        for (var i = 0; i < mapvalues.length; i++) {
-                            for (var j = 0; j < this.layer.features.length; j++) {
-                                if (mapvalues[i].orgUnitName == this.layer.features[j].attributes.name) {
-                                    this.layer.features[j].attributes.value = parseFloat(mapvalues[i].value);
-                                    this.layer.features[j].attributes.labelString = this.layer.features[j].attributes.name + ' (' + this.layer.features[j].attributes.value + ')';
-                                    break;
-                                }
-                            }
-                        }
+                        //for (var i = 0; i < mapvalues.length; i++) {
+                            //for (var j = 0; j < this.layer.features.length; j++) {
+                                //if (mapvalues[i].orgUnitName == this.layer.features[j].attributes.name) {
+                                    //this.layer.features[j].attributes.value = parseFloat(mapvalues[i].value);
+                                    //this.layer.features[j].attributes.labelString = this.layer.features[j].attributes.name + ' (' + this.layer.features[j].attributes.value + ')';
+                                    //break;
+                                //}
+                            //}
+                        //}
                         
                         this.updateValues = false;
                         this.applyValues();
@@ -1518,7 +1518,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         Ext.getCmp('viewhistory_b').addItem(this);
         
 		var options = {
-            indicator: 'value',
+            indicator: 'id',
             method: this.form.findField('method').getValue(),
             numClasses: this.form.findField('classes').getValue(),
             colors: this.getColors()

@@ -271,6 +271,30 @@
         }
     });
     
+    var groupSetStore = new Ext.data.JsonStore({
+        url: G.conf.path_commons + 'getOrganisationUnitGroupSets' + G.conf.type,
+        root: 'organisationUnitGroupSets',
+        fields: ['id', 'name'],
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': G.func.storeLoadListener
+        }
+    });
+    
+    var groupsByGroupSetStore = new Ext.data.JsonStore({
+        url: G.conf.path_commons + 'getOrganisationUnitGroupsByGroupSet' + G.conf.type,
+        root: 'organisationUnitGroups',
+        fields: ['id', 'name'],
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': G.func.storeLoadListener
+        }
+    });
+    
     G.stores = {
 		mapView: mapViewStore,
         polygonMapView: polygonMapViewStore,
@@ -289,7 +313,9 @@
         organisationUnitsAtLevel: organisationUnitsAtLevelStore,
         geojsonFiles: geojsonFilesStore,
         wmsCapabilities: wmsCapabilitiesStore,
-        overlay: overlayStore
+        overlay: overlayStore,
+        groupSet: groupSetStore,
+        groupsByGroupSet: groupsByGroupSetStore
     };
 	
 	/* Thematic layers */
