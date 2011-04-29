@@ -25,36 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.program;
+package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramValidation;
+import org.hisp.dhis.program.ProgramValidationStore;
+
 /**
  * @author Chau Thu Tran
- * @version ProgramStageDataElementValidationService.java May 6, 2010 10:08:04
- *          AM
+ * @version $ HibernateProgramValidationStore.java Apr 28, 2011 10:43:09 AM $
  */
-public interface ProgramStageDataElementValidationService
+public class HibernateProgramValidationStore
+    extends HibernateGenericStore<ProgramValidation>
+    implements ProgramValidationStore
 {
-    String ID = ProgramStageDataElementValidationService.class.getName();
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramValidation> get( Program program )
+    {
+        return getCriteria( Restrictions.eq( "program", program ) ).list();
+    }
 
-    // -------------------------------------------------------------------------
-    // ProgramStage - DataElement validation
-    // -------------------------------------------------------------------------
-
-    int saveProgramStageDataElementValidation( ProgramStageDataElementValidation validation );
-
-    void deleteProgramStageDataElementValidation( ProgramStageDataElementValidation validation );
-
-    void updateProgramStageDataElementValidation( ProgramStageDataElementValidation validation );
-
-    ProgramStageDataElementValidation getProgramStageDataElementValidation( int id );
-
-    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( Program program );
-
-    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( ProgramStageDataElement element );
-
-    Collection<ProgramStageDataElementValidation> getAllProgramStageDataElementValidations();
-    
-    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( ProgramStage programStage );
 }

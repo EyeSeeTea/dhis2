@@ -27,61 +27,62 @@
 
 package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.program.ProgramStageDataElementValidation;
-import org.hisp.dhis.program.ProgramStageDataElementValidationService;
+import org.hisp.dhis.program.ProgramValidation;
+import org.hisp.dhis.program.ProgramValidationService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version AddProgramStageDataElementValidation.java May 6, 2010 1:28:06 PM
+ * @version $ GetProgramValidationAction.java Apr 28, 2011 11:17:58 AM $
  */
-public class GetProgramStageDEValidationAction
+public class GetProgramValidationAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageDataElementValidationService validationService;
+    private ProgramValidationService programValidationService;
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private Integer validationId;
 
-    private ProgramStageDataElementValidation validation;
+    private ProgramValidation validation;
 
     // -------------------------------------------------------------------------
-    // Setters
+    // Getter && Setter
     // -------------------------------------------------------------------------
 
-    public void setValidationService( ProgramStageDataElementValidationService validationService )
+    public void setProgramValidationService( ProgramValidationService programValidationService )
     {
-        this.validationService = validationService;
+        this.programValidationService = programValidationService;
     }
 
-    public ProgramStageDataElementValidation getValidation()
+    public void setValidationId( Integer validationId )
+    {
+        this.validationId = validationId;
+    }
+
+    public ProgramValidation getValidation()
     {
         return validation;
     }
 
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Implementation Action
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
-        validation = validationService.getProgramStageDataElementValidation( id );
+        validation = programValidationService.getProgramValidation( validationId );
 
         return SUCCESS;
     }
+
 }

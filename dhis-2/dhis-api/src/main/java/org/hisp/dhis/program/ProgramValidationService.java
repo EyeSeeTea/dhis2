@@ -29,24 +29,25 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericStore;
-
 /**
  * @author Chau Thu Tran
- * @version ProgramStageDataElementValidationStore.java May 7, 2010 10:08:04 AM
+ * @version $ ProgramValidationService.java Apr 28, 2011 10:32:20 AM $
  */
-public interface ProgramStageDataElementValidationStore
-    extends GenericStore<ProgramStageDataElementValidation>
+public interface ProgramValidationService
 {
-    String ID = ProgramStageDataElementValidationStore.class.getName();
+    String ID = ProgramValidationService.class.getName();
 
-    // -------------------------------------------------------------------------
-    // ProgramStage - DataElement validation
-    // -------------------------------------------------------------------------
+    int addProgramValidation( ProgramValidation programValidation );
 
-    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( Program program );
+    void deleteProgramValidation( ProgramValidation programValidation );
 
-    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( ProgramStageDataElement element );
-    
-    Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( ProgramStage programStage );
+    void updateProgramValidation( ProgramValidation programValidation );
+
+    ProgramValidation getProgramValidation( int id );
+
+    Collection<ProgramValidation> getAllProgramValidation();
+
+    Collection<ProgramValidation> getProgramValidation( Program program );
+
+    boolean runValidation( ProgramValidation validation, ProgramInstance programInstance );
 }

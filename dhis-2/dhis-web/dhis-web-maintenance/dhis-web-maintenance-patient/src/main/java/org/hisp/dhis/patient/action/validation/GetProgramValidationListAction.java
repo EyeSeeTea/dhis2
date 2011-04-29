@@ -25,77 +25,83 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.program;
+package org.hisp.dhis.patient.action.validation;
 
 import java.util.Collection;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramValidation;
+import org.hisp.dhis.program.ProgramValidationService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version DefaultProgramStageDataElementValidationService.java May 6, 2010
- *          10:18:00 AM
+ * @version $ GetProgramValidationListAction.java Apr 28, 2011 11:19:56 AM $
  */
-
-@Transactional
-public class DefaultProgramStageDataElementValidationService
-    implements ProgramStageDataElementValidationService
+public class GetProgramValidationListAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageDataElementValidationStore validationStore;
+    private ProgramValidationService programValidationService;
 
-    public void setValidationStore( ProgramStageDataElementValidationStore validationStore )
+    private ProgramService programService;
+
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+
+    private Integer programId;
+
+    private Collection<ProgramValidation> validations;
+
+    // -------------------------------------------------------------------------
+    // Getter && Setter
+    // -------------------------------------------------------------------------
+
+    public void setProgramService( ProgramService programService )
     {
-        this.validationStore = validationStore;
+        this.programService = programService;
+    }
+
+    public Collection<ProgramValidation> getValidations()
+    {
+        return validations;
+    }
+
+    public void setProgramValidationService( ProgramValidationService programValidationService )
+    {
+        this.programValidationService = programValidationService;
+    }
+
+    public Integer getProgramId()
+    {
+        return programId;
+    }
+
+    public void setProgramId( Integer programId )
+    {
+        this.programId = programId;
     }
 
     // -------------------------------------------------------------------------
-    // Implementation methods
+    // Implementation Action
     // -------------------------------------------------------------------------
 
-    public int saveProgramStageDataElementValidation( ProgramStageDataElementValidation validation )
-    {
-        return validationStore.save( validation );
-    }
 
-    public void updateProgramStageDataElementValidation( ProgramStageDataElementValidation validation )
+    @Override
+    public String execute()
+        throws Exception
     {
-        validationStore.update( validation );
-    }
+        Program program = programService.getProgram( programId );
 
-    public void deleteProgramStageDataElementValidation( ProgramStageDataElementValidation validation )
-    {
-        validationStore.delete( validation );
-    }
+        validations = programValidationService.getProgramValidation( program );
 
-    public Collection<ProgramStageDataElementValidation> getAllProgramStageDataElementValidations()
-    {
-        return validationStore.getAll();
-    }
-
-    public ProgramStageDataElementValidation getProgramStageDataElementValidation( int id )
-    {
-        return validationStore.get( id );
-    }
-
-    public Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations( Program program )
-    {
-        return validationStore.getProgramStageDataElementValidations( program );
-    }
-
-    public Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations(
-        ProgramStageDataElement element )
-    {
-        return validationStore.getProgramStageDataElementValidations( element );
-    }
-
-    public Collection<ProgramStageDataElementValidation> getProgramStageDataElementValidations(
-        ProgramStage programStage )
-    {
-        return validationStore.getProgramStageDataElementValidations( programStage );
+        return SUCCESS;
     }
 
 }

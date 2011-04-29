@@ -25,32 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
+package org.hisp.dhis.patient.action.validation;
 
-import java.util.Collection;
-
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageDataElementValidation;
-import org.hisp.dhis.program.ProgramStageDataElementValidationService;
+import org.hisp.dhis.program.ProgramValidation;
+import org.hisp.dhis.program.ProgramValidationService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version ShowValidationDEAssociationsFormAction.java May 5, 2010 9:35:09 AM
+ * @version $ RemoveProgramValidationAction.java Apr 28, 2011 11:22:14 AM $
  */
-public class ShowValidationDEAssociationsFormAction
+public class RemoveProgramValidationAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramService programService;
-
-    private ProgramStageDataElementValidationService programStageDEValidationService;
+    private ProgramValidationService programValidationService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -59,42 +52,12 @@ public class ShowValidationDEAssociationsFormAction
     private Integer id;
 
     // -------------------------------------------------------------------------
-    // Output
+    // Setters
     // -------------------------------------------------------------------------
 
-    private Program program;
-
-    private Collection<ProgramStage> stages;
-    
-    private Collection<ProgramStageDataElementValidation> validations;
-
-    // -------------------------------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------------------------------
-
-    public Program getProgram()
+    public void setProgramValidationService( ProgramValidationService programValidationService )
     {
-        return program;
-    }
-
-    public Collection<ProgramStageDataElementValidation> getValidations()
-    {
-        return validations;
-    }
-
-    public void setProgramStageDEValidationService( ProgramStageDataElementValidationService programStageDEValidationService )
-    {
-        this.programStageDEValidationService = programStageDEValidationService;
-    }
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
-    public Collection<ProgramStage> getStages()
-    {
-        return stages;
+        this.programValidationService = programValidationService;
     }
 
     public void setId( Integer id )
@@ -103,19 +66,18 @@ public class ShowValidationDEAssociationsFormAction
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Implementation Action
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
-        program = programService.getProgram( id );
+        ProgramValidation validation = programValidationService.getProgramValidation( id );
 
-        stages = program.getProgramStages();
-
-        validations = programStageDEValidationService.getProgramStageDataElementValidations( program );
+        programValidationService.deleteProgramValidation( validation );
 
         return SUCCESS;
     }
+    
 }
