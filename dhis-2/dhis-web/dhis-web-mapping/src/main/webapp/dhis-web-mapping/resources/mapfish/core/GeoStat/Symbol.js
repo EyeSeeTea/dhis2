@@ -39,28 +39,21 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 
     applyClassification: function(options) {
         this.updateOptions(options);
-console.log(document);        
-    
-        //var boundsArray = this.classification.getBoundsArray();
         
-        //var boundsArray = ['Dispensary', 'Hospital', 'Private Medical Clinic'];
-        var boundsArray = [24000, 24300, 24500];
-        var imgLink = ['dispensary.png', 'clinic.png', 'hospital.png'];
-        
+        var boundsArray = G.stores.groupsByGroupSet.data.items;
+        var img = ['h1.png', 'h2.png', 'dispensary.png', 'clinic.png', 'hospital.png'];
         var rules = new Array(boundsArray.length);
+        
         for (var i = 0; i < boundsArray.length; i++) {
-            var rule = new OpenLayers.Rule({
-                
+            var rule = new OpenLayers.Rule({                
                 symbolizer: {
                     'pointRadius': 8,
-                    'externalGraphic': imgLink[i]
-                },
-                
+                    'externalGraphic': img[i]
+                },                
                 filter: new OpenLayers.Filter.Comparison({
-                    type: OpenLayers.Filter.Comparison.BETWEEN,
+                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
                     property: this.indicator,
-                    lowerBoundary: boundsArray[i],
-                    upperBoundary: boundsArray[i + 1]
+                    value: G.stores.groupsByGroupSet.data.items[i].data.name
                 })
             });
             rules[i] = rule;
@@ -76,18 +69,20 @@ console.log(document);
         }
 
         this.legendDiv.update("");
+        var img = ['h1.png', 'h2.png', 'dispensary.png', 'clinic.png', 'hospital.png'];
         //for (var i = 0; i < this.classification.bins.length; i++) {
         for (var i = 0; i < 3; i++) {
             var element = document.createElement("div");
-            element.style.backgroundColor = '#555';
-            element.style.width = "30px";
-            element.style.height = "15px";
+            element.style.backgroundImage = 'url(' + img[i] + ')';
+            element.style.backgroundRepeat = 'no-repeat';
+            element.style.width = "25px";
+            element.style.height = "17px";
             element.style.cssFloat = "left";
-            element.style.marginRight = "10px";
+            element.style.marginLeft = "3px";
             this.legendDiv.appendChild(element);
 
             element = document.createElement("div");
-            element.innerHTML = 'jeje';
+            element.innerHTML = G.stores.groupsByGroupSet.data.items[i].data.name;
             this.legendDiv.appendChild(element);
 
             element = document.createElement("div");

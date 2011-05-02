@@ -260,7 +260,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     'select': {
                         scope: this,
                         fn: function(cb) {
-                            this.form.findField('group').clearValue();
                             G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
                             G.stores.groupsByGroupSet.load();
                         }
@@ -573,7 +572,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
 
     applyValues: function() {
-		var options = {indicator: 'id'};
+		var options = {indicator: this.form.findField('groupset').getRawValue().toLowerCase()};
 		this.coreComp.updateOptions(options);
         this.coreComp.applyClassification();
         this.classificationApplied = true;

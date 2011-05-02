@@ -9,24 +9,19 @@
 			  }
 		}
 		
-		jQuery('#designTextarea').ckeditor({
-			skin: 'office2003'
-		});
-		
-		var editor = jQuery("#designTextarea").ckeditorGet();
-		editor.setData('$encoder.jsEscape( $dataEntryValue, "'" )');
+		jQuery('#designTextarea').ckeditor();
+		jQuery("#designTextarea").ckeditorGet().setData('$encoder.jsEscape( $dataEntryValue, "'" )');
 	});
 
-    var stat = ('$!dataEntryForm') ? "EDIT" : "ADD";
+    var stat = "ADD";
     var dataEntryFormId = -1;
 	var selected = null;
-	var autoSave = '$!autoSave';
+	var autoSave = $autoSave;
 	var t;
-	var timer_is_on=0;
+	var timer_is_on = 0;
 
-    #if($!dataEntryForm)
-        dataEntryFormId = $dataEntryForm.id;
-    #end
+    stat = "EDIT";
+    dataEntryFormId = $dataEntryForm.id;
 
     var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "dataentryform_confirm_delete" ) , "'" )';
 	var i18n_save_success = '$encoder.jsEscape( $i18n.getString( "save_success" ) , "'" )';

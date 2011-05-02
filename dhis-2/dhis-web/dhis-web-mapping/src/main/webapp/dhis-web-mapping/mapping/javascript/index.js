@@ -2647,6 +2647,10 @@
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
 		handler: function() {
+
+        
+alert(G.util.getKeys(G.stores.groupsByGroupSet.data.items[0].data));
+return;            
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }
