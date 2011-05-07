@@ -229,21 +229,7 @@ public class ViewDataEntryFormAction
                 int optionComboId = Integer.parseInt( dataElementMatcher.group( 2 ) );
                 DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
                     .getDataElementCategoryOptionCombo( optionComboId );
-                String optionComboName = "";
-
-                if ( optionCombo != null )
-                {
-                    List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>(
-                        optionCombo.getCategoryOptions() );
-                    Iterator<DataElementCategoryOption> categoryOptionsIterator = categoryOptions.iterator();
-
-                    while ( categoryOptionsIterator.hasNext() )
-                    {
-                        DataElementCategoryOption categoryOption = categoryOptionsIterator.next();
-
-                        optionComboName += categoryOption.getName() + " ";
-                    }
-                }
+                String optionComboName = optionCombo != null ? optionCombo.getName() : "";
 
                 // -------------------------------------------------------------
                 // Insert name of data element in output code
@@ -380,21 +366,7 @@ public class ViewDataEntryFormAction
                 int optionComboId = Integer.parseInt( dataElementMatcher.group( 2 ) );
                 DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
                     .getDataElementCategoryOptionCombo( optionComboId );
-                String optionComboName = "";
-
-                if ( optionCombo != null )
-                {
-                    List<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>(
-                        optionCombo.getCategoryOptions() );
-                    Iterator<DataElementCategoryOption> categoryOptionsIterator = categoryOptions.iterator();
-
-                    while ( categoryOptionsIterator.hasNext() )
-                    {
-                        DataElementCategoryOption categoryOption = categoryOptionsIterator.next();
-
-                        optionComboName += categoryOption.getName() + " ";
-                    }
-                }
+                String optionComboName = optionCombo != null ? optionCombo.getName() : "";
                 
                 // -------------------------------------------------------------
                 // Insert name of data element in output code.
