@@ -281,7 +281,7 @@ public class ViewDataEntryFormAction
                     }
 
                     StringBuilder title = new StringBuilder( "title=\"" ).append( dataElement.getId() ).append( " - " ).
-                        append( dataElement.getName() ).append( " - " ).append( optionCombo.getId() ).append( " - " ).
+                        append( dataElement.getName() ).append( " - " ).append( optionComboId ).append( " - " ).
                         append( optionComboName ).append( " - " ).append( dataElement.getType() ).append( "\"" );
                     
                     if ( dataElementCode.contains( "title=\"\"" ) )
@@ -432,7 +432,7 @@ public class ViewDataEntryFormAction
                     }
 
                     StringBuilder title = new StringBuilder( "title=\"" ).append( dataElement.getId() ).append( " - " ).
-                        append( dataElement.getName() ).append( " - " ).append( optionCombo.getId() ).append( " - " ).
+                        append( dataElement.getName() ).append( " - " ).append( optionComboId ).append( " - " ).
                         append( optionComboName ).append( " - " ).append( dataElement.getType() ).append( "\"" );
                     
                     if ( dataElementCode.contains( "title=\"\"" ) )
