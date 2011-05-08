@@ -7,6 +7,9 @@ var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
 var COLOR_RED = '#ff8a8a';
 
+/**
+/* Used by default and section forms.
+*/
 function saveVal( dataElementId, optionComboId )
 {
 	var dataElementName = document.getElementById( 'value[' + dataElementId + '].name' ).innerHTML;
@@ -14,6 +17,9 @@ function saveVal( dataElementId, optionComboId )
 	saveValue( dataElementId, optionComboId, dataElementName, null );
 }
 
+/**
+/* Used by custom forms.
+*/
 function saveValue( dataElementId, optionComboId, dataElementName )
 {
     var field = document.getElementById( 'value[' + dataElementId + '].value' + ':' +  'value[' + optionComboId + '].value');
