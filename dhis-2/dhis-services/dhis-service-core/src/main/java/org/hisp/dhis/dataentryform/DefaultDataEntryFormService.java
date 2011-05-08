@@ -172,14 +172,14 @@ public class DefaultDataEntryFormService
 
             String inputHtml = inputMatcher.group( 1 );
 
-            Matcher dataElementMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
+            Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
 
-            if ( dataElementMatcher.find() && dataElementMatcher.groupCount() > 0 )
+            if ( identifierMatcher.find() && identifierMatcher.groupCount() > 0 )
             {
-                int dataElementId = Integer.parseInt( dataElementMatcher.group( 1 ) );
+                int dataElementId = Integer.parseInt( identifierMatcher.group( 1 ) );
                 DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
-                int optionComboId = Integer.parseInt( dataElementMatcher.group( 2 ) );
+                int optionComboId = Integer.parseInt( identifierMatcher.group( 2 ) );
                 DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
                 String optionComboName = optionCombo != null ? optionCombo.getName() : "";
 
