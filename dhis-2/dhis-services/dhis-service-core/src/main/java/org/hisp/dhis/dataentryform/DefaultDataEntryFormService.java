@@ -66,6 +66,7 @@ public class DefaultDataEntryFormService
     
     private static final String EMPTY_VALUE_TAG = "value=\"\"";
     private static final String EMPTY_TITLE_TAG = "title=\"\"";
+    private static final String TAG_CLOSE = "/>";
     private static final String EMPTY = "";
     
     // ------------------------------------------------------------------------
@@ -250,16 +251,16 @@ public class DefaultDataEntryFormService
         Collection<DataValue> dataValues, Map<String, MinMaxDataElement> minMaxMap, String disabled, I18n i18n, DataSet dataSet )
     {
         // ---------------------------------------------------------------------
-        // Inline Javascript to add to HTML before outputting
+        // Inline javascript to add to HTML before output
         // ---------------------------------------------------------------------
         
         int i = 1;
         final String jsCodeForInputFields = " name=\"entryfield\" $DISABLED onchange=\"saveValue( $DATAELEMENTID, $OPTIONCOMBOID, '$DATAELEMENTNAME' )\" style=\"text-align:center\" onkeyup=\"return keyPress(event, this)\" ";
-        final String jsCodeForSelectLists = " name=\"entryfield\" $DISABLED onchange=\"saveBoolean( $DATAELEMENTID, $OPTIONCOMBOID, this )\" onkeyup=\"return keyPress(event, this)\" >";
+        final String jsCodeForSelectLists = " name=\"entryfield\" $DISABLED onchange=\"saveBoolean( $DATAELEMENTID, $OPTIONCOMBOID, this )\" onkeyup=\"return keyPress(event, this)\" ";
         final String historyCode = " ondblclick='javascript:viewHistory( $DATAELEMENTID, $OPTIONCOMBOID, true )' ";
         
         // ---------------------------------------------------------------------
-        // Metadata code to add to HTML before outputting
+        // Metadata code to add to HTML before output
         // ---------------------------------------------------------------------
 
         final String metaDataCode = "<span id=\"value[$DATAELEMENTID].name\" style=\"display:none\">$DATAELEMENTNAME</span>"
@@ -279,16 +280,12 @@ public class DefaultDataEntryFormService
             // Get HTML input field code
             // -----------------------------------------------------------------
 
-            String dataElementCode = inputMatcher.group( 1 );
+            String inputHtml = inputMatcher.group();
 
-            Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( dataElementCode );
+            Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
 
             if ( identifierMatcher.find() && identifierMatcher.groupCount() > 0 )
             {
-                // -------------------------------------------------------------
-                // Get data element ID of data element
-                // -------------------------------------------------------------
-
                 int dataElementId = Integer.parseInt( identifierMatcher.group( 1 ) );
                 int optionComboId = Integer.parseInt( identifierMatcher.group( 2 ) );
 
@@ -296,7 +293,7 @@ public class DefaultDataEntryFormService
 
                 if ( dataElement == null )
                 {
-                    return "Data Element Id :" + dataElementId + " not found in this data set";
+                    return "Data element with id :" + dataElementId + " does not exist in this data set";
                 }
 
                 String dataElementValueType = dataElement.getType();
@@ -304,57 +301,47 @@ public class DefaultDataEntryFormService
                 String dataElementValue = getValue( dataValues, dataElementId, optionComboId );
 
                 // -------------------------------------------------------------
-                // Insert value of data element in output code
+                // Insert data value for data element in output code
                 // -------------------------------------------------------------
 
                 if ( dataElement.getType().equals( DataElement.VALUE_TYPE_BOOL ) )
                 {
-                    dataElementCode = dataElementCode.replace( "input", "select" );
-                    dataElementCode = dataElementCode.replaceAll( "value=\".*?\"", "" );
+                    inputHtml = inputHtml.replace( "input", "select" );
+                    inputHtml = inputHtml.replaceAll( "value=\".*?\"", "" );
                 }
                 else
                 {
-                    if ( dataElementCode.contains( EMPTY_VALUE_TAG ) )
+                    if ( inputHtml.contains( EMPTY_VALUE_TAG ) )
                     {
-                        dataElementCode = dataElementCode.replace( EMPTY_VALUE_TAG, "value=\"" + dataElementValue + "\"" );
+                        inputHtml = inputHtml.replace( EMPTY_VALUE_TAG, "value=\"" + dataElementValue + "\"" );
                     }
                     else
                     {
-                        dataElementCode += "value=\"" + dataElementValue + "\"";
+                        inputHtml += "value=\"" + dataElementValue + "\"";
                     }
                 }
-
-                // -------------------------------------------------------------
-                // Min-max values
-                // -------------------------------------------------------------
-
-                MinMaxDataElement minMaxDataElement = minMaxMap.get( dataElement.getId() + ":" + optionComboId );
-                String minValue = "No Min";
-                String maxValue = "No Max";
-
-                if ( minMaxDataElement != null )
-                {
-                    minValue = String.valueOf( minMaxDataElement.getMin() );
-                    maxValue = String.valueOf( minMaxDataElement.getMax() );
-                }
-
-                dataElementCode = dataElementCode.replaceAll( "view=\".*?\"", "" ); // For backwards compatibility
 
                 // -------------------------------------------------------------
                 // Insert title info
                 // -------------------------------------------------------------
 
+                MinMaxDataElement minMaxDataElement = minMaxMap.get( dataElement.getId() + ":" + optionComboId );
+                String minValue = minMaxDataElement != null ? String.valueOf( minMaxDataElement.getMin() ) : "-";
+                String maxValue = minMaxDataElement != null ? String.valueOf( minMaxDataElement.getMax() ) : "-";
+
+                inputHtml = inputHtml.replaceAll( "view=\".*?\"", "" ); // For backwards compatibility
+
                 StringBuilder title = new StringBuilder( "title=\"Name: " ).append( dataElement.getShortName() ).
                     append( " Type: " ).append( dataElement.getType() ).append( " Min: " ).append( minValue ).
                     append( " Max: " ).append( maxValue ).append( "\"" );
                 
-                if ( dataElementCode.contains( EMPTY_TITLE_TAG ) )
+                if ( inputHtml.contains( EMPTY_TITLE_TAG ) )
                 {
-                    dataElementCode = dataElementCode.replace( EMPTY_TITLE_TAG, title );
+                    inputHtml = inputHtml.replace( EMPTY_TITLE_TAG, title );
                 }
                 else
                 {
-                    dataElementCode += " " + title;
+                    inputHtml += " " + title;
                 }
 
                 // -------------------------------------------------------------
@@ -363,11 +350,11 @@ public class DefaultDataEntryFormService
                 // fields
                 // -------------------------------------------------------------
 
-                String appendCode = dataElementCode;
+                String appendCode = "";
 
                 if ( dataElement.getType().equals( VALUE_TYPE_BOOL ) )
                 {
-                    appendCode += jsCodeForSelectLists + "tabindex=\"" + i++ + "\"";
+                    appendCode += jsCodeForSelectLists + "tabindex=\"" + i++ + "\"" + TAG_CLOSE;
 
                     appendCode += "<option value=\"\">" + i18n.getString( "no_value" ) + "</option>";
 
@@ -400,28 +387,30 @@ public class DefaultDataEntryFormService
                         appendCode += historyCode;
                     }
 
-                    //appendCode += " />";
+                    appendCode += TAG_CLOSE;
                 }
 
-                appendCode += metaDataCode;
-                appendCode = appendCode.replace( "$DATAELEMENTID", String.valueOf( dataElementId ) );
-                appendCode = appendCode.replace( "$DATAELEMENTNAME", dataElement.getName() );
-                appendCode = appendCode.replace( "$DATAELEMENTTYPE", dataElementValueType );
-                appendCode = appendCode.replace( "$OPTIONCOMBOID", String.valueOf( optionComboId ) );
-                appendCode = appendCode.replace( "$DISABLED", disabled );
+                inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
+                
+                inputHtml += metaDataCode;
+                inputHtml = inputHtml.replace( "$DATAELEMENTID", String.valueOf( dataElementId ) );
+                inputHtml = inputHtml.replace( "$DATAELEMENTNAME", dataElement.getName() );
+                inputHtml = inputHtml.replace( "$DATAELEMENTTYPE", dataElementValueType );
+                inputHtml = inputHtml.replace( "$OPTIONCOMBOID", String.valueOf( optionComboId ) );
+                inputHtml = inputHtml.replace( "$DISABLED", disabled );
 
                 if ( minMaxDataElement == null )
                 {
-                    appendCode = appendCode.replace( "$MIN", minValue );
-                    appendCode = appendCode.replace( "$MAX", maxValue );
+                    inputHtml = inputHtml.replace( "$MIN", minValue );
+                    inputHtml = inputHtml.replace( "$MAX", maxValue );
                 }
                 else
                 {
-                    appendCode = appendCode.replace( "$MIN", String.valueOf( minMaxDataElement.getMin() ) );
-                    appendCode = appendCode.replace( "$MAX", String.valueOf( minMaxDataElement.getMax() ) );
+                    inputHtml = inputHtml.replace( "$MIN", String.valueOf( minMaxDataElement.getMin() ) );
+                    inputHtml = inputHtml.replace( "$MAX", String.valueOf( minMaxDataElement.getMax() ) );
                 }
 
-                inputMatcher.appendReplacement( sb, appendCode );
+                inputMatcher.appendReplacement( sb, inputHtml );
             }
         }
 
