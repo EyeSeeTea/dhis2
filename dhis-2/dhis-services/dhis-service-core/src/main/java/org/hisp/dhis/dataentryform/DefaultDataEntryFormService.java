@@ -170,7 +170,7 @@ public class DefaultDataEntryFormService
             // Get HTML code
             // -----------------------------------------------------------------
 
-            String inputHtml = inputMatcher.group( 1 );
+            String inputHtml = inputMatcher.group();
 
             Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
 
@@ -273,17 +273,17 @@ public class DefaultDataEntryFormService
 
         StringBuffer sb = new StringBuffer();
 
-        Matcher dataElementMatcher = INPUT_PATTERN.matcher( htmlCode );
+        Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
 
         Map<Integer, DataElement> dataElementMap = getDataElementMap( dataSet );
 
-        while ( dataElementMatcher.find() )
+        while ( inputMatcher.find() )
         {
             // -----------------------------------------------------------------
             // Get HTML input field code
             // -----------------------------------------------------------------
 
-            String dataElementCode = dataElementMatcher.group( 1 );
+            String dataElementCode = inputMatcher.group( 1 );
 
             Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( dataElementCode );
 
@@ -425,11 +425,11 @@ public class DefaultDataEntryFormService
                     appendCode = appendCode.replace( "$MAX", String.valueOf( minMaxDataElement.getMax() ) );
                 }
 
-                dataElementMatcher.appendReplacement( sb, appendCode );
+                inputMatcher.appendReplacement( sb, appendCode );
             }
         }
 
-        dataElementMatcher.appendTail( sb );
+        inputMatcher.appendTail( sb );
 
         return sb.toString();
     }
