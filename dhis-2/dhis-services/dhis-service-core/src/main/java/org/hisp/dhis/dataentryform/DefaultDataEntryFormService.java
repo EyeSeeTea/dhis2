@@ -59,8 +59,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultDataEntryFormService
     implements DataEntryFormService
 {
-    private static final Pattern INPUT_PATTERN = Pattern.compile( "(<input.*?)[/]?>", Pattern.DOTALL );
+    private static final Pattern INPUT_PATTERN = Pattern.compile( "(<input.*?/>)", Pattern.DOTALL );
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile( "value\\[(.*)\\].value:value\\[(.*)\\].value" );
+    private static final Pattern VALUE_TAG_PATTERN = Pattern.compile( "value=\"(.*?)\"", Pattern.DOTALL );
+    private static final Pattern TITLE_TAG_PATTERN = Pattern.compile( "title=\"(.*?)\"", Pattern.DOTALL );
+    
     private static final String EMPTY_VALUE_TAG = "value=\"\"";
     private static final String EMPTY_TITLE_TAG = "title=\"\"";
     private static final String EMPTY = "";
@@ -132,46 +135,23 @@ public class DefaultDataEntryFormService
 
         while ( inputMatcher.find() )
         {
-            // -----------------------------------------------------------------
-            // Get input HTML code (HTML input field code).
-            // -----------------------------------------------------------------
+            String dataElementCode = inputMatcher.group();
+            
+            Matcher valueTagMatcher = VALUE_TAG_PATTERN.matcher( dataElementCode );
+            Matcher titleTagMatcher = TITLE_TAG_PATTERN.matcher( dataElementCode );
 
-            String dataElementCode = inputMatcher.group( 1 );
-
-            // -----------------------------------------------------------------
-            // Pattern to extract data element name from data element field
-            // -----------------------------------------------------------------
-
-            Pattern patDataElementName = Pattern.compile( "value=\"\\[ (.*) \\]\"" );
-            Matcher matDataElementName = patDataElementName.matcher( dataElementCode );
-
-            Pattern patTitle = Pattern.compile( "title=\"-- (.*) --\"" );
-            Matcher matTitle = patTitle.matcher( dataElementCode );
-
-            if ( matDataElementName.find() && matDataElementName.groupCount() > 0 )
+            if ( valueTagMatcher.find() && valueTagMatcher.groupCount() > 0 )
             {
-                String temp = "[ " + matDataElementName.group( 1 ) + " ]";
-                dataElementCode = dataElementCode.replace( temp, "" );
-
-                if ( matTitle.find() && matTitle.groupCount() > 0 )
-                {
-                    temp = "-- " + matTitle.group( 1 ) + " --";
-                    dataElementCode = dataElementCode.replace( temp, "" );
-                }
-
-                // -------------------------------------------------------------
-                // Appends dataElementCode
-                // -------------------------------------------------------------
-
-                String appendCode = dataElementCode;
-                appendCode += "/>";
-                inputMatcher.appendReplacement( sb, appendCode );
+                dataElementCode = dataElementCode.replace( valueTagMatcher.group( 1 ), EMPTY );
             }
-        }
+            
+            if ( titleTagMatcher.find() && valueTagMatcher.groupCount() > 0 )
+            {
+                dataElementCode = dataElementCode.replace( titleTagMatcher.group( 1 ), EMPTY );
+            }
 
-        // ---------------------------------------------------------------------
-        // Add remaining code (after the last match), and return formatted code
-        // ---------------------------------------------------------------------
+            inputMatcher.appendReplacement( sb, dataElementCode );
+        }
 
         inputMatcher.appendTail( sb );
 
@@ -224,7 +204,7 @@ public class DefaultDataEntryFormService
                     }
 
                     StringBuilder title = new StringBuilder( "title=\"[ " ).append( dataElement.getId() ).append( " - " ).
-                        append( dataElement.getName() ).append( " - " ).append( optionComboId ).append( " - " ).
+                        append( dataElement.getShortName() ).append( " - " ).append( optionComboId ).append( " - " ).
                         append( optionComboName ).append( " - " ).append( dataElement.getType() ).append( " ]\"" );
                     
                     if ( inputHtml.contains( EMPTY_TITLE_TAG ) )
@@ -257,7 +237,7 @@ public class DefaultDataEntryFormService
                     }
                 }
 
-                inputHtml += "/>";
+                //inputHtml += "/>";
                 inputMatcher.appendReplacement( sb, inputHtml );
             }
         }
@@ -425,7 +405,7 @@ public class DefaultDataEntryFormService
                         appendCode += historyCode;
                     }
 
-                    appendCode += " />";
+                    //appendCode += " />";
                 }
 
                 appendCode += metaDataCode;
