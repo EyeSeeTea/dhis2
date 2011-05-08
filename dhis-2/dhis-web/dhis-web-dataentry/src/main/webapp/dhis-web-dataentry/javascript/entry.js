@@ -160,18 +160,15 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
     
     this.save = function()
     {
-        var request = new Request();
-        request.setCallbackSuccess( handleResponse );
-        request.setCallbackError( handleHttpError );
-        request.setResponseTypeXML( 'status' );        
-        request.send( 'saveValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
-                dataElementId + '&optionComboId=' + optionComboId + '&value=' + value );
+        var url = 'saveValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
+                dataElementId + '&optionComboId=' + optionComboId + '&value=' + value;
+                
+        $.ajax( { url: url, dataType: 'json', success: handleResponse, error: handleError } );
     };
     
-    function handleResponse( rootElement )
+    function handleResponse( json )
     {
-        var codeElement = rootElement.getElementsByTagName( 'code' )[0];
-        var code = parseInt( codeElement.firstChild.nodeValue );
+        var code = json.code;
         
         if ( code == 0 )
         {
@@ -184,10 +181,10 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
         }
     }
     
-    function handleHttpError( errorCode )
+    function handleError( jqXHR, textStatus, errorThrown )
     {
         markValue( COLOR_RED );
-        window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+        window.alert( i18n_saving_value_failed_error_code + '\n\n' + textStatus );
     }   
     
     function markValue( color )
