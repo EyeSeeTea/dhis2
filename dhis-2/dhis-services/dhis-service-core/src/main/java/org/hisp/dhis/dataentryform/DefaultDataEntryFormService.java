@@ -59,8 +59,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultDataEntryFormService
     implements DataEntryFormService
 {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile( "value\\[(.*)\\].value:value\\[(.*)\\].value" );
     private static final Pattern INPUT_PATTERN = Pattern.compile( "(<input.*?)[/]?>", Pattern.DOTALL );
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile( "value\\[(.*)\\].value:value\\[(.*)\\].value" );
+    private static final String EMPTY_VALUE_TAG = "value=\"\"";
+    private static final String EMPTY_TITLE_TAG = "title=\"\"";
     private static final String EMPTY = "";
     
     // ------------------------------------------------------------------------
@@ -185,23 +187,15 @@ public class DefaultDataEntryFormService
         while ( inputMatcher.find() )
         {
             // -----------------------------------------------------------------
-            // Get input HTML code
+            // Get HTML code
             // -----------------------------------------------------------------
 
-            String dataElementCode = inputMatcher.group( 1 );
+            String inputHtml = inputMatcher.group( 1 );
 
-            // -----------------------------------------------------------------
-            // Pattern to extract data element ID from data element field
-            // -----------------------------------------------------------------
-
-            Matcher dataElementMatcher = IDENTIFIER_PATTERN.matcher( dataElementCode );
+            Matcher dataElementMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
 
             if ( dataElementMatcher.find() && dataElementMatcher.groupCount() > 0 )
             {
-                // -------------------------------------------------------------
-                // Get data element id,name, optionCombo id,name of data element
-                // -------------------------------------------------------------
-
                 int dataElementId = Integer.parseInt( dataElementMatcher.group( 1 ) );
                 DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
@@ -210,65 +204,61 @@ public class DefaultDataEntryFormService
                 String optionComboName = optionCombo != null ? optionCombo.getName() : "";
 
                 // -------------------------------------------------------------
-                // Insert name of data element in output code
+                // Insert name of data element operand as value and title in
+                // the HTML code
                 // -------------------------------------------------------------
 
-                String displayValue = "Data element does not exist";
+                String displayValue = "[ Data element does not exist ]";
 
                 if ( dataElement != null )
                 {
-                    displayValue = dataElement.getShortName() + " " + optionComboName;
+                    displayValue = "[ " + dataElement.getShortName() + " " + optionComboName + " ]";
 
-                    if ( dataElementCode.contains( "value=\"\"" ) )
+                    if ( inputHtml.contains( EMPTY_VALUE_TAG ) )
                     {
-                        dataElementCode = dataElementCode.replace( "value=\"\"", "value=\"[ " + displayValue + " ]\"" );
+                        inputHtml = inputHtml.replace( EMPTY_VALUE_TAG, "value=\"" + displayValue + "\"" );
                     }
                     else
                     {
-                        dataElementCode += " value=\"[ " + displayValue + " ]\"";
+                        inputHtml += " value=\"" + displayValue + "\"";
                     }
 
-                    StringBuilder title = new StringBuilder( "title=\"" ).append( dataElement.getId() ).append( " - " ).
+                    StringBuilder title = new StringBuilder( "title=\"[ " ).append( dataElement.getId() ).append( " - " ).
                         append( dataElement.getName() ).append( " - " ).append( optionComboId ).append( " - " ).
-                        append( optionComboName ).append( " - " ).append( dataElement.getType() ).append( "\"" );
+                        append( optionComboName ).append( " - " ).append( dataElement.getType() ).append( " ]\"" );
                     
-                    if ( dataElementCode.contains( "title=\"\"" ) )
+                    if ( inputHtml.contains( EMPTY_TITLE_TAG ) )
                     {
-                        dataElementCode = dataElementCode.replace( "title=\"\"", title );
+                        inputHtml = inputHtml.replace( EMPTY_TITLE_TAG, title );
                     }
                     else
                     {
-                        dataElementCode += " " + title;
+                        inputHtml += " " + title;
                     }
                 }
                 else
                 {
-                    if ( dataElementCode.contains( "value=\"\"" ) )
+                    if ( inputHtml.contains( EMPTY_VALUE_TAG ) )
                     {
-                        dataElementCode = dataElementCode.replace( "value=\"\"", "value=\"[ " + displayValue + " ]\"" );
+                        inputHtml = inputHtml.replace( EMPTY_VALUE_TAG, "value=\"" + displayValue + "\"" );
                     }
                     else
                     {
-                        dataElementCode += " value=\"[ " + displayValue + " ]\"";
+                        inputHtml += " value=\"" + displayValue + "\"";
                     }
 
-                    if ( dataElementCode.contains( "title=\"\"" ) )
+                    if ( inputHtml.contains( EMPTY_TITLE_TAG ) )
                     {
-                        dataElementCode = dataElementCode.replace( "title=\"\"", "title=\"" + displayValue + "\"" );
+                        inputHtml = inputHtml.replace( EMPTY_TITLE_TAG, "title=\"" + displayValue + "\"" );
                     }
                     else
                     {
-                        dataElementCode += " title=\"" + displayValue + "\"";
+                        inputHtml += " title=\"" + displayValue + "\"";
                     }
                 }
 
-                // -------------------------------------------------------------
-                // Appends dataElementCode
-                // -------------------------------------------------------------
-
-                String appendCode = dataElementCode;
-                appendCode += "/>";
-                inputMatcher.appendReplacement( sb, appendCode );
+                inputHtml += "/>";
+                inputMatcher.appendReplacement( sb, inputHtml );
             }
         }
 
@@ -349,9 +339,9 @@ public class DefaultDataEntryFormService
                 }
                 else
                 {
-                    if ( dataElementCode.contains( "value=\"\"" ) )
+                    if ( dataElementCode.contains( EMPTY_VALUE_TAG ) )
                     {
-                        dataElementCode = dataElementCode.replace( "value=\"\"", "value=\"" + dataElementValue + "\"" );
+                        dataElementCode = dataElementCode.replace( EMPTY_VALUE_TAG, "value=\"" + dataElementValue + "\"" );
                     }
                     else
                     {
@@ -383,9 +373,9 @@ public class DefaultDataEntryFormService
                     append( " Type: " ).append( dataElement.getType() ).append( " Min: " ).append( minValue ).
                     append( " Max: " ).append( maxValue ).append( "\"" );
                 
-                if ( dataElementCode.contains( "title=\"\"" ) )
+                if ( dataElementCode.contains( EMPTY_TITLE_TAG ) )
                 {
-                    dataElementCode = dataElementCode.replace( "title=\"\"", title );
+                    dataElementCode = dataElementCode.replace( EMPTY_TITLE_TAG, title );
                 }
                 else
                 {
