@@ -237,7 +237,6 @@ public class DefaultDataEntryFormService
                     }
                 }
 
-                //inputHtml += "/>";
                 inputMatcher.appendReplacement( sb, inputHtml );
             }
         }
