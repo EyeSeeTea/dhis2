@@ -135,6 +135,10 @@ public class DefaultDataEntryFormService
 
         while ( inputMatcher.find() )
         {
+            // -----------------------------------------------------------------
+            // Remove value and title tags from the HTML code
+            // -----------------------------------------------------------------
+
             String dataElementCode = inputMatcher.group();
             
             Matcher valueTagMatcher = VALUE_TAG_PATTERN.matcher( dataElementCode );
@@ -166,10 +170,6 @@ public class DefaultDataEntryFormService
 
         while ( inputMatcher.find() )
         {
-            // -----------------------------------------------------------------
-            // Get HTML code
-            // -----------------------------------------------------------------
-
             String inputHtml = inputMatcher.group();
 
             Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
@@ -240,10 +240,6 @@ public class DefaultDataEntryFormService
                 inputMatcher.appendReplacement( sb, inputHtml );
             }
         }
-
-        // ---------------------------------------------------------------------
-        // Add remaining code (after the last match), and return formatted code
-        // ---------------------------------------------------------------------
 
         inputMatcher.appendTail( sb );
 
