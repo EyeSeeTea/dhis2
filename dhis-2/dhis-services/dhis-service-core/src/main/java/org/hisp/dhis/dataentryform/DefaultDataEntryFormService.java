@@ -354,7 +354,7 @@ public class DefaultDataEntryFormService
 
                 if ( dataElement.getType().equals( VALUE_TYPE_BOOL ) )
                 {
-                    appendCode += jsCodeForSelectLists + "tabindex=\"" + i++ + "\"" + TAG_CLOSE;
+                    appendCode += jsCodeForSelectLists + "tabindex=\"" + i++ + "\">";
 
                     appendCode += "<option value=\"\">" + i18n.getString( "no_value" ) + "</option>";
 
