@@ -21,7 +21,8 @@
     </property>
 
     <set name="members" table="indicatorgroupmembers">
-      <key column="indicatorgroupid" />
+      <cache usage="read-write" />
+      <key column="indicatorgroupid" foreign-key="fk_indicatorgroupmembers_indicatorgroupid" />
       <many-to-many class="org.hisp.dhis.indicator.Indicator" column="indicatorid" foreign-key="fk_indicatorgroup_indicatorid" />
     </set>
 

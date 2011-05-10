@@ -21,7 +21,8 @@
     </property>
 
     <list name="members" table="indicatorgroupsetmembers">
-      <key column="indicatorgroupsetid" />
+      <cache usage="read-write" />
+      <key column="indicatorgroupsetid" foreign-key="fk_indicatorgroupsetmembers_indicatorgroupsetid" />
       <list-index column="sort_order" base="1" />
       <many-to-many class="org.hisp.dhis.indicator.IndicatorGroup" column="indicatorgroupid" unique="true"
         foreign-key="fk_indicatorgroupset_indicatorgroupid" />

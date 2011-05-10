@@ -227,7 +227,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE aggregateddatavalue DROP COLUMN modified");
         executeSql( "ALTER TABLE aggregatedindicatorvalue DROP COLUMN modified ");
         executeSql( "UPDATE indicatortype SET indicatornumber=false WHERE indicatornumber is null" );
-        
+
         // remove outdated relative periods
         
         executeSql( "ALTER TABLE reporttable DROP COLUMN last3months" );
@@ -279,7 +279,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE datavaluearchive DROP CONSTRAINT fk_datavaluearchive_sourceid" );
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT fke509dd5ef1c932ed" );
         executeSql( "DROP TABLE source CASCADE" );        
-        
+
         log.info( "Tables updated" );
     }
 

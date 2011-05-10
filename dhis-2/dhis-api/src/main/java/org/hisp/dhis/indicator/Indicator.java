@@ -27,10 +27,8 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.AbstractNameableObject;
@@ -42,6 +40,11 @@ import org.hisp.dhis.common.AbstractNameableObject;
 public class Indicator
     extends AbstractNameableObject
 {
+    /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = -6551567526188061690L;
+
     private Boolean annualized;
 
     private IndicatorType indicatorType;
@@ -69,8 +72,6 @@ public class Indicator
     private Date lastUpdated;
     
     private Set<IndicatorGroup> groups =  new HashSet<IndicatorGroup>();
-    
-    private List<IndicatorGroupSet> groupSets = new ArrayList<IndicatorGroupSet>();
     
     // -------------------------------------------------------------------------
     // Logic
@@ -262,15 +263,5 @@ public class Indicator
     public void setGroups( Set<IndicatorGroup> groups )
     {
         this.groups = groups;
-    }
-
-    public List<IndicatorGroupSet> getGroupSets()
-    {
-        return groupSets;
-    }
-
-    public void setGroupSets( List<IndicatorGroupSet> groupSets )
-    {
-        this.groupSets = groupSets;
     }
 }

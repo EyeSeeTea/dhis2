@@ -1,7 +1,32 @@
 
 function organisationUnitSelected( orgUnits )
 {		
-    window.location.href = 'patient.action';    
+	$.getJSON( 'organisationUnitHasPatients.action?orgunitId=' + orgUnits[0], function( json ) 
+	{
+		var type = json.response;
+		
+		if( type == 'success' )
+		{
+			showLoader();
+			
+			var url = 'patientform.action';
+			$('#patientListDiv').load( url, function()
+			{
+				enable('listAllPatientsBtn');
+				setFieldValue('selectedOrgunitText', getFieldValue('orgunitname') );
+				setInnerHTML('warnmessage', '');
+				hideLoader();
+			});
+			
+		}
+		else if( type == 'input' )
+		{
+			setInnerHTML('warnmessage', i18n_can_not_register_patient_for_orgunit);
+			setFieldValue('selectedOrgunitText', i18n_please_select_village );
+			disable('listAllPatientsBtn');
+			setInnerHTML('patientListDiv', '');
+		}
+	} );
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -719,12 +744,16 @@ function searchPatients()
 {
 	showLoader();
 	
-	var url  = 'searchPatient.action?';
-		url += 'searchText=' + getFieldValue('searchText');
-		url += '&searchingAttributeId=' + getFieldValue('searchingAttributeId');
-		url += '&sortPatientAttributeId=' + getFieldValue('sortPatientAttributeId');
-		url += '&programId=' + getFieldValue('programId');
-	$('#contentDiv').load(url);
+	$('#contentDiv').load("searchPatient.action", 
+		{
+			searchText: getFieldValue('searchText'), 
+			searchingAttributeId: getFieldValue('searchingAttributeId'), 
+			sortPatientAttributeId: getFieldValue('sortPatientAttributeId'), 
+			programId: getFieldValue('programId') 
+		}
+		, function(){
+			
+		});
 	
 	hideLoader();
 }

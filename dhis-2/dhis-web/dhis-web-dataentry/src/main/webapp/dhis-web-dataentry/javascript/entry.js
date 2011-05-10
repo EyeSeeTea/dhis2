@@ -7,6 +7,78 @@ var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
 var COLOR_RED = '#ff8a8a';
 
+var indicatorFormulas = new Array();
+
+var FORMULA_PATTERN = /\[.+?\]/g;
+var SEPARATOR = '.';
+
+/**
+ * Updates all indicator input fields with the calculated value based on the
+ * values in the input entry fields in the form.
+ */
+function updateIndicators()
+{
+	var entryFieldValues = getEntryFieldValues();
+
+	$( 'input[name="indicator"]' ).each( function( index ) {
+		var indicatorId = $( this ).attr( 'indicatorId' );
+		var formula = indicatorFormulas[ indicatorId ];
+		
+		var expression = generateExpression( formula );		
+		var value = eval( expression );
+		
+		if ( value )
+		{
+			$( this ).attr( 'value', value );
+		}
+	} );
+}
+
+/**
+ * Returns an associative array with an entry for each entry input field in the
+ * form where the key is the input field id and the value is the input field value.
+ */
+function getEntryFieldValues()
+{
+	var entryFieldValues = new Array();
+	
+	$( 'input[name="entryfield"]' ).each( function( index ) {
+		entryFieldValues[ $( this ).attr( 'id' ) ] = $( this ).attr( 'value' );
+	} );
+	
+	return entryFieldValues;
+}
+
+/**
+ * Parses the expression and substitues the operand identifiers with the value of
+ * the corresponding input entry field.
+ */
+function generateExpression( expression )
+{
+	var matcher = expression.match( FORMULA_PATTERN );
+	
+	for ( k in matcher )
+	{
+		var match = matcher[k];
+		var operand = match.replace( /[\[\]]/g, '' ); // Remove brackets from expression to simplify extraction of identifiers
+		
+		var dataElementId = operand.substring( 0, operand.indexOf( SEPARATOR ) );
+		var categoryOptionComboId = operand.substring( operand.indexOf( SEPARATOR ) + 1, operand.length );
+		
+		var entryFieldId = 'value[' + dataElementId + '].value:value[' + categoryOptionComboId + '].value';		
+		var entryField = document.getElementById( entryFieldId );
+		
+		var value = entryField && entryField.value ? entryField.value : '0';
+		
+		expression = expression.replace( match, value );
+	}
+	
+	return expression;
+}
+
+/**
+/* Used by default and section forms.
+*/
 function saveVal( dataElementId, optionComboId )
 {
 	var dataElementName = document.getElementById( 'value[' + dataElementId + '].name' ).innerHTML;
@@ -14,7 +86,10 @@ function saveVal( dataElementId, optionComboId )
 	saveValue( dataElementId, optionComboId, dataElementName, null );
 }
 
-function saveValue( dataElementId, optionComboId, dataElementName, zeroValueSaveMode ) // ZeroValueSaveMode kept for CDE backwards compatibility
+/**
+/* Used by custom forms.
+*/
+function saveValue( dataElementId, optionComboId, dataElementName )
 {
     var field = document.getElementById( 'value[' + dataElementId + '].value' + ':' +  'value[' + optionComboId + '].value');
     var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML;   
@@ -154,18 +229,15 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
     
     this.save = function()
     {
-        var request = new Request();
-        request.setCallbackSuccess( handleResponse );
-        request.setCallbackError( handleHttpError );
-        request.setResponseTypeXML( 'status' );        
-        request.send( 'saveValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
-                dataElementId + '&optionComboId=' + optionComboId + '&value=' + value );
+        var url = 'saveValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
+                dataElementId + '&optionComboId=' + optionComboId + '&value=' + value;
+                
+        $.ajax( { url: url, dataType: 'json', success: handleResponse, error: handleError } );
     };
     
-    function handleResponse( rootElement )
+    function handleResponse( json )
     {
-        var codeElement = rootElement.getElementsByTagName( 'code' )[0];
-        var code = parseInt( codeElement.firstChild.nodeValue );
+        var code = json.code;
         
         if ( code == 0 )
         {
@@ -178,10 +250,10 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
         }
     }
     
-    function handleHttpError( errorCode )
+    function handleError( jqXHR, textStatus, errorThrown )
     {
         markValue( COLOR_RED );
-        window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+        window.alert( i18n_saving_value_failed_error_code + '\n\n' + textStatus );
     }   
     
     function markValue( color )

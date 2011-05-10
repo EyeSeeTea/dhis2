@@ -32,7 +32,6 @@ import java.util.Collection;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -52,13 +51,6 @@ public class SearchPatientFormAction
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -87,9 +79,7 @@ public class SearchPatientFormAction
         throws Exception
     {
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        patientAttributes = patientAttributeService.getAllPatientAttributes();
-
+        
         return SUCCESS;
     }
 }

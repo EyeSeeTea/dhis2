@@ -27,10 +27,6 @@
 
 package org.hisp.dhis.patient.action.patient;
 
-import java.util.Collection;
-
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
@@ -42,8 +38,6 @@ import com.opensymphony.xwork2.Action;
 public class SelectAction
     implements Action
 {
-    private static final String PATIENT_FORM = "patientform";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -55,31 +49,6 @@ public class SelectAction
         this.selectionManager = selectionManager;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input/output
-    // -------------------------------------------------------------------------
-
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -87,27 +56,8 @@ public class SelectAction
     public String execute()
         throws Exception
     {
-        message = "";
-        
-        // ---------------------------------------------------------------------
-        // Validate selected OrganisationUnit
-        // ---------------------------------------------------------------------
-        
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        selectionManager.clearSelectedOrganisationUnits();
 
-        if ( organisationUnit == null )
-        {
-            return SUCCESS;
-        }
-
-        Collection<OrganisationUnit> orgunits = organisationUnitService.getOrganisationUnits( true );
-
-        if ( !orgunits.contains( organisationUnit ) )
-        {
-            message = "can_not_register_patient_for_orgunit";
-            return SUCCESS;
-        }
-
-        return PATIENT_FORM;
+        return SUCCESS;
     }
 }

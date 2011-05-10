@@ -37,6 +37,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
@@ -73,7 +74,14 @@ public class GetDataSetAction
     {
         this.dataElementComparator = dataElementComparator;
     }
-   
+
+    private Comparator<Indicator> indicatorComparator;
+
+    public void setIndicatorComparator( Comparator<Indicator> indicatorComparator )
+    {
+        this.indicatorComparator = indicatorComparator;
+    }
+
     private SelectionTreeManager selectionTreeManager;
 
     public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
@@ -111,20 +119,27 @@ public class GetDataSetAction
         return dataSetDataElements;
     }
 
+    private List<Indicator> dataSetIndicators;
+
+    public List<Indicator> getDataSetIndicators()
+    {
+        return dataSetIndicators;
+    }
+
     private DataEntryForm dataEntryForm;
-    
+
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
     }
-    
+
     private DataElementCategoryCombo categoryCombo;
 
     public DataElementCategoryCombo getCategoryCombo()
     {
-    	return categoryCombo;
+        return categoryCombo;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action
     // -------------------------------------------------------------------------
@@ -136,14 +151,18 @@ public class GetDataSetAction
 
         dataSetDataElements = new ArrayList<DataElement>( dataSet.getDataElements() );
 
-        Collections.sort( dataSetDataElements, dataElementComparator );       
-                	
+        Collections.sort( dataSetDataElements, dataElementComparator );
+
+        dataSetIndicators = new ArrayList<Indicator>( dataSet.getIndicators() );
+
+        Collections.sort( dataSetIndicators, indicatorComparator );
+
         displayPropertyHandler.handle( dataSetDataElements );
 
-        dataEntryForm = dataSet.getDataEntryForm();        
-        
+        dataEntryForm = dataSet.getDataEntryForm();
+
         selectionTreeManager.setSelectedOrganisationUnits( dataSet.getSources() );
-        
+
         return SUCCESS;
     }
 }

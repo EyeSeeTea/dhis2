@@ -100,6 +100,7 @@ import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.ui.RectangleInsets;
 import org.jfree.util.TableOrder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -539,17 +540,21 @@ public class DefaultChartService
             plot.setRenderer( 1, lineRenderer );
         }
 
+        JFreeChart jFreeChart = new JFreeChart( chart.getTitle(), titleFont, plot, !chart.isHideLegend() );
+
         if ( chart.isTargetLine() )
         {
             Marker marker = new ValueMarker( chart.getTargetLineValue() );
             marker.setPaint( Color.BLACK );
-            marker.setStroke( new BasicStroke( 1.2f ) );
+            marker.setStroke( new BasicStroke( 1.1f ) );
+            marker.setLabel( chart.getTargetLineLabel() );
+            marker.setLabelOffset( new RectangleInsets( -10, 40, 0, 0 ) );
+            marker.setLabelFont( subTitleFont );
 
             plot.addRangeMarker( marker );
         }
 
-        JFreeChart jFreeChart = new JFreeChart( chart.getTitle(), titleFont, plot, !chart.isHideLegend() );
-
+        
         if ( subTitle )
         {
             jFreeChart.addSubtitle( getSubTitle( chart, chart.getFormat() ) );

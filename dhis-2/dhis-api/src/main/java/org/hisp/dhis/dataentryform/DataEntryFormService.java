@@ -29,6 +29,12 @@ package org.hisp.dhis.dataentryform;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.datavalue.DataValue;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.minmax.MinMaxDataElement;
 
 /**
  * @author Bharath Kumar
@@ -86,14 +92,46 @@ public interface DataEntryFormService
      */
     Collection<DataEntryForm> getAllDataEntryForms();    
     
+    /**
+     * Return the DataEntryForms with the given collection of identifiers. If the
+     * given argument is null, all DataEntryForms are returned.
+     * 
+     * @param identifiers the collection of identifiers.
+     * @return a collection of DataEntryForms.
+     */
     Collection<DataEntryForm> getDataEntryForms( final Collection<Integer> identifiers );
     
     /**
-     * Prepare DataEntryForm code
+     * Prepare DataEntryForm code for persisting.
      * 
-     * @return htmlCode.
+     * @return htmlCode the HTML code of the data entry form.
      */
-    String prepareDataEntryFormCode( String preparedCode );
+    String prepareDataEntryFormForSave( String htmlCode );
+
+    /**
+     * Prepares the data entry form code by injecting the data element operand
+     * name as value and title for each entry field.
+     * 
+     * @param htmlCode the HTML code of the data entry form.
+     * @return HTML code for the data entry form.
+     */
+    String prepareDataEntryFormForEdit( String htmlCode );
+    
+    /**
+     * Prepares the data entry form for data entry by injecting required javascripts
+     * and drop down lists.
+     * 
+     * @param htmlCode the HTML code of the data entry form. 
+     * @param dataValues the data values which are registered for this form.
+     * @param minMaxMap a map with data element operand identifier as key and
+     *        corresponding min max data element as value.
+     * @param disabled whether this form is disabled for entry.
+     * @param i18n the i18n object.
+     * @param dataSet the data set associated with this form.
+     * @return HTML code for the form.
+     */
+    String prepareDataEntryFormForEntry( String htmlCode,
+        Collection<DataValue> dataValues, Map<String, MinMaxDataElement> minMaxMap, String disabled, I18n i18n, DataSet dataSet );
     
     Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds );
     

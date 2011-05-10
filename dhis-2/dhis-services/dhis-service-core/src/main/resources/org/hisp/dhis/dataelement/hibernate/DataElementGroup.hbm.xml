@@ -21,7 +21,8 @@
     </property>
 
     <set name="members" table="dataelementgroupmembers">
-      <key column="dataelementgroupid" />
+      <cache usage="read-write" />
+      <key column="dataelementgroupid" foreign-key="fk_dataelementgroupmembers_dataelementgroupid" />
       <many-to-many class="org.hisp.dhis.dataelement.DataElement" column="dataelementid"
         foreign-key="fk_dataelementgroup_dataelementid" />
     </set>

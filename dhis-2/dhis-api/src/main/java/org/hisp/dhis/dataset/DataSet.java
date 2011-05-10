@@ -35,6 +35,7 @@ import org.hisp.dhis.common.AbstractNameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 
@@ -49,6 +50,11 @@ public class DataSet
     extends AbstractNameableObject
 {
     /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = -2466830446144115499L;
+
+    /**
      * The PeriodType indicating the frequency that this DataSet should be used
      */
     private PeriodType periodType;
@@ -58,6 +64,12 @@ public class DataSet
      */
     private Collection<DataElement> dataElements = new HashSet<DataElement>();
 
+    /**
+     * Indicators associated with this data set. Indicators are used for view and
+     * output purposes, such as calculated fields in forms and reports.
+     */
+    private Set<Indicator> indicators = new HashSet<Indicator>();
+    
     /**
      * The DataElementOperands for which data must be entered in order for the
      * DataSet to be considered as complete.
@@ -223,6 +235,16 @@ public class DataSet
     public void setDataElements( Collection<DataElement> dataElements )
     {
         this.dataElements = dataElements;
+    }
+
+    public Set<Indicator> getIndicators()
+    {
+        return indicators;
+    }
+
+    public void setIndicators( Set<Indicator> indicators )
+    {
+        this.indicators = indicators;
     }
 
     public Set<DataElementOperand> getCompulsoryDataElementOperands()

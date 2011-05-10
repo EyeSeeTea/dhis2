@@ -20,7 +20,8 @@
     <property name="compulsory" not-null="true" />
 
     <set name="organisationUnitGroups" table="orgunitgroupsetmembers">
-      <key column="orgunitgroupsetid" />
+      <cache usage="read-write" />
+      <key column="orgunitgroupsetid" foreign-key="fk_orgunitgroupsetmembers_orgunitgroupsetid" />
       <many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnitGroup" column="orgunitgroupid"
         foreign-key="fk_orgunitgroupset_orgunitgroupid" />
     </set>

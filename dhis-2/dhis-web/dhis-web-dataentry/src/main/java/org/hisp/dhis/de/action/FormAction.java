@@ -44,13 +44,13 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementSortOrderComparator;
 import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.datalock.DataSetLock;
 import org.hisp.dhis.datalock.DataSetLockService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.de.comments.StandardCommentsManager;
-import org.hisp.dhis.de.screen.DataEntryScreenManager;
 import org.hisp.dhis.de.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.minmax.MinMaxDataElement;
@@ -107,11 +107,11 @@ public class FormAction
         this.selectedStateManager = selectedStateManager;
     }
 
-    private DataEntryScreenManager dataEntryScreenManager;
+    private DataEntryFormService dataEntryFormService;
 
-    public void setDataEntryScreenManager( DataEntryScreenManager dataEntryScreenManager )
+    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
     {
-        this.dataEntryScreenManager = dataEntryScreenManager;
+        this.dataEntryFormService = dataEntryFormService;
     }
 
     private DataElementCategoryService categoryService;
@@ -380,18 +380,20 @@ public class FormAction
             // Calculating the number of times each category should be repeated
             // -----------------------------------------------------------------
 
-            int catColSpan = optionCombos.size();
-
             Map<Integer, Integer> catRepeat = new HashMap<Integer, Integer>();
 
             Map<Integer, Collection<Integer>> colRepeat = new HashMap<Integer, Collection<Integer>>();
 
+            int catColSpan = optionCombos.size();
+
             for ( DataElementCategory cat : categoryCombo.getCategories() )
             {
-                if ( catColSpan > 0 && cat.getCategoryOptions().size() > 0 )
+                int categoryOptionSize = cat.getCategoryOptions().size();
+                
+                if ( catColSpan > 0 && categoryOptionSize > 0 )
                 {
-                    catColSpan = catColSpan / cat.getCategoryOptions().size();
-                    int total = optionCombos.size() / (catColSpan * cat.getCategoryOptions().size());
+                    catColSpan = catColSpan / categoryOptionSize;
+                    int total = optionCombos.size() / ( catColSpan * categoryOptionSize );
                     Collection<Integer> cols = new ArrayList<Integer>( total );
 
                     for ( int i = 0; i < total; i++ )
@@ -472,7 +474,7 @@ public class FormAction
 
         if ( cdeFormExists )
         {
-            customDataEntryFormCode = dataEntryScreenManager.populateCustomDataEntryScreenForMultiDimensional(
+            customDataEntryFormCode = dataEntryFormService.prepareDataEntryFormForEntry(
                 dataEntryForm.getHtmlCode(), dataValues, minMaxMap, disabled, i18n, dataSet );
         }
 

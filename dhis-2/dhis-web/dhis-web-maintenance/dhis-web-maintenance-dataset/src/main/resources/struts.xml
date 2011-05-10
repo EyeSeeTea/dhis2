@@ -153,16 +153,28 @@
     
     <action name="editDataSetForm"
       class="org.hisp.dhis.dataset.action.DataElementListFilteredByGroup">
+      <result name="success" type="chain">indicatorListFilteredByGroup</result>
+      <param name="requiredAuthorities">F_DATASET_UPDATE</param>
+    </action>
+
+    <action name="indicatorListFilteredByGroup"
+      class="org.hisp.dhis.dataset.action.IndicatorListFilteredByGroup">
       <result name="success" type="chain">dataElementGroupListEditChain</result>
       <param name="requiredAuthorities">F_DATASET_UPDATE</param>
     </action>
-    
+
     <action name="dataElementGroupListEditChain"
       class="org.hisp.dhis.dataset.action.DataElementGroupListAction">
+      <result name="success" type="chain">indicatorGroupListEditChain</result>
+      <param name="requiredAuthorities">F_DATASET_UPDATE</param>
+    </action>
+
+    <action name="indicatorGroupListEditChain"
+      class="org.hisp.dhis.dataset.action.IndicatorGroupListAction">
       <result name="success" type="chain">getDataSetEditChain</result>
       <param name="requiredAuthorities">F_DATASET_UPDATE</param>
     </action>
-    
+
     <action name="getDataSetEditChain"
       class="org.hisp.dhis.dataset.action.GetDataSetAction">
       <result name="success" type="chain">periodTypeListEditChain</result>
@@ -213,6 +225,12 @@
       <result name="success" type="velocity-xml">/dhis-web-maintenance-dataset/responseDataElementGroup.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
+
+    <action name="filterAvailableIndicatorsByIndicatorGroup"
+      class="org.hisp.dhis.dataset.action.IndicatorListFilteredByGroup">
+      <result name="success" type="velocity-xml">/dhis-web-maintenance-dataset/responseIndicatorGroup.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
 	
     <action name="filterDataElementsByDataElementGroupForSection"
       class="org.hisp.dhis.dataset.action.section.DataElementListFilteredByGroupForSection">
@@ -241,15 +259,12 @@
       class="org.hisp.dhis.dataset.action.dataentryform.GetSelectedDataElementsAction">
       <result name="success" type="chain">viewDataEntryFormChain</result>
     </action>
-        
+
     <action name="viewDataEntryForm"
       class="org.hisp.dhis.dataset.action.dataentryform.ViewDataEntryFormAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-dataset/viewDataEntryForm.vm</param>
-      <param name="javascripts">
-      	../dhis-web-commons/ckeditor/ckeditor.js, ../dhis-web-commons/ckeditor/adapters/jquery.js, javascript/dataEntryForm.js
-      </param>
-      <param name="stylesheets">css/cde.css</param>
+      <param name="javascripts">../dhis-web-commons/ckeditor/ckeditor.js, ../dhis-web-commons/ckeditor/adapters/jquery.js, javascript/dataEntryForm.js</param>
     </action>
     
     <action name="saveDataEntryForm"
@@ -287,13 +302,7 @@
       <result name="success" type="velocity-xml">/dhis-web-maintenance-dataset/responseSelDataElementList.vm</result>
       <param name="javascripts">javascript/dataEntryForm.js,javascript/FCK/fckeditor.js</param>
     </action>
-    
-    <action name="getOptionCombos"
-      class="org.hisp.dhis.dataset.action.dataentryform.GetOptionCombosAction">
-      <result name="success" type="velocity-xml">/dhis-web-maintenance-dataset/responseOptionCombo.vm</result>
-      <param name="javascripts">javascript/dataEntryForm.js,javascript/FCK/fckeditor.js</param>
-    </action>
-    
+        
     <!-- Compulsory data elements -->
   
     <action name="displayCompulsoryDataElementsForm"

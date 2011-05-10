@@ -7,8 +7,7 @@ import java.util.List;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupNameComparator;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -40,7 +39,7 @@ import com.opensymphony.xwork2.Action;
  * @author Tran Thanh Tri
  */
 public class GetOrganisationUnitGroupsAction
-    implements Action
+    extends ActionPagingSupport<OrganisationUnitGroup>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -68,12 +67,18 @@ public class GetOrganisationUnitGroupsAction
     public String execute()
         throws Exception
     {
-        organisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService
-            .getAllOrganisationUnitGroups() );
+        organisationUnitGroups = new ArrayList<OrganisationUnitGroup>(
+            organisationUnitGroupService.getAllOrganisationUnitGroups() );
 
         Collections.sort( organisationUnitGroups, new OrganisationUnitGroupNameComparator() );
 
+        if ( usePaging )
+        {
+            this.paging = createPaging( organisationUnitGroups.size() );
+
+            organisationUnitGroups = organisationUnitGroups.subList( paging.getStartPos(), paging.getEndPos() );
+        }
+
         return SUCCESS;
     }
-
 }

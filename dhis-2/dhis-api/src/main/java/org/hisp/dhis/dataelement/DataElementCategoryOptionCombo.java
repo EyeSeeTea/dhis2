@@ -44,6 +44,11 @@ import org.hisp.dhis.common.AbstractNameableObject;
 public class DataElementCategoryOptionCombo
     extends AbstractNameableObject
 {
+    /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = 7759083342982353468L;
+
     public static final String DEFAULT_NAME = "default";
 
     public static final String DEFAULT_TOSTRING = "(default)";
@@ -231,6 +236,7 @@ public class DataElementCategoryOptionCombo
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @Override
     public String getName()
     {
         StringBuilder name = new StringBuilder();
@@ -252,36 +258,43 @@ public class DataElementCategoryOptionCombo
         return name.toString();
     }
 
+    @Override
     public void setName( String name )
     {
         throw new UnsupportedOperationException( "Cannot set name on DataElementCategoryOptionCombo: " + name );
     }
 
+    @Override
     public String getShortName()
     {
         return getName();
     }
 
+    @Override
     public void setShortName( String shortName )
     {
         throw new UnsupportedOperationException( "Cannot set shortName on DataElementCategoryOptionCombo: " + shortName );
     }
 
+    @Override
     public String getCode()
     {
         return getName();
     }
 
+    @Override
     public void setCode( String code )
     {
         throw new UnsupportedOperationException( "Cannot set code on DataElementCategoryOptionCombo: " + code );
     }
 
+    @Override
     public String getAlternativeName()
     {
         return getName();
     }
 
+    @Override
     public void setAlternativeName( String alternativeName )
     {
         throw new UnsupportedOperationException( "Cannot set alternativename on DataElementCategoryOptionCombo: "
