@@ -24,33 +24,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.caseentry.action.caseentry;
 
-import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Viet Nguyen
+ * @author Chau Thu Tran
+ * @version $ LoadProgramStagesAction.java May 7, 2011 2:31:47 PM $
+ * 
  */
-public class CompleteDataEntryAction
+public class LoadProgramStagesAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageInstanceService programStageInstanceService;
+    private PatientService patientService;
 
-    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    public void setPatientService( PatientService patientService )
     {
-        this.programStageInstanceService = programStageInstanceService;
+        this.patientService = patientService;
+    }
+
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
     }
 
     private ProgramInstanceService programInstanceService;
@@ -60,34 +76,52 @@ public class CompleteDataEntryAction
         this.programInstanceService = programInstanceService;
     }
 
+    private ProgramStageInstanceService programStageInstanceService;
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
+    }
+
     // -------------------------------------------------------------------------
-    // Input / Output
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private Integer programStageId;
+    private Integer patientId;
 
-    public Integer getProgramStageId()
+    public void setPatientId( Integer patientId )
     {
-        return programStageId;
+        this.patientId = patientId;
     }
 
-    public void setProgramStageId( Integer programStageId )
+    private Integer programId;
+
+    public void setProgramId( Integer programId )
     {
-        this.programStageId = programStageId;
+        this.programId = programId;
     }
 
-    public Integer programStageInstanceId;
+    private ProgramInstance programInstance;
 
-    public Integer getProgramStageInstanceId()
+    public ProgramInstance getProgramInstance()
     {
-        return programStageInstanceId;
+        return programInstance;
     }
 
-    public void setProgramStageInstanceId( Integer programStageInstanceId )
+    private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+
+    public Set<ProgramStage> getProgramStages()
     {
-        this.programStageInstanceId = programStageInstanceId;
+        return programStages;
     }
-    
+
+    private Map<Integer, String> colorMap = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getColorMap()
+    {
+        return colorMap;
+    }
+
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -95,40 +129,17 @@ public class CompleteDataEntryAction
     public String execute()
         throws Exception
     {
-        ProgramStageInstance programStageInstance = programStageInstanceService
-            .getProgramStageInstance( programStageInstanceId );
+        Patient patient = patientService.getPatient( patientId );
 
-        if ( programStageInstance == null )
-        {
-            return SUCCESS;
-        }
+        Program program = programService.getProgram( programId );
 
-        programStageInstance.setCompleted( true );
+        programInstance = programInstanceService.getProgramInstances( patient, program, false ).iterator().next();
 
-        programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        colorMap = programStageInstanceService.colorProgramStageInstances( programInstance.getProgramStageInstances() );
 
-        // ----------------------------------------------------------------------
-        // Check Completed status for all of ProgramStageInstance of
-        // ProgramInstance
-        // ----------------------------------------------------------------------
+        programStages = program.getProgramStages();
 
-        ProgramInstance programInstance = programStageInstance.getProgramInstance();
-
-        Set<ProgramStageInstance> stageInstances = programInstance.getProgramStageInstances();
-
-        for ( ProgramStageInstance stageInstance : stageInstances )
-        {
-            if ( !stageInstance.isCompleted() )
-            {
-                return SUCCESS;
-            }
-        }
-
-        programInstance.setCompleted( true );
-        programInstance.setEndDate( new Date() );
-
-        programInstanceService.updateProgramInstance( programInstance );
-        
         return SUCCESS;
     }
+
 }

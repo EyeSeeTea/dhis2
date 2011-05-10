@@ -24,58 +24,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.caseentry.action.caseentry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.program.Program;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $ GetSelectedOrgunitAction.java May 7, 2011 12:39:43 PM $
+ * 
  */
-public class DataRecordingSelectAction
-    implements Action
+public class GetSelectedOrgunitAction
+implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setPatientService( PatientService patientService )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.patientService = patientService;
+        this.selectionManager = selectionManager;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private Integer patientId;
+    private OrganisationUnit organisationUnit;
 
-    public void setPatientId( Integer patientId )
+    public OrganisationUnit getOrganisationUnit()
     {
-        this.patientId = patientId;
-    }
-
-    private Patient patient;
-
-    public Patient getPatient()
-    {
-        return patient;
-    }
-
-    private Collection<Program> programs = new ArrayList<Program>();
-
-    public Collection<Program> getPrograms()
-    {
-        return programs;
+        return organisationUnit;
     }
 
     // -------------------------------------------------------------------------
@@ -85,13 +69,9 @@ public class DataRecordingSelectAction
     public String execute()
         throws Exception
     {
-        patient = patientService.getPatient( patientId );
-
-        for ( Program program : patient.getPrograms() )
-        {
-            programs.add( program );
-        }
-
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        
         return SUCCESS;
     }
 }
+
