@@ -41,14 +41,14 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
         this.updateOptions(options);
         
         var boundsArray = G.stores.groupsByGroupSet.data.items;
-        var img = ['h1.png', 'h2.png', 'dispensary.png', 'clinic.png', 'hospital.png'];
+        G.stores.groupsByGroupSet.img = ['h1.png', 'h2.png', 'dispensary.png', 'clinic.png', 'hospital.png'];
         var rules = new Array(boundsArray.length);
         
         for (var i = 0; i < boundsArray.length; i++) {
             var rule = new OpenLayers.Rule({                
                 symbolizer: {
                     'pointRadius': 8,
-                    'externalGraphic': img[i]
+                    'externalGraphic': G.stores.groupsByGroupSet.img[i]
                 },                
                 filter: new OpenLayers.Filter.Comparison({
                     type: OpenLayers.Filter.Comparison.EQUAL_TO,
@@ -69,14 +69,13 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
         }
 
         this.legendDiv.update("");
-        var img = ['h1.png', 'h2.png', 'dispensary.png', 'clinic.png', 'hospital.png'];
-        //for (var i = 0; i < this.classification.bins.length; i++) {
-        for (var i = 0; i < 3; i++) {
+
+        for (var i = 0; i < G.stores.groupsByGroupSet.data.items.length; i++) {
             var element = document.createElement("div");
-            element.style.backgroundImage = 'url(' + img[i] + ')';
+            element.style.backgroundImage = 'url(' + G.stores.groupsByGroupSet.img[i] + ')';
             element.style.backgroundRepeat = 'no-repeat';
             element.style.width = "25px";
-            element.style.height = "17px";
+            element.style.height = "18px";
             element.style.cssFloat = "left";
             element.style.marginLeft = "3px";
             this.legendDiv.appendChild(element);

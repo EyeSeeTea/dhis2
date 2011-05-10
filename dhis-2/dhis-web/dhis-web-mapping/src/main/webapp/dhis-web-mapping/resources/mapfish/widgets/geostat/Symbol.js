@@ -261,10 +261,28 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         scope: this,
                         fn: function(cb) {
                             G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
-                            G.stores.groupsByGroupSet.load();
+                            G.stores.groupsByGroupSet.load({scope: this, callback: function() {
+                                this.classify(false, true);
+                            }});
                         }
                     }
                 }
+            },
+            
+            {
+                xtype: 'grid',
+                name: 'group_gp',
+                height: 200,
+                cm: new Ext.grid.ColumnModel({
+                    columns: [
+                        {id: 'name', header: 'Groups', dataIndex: 'name', width: 100}
+                    ]
+                }),
+                sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+                viewConfig: {forceFit: true},
+                sortable: true,
+                autoExpandColumn: 'name',
+                store: G.stores.groupsByGroupSet
             }
         ];
     },
@@ -485,6 +503,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 return false;
             }
             
+            if (!this.form.findField('groupset').getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, G.i18n.form_is_not_complete);
+                }
+                return false;
+            }                
+            
             return true;
         }
     },
@@ -553,18 +578,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     },
 
     classify: function(exception, position) {
-        if (this.formValidation.validateForm.apply(this, [exception])) {
-            G.vars.mask.msg = G.i18n.aggregating_map_values;
-            G.vars.mask.show();
-            
+        if (this.formValidation.validateForm.apply(this, [exception])) {            
             if (!position && this.layer.features.length) {
                 G.vars.map.zoomToExtent(this.layer.getDataExtent());
-            }
-            
-            var imgLink = ['dispensary.png', 'hospital.png', 'clinic.png'];
-            
-            for (var i = 0; i < this.layer.features.length; i++) {
-                this.layer.features[i].attributes.thumb = imgLink[Math.floor(Math.random()*2+1)];
             }
              
             this.applyValues();
