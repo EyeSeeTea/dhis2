@@ -78,6 +78,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     
     isDrillDown: false,
     
+    groups: false,
+    
     initComponent: function() {
         
         this.initProperties();
@@ -261,7 +263,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         scope: this,
                         fn: function(cb) {
                             G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
-                            G.stores.groupsByGroupSet.load({scope: this, callback: function() {
+                            G.stores.groupsByGroupSet.load({scope: this, callback: function() {                                
+                                for (var i = 0, groupsPanel = Ext.getCmp('groups_p'); i < G.stores.groupsByGroupSet.getTotalCount(); i++) {
+                                    groupsPanel.add({fieldLabel: G.stores.groupsByGroupSet.getAt(i).data.name});
+                                    groupsPanel.doLayout();
+                                }
+                                
                                 this.classify(false, true);
                             }});
                         }
@@ -270,19 +277,26 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             },
             
             {
-                xtype: 'grid',
-                name: 'group_gp',
-                height: 200,
-                cm: new Ext.grid.ColumnModel({
-                    columns: [
-                        {id: 'name', header: 'Groups', dataIndex: 'name', width: 100}
-                    ]
-                }),
-                sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
-                viewConfig: {forceFit: true},
-                sortable: true,
-                autoExpandColumn: 'name',
-                store: G.stores.groupsByGroupSet
+                xtype: 'panel',
+                id: 'groups_p',
+                layout: 'form',
+                bodyStyle: 'margin:0px; padding:8px 0px 8px 5px;',
+                width: '100%',
+                labelWidth: 185,
+                defaults: {
+                    xtype: 'combo',
+                    valueField: 'id',
+                    displayField: 'name',
+                    labelStyle: 'color:#000',
+                    forceSelection: true,
+                    triggerAction: 'all',
+                    mode: 'remote',
+                    emptyText: G.conf.emptytext,
+                    labelSeparator: G.conf.labelseparator,
+                    selectOnFocus: true,
+                    width: 60,
+                    store: G.stores.groupsByGroupSet
+                }
             }
         ];
     },
@@ -436,7 +450,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         
         var onHoverSelect = function onHoverSelect(feature) {
             if (feature.attributes.name) {
-                document.getElementById('featuredatatext').innerHTML = '<div style="color:black">' + feature.attributes.name + '</div><div style="color:#555">' + feature.attributes.value + '</div>';
+                document.getElementById('featuredatatext').innerHTML = '<div style="color:black">' + feature.attributes.name + '</div><div style="color:#555">' + feature.attributes.type + '</div>';
             }
             else {
                 document.getElementById('featuredatatext').innerHTML = '';
@@ -453,33 +467,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         };
         
         var onClickSelect = function onClickSelect(feature) {
-            if (feature.attributes.hasChildrenWithCoordinates) {
-                if (G.vars.locateFeatureWindow) {
-                    G.vars.locateFeatureWindow.destroy();
-                }
-                         
-                scope.updateValues = true;
-                scope.isDrillDown = true;
-                
-                function organisationUnitLevelCallback() {
-                    var names = this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
-                    this.form.findField('boundary').setValue(names[0]);
-                    this.form.findField('level').setValue(names[1]);
-                    this.loadGeoJson();
-                }
-                
-                if (G.stores.organisationUnitLevel.isLoaded) {
-                    organisationUnitLevelCallback.call(scope);
-                }
-                else {
-                    G.stores.organisationUnitLevel.load({scope: scope, callback: function() {
-                        organisationUnitLevelCallback.call(this);
-                    }});
-                }
-            }
-            else {
-                Ext.message.msg(false, G.i18n.no_coordinates_found);
-            }
+            alert('Info: ' + feature.attributes.name);
         };
         
         this.selectFeatures = new OpenLayers.Control.newSelectFeature(

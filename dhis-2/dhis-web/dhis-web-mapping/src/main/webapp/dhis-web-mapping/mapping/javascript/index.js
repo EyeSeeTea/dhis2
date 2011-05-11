@@ -2646,11 +2646,7 @@
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
-		handler: function() {
-
-        
-alert(G.util.getKeys(G.stores.groupsByGroupSet.data.items[0].data));
-return;            
+		handler: function() {                        
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }
