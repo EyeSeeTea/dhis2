@@ -78,7 +78,16 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     
     isDrillDown: false,
     
-    groups: false,
+    iconStore: new Ext.data.ArrayStore({
+        fields: ['icon', 'name'],
+        data: [
+            ['ux-ic-icon-1', '.'],
+            ['ux-ic-icon-2', ','],
+            ['ux-ic-icon-3', ':'],
+            ['ux-ic-icon-4', '^'],
+            ['ux-ic-icon-5', '"']
+        ]
+    }),
     
     initComponent: function() {
         
@@ -282,20 +291,21 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 layout: 'form',
                 bodyStyle: 'margin:0px; padding:8px 0px 8px 5px;',
                 width: '100%',
-                labelWidth: 185,
+                labelWidth: 195,
                 defaults: {
                     xtype: 'combo',
-                    valueField: 'id',
+                    plugins: new Ext.ux.plugins.IconCombo(),
+                    valueField: 'icon',
                     displayField: 'name',
-                    labelStyle: 'color:#000',
-                    forceSelection: true,
+                    iconClsField: 'icon',
+                    editable: false,
                     triggerAction: 'all',
-                    mode: 'remote',
-                    emptyText: G.conf.emptytext,
+                    mode: 'local',
+                    labelStyle: 'color:#000',
                     labelSeparator: G.conf.labelseparator,
-                    selectOnFocus: true,
-                    width: 60,
-                    store: G.stores.groupsByGroupSet
+                    width: 50,
+                    listWidth: 50,
+                    store: this.iconStore
                 }
             }
         ];
