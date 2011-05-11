@@ -20,9 +20,8 @@
     height: 16px;
 }
 .ux-icon-combo-input {
-    color: #000;
-    z-index: -1;
     color: #fff;
+    z-index: -1;
     padding-left: 8px;
 }
 
@@ -33,5 +32,5 @@
 .ux-icon-combo-item {
     background-repeat: no-repeat ! important;
     background-position: 5px 50% ! important;
-    color: #fff;
+    color: #eee;
 }

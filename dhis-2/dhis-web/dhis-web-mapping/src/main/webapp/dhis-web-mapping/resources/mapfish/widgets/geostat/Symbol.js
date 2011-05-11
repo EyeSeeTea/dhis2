@@ -84,7 +84,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             ['ux-ic-icon-1', '.'],
             ['ux-ic-icon-2', ','],
             ['ux-ic-icon-3', ':'],
-            ['ux-ic-icon-4', '^'],
+            ['ux-ic-icon-4', ';'],
             ['ux-ic-icon-5', '"']
         ]
     }),
