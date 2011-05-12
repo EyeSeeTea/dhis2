@@ -277,11 +277,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     'select': {
                         scope: this,
                         fn: function(cb) {
-                            if (cb.currentValue != cb.getValue()) {
+                            var panel = Ext.getCmp('groups_p');
+                            if (cb.currentValue != cb.getValue() && cb.getRawValue() == 'Type') {
                                 cb.currentValue = cb.getValue();
                                 G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
                                 G.stores.groupsByGroupSet.load({scope: this, callback: function() {
-                                    var panel = Ext.getCmp('groups_p');
                                     panel.removeAll();
                                     
                                     for (var i = 0; i < G.stores.groupsByGroupSet.getTotalCount(); i++) {
@@ -295,6 +295,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     
                                     this.classify(false, true);
                                 }});
+                            }
+                            else if (cb.getRawValue() == 'Ownership') {
+                                cb.currentValue = cb.getValue();
+                                panel.removeAll();
+                                panel.doLayout();
                             }
                         }
                     }
