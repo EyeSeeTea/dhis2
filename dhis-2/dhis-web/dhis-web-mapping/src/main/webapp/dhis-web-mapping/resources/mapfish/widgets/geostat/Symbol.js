@@ -78,14 +78,19 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     
     isDrillDown: false,
     
+    iconCombos: [],
+    
     iconStore: new Ext.data.ArrayStore({
-        fields: ['icon', 'name'],
+        fields: ['name', 'css'],
         data: [
-            ['ux-ic-icon-1', '.'],
-            ['ux-ic-icon-2', ','],
-            ['ux-ic-icon-3', ':'],
-            ['ux-ic-icon-4', ';'],
-            ['ux-ic-icon-5', '"']
+            ['0','ux-ic-icon-0'],
+            ['1','ux-ic-icon-1'],
+            ['2','ux-ic-icon-2'],
+            ['3','ux-ic-icon-3'],
+            ['4','ux-ic-icon-4'],
+            ['5','ux-ic-icon-5'],
+            ['6','ux-ic-icon-6'],
+            ['7','ux-ic-icon-7']
         ]
     }),
     
@@ -266,20 +271,31 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 labelSeparator: G.conf.labelseparator,
                 selectOnFocus: true,
                 width: G.conf.combo_width,
+                currentValue: false,
                 store: G.stores.groupSet,
                 listeners: {
                     'select': {
                         scope: this,
                         fn: function(cb) {
-                            G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
-                            G.stores.groupsByGroupSet.load({scope: this, callback: function() {                                
-                                for (var i = 0, groupsPanel = Ext.getCmp('groups_p'); i < G.stores.groupsByGroupSet.getTotalCount(); i++) {
-                                    groupsPanel.add({fieldLabel: G.stores.groupsByGroupSet.getAt(i).data.name});
-                                    groupsPanel.doLayout();
-                                }
-                                
-                                this.classify(false, true);
-                            }});
+                            if (cb.currentValue != cb.getValue()) {
+                                cb.currentValue = cb.getValue();
+                                G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
+                                G.stores.groupsByGroupSet.load({scope: this, callback: function() {
+                                    var panel = Ext.getCmp('groups_p');
+                                    panel.removeAll();
+                                    
+                                    for (var i = 0; i < G.stores.groupsByGroupSet.getTotalCount(); i++) {
+                                        var combo = {
+                                            fieldLabel: G.stores.groupsByGroupSet.getAt(i).data.name,
+                                            value: i
+                                        };
+                                        panel.add(combo);
+                                        panel.doLayout();
+                                    }
+                                    
+                                    this.classify(false, true);
+                                }});
+                            }
                         }
                     }
                 }
@@ -295,9 +311,9 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 defaults: {
                     xtype: 'combo',
                     plugins: new Ext.ux.plugins.IconCombo(),
-                    valueField: 'icon',
-                    displayField: 'name',
-                    iconClsField: 'icon',
+                    valueField: 'name',
+                    displayField: 'css',
+                    iconClsField: 'css',
                     editable: false,
                     triggerAction: 'all',
                     mode: 'local',
@@ -305,7 +321,15 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     labelSeparator: G.conf.labelseparator,
                     width: 50,
                     listWidth: 50,
-                    store: this.iconStore
+                    store: this.iconStore,
+                    listeners: {
+                        'select': {
+                            scope: this,
+                            fn: function() {
+                                this.classify(false, true);
+                            }
+                        }
+                    }
                 }
             }
         ];
@@ -588,7 +612,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     applyValues: function() {
 		var options = {indicator: this.form.findField('groupset').getRawValue().toLowerCase()};
 		this.coreComp.updateOptions(options);
-        this.coreComp.applyClassification();
+        this.coreComp.applyClassification(this.form);
         this.classificationApplied = true;
         
         G.vars.mask.hide();

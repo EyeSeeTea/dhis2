@@ -37,18 +37,20 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
         //}
     },
 
-    applyClassification: function(options) {
-        this.updateOptions(options);
+    applyClassification: function(form) {
+        var panel = Ext.getCmp('groups_p');
+        G.stores.groupsByGroupSet.img = [];
+        for (var i = 0, items = panel.items.items; i < items.length; i++) {
+            G.stores.groupsByGroupSet.img.push(items[i].getRawValue() + '.png');
+        }
         
         var boundsArray = G.stores.groupsByGroupSet.data.items;
-        G.stores.groupsByGroupSet.img = ['h1.png', 'h2.png', 'dispensary.png', 'clinic.png', 'hospital.png'];
         var rules = new Array(boundsArray.length);
-        
         for (var i = 0; i < boundsArray.length; i++) {
             var rule = new OpenLayers.Rule({                
                 symbolizer: {
                     'pointRadius': 8,
-                    'externalGraphic': G.stores.groupsByGroupSet.img[i]
+                    'externalGraphic': '../resources/ext-ux/iconcombo/' + G.stores.groupsByGroupSet.img[i]
                 },                
                 filter: new OpenLayers.Filter.Comparison({
                     type: OpenLayers.Filter.Comparison.EQUAL_TO,
@@ -72,7 +74,7 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 
         for (var i = 0; i < G.stores.groupsByGroupSet.data.items.length; i++) {
             var element = document.createElement("div");
-            element.style.backgroundImage = 'url(' + G.stores.groupsByGroupSet.img[i] + ')';
+            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + G.stores.groupsByGroupSet.img[i] + ')';
             element.style.backgroundRepeat = 'no-repeat';
             element.style.width = "25px";
             element.style.height = "18px";

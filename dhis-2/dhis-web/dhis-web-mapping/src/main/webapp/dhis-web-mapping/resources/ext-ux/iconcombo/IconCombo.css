@@ -1,3 +1,6 @@
+.ux-ic-icon-0 {
+    background-image:url(ux-ic-icon-0.png) ! important;
+}
 .ux-ic-icon-1 {
     background-image:url(ux-ic-icon-1.png) ! important;
 }
@@ -12,6 +15,12 @@
 }
 .ux-ic-icon-5 {
     background-image:url(ux-ic-icon-5.png) ! important;
+}
+.ux-ic-icon-6 {
+    background-image:url(ux-ic-icon-6.png) ! important;
+}
+.ux-ic-icon-7 {
+    background-image:url(ux-ic-icon-7.png) ! important;
 }
 .ux-icon-combo-icon {
     background-repeat: no-repeat;
@@ -32,5 +41,7 @@
 .ux-icon-combo-item {
     background-repeat: no-repeat ! important;
     background-position: 5px 50% ! important;
-    color: #eee;
+    color: #f6f6f6;
+    height: 16px;
+    padding-left: 50px;
 }
