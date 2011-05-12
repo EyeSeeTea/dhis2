@@ -480,24 +480,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 					this.form.findField('boundary').treeWindow = w;
 				}
 			});
-		},
-        
-        featureInfoWindow: function() {
-            var fiw = new Ext.Window({
-                id: 'featureinfo_w',
-                title: '',
-                layout: 'fit',
-                closeAction: 'hide',
-                width: G.conf.window_width,
-                height: 205,
-                items: [
-                    {html: 'some text'}
-                ]
-            });
-            
-            fiw.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
-            fiw.show();
-        }
+		}
 	},
     
     createSelectFeatures: function() {
@@ -522,12 +505,32 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         };
         
         var onClickSelect = function onClickSelect(feature) {
-            if (scope.form.findField('groupset').featureInfoWindow) {
-                scope.form.findField('groupset').featureInfoWindow.show();
+            var featureInfoWindow = scope.form.findField('groupset').featureInfoWindow;
+            if (featureInfoWindow) {
+                featureInfoWindow.destroy();
             }
-            else {
-                scope.createSingletonCmp.featureInfoWindow();
-            }
+            
+            var cssCls = G.stores.groupsByGroupSet.img[G.stores.groupsByGroupSet.find('name', feature.attributes.type)] + '-title';            
+            featureInfoWindow = new Ext.Window({
+                title: '<span class="' + cssCls + '">' + feature.attributes.name + '</span>',
+                layout: 'fit',
+                width: G.conf.window_width,
+                height: 205,
+                items: [
+                    {
+                        xtype: 'panel',
+                        layout: 'anchor',
+                        bodyStyle: 'padding:8px',
+                        items: [
+                            {html: '<b>Type:</b><br>' + feature.attributes.type}
+                        ]
+                    }
+                ]
+            });
+            
+            featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
+            scope.form.findField('groupset').featureInfoWindow = featureInfoWindow;
+            featureInfoWindow.show();
         };
         
         this.selectFeatures = new OpenLayers.Control.newSelectFeature(

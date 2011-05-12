@@ -30,18 +30,14 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     updateOptions: function(newOptions) {
-        //var oldOptions = OpenLayers.Util.extend({}, this.options);
         this.addOptions(newOptions);
-        //if (newOptions) {
-            //this.setClassification();
-        //}
     },
 
     applyClassification: function(form) {
         var panel = Ext.getCmp('groups_p');
         G.stores.groupsByGroupSet.img = [];
         for (var i = 0, items = panel.items.items; i < items.length; i++) {
-            G.stores.groupsByGroupSet.img.push(items[i].getRawValue() + '.png');
+            G.stores.groupsByGroupSet.img.push(items[i].getRawValue());
         }
         
         var boundsArray = G.stores.groupsByGroupSet.data.items;
@@ -50,7 +46,7 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
             var rule = new OpenLayers.Rule({                
                 symbolizer: {
                     'pointRadius': 8,
-                    'externalGraphic': '../resources/ext-ux/iconcombo/' + G.stores.groupsByGroupSet.img[i]
+                    'externalGraphic': '../resources/ext-ux/iconcombo/' + G.stores.groupsByGroupSet.img[i] + '.png'
                 },                
                 filter: new OpenLayers.Filter.Comparison({
                     type: OpenLayers.Filter.Comparison.EQUAL_TO,
@@ -74,7 +70,7 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 
         for (var i = 0; i < G.stores.groupsByGroupSet.data.items.length; i++) {
             var element = document.createElement("div");
-            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + G.stores.groupsByGroupSet.img[i] + ')';
+            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + G.stores.groupsByGroupSet.img[i] + '.png)';
             element.style.backgroundRepeat = 'no-repeat';
             element.style.width = "25px";
             element.style.height = "18px";
