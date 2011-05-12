@@ -74,10 +74,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     
     organisationUnitSelection: false,
     
-    updateValues: false,
-    
-    isDrillDown: false,
-    
     iconCombos: [],
     
     iconStore: new Ext.data.ArrayStore({
@@ -90,7 +86,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             ['4','ux-ic-icon-4'],
             ['5','ux-ic-icon-5'],
             ['6','ux-ic-icon-6'],
-            ['7','ux-ic-icon-7']
+            ['7','ux-ic-icon-7'],
+            ['8','ux-ic-icon-8'],
+            ['9','ux-ic-icon-9'],
+            ['10','ux-ic-icon-10'],
+            ['11','ux-ic-icon-11'],
+            ['12','ux-ic-icon-12']
         ]
     }),
     
@@ -479,7 +480,24 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 					this.form.findField('boundary').treeWindow = w;
 				}
 			});
-		}
+		},
+        
+        featureInfoWindow: function() {
+            var fiw = new Ext.Window({
+                id: 'featureinfo_w',
+                title: '',
+                layout: 'fit',
+                closeAction: 'hide',
+                width: G.conf.window_width,
+                height: 205,
+                items: [
+                    {html: 'some text'}
+                ]
+            });
+            
+            fiw.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
+            fiw.show();
+        }
 	},
     
     createSelectFeatures: function() {
@@ -504,7 +522,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         };
         
         var onClickSelect = function onClickSelect(feature) {
-            alert('Info: ' + feature.attributes.name);
+            if (scope.form.findField('groupset').featureInfoWindow) {
+                scope.form.findField('groupset').featureInfoWindow.show();
+            }
+            else {
+                scope.createSingletonCmp.featureInfoWindow();
+            }
         };
         
         this.selectFeatures = new OpenLayers.Control.newSelectFeature(
