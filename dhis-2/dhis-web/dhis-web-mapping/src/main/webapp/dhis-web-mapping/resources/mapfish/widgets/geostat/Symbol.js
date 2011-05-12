@@ -254,8 +254,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 }
             },
             
-            { html: '<div class="thematic-br">' },
-            
             {
                 xtype: 'combo',
                 name: 'groupset',
@@ -608,6 +606,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         if (this.formValidation.validateForm.apply(this, [exception])) {            
             if (!position && this.layer.features.length) {
                 G.vars.map.zoomToExtent(this.layer.getDataExtent());
+            }
+            
+            for (var i = 0; i < this.layer.features.length; i++) {
+                this.layer.features[i].attributes.labelString = this.layer.features[i].attributes.name;
             }
              
             this.applyValues();
