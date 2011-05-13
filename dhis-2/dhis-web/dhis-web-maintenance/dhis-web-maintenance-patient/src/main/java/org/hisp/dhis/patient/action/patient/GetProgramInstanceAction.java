@@ -27,63 +27,46 @@
 
 package org.hisp.dhis.patient.action.patient;
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $ GetProgramInstanceAction.java May 12, 2011 9:58:11 PM $
+ * 
  */
-public class ValidateSearchPatientAction
+public class GetProgramInstanceAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private ProgramInstanceService programInstanceService;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
-        this.selectionManager = selectionManager;
+        this.programInstanceService = programInstanceService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    private String searchText;
+    private Integer programInstanceId;
 
-    public void setSearchText( String searchText )
+    public void setProgramInstanceId( Integer programInstanceId )
     {
-        this.searchText = searchText;
+        this.programInstanceId = programInstanceId;
     }
 
-    private Integer programId;
+    private ProgramInstance programInstance;
 
-    public void setProgramId( Integer programId )
+    public ProgramInstance getProgramInstance()
     {
-        this.programId = programId;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
+        return programInstance;
     }
 
     // -------------------------------------------------------------------------
@@ -93,27 +76,8 @@ public class ValidateSearchPatientAction
     public String execute()
         throws Exception
     {
-
-        if ( selectionManager.getSelectedOrganisationUnit() == null )
-        {
-            message = i18n.getString( "please_select_a_registering_unit" );
-
-            return INPUT;
-        }
-
-        if ( ( searchText == null || searchText.trim().length() == 0 ) && programId == null )
-        {
-            message = i18n.getString( "specify_a_search_criteria" );
-
-            return INPUT;
-        }
-
-        // ---------------------------------------------------------------------
-        // Validation success
-        // ---------------------------------------------------------------------
-
-        message = i18n.getString( "everything_is_ok" );
-
+        programInstance = programInstanceService.getProgramInstance( programInstanceId );
+        
         return SUCCESS;
     }
 }
