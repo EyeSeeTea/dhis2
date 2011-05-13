@@ -27,9 +27,16 @@
 
 package org.hisp.dhis.patient.action.relationship;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patient.state.SelectedStateManager;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
+import org.hisp.dhis.relationship.Relationship;
+import org.hisp.dhis.relationship.RelationshipService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -53,13 +60,20 @@ public class ShowRelationshipListAction
         this.patientService = patientService;
     }
 
-    private SelectedStateManager selectedStateManager;
+    private PatientAttributeValueService patientAttributeValueService;
 
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
     {
-        this.selectedStateManager = selectedStateManager;
+        this.patientAttributeValueService = patientAttributeValueService;
     }
 
+    private RelationshipService relationshipService;
+
+    public void setRelationshipService( RelationshipService relationshipService )
+    {
+        this.relationshipService = relationshipService;
+    }
+    
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -77,7 +91,20 @@ public class ShowRelationshipListAction
     {
         return patient;
     }
+    
+    Collection<PatientAttributeValue> patientAttributeValues = new ArrayList<PatientAttributeValue>();
 
+    public Collection<PatientAttributeValue> getPatientAttributeValues()
+    {
+        return patientAttributeValues;
+    }
+
+    Collection<Relationship> relationships;
+
+    public Collection<Relationship> getRelationships()
+    {
+        return relationships;
+    }
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -85,26 +112,12 @@ public class ShowRelationshipListAction
     public String execute()
         throws Exception
     {
-        if ( id != null )
-        {
-            patient = patientService.getPatient( id );
-        }
+        patient = patientService.getPatient( id );
+        
+        patientAttributeValues = patientAttributeValueService.getPatientAttributeValues( patient );
 
-        if ( id == null )
-        {
-            patient = selectedStateManager.getSelectedPatient();
-        }
+        relationships = relationshipService.getRelationshipsForPatient( patient );
 
-        if ( patient == null )
-        {
-
-            selectedStateManager.clearSelectedPatient();
-
-            return SUCCESS;
-        }
-
-        selectedStateManager.setSelectedPatient( patient );
-
-        return RELATIONSHIP_LIST;
+        return SUCCESS;
     }
 }

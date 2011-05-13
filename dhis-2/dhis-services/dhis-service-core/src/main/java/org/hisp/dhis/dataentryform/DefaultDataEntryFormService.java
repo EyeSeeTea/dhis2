@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -46,6 +45,8 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.minmax.MinMaxDataElement;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
@@ -58,12 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class DefaultDataEntryFormService
     implements DataEntryFormService
-{
-    private static final Pattern INPUT_PATTERN = Pattern.compile( "(<input.*?/>)", Pattern.DOTALL );
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile( "value\\[(.*)\\].value:value\\[(.*)\\].value" );
-    private static final Pattern VALUE_TAG_PATTERN = Pattern.compile( "value=\"(.*?)\"", Pattern.DOTALL );
-    private static final Pattern TITLE_TAG_PATTERN = Pattern.compile( "title=\"(.*?)\"", Pattern.DOTALL );
-    
+{    
     private static final String EMPTY_VALUE_TAG = "value=\"\"";
     private static final String EMPTY_TITLE_TAG = "title=\"\"";
     private static final String TAG_CLOSE = "/>";
@@ -94,6 +90,13 @@ public class DefaultDataEntryFormService
         this.dataElementService = dataElementService;
     }
     
+    private IndicatorService indicatorService;
+
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
+    }
+
     // ------------------------------------------------------------------------
     // Implemented Methods
     // ------------------------------------------------------------------------
@@ -174,6 +177,7 @@ public class DefaultDataEntryFormService
             String inputHtml = inputMatcher.group();
 
             Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
+            Matcher indicatorMatcher = INDICATOR_PATTERN.matcher( inputHtml );
 
             if ( identifierMatcher.find() && identifierMatcher.groupCount() > 0 )
             {
@@ -185,60 +189,37 @@ public class DefaultDataEntryFormService
                 String optionComboName = optionCombo != null ? optionCombo.getName() : "";
 
                 // -------------------------------------------------------------
-                // Insert name of data element operand as value and title in
-                // the HTML code
+                // Insert name of data element operand as value and title
                 // -------------------------------------------------------------
 
-                String displayValue = "[ Data element does not exist ]";
-
-                if ( dataElement != null )
-                {
-                    displayValue = "[ " + dataElement.getShortName() + " " + optionComboName + " ]";
-
-                    if ( inputHtml.contains( EMPTY_VALUE_TAG ) )
-                    {
-                        inputHtml = inputHtml.replace( EMPTY_VALUE_TAG, "value=\"" + displayValue + "\"" );
-                    }
-                    else
-                    {
-                        inputHtml += " value=\"" + displayValue + "\"";
-                    }
-
-                    StringBuilder title = new StringBuilder( "title=\"[ " ).append( dataElement.getId() ).append( " - " ).
-                        append( dataElement.getShortName() ).append( " - " ).append( optionComboId ).append( " - " ).
-                        append( optionComboName ).append( " - " ).append( dataElement.getType() ).append( " ]\"" );
-                    
-                    if ( inputHtml.contains( EMPTY_TITLE_TAG ) )
-                    {
-                        inputHtml = inputHtml.replace( EMPTY_TITLE_TAG, title );
-                    }
-                    else
-                    {
-                        inputHtml += " " + title;
-                    }
-                }
-                else
-                {
-                    if ( inputHtml.contains( EMPTY_VALUE_TAG ) )
-                    {
-                        inputHtml = inputHtml.replace( EMPTY_VALUE_TAG, "value=\"" + displayValue + "\"" );
-                    }
-                    else
-                    {
-                        inputHtml += " value=\"" + displayValue + "\"";
-                    }
-
-                    if ( inputHtml.contains( EMPTY_TITLE_TAG ) )
-                    {
-                        inputHtml = inputHtml.replace( EMPTY_TITLE_TAG, "title=\"" + displayValue + "\"" );
-                    }
-                    else
-                    {
-                        inputHtml += " title=\"" + displayValue + "\"";
-                    }
-                }
+                StringBuilder title = new StringBuilder( "title=\"" ).append( dataElement.getId() ).append( " - " ).
+                    append( dataElement.getName() ).append( " - " ).append( optionComboId ).append( " - " ).
+                    append( optionComboName ).append( " - " ).append( dataElement.getType() ).append( "\"" );
+                
+                String displayValue = dataElement != null ? "value=\"[ " + dataElement.getName() + " " + optionComboName + " ]\"" : "[ Data element does not exist ]";
+                String displayTitle = dataElement != null ? title.toString() : "[ Data element does not exist ]";
+                
+                inputHtml = inputHtml.contains( EMPTY_VALUE_TAG ) ? inputHtml.replace( EMPTY_VALUE_TAG, displayValue ) : inputHtml + " " + displayValue;                    
+                inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, displayTitle ) : " " + displayTitle;
 
                 inputMatcher.appendReplacement( sb, inputHtml );
+            }
+            else if ( indicatorMatcher.find() && indicatorMatcher.groupCount() > 0 )
+            {
+                int indicatorId = Integer.parseInt( indicatorMatcher.group( 1 ) );
+                Indicator indicator = indicatorService.getIndicator( indicatorId );
+
+                // -------------------------------------------------------------
+                // Insert name of indicator as value and title
+                // -------------------------------------------------------------
+
+                String displayValue = indicator != null ? "value=\"[ " + indicator.getName() + " ]\"" : "[ Indicator does not exist ]";
+                String displayTitle = indicator != null ? "title=\"" + indicator.getName() + "\"" : "[ Indicator does not exist ]";
+
+                inputHtml = inputHtml.contains( EMPTY_VALUE_TAG ) ? inputHtml.replace( EMPTY_VALUE_TAG, displayValue ) : inputHtml + " " + displayValue;                    
+                inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, displayTitle ) : " " + displayTitle;
+
+                inputMatcher.appendReplacement( sb, inputHtml );                
             }
         }
 
@@ -293,7 +274,14 @@ public class DefaultDataEntryFormService
 
                 if ( dataElement == null )
                 {
-                    return "Data element with id :" + dataElementId + " does not exist in this data set";
+                    return "Data element with id : " + dataElementId + " does not exist";
+                }
+                
+                DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
+                
+                if ( categoryOptionCombo == null )
+                {
+                    return "Category option combo with id: " + optionComboId + " does not exist";
                 }
 
                 String dataElementValueType = dataElement.getType();
@@ -331,18 +319,11 @@ public class DefaultDataEntryFormService
 
                 inputHtml = inputHtml.replaceAll( "view=\".*?\"", "" ); // For backwards compatibility
 
-                StringBuilder title = new StringBuilder( "title=\"Name: " ).append( dataElement.getShortName() ).
-                    append( " Type: " ).append( dataElement.getType() ).append( " Min: " ).append( minValue ).
-                    append( " Max: " ).append( maxValue ).append( "\"" );
+                StringBuilder title = new StringBuilder( "title=\"Name: " ).append( dataElement.getName() ).append( " " ).
+                    append( categoryOptionCombo.getName() ).append( " Type: " ).append( dataElement.getType() ).
+                    append( " Min: " ).append( minValue ).append( " Max: " ).append( maxValue ).append( "\"" );
                 
-                if ( inputHtml.contains( EMPTY_TITLE_TAG ) )
-                {
-                    inputHtml = inputHtml.replace( EMPTY_TITLE_TAG, title );
-                }
-                else
-                {
-                    inputHtml += " " + title;
-                }
+                inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, title ) : inputHtml + " " + title;
 
                 // -------------------------------------------------------------
                 // Append Javascript code and meta data (type/min/max) for

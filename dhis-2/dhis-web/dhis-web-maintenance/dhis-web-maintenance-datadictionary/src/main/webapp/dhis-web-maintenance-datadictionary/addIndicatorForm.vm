@@ -74,7 +74,7 @@
 		<td></td>
 		<td>
 			<input type="button" id="denominatorButton" name="denominatorButton" value="$i18n.getString( 'edit_denominator' )" onclick="indicatorDenominatorForm()" style="width:20em"/>
-			<input type="hidden" id="denominator" name="denominator" class="{validate:{required:true}}" value="1"/>
+			<input type="hidden" id="denominator" name="denominator" class="{validate:{required:true}}"/>
 		</td>
 	</tr>
 	<tr>
@@ -90,3 +90,4 @@
 </form>
 
 #parse( "/dhis-web-maintenance-datadictionary/indicatorExpressionBuilderForm.vm" )
+

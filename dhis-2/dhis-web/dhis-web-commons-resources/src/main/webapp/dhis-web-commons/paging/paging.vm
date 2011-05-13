@@ -73,6 +73,8 @@
 <script>
 	
 var isAjax;
+var contentDiv;
+var isShowLoader;
 
 function ajaxPaging( currentPage, pageSize )
 {
@@ -82,10 +84,9 @@ function ajaxPaging( currentPage, pageSize )
 	}
 	else
 	{
-		showLoader();
 		var url = '${baseLink}currentPage=' + currentPage + '&pageSize=' + pageSize;
-		$( '#contentDiv' ).load(url);
-		hideLoader();
+		if( contentDiv == undefined) { $( '#contentDiv' ).load(url); }
+		else { $( '#' + contentDiv ).load(url); }
 	}
 }
 
@@ -99,17 +100,19 @@ function changePageSize( baseLink )
     }
     
 	var currentPage = jQuery("#jumpToPage").val();
+	
 	jQuery.cookie("pageSize", pageSize, {path: "/"});
+	
 	var url = baseLink + 'currentPage=' + currentPage + '&pageSize=' + pageSize;
+	
 	if( isAjax == undefined )
 	{
 		window.location.href = url;
 	}
 	else
 	{
-		showLoader();
-		$( '#contentDiv' ).load(url);
-		hideLoader();
+		if( contentDiv == undefined) { $( '#contentDiv' ).load(url); }
+		else { $( '#' + contentDiv ).load(url); }
 	}
 }
 

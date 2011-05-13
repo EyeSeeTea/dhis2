@@ -27,6 +27,9 @@ package org.hisp.dhis.datasetreport.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.dataentryform.DataEntryFormService.IDENTIFIER_PATTERN;
+import static org.hisp.dhis.dataentryform.DataEntryFormService.INDICATOR_PATTERN;
+import static org.hisp.dhis.dataentryform.DataEntryFormService.INPUT_PATTERN;
 import static org.hisp.dhis.options.SystemSettingManager.AGGREGATION_STRATEGY_REAL_TIME;
 import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_AGGREGATION_STRATEGY;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_AGGREGATION_STRATEGY;
@@ -40,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregationService;
@@ -61,6 +63,7 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -75,9 +78,7 @@ import org.hisp.dhis.system.util.MathUtils;
  */
 public class DefaultDataSetReportService
     implements DataSetReportService
-{
-    private static final Pattern DATAENTRYFORM_PATTERN = Pattern.compile( "(<input.*?)[/]?>", Pattern.DOTALL );
-    private static final Pattern OPERAND_PATTERN = Pattern.compile( "value\\[(.*)\\].value:value\\[(.*)\\].value" );
+{        
     private static final String NULL_REPLACEMENT = "";
     private static final String SEPARATOR = ":";
     private static final String DEFAULT_HEADER = "Value";
@@ -134,13 +135,11 @@ public class DefaultDataSetReportService
         
         FilterUtils.filter( dataElements, new AggregatableDataElementFilter() );
         
-        Map<String, String> map = new TreeMap<String,String>();            
+        Map<String, String> map = new TreeMap<String, String>();            
         
         for ( DataElement dataElement : dataElements )
         {
-            DataElementCategoryCombo categoryCombo = dataElement.getCategoryCombo();                                        
-            
-            for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryCombo.getOptionCombos() )
+            for ( DataElementCategoryOptionCombo categoryOptionCombo : dataElement.getCategoryCombo().getOptionCombos() )
             {
                 String value;
                 
@@ -168,61 +167,78 @@ public class DefaultDataSetReportService
         return map;
     }
     
-    public String prepareReportContent( String dataEntryFormCode, Map<String, String> dataValues )
+    public Map<Integer, String> getAggregatedIndicatorValueMap( DataSet dataSet, OrganisationUnit unit, Period period, I18nFormat format )
+    {
+        String aggregationStrategy = (String) systemSettingManager.getSystemSetting( KEY_AGGREGATION_STRATEGY, DEFAULT_AGGREGATION_STRATEGY );
+        
+        Map<Integer, String> map = new TreeMap<Integer, String>();
+        
+        for ( Indicator indicator : dataSet.getIndicators() )
+        {
+            Double aggregatedValue = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? 
+                aggregationService.getAggregatedIndicatorValue( indicator, period.getStartDate(), period.getEndDate(), unit ) :
+                    aggregatedDataValueService.getAggregatedValue( indicator, period, unit );
+            
+            String value = format.formatValue( aggregatedValue );
+            
+            if ( value != null )
+            {
+                map.put( indicator.getId(), value );
+            }
+        }
+        
+        return map;
+    }
+    
+    public String prepareReportContent( String dataEntryFormCode, Map<String, String> dataValues, Map<Integer, String> indicatorValues )
     {        
         StringBuffer buffer = new StringBuffer();
 
-        Matcher matDataElement = DATAENTRYFORM_PATTERN.matcher( dataEntryFormCode );
+        Matcher inputMatcher = INPUT_PATTERN.matcher( dataEntryFormCode );
 
         // ---------------------------------------------------------------------
         // Iterate through all matching data element fields.
         // ---------------------------------------------------------------------
         
-        while ( matDataElement.find() )
+        while ( inputMatcher.find() )
         {       
             // -----------------------------------------------------------------
             // Get input HTML code
             // -----------------------------------------------------------------
             
-            String dataElementCode = matDataElement.group( 1 );
+            String inputHtml = inputMatcher.group( 1 );
             
-            // -----------------------------------------------------------------
-            // Pattern to extract data element ID from data element field
-            // -----------------------------------------------------------------
+            Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
+            Matcher indicatorMatcher = INDICATOR_PATTERN.matcher( inputHtml );
 
-            Matcher matDataElementId = OPERAND_PATTERN.matcher( dataElementCode );
-            
-            if ( matDataElementId.find() && matDataElementId.groupCount() > 0 )
-            {   
-                // -------------------------------------------------------------
-                // Get data element ID of data element.
-                // -------------------------------------------------------------
+            // -----------------------------------------------------------------
+            // Find existing data or indicator value and replace input tag
+            // -----------------------------------------------------------------               
+             
+            if ( identifierMatcher.find() && identifierMatcher.groupCount() > 0 )
+            {
+                Integer dataElementId = Integer.parseInt( identifierMatcher.group( 1 ) );
+                Integer optionComboId = Integer.parseInt( identifierMatcher.group( 2 ) ); 
                 
-                int dataElementId = Integer.parseInt( matDataElementId.group( 1 ) );
-                int optionComboId = Integer.parseInt( matDataElementId.group( 2 ) ); 
+                String dataValue = dataValues.get( dataElementId + SEPARATOR + optionComboId );               
                 
-               // --------------------------------------------------------------
-               // Find existing value of data element in data set.
-               // --------------------------------------------------------------               
+                dataValue = dataValue != null ? dataValue : NULL_REPLACEMENT;
                 
-                String dataElementValue = dataValues.get( dataElementId + SEPARATOR + optionComboId );               
+                inputMatcher.appendReplacement( buffer, dataValue );
+            }
+            else if ( indicatorMatcher.find() && indicatorMatcher.groupCount() > 0 )
+            {
+                Integer indicatorId = Integer.parseInt( indicatorMatcher.group( 1 ) );
                 
-                if ( dataElementValue == null )
-                {
-                    dataElementValue = NULL_REPLACEMENT;
-                }
-                        
-                dataElementCode = dataElementValue;
+                String indicatorValue = indicatorValues.get( indicatorId );
                 
-                matDataElement.appendReplacement( buffer, dataElementCode );
+                indicatorValue = indicatorValue != null ? indicatorValue : NULL_REPLACEMENT;
+                
+                inputMatcher.appendReplacement( buffer, indicatorValue );
             }
         }
 
-        // ---------------------------------------------------------------------
-        // Add remaining text 
-        // ---------------------------------------------------------------------          
-        
-        matDataElement.appendTail( buffer );
+        inputMatcher.appendTail( buffer );
         
         return buffer.toString();
     }

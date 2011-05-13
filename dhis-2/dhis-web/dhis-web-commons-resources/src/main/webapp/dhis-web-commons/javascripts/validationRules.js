@@ -54,8 +54,7 @@ var validationRules = {
 		"name" : {
 			"required" : true,
 			"rangelength" : [ 2, 210 ],
-			"alphanumericwithbasicpuncspaces" : true,
-			"firstletteralphabet" : true
+			"alphanumericwithbasicpuncspaces" : true
 		},
 		"memberValidator" : {
 			"required" : true
@@ -130,19 +129,17 @@ var validationRules = {
 		"name" : {
 			"required" : true,
 			"alphanumericwithbasicpuncspaces" : true,
-			"firstletteralphabet" : false,
 			"rangelength" : [ 4, 150 ]
 		},
 		"shortName" : {
 			"required" : true,
 			"alphanumericwithbasicpuncspaces" : true,
-			"firstletteralphabet" : false,
-			"rangelength" : [ 2, 20 ]
+			"rangelength" : [ 2, 25 ]
 		},
 		"code" : {
 			"alphanumericwithbasicpuncspaces" : true,
 			"notOnlyDigits" : false,
-			"rangelength" : [ 4, 40 ]
+			"rangelength" : [ 0, 25 ]
 		},
 		"frequencySelect" : {
 			"required" : true
@@ -198,7 +195,7 @@ var validationRules = {
 		},
 		"shortName" : {
 			"required" : true,
-			"rangelength" : [ 2, 20 ],
+			"rangelength" : [ 2, 25 ],
 			"alphanumericwithbasicpuncspaces" : true,
 			"notOnlyDigits" : true
 		},
@@ -208,7 +205,7 @@ var validationRules = {
 			"notOnlyDigits" : true
 		},
 		"code" : {
-			"rangelength" : [ 3, 40 ],
+			"rangelength" : [ 0, 25 ],
 			"alphanumericwithbasicpuncspaces" : true,
 			"notOnlyDigits" : false
 		},
@@ -248,7 +245,6 @@ var validationRules = {
 			"required" : true,
 			"alphanumericwithbasicpuncspaces" : true,
 			"notOnlyDigits" : true,
-			"firstletteralphabet" : true,
 			"rangelength" : [ 3, 150 ]
 		}
 	},
@@ -285,24 +281,21 @@ var validationRules = {
 		},
 		"shortName" : {
 			"required" : true,
-			"rangelength" : [ 2, 20 ],
-			"alphanumericwithbasicpuncspaces" : true,
-			"firstletteralphabet" : true
+			"rangelength" : [ 2, 25 ],
+			"alphanumericwithbasicpuncspaces" : true
 		},
 		"alternativeName" : {
 			"rangelength" : [ 3, 150 ],
-			"alphanumericwithbasicpuncspaces" : true,
-			"firstletteralphabet" : true
+			"alphanumericwithbasicpuncspaces" : true
 		},
 		"code" : {
-			"rangelength" : [ 3, 25 ],
+			"rangelength" : [ 0, 25 ],
 			"alphanumericwithbasicpuncspaces" : true,
 			"notOnlyDigits" : false
 		},
 		"description" : {
 			"rangelength" : [ 3, 250 ],
-			"alphanumericwithbasicpuncspaces" : true,
-			"firstletteralphabet" : true
+			"alphanumericwithbasicpuncspaces" : true
 		},
 		"url" : {
 			"url" : true,

@@ -102,6 +102,8 @@ public class UpdatePatientAction
 
     private String gender;
 
+    private String bloodGroup;
+	
     private boolean underAge;
 
     private Integer representativeId;
@@ -160,13 +162,15 @@ public class UpdatePatientAction
         // ---------------------------------------------------------------------
 
         patient.setGender( gender );
-
         patient.setIsDead( isDead );
+        patient.setBloodGroup( bloodGroup );
+		
         if ( deathDate != null )
         {
             deathDate = deathDate.trim();
             patient.setDeathDate( format.parseDate( deathDate ) );
         }
+		
         patient.setUnderAge( underAge );
         patient.setOrganisationUnit( organisationUnit );
 
@@ -391,6 +395,11 @@ public class UpdatePatientAction
     public void setGender( String gender )
     {
         this.gender = gender;
+    }
+	
+    public void setBloodGroup( String bloodGroup )
+    {
+        this.bloodGroup = bloodGroup;
     }
 
     public Patient getPatient()

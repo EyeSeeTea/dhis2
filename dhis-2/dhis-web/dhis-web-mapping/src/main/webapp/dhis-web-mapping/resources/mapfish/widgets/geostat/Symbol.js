@@ -514,21 +514,25 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             featureInfoWindow = new Ext.Window({
                 title: '<span class="' + cssCls + '">' + feature.attributes.name + '</span>',
                 layout: 'fit',
-                width: G.conf.window_width,
-                height: 205,
+                width: 200,
+                height: 225,
                 items: [
                     {
                         xtype: 'panel',
                         layout: 'anchor',
                         bodyStyle: 'padding:8px',
                         items: [
-                            {html: '<b>Type:</b><br>' + feature.attributes.type}
+                            {html: '<div class="window-info">Type:<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
+                            {html: '<div class="window-info">Address:<p style="font-weight:normal">' + feature.attributes.address + '</p></div>'},
+                            {html: '<div class="window-info">Contact person:<p style="font-weight:normal">' + feature.attributes.contactPerson + '</p></div>'},
+                            {html: '<div class="window-info">Email:<p style="font-weight:normal">' + feature.attributes.email + '</p></div>'},
+                            {html: '<div class="window-info">Phone number:<p style="font-weight:normal">' + feature.attributes.phoneNumber + '</p></div>'}
                         ]
                     }
                 ]
             });
             
-            featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
+            featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5 - 51), Ext.getCmp('center').y + 41);
             scope.form.findField('groupset').featureInfoWindow = featureInfoWindow;
             featureInfoWindow.show();
         };

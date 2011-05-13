@@ -467,7 +467,7 @@
                         labelSeparator: G.conf.labelseparator,
                         editable: false
                     },
-                        
+                    
                     {html: '<div class="window-p"></div>'},
                     {html: '<div class="window-info">Delete favorite / Add to dashboard</div>'},
                     {

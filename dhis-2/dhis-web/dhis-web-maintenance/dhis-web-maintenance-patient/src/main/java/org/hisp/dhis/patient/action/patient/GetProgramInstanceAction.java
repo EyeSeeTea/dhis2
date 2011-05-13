@@ -1,7 +1,5 @@
-package org.hisp.dhis.importexport.dhis14.xml.converter.xsd;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,58 +25,59 @@ package org.hisp.dhis.importexport.dhis14.xml.converter.xsd;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.amplecode.staxwax.reader.XMLReader;
-import org.amplecode.staxwax.writer.XMLWriter;
-import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.ImportParams;
+package org.hisp.dhis.patient.action.patient;
+
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $ GetProgramInstanceAction.java May 12, 2011 9:58:11 PM $
+ * 
  */
-public class CalculatedDataElementAssociationXSDConverter
-    extends AbstractXSDConverter
+public class GetProgramInstanceAction
+    implements Action
 {
     // -------------------------------------------------------------------------
-    // Constructor
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    /**
-     * Constructor for write operations.
-     */
-    public CalculatedDataElementAssociationXSDConverter()
-    {   
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
     }
 
     // -------------------------------------------------------------------------
-    // XMLConverter implementation
+    // Input/Output
     // -------------------------------------------------------------------------
-    
-    public void write( XMLWriter writer, ExportParams params )
-    {
-        writer.openElement( "xsd:element", "name", "DataElementCalculated" );
 
-        writeAnnotation( writer );
-        
-        writer.openElement( "xsd:complexType" );
-        
-        writer.openElement( "xsd:sequence" );
-        
-        writeInteger( writer, "DataElementCalculatedID", 1, true );
-        
-        writeInteger( writer, "DataElementID", 1, true );
-        
-        writeDouble( writer, "DataElementFactor", 1, false );
-        
-        writer.closeElement();
-        
-        writer.closeElement();
-        
-        writer.closeElement();
+    private Integer programInstanceId;
+
+    public void setProgramInstanceId( Integer programInstanceId )
+    {
+        this.programInstanceId = programInstanceId;
     }
 
-    public void read( XMLReader reader, ImportParams params )
+    private ProgramInstance programInstance;
+
+    public ProgramInstance getProgramInstance()
     {
-        // Not implemented        
+        return programInstance;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        programInstance = programInstanceService.getProgramInstance( programInstanceId );
+        
+        return SUCCESS;
     }
 }
