@@ -295,7 +295,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     this.classify(false, true);
                                 }});
                             }
-                            else if (cb.getRawValue() == 'Ownership') {
+                            else if (cb.getRawValue() != 'Type') {
                                 cb.currentValue = cb.getValue();
                                 panel.removeAll();
                                 panel.doLayout();
