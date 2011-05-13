@@ -82,11 +82,11 @@ public class GetGeoJsonAction
         this.level = level;
     }
 
-    private Boolean type;
+    private Boolean symbol;
 
-    public void setType( Boolean type )
+    public void setSymbol( Boolean symbol )
     {
-        this.type = type;
+        this.symbol = symbol;
     }
 
     // -------------------------------------------------------------------------
@@ -98,11 +98,6 @@ public class GetGeoJsonAction
     public Collection<OrganisationUnit> getObject()
     {
         return object;
-    }
-
-    public Boolean getType()
-    {
-        return type;
     }
 
     // -------------------------------------------------------------------------
@@ -120,11 +115,11 @@ public class GetGeoJsonAction
 
         FilterUtils.filter( object, new OrganisationUnitWithCoordinatesFilter() );
 
-        OrganisationUnitGroupSet typeGroupSet = organisationUnitGroupService
-            .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
-
-        if ( type != null )
+        if ( symbol != null )
         {
+            OrganisationUnitGroupSet typeGroupSet = organisationUnitGroupService
+                .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
+            
             for ( OrganisationUnit organisationUnit : object )
             {
                 if ( organisationUnit.getFeatureType() != null
@@ -133,6 +128,8 @@ public class GetGeoJsonAction
                     organisationUnit.setType( organisationUnit.getGroupNameInGroupSet( typeGroupSet ) );
                 }
             }
+            
+            return OrganisationUnit.RESULTTYPE_SYMBOL;
         }
 
         return object.size() > 0 ? object.iterator().next().getFeatureType() : NONE;
