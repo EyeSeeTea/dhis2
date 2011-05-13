@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.filter.OrganisationUnitWithCoordinatesFilter;
@@ -81,6 +82,13 @@ public class GetGeoJsonAction
         this.level = level;
     }
 
+    private Boolean symbol;
+
+    public void setSymbol( Boolean symbol )
+    {
+        this.symbol = symbol;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -107,14 +115,21 @@ public class GetGeoJsonAction
 
         FilterUtils.filter( object, new OrganisationUnitWithCoordinatesFilter() );
 
-        for ( OrganisationUnit organisationUnit : object )
+        if ( symbol != null )
         {
-            if ( organisationUnit.getFeatureType() != null
-                && organisationUnit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
+            OrganisationUnitGroupSet typeGroupSet = organisationUnitGroupService
+                .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
+            
+            for ( OrganisationUnit organisationUnit : object )
             {
-                organisationUnit.setType( organisationUnit.getGroupNameInGroupSet( organisationUnitGroupService
-                    .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE ) ) );
+                if ( organisationUnit.getFeatureType() != null
+                    && organisationUnit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
+                {
+                    organisationUnit.setType( organisationUnit.getGroupNameInGroupSet( typeGroupSet ) );
+                }
             }
+            
+            return OrganisationUnit.RESULTTYPE_SYMBOL;
         }
 
         return object.size() > 0 ? object.iterator().next().getFeatureType() : NONE;
