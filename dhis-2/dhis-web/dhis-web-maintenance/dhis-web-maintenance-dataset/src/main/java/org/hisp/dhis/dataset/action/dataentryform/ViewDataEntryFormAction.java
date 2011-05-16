@@ -27,19 +27,10 @@ package org.hisp.dhis.dataset.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.dataelement.comparator.DataElementOperandNameComparator;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
@@ -60,13 +51,6 @@ public class ViewDataEntryFormAction
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
-    }
-
-    private DataElementCategoryService dataElementCategoryService;
-
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
     }
 
     private UserSettingService userSettingService;
@@ -115,20 +99,6 @@ public class ViewDataEntryFormAction
         return autoSave;
     }
 
-    public List<DataElementOperand> operands;
-
-    public List<DataElementOperand> getOperands()
-    {
-        return operands;
-    }
-
-    private Set<Indicator> indicators;
-
-    public Set<Indicator> getIndicators()
-    {
-        return indicators;
-    }
-
     private String dataEntryValue;
 
     public String getDataEntryValue()
@@ -151,13 +121,6 @@ public class ViewDataEntryFormAction
             .getHtmlCode() ) : "";
 
         autoSave = (Boolean) userSettingService.getUserSetting( UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM, false );
-
-        operands = new ArrayList<DataElementOperand>( dataElementCategoryService.getFullOperands( dataSet
-            .getDataElements() ) );
-
-        indicators = dataSet.getIndicators();
-
-        Collections.sort( operands, new DataElementOperandNameComparator() );
 
         return SUCCESS;
     }
