@@ -1,4 +1,4 @@
-package org.hisp.dhis.reporting.scheduling.action;
+package org.hisp.dhis.scheduling;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,19 +27,19 @@ package org.hisp.dhis.reporting.scheduling.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.hisp.dhis.options.SystemSettingManager;
-import org.hisp.dhis.scheduling.SchedulingManager;
 import org.hisp.dhis.system.scheduling.Scheduler;
-
-import com.opensymphony.xwork2.Action;
-
-import static org.hisp.dhis.options.SystemSettingManager.*;
 
 /**
  * @author Lars Helge Overland
  */
-public class ScheduleTasksAction
-    implements Action
+public class DefaultSchedulingManager
+    implements SchedulingManager
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -51,81 +51,82 @@ public class ScheduleTasksAction
     {
         this.systemSettingManager = systemSettingManager;
     }
-    
-    private SchedulingManager schedulingManager;
 
-    public void setSchedulingManager( SchedulingManager schedulingManager )
+    private Scheduler scheduler;
+
+    public void setScheduler( Scheduler scheduler )
     {
-        this.schedulingManager = schedulingManager;
+        this.scheduler = scheduler;
+    }
+
+    private Map<String, Runnable> tasks = new HashMap<String, Runnable>();
+
+    public void setTasks( Map<String, Runnable> tasks )
+    {
+        this.tasks = tasks;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // SchedulingManager implementation
     // -------------------------------------------------------------------------
 
-    private boolean execute;
-
-    public void setExecute( boolean execute )
+    public void scheduleTasks()
     {
-        this.execute = execute;
-    }
-    
-    private boolean statusOnly = false;
-
-    public void setStatusOnly( boolean statusOnly )
-    {
-        this.statusOnly = statusOnly;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private String status;
-
-    public String getStatus()
-    {
-        return status;
-    }
-
-    private boolean running;
-
-    public boolean isRunning()
-    {
-        return running;
+        scheduler.scheduleTask( getRunnables(), Scheduler.CRON_NIGHTLY_1AM );
     }
     
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    public void stopTasks()
     {
-        if ( !statusOnly )
+        scheduler.stopTask( Runnables.class );
+    }
+    
+    public void executeTasks()
+    {
+        scheduler.executeTask( getRunnables() );
+    }
+    
+    public String getTaskStatus()
+    {
+        return scheduler.getTaskStatus( Runnables.class );
+    }
+    
+    public Set<String> getRunningTaskKeys()
+    {
+        final Set<String> keys = new HashSet<String>();
+        
+        for ( String key : tasks.keySet() )
         {
-            if ( execute )
+            if ( Scheduler.STATUS_RUNNING.equals( scheduler.getTaskStatus( tasks.get( key ).getClass() ) ) )
             {
-                schedulingManager.executeTasks();
+                keys.add( key );
             }
-            else if ( Scheduler.STATUS_RUNNING.equals( schedulingManager.getTaskStatus() ) )
+        }
+        
+        return keys;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private Runnables getRunnables()
+    {
+        final Runnables runnables = new Runnables();
+        
+        for ( String key : tasks.keySet() )
+        {
+            boolean schedule = (Boolean) systemSettingManager.getSystemSetting( key, false );
+            
+            if ( schedule )
             {
-                systemSettingManager.saveSystemSetting( KEY_DATAMART_TASK, new Boolean( false ) );
-                systemSettingManager.saveSystemSetting( KEY_DATASETCOMPLETENESS_TASK, new Boolean( false ) );
-                
-                schedulingManager.stopTasks();
+                runnables.addRunnable( tasks.get( key ) );
             }
             else
             {
-                systemSettingManager.saveSystemSetting( KEY_DATAMART_TASK, new Boolean( true) );
-                systemSettingManager.saveSystemSetting( KEY_DATASETCOMPLETENESS_TASK, new Boolean( true ) );
-                
-                schedulingManager.scheduleTasks();
+                scheduler.stopTask( tasks.get( key ).getClass() );
             }
         }
-
-        status = schedulingManager.getTaskStatus();        
-        running = Scheduler.STATUS_RUNNING.equals( status );
         
-        return SUCCESS;
+        return runnables;
     }
 }
