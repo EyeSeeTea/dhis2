@@ -261,37 +261,6 @@ G.util = {
             if (e.measure) { 
                 document.getElementById('measureDistanceDiv').innerHTML = e.measure.toFixed(2) + ' ' + e.units;
             }
-            else {
-                var control = G.vars.map.getControl('measuredistance');
-                var window = control.window;                
-                
-                if (!window) {
-                    window = new Ext.Window({
-                        title: '<span id="window-measure-title">Measure distance</span>',
-                        layout: 'fit',
-                        closeAction: 'hide',
-                        width: 150,
-                        height: 90,
-                        items: [
-                            {
-                                xtype: 'panel',
-                                layout: 'anchor',
-                                bodyStyle: 'padding:8px',
-                                items: [
-                                    {html: '<div class="window-info">Total distance</div>'},
-                                    {html: '<div id="measureDistanceDiv"></div>'}
-                                ]
-                            }
-                        ]
-                    });
-                    control.window = window;
-                }              
-                window.setPagePosition(Ext.getCmp('east').x - (window.width + 15 + 5), Ext.getCmp('center').y + 41);
-                window.show();
-                control.setImmediate(true);
-                control.geodesic = true;
-                control.activate();
-            }
         }
     },            
 

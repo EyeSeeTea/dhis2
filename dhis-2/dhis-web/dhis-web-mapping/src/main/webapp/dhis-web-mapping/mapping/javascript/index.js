@@ -2662,8 +2662,38 @@
         toolTip: G.i18n.measure_distance,
         style: 'margin-top:1px',
         handler: function() {
-            var control = G.vars.map.getControl('measuredistance');            
+            var control = G.vars.map.getControl('measuredistance');
+            var window = control.window;
+            
             if (!control.active) {
+                control.activate();
+                
+                if (!window) {
+                    window = new Ext.Window({
+                        title: '<span id="window-measure-title">' + G.i18n.measure_distance + '</span>',
+                        layout: 'fit',
+                        closeAction: 'hide',
+                        width: 150,
+                        height: 90,
+                        items: [
+                            {
+                                xtype: 'panel',
+                                layout: 'anchor',
+                                bodyStyle: 'padding:8px',
+                                items: [
+                                    {html: '<div class="window-info">Total distance</div>'},
+                                    {html: '<div id="measureDistanceDiv"></div>'}
+                                ]
+                            }
+                        ]
+                    });
+                    control.window = window;
+                }
+                window.setPagePosition(Ext.getCmp('east').x - (window.width + 15 + 5), Ext.getCmp('center').y + 41);
+                window.show();
+                document.getElementById('measureDistanceDiv').innerHTML = '0 km';                
+                control.setImmediate(true);
+                control.geodesic = true;
                 control.activate();
             }
             else {
