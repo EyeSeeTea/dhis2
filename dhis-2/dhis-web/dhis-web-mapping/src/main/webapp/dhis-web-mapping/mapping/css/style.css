@@ -68,6 +68,9 @@
 .x-date-inner .x-date-today a {
     border-color:#999999;
 }
+.x-border-layout-ct {
+    background-color: #fcfcfc;
+}
 
 /* OpenLayers (include in lib) */
 /*
@@ -435,4 +438,8 @@ a.x-menu-item-custom {
     -webkit-border-top-left-radius: 2px;
     -moz-border-radius-topright: 2px;
     -webkit-border-top-right-radius: 2px;
+}
+#measureDistanceDiv {
+    padding:0 0 0 5px;
+    color:#222222;
 }

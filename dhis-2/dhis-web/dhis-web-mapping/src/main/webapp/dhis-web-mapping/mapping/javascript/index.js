@@ -2496,7 +2496,7 @@
 		iconCls: 'icon-zoomout',
 		tooltip: G.i18n.zoom_out,
         style: 'margin-top:1px',
-		handler:function() {
+		handler: function() {
 			G.vars.map.zoomOut();
 		}
 	});
@@ -2518,6 +2518,21 @@
             }
         }
 	});
+    
+    var measureDistanceButton = new Ext.Button({
+        iconCls: 'icon-measure',
+        toolTip: G.i18n.measure_distance,
+        style: 'margin-top:1px',
+        handler: function() {
+            var control = G.vars.map.getControl('measuredistance');            
+            if (!control.active) {
+                control.activate();
+            }
+            else {
+                control.deactivate();
+            }
+        }
+    });                    
     
     var viewHistoryButton = new Ext.Button({
         id: 'viewhistory_b',
@@ -2662,7 +2677,7 @@
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
-		handler: function() {                        
+		handler: function() {          
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }
@@ -2711,6 +2726,7 @@
 			zoomInButton,
 			zoomOutButton,
 			zoomToVisibleExtentButton,
+            measureDistanceButton,
 			viewHistoryButton,
 			'-',
 			favoritesButton,
@@ -2872,6 +2888,21 @@
     G.vars.map.addControl(new OpenLayers.Control.PanPanel({
         slideFactor: 100
     }));
+    
+    var measureControl = new OpenLayers.Control.Measure(
+        OpenLayers.Handler.Path, {
+            id: 'measuredistance',
+            persist: true,
+            handlerOptions: {
+                layerOptions: {styleMap: G.util.measureDistance.getMeasureStyleMap()}
+            }
+        }
+    );    
+    measureControl.events.on({
+        "measurepartial": G.util.measureDistance.handleMeasurements,
+        "measure": G.util.measureDistance.handleMeasurements
+    });
+    G.vars.map.addControl(measureControl);
     
 	}});
 });
