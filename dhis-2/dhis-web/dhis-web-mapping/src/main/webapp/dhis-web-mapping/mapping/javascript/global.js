@@ -258,7 +258,7 @@ G.util = {
         },
             
         handleMeasurements: function(e) {
-            if (e.measure) { 
+            if (e.measure) {
                 document.getElementById('measureDistanceDiv').innerHTML = e.measure.toFixed(2) + ' ' + e.units;
             }
         }

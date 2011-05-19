@@ -2659,17 +2659,16 @@
     
     var measureDistanceButton = new Ext.Button({
         iconCls: 'icon-measure',
-        toolTip: G.i18n.measure_distance,
+        tooltip: G.i18n.measure_distance,
         style: 'margin-top:1px',
         handler: function() {
             var control = G.vars.map.getControl('measuredistance');
-            var window = control.window;
             
             if (!control.active) {
                 control.activate();
                 
-                if (!window) {
-                    window = new Ext.Window({
+                if (!control.window) {
+                    control.window = new Ext.Window({
                         title: '<span id="window-measure-title">' + G.i18n.measure_distance + '</span>',
                         layout: 'fit',
                         closeAction: 'hide',
@@ -2685,12 +2684,16 @@
                                     {html: '<div id="measureDistanceDiv"></div>'}
                                 ]
                             }
-                        ]
+                        ],
+                        listeners: {
+                            'hide': function() {
+                                G.vars.map.getControl('measuredistance').deactivate();
+                            }
+                        }
                     });
-                    control.window = window;
                 }
-                window.setPagePosition(Ext.getCmp('east').x - (window.width + 15 + 5), Ext.getCmp('center').y + 41);
-                window.show();
+                control.window.setPagePosition(Ext.getCmp('east').x - (control.window.width + 15 + 5), Ext.getCmp('center').y + 41);
+                control.window.show();
                 document.getElementById('measureDistanceDiv').innerHTML = '0 km';                
                 control.setImmediate(true);
                 control.geodesic = true;
@@ -2698,6 +2701,7 @@
             }
             else {
                 control.deactivate();
+                control.window.hide();
             }
         }
     });           
@@ -2919,20 +2923,18 @@
         slideFactor: 100
     }));
     
-    var measureControl = new OpenLayers.Control.Measure(
-        OpenLayers.Handler.Path, {
-            id: 'measuredistance',
-            persist: true,
-            handlerOptions: {
-                layerOptions: {styleMap: G.util.measureDistance.getMeasureStyleMap()}
-            }
+    G.vars.map.addControl(new OpenLayers.Control.Measure( OpenLayers.Handler.Path, {
+        id: 'measuredistance',
+        persist: true,
+        handlerOptions: {
+            layerOptions: {styleMap: G.util.measureDistance.getMeasureStyleMap()}
         }
-    );    
-    measureControl.events.on({
+    }));
+    
+    G.vars.map.getControl('measuredistance').events.on({
         "measurepartial": G.util.measureDistance.handleMeasurements,
         "measure": G.util.measureDistance.handleMeasurements
     });
-    G.vars.map.addControl(measureControl);
     
 	}});
 });
