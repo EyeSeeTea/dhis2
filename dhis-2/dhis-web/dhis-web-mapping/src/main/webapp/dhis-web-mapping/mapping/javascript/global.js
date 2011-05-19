@@ -267,10 +267,10 @@ G.util = {
                 
                 if (!window) {
                     window = new Ext.Window({
-                        title: '<span id="window-favorites-measure">Measure distance</span>',
+                        title: '<span id="window-measure-title">Measure distance</span>',
                         layout: 'fit',
                         closeAction: 'hide',
-                        width: 140,
+                        width: 150,
                         height: 90,
                         items: [
                             {

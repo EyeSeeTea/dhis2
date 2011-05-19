@@ -2517,22 +2517,7 @@
                 }
             }
         }
-	});
-    
-    var measureDistanceButton = new Ext.Button({
-        iconCls: 'icon-measure',
-        toolTip: G.i18n.measure_distance,
-        style: 'margin-top:1px',
-        handler: function() {
-            var control = G.vars.map.getControl('measuredistance');            
-            if (!control.active) {
-                control.activate();
-            }
-            else {
-                control.deactivate();
-            }
-        }
-    });                    
+	});         
     
     var viewHistoryButton = new Ext.Button({
         id: 'viewhistory_b',
@@ -2629,6 +2614,27 @@
 		}
 	});
 	
+	var predefinedMapLegendSetButton = new Ext.Button({
+		iconCls: 'icon-predefinedlegendset',
+		tooltip: G.i18n.predefined_legend_sets,
+		disabled: !G.user.isAdmin,
+        style: 'margin-top:1px',
+		handler: function() {		
+			if (!predefinedMapLegendSetWindow.hidden) {
+				predefinedMapLegendSetWindow.hide();
+			}
+			else {
+                var x = Ext.getCmp('center').x + G.conf.window_position_x;
+                var y = Ext.getCmp('center').y + G.conf.window_position_y;
+                predefinedMapLegendSetWindow.setPosition(x,y);
+				predefinedMapLegendSetWindow.show();
+                if (!G.stores.predefinedMapLegend.isLoaded) {
+                    G.stores.predefinedMapLegend.load();
+                }
+			}
+		}
+	});
+	
 	var exportImageButton = new Ext.Button({
 		iconCls: 'icon-image',
 		tooltip: G.i18n.export_map_as_image,
@@ -2650,27 +2656,21 @@
 			}
 		}
 	});
-	
-	var predefinedMapLegendSetButton = new Ext.Button({
-		iconCls: 'icon-predefinedlegendset',
-		tooltip: G.i18n.predefined_legend_sets,
-		disabled: !G.user.isAdmin,
+    
+    var measureDistanceButton = new Ext.Button({
+        iconCls: 'icon-measure',
+        toolTip: G.i18n.measure_distance,
         style: 'margin-top:1px',
-		handler: function() {		
-			if (!predefinedMapLegendSetWindow.hidden) {
-				predefinedMapLegendSetWindow.hide();
-			}
-			else {
-                var x = Ext.getCmp('center').x + G.conf.window_position_x;
-                var y = Ext.getCmp('center').y + G.conf.window_position_y;
-                predefinedMapLegendSetWindow.setPosition(x,y);
-				predefinedMapLegendSetWindow.show();
-                if (!G.stores.predefinedMapLegend.isLoaded) {
-                    G.stores.predefinedMapLegend.load();
-                }
-			}
-		}
-	});
+        handler: function() {
+            var control = G.vars.map.getControl('measuredistance');            
+            if (!control.active) {
+                control.activate();
+            }
+            else {
+                control.deactivate();
+            }
+        }
+    });           
 	
 	var adminButton = new Ext.Button({
 		iconCls: 'icon-admin',
@@ -2726,12 +2726,12 @@
 			zoomInButton,
 			zoomOutButton,
 			zoomToVisibleExtentButton,
-            measureDistanceButton,
 			viewHistoryButton,
 			'-',
 			favoritesButton,
             predefinedMapLegendSetButton,
 			exportImageButton,
+            measureDistanceButton,
 			'-',
             adminButton,
 			helpButton,
