@@ -273,7 +273,7 @@
     };
 	
 	/* Thematic layers */
-    polygonLayer = new OpenLayers.Layer.Vector('Polygon layer', {
+    polygonLayer = new OpenLayers.Layer.Vector(G.conf.thematic_layer_1, {
         'visibility': false,
         'displayInLayerSwitcher': false,
         'styleMap': new OpenLayers.StyleMap({
@@ -292,7 +292,7 @@
     polygonLayer.layerType = G.conf.map_layer_type_thematic;
     G.vars.map.addLayer(polygonLayer);
     
-    pointLayer = new OpenLayers.Layer.Vector('Point layer', {
+    pointLayer = new OpenLayers.Layer.Vector(G.conf.thematic_layer_2, {
         'visibility': false,
         'displayInLayerSwitcher': false,
         'styleMap': new OpenLayers.StyleMap({
@@ -1955,11 +1955,11 @@
                 },
                 {
                     nodeType: 'gx_layer',
-                    layer: 'Polygon layer'
+                    layer: G.conf.thematic_layer_1
                 },
                 {
                     nodeType: 'gx_layer',
-                    layer: 'Point layer'
+                    layer: G.conf.thematic_layer_2
                 },
                 {
                     nodeType: 'gx_layer',
@@ -2329,7 +2329,7 @@
     /* Section: widgets */
     choropleth = new mapfish.widgets.geostat.Choropleth({
         id: 'choropleth',
-		title: '<span class="panel-title">' + G.i18n.polygon_layer + '</span>',
+		title: '<span class="panel-title">Thematic layer 1</span>',
         map: G.vars.map,
         layer: polygonLayer,
         featureSelection: false,
@@ -2366,7 +2366,7 @@
         id: 'point',
         map: G.vars.map,
         layer: pointLayer,
-		title: '<span class="panel-title">' + G.i18n.point_layer + '</span>',
+		title: '<span class="panel-title">Thematic layer 2</span>',
         featureSelection: false,
         legendDiv: 'pointlegend',
         defaults: {width: 130},
