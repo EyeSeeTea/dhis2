@@ -1343,7 +1343,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
     formValues: {
 		getAllValues: function() {
 			return {
-				featureType: G.conf.map_feature_type_point,
 				mapValueType: this.form.findField('mapvaluetype').getValue(),
                 indicatorGroupId: this.valueType.isIndicator() ? this.form.findField('indicatorgroup').getValue() : null,
                 indicatorId: this.valueType.isIndicator() ? this.form.findField('indicator').getValue() : null,
