@@ -29,7 +29,7 @@
     var mapViewStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getAllMapViews' + G.conf.type,
         root: 'mapViews',
-        fields: [ 'id', 'name', 'userId', 'featureType', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
+        fields: [ 'id', 'name', 'userId', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
             'mapDateType', 'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName',
             'parentOrganisationUnitLevel', 'organisationUnitLevel', 'organisationUnitLevelName', 'mapLegendType', 'method', 'classes',
             'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'radiusLow', 'radiusHigh', 'longitude', 'latitude', 'zoom'

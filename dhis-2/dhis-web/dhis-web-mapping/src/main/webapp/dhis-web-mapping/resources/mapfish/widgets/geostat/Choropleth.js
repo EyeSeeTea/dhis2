@@ -1447,6 +1447,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.form.findField('classes').setValue(this.legend.classes);
             this.form.findField('bounds').reset();
             
+            this.form.findField('startcolor').setValue('#FF0000');
+            this.form.findField('endcolor').setValue('#FFFF00');
+            
             this.form.findField('radiuslow').reset();
             this.form.findField('radiushigh').reset();
             
