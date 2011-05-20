@@ -87,6 +87,10 @@ G.conf = {
     
     defaultLayerZIndex: 10000,
     
+    defaultLowRadius: 5,
+    
+    defaultHighRadius: 20,
+    
 //  Measure
 
     sketchSymbolizers: {

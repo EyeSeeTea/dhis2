@@ -207,12 +207,12 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             emptyText: G.i18n.optional,
             selectOnFocus: true,
             width: G.conf.combo_width,
-            store: G.stores.pointMapView,
+            store: G.stores.mapView,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        this.mapView = G.stores.pointMapView.getAt(G.stores.pointMapView.find('id', cb.getValue())).data;
+                        this.mapView = G.stores.mapView.getAt(G.stores.mapView.find('id', cb.getValue())).data;
                         this.updateValues = true;
                         
                         this.legend.value = this.mapView.mapLegendType;
@@ -1188,9 +1188,9 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             this.applyPredefinedLegend(true);
         }
         
-        this.form.findField('radiuslow').setValue(this.mapView.radiusLow);
-        this.form.findField('radiushigh').setValue(this.mapView.radiusHigh);
-
+        this.form.findField('radiuslow').setValue(this.mapView.radiusLow || G.conf.defaultLowRadius);
+        this.form.findField('radiushigh').setValue(this.mapView.radiusHigh || G.conf.defaultHighRadius);
+        
         if (this.legend.value == G.conf.map_legend_type_automatic) {
             this.form.findField('method').setValue(this.mapView.method);
             this.form.findField('startcolor').setValue(this.mapView.colorLow);
@@ -1435,8 +1435,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
         
         this.setUrl(G.conf.path_mapping + 'getGeoJson.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +
-            '&level=' + this.organisationUnitSelection.level.level +
-            '&type=true'
+            '&level=' + this.organisationUnitSelection.level.level
         );
     },
 
@@ -1532,11 +1531,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
     
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Point.superclass.onRender.apply(this, arguments);
-        if (this.loadMask) {
-            this.loadMask = new Ext.LoadMask(this.bwrap, this.loadMask);
-            this.loadMask.show();
-        }
-
+        
         var coreOptions = {
             'layer': this.layer,
             'format': this.format,

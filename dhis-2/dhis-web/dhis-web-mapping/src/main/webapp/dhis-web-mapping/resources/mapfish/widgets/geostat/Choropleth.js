@@ -105,11 +105,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 this.setMapView();
             }
             
-            if (G.stores.polygonMapView.isLoaded) {
+            if (G.stores.mapView.isLoaded) {
                 mapViewStoreCallback.call(this);
             }
             else {
-                G.stores.polygonMapView.load({scope: this, callback: function() {
+                G.stores.mapView.load({scope: this, callback: function() {
                     mapViewStoreCallback.call(this);
                 }});
             }
@@ -236,12 +236,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             emptyText: G.i18n.optional,
             selectOnFocus: true,
             width: G.conf.combo_width,
-            store: G.stores.polygonMapView,
+            store: G.stores.mapView,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        this.mapView = G.stores.polygonMapView.getAt(G.stores.polygonMapView.find('id', cb.getValue())).data;
+                        this.mapView = G.stores.mapView.getAt(G.stores.mapView.find('id', cb.getValue())).data;
                         this.updateValues = true;
                         
                         this.legend.value = this.mapView.mapLegendType;
@@ -1217,9 +1217,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.applyPredefinedLegend(true);
         }
         
-        this.form.findField('radiuslow').setValue(this.mapView.radiusLow);
-        this.form.findField('radiushigh').setValue(this.mapView.radiusHigh);
-
+        this.form.findField('radiuslow').setValue(this.mapView.radiusLow || G.conf.defaultLowRadius);
+        this.form.findField('radiushigh').setValue(this.mapView.radiusHigh || G.conf.defaultHighRadius);
+        
         if (this.legend.value == G.conf.map_legend_type_automatic) {
             this.form.findField('method').setValue(this.mapView.method);
             this.form.findField('startcolor').setValue(this.mapView.colorLow);
@@ -1560,10 +1560,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Choropleth.superclass.onRender.apply(this, arguments);
-        if (this.loadMask) {
-            this.loadMask = new Ext.LoadMask(this.bwrap, this.loadMask);
-            this.loadMask.show();
-        }
 
         var coreOptions = {
             'layer': this.layer,

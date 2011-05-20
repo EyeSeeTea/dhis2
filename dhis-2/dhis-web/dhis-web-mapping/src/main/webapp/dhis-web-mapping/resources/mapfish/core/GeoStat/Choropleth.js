@@ -127,7 +127,7 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
                     upperBoundary: boundsArray[i + 1]
                 })
             });
-            rules.push(rule);
+            rules[i] = rule;
         }
 
         this.extendStyle(rules);
