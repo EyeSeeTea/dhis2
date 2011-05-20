@@ -33,12 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hisp.dhis.caseentry.screen.DataEntryScreenManager;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.minmax.MinMaxDataElement;
-import org.hisp.dhis.minmax.MinMaxDataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
@@ -49,7 +45,6 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
-import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
@@ -80,13 +75,7 @@ public class LoadDataEntryAction
 
     private PatientService patientService;
 
-    private MinMaxDataElementService minMaxDataElementService;
-
     private OrganisationUnitSelectionManager selectionManager;
-
-    private ProgramStageDataElementService programStageDataElementService;
-
-    private DataEntryFormService dataEntryFormService;
 
     // -------------------------------------------------------------------------
     // Input && Output
@@ -122,10 +111,12 @@ public class LoadDataEntryAction
         this.patientService = patientService;
     }
 
-    public void setMinMaxDataElementService( MinMaxDataElementService minMaxDataElementService )
-    {
-        this.minMaxDataElementService = minMaxDataElementService;
-    }
+    //
+    // public void setMinMaxDataElementService( MinMaxDataElementService
+    // minMaxDataElementService )
+    // {
+    // this.minMaxDataElementService = minMaxDataElementService;
+    // }
 
     public void setProgramStageService( ProgramStageService programStageService )
     {
@@ -155,16 +146,6 @@ public class LoadDataEntryAction
     public ProgramStageInstance getProgramStageInstance()
     {
         return programStageInstance;
-    }
-
-    public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
-    {
-        this.programStageDataElementService = programStageDataElementService;
-    }
-
-    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
-    {
-        this.dataEntryFormService = dataEntryFormService;
     }
 
     public void setPatientId( Integer patientId )
@@ -224,8 +205,6 @@ public class LoadDataEntryAction
 
         programStageDataElements = programStage.getProgramStageDataElements();
 
-        Collection<DataElement> dataElements = programStageDataElementService.getListDataElement( programStage );
-
         programStageInstance = programStageInstanceService.getProgramStageInstance( programInstance, programStage );
 
         if ( programStageInstance != null )
@@ -245,40 +224,20 @@ public class LoadDataEntryAction
             }
 
             // ---------------------------------------------------------------------
-            // Get min/max data-elements
-            // ---------------------------------------------------------------------
-
-            Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
-                organisationUnit, dataElements );
-
-            Map<Integer, MinMaxDataElement> minMaxMap = new HashMap<Integer, MinMaxDataElement>( minMaxDataElements
-                .size() );
-
-            for ( MinMaxDataElement minMaxDataElement : minMaxDataElements )
-            {
-                minMaxMap.put( minMaxDataElement.getDataElement().getId(), minMaxDataElement );
-            }
-
-            // ---------------------------------------------------------------------
             // Get data-entry-form
             // ---------------------------------------------------------------------
 
             DataEntryForm dataEntryForm = programStage.getDataEntryForm();
 
-            if ( useDefaultForm != null && !useDefaultForm )
+            if ( !useDefaultForm && dataEntryForm != null)
             {
-                customDataEntryFormCode = dataEntryScreenManager.populateCustomDataEntryScreenForMultiDimensional(
-                    dataEntryForm.getHtmlCode(), patientDataValues, minMaxMap, "", i18n, programStage,
-                    programStageInstance, organisationUnit );
-
-                customDataEntryFormCode = dataEntryFormService.prepareDataEntryFormForEdit( customDataEntryFormCode );
+              customDataEntryFormCode = dataEntryScreenManager.populateCustomDataEntryScreenForMultiDimensional(
+                    dataEntryForm.getHtmlCode(), patientDataValues, "", i18n, programStage, programStageInstance,
+                    organisationUnit );
             }
 
             return SUCCESS;
         }
-
-        // customDataEntryFormCode =
-        // programStage.getDataEntryForm().getHtmlCode();
 
         return SUCCESS;
     }
