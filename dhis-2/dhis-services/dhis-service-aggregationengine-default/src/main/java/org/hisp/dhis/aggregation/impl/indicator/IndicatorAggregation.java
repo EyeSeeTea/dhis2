@@ -27,14 +27,13 @@ package org.hisp.dhis.aggregation.impl.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.DateUtils.DAYS_IN_YEAR;
-import static org.hisp.dhis.system.util.DateUtils.getDays;
 import static org.hisp.dhis.system.util.MathUtils.INVALID;
 import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.hisp.dhis.aggregation.impl.cache.AggregationCache;
 import org.hisp.dhis.dataelement.DataElement;
@@ -45,6 +44,7 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.system.util.DateUtils;
 
 /**
  * @author Lars Helge Overland
@@ -52,8 +52,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  */
 public class IndicatorAggregation
 {
-    private static final Pattern FORMULA_PATTERN = Pattern.compile( ExpressionService.FORMULA_EXPRESSION );
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -70,6 +68,13 @@ public class IndicatorAggregation
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
+    }
+
+    private ExpressionService expressionService;
+
+    public void setExpressionService( ExpressionService expressionService )
+    {
+        this.expressionService = expressionService;
     }
     
     private DataElementCategoryService categoryService;
@@ -100,7 +105,7 @@ public class IndicatorAggregation
         {
             int factor = indicator.getIndicatorType().getFactor();
 
-            double annualizationFactor = getAnnualizationFactor( indicator, startDate, endDate );
+            double annualizationFactor = DateUtils.getAnnualizationFactor( indicator, startDate, endDate );
             
             double aggregatedValue = ( numeratorValue / denominatorValue ) * factor * annualizationFactor;
 
@@ -125,64 +130,21 @@ public class IndicatorAggregation
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Returns the annualized value.
-     */
-    private double getAnnualizationFactor( Indicator indicator, Date startDate, Date endDate )
-    {
-        double factor = 1.0;
-        
-        if ( indicator.getAnnualized() != null && indicator.getAnnualized() )
-        {
-            long days = getDays( startDate, endDate ) + 1;
-            
-            factor = DAYS_IN_YEAR / days;
-        }
-        
-        return factor;
-    }
     
-    /**
-     * Converts an expression on the form<br>
-     * [34] + [23], where the numbers are IDs of DataElements, to the form<br>
-     * 200 + 450, where the numbers are the values of the DataValues registered
-     * for the Period and source.
-     * 
-     * @return The generated expression
-     */
-    private String generateExpression( String formula, Date startDate, Date endDate, OrganisationUnit organisationUnit )
-    {    	
-        try
-        {        	
-            Matcher matcher = FORMULA_PATTERN.matcher( formula );
-            
-            StringBuffer buffer = new StringBuffer();            
-            
-            while ( matcher.find() )
-            {
-                String match = matcher.group();
-                
-                DataElementOperand operand = DataElementOperand.getOperand( match );
-                
-                DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
-                
-                DataElementCategoryOptionCombo optionCombo = !operand.isTotal() ? categoryService.getDataElementCategoryOptionCombo( operand.getOptionComboId() ) : null;
-
-                Double aggregatedValue = aggregationCache.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit );   
-                
-                match = aggregatedValue == null ? ExpressionService.NULL_REPLACEMENT : String.valueOf( aggregatedValue );
-                
-                matcher.appendReplacement( buffer, match );
-            }
-
-            matcher.appendTail( buffer );
-
-            return buffer.toString();
-        }
-        catch ( NumberFormatException ex )
+    private String generateExpression( String expression, Date startDate, Date endDate, OrganisationUnit organisationUnit )
+    {
+        Set<DataElementOperand> operands = expressionService.getOperandsInExpression( expression );
+        
+        Map<DataElementOperand, Double> valueMap = new HashMap<DataElementOperand, Double>();
+        
+        for ( DataElementOperand operand : operands )
         {
-            throw new RuntimeException( "Illegal DataElement id", ex );
+            DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
+            DataElementCategoryOptionCombo optionCombo = !operand.isTotal() ? categoryService.getDataElementCategoryOptionCombo( operand.getOptionComboId() ) : null;
+
+            valueMap.put( operand, aggregationCache.getAggregatedDataValue( dataElement, optionCombo, startDate, endDate, organisationUnit ) );            
         }
+        
+        return expressionService.generateExpression( expression, valueMap );
     }
 }

@@ -27,9 +27,7 @@ package org.hisp.dhis.datamart.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.datamart.util.ParserUtil.generateExpression;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
-import static org.hisp.dhis.system.util.DateUtils.DAYS_IN_YEAR;
 import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
 
@@ -43,6 +41,7 @@ import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
 import org.hisp.dhis.datamart.aggregation.dataelement.DataElementAggregator;
+import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedIndicatorValueBatchHandler;
 import org.hisp.dhis.options.SystemSettingManager;
@@ -73,6 +72,13 @@ public class DefaultIndicatorDataMart
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+    
+    private ExpressionService expressionService;
+
+    public void setExpressionService( ExpressionService expressionService )
+    {
+        this.expressionService = expressionService;
     }
 
     private DataElementAggregator sumIntAggregator;
@@ -161,8 +167,8 @@ public class DefaultIndicatorDataMart
                 
                 for ( final Indicator indicator : indicators )
                 {
-                    final double numeratorValue = calculateExpression( generateExpression( indicator.getExplodedNumerator(), valueMap ) );                    
-                    final double denominatorValue = calculateExpression( generateExpression( indicator.getExplodedDenominator(), valueMap ) );
+                    final double numeratorValue = calculateExpression( expressionService.generateExpression( indicator.getExplodedNumerator(), valueMap ) );                    
+                    final double denominatorValue = calculateExpression( expressionService.generateExpression( indicator.getExplodedDenominator(), valueMap ) );
 
                     // ---------------------------------------------------------
                     // AggregatedIndicatorValue
@@ -170,7 +176,7 @@ public class DefaultIndicatorDataMart
 
                     if ( denominatorValue != 0 && !( omitZeroNumerator && numeratorValue == 0 ) )
                     {
-                        annualizationFactor = getAnnualizationFactor( indicator, period );
+                        annualizationFactor = DateUtils.getAnnualizationFactor( indicator, period.getStartDate(), period.getEndDate() );
                         
                         factor = indicator.getIndicatorType().getFactor();
                         
@@ -207,21 +213,7 @@ public class DefaultIndicatorDataMart
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-    
-    public static double getAnnualizationFactor( final Indicator indicator, final Period period )
-    {
-        double factor = 1.0;
         
-        if ( indicator.getAnnualized() != null && indicator.getAnnualized() )
-        {
-            final int daysInPeriod = DateUtils.daysBetween( period.getStartDate(), period.getEndDate() ) + 1;
-            
-            factor = DAYS_IN_YEAR / daysInPeriod;
-        }
-        
-        return factor;
-    }
-    
     public static String getAnnualizationString( final Boolean annualized )
     {
         return ( annualized == null || !annualized ) ? FALSE : TRUE;
