@@ -87,34 +87,32 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         this.createSelectFeatures();
 
         if (G.vars.parameter.id) {
-			if (G.vars.parameter.mapView.featureType == G.conf.map_feature_type_multipolygon) {
-				this.mapView = G.vars.parameter.mapView;
-				this.updateValues = true;
-				this.legend = {
-					value: this.mapView.mapLegendType,
-					method: this.mapView.method || this.legend.method,
-					classes: this.mapView.classes || this.legend.classes
-				};
-				
-				G.vars.parameter.id = false;
-				G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-				
-				function mapViewStoreCallback() {
-					this.form.findField('mapview').setValue(this.mapView.id);
-					this.valueType.value = this.mapView.mapValueType;
-					this.form.findField('mapvaluetype').setValue(this.valueType.value);
-					this.setMapView();
-				}
-				
-				if (G.stores.polygonMapView.isLoaded) {
-					mapViewStoreCallback.call(this);
-				}
-				else {
-					G.stores.polygonMapView.load({scope: this, callback: function() {
-						mapViewStoreCallback.call(this);
-					}});
-				}
-			}
+            this.mapView = G.vars.parameter.mapView;
+            this.updateValues = true;
+            this.legend = {
+                value: this.mapView.mapLegendType,
+                method: this.mapView.method || this.legend.method,
+                classes: this.mapView.classes || this.legend.classes
+            };
+            
+            G.vars.parameter.id = false;
+            G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
+            
+            function mapViewStoreCallback() {
+                this.form.findField('mapview').setValue(this.mapView.id);
+                this.valueType.value = this.mapView.mapValueType;
+                this.form.findField('mapvaluetype').setValue(this.valueType.value);
+                this.setMapView();
+            }
+            
+            if (G.stores.polygonMapView.isLoaded) {
+                mapViewStoreCallback.call(this);
+            }
+            else {
+                G.stores.polygonMapView.load({scope: this, callback: function() {
+                    mapViewStoreCallback.call(this);
+                }});
+            }
         }
         
 		mapfish.widgets.geostat.Choropleth.superclass.initComponent.apply(this);
@@ -798,12 +796,52 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     }
                 }
             }
+        },
+        
+        { html: '<div class="thematic-br">' },
+        
+        {
+            xtype: 'numberfield',
+            name: 'radiuslow',
+            fieldLabel: 'Low point size',
+            width: G.conf.combo_number_width_small,
+            allowDecimals: false,
+            allowNegative: false,
+            minValue: 1,
+            value: 5,
+            listeners: {
+                'change': {
+                    scope: this,
+                    fn: function() {
+                        this.classify(false, true);
+                    }
+                }                
+            }
+        },
+        
+        {
+            xtype: 'numberfield',
+            name: 'radiushigh',
+            fieldLabel: 'High point size',
+            width: G.conf.combo_number_width_small,
+            allowDecimals: false,
+            allowNegative: false,
+            minValue: 1,
+            value: 20,
+            listeners: {
+                'change': {
+                    scope: this,
+                    fn: function() {
+                        this.classify(false, true);
+                    }
+                }                
+            }
         }
 
         ];
     },
     
-	createSingletonCmp: {
+    createSingletonCmp: {
 		treeWindow: function() {
 			Ext.Ajax.request({
 				url: G.conf.path_commons + 'getOrganisationUnits' + G.conf.type,
@@ -885,6 +923,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 										forceSelection: true,
 										triggerAction: 'all',
 										selectOnFocus: true,
+										emptyText: G.conf.emptytext,
+										labelSeparator: G.conf.labelseparator,
 										fieldLabel: 'Level',
 										width: G.conf.combo_width_fieldset,
 										minListWidth: G.conf.combo_width_fieldset,
@@ -917,8 +957,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 										Ext.message.msg(false, 'Level is higher than boundary level');
 										return;
 									}
-									
-									if (Ext.getCmp('locatefeature_w')) {
+                                    
+                                    if (Ext.getCmp('locatefeature_w')) {
 										Ext.getCmp('locatefeature_w').destroy();
 									}
 									
@@ -1176,6 +1216,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.form.findField('maplegendset').setValue(this.mapView.mapLegendSetId);
             this.applyPredefinedLegend(true);
         }
+        
+        this.form.findField('radiuslow').setValue(this.mapView.radiusLow);
+        this.form.findField('radiushigh').setValue(this.mapView.radiusHigh);
 
         if (this.legend.value == G.conf.map_legend_type_automatic) {
             this.form.findField('method').setValue(this.mapView.method);
@@ -1315,6 +1358,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 }
             }
             
+            if (!this.form.findField('radiuslow').getValue() || !this.form.findField('radiushigh').getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, G.i18n.form_is_not_complete);
+                }
+                return false;
+            }
+            
             return true;
         }
     },
@@ -1348,8 +1398,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                 colorLow: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('startcolor').getValue() : null,
                 colorHigh: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('endcolor').getValue() : null,
                 mapLegendSetId: this.legend.value == G.conf.map_legend_type_predefined ? this.form.findField('maplegendset').getValue() : null,
-                radiusLow: null,
-                radiusHigh: null,
+				radiusLow: this.form.findField('radiuslow').getValue(),
+				radiusHigh: this.form.findField('radiushigh').getValue(),
                 longitude: G.vars.map.getCenter().lon,
                 latitude: G.vars.map.getCenter().lat,
                 zoom: parseFloat(G.vars.map.getZoom())
@@ -1397,6 +1447,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             this.form.findField('method').setValue(this.legend.method);
             this.form.findField('classes').setValue(this.legend.classes);
             this.form.findField('bounds').reset();
+            
+            this.form.findField('radiuslow').reset();
+            this.form.findField('radiushigh').reset();
             
             document.getElementById(this.legendDiv).innerHTML = '';
             
@@ -1491,13 +1544,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
         Ext.getCmp('viewhistory_b').addItem(this);
         
 		var options = {
-            indicator: 'id',
+            indicator: 'value',
             method: this.form.findField('method').getValue(),
             numClasses: this.form.findField('classes').getValue(),
-            colors: this.getColors()
+            colors: this.getColors(),
+            minSize: parseInt(this.form.findField('radiuslow').getValue()),
+            maxSize: parseInt(this.form.findField('radiushigh').getValue())
         };
-       
-        this.coreComp.applyClassification(options);
+        
+        this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
         G.vars.mask.hide();

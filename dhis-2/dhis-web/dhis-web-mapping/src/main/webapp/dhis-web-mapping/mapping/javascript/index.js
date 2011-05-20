@@ -41,40 +41,6 @@
             'load': G.func.storeLoadListener
         }
     });
-    
-    var polygonMapViewStore = new Ext.data.JsonStore({
-        url: G.conf.path_mapping + 'getMapViewsByFeatureType' + G.conf.type,
-        baseParams: {featureType: G.conf.map_feature_type_multipolygon},
-        root: 'mapViews',
-        fields: [ 'id', 'name', 'userId', 'featureType', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
-            'mapDateType', 'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName',
-            'parentOrganisationUnitLevel', 'organisationUnitLevel', 'organisationUnitLevelName', 'mapLegendType', 'method', 'classes',
-            'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'longitude', 'latitude', 'zoom'
-        ],
-        sortInfo: {field: 'userId', direction: 'ASC'},
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-            'load': G.func.storeLoadListener
-        }
-    });
-    
-    var pointMapViewStore = new Ext.data.JsonStore({
-        url: G.conf.path_mapping + 'getMapViewsByFeatureType' + G.conf.type,
-        baseParams: {featureType: G.conf.map_feature_type_point},
-        root: 'mapViews',
-        fields: [ 'id', 'name', 'userId', 'featureType', 'mapValueType', 'indicatorGroupId', 'indicatorId', 'dataElementGroupId', 'dataElementId',
-            'mapDateType', 'periodTypeId', 'periodId', 'startDate', 'endDate', 'parentOrganisationUnitId', 'parentOrganisationUnitName',
-            'parentOrganisationUnitLevel', 'organisationUnitLevel', 'organisationUnitLevelName', 'mapLegendType', 'method', 'classes',
-            'bounds', 'colorLow', 'colorHigh', 'mapLegendSetId', 'radiusLow', 'radiusHigh', 'longitude', 'latitude', 'zoom'
-        ],
-        sortInfo: {field: 'userId', direction: 'ASC'},
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-            'load': G.func.storeLoadListener
-        }
-    });
 
     var indicatorGroupStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getAllIndicatorGroups' + G.conf.type,
@@ -288,8 +254,6 @@
     
     G.stores = {
 		mapView: mapViewStore,
-        polygonMapView: polygonMapViewStore,
-        pointMapView: pointMapViewStore,
         indicatorGroup: indicatorGroupStore,
         indicatorsByGroup: indicatorsByGroupStore,
         indicator: indicatorStore,
@@ -490,12 +454,12 @@
 				text: G.i18n.register,
 				handler: function() {
 					var vn = Ext.getCmp('favoritename_tf').getValue();
-                    var params;
-                    
                     if (!vn) {
 						Ext.message.msg(false, G.i18n.form_is_not_complete);
 						return;
 					}
+                    
+                    var params;                    
                     
                     if (G.vars.activePanel.isPolygon()) {
                         if (!choropleth.formValidation.validateForm.apply(choropleth, [true])) {

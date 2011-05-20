@@ -85,36 +85,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
         this.createItems();
         
         this.createSelectFeatures();
-
-        if (G.vars.parameter.id) {
-			if (G.vars.parameter.mapView.featureType == G.conf.map_feature_type_point) {
-				this.mapView = G.vars.parameter.mapView;
-				this.updateValues = true;
-				this.legend = {
-					value: this.mapView.mapLegendType,
-					method: this.mapView.method || this.legend.method,
-					classes: this.mapView.classes || this.legend.classes
-				};
-                
-				G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-				
-				function mapViewStoreCallback() {
-					this.form.findField('mapview').setValue(this.mapView.id);
-					this.valueType.value = this.mapView.mapValueType;
-					this.form.findField('mapvaluetype').setValue(this.valueType.value);
-					this.setMapView();
-				}
-				
-				if (G.stores.pointMapView.isLoaded) {
-					mapViewStoreCallback.call(this);
-				}
-				else {
-					G.stores.pointMapView.load({scope: this, callback: function() {
-						mapViewStoreCallback.call(this);
-					}});
-				}
-			}
-        }
         
 		mapfish.widgets.geostat.Point.superclass.initComponent.apply(this);
     },
@@ -216,6 +186,12 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
     },
     
     createItems: function() {
+        
+        this.defaults = {
+			labelSeparator: G.conf.labelseparator,
+            emptyText: G.conf.emptytext
+        };
+        
         this.items = [
         {
             xtype: 'combo',
@@ -230,7 +206,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             emptyText: G.i18n.optional,
             selectOnFocus: true,
-			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_width,
             store: G.stores.pointMapView,
             listeners: {
@@ -262,7 +237,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'combo',
             name: 'mapvaluetype',
             fieldLabel: G.i18n.mapvaluetype,
-			labelSeparator: G.conf.labelseparator,
             editable: false,
             valueField: 'id',
             displayField: 'name',
@@ -300,8 +274,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             selectOnFocus: true,
             width: G.conf.combo_width,
             store: G.stores.indicatorGroup,
@@ -328,8 +300,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             selectOnFocus: true,
             width: G.conf.combo_width,
             store: G.stores.indicatorsByGroup,
@@ -393,8 +363,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             selectOnFocus: true,
             width: G.conf.combo_width,
             store: G.stores.dataElementGroup,
@@ -421,8 +389,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             selectOnFocus: true,
             width: G.conf.combo_width,
             store: G.stores.dataElementsByGroup,
@@ -485,8 +451,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             selectOnFocus: true,
             width: G.conf.combo_width,
             store: G.stores.periodType,
@@ -513,8 +477,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             selectOnFocus: true,
             width: G.conf.combo_width,
             store: G.stores.periodsByTypeStore,
@@ -541,8 +503,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             fieldLabel: G.i18n.start_date,
             format: 'Y-m-d',
             hidden: true,
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_width,
             listeners: {
                 'select': {
@@ -563,8 +523,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             fieldLabel: G.i18n.end_date,
             format: 'Y-m-d',
             hidden: true,
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_width,
             listeners: {
                 'select': {
@@ -585,8 +543,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'textfield',
             name: 'boundary',
             fieldLabel: G.i18n.boundary,
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_width,
             style: 'cursor:pointer',
             node: {attributes: {hasChildrenWithCoordinates: false}},
@@ -612,8 +568,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'textfield',
             name: 'level',
             fieldLabel: G.i18n.level,
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_width,
             style: 'cursor:pointer',
             levelComboBox: null,
@@ -642,8 +596,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             displayField: 'text',
             mode: 'local',
             fieldLabel: G.i18n.legend_type,
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             value: this.legend.value,
             triggerAction: 'all',
             width: G.conf.combo_width,
@@ -684,8 +636,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             displayField: 'name',
             mode: 'remote',
             fieldLabel: G.i18n.legendset,
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             triggerAction: 'all',
             width: G.conf.combo_width,
 			hidden: true,
@@ -709,8 +659,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             valueField: 'value',
             displayField: 'text',
             mode: 'local',
-            emptyText: G.conf.emptytext,
-			labelSeparator: G.conf.labelseparator,
             value: this.legend.method,
             triggerAction: 'all',
             width: G.conf.combo_width,
@@ -745,8 +693,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'textfield',
             name: 'bounds',
             fieldLabel: G.i18n.bounds,
-			labelSeparator: G.conf.labelseparator,
-            emptyText: G.i18n.comma_separated_values,
             width: G.conf.combo_width,
             hidden: true,
             listeners: {
@@ -763,7 +709,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'combo',
             name: 'classes',
             fieldLabel: G.i18n.classes,
-			labelSeparator: G.conf.labelseparator,
             editable: false,
             valueField: 'value',
             displayField: 'value',
@@ -794,7 +739,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'colorfield',
             name: 'startcolor',
             fieldLabel: G.i18n.low_color,
-			labelSeparator: G.conf.labelseparator,
             allowBlank: false,
             width: G.conf.combo_width,
             value: "#FF0000",
@@ -812,7 +756,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'colorfield',
             name: 'endcolor',
             fieldLabel: G.i18n.high_color,
-			labelSeparator: G.conf.labelseparator,
             allowBlank: false,
             width: G.conf.combo_width,
             value: "#FFFF00",
@@ -832,7 +775,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'numberfield',
             name: 'radiuslow',
             fieldLabel: 'Low point size',
-			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_number_width_small,
             allowDecimals: false,
             allowNegative: false,
@@ -852,7 +794,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             xtype: 'numberfield',
             name: 'radiushigh',
             fieldLabel: 'High point size',
-			labelSeparator: G.conf.labelseparator,
             width: G.conf.combo_number_width_small,
             allowDecimals: false,
             allowNegative: false,
@@ -987,14 +928,14 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
 										Ext.message.msg(false, 'Level is higher than boundary level');
 										return;
 									}
-
-									if (Ext.getCmp('locatefeature_w')) {
+                                    
+                                    if (Ext.getCmp('locatefeature_w')) {
 										Ext.getCmp('locatefeature_w').destroy();
 									}
 									
 									this.form.findField('mapview').clearValue();
 									this.updateValues = true;
-                                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
+									this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
 										this.form.findField('level').levelComboBox.getValue(), this.form.findField('level').levelComboBox.getRawValue());
 										
 									this.form.findField('boundary').setValue(node.attributes.text);
@@ -1520,7 +1461,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             }
             
             if (this.updateValues) {
-                var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';                
+                var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
                 var params = {
                     id: this.valueType.isIndicator() ? this.form.findField('indicator').getValue() : this.form.findField('dataelement').getValue(),
                     periodId: G.system.mapDateType.isFixed() ? this.form.findField('period').getValue() : null,
@@ -1582,9 +1523,8 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             minSize: parseInt(this.form.findField('radiuslow').getValue()),
             maxSize: parseInt(this.form.findField('radiushigh').getValue())
 		};
-
-		this.coreComp.updateOptions(options);
-        this.coreComp.applyClassification();
+        
+        this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
         G.vars.mask.hide();
@@ -1610,11 +1550,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
         };
 
         this.coreComp = new mapfish.GeoStat.Point(this.map, coreOptions);
-        
-        if (G.vars.parameter.id) {
-            G.util.expandWidget(this);
-			G.vars.parameter = false;
-		}
     }
 });
 
