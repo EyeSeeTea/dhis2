@@ -46,24 +46,10 @@ public class DataBrowserAction
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
     {
         isZeroAdded = (showZeroCheckBox != null) && showZeroCheckBox.equals( TRUE );
-
-        // If set, change the current selected unit
-        if ( selectedUnitChanger != null )
-        {
-            selectionManager.setSelectedOrganisationUnit( this.organisationUnitService.getOrganisationUnit( Integer
-                .parseInt( selectedUnitChanger.trim() ) ) );
-        }
-
-        // Checks if the selected unit is a leaf node of tree then
-        // We must add parent as the same parameter value
-        if ( parent == null && mode.equals( "OU" ) && selectionManager.getSelectedOrganisationUnit() != null
-            && selectionManager.getSelectedOrganisationUnit().getChildren().size() == 0 )
-        {
-            parent = selectionManager.getSelectedOrganisationUnit().getId() + EMPTY;
-        }
 
         // Check if the second selected date is later than the first selected
         // date
@@ -73,6 +59,22 @@ public class DataBrowserAction
             {
                 return ERROR;
             }
+        }
+
+        // If set, change the current selected unit
+        if ( selectedUnitChanger != null )
+        {
+            selectionManager.setSelectedOrganisationUnit( organisationUnitService.getOrganisationUnit( Integer
+                .parseInt( selectedUnitChanger ) ) );
+        }
+
+        selectedUnit = selectionManager.getSelectedOrganisationUnit();
+
+        // Checks if the selected unit is a leaf node of tree then
+        // We must add parent as the same parameter value
+        if ( parent == null && mode.equals( "OU" ) && selectedUnit != null && selectedUnit.getChildren().size() == 0 )
+        {
+            parent = selectedUnit.getId() + EMPTY;
         }
 
         PeriodType periodType = periodService.getPeriodTypeByName( periodTypeId );
@@ -170,10 +172,14 @@ public class DataBrowserAction
             return ERROR;
         }
 
+        // Set title to grid
         setGridTitle();
 
         // Convert column date names
         convertColumnNames( grid );
+
+        // Do paging
+        doPaging();
 
         // Set DataBrowserTable variable for PDF export
         SessionUtils.setSessionVar( KEY_DATABROWSERGRID, grid );

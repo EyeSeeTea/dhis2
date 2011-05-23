@@ -29,6 +29,91 @@
  * @author mortenoh
  */
 
+// -----------------------------------------------
+// Support functions
+// -----------------------------------------------
+
+/* perform dblclick action on the sourceId */
+function dhisPaging_moveAllSelected(sourceId)
+{
+    jQuery("#" + sourceId).dblclick();
+}
+
+/* select all options and perform dblclick action on the sourceId */
+function dhisPaging_moveAll(sourceId)
+{
+    var jqSource = jQuery("#" + sourceId);
+    jqSource.find("option").attr("selected", "selected");
+    jqSource.dblclick();
+}
+
+/*
+ * 
+ */
+function dhisPaging_availableList_dblclick(sourceId, targetId, removeArray) {
+    var jqAvailableList = jQuery("#" + sourceId);
+    var jqSelectedList = jQuery("#" + targetId);
+
+    var settings = jqAvailableList.data("settings");
+
+    jqAvailableList.find(":selected").each(function(i) {
+        var jqThis = jQuery(this);
+        var option_id = +jqThis.attr("value");
+
+        jqSelectedList.append( this );
+
+        if( jQuery.isArray(settings[removeArray]) ) {
+            settings[removeArray].push(option_id);
+        } else {
+            settings[removeArray] = [option_id];
+        }
+    });
+
+    if(settings[removeArray] && settings[removeArray].length > 0) {
+        settings.params[removeArray] = settings[removeArray].join(",");
+    } else {
+        delete settings[removeArray];
+        delete settings.params[removeArray];
+    }
+
+    jqAvailableList.dhisPaging("load", sourceId);
+}
+
+/*
+ *
+ */
+function dhisPaging_selectedList_dblclick(sourceId, targetId, removeArray) {
+    var jqAvailableList = jQuery("#" + targetId);
+    var jqSelectedList = jQuery("#" + sourceId);
+
+    var settings = jQuery("#" + targetId).data("settings");
+
+    jqSelectedList.find(":selected").each(function(i) {
+        var jqThis = jQuery(this);
+        var option_id = +jqThis.attr("value");
+        jqThis.remove();
+
+        if( jQuery.isArray(settings[removeArray]) )
+        {
+            var remove_idx = jQuery.inArray(option_id, settings[removeArray]);
+            settings[removeArray].splice(remove_idx, remove_idx+1);
+        }
+    });
+
+    if(settings[removeArray] && settings[removeArray].length > 0) {
+        settings.params[removeArray] = settings[removeArray].join(",");
+    } else {
+        delete settings[removeArray];
+        delete settings.params[removeArray];
+    }
+
+    jqAvailableList.dhisPaging("load", targetId);
+}
+
+// -----------------------------------------------
+// Plugin
+// -----------------------------------------------
+
 (function($) {
   var templates = {
     wrapper: "<div id='${id}' style='padding: 0; margin: 0; background-color: #eee; border: 1px solid #666;' />",
@@ -96,9 +181,6 @@
             if(params.currentPage == params.numberOfPages) {
                 $next_button.attr("disabled", "disabled");
             }
-
-            settings.params = params;
-            $select.data("settings", settings);
          });
     },
     init: function(options) {
@@ -166,7 +248,6 @@
               }
 
               settings.params.currentPage = 1;
-              $select.data("settings", settings);
               methods.load(event.data.id);
           });
       }
@@ -211,48 +292,40 @@
 
       $next_button.click(function() {
           params.currentPage = +params.currentPage + 1;
-          settings.params = params;
-          $select.data("settings", settings);
-
           methods.load("" + id);
       });
 
       $previous_button.click(function() {
           params.currentPage = +params.currentPage - 1;
-          settings.params = params;
-          $select.data("settings", settings);
-
           methods.load("" + id);
       });
 
       $filter_button.click(function() {
-         params.key = escape( $filter_input.val() );
+         params.key = $filter_input.val();
 
          if(params.key.length === 0) {
              delete params.key;
          }
 
          params.currentPage = 1;
-         settings.params = params;
-         $select.data("settings", settings);
-         
          methods.load("" + id);
+      });
+      
+      $filter_input.keypress(function(e) {
+          if(e.keyCode == 13) {
+              $filter_button.click();
+              e.preventDefault();
+          }
       });
       
       $select_page.change(function() {
           params.currentPage = +$(this).find(":selected").val();
-          settings.params = params;
-          $select.data("settings", settings);
-
           methods.load("" + id);
       });
 
       $pagesize_input.change(function() {
          params.pageSize = +$(this).val();
          params.currentPage = 1;
-         settings.params = params;
-         $select.data("settings", settings);
-
          methods.load("" + id);
       });
     }
