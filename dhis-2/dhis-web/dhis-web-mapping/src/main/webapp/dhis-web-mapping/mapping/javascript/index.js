@@ -2768,11 +2768,11 @@
                         contentEl: 'featuredatatext'
 					},
                     {
-                        title: '<span class="panel-title">' + G.i18n.map_legend_polygon + '</span>',
+                        title: '<span class="panel-title">' + G.conf.thematic_layer_1 + ' legend</span>',
                         contentEl: 'polygonlegend'
                     },
                     {
-                        title: '<span class="panel-title">' + G.i18n.map_legend_point + '</span>',
+                        title: '<span class="panel-title">' + G.conf.thematic_layer_2 + ' legend</span>',
                         contentEl: 'pointlegend'
                     },
                     {
