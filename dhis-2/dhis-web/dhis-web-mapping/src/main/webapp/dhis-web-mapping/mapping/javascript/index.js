@@ -2776,7 +2776,7 @@
                         contentEl: 'pointlegend'
                     },
                     {
-                        title: '<span class="panel-title">Symbol legend</span>',
+                        title: '<span class="panel-title">Symbol layer legend</span>',
                         contentEl: 'symbollegend'
                     }
                 ]
