@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.system.util.IdentifiableObjectUtils;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.comparator.UserGroupComparator;
@@ -57,6 +58,13 @@ public class GetUserGroupsAction
     // Input & Output
     // -------------------------------------------------------------------------
 
+    private String key;
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
     private List<UserGroup> userGroups;
 
     public List<UserGroup> getUserGroups()
@@ -67,12 +75,17 @@ public class GetUserGroupsAction
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
-    
+
     @Override
     public String execute()
         throws Exception
     {
         userGroups = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
+
+        if ( key != null )
+        {
+            userGroups = IdentifiableObjectUtils.filterNameByKey( userGroups, key, true );
+        }
 
         Collections.sort( userGroups, new UserGroupComparator() );
 

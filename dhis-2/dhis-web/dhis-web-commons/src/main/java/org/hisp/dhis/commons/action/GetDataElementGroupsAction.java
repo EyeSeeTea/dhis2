@@ -28,6 +28,7 @@ package org.hisp.dhis.commons.action;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,10 +36,11 @@ import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
 import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.system.util.IdentifiableObjectUtils;
 
 /**
  * @author Tran Thanh Tri
- * @version $Id: GetDataElementGroupsAction 2010-8-28$
+ * @author mortenoh
  */
 public class GetDataElementGroupsAction
     extends ActionPagingSupport<DataElementGroup>
@@ -58,6 +60,28 @@ public class GetDataElementGroupsAction
     // Input & output
     // -------------------------------------------------------------------------
 
+    private String key;
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
+    private List<Integer> removeDataElementGroups = new ArrayList<Integer>();
+
+    public void setRemoveDataElementGroups( String removeDataElementGroups )
+    {
+        if ( removeDataElementGroups.length() > 0 )
+        {
+            List<String> stringList = Arrays.asList( removeDataElementGroups.split( "," ) );
+
+            for ( String s : stringList )
+            {
+                this.removeDataElementGroups.add( Integer.parseInt( s ) );
+            }
+        }
+    }
+
     private List<DataElementGroup> dataElementGroups;
 
     public List<DataElementGroup> getDataElementGroups()
@@ -74,6 +98,20 @@ public class GetDataElementGroupsAction
     {
         dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
 
+        if ( removeDataElementGroups.size() > 0 )
+        {
+            for ( Integer id : removeDataElementGroups )
+            {
+                DataElementGroup dataElementGroup = dataElementService.getDataElementGroup( id );
+                dataElementGroups.remove( dataElementGroup );
+            }
+        }
+
+        if ( key != null )
+        {
+            dataElementGroups = IdentifiableObjectUtils.filterNameByKey( dataElementGroups, key, true );
+        }
+
         Collections.sort( this.dataElementGroups, new DataElementGroupNameComparator() );
 
         if ( usePaging )
@@ -82,7 +120,7 @@ public class GetDataElementGroupsAction
 
             dataElementGroups = dataElementGroups.subList( paging.getStartPos(), paging.getEndPos() );
         }
-        
+
         return SUCCESS;
     }
 }
