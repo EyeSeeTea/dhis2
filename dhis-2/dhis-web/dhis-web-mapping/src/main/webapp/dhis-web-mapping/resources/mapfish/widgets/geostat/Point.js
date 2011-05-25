@@ -76,7 +76,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
     
     isDrillDown: false,
 
-	imageLegend: [],
+	imageLegend: false,
     
     initComponent: function() {
     

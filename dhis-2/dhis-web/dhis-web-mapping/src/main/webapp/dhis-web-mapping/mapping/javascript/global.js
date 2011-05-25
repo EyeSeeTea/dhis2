@@ -277,9 +277,9 @@ G.util = {
         return b.value-a.value;
     },
 
-    getLegendsJSON: function() {
+    getLegendsJSON: function() {   
         var json = '{"legends":[';
-        for(var i = 0; i < this.imageLegend.length; i++) {
+        for (var i = 0; i < this.imageLegend.length; i++) {
             json += '{';
             json += '"label": "' + this.imageLegend[i].label + '",';
             json += '"color": "' + this.imageLegend[i].color + '"';
