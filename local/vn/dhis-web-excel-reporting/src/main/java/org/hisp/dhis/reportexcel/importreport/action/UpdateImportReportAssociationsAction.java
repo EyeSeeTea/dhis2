@@ -1,5 +1,3 @@
-package org.hisp.dhis.reportexcel.exportitem.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,39 +24,52 @@ package org.hisp.dhis.reportexcel.exportitem.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.reportexcel.importreport.action;
+
 import java.util.Collection;
 
-import org.hisp.dhis.reportexcel.ExportReportService;
-import org.hisp.dhis.reportexcel.action.ActionSupport;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.importitem.ImportItemService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Chau Thu Tran
  * @version $Id$
  */
 
-public class DeleteMultiImportItemAction
-    extends ActionSupport
+public class UpdateImportReportAssociationsAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ExportReportService exportReportService;
+    private ImportItemService importItemService;
 
-    public void setExportReportService( ExportReportService exportReportService )
+    public void setImportItemService( ImportItemService importItemService )
     {
-        this.exportReportService = exportReportService;
+        this.importItemService = importItemService;
+    }
+
+    private SelectionTreeManager selectionTreeManager;
+
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    {
+        this.selectionTreeManager = selectionTreeManager;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Collection<Integer> ids;
+    private Integer importReportId;
 
-    public void setIds( Collection<Integer> ids )
+    public void setImportReportId( Integer importReportId )
     {
-        this.ids = ids;
+        this.importReportId = importReportId;
     }
 
     // -------------------------------------------------------------------------
@@ -68,7 +79,15 @@ public class DeleteMultiImportItemAction
     public String execute()
         throws Exception
     {
-        exportReportService.deleteMultiExportItem( ids );
+        ExcelItemGroup importReport = importItemService.getImportReport( importReportId );
+
+        importReport.getOrganisationAssocitions().clear();
+
+        Collection<OrganisationUnit> orgUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
+
+        importReport.getOrganisationAssocitions().addAll( orgUnits );
+
+        importItemService.updateImportReport( importReport );
 
         return SUCCESS;
     }
