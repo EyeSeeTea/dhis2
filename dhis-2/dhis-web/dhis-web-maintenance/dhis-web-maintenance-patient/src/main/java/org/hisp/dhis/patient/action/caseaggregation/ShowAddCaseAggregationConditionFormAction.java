@@ -47,9 +47,9 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version ShowCaseAggregationConditionFormAction.java Nov 17, 2010 11:04:46 AM
+ * @version ShowAddCaseAggregationConditionFormAction.java Nov 17, 2010 11:04:46 AM
  */
-public class ShowCaseAggregationConditionFormAction
+public class ShowAddCaseAggregationConditionFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -66,7 +66,7 @@ public class ShowCaseAggregationConditionFormAction
     // Output
     // -------------------------------------------------------------------------
     
-	private Integer id;
+    private Integer id;
 	
     private List<PatientAttribute> patientAttributes;
 
