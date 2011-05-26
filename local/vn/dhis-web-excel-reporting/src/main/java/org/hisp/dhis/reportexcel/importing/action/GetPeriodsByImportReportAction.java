@@ -24,28 +24,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.importreport.action;
+package org.hisp.dhis.reportexcel.importing.action;
 
-import java.util.Collection;
+import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.reportexcel.action.ActionSupport;
 import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
 import org.hisp.dhis.reportexcel.importitem.ImportItemService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.reportexcel.period.generic.PeriodGenericManager;
 
 /**
  * @author Chau Thu Tran
  * @version $Id$
  */
-
-public class UpdateExcelItemGroupAssociationsAction
-    implements Action
+public class GetPeriodsByImportReportAction
+    extends ActionSupport
 {
+
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependences
     // -------------------------------------------------------------------------
+
+    private PeriodGenericManager periodGenericManager;
+
+    public void setPeriodGenericManager( PeriodGenericManager periodGenericManager )
+    {
+        this.periodGenericManager = periodGenericManager;
+    }
 
     private ImportItemService importItemService;
 
@@ -54,42 +60,44 @@ public class UpdateExcelItemGroupAssociationsAction
         this.importItemService = importItemService;
     }
 
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer importReportId;
+    private List<Period> periods;
 
-    public void setImportReportId( Integer importReportId )
+    public List<Period> getPeriods()
+    {
+        return periods;
+    }
+
+    private String importReportId;
+
+    public void setImportReportId( String importReportId )
     {
         this.importReportId = importReportId;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Implement Action method
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        ExcelItemGroup importReport = importItemService.getImportReport( importReportId );
+        if ( importReportId == null || importReportId.equals( "null" ) )
+        {
+            message = i18n.getString( "there_is_no_excel_item_group" );
 
-        importReport.getOrganisationAssocitions().clear();
+            return ERROR;
+        }
 
-        Collection<OrganisationUnit> orgUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
+        ExcelItemGroup importReport = importItemService.getImportReport( Integer.parseInt( importReportId ) );
 
-        importReport.getOrganisationAssocitions().addAll( orgUnits );
+        periodGenericManager.setPeriodType( importReport.getPeriodType().getName() );
 
-        importItemService.updateImportReport( importReport );
+        periods = periodGenericManager.getPeriodList();
 
         return SUCCESS;
     }
-
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.importitem.action;
+package org.hisp.dhis.reportexcel.exportitem.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,41 +26,39 @@ package org.hisp.dhis.reportexcel.importitem.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 import java.util.Collection;
 
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.reportexcel.ExportReportService;
+import org.hisp.dhis.reportexcel.action.ActionSupport;
 
 /**
- * @author Chau Thu Tran
+ * @author Tran Thanh Tri
  * @version $Id$
  */
-public class GetExcelItemParamAction
-    implements Action
+
+public class DeleteMultiExportItemAction
+    extends ActionSupport
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private DataSetService dataSetService;
+    private ExportReportService exportReportService;
 
-    public void setDataSetService( DataSetService dataSetService )
+    public void setExportReportService( ExportReportService exportReportService )
     {
-        this.dataSetService = dataSetService;
+        this.exportReportService = exportReportService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Collection<DataSet> dataSets;
+    private Collection<Integer> ids;
 
-    public Collection<DataSet> getDataSets()
+    public void setIds( Collection<Integer> ids )
     {
-        return dataSets;
+        this.ids = ids;
     }
 
     // -------------------------------------------------------------------------
@@ -70,7 +68,7 @@ public class GetExcelItemParamAction
     public String execute()
         throws Exception
     {
-        dataSets = dataSetService.getAllDataSets();
+        exportReportService.deleteMultiExportItem( ids );
 
         return SUCCESS;
     }

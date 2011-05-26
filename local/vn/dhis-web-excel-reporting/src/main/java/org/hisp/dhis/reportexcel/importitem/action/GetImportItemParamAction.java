@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportexcel.importitem.action;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -24,80 +26,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.importing.action;
 
-import java.util.List;
+import java.util.Collection;
 
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reportexcel.action.ActionSupport;
-import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
-import org.hisp.dhis.reportexcel.importitem.ImportItemService;
-import org.hisp.dhis.reportexcel.period.generic.PeriodGenericManager;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * @version $Id$
  */
-public class GetPeriodsByExcelItemGroupAction
-    extends ActionSupport
+public class GetImportItemParamAction
+    implements Action
 {
-
     // -------------------------------------------------------------------------
-    // Dependences
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private PeriodGenericManager periodGenericManager;
+    private DataSetService dataSetService;
 
-    public void setPeriodGenericManager( PeriodGenericManager periodGenericManager )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.periodGenericManager = periodGenericManager;
-    }
-
-    private ImportItemService importItemService;
-
-    public void setImportItemService( ImportItemService importItemService )
-    {
-        this.importItemService = importItemService;
+        this.dataSetService = dataSetService;
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Output
     // -------------------------------------------------------------------------
 
-    private List<Period> periods;
+    private Collection<DataSet> dataSets;
 
-    public List<Period> getPeriods()
+    public Collection<DataSet> getDataSets()
     {
-        return periods;
-    }
-
-    private String importReportId;
-
-    public void setImportReportId( String importReportId )
-    {
-        this.importReportId = importReportId;
+        return dataSets;
     }
 
     // -------------------------------------------------------------------------
-    // Implement Action method
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        if ( importReportId == null || importReportId.equals( "null" ) )
-        {
-            message = i18n.getString( "there_is_no_excel_item_group" );
-
-            return ERROR;
-        }
-
-        ExcelItemGroup importReport = importItemService.getImportReport( Integer.parseInt( importReportId ) );
-
-        periodGenericManager.setPeriodType( importReport.getPeriodType().getName() );
-
-        periods = periodGenericManager.getPeriodList();
+        dataSets = dataSetService.getAllDataSets();
 
         return SUCCESS;
     }
+
 }
