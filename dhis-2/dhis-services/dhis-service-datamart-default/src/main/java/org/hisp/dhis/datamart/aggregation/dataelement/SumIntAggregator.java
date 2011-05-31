@@ -182,8 +182,9 @@ public class SumIntAggregator
                         
                         value = value * factor;
 
-                        value += totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
-                        relevantDays += totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
+                        final double[] totalSum = totalSums.get( entry.getKey() );
+                        value += totalSum != null ? totalSum[0] : 0;
+                        relevantDays += totalSum != null ? totalSum[1] : 0;
                         
                         final double[] values = { value, relevantDays };
                         
