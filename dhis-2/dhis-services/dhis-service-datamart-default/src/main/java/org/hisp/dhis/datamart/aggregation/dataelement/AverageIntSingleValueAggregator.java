@@ -175,9 +175,9 @@ public class AverageIntSingleValueAggregator
         return totalSums;
     }
 
-    public Collection<DataElementOperand> filterOperands( Collection<DataElementOperand> operands, PeriodType periodType )
+    public Collection<DataElementOperand> filterOperands( final Collection<DataElementOperand> operands, final PeriodType periodType )
     {
-        Collection<DataElementOperand> filteredOperands = new HashSet<DataElementOperand>();
+        final Collection<DataElementOperand> filteredOperands = new HashSet<DataElementOperand>();
         
         for ( final DataElementOperand operand : operands )
         {
