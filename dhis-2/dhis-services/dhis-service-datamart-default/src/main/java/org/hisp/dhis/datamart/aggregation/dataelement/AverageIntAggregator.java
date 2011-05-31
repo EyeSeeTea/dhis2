@@ -130,8 +130,6 @@ public class AverageIntAggregator
         
         double value = 0.0;
         double relevantDays = 0.0;
-        double existingValue = 0.0;
-        double existingRelevantDays = 0.0;
         double duration = 0.0;
         
         int dataValueLevel = 0;
@@ -190,10 +188,10 @@ public class AverageIntAggregator
                         
                         value = value * relevantDays;
                         
-                        existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
-                        existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
+                        value += totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
+                        relevantDays += totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
                         
-                        final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
+                        final double[] values = { value, relevantDays };
                         
                         totalSums.put( entry.getKey(), values );
                     }
