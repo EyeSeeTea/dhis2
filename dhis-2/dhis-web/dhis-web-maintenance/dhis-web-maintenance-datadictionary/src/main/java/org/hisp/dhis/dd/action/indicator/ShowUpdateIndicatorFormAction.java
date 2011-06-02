@@ -1,7 +1,5 @@
-package org.hisp.dhis.user.action;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,47 +25,97 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.dd.action.indicator;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.indicator.IndicatorType;
+import org.hisp.dhis.indicator.comparator.IndicatorTypeNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
-public class AddUserGroupFormAction 
+/**
+ * @author Chau Thu Tran
+ * @version $ ShowUpdateIndicatorFormAction.java May 30, 2011 2:34:10 PM $
+ * 
+ */
+public class ShowUpdateIndicatorFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserService userService;
-    
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Parameters
-    // -------------------------------------------------------------------------
+    private IndicatorService indicatorService;
 
-    private List<User> availableUsers;
-    
-    public List<User> getAvailableUsers()
+    public void setIndicatorService( IndicatorService indicatorService )
     {
-        return availableUsers;
+        this.indicatorService = indicatorService;
     }
 
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Input/output
     // -------------------------------------------------------------------------
 
-    public String execute() throws Exception
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        availableUsers = new ArrayList<User>( userService.getAllUsers() );
-        
+        this.id = id;
+    }
+
+    private Indicator indicator;
+
+    public Indicator getIndicator()
+    {
+        return indicator;
+    }
+
+    private int selectedIndicatorType;
+
+    public int getSelectedIndicatorType()
+    {
+        return selectedIndicatorType;
+    }
+
+    private String indicatorTypeName;
+
+    public String getIndicatorTypeName()
+    {
+        return indicatorTypeName;
+    }
+
+    private List<IndicatorType> indicatorTypes;
+
+    public List<IndicatorType> getIndicatorTypes()
+    {
+        return indicatorTypes;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+    {
+        indicator = indicatorService.getIndicator( id );
+
+        if ( indicator.getIndicatorType() != null )
+        {
+            selectedIndicatorType = indicator.getIndicatorType().getId();
+
+            indicatorTypeName = indicator.getIndicatorType().getName();
+        }
+
+        indicatorTypes = new ArrayList<IndicatorType>( indicatorService.getAllIndicatorTypes() );
+
+        Collections.sort( indicatorTypes, new IndicatorTypeNameComparator() );
+
         return SUCCESS;
     }
+
 }

@@ -1,5 +1,3 @@
-package org.hisp.dhis.settings.action.user;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,43 +25,22 @@ package org.hisp.dhis.settings.action.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+dhis2.util.namespace( 'dhis2.array' );
 
-import org.hisp.dhis.options.UserSettingManager;
-
-import com.opensymphony.xwork2.Action;
-
-public class GetAvailableChartsInDashboardAction
-    implements Action
+/**
+ * Remove part of an array.
+ * 
+ * @param array {Array} Array to remove from
+ * @param from {Number} Start index
+ * @param to {Number} End index
+ * 
+ * @returns {Array} Array without the removed parts
+ */
+dhis2.array.remove = function( array, from, to )
 {
-    private UserSettingManager userSettingManager;
+    // Array Remove - By John Resig (MIT Licensed)
+    var rest = array.slice( (to || from) + 1 || array.length );
+    array.length = from < 0 ? array.length + from : from;
 
-    public void setUserSettingManager( UserSettingManager userSettingManager )
-    {
-        this.userSettingManager = userSettingManager;
-    }
-
-    private Integer chartsInDashboard;
-
-    public Integer getChartsInDashboard()
-    {
-        return chartsInDashboard;
-    }
-
-    private List<Integer> chartsInDashboardOptions;
-
-    public List<Integer> getChartsInDashboardOptions()
-    {
-        return chartsInDashboardOptions;
-    }
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        chartsInDashboard = userSettingManager.getChartsInDashboard();
-        chartsInDashboardOptions = userSettingManager.getChartsInDashboardOptions();
-        
-        return SUCCESS;
-    }
-}
+    return array.push.apply( array, rest );
+};

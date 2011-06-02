@@ -27,7 +27,6 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +48,10 @@ import org.hisp.dhis.period.PeriodType;
 public class DataSet
     extends AbstractNameableObject
 {
+    public static final String TYPE_DEFAULT = "default";
+    public static final String TYPE_SECTION = "section";
+    public static final String TYPE_CUSTOM = "custom";
+    
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
@@ -62,7 +65,7 @@ public class DataSet
     /**
      * All DataElements associated with this DataSet.
      */
-    private Collection<DataElement> dataElements = new HashSet<DataElement>();
+    private Set<DataElement> dataElements = new HashSet<DataElement>();
 
     /**
      * Indicators associated with this data set. Indicators are used for view and
@@ -149,6 +152,62 @@ public class DataSet
     // Logic
     // -------------------------------------------------------------------------
 
+    public void addOrganisationUnit( OrganisationUnit unit )
+    {
+        sources.add( unit );
+        unit.getDataSets().add( this );
+    }
+    
+    public void removeOrganisationUnit( OrganisationUnit unit )
+    {
+        sources.remove( unit );
+        unit.getDataSets().remove( this );
+    }
+    
+    public void updateOrganisationUnits( Set<OrganisationUnit> updates )
+    {
+        for ( OrganisationUnit unit : new HashSet<OrganisationUnit>( sources ) )
+        {
+            if ( !updates.contains( unit ) )
+            {
+                removeOrganisationUnit( unit );
+            }
+        }
+        
+        for ( OrganisationUnit unit : updates )
+        {
+            addOrganisationUnit( unit );
+        }
+    }
+    
+    public void addDataElement( DataElement dataElement )
+    {
+        dataElements.add( dataElement );
+        dataElement.getDataSets().add( this );
+    }
+    
+    public void removeDataElement( DataElement dataElement )
+    {
+        dataElements.remove( dataElement );
+        dataElement.getDataSets().remove( dataElement );
+    }
+    
+    public void updateDataElements( Set<DataElement> updates )
+    {
+        for ( DataElement dataElement : new HashSet<DataElement>( dataElements ) )
+        {
+            if ( !updates.contains( dataElement ) )
+            {
+                removeDataElement( dataElement );
+            }
+        }
+        
+        for ( DataElement dataElement : updates )
+        {
+            addDataElement( dataElement );
+        }
+    }
+    
     public boolean hasDataEntryForm()
     {
         return dataEntryForm != null;
@@ -162,6 +221,21 @@ public class DataSet
     public boolean isMobile()
     {
         return mobile != null && mobile;
+    }
+    
+    public String getDataSetType()
+    {
+        if ( hasDataEntryForm() )
+        {
+            return TYPE_CUSTOM;
+        }
+        
+        if ( hasSections() )
+        {
+            return TYPE_SECTION;
+        }
+        
+        return TYPE_DEFAULT;
     }
     
     // -------------------------------------------------------------------------
@@ -227,12 +301,12 @@ public class DataSet
         this.periodType = periodType;
     }
 
-    public Collection<DataElement> getDataElements()
+    public Set<DataElement> getDataElements()
     {
         return dataElements;
     }
 
-    public void setDataElements( Collection<DataElement> dataElements )
+    public void setDataElements( Set<DataElement> dataElements )
     {
         this.dataElements = dataElements;
     }

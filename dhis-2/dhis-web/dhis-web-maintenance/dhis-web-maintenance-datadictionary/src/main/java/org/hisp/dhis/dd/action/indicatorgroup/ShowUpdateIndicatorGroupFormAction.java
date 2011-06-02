@@ -1,7 +1,5 @@
-package org.hisp.dhis.reporting.dataset.action;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,106 +25,84 @@ package org.hisp.dhis.reporting.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.datasetreport.DataSetReportService;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
+package org.hisp.dhis.dd.action.indicatorgroup;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
+ * @version $ ShowUpdateIndicatorGroupFormAction.java May 30, 2011 3:01:41 PM $
+ * 
  */
-public class GenerateDefaultDataSetReportAction
+public class ShowUpdateIndicatorGroupFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataSetReportService dataSetReportService;
+    private IndicatorService indicatorService;
+
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
+    }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Comparator
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit selectedOrgunit;
+    private Comparator<Indicator> indicatorComparator;
 
-    private DataSet selectedDataSet;
-
-    private Period selectedPeriod;
-
-    private boolean selectedUnitOnly;
-
-    private I18nFormat format;
-
-    private I18n i18n;
+    public void setIndicatorComparator( Comparator<Indicator> indicatorComparator )
+    {
+        this.indicatorComparator = indicatorComparator;
+    }
 
     // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-    
-    private Grid grid;
-
-    private String reportingUnit;
-
-    private String reportingPeriod;
-
-    // -------------------------------------------------------------------------
-    // Getters && Setters
+    // DisplayPropertyHandler
     // -------------------------------------------------------------------------
 
-    public void setDataSetReportService( DataSetReportService dataSetReportService )
+    private DisplayPropertyHandler displayPropertyHandler;
+
+    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
     {
-        this.dataSetReportService = dataSetReportService;
+        this.displayPropertyHandler = displayPropertyHandler;
     }
 
-    public void setSelectedOrgunit( OrganisationUnit selectedOrgunit )
+    // -------------------------------------------------------------------------
+    // Input/output
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        this.selectedOrgunit = selectedOrgunit;
+        this.id = id;
     }
 
-    public void setSelectedDataSet( DataSet selectedDataSet )
+    private IndicatorGroup indicatorGroup;
+
+    public IndicatorGroup getIndicatorGroup()
     {
-        this.selectedDataSet = selectedDataSet;
+        return indicatorGroup;
     }
 
-    public void setSelectedPeriod( Period selectedPeriod )
-    {
-        this.selectedPeriod = selectedPeriod;
-    }
+    private List<Indicator> groupMembers = new ArrayList<Indicator>();
 
-    public String getReportingUnit()
+    public List<Indicator> getGroupMembers()
     {
-        return reportingUnit;
-    }
-
-    public String getReportingPeriod()
-    {
-        return reportingPeriod;
-    }
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
-    public Grid getGrid()
-    {
-        return grid;
-    }
-
-    public void setSelectedUnitOnly( boolean selectedUnitOnly )
-    {
-        this.selectedUnitOnly = selectedUnitOnly;
+        return groupMembers;
     }
 
     // -------------------------------------------------------------------------
@@ -134,13 +110,14 @@ public class GenerateDefaultDataSetReportAction
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        grid = dataSetReportService.getDefaultDataSetReport( selectedDataSet, selectedPeriod, selectedOrgunit, selectedUnitOnly, format, i18n );
-        
-        reportingUnit = selectedOrgunit.getName();
+        indicatorGroup = indicatorService.getIndicatorGroup( id );
 
-        reportingPeriod = format.formatPeriod( selectedPeriod );
+        groupMembers = new ArrayList<Indicator>( indicatorGroup.getMembers() );
+
+        Collections.sort( groupMembers, indicatorComparator );
+
+        displayPropertyHandler.handle( groupMembers );
 
         return SUCCESS;
     }

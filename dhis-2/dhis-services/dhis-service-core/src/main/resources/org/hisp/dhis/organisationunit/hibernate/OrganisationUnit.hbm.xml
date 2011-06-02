@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
   <class name="org.hisp.dhis.organisationunit.OrganisationUnit" table="organisationunit">
@@ -19,7 +20,7 @@
       <column name="name" not-null="true" unique="true" length="230" />
     </property>
 
-    <set name="children" inverse="true" cascade="save-update,delete-orphan">
+    <set name="children" inverse="true">
       <cache usage="read-write" />
       <key column="parentid" />
       <one-to-many class="org.hisp.dhis.organisationunit.OrganisationUnit" />

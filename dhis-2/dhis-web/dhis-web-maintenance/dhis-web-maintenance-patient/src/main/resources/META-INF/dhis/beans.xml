@@ -809,8 +809,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="programStageService">
 			<ref bean="org.hisp.dhis.program.ProgramStageService" />
 		</property>
-		<property name="programStageDataElementService"
-			ref="org.hisp.dhis.program.ProgramStageDataElementService" />
 		<property name="programDataEntryService"
 			ref="org.hisp.dhis.program.ProgramDataEntryService" />
 	</bean>
@@ -1277,12 +1275,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<!-- Import patient -->
 
 	<bean
-		id="org.hisp.dhis.patient.action.patientimport.UploadExcelFileAction"
-		class="org.hisp.dhis.patient.action.patientimport.UploadExcelFileAction"
-		scope="prototype">
-	</bean>
-
-	<bean
 		id="org.hisp.dhis.patient.action.patientimport.ValidateUploadExcelFileAction"
 		class="org.hisp.dhis.patient.action.patientimport.ValidateUploadExcelFileAction"
 		scope="prototype">
@@ -1329,11 +1321,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		</property>
 		<property name="patientIdentifierService">
 			<ref bean="org.hisp.dhis.patient.PatientIdentifierService" />
-
 		</property>
 		<property name="patientAttributeValueService">
-			<ref
-				bean="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
+			<ref bean="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
 		</property>
 	</bean>
 

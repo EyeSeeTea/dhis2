@@ -63,6 +63,38 @@ public class OrganisationUnitGroup
     }
     
     // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public void addOrganisationUnit( OrganisationUnit unit )
+    {
+        members.add( unit );
+        unit.getGroups().add( this );
+    }
+    
+    public void removeOrganisationUnit( OrganisationUnit unit )
+    {
+        members.remove( unit );
+        unit.getGroups().remove( this );
+    }
+    
+    public void updateOrganisationUnits( Set<OrganisationUnit> updates )
+    {
+        for ( OrganisationUnit unit : new HashSet<OrganisationUnit>( members ) )
+        {
+            if ( !updates.contains( unit ) )
+            {
+                removeOrganisationUnit( unit );
+            }
+        }
+        
+        for ( OrganisationUnit unit : updates )
+        {
+            addOrganisationUnit( unit );
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
 

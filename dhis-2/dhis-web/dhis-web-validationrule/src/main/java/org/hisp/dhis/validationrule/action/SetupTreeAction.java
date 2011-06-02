@@ -27,12 +27,18 @@ package org.hisp.dhis.validationrule.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.validation.ValidationRuleGroup;
+import org.hisp.dhis.validation.ValidationRuleService;
+import org.hisp.dhis.validation.comparator.ValidationRuleGroupNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -53,14 +59,14 @@ public class SetupTreeAction
     {
         this.selectionTreeManager = selectionTreeManager;
     }
-    
+
     private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
     }
-    
+
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -68,13 +74,31 @@ public class SetupTreeAction
         this.currentUserService = currentUserService;
     }
 
+    private ValidationRuleService validationRuleService;
+
+    public void setValidationRuleService( ValidationRuleService validationRuleService )
+    {
+        this.validationRuleService = validationRuleService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private List<ValidationRuleGroup> validationRuleGroups;
+
+    public List<ValidationRuleGroup> getValidationRuleGroups()
+    {
+        return validationRuleGroups;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-    
+
     public String execute()
         throws Exception
-    {    	
+    {
         if ( currentUserService.getCurrentUser() != null )
         {
             Collection<OrganisationUnit> orgUnits = currentUserService.getCurrentUser().getOrganisationUnits();
@@ -91,7 +115,11 @@ public class SetupTreeAction
         {
             selectionTreeManager.setSelectedOrganisationUnits( selectionManager.getSelectedOrganisationUnits() );
         }
-        
+
+        validationRuleGroups = new ArrayList<ValidationRuleGroup>( validationRuleService.getAllValidationRuleGroups() );
+
+        Collections.sort( validationRuleGroups, new ValidationRuleGroupNameComparator() );
+
         return SUCCESS;
     }
 }

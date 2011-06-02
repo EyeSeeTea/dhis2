@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,39 +25,77 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.settings.action.user;
+package org.hisp.dhis.dd.action.dataelementgroup;
 
-import org.hisp.dhis.user.UserSettingService;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version GetAvailableAutoSaveDataEntryFormAction.java Jun 23, 2010 3:49:11 PM
+ * @version $ ShowDataElementGroupEditorAction.java May 30, 2011 2:05:49 PM $
+ * 
  */
-public class GetAvailableAutoSaveDataEntryFormAction
+public class ShowDataElementGroupEditorAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserSettingService userSettingService;
+    private DataElementService dataElementService;
 
-    public void setUserSettingService( UserSettingService userSettingService )
+    public void setDataElementService( DataElementService dataElementService )
     {
-        this.userSettingService = userSettingService;
+        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Comparator
     // -------------------------------------------------------------------------
 
-    private Boolean autoSave;
+    private Comparator<DataElement> dataElementComparator;
 
-    public Boolean getAutoSave()
+    public void setDataElementComparator( Comparator<DataElement> dataElementComparator )
     {
-        return autoSave;
+        this.dataElementComparator = dataElementComparator;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input & output
+    // -------------------------------------------------------------------------
+
+    private List<DataElementGroup> dataElementGroups;
+
+    public List<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
+    }
+
+    private List<DataElement> dataElements;
+
+    public List<DataElement> getDataElements()
+    {
+        return dataElements;
+    }
+
+    // -------------------------------------------------------------------------
+    // DisplayPropertyHandler
+    // -------------------------------------------------------------------------
+
+    private DisplayPropertyHandler displayPropertyHandler;
+
+    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
+    {
+        this.displayPropertyHandler = displayPropertyHandler;
     }
 
     // -------------------------------------------------------------------------
@@ -67,8 +105,13 @@ public class GetAvailableAutoSaveDataEntryFormAction
     public String execute()
         throws Exception
     {
-        autoSave = (Boolean) userSettingService.getUserSetting( UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM, false );
+        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
+
+        dataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
+        Collections.sort( dataElements, dataElementComparator );
+        displayPropertyHandler.handle( dataElements );
 
         return SUCCESS;
     }
+
 }

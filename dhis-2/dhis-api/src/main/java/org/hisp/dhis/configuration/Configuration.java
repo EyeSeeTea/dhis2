@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.dataelementgroupset;
+package org.hisp.dhis.configuration;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,56 +27,59 @@ package org.hisp.dhis.dd.action.dataelementgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.Serializable;
 
 import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
-import org.hisp.dhis.system.filter.DataElementGroupWithoutGroupSetFilter;
-import org.hisp.dhis.system.util.FilterUtils;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.user.UserGroup;
 
 /**
- * @author Lars Helge Oeverland
+ * @author Lars Helge Overland
  */
-public class OpenAddDataElementGroupSetAction
-    implements Action
+public class Configuration
+    implements Serializable
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = 936186436040704261L;
+    
+    private int id;
+    
+    private UserGroup messageRecipients;
 
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
+    private DataElementGroup infrastructuralDataElements;
+    
+    public Configuration()
     {
-        this.dataElementService = dataElementService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input & Ouput
-    // -------------------------------------------------------------------------
-
-    private List<DataElementGroup> availableGroups;
-
-    public List<DataElementGroup> getAvailableGroups()
-    {
-        return availableGroups;
     }
     
-    public String execute()
-        throws Exception
+    public int getId()
     {
-        availableGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
+        return id;
+    }
 
-        FilterUtils.filter( availableGroups, new DataElementGroupWithoutGroupSetFilter() );
-        
-        Collections.sort( availableGroups, new DataElementGroupNameComparator() );
-        
-        return SUCCESS;
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public UserGroup getMessageRecipients()
+    {
+        return messageRecipients;
+    }
+
+    public void setMessageRecipients( UserGroup messageRecipients )
+    {
+        this.messageRecipients = messageRecipients;
+    }
+
+    public DataElementGroup getInfrastructuralDataElements()
+    {
+        return infrastructuralDataElements;
+    }
+
+    public void setInfrastructuralDataElements( DataElementGroup infrastructuralDataElements )
+    {
+        this.infrastructuralDataElements = infrastructuralDataElements;
     }
 }
-

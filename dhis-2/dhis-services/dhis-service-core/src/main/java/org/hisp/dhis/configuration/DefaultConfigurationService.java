@@ -1,4 +1,4 @@
-package org.hisp.dhis.dd.action.indicatorgroupset;
+package org.hisp.dhis.configuration;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,58 +27,40 @@ package org.hisp.dhis.dd.action.indicatorgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
 
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
-import org.hisp.dhis.system.filter.IndicatorGroupWIthoutGroupSetFilter;
-import org.hisp.dhis.system.util.FilterUtils;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.GenericStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Lars Helge Overland
  */
-public class OpenAddIndicatorGroupSetAction
-    implements Action
+@Transactional
+public class DefaultConfigurationService
+    implements ConfigurationService
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    private GenericStore<Configuration> configurationStore;
 
-    private IndicatorService indicatorService;
-
-    public void setIndicatorService( IndicatorService indicatorService )
+    public void setConfigurationStore( GenericStore<Configuration> configurationStore )
     {
-        this.indicatorService = indicatorService;
+        this.configurationStore = configurationStore;
     }
 
     // -------------------------------------------------------------------------
-    // Input & Ouput
+    // ConfigurationService implementation
     // -------------------------------------------------------------------------
-
-    private List<IndicatorGroup> availableGroups;
-
-    public List<IndicatorGroup> getAvailableGroups()
+    
+    @Override
+    public void setConfiguration( Configuration configuration )
     {
-        return availableGroups;
+        configurationStore.saveOrUpdate( configuration );
     }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    
+    @Override
+    public Configuration getConfiguration()
     {
-        availableGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
-
-        FilterUtils.filter( availableGroups, new IndicatorGroupWIthoutGroupSetFilter() );
+        Iterator<Configuration> iterator = configurationStore.getAll().iterator();
         
-        Collections.sort( availableGroups, new IndicatorGroupNameComparator() );
-
-        return SUCCESS;
+        return iterator.hasNext() ? iterator.next() : new Configuration();
     }
 }

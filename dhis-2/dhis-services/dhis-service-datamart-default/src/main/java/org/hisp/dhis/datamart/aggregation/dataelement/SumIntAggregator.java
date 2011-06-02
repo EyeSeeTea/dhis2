@@ -112,29 +112,16 @@ public class SumIntAggregator
     {
         final Map<DataElementOperand, double[]> totalSums = new HashMap<DataElementOperand, double[]>(); // <Operand, [total value, total relevant days]>
 
-        Period period = null;
-        Date currentStartDate = null;
-        Date currentEndDate = null;
-        
-        double value = 0.0;
-        double relevantDays = 0.0;
-        double factor = 0.0;
-        double existingValue = 0.0;
-        double existingRelevantDays = 0.0;
-        double duration = 0.0;
-        
-        int dataValueLevel = 0;
-        
         for ( final CrossTabDataValue crossTabValue : crossTabValues )
         {
-            period = aggregationCache.getPeriod( crossTabValue.getPeriodId() );
+            final Period period = aggregationCache.getPeriod( crossTabValue.getPeriodId() );
             
-            currentStartDate = period.getStartDate();
-            currentEndDate = period.getEndDate();
+            final Date currentStartDate = period.getStartDate();
+            final Date currentEndDate = period.getEndDate();
             
-            duration = getDaysInclusive( currentStartDate, currentEndDate );
+            final double duration = getDaysInclusive( currentStartDate, currentEndDate );
             
-            dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
+            final int dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
             
             if ( duration > 0 )
             {
@@ -142,9 +129,9 @@ public class SumIntAggregator
                 {
                     if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
                     {
-                        value = 0.0;
-                        relevantDays = 0.0;
-                        factor = 0.0;                        
+                        double value = 0.0;
+                        double relevantDays = 0.0;
+                        double factor = 0.0;                        
                         
                         try
                         {
@@ -183,11 +170,12 @@ public class SumIntAggregator
                         }
                         
                         value = value * factor;
+
+                        final double[] totalSum = totalSums.get( entry.getKey() );
+                        value += totalSum != null ? totalSum[0] : 0;
+                        relevantDays += totalSum != null ? totalSum[1] : 0;
                         
-                        existingValue = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 0 ] : 0;
-                        existingRelevantDays = totalSums.containsKey( entry.getKey() ) ? totalSums.get( entry.getKey() )[ 1 ] : 0;
-                        
-                        final double[] values = { ( value + existingValue ), ( relevantDays + existingRelevantDays ) };
+                        final double[] values = { value, relevantDays };
                         
                         totalSums.put( entry.getKey(), values );
                     }
@@ -198,9 +186,9 @@ public class SumIntAggregator
         return totalSums;
     }
 
-    public Collection<DataElementOperand> filterOperands( Collection<DataElementOperand> operands, PeriodType periodType )
+    public Collection<DataElementOperand> filterOperands( final Collection<DataElementOperand> operands, final PeriodType periodType )
     {
-        Collection<DataElementOperand> filteredOperands = new HashSet<DataElementOperand>();
+        final Collection<DataElementOperand> filteredOperands = new HashSet<DataElementOperand>();
         
         for ( final DataElementOperand operand : operands )
         {

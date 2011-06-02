@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -48,8 +49,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: UpdateOrganisationUnitAction.java 1898 2006-09-22 12:06:56Z
- *          torgeilo $
  */
 public class UpdateOrganisationUnitAction
     implements Action
@@ -269,24 +268,15 @@ public class UpdateOrganisationUnitAction
         organisationUnit.setEmail( email );
         organisationUnit.setPhoneNumber( phoneNumber );
 
-        for ( DataSet dataSet : organisationUnit.getDataSets() ) // Remove current
+        Set<DataSet> sets = new HashSet<DataSet>();
+        
+        for ( String id : dataSets )
         {
-            dataSet.getSources().remove( organisationUnit );
+            sets.add( dataSetService.getDataSet( Integer.parseInt( id ) ) );
         }
 
-        organisationUnit.getDataSets().clear();
-
-        for ( String id : dataSets ) // Add selected
-        {
-            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( id ) );
-            
-            if ( dataSet != null )
-            {
-                dataSet.getSources().add( organisationUnit );
-                dataSetService.updateDataSet( dataSet );
-            }
-        }
-
+        organisationUnit.updateDataSets( sets );
+        
         organisationUnitService.updateOrganisationUnit( organisationUnit );
 
         for ( int i = 0; i < orgUnitGroupSets.size(); i++ )
@@ -301,11 +291,13 @@ public class UpdateOrganisationUnitAction
 
             if ( oldGroup != null && oldGroup.getMembers().remove( organisationUnit ) )
             {
+                oldGroup.removeOrganisationUnit( organisationUnit );
                 organisationUnitGroupService.updateOrganisationUnitGroup( oldGroup );
             }
 
             if ( newGroup != null && newGroup.getMembers().add( organisationUnit ) )
             {
+                newGroup.addOrganisationUnit( organisationUnit );
                 organisationUnitGroupService.updateOrganisationUnitGroup( newGroup );
             }
         }

@@ -1,7 +1,5 @@
-package org.hisp.dhis.dd.action.indicatorgroup;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,56 +25,37 @@ package org.hisp.dhis.dd.action.indicatorgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.validationrule.action.validationrulegroup;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
+import org.hisp.dhis.validation.ValidationRule;
+import org.hisp.dhis.validation.ValidationRuleGroup;
+import org.hisp.dhis.validation.ValidationRuleService;
+import org.hisp.dhis.validation.comparator.ValidationRuleNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: GetIndicatorGroupMembersAction.java 6475 2008-11-25 15:42:55Z larshelg $
+ * @author Chau Thu Tran
+ * @version $ ShowUpdateValidationRuleGroupFormAction.java May 31, 2011 11:23:59
+ *          AM $
+ * 
  */
-public class GetIndicatorGroupMembersAction
+public class ShowUpdateValidationRuleGroupFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IndicatorService indicatorService;
+    private ValidationRuleService validationRuleService;
 
-    public void setIndicatorService( IndicatorService indicatorService )
+    public void setValidationRuleService( ValidationRuleService validationRuleService )
     {
-        this.indicatorService = indicatorService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Comparator
-    // -------------------------------------------------------------------------
-
-    private Comparator<Indicator> indicatorComparator;
-
-    public void setIndicatorComparator( Comparator<Indicator> indicatorComparator )
-    {
-        this.indicatorComparator = indicatorComparator;
-    }
-    
-    // -------------------------------------------------------------------------
-    // DisplayPropertyHandler
-    // -------------------------------------------------------------------------
-
-    private DisplayPropertyHandler displayPropertyHandler;
-
-    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
-    {
-        this.displayPropertyHandler = displayPropertyHandler;
+        this.validationRuleService = validationRuleService;
     }
 
     // -------------------------------------------------------------------------
@@ -94,18 +73,25 @@ public class GetIndicatorGroupMembersAction
     // Output
     // -------------------------------------------------------------------------
 
-    private List<Indicator> groupMembers = new ArrayList<Indicator>();
+    private ValidationRuleGroup validationRuleGroup;
 
-    public List<Indicator> getGroupMembers()
+    public ValidationRuleGroup getValidationRuleGroup()
+    {
+        return validationRuleGroup;
+    }
+
+    private List<ValidationRule> groupMembers = new ArrayList<ValidationRule>();
+
+    public List<ValidationRule> getGroupMembers()
     {
         return groupMembers;
     }
 
-    private List<Indicator> availableIndicators = new ArrayList<Indicator>();
+    private List<ValidationRule> availableValidationRules = new ArrayList<ValidationRule>();
 
-    public List<Indicator> getAvailableIndicators()
+    public List<ValidationRule> getAvailableValidationRules()
     {
-        return availableIndicators;
+        return availableValidationRules;
     }
 
     // -------------------------------------------------------------------------
@@ -115,32 +101,26 @@ public class GetIndicatorGroupMembersAction
     public String execute()
     {
         // ---------------------------------------------------------------------
-        // Get group members
+        // Get selected group
         // ---------------------------------------------------------------------
 
-        if ( id != null )
-        {
-            IndicatorGroup group = indicatorService.getIndicatorGroup( id.intValue() );
+        validationRuleGroup = validationRuleService.getValidationRuleGroup( id );
 
-            groupMembers = new ArrayList<Indicator>( group.getMembers() );
+        groupMembers = new ArrayList<ValidationRule>( validationRuleGroup.getMembers() );
 
-            Collections.sort( groupMembers, indicatorComparator );
-            
-            displayPropertyHandler.handle( groupMembers );
-        }
+        Collections.sort( groupMembers, new ValidationRuleNameComparator() );
 
         // ---------------------------------------------------------------------
-        // Get available elements
+        // Get available ValidationRules
         // ---------------------------------------------------------------------
 
-        availableIndicators = new ArrayList<Indicator>( indicatorService.getAllIndicators() );
+        availableValidationRules = new ArrayList<ValidationRule>( validationRuleService.getAllValidationRules() );
 
-        availableIndicators.removeAll( groupMembers );
+        availableValidationRules.removeAll( groupMembers );
 
-        Collections.sort( availableIndicators, indicatorComparator );
-        
-        displayPropertyHandler.handle( availableIndicators );
+        Collections.sort( availableValidationRules, new ValidationRuleNameComparator() );
 
         return SUCCESS;
     }
+
 }

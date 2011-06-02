@@ -101,12 +101,6 @@ public class GetValidationRuleAction
         return rightSideTextualExpression;
     }
     
-    private String validationOperator;
-    
-    public String getValidationOperator()
-    {
-    	return validationOperator;
-    }
     private PeriodType periodType;
 
     public PeriodType getPeriodType()
@@ -129,8 +123,6 @@ public class GetValidationRuleAction
         
         leftSideTextualExpression = VALID.equals( leftSideResult ) ? expressionService.getExpressionDescription( leftSideFormula ) : i18n.getString( leftSideResult );
         rightSideTextualExpression = VALID.equals( rightSideResult ) ? expressionService.getExpressionDescription( rightSideFormula ) : i18n.getString( rightSideResult );
-        
-        validationOperator = validationRule.getOperator().toString();       
         
         periodType = validationRule.getPeriodType();
         

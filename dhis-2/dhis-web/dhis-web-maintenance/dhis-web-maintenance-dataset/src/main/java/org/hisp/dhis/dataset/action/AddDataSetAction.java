@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -39,10 +38,6 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
@@ -77,13 +72,6 @@ public class AddDataSetAction
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
     }
 
     private UserService userService;
@@ -176,11 +164,11 @@ public class AddDataSetAction
 
         PeriodType periodType = periodService.getPeriodTypeByName( frequencySelect );
 
-        Collection<DataElement> dataElements = new HashSet<DataElement>();
+        DataSet dataSet = new DataSet( name, shortName, code, periodType );
 
         for ( String id : dataElementsSelectedList )
         {
-            dataElements.add( dataElementService.getDataElement( Integer.parseInt( id ) ) );
+            dataSet.addDataElement( dataElementService.getDataElement( Integer.parseInt( id ) ) );
         }
 
         Set<Indicator> indicators = new HashSet<Indicator>();
@@ -190,34 +178,14 @@ public class AddDataSetAction
             indicators.add( indicatorService.getIndicator( Integer.parseInt( id ) ) );
         }
 
-        DataSet dataSet = new DataSet( name, shortName, code, periodType );
-
         dataSet.setMobile( mobile );
         dataSet.setVersion( 1 );
-        dataSet.setDataElements( dataElements );
         dataSet.setIndicators( indicators );
 
         dataSetService.addDataSet( dataSet );
 
-        assignDataSetToUserRole( dataSet );
+        userService.assignDataSetToUserRole( dataSet );
 
         return SUCCESS;
-    }
-
-    private void assignDataSetToUserRole( DataSet dataSet )
-    {
-        User currentUser = currentUserService.getCurrentUser();
-
-        if ( !currentUserService.currentUserIsSuper() && currentUser != null )
-        {
-            UserCredentials userCredentials = userService.getUserCredentials( currentUser );
-
-            for ( UserAuthorityGroup userAuthorityGroup : userCredentials.getUserAuthorityGroups() )
-            {
-                userAuthorityGroup.getDataSets().add( dataSet );
-
-                userService.updateUserAuthorityGroup( userAuthorityGroup );
-            }
-        }
     }
 }

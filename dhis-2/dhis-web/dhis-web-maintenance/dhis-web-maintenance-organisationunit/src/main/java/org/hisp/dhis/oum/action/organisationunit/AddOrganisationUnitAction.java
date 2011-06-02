@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -46,8 +45,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: AddOrganisationUnitAction.java 1898 2006-09-22 12:06:56Z
- *          torgeilo $
  */
 public class AddOrganisationUnitAction
     implements Action
@@ -233,13 +230,12 @@ public class AddOrganisationUnitAction
         if ( parent == null )
         {
             // -----------------------------------------------------------------
-            // If no unit is selected, the parent is the parent of the roots in
-            // the tree
+            // If no unit is selected, the parent is the parent of the roots
             // -----------------------------------------------------------------
 
             parent = selectionManager.getRootOrganisationUnitsParent();
         }
-
+        
         // ---------------------------------------------------------------------
         // Create organisation unit
         // ---------------------------------------------------------------------
@@ -255,18 +251,17 @@ public class AddOrganisationUnitAction
         organisationUnit.setEmail( email );
         organisationUnit.setPhoneNumber( phoneNumber );
 
-        organisationUnitId = organisationUnitService.addOrganisationUnit( organisationUnit );
+        if ( parent != null )
+        {
+            parent.getChildren().add( organisationUnit );
+        }
 
         for ( String id : dataSets )
         {
-            DataSet dataSet = dataSetService.getDataSet( Integer.parseInt( id ) );
-            
-            if ( dataSet != null )
-            {
-                dataSet.getSources().add( organisationUnit );
-                dataSetService.updateDataSet( dataSet );
-            }
+            organisationUnit.addDataSet( dataSetService.getDataSet( Integer.parseInt( id ) ) );
         }
+        
+        organisationUnitId = organisationUnitService.addOrganisationUnit( organisationUnit );
 
         for ( String id : selectedGroups )
         {
@@ -274,7 +269,7 @@ public class AddOrganisationUnitAction
             
             if ( group != null )
             {
-                group.getMembers().add( organisationUnit );
+                group.addOrganisationUnit( organisationUnit );
                 organisationUnitGroupService.updateOrganisationUnitGroup( group );
             }
         }

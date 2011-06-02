@@ -1,7 +1,5 @@
-package org.hisp.dhis.reporting.dataset.action;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,109 +25,88 @@ package org.hisp.dhis.reporting.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.dd.action.dataelementgroup;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.datasetreport.DataSetReportService;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
+ * @version $ ShowUpdateDataElementGroupAction.java May 30, 2011 2:26:15 PM $
+ * 
  */
-public class GenerateSectionDataSetReportAction
+public class ShowUpdateDataElementGroupFormAction
     implements Action
-{    
+{
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataSetReportService dataSetReportService;
-    
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Comparator
+    // -------------------------------------------------------------------------
+
+    private Comparator<DataElement> dataElementComparator;
+
+    public void setDataElementComparator( Comparator<DataElement> dataElementComparator )
+    {
+        this.dataElementComparator = dataElementComparator;
+    }
+
+    // -------------------------------------------------------------------------
+    // DisplayPropertyHandler
+    // -------------------------------------------------------------------------
+
+    private DisplayPropertyHandler displayPropertyHandler;
+
+    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
+    {
+        this.displayPropertyHandler = displayPropertyHandler;
+    }
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit selectedOrgunit;
+    private Integer id;
 
-    private DataSet selectedDataSet;
-
-    private Period selectedPeriod;
-
-    private boolean selectedUnitOnly;
-
-    private I18nFormat format;
-
-    private I18n i18n;
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
-    
-    private List<Grid> grids = new ArrayList<Grid>();
 
-    private String reportingUnit;
+    private DataElementGroup dataElementGroup;
 
-    private String reportingPeriod;
-
-    // -------------------------------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------------------------------
-
-    public void setDataSetReportService( DataSetReportService dataSetReportService )
+    public DataElementGroup getDataElementGroup()
     {
-        this.dataSetReportService = dataSetReportService;
+        return dataElementGroup;
     }
 
-    public String getReportingUnit()
-    {
-        return reportingUnit;
-    }
+    private List<DataElement> groupMembers = new ArrayList<DataElement>();
 
-    public String getReportingPeriod()
+    public List<DataElement> getGroupMembers()
     {
-        return reportingPeriod;
-    }
-
-    public List<Grid> getGrids()
-    {
-        return grids;
-    }
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
-    public void setSelectedOrgunit( OrganisationUnit selectedOrgunit )
-    {
-        this.selectedOrgunit = selectedOrgunit;
-    }
-
-    public void setSelectedDataSet( DataSet selectedDataSet )
-    {
-        this.selectedDataSet = selectedDataSet;
-    }
-
-    public void setSelectedPeriod( Period selectedPeriod )
-    {
-        this.selectedPeriod = selectedPeriod;
-    }
-    
-    public void setSelectedUnitOnly( boolean selectedUnitOnly )
-    {
-        this.selectedUnitOnly = selectedUnitOnly;
+        return groupMembers;
     }
 
     // -------------------------------------------------------------------------
@@ -137,12 +114,18 @@ public class GenerateSectionDataSetReportAction
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        grids = dataSetReportService.getSectionDataSetReport( selectedDataSet, selectedPeriod, selectedOrgunit, selectedUnitOnly, format, i18n );
-        
-        reportingUnit = selectedOrgunit.getName();
-        reportingPeriod = format.formatPeriod( selectedPeriod );
+        // ---------------------------------------------------------------------
+        // Get group members
+        // ---------------------------------------------------------------------
+
+        dataElementGroup = dataElementService.getDataElementGroup( id );
+
+        groupMembers = new ArrayList<DataElement>( dataElementGroup.getMembers() );
+
+        Collections.sort( groupMembers, dataElementComparator );
+
+        displayPropertyHandler.handle( groupMembers );
 
         return SUCCESS;
     }

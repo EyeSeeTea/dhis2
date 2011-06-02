@@ -25,10 +25,10 @@
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.metadata.js"></script>	
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.upload-1.0.2.min.js"></script>
-	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.dhisPaging.js"></script>
+	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.dhisAjaxSelect.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.utils.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/ui/jquery-ui-1.8.12.custom.min.js"></script>
-	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/ui/jquery.block.js"></script>
+	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/ui/jquery.blockUI.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/ui/ui.thickbox.min.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/ui/jquery.cluetip.min.js"></script>
 	<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.validate.js"></script>
@@ -41,6 +41,11 @@
     <script type="text/javascript" src="../dhis-web-commons/javascripts/lists.js"></script>
     <script type="text/javascript" src="../dhis-web-commons/javascripts/date.js"></script>
     <script type="text/javascript" src="../dhis-web-commons/javascripts/validationRules.js"></script>
+
+    <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.util.js"></script>
+    <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.array.js"></script>
+    <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.select.js"></script>
+    <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.comparator.js"></script>
 
     <script type="text/javascript" src="../dhis-web-commons/css/${stylesheetDirectory}/dom.js"></script>
 		

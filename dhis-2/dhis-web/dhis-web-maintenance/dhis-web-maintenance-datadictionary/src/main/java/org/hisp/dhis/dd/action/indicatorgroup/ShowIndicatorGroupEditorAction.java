@@ -1,7 +1,5 @@
-package org.hisp.dhis.settings.action.user;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,77 +25,98 @@ package org.hisp.dhis.settings.action.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.dd.action.indicatorgroup;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
-import org.hisp.dhis.i18n.locale.LocaleManager;
-import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
+import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: GetAvailableLocalesAction.java 3264 2007-04-25 14:54:05Z stianast $
+ * @author Chau Thu Tran
+ * @version $ ShowIndicatorGroupEditorAction.java May 30, 2011 2:44:20 PM $
+ * 
  */
-public class GetAvailableLocalesAction
+public class ShowIndicatorGroupEditorAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ResourceBundleManager resourceBundleManager;
+    private IndicatorService indicatorService;
 
-    public void setResourceBundleManager( ResourceBundleManager resourceBundleManager )
+    public void setIndicatorService( IndicatorService indicatorService )
     {
-        this.resourceBundleManager = resourceBundleManager;
-    }
-
-    private LocaleManager localeManager;
-
-    public void setLocaleManager( LocaleManager localeManager )
-    {
-        this.localeManager = localeManager;
+        this.indicatorService = indicatorService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Comparator
     // -------------------------------------------------------------------------
 
-    private List<Locale> availableLocales;
+    private Comparator<Indicator> indicatorComparator;
 
-    public List<Locale> getAvailableLocales()
+    public void setIndicatorComparator( Comparator<Indicator> indicatorComparator )
     {
-        return availableLocales;
-    }
-
-    private Locale currentLocale;
-
-    public Locale getCurrentLocale()
-    {
-        return currentLocale;
+        this.indicatorComparator = indicatorComparator;
     }
 
     // -------------------------------------------------------------------------
+    // DisplayPropertyHandler
+    // -------------------------------------------------------------------------
+
+    private DisplayPropertyHandler displayPropertyHandler;
+
+    public void setDisplayPropertyHandler( DisplayPropertyHandler displayPropertyHandler )
+    {
+        this.displayPropertyHandler = displayPropertyHandler;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+   
+    private List<IndicatorGroup> indicatorGroups;
+
+    public List<IndicatorGroup> getIndicatorGroups()
+    {
+        return indicatorGroups;
+    }
+
+    private List<Indicator> indicators;
+
+    public List<Indicator> getIndicators()
+    {
+        return indicators;
+    }
+    
+    // -------------------------------------------------------------------------
+
     // Action implementation
     // -------------------------------------------------------------------------
 
-    public String execute() throws Exception
+    public String execute()
     {
-        availableLocales = new ArrayList<Locale>( resourceBundleManager.getAvailableLocales() );
+        indicatorGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
+        
+        Collections.sort( indicatorGroups, new IndicatorGroupNameComparator() );
 
-        Collections.sort( availableLocales, new Comparator<Locale>() {
-            public int compare( Locale locale0, Locale locale1 )
-            {
-                return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
-            }
-        } );
-
-        currentLocale = localeManager.getCurrentLocale();
-
+        
+        indicators = new ArrayList<Indicator>( indicatorService.getAllIndicators() );
+        
+        Collections.sort( indicators, indicatorComparator );
+        
+        displayPropertyHandler.handle( indicators );
+        
         return SUCCESS;
     }
 }

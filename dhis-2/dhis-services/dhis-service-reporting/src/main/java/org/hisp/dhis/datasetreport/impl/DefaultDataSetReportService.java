@@ -55,6 +55,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.comparator.DataElementCategoryOptionComboNameComparator;
 import org.hisp.dhis.dataelement.comparator.DataElementNameComparator;
+import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
@@ -70,7 +71,6 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.system.util.MathUtils;
 
 /**
  * @author Abyot Asalefew
@@ -190,11 +190,11 @@ public class DefaultDataSetReportService
         return map;
     }
     
-    public String prepareReportContent( String dataEntryFormCode, Map<String, String> dataValues, Map<Integer, String> indicatorValues )
+    public String prepareReportContent( DataEntryForm dataEntryForm, Map<String, String> dataValues, Map<Integer, String> indicatorValues )
     {        
         StringBuffer buffer = new StringBuffer();
 
-        Matcher inputMatcher = INPUT_PATTERN.matcher( dataEntryFormCode );
+        Matcher inputMatcher = INPUT_PATTERN.matcher( dataEntryForm.getHtmlCode() );
 
         // ---------------------------------------------------------------------
         // Iterate through all matching data element fields.
@@ -241,6 +241,15 @@ public class DefaultDataSetReportService
         inputMatcher.appendTail( buffer );
         
         return buffer.toString();
+    }
+    
+    public String getCustomDataSetReport( DataSet dataSet, OrganisationUnit unit, Period period, boolean selectedUnitOnly, I18nFormat format )
+    {
+        Map<String, String> aggregatedDataValueMap = getAggregatedValueMap( dataSet, unit, period, selectedUnitOnly, format );
+
+        Map<Integer, String> aggregatedIndicatorMap = getAggregatedIndicatorValueMap( dataSet, unit, period, format );
+        
+        return prepareReportContent( dataSet.getDataEntryForm(), aggregatedDataValueMap, aggregatedIndicatorMap ); 
     }
     
     public List<Grid> getSectionDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, boolean selectedUnitOnly, I18nFormat format, I18n i18n )
@@ -405,21 +414,18 @@ public class DefaultDataSetReportService
 
             for ( DataElementCategoryOptionCombo optionCombo : orderedOptionCombos )
             {
-                String value = "";
+                Double value = null;
 
                 if ( selectedUnitOnly )
                 {
                     DataValue dataValue = dataValueService.getDataValue( unit, dataElement, period, optionCombo );
-                    value = (dataValue != null) ? dataValue.getValue() : null;
+                    value = dataValue != null && dataValue.getValue() != null ? Double.parseDouble( dataValue.getValue() ) : null;
                 }
                 else
                 {
-                    Double aggregatedValue = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? aggregationService
-                        .getAggregatedDataValue( dataElement, optionCombo, period.getStartDate(), period.getEndDate(), unit )
-                        : aggregatedDataValueService.getAggregatedValue( dataElement, optionCombo, period, unit );
-
-                    value = (aggregatedValue != null) ? String.valueOf( MathUtils.getRounded( aggregatedValue, 0 ) )
-                        : null;
+                    value = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? 
+                        aggregationService.getAggregatedDataValue( dataElement, optionCombo, period.getStartDate(), period.getEndDate(), unit ) : 
+                        aggregatedDataValueService.getAggregatedValue( dataElement, optionCombo, period, unit );
                 }
 
                 grid.addValue( value );

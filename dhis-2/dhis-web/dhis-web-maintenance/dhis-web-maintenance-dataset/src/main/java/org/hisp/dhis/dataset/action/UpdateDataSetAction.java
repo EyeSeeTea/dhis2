@@ -155,7 +155,7 @@ public class UpdateDataSetAction
             code = null;
         }
 
-        Collection<DataElement> dataElements = new HashSet<DataElement>();
+        Set<DataElement> dataElements = new HashSet<DataElement>();
 
         for ( String id : dataElementsSelectedList )
         {
@@ -177,12 +177,12 @@ public class UpdateDataSetAction
         dataSet.setShortName( shortName );
         dataSet.setCode( code );
         dataSet.setPeriodType( periodService.getPeriodTypeByClass( periodType.getClass() ) );
-        dataSet.setDataElements( dataElements );
+        dataSet.updateDataElements( dataElements );
         dataSet.setIndicators( indicators );
 
         if ( dataSet.isMobile() )
         {
-            dataSet.setVersion( dataSet.getVersion() + 1 ); // TODO we should check if anything is actually updated before bumping version and push this to service layer
+            dataSet.setVersion( dataSet.getVersion() + 1 ); // TODO hack
         }
 
         dataSetService.updateDataSet( dataSet );
