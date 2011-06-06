@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
@@ -90,13 +91,13 @@ public class DefaultCrossTabService
     // CrossTabService implementation
     // -------------------------------------------------------------------------
 
-    public Collection<DataElementOperand> getOperandsWithData( Collection<DataElementOperand> operands )
+    public Set<DataElementOperand> getOperandsWithData( Set<DataElementOperand> operands )
     {
         return dataValueService.getOperandsWithDataValues( operands );
     }
     
-    public String populateCrossTabTable( final Collection<DataElementOperand> operands,
-        final Collection<Integer> periodIds, final Collection<Integer> organisationUnitIds )
+    public String populateCrossTabTable( List<DataElementOperand> operands,
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds )
     {
         final String key = RandomStringUtils.randomAlphanumeric( 8 );
         
@@ -105,9 +106,8 @@ public class DefaultCrossTabService
             crossTabStore.dropCrossTabTable( key );    
             crossTabStore.createCrossTabTable( operands, key );
 
-            final BatchHandler<Object> batchHandler = batchHandlerFactory.createBatchHandler( GenericBatchHandler.class );
-            batchHandler.setTableName( CrossTabStore.TABLE_PREFIX + key );
-            batchHandler.init();
+            final BatchHandler<Object> batchHandler = batchHandlerFactory.createBatchHandler( GenericBatchHandler.class ).
+                setTableName( CrossTabStore.CROSSTAB_TABLE_PREFIX + key ).init();
 
             for ( final Integer periodId : periodIds )
             {
@@ -160,6 +160,16 @@ public class DefaultCrossTabService
         crossTabStore.dropCrossTabTable( key );
     }
 
+    public void createAggregatedDataCache( List<DataElementOperand> operands, String key )
+    {
+        crossTabStore.createAggregatedDataCache( operands, key );
+    }
+    
+    public void dropAggregatedDataCache( String key )
+    {
+        crossTabStore.dropAggregatedDataCache( key );
+    }
+    
     public Collection<CrossTabDataValue> getCrossTabDataValues( Collection<DataElementOperand> operands,
         Collection<Integer> periodIds, Collection<Integer> sourceIds, String key )
     {
@@ -170,6 +180,12 @@ public class DefaultCrossTabService
         Collection<Integer> periodIds, int sourceId, String key )
     {
         return crossTabStore.getCrossTabDataValues( operands, periodIds, sourceId, key );
+    }
+    
+    public Map<DataElementOperand, Double> getAggregatedDataCacheValue( Collection<DataElementOperand> operands, 
+        int periodId, int sourceId, String key )
+    {
+        return crossTabStore.getAggregatedDataCacheValue( operands, periodId, sourceId, key );
     }
 
     // -------------------------------------------------------------------------
