@@ -256,6 +256,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
     <!-- DataElement -->
 
+    <bean id="org.hisp.dhis.mapping.action.GetAllDataElementGroupSetsAction"
+        class="org.hisp.dhis.mapping.action.GetAllDataElementGroupSetsAction"
+        scope="prototype">
+        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    </bean>
+
     <bean id="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction"
         class="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction"
         scope="prototype">

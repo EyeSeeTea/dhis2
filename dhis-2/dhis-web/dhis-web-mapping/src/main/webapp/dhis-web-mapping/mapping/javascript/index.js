@@ -88,6 +88,18 @@
         }
     });
   
+    var dataElementGroupSetStore = new Ext.data.JsonStore({
+        url: G.conf.path_mapping + 'getAllDataElementGroupSets' + G.conf.type,
+        root: 'dataElementGroupSets',
+        fields: ['id', 'name'],
+        sortInfo: {field: 'name', direction: 'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': G.func.storeLoadListener
+        }
+    });
+  
     var dataElementGroupStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getAllDataElementGroups' + G.conf.type,
         root: 'dataElementGroups',
@@ -257,6 +269,7 @@
         indicatorGroup: indicatorGroupStore,
         indicatorsByGroup: indicatorsByGroupStore,
         indicator: indicatorStore,
+        dataElementGroupSet: dataElementGroupSetStore,
         dataElementGroup: dataElementGroupStore,
         dataElementsByGroup: dataElementsByGroupStore,
         dataElement: dataElementStore,
@@ -1723,7 +1736,6 @@ return;
                 ],
                 listeners: {
                     expand: {
-                        scope: this,
                         fn: function() {
                             adminWindow.setHeight(G.conf.adminwindow_expanded_1);
                         }
@@ -1796,7 +1808,7 @@ return;
                 }
             },
             {
-                title: 'Organisation unit',
+                title: 'Organisation unit profile',
                 items: [
                     {
                         xtype: 'form',
@@ -1809,39 +1821,22 @@ return;
                                 id: 'dataelementgroupset_cb',
                                 fieldLabel: 'Group set',
                                 labelSeparator: G.conf.labelseparator,
-                                disabled: G.system.aggregationStrategy === G.conf.aggregation_strategy_batch,
-                                disabledClass: 'combo-disabled',
                                 editable: false,
-                                valueField: 'value',
-                                displayField: 'text',
-                                mode: 'local',
-                                value: G.conf.map_date_type_fixed,
+                                valueField: 'id',
+                                displayField: 'name',
+                                mode: 'remote',
                                 triggerAction: 'all',
                                 width: G.conf.combo_width_fieldset,
                                 minListWidth: G.conf.combo_width_fieldset,
-                                store: {
-                                    xtype: 'arraystore',
-                                    fields: ['value', 'text'],
-                                    data: [
-                                        [G.conf.map_date_type_fixed, G.i18n.fixed_periods],
-                                        [G.conf.map_date_type_start_end, G.i18n.start_end_dates]
-                                    ]
-                                },
+                                store: G.stores.dataElementGroupSet,
                                 listeners: {
-                                    'select': function(cb) {
-                                        if (cb.getValue() !== G.system.mapDateType.value) {
-                                            G.system.mapDateType.value = cb.getValue();
-                                            Ext.Ajax.request({
-                                                url: G.conf.path_mapping + 'setMapUserSettings' + G.conf.type,
-                                                method: 'POST',
-                                                params: {mapDateType: G.system.mapDateType.value},
-                                                success: function() {
-                                                    Ext.message.msg(true, '<span class="x-msg-hl">' + cb.getRawValue() + '</span> '+ G.i18n.saved_as_date_type);
-                                                    choropleth.prepareMapViewDateType();
-                                                    point.prepareMapViewDateType();
-                                                }
-                                            });
+                                    'beforeselect': function(cb, r, i) {
+                                        if (r.data.id == cb.getValue()) {
+                                            return false;
                                         }
+                                    },
+                                    'select': function(cb) {
+                                        //alert('select: ' + cb.getValue());
                                     }
                                 }
                             }

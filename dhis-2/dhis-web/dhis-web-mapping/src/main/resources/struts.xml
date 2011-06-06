@@ -286,6 +286,12 @@
 
         <!-- DataElement -->
 
+        <action name="getAllDataElementGroupSets"
+            class="org.hisp.dhis.mapping.action.GetAllDataElementGroupSetsAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonDataElementGroupSets.vm</result>
+        </action>
+
         <action name="getAllDataElementGroups"
             class="org.hisp.dhis.mapping.action.GetAllDataElementGroupsAction">
             <result name="success" type="velocity-json">
