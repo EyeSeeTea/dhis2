@@ -1,7 +1,7 @@
-package org.hisp.dhis.reportexcel.exporting.action;
+package org.hisp.dhis.reportexcel.importitem.action;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,64 +27,100 @@ package org.hisp.dhis.reportexcel.exporting.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportexcel.ExportReportService;
-import org.hisp.dhis.reportexcel.ReportExcel;
-import org.hisp.dhis.reportexcel.state.SelectionManager;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
+import org.hisp.dhis.reportexcel.importitem.ExcelItem;
+import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.importitem.ImportItemService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GenerateExcelReportFlowAction
+
+public class ShowUpdateImportItemFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private ExportReportService exportReportService;
+    private ImportItemService importItemService;
 
-    public void setExportReportService( ExportReportService exportReportService )
+    public void setImportItemService( ImportItemService importItemService )
     {
-        this.exportReportService = exportReportService;
+        this.importItemService = importItemService;
     }
 
-    private SelectionManager selectionManager;
+    private DataElementService dataElementService;
 
-    public void setSelectionManager( SelectionManager selectionManager )
+    public void setDataElementService( DataElementService dataElementService )
     {
-        this.selectionManager = selectionManager;
+        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
     // Input && Output
     // -------------------------------------------------------------------------
 
-    private Integer organisationGroupId;
+    private Integer importReportId;
 
-    public void setOrganisationGroupId( Integer organisationGroupId )
+    public void setImportReportId( Integer importReportId )
     {
-        this.organisationGroupId = organisationGroupId;
+        this.importReportId = importReportId;
     }
 
-    public Integer getOrganisationGroupId()
+    private Integer importItemId;
+
+    public void setImportItemId( Integer importItemId )
     {
-        return organisationGroupId;
+        this.importItemId = importItemId;
+    }
+
+    public ExcelItemGroup importReport;
+
+    public ExcelItemGroup getImportReport()
+    {
+        return importReport;
+    }
+
+    private ExcelItem importItem;
+
+    public ExcelItem getImportItem()
+    {
+        return importItem;
+    }
+
+    private List<DataElementGroup> dataElementGroups;
+
+    public List<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        ReportExcel exportReport = exportReportService.getExportReport( selectionManager.getSelectedReportId() );
+        importReport = importItemService.getImportReport( importReportId );
 
-        return exportReport.getReportType();
+        importItem = importItemService.getImportItem( importItemId );
+
+        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
+
+        Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
+
+        return SUCCESS;
     }
-
 }

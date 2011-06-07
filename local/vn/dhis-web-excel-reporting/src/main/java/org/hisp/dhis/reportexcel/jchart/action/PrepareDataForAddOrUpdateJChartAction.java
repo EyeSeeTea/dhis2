@@ -1,4 +1,4 @@
-package org.hisp.dhis.commons.action;
+package org.hisp.dhis.reportexcel.jchart.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,22 +27,36 @@ package org.hisp.dhis.commons.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.jchart.JChart;
+import org.hisp.dhis.jchart.JChartSevice;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 
+import com.opensymphony.xwork2.Action;
+
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  */
-public class GetPeriodTypesAction
-    extends ActionPagingSupport<PeriodType>
+public class PrepareDataForAddOrUpdateJChartAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
+
+    private JChartSevice jchartService;
+
+    public void setJchartService( JChartSevice jchartService )
+    {
+        this.jchartService = jchartService;
+    }
 
     private PeriodService periodService;
 
@@ -51,9 +65,30 @@ public class GetPeriodTypesAction
         this.periodService = periodService;
     }
 
+    private IndicatorService indicatorService;
+
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
+    }
+
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    private JChart jchart;
+
+    public JChart getJchart()
+    {
+        return jchart;
+    }
 
     private List<PeriodType> periodTypes;
 
@@ -62,19 +97,30 @@ public class GetPeriodTypesAction
         return periodTypes;
     }
 
-    @Override
+    private List<IndicatorGroup> indicatorGroups;
+
+    public List<IndicatorGroup> getIndicatorGroups()
+    {
+        return indicatorGroups;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
         throws Exception
     {
+        if ( isNotBlank( String.valueOf( id ) ) )
+        {
+            jchart = jchartService.getJChart( id );
+        }
+        
         periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
 
-        if ( usePaging )
-        {
-            this.paging = createPaging( periodTypes.size() );
-
-            periodTypes = periodTypes.subList( paging.getStartPos(), paging.getEndPos() );
-        }
+        indicatorGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
 
         return SUCCESS;
     }
+
 }

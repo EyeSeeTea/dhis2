@@ -1,7 +1,7 @@
-package org.hisp.dhis.commons.action;
+package org.hisp.dhis.reportexcel.importreport.action;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,30 @@ package org.hisp.dhis.commons.action;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
+import org.hisp.dhis.reportexcel.importitem.ImportItemService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class GetPeriodTypesAction
-    extends ActionPagingSupport<PeriodType>
+public class ShowUpdateImportReportFormAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
+
+    private ImportItemService importItemService;
+
+    public void setImportItemService( ImportItemService importItemService )
+    {
+        this.importItemService = importItemService;
+    }
 
     private PeriodService periodService;
 
@@ -52,8 +63,22 @@ public class GetPeriodTypesAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input && Output
     // -------------------------------------------------------------------------
+
+    private int id;
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    private ExcelItemGroup importReport;
+
+    public ExcelItemGroup getImportReport()
+    {
+        return importReport;
+    }
 
     private List<PeriodType> periodTypes;
 
@@ -62,18 +87,16 @@ public class GetPeriodTypesAction
         return periodTypes;
     }
 
-    @Override
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
         throws Exception
     {
+        importReport = importItemService.getImportReport( id );
+        
         periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
-
-        if ( usePaging )
-        {
-            this.paging = createPaging( periodTypes.size() );
-
-            periodTypes = periodTypes.subList( paging.getStartPos(), paging.getEndPos() );
-        }
 
         return SUCCESS;
     }

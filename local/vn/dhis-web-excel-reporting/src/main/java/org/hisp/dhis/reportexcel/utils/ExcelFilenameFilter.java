@@ -1,4 +1,4 @@
-package org.hisp.dhis.commons.action;
+package org.hisp.dhis.reportexcel.utils;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -26,55 +26,31 @@ package org.hisp.dhis.commons.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
+import java.io.File;
+import java.io.FilenameFilter;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
+ * @version $Id
  */
-public class GetPeriodTypesAction
-    extends ActionPagingSupport<PeriodType>
+public class ExcelFilenameFilter
+    implements FilenameFilter
 {
-    // -------------------------------------------------------------------------
-    // Dependency
-    // -------------------------------------------------------------------------
-
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private List<PeriodType> periodTypes;
-
-    public List<PeriodType> getPeriodTypes()
-    {
-        return periodTypes;
-    }
-
     @Override
-    public String execute()
-        throws Exception
+    public boolean accept( File file, String extension )
     {
-        periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
-
-        if ( usePaging )
+        if ( file.isDirectory() )
+            return false;
+        else
         {
-            this.paging = createPaging( periodTypes.size() );
+            String name = file.getName().toLowerCase();
 
-            periodTypes = periodTypes.subList( paging.getStartPos(), paging.getEndPos() );
+            if ( extension == null )
+            {
+                return name.endsWith( ".xls" ) || name.endsWith( ".xlsx" );
+            }
+
+            return name.endsWith( "." + extension );
         }
-
-        return SUCCESS;
     }
 }
