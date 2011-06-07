@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportexcel.importing.action;
+package org.hisp.dhis.reportexcel.jchart.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,101 +27,81 @@ package org.hisp.dhis.reportexcel.importing.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
-import org.hisp.dhis.reportexcel.importitem.ImportItemService;
-import org.hisp.dhis.reportexcel.period.generic.PeriodGenericManager;
-import org.hisp.dhis.reportexcel.state.SelectionManager;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.jchart.JChart;
+import org.hisp.dhis.jchart.JChartSevice;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * @version $Id$
+ * @author Dang Duy Hieu
  */
-public class ImportDataFlowAction
+public class PrepareDataForAddOrUpdateJChartAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private ImportItemService importItemService;
+    private JChartSevice jchartService;
 
-    public void setImportItemService( ImportItemService importItemService )
+    public void setJchartService( JChartSevice jchartService )
     {
-        this.importItemService = importItemService;
+        this.jchartService = jchartService;
     }
 
-    private PeriodGenericManager periodGenericManager;
+    private PeriodService periodService;
 
-    public void setPeriodGenericManager( PeriodGenericManager periodGenericManager )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.periodGenericManager = periodGenericManager;
+        this.periodService = periodService;
     }
 
-    private SelectionManager selectionManager;
+    private IndicatorService indicatorService;
 
-    public void setSelectionManager( SelectionManager selectionManager )
+    public void setIndicatorService( IndicatorService indicatorService )
     {
-        this.selectionManager = selectionManager;
+        this.indicatorService = indicatorService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer importReportId;
+    private Integer id;
 
-    private Integer periodId;
-
-    private Integer sheetId;
-
-    private Integer orgunitGroupId;
-
-    public String[] importItemIds;
-
-    // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
-
-    public Integer getImportReportId()
+    public void setId( Integer id )
     {
-        return importReportId;
+        this.id = id;
     }
 
-    public void setImportReportId( Integer importReportId )
+    private JChart jchart;
+
+    public JChart getJchart()
     {
-        this.importReportId = importReportId;
+        return jchart;
     }
 
-    public void setPeriodId( Integer periodId )
+    private List<PeriodType> periodTypes;
+
+    public List<PeriodType> getPeriodTypes()
     {
-        this.periodId = periodId;
+        return periodTypes;
     }
 
-    public Integer getSheetId()
-    {
-        return sheetId;
-    }
+    private List<IndicatorGroup> indicatorGroups;
 
-    public void setSheetId( Integer sheetId )
+    public List<IndicatorGroup> getIndicatorGroups()
     {
-        this.sheetId = sheetId;
-    }
-
-    public Integer getOrgunitGroupId()
-    {
-        return orgunitGroupId;
-    }
-
-    public void setOrgunitGroupId( Integer orgunitGroupId )
-    {
-        this.orgunitGroupId = orgunitGroupId;
-    }
-
-    public void setImportItemIds( String[] importItemIds )
-    {
-        this.importItemIds = importItemIds;
+        return indicatorGroups;
     }
 
     // -------------------------------------------------------------------------
@@ -131,13 +111,16 @@ public class ImportDataFlowAction
     public String execute()
         throws Exception
     {
-        periodGenericManager.setSelectedPeriodIndex( periodId );
+        if ( isNotBlank( String.valueOf( id ) ) )
+        {
+            jchart = jchartService.getJChart( id );
+        }
+        
+        periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
 
-        selectionManager.setListObject( importItemIds );
+        indicatorGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
 
-        ExcelItemGroup importReport = importItemService.getImportReport( importReportId );
-
-        return importReport.getType();
+        return SUCCESS;
     }
 
 }

@@ -1,7 +1,7 @@
-package org.hisp.dhis.reportexcel.importing.action;
+package org.hisp.dhis.reportexcel.importitem.action;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,25 @@ package org.hisp.dhis.reportexcel.importing.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
+import org.hisp.dhis.reportexcel.importitem.ExcelItem;
 import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
 import org.hisp.dhis.reportexcel.importitem.ImportItemService;
-import org.hisp.dhis.reportexcel.period.generic.PeriodGenericManager;
-import org.hisp.dhis.reportexcel.state.SelectionManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ImportDataFlowAction
+
+public class ShowUpdateImportItemFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -52,92 +59,68 @@ public class ImportDataFlowAction
         this.importItemService = importItemService;
     }
 
-    private PeriodGenericManager periodGenericManager;
+    private DataElementService dataElementService;
 
-    public void setPeriodGenericManager( PeriodGenericManager periodGenericManager )
+    public void setDataElementService( DataElementService dataElementService )
     {
-        this.periodGenericManager = periodGenericManager;
-    }
-
-    private SelectionManager selectionManager;
-
-    public void setSelectionManager( SelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
+        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Input && Output
     // -------------------------------------------------------------------------
 
     private Integer importReportId;
-
-    private Integer periodId;
-
-    private Integer sheetId;
-
-    private Integer orgunitGroupId;
-
-    public String[] importItemIds;
-
-    // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
-
-    public Integer getImportReportId()
-    {
-        return importReportId;
-    }
 
     public void setImportReportId( Integer importReportId )
     {
         this.importReportId = importReportId;
     }
 
-    public void setPeriodId( Integer periodId )
+    private Integer importItemId;
+
+    public void setImportItemId( Integer importItemId )
     {
-        this.periodId = periodId;
+        this.importItemId = importItemId;
     }
 
-    public Integer getSheetId()
+    public ExcelItemGroup importReport;
+
+    public ExcelItemGroup getImportReport()
     {
-        return sheetId;
+        return importReport;
     }
 
-    public void setSheetId( Integer sheetId )
+    private ExcelItem importItem;
+
+    public ExcelItem getImportItem()
     {
-        this.sheetId = sheetId;
+        return importItem;
     }
 
-    public Integer getOrgunitGroupId()
-    {
-        return orgunitGroupId;
-    }
+    private List<DataElementGroup> dataElementGroups;
 
-    public void setOrgunitGroupId( Integer orgunitGroupId )
+    public List<DataElementGroup> getDataElementGroups()
     {
-        this.orgunitGroupId = orgunitGroupId;
-    }
-
-    public void setImportItemIds( String[] importItemIds )
-    {
-        this.importItemIds = importItemIds;
+        return dataElementGroups;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        periodGenericManager.setSelectedPeriodIndex( periodId );
+        importReport = importItemService.getImportReport( importReportId );
 
-        selectionManager.setListObject( importItemIds );
+        importItem = importItemService.getImportItem( importItemId );
 
-        ExcelItemGroup importReport = importItemService.getImportReport( importReportId );
+        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
 
-        return importReport.getType();
+        Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
+
+        return SUCCESS;
     }
-
 }
