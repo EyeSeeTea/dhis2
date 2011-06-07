@@ -51,6 +51,16 @@
 </select>
 </p>
 
+<h4>$i18n.getString( "infrastructural_data_elements" )</h4>
+
+<p>
+<select name="infrastructuralDataElements" style="width:30em">
+    #foreach ( $group in $dataElementGroups )
+    <option value="$group.id" #if( $group.id == $configuration.infrastructuralDataElements.id )selected="selected"#end>$group.name</option>
+    #end
+</select>
+</p>
+
 <h4>$i18n.getString( "omit_indicators_zero_numerator_data_mart" )</h4>
 
 <p>

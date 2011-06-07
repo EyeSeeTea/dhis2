@@ -523,10 +523,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         bodyStyle: 'padding:8px',
                         items: [
                             {html: '<div class="window-info">Type:<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
-                            {html: '<div class="window-info">Address:<p style="font-weight:normal">' + feature.attributes.address + '</p></div>'},
-                            {html: '<div class="window-info">Contact person:<p style="font-weight:normal">' + feature.attributes.contactPerson + '</p></div>'},
-                            {html: '<div class="window-info">Email:<p style="font-weight:normal">' + feature.attributes.email + '</p></div>'},
-                            {html: '<div class="window-info">Phone number:<p style="font-weight:normal">' + feature.attributes.phoneNumber + '</p></div>'}
+                            {html: '<div class="window-info">Address:<p style="font-weight:normal">' + feature.attributes.ad + '</p></div>'},
+                            {html: '<div class="window-info">Contact person:<p style="font-weight:normal">' + feature.attributes.cp + '</p></div>'},
+                            {html: '<div class="window-info">Email:<p style="font-weight:normal">' + feature.attributes.em + '</p></div>'},
+                            {html: '<div class="window-info">Phone number:<p style="font-weight:normal">' + feature.attributes.pn + '</p></div>'}
                         ]
                     }
                 ]

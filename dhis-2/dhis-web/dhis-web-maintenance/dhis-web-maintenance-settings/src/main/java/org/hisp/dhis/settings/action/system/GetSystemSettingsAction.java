@@ -27,10 +27,15 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 
+import org.hisp.dhis.configuration.Configuration;
+import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.options.style.StyleManager;
 import org.hisp.dhis.system.util.Filter;
@@ -74,11 +79,25 @@ public class GetSystemSettingsAction
     {
         this.styleManager = styleManager;
     }
+    
+    private ConfigurationService configurationService;
+    
+    public void setConfigurationService( ConfigurationService configurationService )
+    {
+        this.configurationService = configurationService;
+    }
+
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
-    
+
     private SortedMap<String, String> flags;
 
     public SortedMap<String, String> getFlags()
@@ -113,11 +132,25 @@ public class GetSystemSettingsAction
     {
         return aggregationStrategies;
     }
+    
+    private Configuration configuration;
+    
+    public Configuration getConfiguration()
+    {
+        return configuration;
+    }
+
+    private List<DataElementGroup> dataElementGroups;
+
+    public List<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-    
+
     public String execute()
     {    	
     	flags = systemSettingManager.getFlags();
@@ -131,6 +164,10 @@ public class GetSystemSettingsAction
         currentStyle = styleManager.getCurrentStyle();
         
         aggregationStrategies = systemSettingManager.getAggregationStrategies();
+        
+        configuration = configurationService.getConfiguration();
+        
+        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
         
         return SUCCESS;
     }

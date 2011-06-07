@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.mapping.MapLayer;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
@@ -65,6 +67,13 @@ public class InitializeAction
     public void setUserSettingService( UserSettingService userSettingService )
     {
         this.userSettingService = userSettingService;
+    }
+    
+    private ConfigurationService configurationService;
+    
+    public void setConfigurationService( ConfigurationService configurationService )
+    {
+        this.configurationService = configurationService;
     }
 
     // -------------------------------------------------------------------------
@@ -109,6 +118,13 @@ public class InitializeAction
     {
         return overlays;
     }
+    
+    private DataElementGroup infrastructuralDataElements;
+
+    public DataElementGroup getInfrastructuralDataElements()
+    {
+        return infrastructuralDataElements;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -135,7 +151,9 @@ public class InitializeAction
         
         overlays = new ArrayList<MapLayer>( mappingService.getMapLayersByType( MappingService.MAP_LAYER_TYPE_OVERLAY ) );
         
-        Collections.sort( overlays, new MapLayerNameComparator() );        
+        Collections.sort( overlays, new MapLayerNameComparator() );
+
+        infrastructuralDataElements = configurationService.getConfiguration().getInfrastructuralDataElements();
 
         return SUCCESS;
     }

@@ -18,6 +18,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="styleManager">
 			<ref bean="org.hisp.dhis.options.style.StyleManager" />
 		</property>
+        <property name="configurationService">
+            <ref bean="org.hisp.dhis.configuration.ConfigurationService" />
+        </property>
+        <property name="dataElementService">
+            <ref bean="org.hisp.dhis.dataelement.DataElementService" />
+        </property>
 	</bean>
 
 	<bean id="org.hisp.dhis.settings.action.system.SetSystemSettingsAction"
@@ -29,6 +35,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="styleManager">
 			<ref bean="org.hisp.dhis.options.style.StyleManager" />
 		</property>
+        <property name="configurationService">
+            <ref bean="org.hisp.dhis.configuration.ConfigurationService" />
+        </property>
+        <property name="dataElementService">
+            <ref bean="org.hisp.dhis.dataelement.DataElementService" />
+        </property>
 	</bean>
 
 	<!-- User settings -->

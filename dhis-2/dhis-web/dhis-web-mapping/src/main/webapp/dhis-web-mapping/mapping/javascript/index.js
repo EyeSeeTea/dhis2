@@ -22,6 +22,7 @@
             G.user.initOverlays = init.overlays;
             G.user.isAdmin = init.security.isAdmin;
             G.system.aggregationStrategy = init.systemSettings.aggregationStrategy;
+            G.system.infrastructuralDataElements = init.systemSettings.infrastructuralDataElements;
             G.system.mapDateType.value = G.system.aggregationStrategy == G.conf.aggregation_strategy_batch ?
 				G.conf.map_date_type_fixed : init.userSettings.mapDateType;
 
@@ -81,18 +82,6 @@
         url: G.conf.path_mapping + 'getAllIndicators' + G.conf.type,
         root: 'indicators',
         fields: ['id', 'shortName'],
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-            'load': G.func.storeLoadListener
-        }
-    });
-  
-    var dataElementGroupSetStore = new Ext.data.JsonStore({
-        url: G.conf.path_mapping + 'getAllDataElementGroupSets' + G.conf.type,
-        root: 'dataElementGroupSets',
-        fields: ['id', 'name'],
-        sortInfo: {field: 'name', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -269,7 +258,6 @@
         indicatorGroup: indicatorGroupStore,
         indicatorsByGroup: indicatorsByGroupStore,
         indicator: indicatorStore,
-        dataElementGroupSet: dataElementGroupSetStore,
         dataElementGroup: dataElementGroupStore,
         dataElementsByGroup: dataElementsByGroupStore,
         dataElement: dataElementStore,
@@ -1792,51 +1780,6 @@ return;
                                                 }
                                             });
                                         }
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                ],
-                listeners: {
-                    expand: function() {
-                        adminWindow.setHeight(G.conf.adminwindow_expanded_2);
-                    },
-                    collapse: function() {
-                        adminWindow.setHeight(G.conf.adminwindow_collapsed);
-                    }
-                }
-            },
-            {
-                title: 'Organisation unit profile',
-                items: [
-                    {
-                        xtype: 'form',
-                        bodyStyle: 'padding:8px',
-                        labelWidth: G.conf.label_width,
-                        items: [
-                            {html: '<div class="window-info">Set data element group set</div>'},
-                            {
-                                xtype: 'combo',
-                                id: 'dataelementgroupset_cb',
-                                fieldLabel: 'Group set',
-                                labelSeparator: G.conf.labelseparator,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'name',
-                                mode: 'remote',
-                                triggerAction: 'all',
-                                width: G.conf.combo_width_fieldset,
-                                minListWidth: G.conf.combo_width_fieldset,
-                                store: G.stores.dataElementGroupSet,
-                                listeners: {
-                                    'beforeselect': function(cb, r, i) {
-                                        if (r.data.id == cb.getValue()) {
-                                            return false;
-                                        }
-                                    },
-                                    'select': function(cb) {
-                                        //alert('select: ' + cb.getValue());
                                     }
                                 }
                             }

@@ -36,6 +36,10 @@ import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZER
 import static org.hisp.dhis.options.SystemSettingManager.KEY_START_MODULE;
 
 import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.configuration.Configuration;
+import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.options.style.StyleManager;
 
@@ -66,10 +70,24 @@ public class SetSystemSettingsAction
         this.styleManager = styleManager;
     }
     
+    private ConfigurationService configurationService;
+    
+    public void setConfigurationService( ConfigurationService configurationService )
+    {
+        this.configurationService = configurationService;
+    }
+    
+    private DataElementService dataElementService;
+    
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
-    
+
     private String systemIdentifier;
     
     public void setSystemIdentifier( String systemIdentifier )
@@ -96,6 +114,13 @@ public class SetSystemSettingsAction
     public void setStartModule( String startModule )
     {
         this.startModule = startModule;
+    }
+    
+    private Integer infrastructuralDataElements;
+
+    public void setInfrastructuralDataElements( Integer infrastructuralDataElements )
+    {
+        this.infrastructuralDataElements = infrastructuralDataElements;
     }
 
     private Boolean omitIndicatorsZeroNumeratorDataMart;
@@ -156,6 +181,15 @@ public class SetSystemSettingsAction
         if ( startModule != null && startModule.equals( "NO_START_PAGE" ) )
         {
             startModule = null;
+        }
+        
+        if ( infrastructuralDataElements != null )
+        {
+            Configuration configuration = configurationService.getConfiguration();
+
+            configuration.setInfrastructuralDataElements( dataElementService.getDataElementGroup( infrastructuralDataElements ) );  
+            
+            configurationService.setConfiguration( configuration );
         }
         
         systemSettingManager.saveSystemSetting( KEY_SYSTEM_IDENTIFIER, systemIdentifier );
