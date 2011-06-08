@@ -22,11 +22,14 @@
             <table width="100%">
 				  <tr>
 				  	<td>#filterDiv( "displayViewChartForm" )</td>
-                    <td align="right">
+                    <td align="right" style="padding-top: 16px;">
                     	<select id="chart_type">
                     		<option value='period'>$i18n.getString( 'period_by_indicator_chart' )</option>
+                    		<option value='period_dataElement'>$i18n.getString( 'period_by_dataelement_chart' )</option>
                     		<option value='organisationUnit'>$i18n.getString( 'indicator_by_organisation_unit_chart' )</option>
+                    		<option value='organisationUnit_dataElement'>$i18n.getString( 'dataelement_by_organisation_unit_chart' )</option>
                     		<option value='indicator'>$i18n.getString( 'indicator_by_period_chart' )</option>
+                    		<option value='dataElement_period'>$i18n.getString( 'dataelement_by_period_chart' )</option>
                     	</select>
                     	<button type="button" id="add_chart">$i18n.getString( 'add' )</button>
                     </td>
