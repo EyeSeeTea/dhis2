@@ -701,8 +701,6 @@
                             document.getElementById('indicatorField').value = values.mapValueTypeValue;
                             document.getElementById('legendsField').value = G.util.getLegendsJSON.call(choropleth);
                             svg = document.getElementById(polygonLayer.svgId).parentNode.innerHTML;
-console.log(svg);
-return;                            
                         }
                         else {
                             Ext.message.msg(false, '<span class="x-msg-hl">' + G.conf.thematic_layer_1 + '</span> not rendered');
