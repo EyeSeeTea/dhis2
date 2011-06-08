@@ -1481,7 +1481,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
                     params: params,
                     scope: this,
                     success: function(r) {
-                        var mapvalues = Ext.util.JSON.decode(r.responseText).mapvalues;
+                        var mapvalues = Ext.util.JSON.decode(r.responseText).mapValues;
                         
                         if (!this.layer.features.length) {
                             Ext.message.msg(false, 'No coordinates found');

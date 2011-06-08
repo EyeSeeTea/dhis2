@@ -31,6 +31,7 @@ import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 
 import com.opensymphony.xwork2.Action;
 
@@ -100,7 +101,9 @@ public class SetMapSystemSettingsAction
         {
             Configuration configuration = configurationService.getConfiguration();
             
-            configuration.setInfrastructuralPeriodType( periodService.getPeriodTypeByName( infrastructuralPeriodType ) );
+            PeriodType periodType = periodService.getPeriodTypeByName( infrastructuralPeriodType );
+            
+            configuration.setInfrastructuralPeriodType( periodType );
             
             configurationService.setConfiguration( configuration );
         }
@@ -108,8 +111,3 @@ public class SetMapSystemSettingsAction
         return SUCCESS;
     }
 }
-
-
-
-
-

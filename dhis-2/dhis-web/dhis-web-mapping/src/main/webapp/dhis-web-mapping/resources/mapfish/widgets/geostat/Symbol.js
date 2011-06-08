@@ -590,10 +590,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     triggerAction: 'all',
                                     selectOnFocus: true,
                                     width: G.conf.combo_width,
-                                    store: G.stores.periodsByTypeStore,
+                                    store: G.stores.infrastructuralPeriodsByType,
                                     keepPosition: false,
                                     listeners: {
                                         'select': function(cb) {
+                                            G.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
+                                            G.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);                                            
+                                            G.stores.infrastructuralDataElementMapValue.load();                                            
                                         }
                                     }
                                 },
@@ -603,14 +606,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     width: 241,
                                     cm: new Ext.grid.ColumnModel({
                                         columns: [
-                                            {id: 'name', header: 'Data element', dataIndex: 'shortName', sortable: true, width: 150},
-                                            {id: 'shortName', header: 'Value', dataIndex: 'shortName', sortable: true, width: 50}
+                                            {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
+                                            {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
                                         ]
                                     }),
                                     disableSelection: true,
                                     viewConfig: {forceFit: true},
-                                    sortable: true,
-                                    autoExpandColumn: 'name',
                                     store: G.stores.infrastructuralDataElementMapValue
                                 }
                             ]
