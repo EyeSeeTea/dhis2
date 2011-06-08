@@ -611,7 +611,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                     viewConfig: {forceFit: true},
                                     sortable: true,
                                     autoExpandColumn: 'name',
-                                    store: G.stores.dataElementsByGroup
+                                    store: G.stores.infrastructuralDataElementMapValue
                                 }
                             ]
                         }
