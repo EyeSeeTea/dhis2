@@ -367,8 +367,8 @@ a.x-menu-item-custom {
     font-family:arial,ubuntu;
 }
 .x-grid3-hd-inner {
-    color:#555555;
-    font: bold 11px arial,ubuntu;
+    color:#111111;
+    font: 11px arial,ubuntu;
 }
 .x-grid3-row {
     border-color:#ffffff;

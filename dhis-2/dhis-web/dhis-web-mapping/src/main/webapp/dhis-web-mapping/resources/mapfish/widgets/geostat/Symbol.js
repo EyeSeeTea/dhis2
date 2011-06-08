@@ -531,11 +531,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         layout: 'anchor',
                         width: 150,
                         items: [
-                            {html: '<div class="window-info">Type:<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
-                            {html: '<div class="window-info">Address:<p style="font-weight:normal">' + 'feature.attributes.ad' + '</p></div>'},
-                            {html: '<div class="window-info">Contact person:<p style="font-weight:normal">' + 'feature.attributes.cp' + '</p></div>'},
-                            {html: '<div class="window-info">Email:<p style="font-weight:normal">' + 'feature.attributes.em' + '</p></div>'},
-                            {html: '<div class="window-info">Phone number:<p style="font-weight:normal">' + 'feature.attributes.pn' + '</p></div>'}
+                            {html: '<div class="window-info">Type<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
+                            {html: '<div class="window-info">Address<p style="font-weight:normal">' + 'feature.attributes.ad' + '</p></div>'},
+                            {html: '<div class="window-info">Contact person<p style="font-weight:normal">' + 'feature.attributes.cp' + '</p></div>'},
+                            {html: '<div class="window-info">Email<p style="font-weight:normal">' + 'feature.attributes.em' + '</p></div>'},
+                            {html: '<div class="window-info">Phone number<p style="font-weight:normal">' + 'feature.attributes.pn' + '</p></div>'}
                         ]
                     },
                     {
@@ -557,15 +557,22 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 triggerAction: 'all',
                                 selectOnFocus: true,
                                 width: G.conf.combo_width,
+                                value: G.system.infrastructuralPeriodType,
                                 store: G.stores.periodType,
                                 listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            cb.findParentByType('form').find('name', 'period')[0].clearValue();
-                                            G.stores.periodsByTypeStore.setBaseParam('name', cb.getValue());
-                                            G.stores.periodsByTypeStore.load();
-                                        }
+                                    'select': function(cb) {
+                                        cb.findParentByType('form').find('name', 'period')[0].clearValue();
+                                        G.stores.periodsByTypeStore.setBaseParam('name', cb.getValue());
+                                        G.stores.periodsByTypeStore.load();
+                                        
+                                        Ext.Ajax.request({
+                                            url: G.conf.path_mapping + 'setMapSystemSettings' + G.conf.type,
+                                            method: 'POST',
+                                            params: {infrastructuralPeriodType: cb.getValue()},
+                                            success: function(r) {
+                                                G.system.infrastructuralPeriodType = cb.getValue();
+                                            }
+                                        });
                                     }
                                 }
                             },
@@ -585,10 +592,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                 store: G.stores.periodsByTypeStore,
                                 keepPosition: false,
                                 listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                        }
+                                    'select': function(cb) {
                                     }
                                 }
                             },

@@ -27,7 +27,10 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.configuration.Configuration;
+import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.options.SystemSettingManager;
+import org.hisp.dhis.period.PeriodService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -48,16 +51,37 @@ public class SetMapSystemSettingsAction
     {
         this.systemSettingManager = systemSettingManager;
     }
+    
+    private ConfigurationService configurationService;
+    
+    public void setConfigurationService( ConfigurationService configurationService )
+    {
+        this.configurationService = configurationService;
+    }
+    
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
-    
+
     private String googleKey;
 
     public void setGoogleKey( String googleKey )
     {
         this.googleKey = googleKey;
+    }
+    
+    private String infrastructuralPeriodType;
+
+    public void setInfrastructuralPeriodType( String infrastructuralPeriodType )
+    {
+        this.infrastructuralPeriodType = infrastructuralPeriodType;
     }
 
     // -------------------------------------------------------------------------
@@ -72,6 +96,20 @@ public class SetMapSystemSettingsAction
             systemSettingManager.saveSystemSetting( SystemSettingManager.KEY_GOOGLE_MAPS_API_KEY, googleKey );
         }
         
+        if ( infrastructuralPeriodType != null )
+        {
+            Configuration configuration = configurationService.getConfiguration();
+            
+            configuration.setInfrastructuralPeriodType( periodService.getPeriodTypeByName( infrastructuralPeriodType ) );
+            
+            configurationService.setConfiguration( configuration );
+        }
+        
         return SUCCESS;
     }
 }
+
+
+
+
+

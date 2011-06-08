@@ -23,6 +23,7 @@
             G.user.isAdmin = init.security.isAdmin;
             G.system.aggregationStrategy = init.systemSettings.aggregationStrategy;
             G.system.infrastructuralDataElements = init.systemSettings.infrastructuralDataElements;
+            G.system.infrastructuralPeriodType = init.systemSettings.infrastructuralPeriodType;
             G.system.mapDateType.value = G.system.aggregationStrategy == G.conf.aggregation_strategy_batch ?
 				G.conf.map_date_type_fixed : init.userSettings.mapDateType;
 

@@ -501,7 +501,9 @@ G.system = {
         isStartEnd: function() {
             return this.value === G.conf.map_date_type_start_end;
         }
-    }
+    },
+    
+    infrastructuralPeriodType: null
 };
 
 G.func = {

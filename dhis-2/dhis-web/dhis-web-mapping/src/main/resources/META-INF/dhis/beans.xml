@@ -69,12 +69,15 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         class="org.hisp.dhis.mapping.action.GetMapSystemSettingsAction"
         scope="prototype">
         <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
+        <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />        
+        <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     </bean>
 
     <bean id="org.hisp.dhis.mapping.action.SetMapSystemSettingsAction"
         class="org.hisp.dhis.mapping.action.SetMapSystemSettingsAction"
         scope="prototype">
         <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
+        
     </bean>
 
     <bean id="org.hisp.dhis.mapping.action.DeleteMapSystemSettingsAction"
