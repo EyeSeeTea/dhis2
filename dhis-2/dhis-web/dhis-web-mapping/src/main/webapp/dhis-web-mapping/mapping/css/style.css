@@ -367,8 +367,12 @@ a.x-menu-item-custom {
     font-family:arial,ubuntu;
 }
 .x-grid3-hd-inner {
-    color:#111111;
+    color:#555555;
     font: bold 11px arial,ubuntu;
+}
+.x-grid3-row {
+    border-color:#ffffff;
+    border-bottom-color:#eeeeee;
 }
 .sort-asc .x-grid3-sort-icon {
     display:none;
@@ -376,9 +380,10 @@ a.x-menu-item-custom {
 #featuregrid_gp .x-grid3-header {
     display:none;
 }
-#featuregrid_gp .x-grid3-row {
-    border-right:0px none;
-    border-left:0px none;
+
+/* Ext TableLayout */
+.x-table-layout-cell {
+    vertical-align:top;
 }
 
 /* DHIS Help */

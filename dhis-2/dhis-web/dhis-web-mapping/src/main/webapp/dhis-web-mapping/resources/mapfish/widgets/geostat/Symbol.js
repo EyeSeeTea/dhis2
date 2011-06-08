@@ -513,26 +513,107 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             var cssCls = G.stores.groupsByGroupSet.img[G.stores.groupsByGroupSet.find('name', feature.attributes.type)] + '-title';            
             featureInfoWindow = new Ext.Window({
                 title: '<span class="' + cssCls + '">' + feature.attributes.name + '</span>',
-                layout: 'fit',
-                width: 200,
-                height: 225,
+                layout: 'table',
+                width: G.conf.window_width + 170,
+                height: G.util.getMultiSelectHeight() + 120,
+                bodyStyle: 'background-color:#fff',
+                defaults: {
+                    bodyStyle: 'padding:8px; vertical-align:top',
+                    labelSeparator: G.conf.labelseparator,
+                    emptyText: G.conf.emptytext
+                },
+                layoutConfig: {
+                    columns: 2
+                },
                 items: [
                     {
                         xtype: 'panel',
                         layout: 'anchor',
-                        bodyStyle: 'padding:8px',
+                        width: 150,
                         items: [
                             {html: '<div class="window-info">Type:<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
-                            {html: '<div class="window-info">Address:<p style="font-weight:normal">' + feature.attributes.ad + '</p></div>'},
-                            {html: '<div class="window-info">Contact person:<p style="font-weight:normal">' + feature.attributes.cp + '</p></div>'},
-                            {html: '<div class="window-info">Email:<p style="font-weight:normal">' + feature.attributes.em + '</p></div>'},
-                            {html: '<div class="window-info">Phone number:<p style="font-weight:normal">' + feature.attributes.pn + '</p></div>'}
+                            {html: '<div class="window-info">Address:<p style="font-weight:normal">' + 'feature.attributes.ad' + '</p></div>'},
+                            {html: '<div class="window-info">Contact person:<p style="font-weight:normal">' + 'feature.attributes.cp' + '</p></div>'},
+                            {html: '<div class="window-info">Email:<p style="font-weight:normal">' + 'feature.attributes.em' + '</p></div>'},
+                            {html: '<div class="window-info">Phone number:<p style="font-weight:normal">' + 'feature.attributes.pn' + '</p></div>'}
+                        ]
+                    },
+                    {
+                        xtype: 'form',
+                        width: G.conf.window_width + 20,
+                        labelWidth: G.conf.label_width,
+                        items: [
+                            {html: '<div class="window-info">Infrastrucural data elements</div>'},
+                            {
+                                xtype: 'combo',
+                                name: 'periodtype',
+                                fieldLabel: G.i18n.period_type,
+                                typeAhead: true,
+                                editable: false,
+                                valueField: 'name',
+                                displayField: 'displayName',
+                                mode: 'remote',
+                                forceSelection: true,
+                                triggerAction: 'all',
+                                selectOnFocus: true,
+                                width: G.conf.combo_width,
+                                store: G.stores.periodType,
+                                listeners: {
+                                    'select': {
+                                        scope: this,
+                                        fn: function(cb) {
+                                            cb.findParentByType('form').find('name', 'period')[0].clearValue();
+                                            G.stores.periodsByTypeStore.setBaseParam('name', cb.getValue());
+                                            G.stores.periodsByTypeStore.load();
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                xtype: 'combo',
+                                name: 'period',
+                                fieldLabel: G.i18n.period,
+                                typeAhead: true,
+                                editable: false,
+                                valueField: 'id',
+                                displayField: 'name',
+                                mode: 'remote',
+                                forceSelection: true,
+                                triggerAction: 'all',
+                                selectOnFocus: true,
+                                width: G.conf.combo_width,
+                                store: G.stores.periodsByTypeStore,
+                                keepPosition: false,
+                                listeners: {
+                                    'select': {
+                                        scope: this,
+                                        fn: function(cb) {
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                xtype: 'grid',
+                                height: G.util.getMultiSelectHeight(),
+                                width: 241,
+                                cm: new Ext.grid.ColumnModel({
+                                    columns: [
+                                        {id: 'name', header: 'Data element', dataIndex: 'shortName', sortable: true, width: 150},
+                                        {id: 'shortName', header: 'Value', dataIndex: 'shortName', sortable: true, width: 50}
+                                    ]
+                                }),
+                                disableSelection: true,
+                                viewConfig: {forceFit: true},
+                                sortable: true,
+                                autoExpandColumn: 'name',
+                                store: G.stores.dataElementsByGroup
+                            }
                         ]
                     }
                 ]
             });
             
-            featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5 - 51), Ext.getCmp('center').y + 41);
+            featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 170 + 15 + 5), Ext.getCmp('center').y + 41);
             scope.form.findField('groupset').featureInfoWindow = featureInfoWindow;
             featureInfoWindow.show();
         };
