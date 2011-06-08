@@ -105,6 +105,12 @@
             <result name="success" type="velocity-json">
                 /dhis-web-mapping/jsonminAggregatedMapValues.vm</result>
         </action>
+        
+        <action name="getInfrastructuralDataElementMapValues"
+            class="org.hisp.dhis.mapping.action.GetInfrastructuralDataElementMapValuesAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-mapping/jsonInfrastructuralAggregatedMapValues.vm</result>
+        </action>
 
 		<!-- MapLegend -->
 

@@ -37,7 +37,8 @@
   },
   "systemSettings": {
     "aggregationStrategy": "$!encoder.jsonEncode( ${aggregationStrategy} )",
-    "infrastructuralDataElements": "$!{infrastructuralDataElements.id}"
+    "infrastructuralDataElements": "$!{infrastructuralDataElements.id}",
+    "infrastructuralPeriodType": "$!{infrastructuralPeriodType.name}"
   },
   "overlays": [
 #foreach( $overlay in $overlays )

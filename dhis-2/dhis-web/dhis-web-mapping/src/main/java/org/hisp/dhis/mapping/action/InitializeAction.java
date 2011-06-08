@@ -40,6 +40,8 @@ import org.hisp.dhis.mapping.MapLayer;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.mapping.comparator.MapLayerNameComparator;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
@@ -74,6 +76,13 @@ public class InitializeAction
     public void setConfigurationService( ConfigurationService configurationService )
     {
         this.configurationService = configurationService;
+    }
+    
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
@@ -125,6 +134,13 @@ public class InitializeAction
     {
         return infrastructuralDataElements;
     }
+    
+    private PeriodType infrastructuralPeriodType;
+
+    public PeriodType getInfrastructuralPeriodType()
+    {
+        return infrastructuralPeriodType;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -154,6 +170,8 @@ public class InitializeAction
         Collections.sort( overlays, new MapLayerNameComparator() );
 
         infrastructuralDataElements = configurationService.getConfiguration().getInfrastructuralDataElements();
+        
+        infrastructuralPeriodType = configurationService.getConfiguration().getInfrastructuralPeriodType();
 
         return SUCCESS;
     }
