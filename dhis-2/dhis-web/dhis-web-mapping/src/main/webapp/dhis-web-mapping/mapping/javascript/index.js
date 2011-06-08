@@ -158,6 +158,28 @@
         }
     });
     
+    var infrastructuralPeriodTypeStore = new Ext.data.JsonStore({
+        url: G.conf.path_mapping + 'getAllPeriodTypes' + G.conf.type,
+        root: 'periodTypes',
+        fields: ['name', 'displayName'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': G.func.storeLoadListener
+        }
+    });
+        
+    var infrastructuralPeriodsByTypeStore = new Ext.data.JsonStore({
+        url: G.conf.path_mapping + 'getPeriodsByPeriodType' + G.conf.type,
+        root: 'periods',
+        fields: ['id', 'name'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+            'load': G.func.storeLoadListener
+        }
+    });
+    
 	var predefinedMapLegendStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getAllMapLegends' + G.conf.type,
         root: 'mapLegends',
@@ -263,7 +285,9 @@
         dataElementsByGroup: dataElementsByGroupStore,
         dataElement: dataElementStore,
         periodType: periodTypeStore,
-        periodsByTypeStore: periodsByTypeStore,
+        periodsByType: periodsByTypeStore,
+        infrastructuralPeriodType: infrastructuralPeriodTypeStore,
+        infrastructuralPeriodsByType: infrastructuralPeriodsByTypeStore,
         predefinedMapLegend: predefinedMapLegendStore,
         predefinedMapLegendSet: predefinedMapLegendSetStore,
         organisationUnitLevel: organisationUnitLevelStore,
