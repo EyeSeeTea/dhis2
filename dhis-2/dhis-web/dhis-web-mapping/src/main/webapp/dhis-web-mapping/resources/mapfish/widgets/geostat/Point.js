@@ -459,8 +459,8 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     fn: function(cb) {
                         this.form.findField('period').clearValue();
-                        G.stores.periodsByTypeStore.setBaseParam('name', cb.getValue());
-                        G.stores.periodsByTypeStore.load();
+                        G.stores.periodsByType.setBaseParam('name', cb.getValue());
+                        G.stores.periodsByType.load();
                     }
                 }
             }
@@ -479,7 +479,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             selectOnFocus: true,
             width: G.conf.combo_width,
-            store: G.stores.periodsByTypeStore,
+            store: G.stores.periodsByType,
             keepPosition: false,
             listeners: {
                 'select': {
@@ -1078,7 +1078,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             };
             obj.stores = {
                 c1: G.stores.periodType,
-                c2: G.stores.periodsByTypeStore
+                c2: G.stores.periodsByType
             };
             obj.mapView = {
                 c1: 'periodTypeId',
