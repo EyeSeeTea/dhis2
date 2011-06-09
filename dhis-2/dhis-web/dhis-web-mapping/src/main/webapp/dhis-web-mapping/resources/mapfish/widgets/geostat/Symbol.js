@@ -547,7 +547,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             width: G.conf.window_width + 20,
                             labelWidth: G.conf.label_width,
                             items: [
-                                {html: '<div class="window-info">Infrastructural data elements</div>'},
+                                {html: '<div class="window-info">Infrastructural data</div>'},
                                 {
                                     xtype: 'combo',
                                     name: 'periodtype',
@@ -630,7 +630,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     }
                 }
                 
-                featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 170 + 15 + 5), Ext.getCmp('center').y + 41);
+                featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 178 + 15 + 5), Ext.getCmp('center').y + 41);
                 scope.form.findField('groupset').featureInfoWindow = featureInfoWindow;
                 featureInfoWindow.show();
             }

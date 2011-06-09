@@ -27,21 +27,24 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.options.SystemSettingManager.*;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_AGGREGATION_STRATEGY;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_APPLICATION_TITLE;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_COMPLETENESS_OFFSET;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_FACTOR_OF_DEVIATION;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_FLAG;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_START_MODULE;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_SYSTEM_IDENTIFIER;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
-import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.options.style.StyleManager;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 
 import com.opensymphony.xwork2.Action;
 
@@ -83,6 +86,13 @@ public class SetSystemSettingsAction
     {
         this.dataElementService = dataElementService;
     }
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
     
     // -------------------------------------------------------------------------
     // Output
@@ -121,6 +131,13 @@ public class SetSystemSettingsAction
     public void setInfrastructuralDataElements( Integer infrastructuralDataElements )
     {
         this.infrastructuralDataElements = infrastructuralDataElements;
+    }
+    
+    private String infrastructuralPeriodType;
+
+    public void setInfrastructuralPeriodType( String infrastructuralPeriodType )
+    {
+        this.infrastructuralPeriodType = infrastructuralPeriodType;
     }
 
     private Boolean omitIndicatorsZeroNumeratorDataMart;
@@ -183,11 +200,20 @@ public class SetSystemSettingsAction
             startModule = null;
         }
         
-        if ( infrastructuralDataElements != null )
+        if ( infrastructuralDataElements != null || infrastructuralPeriodType != null )
         {
             Configuration configuration = configurationService.getConfiguration();
-
-            configuration.setInfrastructuralDataElements( dataElementService.getDataElementGroup( infrastructuralDataElements ) );  
+        
+            if ( infrastructuralDataElements != null )
+            {
+                configuration.setInfrastructuralDataElements( dataElementService.getDataElementGroup( infrastructuralDataElements ) );
+            }
+            
+            if ( infrastructuralPeriodType != null )
+            {
+                configuration.setInfrastructuralPeriodType( periodService
+                    .getPeriodTypeByClass( PeriodType.getPeriodTypeByName( infrastructuralPeriodType ).getClass() ) );
+            }
             
             configurationService.setConfiguration( configuration );
         }

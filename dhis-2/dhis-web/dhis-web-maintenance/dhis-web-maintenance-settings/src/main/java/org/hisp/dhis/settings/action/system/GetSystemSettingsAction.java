@@ -38,6 +38,8 @@ import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.options.style.StyleManager;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.webportal.module.Module;
@@ -93,6 +95,13 @@ public class GetSystemSettingsAction
     {
         this.dataElementService = dataElementService;
     }
+    
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
 
     // -------------------------------------------------------------------------
     // Output
@@ -147,6 +156,13 @@ public class GetSystemSettingsAction
         return dataElementGroups;
     }
 
+    private List<PeriodType> periodTypes;
+
+    public List<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -168,6 +184,8 @@ public class GetSystemSettingsAction
         configuration = configurationService.getConfiguration();
         
         dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
+        
+        periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
         
         return SUCCESS;
     }

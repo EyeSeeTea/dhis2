@@ -24,6 +24,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="dataElementService">
             <ref bean="org.hisp.dhis.dataelement.DataElementService" />
         </property>
+        <property name="periodService">
+            <ref bean="org.hisp.dhis.period.PeriodService" />
+        </property>
 	</bean>
 
 	<bean id="org.hisp.dhis.settings.action.system.SetSystemSettingsAction"
@@ -40,6 +43,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         </property>
         <property name="dataElementService">
             <ref bean="org.hisp.dhis.dataelement.DataElementService" />
+        </property>
+        <property name="periodService">
+            <ref bean="org.hisp.dhis.period.PeriodService" />
         </property>
 	</bean>
 

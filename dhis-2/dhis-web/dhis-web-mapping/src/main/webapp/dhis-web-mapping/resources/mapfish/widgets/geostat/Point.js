@@ -1024,7 +1024,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
                                 width: G.conf.window_width + 20,
                                 labelWidth: G.conf.label_width,
                                 items: [
-                                    {html: '<div class="window-info">Infrastructural data elements</div>'},
+                                    {html: '<div class="window-info">Infrastructural data</div>'},
                                     {
                                         xtype: 'combo',
                                         name: 'periodtype',
@@ -1107,7 +1107,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
                         }
                     }
                     
-                    scope.featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 170 + 15 + 5), Ext.getCmp('center').y + 41);
+                    scope.featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 178 + 15 + 5), Ext.getCmp('center').y + 41);
                     scope.featureInfoWindow.show();
                 }
                 
