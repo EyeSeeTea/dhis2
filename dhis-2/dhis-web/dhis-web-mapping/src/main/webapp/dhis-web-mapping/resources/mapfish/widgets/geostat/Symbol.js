@@ -515,11 +515,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 featureInfoWindow = new Ext.Window({
                     title: '<span class="' + cssCls + '">' + feature.attributes.name + '</span>',
                     layout: 'table',
-                    width: G.conf.window_width + 170,
+                    width: G.conf.window_width + 178,
                     height: G.util.getMultiSelectHeight() + 125,
                     bodyStyle: 'background-color:#fff',
                     defaults: {
-                        bodyStyle: 'padding:8px; vertical-align:top',
+                        bodyStyle: 'vertical-align:top',
                         labelSeparator: G.conf.labelseparator,
                         emptyText: G.conf.emptytext
                     },
@@ -530,21 +530,23 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         {
                             xtype: 'panel',
                             layout: 'anchor',
-                            width: 150,
+                            bodyStyle: 'padding:8px 4px 8px 8px',
+                            width: 160,
                             items: [
                                 {html: '<div class="window-info">Type<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
-                                {html: '<div class="window-info">Address<p style="font-weight:normal">' + 'feature.attributes.ad' + '</p></div>'},
-                                {html: '<div class="window-info">Contact person<p style="font-weight:normal">' + 'feature.attributes.cp' + '</p></div>'},
-                                {html: '<div class="window-info">Email<p style="font-weight:normal">' + 'feature.attributes.em' + '</p></div>'},
-                                {html: '<div class="window-info">Phone number<p style="font-weight:normal">' + 'feature.attributes.pn' + '</p></div>'}
+                                {html: '<div class="window-info">Address<p style="font-weight:normal">' + feature.attributes.ad + '</p></div>'},
+                                {html: '<div class="window-info">Contact person<p style="font-weight:normal">' + feature.attributes.cp + '</p></div>'},
+                                {html: '<div class="window-info">Email<p style="font-weight:normal">' + feature.attributes.em + '</p></div>'},
+                                {html: '<div class="window-info">Phone number<p style="font-weight:normal">' + feature.attributes.pn + '</p></div>'}
                             ]
                         },
                         {
                             xtype: 'form',
+                            bodyStyle: 'padding:8px 8px 8px 4px',
                             width: G.conf.window_width + 20,
                             labelWidth: G.conf.label_width,
                             items: [
-                                {html: '<div class="window-info">Infrastrucural data elements</div>'},
+                                {html: '<div class="window-info">Infrastructural data elements</div>'},
                                 {
                                     xtype: 'combo',
                                     name: 'periodtype',

@@ -184,6 +184,7 @@
         url: G.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + G.conf.type,
         root: 'mapValues',
         fields: ['dataElementName', 'value'],
+        sortInfo: {field: 'dataElementName', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
         listeners: {
