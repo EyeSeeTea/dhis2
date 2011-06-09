@@ -745,8 +745,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         
         this.setUrl(G.conf.path_mapping + 'getGeoJson.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +
-            '&level=' + this.organisationUnitSelection.level.level +
-            '&symbol=true'
+            '&level=' + this.organisationUnitSelection.level.level
         );
     },
 

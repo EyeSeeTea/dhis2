@@ -340,6 +340,12 @@ a.x-menu-item-custom {
 	font:bold 11px arial;
 	color:#111;
 }
+.window-information-title {
+	padding:0 0 3px 21px;
+	background:url('../../../images/information2.png') no-repeat 0 0 transparent;
+	font:bold 11px arial;
+	color:#111;
+}
 
 /* Ext Panel */
 .panel-title {
