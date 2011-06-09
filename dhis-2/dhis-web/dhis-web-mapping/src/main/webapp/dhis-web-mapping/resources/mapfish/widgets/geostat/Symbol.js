@@ -600,10 +600,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                                         }
                                     }
                                 },
+                                {html: '<div style="padding:4px 0 0 0"></div>'},
                                 {
                                     xtype: 'grid',
                                     height: G.util.getMultiSelectHeight(),
-                                    width: 241,
+                                    width: 242,
                                     cm: new Ext.grid.ColumnModel({
                                         columns: [
                                             {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
@@ -618,6 +619,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         }
                     ]
                 });
+                
+                if (G.system.infrastructuralPeriodType) {
+                    if (!G.stores.infrastructuralPeriodsByType.isLoaded) {
+                        G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
+                        G.stores.infrastructuralPeriodsByType.load();
+                    }
+                }
                 
                 featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 170 + 15 + 5), Ext.getCmp('center').y + 41);
                 scope.form.findField('groupset').featureInfoWindow = featureInfoWindow;

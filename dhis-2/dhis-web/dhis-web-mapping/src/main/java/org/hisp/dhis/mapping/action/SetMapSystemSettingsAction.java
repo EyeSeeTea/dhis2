@@ -52,14 +52,14 @@ public class SetMapSystemSettingsAction
     {
         this.systemSettingManager = systemSettingManager;
     }
-    
+
     private ConfigurationService configurationService;
-    
+
     public void setConfigurationService( ConfigurationService configurationService )
     {
         this.configurationService = configurationService;
     }
-    
+
     private PeriodService periodService;
 
     public void setPeriodService( PeriodService periodService )
@@ -77,7 +77,7 @@ public class SetMapSystemSettingsAction
     {
         this.googleKey = googleKey;
     }
-    
+
     private String infrastructuralPeriodType;
 
     public void setInfrastructuralPeriodType( String infrastructuralPeriodType )
@@ -96,18 +96,20 @@ public class SetMapSystemSettingsAction
         {
             systemSettingManager.saveSystemSetting( SystemSettingManager.KEY_GOOGLE_MAPS_API_KEY, googleKey );
         }
-        
+
         if ( infrastructuralPeriodType != null )
         {
             Configuration configuration = configurationService.getConfiguration();
-            
-            PeriodType periodType = periodService.getPeriodTypeByName( infrastructuralPeriodType );
-            
+
+            PeriodType periodType = infrastructuralPeriodType != null && !infrastructuralPeriodType.isEmpty() ? periodService
+                .getPeriodTypeByClass( PeriodType.getPeriodTypeByName( infrastructuralPeriodType ).getClass() )
+                : null;
+
             configuration.setInfrastructuralPeriodType( periodType );
-            
+
             configurationService.setConfiguration( configuration );
         }
-        
+
         return SUCCESS;
     }
 }
