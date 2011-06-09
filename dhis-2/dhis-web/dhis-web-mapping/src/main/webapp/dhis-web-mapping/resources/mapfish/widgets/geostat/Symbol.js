@@ -516,7 +516,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     title: '<span class="' + cssCls + '">' + feature.attributes.name + '</span>',
                     layout: 'table',
                     width: G.conf.window_width + 170,
-                    height: G.util.getMultiSelectHeight() + 120,
+                    height: G.util.getMultiSelectHeight() + 125,
                     bodyStyle: 'background-color:#fff',
                     defaults: {
                         bodyStyle: 'padding:8px; vertical-align:top',
