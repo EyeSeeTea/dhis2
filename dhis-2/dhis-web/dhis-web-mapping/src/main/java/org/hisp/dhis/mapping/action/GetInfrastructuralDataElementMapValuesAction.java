@@ -27,11 +27,13 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.configuration.Configuration;
-import org.hisp.dhis.configuration.ConfigurationService;
-import org.hisp.dhis.options.SystemSettingManager;
+import java.util.Collection;
+
+import org.hisp.dhis.aggregation.AggregatedMapValue;
+import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.util.DateUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -39,50 +41,47 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  * @version $Id$
  */
-public class SetMapSystemSettingsAction
+public class GetInfrastructuralDataElementMapValuesAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SystemSettingManager systemSettingManager;
+    private MappingService mappingService;
 
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    public void setMappingService( MappingService mappingService )
     {
-        this.systemSettingManager = systemSettingManager;
-    }
-
-    private ConfigurationService configurationService;
-
-    public void setConfigurationService( ConfigurationService configurationService )
-    {
-        this.configurationService = configurationService;
-    }
-
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
+        this.mappingService = mappingService;
     }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String googleKey;
+    private Integer periodId;
 
-    public void setGoogleKey( String googleKey )
+    public void setPeriodId( Integer periodId )
     {
-        this.googleKey = googleKey;
+        this.periodId = periodId;
     }
 
-    private String infrastructuralPeriodType;
+    private Integer organisationUnitId;
 
-    public void setInfrastructuralPeriodType( String infrastructuralPeriodType )
+    public void setOrganisationUnitId( Integer organisationUnitId )
     {
-        this.infrastructuralPeriodType = infrastructuralPeriodType;
+        this.organisationUnitId = organisationUnitId;
+    }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private Collection<AggregatedMapValue> object;
+
+    public Collection<AggregatedMapValue> getObject()
+    {
+        return object;
     }
 
     // -------------------------------------------------------------------------
@@ -92,23 +91,7 @@ public class SetMapSystemSettingsAction
     public String execute()
         throws Exception
     {
-        if ( googleKey != null )
-        {
-            systemSettingManager.saveSystemSetting( SystemSettingManager.KEY_GOOGLE_MAPS_API_KEY, googleKey );
-        }
-
-        if ( infrastructuralPeriodType != null )
-        {
-            Configuration configuration = configurationService.getConfiguration();
-
-            PeriodType periodType = infrastructuralPeriodType != null && !infrastructuralPeriodType.isEmpty() ? periodService
-                .getPeriodTypeByClass( PeriodType.getPeriodTypeByName( infrastructuralPeriodType ).getClass() )
-                : null;
-
-            configuration.setInfrastructuralPeriodType( periodType );
-
-            configurationService.setConfiguration( configuration );
-        }
+        object = mappingService.getInfrastructuralDataElementMapValues( periodId, organisationUnitId );
 
         return SUCCESS;
     }
