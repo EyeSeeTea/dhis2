@@ -78,6 +78,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 
 	imageLegend: false,
     
+    stores: false,
+    
+    infrastructuralPeriod: false,
+    
     initComponent: function() {
     
         this.initProperties();
@@ -211,6 +215,20 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
             isDataElement: function() {
                 return this.value == G.conf.map_value_type_dataelement;
             }
+        };
+        
+        this.stores = {
+            infrastructuralDataElementMapValue: new Ext.data.JsonStore({
+                url: G.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + G.conf.type,
+                root: 'mapValues',
+                fields: ['dataElementName', 'value'],
+                sortInfo: {field: 'dataElementName', direction: 'ASC'},
+                autoLoad: false,
+                isLoaded: false,
+                listeners: {
+                    'load': G.func.storeLoadListener
+                }
+            })
         };
     },
     
@@ -1022,7 +1040,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         title: '<span class="window-information-title">' + feature.attributes.name + '</span>',
                         layout: 'table',
                         width: G.conf.window_width + 178,
-                        height: G.util.getMultiSelectHeight() + 125,
+                        height: G.util.getMultiSelectHeight() + 100,
                         bodyStyle: 'background-color:#fff',
                         defaults: {
                             bodyStyle: 'vertical-align:top',
@@ -1056,38 +1074,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                     {html: '<div class="window-info">Infrastructural data</div>'},
                                     {
                                         xtype: 'combo',
-                                        name: 'periodtype',
-                                        fieldLabel: G.i18n.period_type,
-                                        typeAhead: true,
-                                        editable: false,
-                                        valueField: 'name',
-                                        displayField: 'displayName',
-                                        mode: 'remote',
-                                        forceSelection: true,
-                                        triggerAction: 'all',
-                                        selectOnFocus: true,
-                                        width: G.conf.combo_width,
-                                        value: G.system.infrastructuralPeriodType,
-                                        store: G.stores.infrastructuralPeriodType,
-                                        listeners: {
-                                            'select': function(cb) {
-                                                cb.findParentByType('form').find('name', 'period')[0].clearValue();
-                                                G.stores.infrastructuralPeriodsByType.setBaseParam('name', cb.getValue());
-                                                G.stores.infrastructuralPeriodsByType.load();
-                                                
-                                                Ext.Ajax.request({
-                                                    url: G.conf.path_mapping + 'setMapSystemSettings' + G.conf.type,
-                                                    method: 'POST',
-                                                    params: {infrastructuralPeriodType: cb.getValue()},
-                                                    success: function(r) {
-                                                        G.system.infrastructuralPeriodType = cb.getValue();
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    },
-                                    {
-                                        xtype: 'combo',
                                         name: 'period',
                                         fieldLabel: G.i18n.period,
                                         typeAhead: true,
@@ -1103,9 +1089,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         keepPosition: false,
                                         listeners: {
                                             'select': function(cb) {
-                                                G.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-                                                G.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);                                            
-                                                G.stores.infrastructuralDataElementMapValue.load();                                            
+                                                scope.infrastructuralPeriod = cb.getValue();
+                                                scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
+                                                scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                                                scope.stores.infrastructuralDataElementMapValue.load();
                                             }
                                         }
                                     },
@@ -1122,29 +1109,30 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                                         }),
                                         disableSelection: true,
                                         viewConfig: {forceFit: true},
-                                        store: G.stores.infrastructuralDataElementMapValue
+                                        store: scope.stores.infrastructuralDataElementMapValue
                                     }
                                 ]
                             }
                         ]
                     });
                     
-                    if (G.system.infrastructuralPeriodType) {
-                        if (!G.stores.infrastructuralPeriodsByType.isLoaded) {
-                            G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
-                            G.stores.infrastructuralPeriodsByType.load();
-                        }
+                    if (scope.infrastructuralPeriod) {
+                        scope.featureInfoWindow.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
+                        scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
+                        scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                        scope.stores.infrastructuralDataElementMapValue.load();
                     }
                     
                     scope.featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 178 + 15 + 5), Ext.getCmp('center').y + 41);
                     scope.featureInfoWindow.show();
                 }
                 
-                if (G.stores.infrastructuralPeriodType.isLoaded) {
+                if (G.stores.infrastructuralPeriodsByType.isLoaded) {
                     fn();
                 }
                 else {
-                    G.stores.infrastructuralPeriodType.load({callback: function() {
+                    G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
+                    G.stores.infrastructuralPeriodsByType.load({callback: function() {
                         fn();
                     }});
                 }

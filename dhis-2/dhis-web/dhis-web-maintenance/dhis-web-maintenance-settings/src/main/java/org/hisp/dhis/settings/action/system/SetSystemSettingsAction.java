@@ -45,6 +45,7 @@ import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.options.style.StyleManager;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.user.UserGroupService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -72,16 +73,23 @@ public class SetSystemSettingsAction
     {
         this.styleManager = styleManager;
     }
-    
+
+    private UserGroupService userGroupService;
+
+    public void setUserGroupService( UserGroupService userGroupService )
+    {
+        this.userGroupService = userGroupService;
+    }
+
     private ConfigurationService configurationService;
-    
+
     public void setConfigurationService( ConfigurationService configurationService )
     {
         this.configurationService = configurationService;
     }
-    
+
     private DataElementService dataElementService;
-    
+
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
@@ -93,13 +101,13 @@ public class SetSystemSettingsAction
     {
         this.periodService = periodService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
     private String systemIdentifier;
-    
+
     public void setSystemIdentifier( String systemIdentifier )
     {
         this.systemIdentifier = systemIdentifier;
@@ -125,14 +133,14 @@ public class SetSystemSettingsAction
     {
         this.startModule = startModule;
     }
-    
+
     private Integer infrastructuralDataElements;
 
     public void setInfrastructuralDataElements( Integer infrastructuralDataElements )
     {
         this.infrastructuralDataElements = infrastructuralDataElements;
     }
-    
+
     private String infrastructuralPeriodType;
 
     public void setInfrastructuralPeriodType( String infrastructuralPeriodType )
@@ -167,14 +175,21 @@ public class SetSystemSettingsAction
     {
         this.currentStyle = style;
     }
-    
+
     private String aggregationStrategy;
 
     public void setAggregationStrategy( String aggregationStrategy )
     {
         this.aggregationStrategy = aggregationStrategy;
     }
-    
+
+    private Integer feedbackRecipients;
+
+    public void setFeedbackRecipients( Integer feedbackRecipients )
+    {
+        this.feedbackRecipients = feedbackRecipients;
+    }
+
     private Integer completenessOffset;
 
     public void setCompletenessOffset( Integer completenessOffset )
@@ -185,7 +200,7 @@ public class SetSystemSettingsAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-    
+
     public String execute()
     {
         applicationTitle = StringUtils.trimToNull( applicationTitle );
@@ -199,36 +214,41 @@ public class SetSystemSettingsAction
         {
             startModule = null;
         }
-        
-        if ( infrastructuralDataElements != null || infrastructuralPeriodType != null )
-        {
-            Configuration configuration = configurationService.getConfiguration();
-        
-            if ( infrastructuralDataElements != null )
-            {
-                configuration.setInfrastructuralDataElements( dataElementService.getDataElementGroup( infrastructuralDataElements ) );
-            }
-            
-            if ( infrastructuralPeriodType != null )
-            {
-                configuration.setInfrastructuralPeriodType( periodService
-                    .getPeriodTypeByClass( PeriodType.getPeriodTypeByName( infrastructuralPeriodType ).getClass() ) );
-            }
-            
-            configurationService.setConfiguration( configuration );
-        }
-        
+
         systemSettingManager.saveSystemSetting( KEY_SYSTEM_IDENTIFIER, systemIdentifier );
         systemSettingManager.saveSystemSetting( KEY_APPLICATION_TITLE, applicationTitle );
         systemSettingManager.saveSystemSetting( KEY_FLAG, flag );
         systemSettingManager.saveSystemSetting( KEY_START_MODULE, startModule );
-        systemSettingManager.saveSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, omitIndicatorsZeroNumeratorDataMart );
-        systemSettingManager.saveSystemSetting( KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED, disableDataEntryWhenCompleted );
+        systemSettingManager.saveSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART,
+            omitIndicatorsZeroNumeratorDataMart );
+        systemSettingManager
+            .saveSystemSetting( KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED, disableDataEntryWhenCompleted );
         systemSettingManager.saveSystemSetting( KEY_FACTOR_OF_DEVIATION, factorDeviation );
         styleManager.setCurrentStyle( currentStyle );
         systemSettingManager.saveSystemSetting( KEY_AGGREGATION_STRATEGY, aggregationStrategy );
         systemSettingManager.saveSystemSetting( KEY_COMPLETENESS_OFFSET, completenessOffset );
-        
+
+        Configuration configuration = configurationService.getConfiguration();
+
+        if ( feedbackRecipients != null )
+        {
+            configuration.setFeedbackRecipients( userGroupService.getUserGroup( feedbackRecipients ) );
+        }
+
+        if ( infrastructuralDataElements != null )
+        {
+            configuration.setInfrastructuralDataElements( dataElementService
+                .getDataElementGroup( infrastructuralDataElements ) );
+        }
+
+        if ( infrastructuralPeriodType != null )
+        {
+            configuration.setInfrastructuralPeriodType( periodService.getPeriodTypeByClass( PeriodType
+                .getPeriodTypeByName( infrastructuralPeriodType ).getClass() ) );
+        }
+
+        configurationService.setConfiguration( configuration );
+
         return SUCCESS;
     }
 }

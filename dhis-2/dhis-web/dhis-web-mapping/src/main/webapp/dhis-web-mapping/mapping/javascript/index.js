@@ -179,18 +179,6 @@
             'load': G.func.storeLoadListener
         }
     });
-        
-    var infrastructuralDataElementMapValueStore = new Ext.data.JsonStore({
-        url: G.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + G.conf.type,
-        root: 'mapValues',
-        fields: ['dataElementName', 'value'],
-        sortInfo: {field: 'dataElementName', direction: 'ASC'},
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-            'load': G.func.storeLoadListener
-        }
-    });
     
 	var predefinedMapLegendStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getAllMapLegends' + G.conf.type,
@@ -300,7 +288,6 @@
         periodsByType: periodsByTypeStore,
         infrastructuralPeriodType: infrastructuralPeriodTypeStore,
         infrastructuralPeriodsByType: infrastructuralPeriodsByTypeStore,
-        infrastructuralDataElementMapValue: infrastructuralDataElementMapValueStore,
         predefinedMapLegend: predefinedMapLegendStore,
         predefinedMapLegendSet: predefinedMapLegendSetStore,
         organisationUnitLevel: organisationUnitLevelStore,
