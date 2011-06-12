@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,18 +27,41 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * @author Lars Helge Overland
  */
-public interface AggregatedValue
+public class Clock
+    extends StopWatch
 {
-    final Double ZERO = 0d;
+    private static final Log log = LogFactory.getLog( Clock.class );
     
-    int getElementId();
+    private static final String SEPARATOR = ": ";
     
-    int getPeriodId();
+    public Clock()
+    {
+        super();
+    }
     
-    int getOrganisationUnitId();
+    public Clock startClock()
+    {
+        this.start();
+        
+        return this;
+    }
     
-    double getValue();
+    public Clock logTime( String message )
+    {
+        super.split();
+        
+        String time = DurationFormatUtils.formatDurationHMS( super.getSplitTime() ); 
+        
+        log.info( message + SEPARATOR + time );
+        
+        return this;
+    }
 }
