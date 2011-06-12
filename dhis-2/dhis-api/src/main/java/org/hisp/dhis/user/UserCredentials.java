@@ -28,6 +28,7 @@ package org.hisp.dhis.user;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,6 +62,50 @@ public class UserCredentials
     private String password;
 
     private Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
+    
+    private Date lastLogin;
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns a set of the aggregated authorities for all user authority groups
+     * of this user credentials.
+     */
+    public Set<String> getAllAuthorities()
+    {
+        Set<String> authorities = new HashSet<String>();
+        
+        for ( UserAuthorityGroup group : userAuthorityGroups )
+        {
+            authorities.addAll( group.getAuthorities() );
+        }
+        
+        return authorities;
+    }
+    
+    /**
+     * Indicates whether this user credentials can issue the given user authority
+     * group. First the given authority group must not be null. Second this 
+     * user credentials must not contain the given authority group. Third
+     * the authority group must be a subset of the aggregated user authorities
+     * of this user credentials, or this user credentials must have the ALL
+     * authority.
+     * 
+     * @param group the user authority group.
+     */
+    public boolean canIssue( UserAuthorityGroup group )
+    {
+        if ( group == null || userAuthorityGroups.contains( group ) )
+        {
+            return false;
+        }
+                
+        final Set<String> authorities = getAllAuthorities();
+        
+        return ( authorities.contains( UserAuthorityGroup.AUTHORITY_ALL ) || authorities.containsAll( group.getAuthorities() ) );
+    }
     
     // -------------------------------------------------------------------------
     // hashCode and equals
@@ -105,6 +150,16 @@ public class UserCredentials
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+    
     public String getPassword()
     {
         return password;
@@ -145,13 +200,13 @@ public class UserCredentials
         this.username = username;
     }
 
-    public int getId()
+    public Date getLastLogin()
     {
-        return id;
+        return lastLogin;
     }
 
-    public void setId( int id )
+    public void setLastLogin( Date lastLogin )
     {
-        this.id = id;
+        this.lastLogin = lastLogin;
     }
 }
