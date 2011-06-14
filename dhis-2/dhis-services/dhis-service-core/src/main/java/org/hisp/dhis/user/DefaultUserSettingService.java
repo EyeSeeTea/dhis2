@@ -30,10 +30,13 @@ package org.hisp.dhis.user;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * @author Torgeir Lorange Ostby
  * @version $Id: DefaultUserSettingService.java 5724 2008-09-18 14:37:01Z larshelg $
  */
+@Transactional
 public class DefaultUserSettingService
     implements UserSettingService
 {
@@ -48,13 +51,13 @@ public class DefaultUserSettingService
         this.currentUserService = currentUserService;
     }
 
-    private UserStore userStore;
+    private UserService userService;
 
-    public void setUserStore( UserStore userStore )
+    public void setUserService( UserService userService )
     {
-        this.userStore = userStore;
+        this.userService = userService;
     }
-
+    
     // -------------------------------------------------------------------------
     // UserSettingService implementation
     // -------------------------------------------------------------------------
@@ -69,7 +72,7 @@ public class DefaultUserSettingService
             throw new NoCurrentUserException( "No current user. User setting not saved: " + name );
         }
 
-        UserSetting userSetting = userStore.getUserSetting( currentUser, name );
+        UserSetting userSetting = userService.getUserSetting( currentUser, name );
 
         if ( userSetting == null )
         {
@@ -78,13 +81,13 @@ public class DefaultUserSettingService
             userSetting.setName( name );
             userSetting.setValue( value );
 
-            userStore.addUserSetting( userSetting );
+            userService.addUserSetting( userSetting );
         }
         else
         {
             userSetting.setValue( value );
 
-            userStore.updateUserSetting( userSetting );
+            userService.updateUserSetting( userSetting );
         }
     }
 
@@ -98,7 +101,7 @@ public class DefaultUserSettingService
             throw new NoCurrentUserException( "No current user. User setting not returned: " + name );
         }
 
-        UserSetting userSetting = userStore.getUserSetting( currentUser, name );
+        UserSetting userSetting = userService.getUserSetting( currentUser, name );
 
         if ( userSetting != null )
         {
@@ -117,7 +120,7 @@ public class DefaultUserSettingService
             return defaultValue;
         }
 
-        UserSetting userSetting = userStore.getUserSetting( currentUser, name );
+        UserSetting userSetting = userService.getUserSetting( currentUser, name );
 
         if ( userSetting != null )
         {
@@ -137,7 +140,7 @@ public class DefaultUserSettingService
             throw new NoCurrentUserException( "No current user. User settings not returned" );
         }
 
-        return userStore.getAllUserSettings( currentUser );
+        return userService.getAllUserSettings( currentUser );
     }
 
     public void deleteUserSetting( String name )
@@ -150,6 +153,6 @@ public class DefaultUserSettingService
             throw new NoCurrentUserException( "No current user. User setting not deleted: " + name );
         }
 
-        userStore.deleteUserSetting( userStore.getUserSetting( currentUser, name ) );
+        userService.deleteUserSetting( userService.getUserSetting( currentUser, name ) );
     }
 }
