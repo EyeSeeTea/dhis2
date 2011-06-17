@@ -67,8 +67,11 @@ public class GetDataElementGroupSetAction
         return dataElementGroupSet;
     }
 
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
-        throws Exception
     {
         if ( id != null )
         {
