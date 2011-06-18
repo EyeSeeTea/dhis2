@@ -28,18 +28,19 @@ package org.hisp.dhis.commons.action;
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.user.comparator.UserRoleComparator;
 
 /**
  * @author mortenoh
  */
 public class GetUserRolesAction
-    implements Action
+    extends ActionPagingSupport<UserAuthorityGroup>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -71,6 +72,15 @@ public class GetUserRolesAction
         throws Exception
     {
         userRoles = new ArrayList<UserAuthorityGroup>( userService.getAllUserAuthorityGroups() );
+
+        Collections.sort( userRoles, new UserRoleComparator() );
+
+        if ( usePaging )
+        {
+            this.paging = createPaging( userRoles.size() );
+
+            userRoles = userRoles.subList( paging.getStartPos(), paging.getEndPos() );
+        }
 
         return SUCCESS;
     }
