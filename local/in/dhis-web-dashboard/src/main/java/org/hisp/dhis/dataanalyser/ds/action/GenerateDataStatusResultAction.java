@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -103,6 +104,17 @@ public class GenerateDataStatusResultAction
     {
         this.orgUnitComparator = orgUnitComparator;
     }
+
+/*    
+    private DataEntryStatusService dataEntryStatusService;
+    
+    public void setDataEntryStatusService( DataEntryStatusService dataEntryStatusService )
+    {
+        this.dataEntryStatusService = dataEntryStatusService;
+    }
+*/    
+
+
 
     // ---------------------------------------------------------------
     // Output Parameters
@@ -228,6 +240,11 @@ public class GenerateDataStatusResultAction
     }
 
     private String immChildOption;
+    
+    public String getImmChildOption()
+    {
+        return immChildOption;
+    }
 
     public void setImmChildOption( String immChildOption )
     {
@@ -335,6 +352,7 @@ public class GenerateDataStatusResultAction
     {
         return dataElementCount;
     }
+    
 
     // ---------------------------------------------------------------
     // Action Implementation
@@ -343,6 +361,8 @@ public class GenerateDataStatusResultAction
     public String execute()
         throws Exception
     {
+        
+        System.out.println( "Data Entry Status  Start Time  : " + new Date() );
         orgUnitCount = 0;
         dataViewName = "";
 
@@ -352,9 +372,12 @@ public class GenerateDataStatusResultAction
         results = new ArrayList<Integer>();
         maxOULevel = 1;
         minOULevel = organisationUnitService.getNumberOfOrganisationalLevels();
-
+        
+        
+        System.out.println( "immChildOption : "  + immChildOption + ", Ou Id is : " + ouId + ", DS id is : " + dsId );
         if ( immChildOption != null && immChildOption.equalsIgnoreCase( "yes" ) )
         {
+            System.out.println( "Inside Drill Down" );
             orgUnitListCB = new ArrayList<String>();
             orgUnitListCB.add( ouId );
 
@@ -482,7 +505,7 @@ public class GenerateDataStatusResultAction
             dataSetMemberCount1 += de1.getCategoryCombo().getOptionCombos().size();
         }
 
-        // System.out.println( "DataSet Member Count :" + dataSetMemberCount1 );
+        
 
         deInfo = getDEInfo( dataElements );
 
@@ -525,62 +548,75 @@ public class GenerateDataStatusResultAction
                 p = (Period) periodIterator.next();
                 periodInfo = "" + p.getId();
                 dataElementCount = 0;
-                if ( dso == null )
-                {
-                    dsResults.add( -1 );
-                    deCounts.add( -1 );
-                    continue;
-                }
-                else if ( !dso.contains( o ) )
-                {
-                    System.out.println( "Dataset : " + selDataSet.getName() + " not assign to " + o.getName() );
-                    /*
-                     * if( childOrgUnits == null || childOrgUnits.size() <= 0 )
-                     * { dsResults.add( -2 ); continue; }
-                     * 
-                     * else
-                     */
-                    // {
-                    /*
-                     * orgUnitInfo = "-1"; orgUnitCount = 0; getOrgUnitInfo( o,
-                     * dso );
-                     * 
-                     * if ( includeZeros == null ) { query =
-                     * "SELECT COUNT(*) FROM " + dataViewName +
-                     * " WHERE dataelementid IN (" + deInfo +
-                     * ") AND sourceid IN (" + orgUnitInfo +
-                     * ") AND periodid IN (" + periodInfo + ") and value <> 0";
-                     * 
-                     * } else { query = "SELECT COUNT(*) FROM " + dataViewName +
-                     * " WHERE dataelementid IN (" + deInfo +
-                     * ") AND sourceid IN (" + orgUnitInfo +
-                     * ") AND periodid IN (" + periodInfo + ")"; }
-                     * 
-                     * System.out.println("Used Query is :::::::" + query );
-                     * SqlRowSet sqlResultSet = jdbcTemplate.queryForRowSet(
-                     * query );
-                     * 
-                     * if ( sqlResultSet.next() ) { try { //System.out.println(
-                     * "Result is : \t" + sqlResultSet.getLong( 1 ) );
-                     * dataStatusPercentatge = ((double) sqlResultSet.getInt( 1
-                     * ) / (double) (dataSetMemberCount1 orgUnitCount)) 100.0;
-                     * 
-                     * } catch ( Exception e ) { dataStatusPercentatge = 0.0; }
-                     * } else dataStatusPercentatge = 0.0;
-                     * 
-                     * if ( dataStatusPercentatge > 100.0 )
-                     * dataStatusPercentatge = 100;
-                     * 
-                     * dataStatusPercentatge = Math.round( dataStatusPercentatge
-                     * Math.pow( 10, 0 ) ) / Math.pow( 10, 0 );
-                     */
-                    // dsResults.add( (int) dataStatusPercentatge );
-                    dsResults.add( -1 );
-                    // dataElementCount = sqlResultSet.getInt( 1 );
-                    deCounts.add( -1 );
-                    continue;
-                    // }
-                }
+
+                
+
+                    if ( dso == null )
+                    {
+                        dsResults.add( -1 );
+                        deCounts.add( -1 );
+                        continue;
+                    }
+                    else if ( !dso.contains( o ) )
+                    {
+                        System.out.println("Dataset : " + selDataSet.getName() + " not assign to " + o.getName() );
+                        /*
+                        if( childOrgUnits == null || childOrgUnits.size() <= 0 )
+                        {
+                            dsResults.add( -2 );
+                            continue;
+                        }
+                        
+                        else*/
+                        //{
+                            /*orgUnitInfo = "-1";
+                            orgUnitCount = 0;
+                            getOrgUnitInfo( o, dso );
+        
+                            if ( includeZeros == null )
+                            {
+                                query = "SELECT COUNT(*) FROM " + dataViewName + " WHERE dataelementid IN (" + deInfo
+                                    + ") AND sourceid IN (" + orgUnitInfo + ") AND periodid IN (" + periodInfo
+                                    + ") and value <> 0";
+                                
+                            }
+                            else
+                            {
+                                query = "SELECT COUNT(*) FROM " + dataViewName + " WHERE dataelementid IN (" + deInfo
+                                    + ") AND sourceid IN (" + orgUnitInfo + ") AND periodid IN (" + periodInfo + ")";
+                            }
+        
+                            System.out.println("Used Query is :::::::" + query );
+                            SqlRowSet sqlResultSet = jdbcTemplate.queryForRowSet( query );
+        
+                            if ( sqlResultSet.next() )
+                            {
+                                try
+                                {
+                                    //System.out.println( "Result is : \t" + sqlResultSet.getLong( 1 ) );
+                                    dataStatusPercentatge = ((double) sqlResultSet.getInt( 1 ) / (double) (dataSetMemberCount1 * orgUnitCount)) * 100.0;
+                                    
+                                }
+                                catch ( Exception e )
+                                {
+                                    dataStatusPercentatge = 0.0;
+                                }
+                            }
+                            else
+                                dataStatusPercentatge = 0.0;
+        
+                            if ( dataStatusPercentatge > 100.0 )
+                                dataStatusPercentatge = 100;
+        
+                            dataStatusPercentatge = Math.round( dataStatusPercentatge * Math.pow( 10, 0 ) ) / Math.pow( 10, 0 );
+                            */
+                            //dsResults.add( (int) dataStatusPercentatge );
+                            dsResults.add( -1 );
+                            //dataElementCount = sqlResultSet.getInt( 1 );
+                            deCounts.add( -1 );
+                            continue;
+                        //}
+                    }
 
                 orgUnitInfo = "" + o.getId();
 
@@ -603,6 +639,7 @@ public class GenerateDataStatusResultAction
                     {
                         dataElementCount = sqlResultSet.getInt( 1 );
                         dataStatusPercentatge = ((double) sqlResultSet.getInt( 1 ) / (double) dataSetMemberCount1) * 100.0;
+
                     }
                     catch ( Exception e )
                     {
@@ -616,18 +653,21 @@ public class GenerateDataStatusResultAction
                     dataElementCount = -1;
                 }
 
+                    
                 if ( dataStatusPercentatge > 100.0 )
                     dataStatusPercentatge = 100;
 
-                dataStatusPercentatge = Math.round( dataStatusPercentatge * Math.pow( 10, 0 ) ) / Math.pow( 10, 0 );
-
+                dataStatusPercentatge = Math.round( dataStatusPercentatge * Math.pow( 10, 0 ) ) / Math.pow( 10, 0 );                
+                
                 dsResults.add( (int) dataStatusPercentatge );
                 deCounts.add( dataElementCount );
-            }
-
+                //String dataEntryStatusValue =  dataEntryStatusService.getValue( selDataSet.getId(), o.getId(), p.getId() );
+         }
+            
             ouMapDataStatusResult.put( o, dsResults );
             ouMapDataElementCount.put( o, deCounts );
-        }
+     }
+
 
         // For Level Names
         String ouLevelNames[] = new String[organisationUnitService.getNumberOfOrganisationalLevels() + 1];
@@ -671,7 +711,7 @@ public class GenerateDataStatusResultAction
 
         // System.out.println("OrgUnit Size is :" + ouMapDataStatusResult.size()
         // );
-
+        System.out.println( "Data Entry Status  End Time  : " + new Date() );
         return SUCCESS;
     }
 

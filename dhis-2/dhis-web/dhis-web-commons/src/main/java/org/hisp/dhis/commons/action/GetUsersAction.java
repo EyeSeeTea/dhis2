@@ -37,7 +37,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.comparator.UserComparator;
 
-/*
+/**
  * @author mortenoh
  */
 public class GetUsersAction

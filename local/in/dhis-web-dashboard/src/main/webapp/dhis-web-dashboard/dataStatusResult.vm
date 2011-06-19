@@ -8,16 +8,22 @@
             var startDate = "$sDateLB";
             var endDate = "$eDateLB";
             var dsType = "$selectedButton";
+            var includeZeros = "$includeZeros";
 
             function getImmChildInfo( evt, dsId, selOrgUnit )
             {
+            	//alert("DataStatus : " + dsId + ":" + selOrgUnit );
                 immChildOption = "yes";
                 if( document.getElementById('includeZeros').checked )
                 {
+                    //alert("inside include zero : " + immChildOption );
+                    //var urlForImmChild = "dataStatusResult.action?immChildOption="+immChildOption+"&dsId="+dsId+"&sDateLB="+startDate+"&eDateLB="+endDate+"&ouId="+selOrgUnit+"&selectedButton="+dsType+"&includeZeros="+includeZeros;
+                    //alert( urlForImmChild );
                     evt.target.href = "dataStatusResult.action?immChildOption="+immChildOption+"&dsId="+dsId+"&sDateLB="+startDate+"&eDateLB="+endDate+"&ouId="+selOrgUnit+"&selectedButton="+dsType+"&includeZeros="+includeZeros;
                 }
                 else
                 {
+                    alert("inside include zero null");
                     evt.target.href = "dataStatusResult.action?immChildOption="+immChildOption+"&dsId="+dsId+"&sDateLB="+startDate+"&eDateLB="+endDate+"&ouId="+selOrgUnit+"&selectedButton="+dsType;
                 }
             }

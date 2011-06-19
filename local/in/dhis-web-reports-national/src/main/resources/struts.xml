@@ -59,7 +59,6 @@
             <result name="input" type="velocity-xml">/dhis-web-reports/responseReportManagementInput.vm</result>
             <param name="onExceptionReturn">plainTextError</param>
         </action>
-        
         <!-- Get Report details -->
         <action name="getReport"
             class="org.hisp.dhis.reports.reportmanagement.action.GetReportAction">
@@ -68,7 +67,7 @@
         </action>
         
         <!-- Report Association -->
-        <action name="defineReportAssociationsForm"
+<!--    <action name="defineReportAssociationsForm"
             class="org.hisp.dhis.reports.reportmanagement.action.GetNumberOfLevelsAction">
             <result name="success" type="chain">defineReportAssociationsFormChain</result>
         </action>
@@ -78,8 +77,14 @@
             <param name="menu">/dhis-web-reports/menu.vm</param>
             <param name="page">/dhis-web-reports/reportAssociations.vm</param>
             <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/reportManagementAssociations.js</param>
-        </action>
-        
+        </action>-->
+        <action name="defineReportAssociationsForm"
+            class="org.hisp.dhis.reports.reportmanagement.action.SetupAssociationsTreeAction">
+            <result name="success" type="velocity">/main.vm</result>
+            <param name="menu">/dhis-web-reports/menu.vm</param>
+            <param name="page">/dhis-web-reports/reportAssociations.vm</param>
+            <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/reportManagementAssociations.js</param>
+		</action>		
         <!-- Report Association save -->
         <action name="defineReportAssociations"
             class="org.hisp.dhis.reports.reportmanagement.action.DefineReportAssociationsAction">
@@ -87,33 +92,33 @@
         </action>
         
         <!-- Report Association Remove All -->
-        <action name="unselectAll"
+<!--        <action name="unselectAll"
             class="org.hisp.dhis.reports.reportmanagement.action.UnselectAllAction">
             <result name="success" type="chain">getNumberOfLevelsSelectLevelChain</result>
-        </action>
+        </action>-->
         
         <!-- Report Association select/unselect All at Level -->
-        <action name="selectLevel"
+<!--        <action name="selectLevel"
             class="org.hisp.dhis.reports.reportmanagement.action.SelectLevelAction">
             <result name="success" type="chain">getNumberOfLevelsSelectLevelChain</result>
         </action>
         <action name="unselectLevel"
             class="org.hisp.dhis.reports.reportmanagement.action.UnselectLevelAction">
             <result name="success" type="chain">getNumberOfLevelsSelectLevelChain</result>
-        </action>
+        </action>-->
         
         <!-- Report Association select/unselect All at Group -->
-        <action name="selectgroup"
+<!--        <action name="selectgroup"
             class="org.hisp.dhis.reports.reportmanagement.action.SelectGroupAction">
             <result name="success" type="chain">getNumberOfLevelsSelectLevelChain</result>
         </action>
         <action name="unselectgroup"
             class="org.hisp.dhis.reports.reportmanagement.action.UnselectGroupAction">
             <result name="success" type="chain">getNumberOfLevelsSelectLevelChain</result>
-        </action>
+        </action>-->
         
         <!-- Chain for Associations -->
-        <action name="getNumberOfLevelsSelectLevelChain"
+<!--        <action name="getNumberOfLevelsSelectLevelChain"
             class="org.hisp.dhis.reports.reportmanagement.action.GetNumberOfLevelsAction">
             <result name="success" type="chain">getReportSelectLevelChain</result>
         </action>
@@ -123,7 +128,7 @@
             <param name="menu">/dhis-web-reports/menu.vm</param>
             <param name="page">/dhis-web-reports/reportAssociations.vm</param>
             <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/reportManagementAssociations.js</param>
-        </action>
+        </action>-->
         
         <!-- Report Deletion -->
         <action name="delReport"
@@ -1141,6 +1146,26 @@
             </result>
         </action>
 -->     
-        
+       
+		<!-- Linelisting Web-Portal Reports -->
+		<action name="linelistingWebPortalReportAnalyser"
+			class="org.hisp.dhis.reports.linelisting.action.GenerateLinelistingWebPortalReportAnalyserFormAction">
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-reports/linelstingWebPortalReportAnalyserFront.vm</param>
+			<param name="menu">/dhis-web-reports/menuWithTreeForLineListingWebPortalReport.vm</param>
+			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,../dhis-web-commons/lists/lists.js,javascript/reportManagement.js,javascript/hashtable.js</param>
+			<param name="stylesheets">css/StylesForTags.css</param>
+			<param name="requiredAuthorities">F_REPORT_LINELIST</param>
+			<interceptor-ref name="organisationUnitTreeStack"/>
+		</action>
+		<action name="generateLinelistingWebPortalReport"
+			class="org.hisp.dhis.reports.linelisting.action.GenerateLinelistingWebPortalReportAnalyserResultAction">
+			<result name="success" type="stream">
+				<param name="contentType">application/vnd.ms-excel</param>
+				<param name="inputName">inputStream</param>
+				<param name="contentDisposition">filename="${fileName}"</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>		 
     </package>
 </struts>

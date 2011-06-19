@@ -41,8 +41,9 @@
 </div>
 #end
 
-<h3>$i18n.getString( "dashboard" ) 
-#if( $messageCount > 0 )<a href="message.action">$messageCount #if( $messageCount > 1 )$i18n.getString( "unread_messages" )#else$i18n.getString( "unread_message" )#end</a> #end</h3>
+<h3>$i18n.getString( "dashboard" )
+&#8226; <a href="showSendFeedback.action">$i18n.getString( "write_feedback" )</a>
+#if( $messageCount > 0 )&#8226; <a href="message.action">$messageCount #if( $messageCount > 1 )$i18n.getString( "unread_messages" )#else$i18n.getString( "unread_message" )#end</a> #end</h3>
 
 <table cellspacing="0" cellpadding="0" style="width:960px">
 <tr>
@@ -80,6 +81,6 @@
 </tr>
 </table>
 
-<div id="chartView" style="display: none; padding: 0; margin: 0;'">
-	<img id='chartImage' src=''></img>
+<div id="chartView" style="display:none; padding:0; margin:0;">
+	<img id="chartImage" src="" style="padding: 10px;"></img>
 </div>

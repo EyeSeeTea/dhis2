@@ -6,7 +6,7 @@
 * 
 {
   font-family: LiberationSansRegular, arial;
-  line-height: 125%;
+  line-height: 140%;
 }
 
 html,body 
@@ -47,16 +47,19 @@ a:visited
   color:#3b73b8;
 }
 
-.ui-widget {
+.ui-widget 
+{
 	font-family: LiberationSansRegular, arial, sans-serif !important;
 	font-size: 11px;
 }
 
-.ui-widget .ui-widget {
+.ui-widget .ui-widget 
+{
 	font-size: 11px;
 }
 
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button 
+{
 	font-family: LiberationSansRegular, arial, sans-serif !important;
 	font-size: 11px;
 }
@@ -436,7 +439,7 @@ div#menuDropDown3
   background-color: #dfe9f4;
 }
 
-.bold
+.bold, .bold td
 {
   font-family: LiberationSansBold, arial;
 }

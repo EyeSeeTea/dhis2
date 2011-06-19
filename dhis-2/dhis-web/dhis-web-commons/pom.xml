@@ -17,11 +17,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
+		<version>1.6</version>
         <executions>
           <execution>
             <phase>generate-resources</phase>
             <configuration>
-              <tasks>
+              <target>
                 <tstamp>
                   <format property="now" pattern="yyyy-MM-dd HH:mm:ss"/>
                 </tstamp>
@@ -31,7 +32,7 @@
                 </exec>
                 <echo file="${project.build.outputDirectory}/build.properties"
                   message="build.version = ${project.version}&#10;build.time = ${now}&#10;build.revision = ${revision}&#10;"/>
-              </tasks>
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>
@@ -116,10 +117,6 @@
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-email</artifactId>
-    </dependency> 
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
