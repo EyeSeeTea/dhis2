@@ -1145,7 +1145,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
                         scope.stores.infrastructuralDataElementMapValue.load();
                     }
                     
-                    scope.featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 178 + 15 + 5), Ext.getCmp('center').y + 41);
+                    scope.featureInfoWindow.setPagePosition(Ext.getCmp('east').x - (scope.featureInfoWindow.width + 178 + 15), Ext.getCmp('center').y + 41);
                     scope.featureInfoWindow.show();
                 }
                 

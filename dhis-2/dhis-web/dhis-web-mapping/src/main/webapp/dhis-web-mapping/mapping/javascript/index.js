@@ -1952,7 +1952,7 @@
                             }
                         }
                     });
-                    locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
+                    locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - (locateFeatureWindow.width + 15), Ext.getCmp('center').y + 41);
                     locateFeatureWindow.show();
                 }
                 else {
@@ -2076,8 +2076,7 @@
                                 }
                             ]
                         });
-                        
-                        item.labelWindow.setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
+                        item.labelWindow.setPagePosition(Ext.getCmp('east').x - (item.labelWindow.width + 15), Ext.getCmp('center').y + 41);                        
                         item.labelWindow.show();
                     }
                 }
@@ -2153,7 +2152,7 @@
                 text: 'Overlays',
                 iconCls: 'icon-overlay',
                 handler: function() {
-                    Ext.getCmp('overlays_w').setPagePosition(Ext.getCmp('east').x - (G.conf.window_width + 15 + 5), Ext.getCmp('center').y + 41);
+                    Ext.getCmp('overlays_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
                     Ext.getCmp('overlays_w').show();
                 }
             }
@@ -2478,7 +2477,7 @@
                         }
                     });
                 }
-                control.window.setPagePosition(Ext.getCmp('east').x - (control.window.width + 15 + 5), Ext.getCmp('center').y + 41);
+                control.window.setPagePosition(Ext.getCmp('east').x - (control.window.width + 15), Ext.getCmp('center').y + 41);
                 control.window.show();
                 document.getElementById('measureDistanceDiv').innerHTML = '0 km';                
                 control.setImmediate(true);
@@ -2684,6 +2683,8 @@
                 });
                 
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
+                
+                G.vars.map.getLayersByName('Google Normal')[0].setVisibility(false);
             }
         }
     });
