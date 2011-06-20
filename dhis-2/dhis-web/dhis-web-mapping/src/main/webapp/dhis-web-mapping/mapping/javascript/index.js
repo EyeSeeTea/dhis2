@@ -2682,6 +2682,18 @@
                     e.layer.svgId = svg[svg.length-1].id;
                 });
                 
+                G.vars.map.events.register('mousemove', null, function(e) {
+                    G.vars.mouseMove.x = e.clientX;
+                    G.vars.mouseMove.y = e.clientY;
+                });
+                
+                G.vars.map.events.register('click', null, function(e) {
+                    if (G.vars.setPointCoordinate) {
+                        var mp = document.getElementById('mouseposition');
+                        alert(mp.childNodes[1].data + ', ' + mp.childNodes[4].data);
+                    }
+                });
+                
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
                 
                 G.vars.map.getLayersByName('Google Normal')[0].setVisibility(false);

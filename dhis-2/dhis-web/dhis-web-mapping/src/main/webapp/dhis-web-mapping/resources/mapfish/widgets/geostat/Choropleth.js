@@ -1061,7 +1061,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     createSelectFeatures: function() {
         var scope = this;
         
-        var onHoverSelect = function onHoverSelect(feature) {  
+        var onHoverSelect = function onHoverSelect(feature) {
             if (feature.attributes.name) {
                 document.getElementById('featuredatatext').innerHTML =
                     '<div style="' + G.conf.feature_data_style_name + '">' + feature.attributes.name + '</div>' +
@@ -1088,145 +1088,128 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                     scope.featureOptions.menu.destroy();
                 }
                 
-                scope.featureOptions.menu = new Ext.Window({
-                    title: '<span class="">' + feature.attributes.name + '</span>',
-                    width: 170,
-                    items: [
-                        {
-                            xtype: 'menu',
-                            floating: false,
-                            showInfo: function() {
-                                if (scope.featureOptions.info) {
-                                    scope.featureOptions.info.destroy();
-                                }
-                                
-                                scope.featureOptions.info = new Ext.Window({
-                                    title: '<span class="window-information-title">' + feature.attributes.name + '</span>',
-                                    layout: 'table',
-                                    width: G.conf.window_width + 178,
-                                    height: G.util.getMultiSelectHeight() + 100,
-                                    bodyStyle: 'background-color:#fff',
-                                    defaults: {
-                                        bodyStyle: 'vertical-align:top',
-                                        labelSeparator: G.conf.labelseparator,
-                                        emptyText: G.conf.emptytext
-                                    },
-                                    layoutConfig: {
-                                        columns: 2
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'panel',
-                                            layout: 'anchor',
-                                            bodyStyle: 'padding:8px 4px 8px 8px',
-                                            width: 160,
-                                            items: [
-                                                {html: '<div class="window-info">Type<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
-                                                {html: '<div class="window-info">Code<p style="font-weight:normal">' + feature.attributes.code + '</p></div>'},
-                                                {html: '<div class="window-info">Address<p style="font-weight:normal">' + feature.attributes.ad + '</p></div>'},
-                                                {html: '<div class="window-info">Contact person<p style="font-weight:normal">' + feature.attributes.cp + '</p></div>'},
-                                                {html: '<div class="window-info">Email<p style="font-weight:normal">' + feature.attributes.em + '</p></div>'},
-                                                {html: '<div class="window-info">Phone number<p style="font-weight:normal">' + feature.attributes.pn + '</p></div>'}
-                                            ]
-                                        },
-                                        {
-                                            xtype: 'form',
-                                            bodyStyle: 'padding:8px 8px 8px 4px',
-                                            width: G.conf.window_width + 20,
-                                            labelWidth: G.conf.label_width,
-                                            items: [
-                                                {html: '<div class="window-info">Infrastructural data</div>'},
-                                                {
-                                                    xtype: 'combo',
-                                                    name: 'period',
-                                                    fieldLabel: G.i18n.period,
-                                                    typeAhead: true,
-                                                    editable: false,
-                                                    valueField: 'id',
-                                                    displayField: 'name',
-                                                    mode: 'remote',
-                                                    forceSelection: true,
-                                                    triggerAction: 'all',
-                                                    selectOnFocus: true,
-                                                    width: G.conf.combo_width,
-                                                    store: G.stores.infrastructuralPeriodsByType,
-                                                    keepPosition: false,
-                                                    listeners: {
-                                                        'select': function(cb) {
-                                                            scope.infrastructuralPeriod = cb.getValue();
-                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                                            scope.stores.infrastructuralDataElementMapValue.load();
-                                                        }
-                                                    }
-                                                },
-                                                {html: '<div style="padding:4px 0 0 0"></div>'},
-                                                {
-                                                    xtype: 'grid',
-                                                    height: G.util.getMultiSelectHeight(),
-                                                    width: 242,
-                                                    cm: new Ext.grid.ColumnModel({
-                                                        columns: [
-                                                            {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
-                                                            {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
-                                                        ]
-                                                    }),
-                                                    disableSelection: true,
-                                                    viewConfig: {forceFit: true},
-                                                    store: scope.stores.infrastructuralDataElementMapValue
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                });
-            
-                                if (scope.infrastructuralPeriod) {
-                                    scope.featureOptions.info.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
-                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
-                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                    scope.stores.infrastructuralDataElementMapValue.load();
-                                }
-                                scope.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
-                                scope.featureOptions.info.show();
-                                scope.featureOptions.menu.destroy();
+                scope.featureOptions.menu = new Ext.menu.Menu({
+                    showInfo: function() {
+                        if (scope.featureOptions.info) {
+                            scope.featureOptions.info.destroy();
+                        }
+                        
+                        scope.featureOptions.info = new Ext.Window({
+                            title: '<span class="window-information-title">' + feature.attributes.name + '</span>',
+                            layout: 'table',
+                            width: G.conf.window_width + 178,
+                            height: G.util.getMultiSelectHeight() + 100,
+                            bodyStyle: 'background-color:#fff',
+                            defaults: {
+                                bodyStyle: 'vertical-align:top',
+                                labelSeparator: G.conf.labelseparator,
+                                emptyText: G.conf.emptytext
+                            },
+                            layoutConfig: {
+                                columns: 2
                             },
                             items: [
                                 {
-                                    text: 'Show information sheet',
-                                    iconCls: 'menu-layeroptions-opacity',
-                                    handler: function(item) {
-                                        if (G.stores.infrastructuralPeriodsByType.isLoaded) {
-                                            item.parentMenu.showInfo();
-                                        }
-                                        else {
-                                            G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
-                                            G.stores.infrastructuralPeriodsByType.load({callback: function() {
-                                                item.parentMenu.showInfo();
-                                            }});
-                                        }
-                                    }
+                                    xtype: 'panel',
+                                    layout: 'anchor',
+                                    bodyStyle: 'padding:8px 4px 8px 8px',
+                                    width: 160,
+                                    items: [
+                                        {html: '<div class="window-info">Type<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
+                                        {html: '<div class="window-info">Code<p style="font-weight:normal">' + feature.attributes.code + '</p></div>'},
+                                        {html: '<div class="window-info">Address<p style="font-weight:normal">' + feature.attributes.ad + '</p></div>'},
+                                        {html: '<div class="window-info">Contact person<p style="font-weight:normal">' + feature.attributes.cp + '</p></div>'},
+                                        {html: '<div class="window-info">Email<p style="font-weight:normal">' + feature.attributes.em + '</p></div>'},
+                                        {html: '<div class="window-info">Phone number<p style="font-weight:normal">' + feature.attributes.pn + '</p></div>'}
+                                    ]
                                 },
                                 {
-                                    text: 'Set point coordinate',
-                                    iconCls: 'menu-layeroptions-opacity',
-                                    handler: function(item) {
-                                        if (G.stores.infrastructuralPeriodsByType.isLoaded) {
-                                            item.parentMenu.showInfo();
+                                    xtype: 'form',
+                                    bodyStyle: 'padding:8px 8px 8px 4px',
+                                    width: G.conf.window_width + 20,
+                                    labelWidth: G.conf.label_width,
+                                    items: [
+                                        {html: '<div class="window-info">Infrastructural data</div>'},
+                                        {
+                                            xtype: 'combo',
+                                            name: 'period',
+                                            fieldLabel: G.i18n.period,
+                                            typeAhead: true,
+                                            editable: false,
+                                            valueField: 'id',
+                                            displayField: 'name',
+                                            mode: 'remote',
+                                            forceSelection: true,
+                                            triggerAction: 'all',
+                                            selectOnFocus: true,
+                                            width: G.conf.combo_width,
+                                            store: G.stores.infrastructuralPeriodsByType,
+                                            keepPosition: false,
+                                            listeners: {
+                                                'select': function(cb) {
+                                                    scope.infrastructuralPeriod = cb.getValue();
+                                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
+                                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                                                    scope.stores.infrastructuralDataElementMapValue.load();
+                                                }
+                                            }
+                                        },
+                                        {html: '<div style="padding:4px 0 0 0"></div>'},
+                                        {
+                                            xtype: 'grid',
+                                            height: G.util.getMultiSelectHeight(),
+                                            width: 242,
+                                            cm: new Ext.grid.ColumnModel({
+                                                columns: [
+                                                    {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
+                                                    {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
+                                                ]
+                                            }),
+                                            disableSelection: true,
+                                            viewConfig: {forceFit: true},
+                                            store: scope.stores.infrastructuralDataElementMapValue
                                         }
-                                        else {
-                                            G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
-                                            G.stores.infrastructuralPeriodsByType.load({callback: function() {
-                                                item.parentMenu.showInfo();
-                                            }});
-                                        }
-                                    }
+                                    ]
                                 }
                             ]
+                        });
+    
+                        if (scope.infrastructuralPeriod) {
+                            scope.featureOptions.info.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
+                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
+                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                            scope.stores.infrastructuralDataElementMapValue.load();
+                        }
+                        scope.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
+                        scope.featureOptions.info.show();
+                        scope.featureOptions.menu.destroy();
+                    },
+                    items: [
+                        {
+                            text: 'Show information sheet',
+                            iconCls: 'menu-layeroptions-opacity',
+                            handler: function(item) {
+                                if (G.stores.infrastructuralPeriodsByType.isLoaded) {
+                                    item.parentMenu.showInfo();
+                                }
+                                else {
+                                    G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
+                                    G.stores.infrastructuralPeriodsByType.load({callback: function() {
+                                        item.parentMenu.showInfo();
+                                    }});
+                                }
+                            }
+                        },
+                        {
+                            text: 'Set point coordinate',
+                            iconCls: 'menu-layeroptions-opacity',
+                            handler: function(item) {
+                                G.vars.setPointCoordinate = G.vars.setPointCoordinate ? false : true;
+                            }
                         }
                     ]
                 });
-                scope.featureOptions.menu.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.menu.width + 15), Ext.getCmp('center').y + 41);
-                scope.featureOptions.menu.show();
+                scope.featureOptions.menu.showAt([G.vars.mouseMove.x, G.vars.mouseMove.y]);
             }
             else {
                 if (feature.attributes.hasChildrenWithCoordinates) {

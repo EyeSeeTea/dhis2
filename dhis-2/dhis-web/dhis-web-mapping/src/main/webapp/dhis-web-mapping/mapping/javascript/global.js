@@ -477,7 +477,11 @@ G.vars = {
         isSymbol: function() {
             return this.value === G.conf.thematicMap3;
         }
-    }
+    },
+    
+    setPointCoordinate: false,
+    
+    mouseMove: {}
 };
 
 G.user = {
