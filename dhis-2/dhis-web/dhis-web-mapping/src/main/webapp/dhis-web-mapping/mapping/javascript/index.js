@@ -2691,6 +2691,7 @@
                     if (G.vars.relocate.active) {
                         var mp = document.getElementById('mouseposition');
                         var coordinates = '[' + mp.childNodes[1].data + ',' + mp.childNodes[4].data + ']';
+                        var center = Ext.getCmp('center').x;
 	
                         Ext.Ajax.request({
                             url: G.conf.path_mapping + 'updateOrganisationUnitCoordinates' + G.conf.type,
@@ -2699,7 +2700,8 @@
                             success: function(r) {
                                 G.vars.relocate.active = false;
                                 G.vars.relocate.widget.featureOptions.coordinate.destroy();
-                                
+                                                                
+                                G.vars.relocate.feature.move({x: parseFloat(e.clientX - center), y: parseFloat(e.clientY - 28)});
                                 document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
                                 Ext.message.msg(true, '<span class="x-msg-hl">' + G.vars.relocate.feature.attributes.name + 
                                     ' </span>relocated to ' +
