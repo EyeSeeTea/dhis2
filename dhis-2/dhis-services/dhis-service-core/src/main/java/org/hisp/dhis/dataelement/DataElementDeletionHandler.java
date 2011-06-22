@@ -95,4 +95,16 @@ public class DataElementDeletionHandler
             }
         }
     }
+
+    @Override
+    public void deleteDataElementGroup( DataElementGroup group )
+    {
+        for ( DataElement dataElement : dataElementService.getAllDataElements() )
+        {
+            if ( dataElement.getGroups().remove( dataElement ) )
+            {
+                dataElementService.updateDataElement( dataElement );
+            }
+        }
+    }
 }
