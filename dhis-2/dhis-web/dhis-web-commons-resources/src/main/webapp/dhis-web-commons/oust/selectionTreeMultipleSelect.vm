@@ -22,14 +22,14 @@ function selectedOrganisationUnitXML__( xml )
 
 	jQuery.each( jQuery( xml ).find( 'unitId' ), function( i, item ) {
 		id = item.firstChild.nodeValue;
-		selectedOrganisationUnitList__.append( '<option value="' + id + ' selected="selected">' + id + '</option>' );
+		selectedOrganisationUnitList__.append( '<option value="' + id + '" selected="selected">' + id + '</option>' );
 	});
 	#end
 	selectionTree.buildSelectionTree();
 }
 </script>
 
-<table cellspacing=0 width="495px">
+<table cellspacing=0 width="535px">
 	<thead>
 		<tr>
 			<th colspan="2">$i18n.getString( "organisation_unit_selection_tree" )			

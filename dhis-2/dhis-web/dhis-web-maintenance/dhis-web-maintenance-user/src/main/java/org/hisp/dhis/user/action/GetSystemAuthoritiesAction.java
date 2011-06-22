@@ -1,4 +1,4 @@
-package org.hisp.dhis.commons.action;
+package org.hisp.dhis.user.action;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -32,46 +32,34 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.user.comparator.UserRoleComparator;
+import org.hisp.dhis.security.authority.SystemAuthoritiesProvider;
 
 /**
  * @author mortenoh
  */
-public class GetUserRolesAction
-    extends ActionPagingSupport<UserAuthorityGroup>
+public class GetSystemAuthoritiesAction
+    extends ActionPagingSupport<String>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserService userService;
+    private SystemAuthoritiesProvider authoritiesProvider;
 
-    public void setUserService( UserService userService )
+    public void setAuthoritiesProvider( SystemAuthoritiesProvider authoritiesProvider )
     {
-        this.userService = userService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
+        this.authoritiesProvider = authoritiesProvider;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<UserAuthorityGroup> userRoles;
+    private List<String> systemAuthorities;
 
-    public List<UserAuthorityGroup> getUserRoles()
+    public List<String> getSystemAuthorities()
     {
-        return this.userRoles;
+        return systemAuthorities;
     }
 
     // -------------------------------------------------------------------------
@@ -81,20 +69,17 @@ public class GetUserRolesAction
     public String execute()
         throws Exception
     {
-        userRoles = new ArrayList<UserAuthorityGroup>( userService.getAllUserAuthorityGroups() );
+        systemAuthorities = new ArrayList<String>( authoritiesProvider.getSystemAuthorities() );
 
-        FilterUtils.filter( userRoles, new UserAuthorityGroupCanIssueFilter( currentUserService.getCurrentUser() ) );
-
-        Collections.sort( userRoles, new UserRoleComparator() );
+        Collections.sort( systemAuthorities );
 
         if ( usePaging )
         {
-            this.paging = createPaging( userRoles.size() );
+            this.paging = createPaging( systemAuthorities.size() );
 
-            userRoles = userRoles.subList( paging.getStartPos(), paging.getEndPos() );
+            systemAuthorities = systemAuthorities.subList( paging.getStartPos(), paging.getEndPos() );
         }
 
         return SUCCESS;
     }
-
 }

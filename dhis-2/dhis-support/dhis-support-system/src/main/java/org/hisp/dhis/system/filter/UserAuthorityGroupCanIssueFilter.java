@@ -1,3 +1,5 @@
+package org.hisp.dhis.system.filter;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -25,22 +27,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dhis2.util.namespace( 'dhis2.array' );
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserCredentials;
 
 /**
- * Remove part of an array.
- * 
- * @param array {Array} Array to remove from
- * @param from {Number} Start index
- * @param to {Number} End index
- * 
- * @returns {Array} Array without the removed parts
+ * @author Lars Helge Overland
  */
-dhis2.array.remove = function( array, from, to )
+public class UserAuthorityGroupCanIssueFilter
+    implements Filter<UserAuthorityGroup>
 {
-    // Array Remove - By John Resig (MIT Licensed)
-    var rest = array.slice( ( to || from ) + 1 || array.length );
-    array.length = from < 0 ? array.length + from : from;
+    private UserCredentials userCredentials;
+    
+    protected UserAuthorityGroupCanIssueFilter()
+    {
+    }
+    
+    public UserAuthorityGroupCanIssueFilter( User user )
+    {
+        if ( user != null && user.getUserCredentials() != null )
+        {
+            this.userCredentials = user.getUserCredentials();
+        }
+    }
 
-    return array.push.apply( array, rest );
-};
+    @Override
+    public boolean retain( UserAuthorityGroup group )
+    {
+        return userCredentials != null && userCredentials.canIssue( group );
+    }
+}

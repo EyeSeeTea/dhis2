@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
+/**
  * @author mortenoh
  */
 
@@ -89,12 +89,9 @@ function dhisAjaxSelect_filter_on_kv($target, key, value)
 }
 
 /**
- * @param $target
- *            jQuery object to work on
- * @param key
- *            data-entry key, $target.data(key)
- * @param value
- *            value to compare to
+ * @param $target jQuery object to work on
+ * @param key data-entry key, $target.data(key)
+ * @param value value to compare to
  * @returns {Boolean} true or false after comparing $target.data(key) with value
  */
 function compare_data_with_kv($target, key, value)
@@ -126,8 +123,13 @@ function dhisAjaxSelect_availableList_dblclick(sourceId, targetId)
     {
         var jqAvailableList = $("#" + sourceId);
         var jqSelectedList = $("#" + targetId);
+        var settings = jqAvailableList.data("settings");
 
-        dhis2.select.moveSorted(jqSelectedList, jqAvailableList.find(":selected"));
+        if(settings.sortSelected) {
+            dhis2.select.moveSorted(jqSelectedList, jqAvailableList.find(":selected"));
+        } else {
+            dhis2.select.move(jqSelectedList, jqAvailableList.find(":selected"));
+        }
     }
 }
 
@@ -137,8 +139,15 @@ function dhisAjaxSelect_selectedList_dblclick(sourceId, targetId)
     {
         var jqAvailableList = $("#" + targetId);
         var jqSelectedList = $("#" + sourceId);
+        var settings = jqAvailableList.data("settings");
 
-        dhis2.select.moveSorted(jqAvailableList, jqSelectedList.find(":selected"));
+        var $children = jqSelectedList.find(":selected");
+
+        if(!settings.sortSelected) {
+            $children = dhis2.select.sortNC( $children );
+        }
+
+        dhis2.select.moveSorted(jqAvailableList, $children);
     }
 }
 
@@ -197,7 +206,11 @@ function dhisAjaxSelect_selectedList_dblclick(sourceId, targetId)
         },
         init : function(options)
         {
-            var settings = {}
+            var settings = {
+                sortAvailable: true,
+                sortSelected: true
+            };
+
             var params = {}
 
             $.extend(settings, options);

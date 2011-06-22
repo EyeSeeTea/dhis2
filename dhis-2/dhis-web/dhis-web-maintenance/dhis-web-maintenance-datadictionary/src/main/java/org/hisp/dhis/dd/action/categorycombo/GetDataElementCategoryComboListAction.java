@@ -112,7 +112,7 @@ public class GetDataElementCategoryComboListAction
             
             dataElementCategoryCombos = new ArrayList<DataElementCategoryCombo>( dataElementCategoryService.getDataElementCategoryCombosBetween( paging.getStartPos(), paging.getPageSize() ) );
         }
-        
+
         Collections.sort( dataElementCategoryCombos, new DataElementCategoryComboNameComparator() );
         
         return SUCCESS;

@@ -327,6 +327,7 @@
   <bean id="org.hisp.dhis.commons.action.GetUserRolesAction" class="org.hisp.dhis.commons.action.GetUserRolesAction"
     scope="prototype">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
   </bean>
 
   <bean id="org.hisp.dhis.commons.action.GetUsersAction" class="org.hisp.dhis.commons.action.GetUsersAction" scope="prototype">
@@ -394,6 +395,17 @@
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.commons.action.GetSectionDataElementsAction" class="org.hisp.dhis.commons.action.GetSectionDataElementsAction"
+    scope="prototype">
+    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.commons.action.GetDataElementCategoriesAction" class="org.hisp.dhis.commons.action.GetDataElementCategoriesAction"
+    scope="prototype">
+    <property name="dataElementCategoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.commons.action.GetDataSetAction" class="org.hisp.dhis.commons.action.GetDataSetAction"

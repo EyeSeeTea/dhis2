@@ -31,47 +31,37 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.comparator.DataElementCategoryNameComparator;
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.user.comparator.UserRoleComparator;
 
 /**
  * @author mortenoh
  */
-public class GetUserRolesAction
-    extends ActionPagingSupport<UserAuthorityGroup>
+public class GetDataElementCategoriesAction
+    extends ActionPagingSupport<DataElementCategory>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserService userService;
+    private DataElementCategoryService dataElementCategoryService;
 
-    public void setUserService( UserService userService )
+    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
     {
-        this.userService = userService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
+        this.dataElementCategoryService = dataElementCategoryService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<UserAuthorityGroup> userRoles;
+    private List<DataElementCategory> dataElementCategories;
 
-    public List<UserAuthorityGroup> getUserRoles()
+    public List<DataElementCategory> getDataElementCategories()
     {
-        return this.userRoles;
+        return dataElementCategories;
     }
 
     // -------------------------------------------------------------------------
@@ -81,17 +71,16 @@ public class GetUserRolesAction
     public String execute()
         throws Exception
     {
-        userRoles = new ArrayList<UserAuthorityGroup>( userService.getAllUserAuthorityGroups() );
+        dataElementCategories = new ArrayList<DataElementCategory>(
+            dataElementCategoryService.getAllDataElementCategories() );
 
-        FilterUtils.filter( userRoles, new UserAuthorityGroupCanIssueFilter( currentUserService.getCurrentUser() ) );
-
-        Collections.sort( userRoles, new UserRoleComparator() );
+        Collections.sort( dataElementCategories, new DataElementCategoryNameComparator() );
 
         if ( usePaging )
         {
-            this.paging = createPaging( userRoles.size() );
+            this.paging = createPaging( dataElementCategories.size() );
 
-            userRoles = userRoles.subList( paging.getStartPos(), paging.getEndPos() );
+            dataElementCategories = dataElementCategories.subList( paging.getStartPos(), paging.getEndPos() );
         }
 
         return SUCCESS;
