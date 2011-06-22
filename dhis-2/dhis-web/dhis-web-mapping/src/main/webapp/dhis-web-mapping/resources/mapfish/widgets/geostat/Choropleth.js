@@ -1184,10 +1184,53 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                         scope.featureOptions.info.show();
                         scope.featureOptions.menu.destroy();
                     },
+                    showRelocate: function() {
+                        if (scope.featureOptions.coordinate) {
+                            scope.featureOptions.coordinate.destroy();
+                        }
+                        
+                        scope.featureOptions.coordinate = new Ext.Window({
+                            title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
+                            layout: 'fit',
+                            width: G.conf.window_width,
+                            height: 95,
+                            items: [
+                                {
+                                    xtype: 'panel',
+                                    bodyStyle: 'padding:8px',
+                                    items: [
+                                        {html: 'Please select the new location on the map..'}
+                                    ]
+                                }
+                            ],
+                            bbar: [
+                                '->',
+                                {
+                                    xtype: 'button',
+                                    iconCls: 'icon-cancel',
+                                    hideLabel: true,
+                                    text: G.i18n.cancel,
+                                    handler: function() {
+                                        G.vars.relocate.active = false;
+                                        scope.featureOptions.coordinate.destroy();
+                                        document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
+                                    }
+                                }
+                            ],
+                            listeners: {
+                                'close': function() {
+                                    G.vars.relocate.active = false;
+                                    document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
+                                }
+                            }
+                        });
+                        scope.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
+                        scope.featureOptions.coordinate.show();                        
+                    },
                     items: [
                         {
                             text: 'Show information sheet',
-                            iconCls: 'menu-layeroptions-opacity',
+                            iconCls: 'menu-featureoptions-info',
                             handler: function(item) {
                                 if (G.stores.infrastructuralPeriodsByType.isLoaded) {
                                     item.parentMenu.showInfo();
@@ -1201,10 +1244,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
                             }
                         },
                         {
-                            text: 'Set point coordinate',
-                            iconCls: 'menu-layeroptions-opacity',
+                            text: 'Relocate',
+                            iconCls: 'menu-featureoptions-relocate',
                             handler: function(item) {
-                                G.vars.setPointCoordinate = G.vars.setPointCoordinate ? false : true;
+                                G.vars.relocate.active = true;
+                                G.vars.relocate.widget = scope;
+                                G.vars.relocate.feature = feature;
+                                document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
+                                item.parentMenu.showRelocate();
                             }
                         }
                     ]

@@ -479,7 +479,7 @@ G.vars = {
         }
     },
     
-    setPointCoordinate: false,
+    relocate: {},
     
     mouseMove: {}
 };

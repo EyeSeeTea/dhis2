@@ -2174,7 +2174,7 @@
                 qtip: 'Refresh layer',
                 handler: function() {
                     choropleth.updateValues = true;
-                    choropleth.classify();
+                    choropleth.loadGeoJson();
                 }
             },
             {
@@ -2209,7 +2209,7 @@
                 qtip: 'Refresh layer',
                 handler: function() {
                     point.updateValues = true;
-                    point.classify();
+                    point.loadGeoJson();
                 }
             },
             {
@@ -2243,7 +2243,7 @@
                 id: 'refresh',
                 qtip: 'Refresh layer',
                 handler: function() {
-                    symbol.classify();
+                    symbol.loadGeoJson();
                 }
             },
             {
@@ -2688,15 +2688,29 @@
                 });
                 
                 G.vars.map.events.register('click', null, function(e) {
-                    if (G.vars.setPointCoordinate) {
+                    if (G.vars.relocate.active) {
                         var mp = document.getElementById('mouseposition');
-                        alert(mp.childNodes[1].data + ', ' + mp.childNodes[4].data);
+                        var coordinates = '[' + mp.childNodes[1].data + ',' + mp.childNodes[4].data + ']';
+	
+                        Ext.Ajax.request({
+                            url: G.conf.path_mapping + 'updateOrganisationUnitCoordinates' + G.conf.type,
+                            method: 'POST',
+                            params: {id: G.vars.relocate.feature.attributes.id, coordinates: coordinates},
+                            success: function(r) {
+                                G.vars.relocate.active = false;
+                                G.vars.relocate.widget.featureOptions.coordinate.destroy();
+                                
+                                document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
+                                Ext.message.msg(true, '<span class="x-msg-hl">' + G.vars.relocate.feature.attributes.name + 
+                                    ' </span>relocated to ' +
+                                    '[<span class="x-msg-hl">' + mp.childNodes[1].data + '</span>,' + 
+                                    '<span class="x-msg-hl">' + mp.childNodes[4].data + '</span>]');
+                            }
+                        });
                     }
                 });
                 
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
-                
-                G.vars.map.getLayersByName('Google Normal')[0].setVisibility(false);
             }
         }
     });
