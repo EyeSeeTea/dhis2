@@ -273,6 +273,12 @@ a.x-menu-item-custom {
     cursor: default;
 }
 
+/* Ext Item */
+.x-item-disabled {
+  cursor:default;
+  opacity:1;
+}
+
 /* Ext Loading Mask */
 .x-mask-loading2 div  {
 	padding:5px 11px 6px 32px;
