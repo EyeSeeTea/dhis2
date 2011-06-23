@@ -104,7 +104,7 @@
     <tr>
         <td align="right">
             <input type="submit" name="save" value="$i18n.getString( 'save' )" style="width:100px"/>
-            <input type="button" name="cancel" value="$i18n.getString( 'cancel' )" style="width:100px" onclick="window.location='programStage.action?id=$!programStageId'">            
+            <input type="button" name="cancel" value="$i18n.getString( 'cancel' )" style="width:100px" onclick="window.location='programStage.action?id=$!programStage.program.id'">            
 			#if( $!dataEntryForm )
 			<input type="button" name="delete" value="$i18n.getString( 'delete' )" style="width:100px" onclick="deleteDataEntryForm( $programStage.id )" />
 			#end
@@ -138,12 +138,12 @@
 		</tr>
 		<tr>
 			<td>
-				<b>$i18n.getString( "view_as" )</b><br>
+				<!-- <b>$i18n.getString( "view_as" )</b><br>
 				<select name="viewBySelector" id="viewBySelector" style="width:150px">		
 					<option value="deid">$i18n.getString( "id" )</option>
 					<option value="dename">$i18n.getString( "name" )</option>
 					<option value="deshortname" selected>$i18n.getString( "short_name" )</option> 	
-				</select>
+				</select> -->
 				<input type="button" value="Insert" id="insert" name="insert" onclick="insertDataElement( '#dataElementSelection', '$programStage.id')"/>
 			</td>
 			<td>
@@ -180,12 +180,12 @@
 		</tr>
 		<tr>
 			<td>
-				<b>$i18n.getString( "view_as" )</b><br>
+				<!-- <b>$i18n.getString( "view_as" )</b><br>
 				<select name="viewBySelector" id="viewBySelector" style="width:150px">		
 					<option value="deid">$i18n.getString( "id" )</option>
 					<option value="dename">$i18n.getString( "name" )</option>
 					<option value="deshortname" selected>$i18n.getString( "short_name" )</option> 	
-				</select>
+				</select> -->
 				<input type="button" value="Insert" id="insert" name="insert" onclick="insertDataElement( '#otherProgramStageDataElements', byId('programStageIds').value )"/>
 			</td>
 			<td>
