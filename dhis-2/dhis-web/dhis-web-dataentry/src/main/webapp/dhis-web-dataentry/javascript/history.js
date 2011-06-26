@@ -1,4 +1,8 @@
 
+var COLOR_GREEN = '#b9ffb9';
+var COLOR_YELLOW = '#fffe8c';
+var COLOR_RED = '#ff8a8a';
+
 // -----------------------------------------------------------------------------
 // Comments
 // -----------------------------------------------------------------------------
@@ -44,7 +48,7 @@ function commentLeft()
     }
 }
 
-function saveComment( commentValue )
+function saveComment2( commentValue )
 {
     var field = document.getElementById( 'value[' + currentDataElementId + ':' + currentOptionComboId + '].comment' );                
     var select = document.getElementById( 'value[' + currentDataElementId + ':' + currentOptionComboId + '].comments' );
@@ -56,11 +60,17 @@ function saveComment( commentValue )
     commentSaver.save();
 }
 
-function CommentSaver( dataElementId_, optionComboId_, organisationUnitId_, value_ )
+function saveComment()
 {
-    var SUCCESS = '#ccffcc';
-    var ERROR = '#ccccff';
+	var commentValue = $( '#commentTextArea' ).val();
+	
+	var commentSaver = new CommentSaver( currentDataElementId, currentOptionComboId, currentOrganisationUnitId, commentValue );
+	
+	commentSaver.save();
+}
 
+function CommentSaver( dataElementId_, optionComboId_, organisationUnitId_, value_ )
+{	
     var dataElementId = dataElementId_;
     var optionComboId = optionComboId_;
     var organisationUnitId = organisationUnitId_;
@@ -68,6 +78,8 @@ function CommentSaver( dataElementId_, optionComboId_, organisationUnitId_, valu
     
     this.save = function()
     {
+    	markComment( COLOR_YELLOW );
+    	
         var url = 'saveComment.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' +
                 dataElementId + '&optionComboId=' + optionComboId + '&comment=' + value;
         
@@ -80,28 +92,24 @@ function CommentSaver( dataElementId_, optionComboId_, organisationUnitId_, valu
     	
         if ( code == 0 )
         {
-            markComment( SUCCESS );           
+            markComment( COLOR_GREEN );           
         }
         else
         {
-            markComment( ERROR );
+            markComment( COLOR_RED );
             window.alert( i18n_saving_comment_failed_status_code + '\n\n' + code );
         }
     }
     
     function handleError( jqXHR, textStatus, errorThrown )
     {
-        markComment( ERROR );
+        markComment( COLOR_RED );
         window.alert( i18n_saving_comment_failed_error_code + '\n\n' + textStatus );
     }
     
     function markComment( color )
     {
-        var field = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comment' );                
-        var select = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comments' );        
-
-        field.style.backgroundColor = color;
-        select.style.backgroundColor = color;
+    	$( '#commentTextArea' ).css( 'background-color', color );
     }
 }
 
@@ -176,11 +184,11 @@ function markValueForFollowup( dataElementId, periodId, sourceId, categoryOption
     $.getJSON( url, function( json ) {
     	
     	if ( json.message == 'marked' ) {
-    		$( '#followup' ).attr( 'src', '../images/marked_large.png' );
+    		$( '#followup' ).attr( 'src', '../images/marked.png' );
     		$( '#followup' ).attr( 'alt', i18n_unmark_value_for_followup );
     	}
     	else if ( json.message == 'unmarked' ) {
-    		$( '#followup' ).attr( 'src', '../images/unmarked_large.png' );
+    		$( '#followup' ).attr( 'src', '../images/unmarked.png' );
     		$( '#followup' ).attr( 'alt', i18n_mark_value_for_followup );
     	}
     } );
