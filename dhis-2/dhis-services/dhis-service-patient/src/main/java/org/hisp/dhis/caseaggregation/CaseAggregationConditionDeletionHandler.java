@@ -1,7 +1,5 @@
-package org.hisp.dhis.reportexcel.importitem.action;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,67 +25,67 @@ package org.hisp.dhis.reportexcel.importitem.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportexcel.action.ActionSupport;
-import org.hisp.dhis.reportexcel.importitem.ExcelItem;
-import org.hisp.dhis.reportexcel.importitem.ImportItemService;
+package org.hisp.dhis.caseaggregation;
+
+import java.util.Collection;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
  * @author Chau Thu Tran
- * @author Tran Thanh Tri
- * @version $Id$
+ * @version $ CaseAggregationConditionDeletionHandler.java Jun 24, 2011 1:52:01
+ *          PM $
+ * 
  */
-public class ValidateImportItemAction
-    extends ActionSupport
+public class CaseAggregationConditionDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ImportItemService importItemService;
+    private CaseAggregationConditionService aggregationConditionService;
 
-    public void setImportItemService( ImportItemService importItemService )
+    public void setAggregationConditionService( CaseAggregationConditionService aggregationConditionService )
     {
-        this.importItemService = importItemService;
+        this.aggregationConditionService = aggregationConditionService;
     }
 
     // -------------------------------------------------------------------------
-    // Inputs
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private String name;
-
-    private Integer id;
-
-    // -------------------------------------------------------------------------
-    // Setters
-    // -------------------------------------------------------------------------
-
-    public void setId( Integer id )
+    @Override
+    protected String getClassName()
     {
-        this.id = id;
+        return CaseAggregationCondition.class.getSimpleName();
     }
 
-    public void setName( String name )
+    @Override
+    public boolean allowDeleteDataElement( DataElement dataElement )
     {
-        this.name = name;
-    }
+        Collection<CaseAggregationCondition> conditions = aggregationConditionService
+            .getCaseAggregationCondition( dataElement );
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        ExcelItem importItem = importItemService.getImportItem( name );
-
-        if ( importItem != null && (this.id == null || importItem.getId() != this.id) )
+        if ( conditions != null && conditions.size() > 0 )
         {
-            message = i18n.getString( "name_ready_exist" );
-
-            return ERROR;
+            return false;
         }
 
-        return SUCCESS;
+        conditions = aggregationConditionService.getAllCaseAggregationCondition();
+
+        for( CaseAggregationCondition condition : conditions )
+        {
+            Collection<DataElement> dataElements = aggregationConditionService.getDataElementsInCondition( condition.getAggregationExpression() );
+            
+            if ( dataElements != null && dataElements.contains( dataElement ) )
+            {
+                return false;
+            }
+        }
+        
+        return true;
     }
+
 }

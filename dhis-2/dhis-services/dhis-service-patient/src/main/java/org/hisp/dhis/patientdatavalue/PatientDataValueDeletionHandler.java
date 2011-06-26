@@ -1,7 +1,5 @@
-package org.hisp.dhis.reportexcel.importitem.action;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,67 +25,46 @@ package org.hisp.dhis.reportexcel.importitem.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportexcel.action.ActionSupport;
-import org.hisp.dhis.reportexcel.importitem.ExcelItem;
-import org.hisp.dhis.reportexcel.importitem.ImportItemService;
+package org.hisp.dhis.patientdatavalue;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Chau Thu Tran
- * @author Tran Thanh Tri
- * @version $Id$
+ * @version $ PatientDataValueDeletionHandler.java Jun 24, 2011 1:10:46 PM $
+ * 
  */
-public class ValidateImportItemAction
-    extends ActionSupport
+public class PatientDataValueDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ImportItemService importItemService;
+    private JdbcTemplate jdbcTemplate;
 
-    public void setImportItemService( ImportItemService importItemService )
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
     {
-        this.importItemService = importItemService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     // -------------------------------------------------------------------------
-    // Inputs
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private String name;
-
-    private Integer id;
-
-    // -------------------------------------------------------------------------
-    // Setters
-    // -------------------------------------------------------------------------
-
-    public void setId( Integer id )
+    @Override
+    protected String getClassName()
     {
-        this.id = id;
+        return PatientDataValue.class.getSimpleName();
     }
 
-    public void setName( String name )
+    @Override
+    public boolean allowDeleteDataElement( DataElement dataElement )
     {
-        this.name = name;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        ExcelItem importItem = importItemService.getImportItem( name );
-
-        if ( importItem != null && (this.id == null || importItem.getId() != this.id) )
-        {
-            message = i18n.getString( "name_ready_exist" );
-
-            return ERROR;
-        }
-
-        return SUCCESS;
+        String sql = "SELECT COUNT(*) FROM patientdatavalue where dataelementid=" + dataElement.getId();
+        
+        return jdbcTemplate.queryForInt( sql ) == 0;
     }
 }

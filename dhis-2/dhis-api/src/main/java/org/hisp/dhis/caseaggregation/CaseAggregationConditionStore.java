@@ -44,6 +44,8 @@ public interface CaseAggregationConditionStore
     String ID = CaseAggregationConditionStore.class.getName();
 
     CaseAggregationCondition get( DataElement dataElement, DataElementCategoryOptionCombo optionCombo);
-
+   
+    Collection<CaseAggregationCondition> get( DataElement dataElement );
+    
     Collection<Integer> executeSQL( String sql );
 }
