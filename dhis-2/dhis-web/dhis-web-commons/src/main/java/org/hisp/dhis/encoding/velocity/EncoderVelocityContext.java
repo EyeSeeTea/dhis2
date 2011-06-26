@@ -28,8 +28,7 @@ package org.hisp.dhis.encoding.velocity;
  */
 
 import org.apache.velocity.VelocityContext;
-
-import org.apache.commons.lang.StringEscapeUtils;
+import org.hisp.dhis.system.util.Encoder;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -62,47 +61,5 @@ public class EncoderVelocityContext
     public boolean containsKey( Object key )
     {
         return KEY.equals( key ) || super.containsKey( key );
-    }
-
-    // -------------------------------------------------------------------------
-    // Encoder class
-    // -------------------------------------------------------------------------
-
-    public static class Encoder
-    {
-        public String htmlEncode( Object object )
-        {
-            return object != null ? StringEscapeUtils.escapeHtml( String.valueOf( object ) ) : null;
-        }
-        
-        public String htmlEncode( String object )
-        {
-            return StringEscapeUtils.escapeHtml( object );
-        }
-
-        public String xmlEncode( String object )
-        {
-            return StringEscapeUtils.escapeXml( object );
-        }
-
-        public String jsEncode( String object )
-        {
-            return StringEscapeUtils.escapeJavaScript( object );
-        }
-
-        /**
-         * Assumes " is used as quote char and not used inside values and does
-         * not escape '.
-         */
-        public String jsonEncode( String object )
-        {
-            return StringEscapeUtils.escapeJava( object );
-        }
-
-        @Deprecated
-        public String jsEscape( String object, String quoteChar )
-        {
-            return jsEncode( object );
-        }
     }
 }
