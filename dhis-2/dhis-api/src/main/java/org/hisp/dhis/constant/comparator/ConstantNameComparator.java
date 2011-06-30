@@ -1,4 +1,4 @@
-package org.hisp.dhis.de.comments;
+package org.hisp.dhis.constant.comparator;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,15 +27,19 @@ package org.hisp.dhis.de.comments;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.Comparator;
+
+import org.hisp.dhis.constant.Constant;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: StandardCommentsManager.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public interface StandardCommentsManager
+public class ConstantNameComparator
+    implements Comparator<Constant>
 {
-    String ID = StandardCommentsManager.class.getName();
-
-    List<String> getStandardComments();
+    public int compare( Constant constant0, Constant constant1 )
+    {
+        return constant0.getName().compareToIgnoreCase( constant1.getName() );
+    }
 }

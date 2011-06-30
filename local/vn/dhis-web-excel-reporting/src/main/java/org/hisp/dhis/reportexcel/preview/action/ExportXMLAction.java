@@ -27,7 +27,6 @@ package org.hisp.dhis.reportexcel.preview.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
 import java.io.IOException;
 
 import org.hisp.dhis.reportexcel.ExportReportService;
@@ -46,9 +45,6 @@ import com.opensymphony.xwork2.Action;
 public class ExportXMLAction
     implements Action
 {
-
-    private static final String ENCODING = "UTF8";
-
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
@@ -70,10 +66,8 @@ public class ExportXMLAction
     // -------------------------------------------------------------------------
     // Input && Output
     // -------------------------------------------------------------------------
-    
-    private String xmlStructureResponse;
 
-    private File FILE_XLS;
+    private String xmlStructureResponse;
 
     // -------------------------------------------------------------------------
     // Getter & Setter
@@ -88,38 +82,21 @@ public class ExportXMLAction
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings( "static-access" )
     public String execute()
         throws IOException
     {
         try
         {
-            this.init();
-
-            xmlStructureResponse = new XMLStructureResponse( this.FILE_XLS.getPath(), this.ENCODING, exportReportService
-                .getSheets( selectionManager.getSelectedReportId() ), true, false, true, false, false )
-                .getSTRUCTURE_DATA_RESPONSE();
-
-            // this.FILE_XLS.deleteOnExit();
+            xmlStructureResponse = new XMLStructureResponse( selectionManager.getDownloadFilePath(),
+                exportReportService.getSheets( selectionManager.getSelectedReportId() ), false, false, true, false,
+                true ).getXml();
 
             return SUCCESS;
         }
         catch ( Exception e )
         {
-            e.printStackTrace();
+            System.out.println( e.toString() );
             return ERROR;
         }
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private void init()
-        throws Exception
-    {
-        this.FILE_XLS = new File( selectionManager.getDownloadFilePath() );
-
-        // inputStream.close();
     }
 }

@@ -1,7 +1,7 @@
-package org.hisp.dhis.de.comments;
+package org.hisp.dhis.dataadmin.action.constant;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,70 +27,57 @@ package org.hisp.dhis.de.comments;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.constant.ConstantService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.thoughtworks.xstream.XStream;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: DefaultStandardCommentsManager.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class DefaultStandardCommentsManager
-    implements StandardCommentsManager
+public class AddConstantAction
+    implements Action
 {
-    private static final Log log = LogFactory.getLog( DefaultStandardCommentsManager.class );
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private String standardCommentsFile;
+    private ConstantService constantService;
 
-    public void setStandardCommentsFile( String standardCommentsFile )
+    public void setConstantService( ConstantService constantService )
     {
-        this.standardCommentsFile = standardCommentsFile;
+        this.constantService = constantService;
     }
 
-    private List<String> standardComments;
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
-    public void init()
+    private String name;
+
+    public void setName( String name )
     {
-        Reader reader = null;
-        try 
-        {
-            reader = new BufferedReader( new InputStreamReader( getClass().getClassLoader().getResourceAsStream( standardCommentsFile ), "UTF-8" ) );
-        }
-        catch ( UnsupportedEncodingException e )
-        {
-            log.warn( "Unsupported encoding", e );
-        }
-        
-        if ( reader != null )
-        {
-            XStream xStream = new XStream();
-            standardComments = (List<String>) xStream.fromXML( reader );
-        }
-        else
-        {
-            standardComments = new ArrayList<String>();
-        }
+        this.name = name;
     }
-    
+
+    private String value;
+
+    public void setValue( String value )
+    {
+        this.value = value;
+    }
+
     // -------------------------------------------------------------------------
-    // StandardCommentsManager implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
-    public List<String> getStandardComments()
+    public String execute()
     {
-        return standardComments;
+        Constant constant = new Constant( name, Double.parseDouble( value ) );
+
+        constantService.saveConstant( constant );
+
+        return SUCCESS;
     }
 }
