@@ -349,6 +349,11 @@ G.util = {
         return p.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
     },
     
+    getTransformedPoint: function(p) {
+        return p.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    },
+		
+    
     createOverlay: function(name, fillColor, fillOpacity, strokeColor, strokeWidth, url) {
         return new OpenLayers.Layer.Vector(name, {
             'visibility': false,

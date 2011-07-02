@@ -606,7 +606,7 @@
                     {
                         xtype: 'checkbox',
                         id: 'exportimageincludelegend_chb',
-                        fieldLabel: G.i18n.legend_,
+                        fieldLabel: G.i18n.legend,
                         labelSeparator: '',				
                         isFormField: true,
                         checked: true
@@ -728,7 +728,7 @@
         items: [
             {
                 id: 'newpredefinedmaplegend_p',
-                title: G.i18n.legend_,
+                title: G.i18n.legend,
                 items: [
                     {
                         xtype: 'form',
@@ -784,7 +784,7 @@
                                 selectOnFocus: true,
                                 emptyText: G.conf.emptytext,
                                 labelSeparator: G.conf.labelseparator,
-                                fieldLabel: G.i18n.legend_,
+                                fieldLabel: G.i18n.legend,
                                 width: G.conf.combo_width_fieldset,
                                 minListWidth: G.conf.combo_width_fieldset,
                                 store: G.stores.predefinedMapLegend
@@ -2629,6 +2629,9 @@
                         });
                     }
                 });
+                
+                G.vars.map.getLayersByName('Google Streets')[0].setVisibility(false);
+
                 
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
             }
