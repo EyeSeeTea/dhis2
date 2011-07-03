@@ -88,22 +88,30 @@ mapfish.GeoStat = OpenLayers.Class({
         if (!doc || !doc.documentElement) {
             doc = request.responseText;
         }
-        
         var format = this.format || new OpenLayers.Format.GeoJSON();
         this.layer.removeFeatures(this.layer.features);
-        
-		for (var i = 0, a = null, p = null, geo = format.read(doc); i < geo.length; i++) {
-			p = G.util.getTransformedPoint(geo[i].geometry.getCentroid());
-			geo[i] = new OpenLayers.Feature.Vector(p, geo[i].attributes);;
-		}
-		
-        this.layer.addFeatures(geo);
+        this.layer.addFeatures(format.read(doc));
+		this.layer.features = G.util.getTransformedFeatureArray(this.layer.features);
         this.requestSuccess(request);
-  
-		if (!choropleth.formValidation.validateForm.call(choropleth)) {
-			G.vars.mask.hide();
-		}
-		choropleth.classify(false);
+
+        if (G.vars.activePanel.isPolygon()) {
+            if (!choropleth.formValidation.validateForm.call(choropleth)) {
+                G.vars.mask.hide();
+            }
+            choropleth.classify(false);
+        }
+        else if (G.vars.activePanel.isPoint()) {
+            if (!point.formValidation.validateForm.call(point)) {
+                G.vars.mask.hide();
+            }
+            point.classify(false);
+        }
+        else if (G.vars.activePanel.isSymbol()) {
+            if (!symbol.formValidation.validateForm.call(symbol)) {
+                G.vars.mask.hide();
+            }
+            symbol.classify(false);
+        }
     },
 
     onSuccess2: function(request) {
