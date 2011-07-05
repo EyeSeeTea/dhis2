@@ -86,7 +86,7 @@ public interface MappingService
     // MapLegend
     // -------------------------------------------------------------------------
 
-    void addOrUpdateMapLegend( String name, Double startValue, Double endValue, String color );
+    void addOrUpdateMapLegend( String name, Double startValue, Double endValue, String color, String imgUrl );
 
     void deleteMapLegend( MapLegend legend );
 
