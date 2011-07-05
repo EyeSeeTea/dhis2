@@ -192,19 +192,19 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
             icon: new Ext.data.ArrayStore({
                 fields: ['name', 'css'],
                 data: [
-                    ['0','ux-ic-icon-0'],
-                    ['1','ux-ic-icon-1'],
-                    ['2','ux-ic-icon-2'],
-                    ['3','ux-ic-icon-3'],
-                    ['4','ux-ic-icon-4'],
-                    ['5','ux-ic-icon-5'],
-                    ['6','ux-ic-icon-6'],
-                    ['7','ux-ic-icon-7'],
-                    ['8','ux-ic-icon-8'],
-                    ['9','ux-ic-icon-9'],
-                    ['10','ux-ic-icon-10'],
-                    ['11','ux-ic-icon-11'],
-                    ['12','ux-ic-icon-12']
+                    ['0','ux-ic-icon-groupset-type-0'],
+                    ['1','ux-ic-icon-groupset-type-1'],
+                    ['2','ux-ic-icon-groupset-type-2'],
+                    ['3','ux-ic-icon-groupset-type-3'],
+                    ['4','ux-ic-icon-groupset-type-4'],
+                    ['5','ux-ic-icon-groupset-type-5'],
+                    ['6','ux-ic-icon-groupset-type-6'],
+                    ['7','ux-ic-icon-groupset-type-7'],
+                    ['8','ux-ic-icon-groupset-type-8'],
+                    ['9','ux-ic-icon-groupset-type-9'],
+                    ['10','ux-ic-icon-groupset-type-10'],
+                    ['11','ux-ic-icon-groupset-type-11'],
+                    ['12','ux-ic-icon-groupset-type-12']
                 ]
             }),
             infrastructuralDataElementMapValue: new Ext.data.JsonStore({

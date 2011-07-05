@@ -222,6 +222,22 @@
         }
     });
     
+    var mapLegendTypeIconStore = new Ext.data.ArrayStore({
+        fields: ['name', 'css'],
+        data: [
+            ['0','ux-ic-icon-maplegend-type-0'],
+            ['1','ux-ic-icon-maplegend-type-1'],
+            ['2','ux-ic-icon-maplegend-type-2'],
+            ['3','ux-ic-icon-maplegend-type-3'],
+            ['4','ux-ic-icon-maplegend-type-4'],
+            ['5','ux-ic-icon-maplegend-type-5'],
+            ['6','ux-ic-icon-maplegend-type-6'],
+            ['7','ux-ic-icon-maplegend-type-7'],
+            ['8','ux-ic-icon-maplegend-type-8'],
+            ['9','ux-ic-icon-maplegend-type-9']
+        ]
+    });
+    
     G.stores = {
 		mapView: mapViewStore,
         indicatorGroup: indicatorGroupStore,
@@ -238,7 +254,8 @@
         geojsonFiles: geojsonFilesStore,
         overlay: overlayStore,
         groupSet: groupSetStore,
-        groupsByGroupSet: groupsByGroupSetStore
+        groupsByGroupSet: groupsByGroupSetStore,
+        mapLegendTypeIcon: mapLegendTypeIconStore
     };
     
 	/* Thematic layers */
@@ -298,6 +315,25 @@
     
     symbolLayer.layerType = G.conf.map_layer_type_thematic;
     G.vars.map.addLayer(symbolLayer);
+    
+    centroidLayer = new OpenLayers.Layer.Vector('Centroid layer', {
+        'visibility': false,
+        'displayInLayerSwitcher': false,
+        'styleMap': new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style(
+                OpenLayers.Util.applyDefaults(
+                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
+                    OpenLayers.Feature.Vector.style['default']
+                )
+            ),
+            'select': new OpenLayers.Style(
+                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+            )
+        })
+    });
+    
+    centroidLayer.layerType = G.conf.map_layer_type_thematic;
+    G.vars.map.addLayer(centroidLayer);
     
     /* Init base layers */
     if (window.google) {
@@ -563,7 +599,6 @@
                         valueField: 'id',
                         displayField: 'text',
                         width: G.conf.combo_width_fieldset,
-                        mode: 'local',
                         triggerAction: 'all'
                     },
                     {
@@ -761,6 +796,24 @@
                                 width: G.conf.combo_number_width_small
                             },
                             {
+                                xtype: 'combo',
+                                id: 'predefinedmaplegendtype_cb',
+                                fieldLabel: G.i18n.legend_type,
+                                labelSeparator: G.conf.labelseparator,
+                                editable: false,
+                                valueField: 'id',
+                                displayField: 'type',
+                                width: G.conf.combo_width_fieldset,
+                                minListWidth: G.conf.combo_width_fieldset,
+                                mode: 'local',
+                                triggerAction: 'all',
+                                value: 'color',
+                                store: new Ext.data.ArrayStore({
+                                    fields: ['id','type'],
+                                    data: [['color', 'Color'], ['image', 'Image']]
+                                })
+                            },
+                            {
                                 xtype: 'colorfield',
                                 id: 'predefinedmaplegendcolor_cp',
                                 emptyText: G.conf.emptytext,
@@ -769,6 +822,22 @@
                                 allowBlank: false,
                                 width: G.conf.combo_width_fieldset,
                                 value:"#C0C0C0"
+                            },
+                            {
+                                xtype: 'combo',
+                                id: 'predefinedmaplegendimage_cb',
+                                plugins: new Ext.ux.plugins.IconCombo(),
+                                valueField: 'name',
+                                displayField: 'css',
+                                iconClsField: 'css',
+                                editable: false,
+                                triggerAction: 'all',
+                                mode: 'local',
+                                labelSeparator: G.conf.labelseparator,
+                                fieldLabel: G.i18n.image,
+                                width: 50,
+                                listWidth: 50,
+                                store: G.stores.mapLegendTypeIcon
                             },
                             {html: '<div class="window-p"></div>'},
                             {html: '<div class="window-info">Delete legend</div>'},
@@ -809,13 +878,14 @@
                                             var mlsv = parseFloat(Ext.getCmp('predefinedmaplegendstartvalue_nf').getValue());
                                             var mlev = parseFloat(Ext.getCmp('predefinedmaplegendendvalue_nf').getValue());
                                             var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
+                                            var mli = Ext.getCmp('predefinedmaplegendimage_cb').getValue();
                                             
                                             if (!Ext.isNumber(parseFloat(mlsv)) || !Ext.isNumber(mlev)) {
                                                 Ext.message.msg(false, G.i18n.form_is_not_complete);
                                                 return;
                                             }
                                             
-                                            if (!mln || !mlc) {
+                                            if (!mln || (!mlc && !mli)) {
                                                 Ext.message.msg(false, G.i18n.form_is_not_complete);
                                                 return;
                                             }
@@ -833,7 +903,7 @@
                                             Ext.Ajax.request({
                                                 url: G.conf.path_mapping + 'addOrUpdateMapLegend' + G.conf.type,
                                                 method: 'POST',
-                                                params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc},
+                                                params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc, image: mli},
                                                 success: function(r) {
                                                     Ext.message.msg(true, G.i18n.legend + ' <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.was_registered);
                                                     G.stores.predefinedMapLegend.load();
@@ -841,6 +911,7 @@
                                                     Ext.getCmp('predefinedmaplegendstartvalue_nf').reset();
                                                     Ext.getCmp('predefinedmaplegendendvalue_nf').reset();
                                                     Ext.getCmp('predefinedmaplegendcolor_cp').reset();
+                                                    Ext.getCmp('predefinedmaplegendtype_cb').clearValue();
                                                 }
                                             });
                                         }
@@ -1714,6 +1785,10 @@
                 {
                     nodeType: 'gx_layer',
                     layer: 'Symbol layer'
+                },
+                {
+                    nodeType: 'gx_layer',
+                    layer: 'Centroid layer'
                 }
             ]
         },
@@ -2180,6 +2255,41 @@
         }
     });
     
+    centroid = new mapfish.widgets.geostat.Centroid({
+        id: 'centroid',
+		title: '<span class="panel-title">Centroid layer</span>',
+        map: G.vars.map,
+        layer: centroidLayer,
+        featureSelection: false,
+        legendDiv: 'centroidlegend',
+        defaults: {width: 130},
+        tools: [
+            {
+                id: 'refresh',
+                qtip: 'Refresh layer',
+                handler: function() {
+                    centroid.updateValues = true;
+                    centroid.classify();
+                }
+            },
+            {
+                id: 'close',
+                qtip: 'Clear layer',
+                handler: function() {
+                    choropleth.formValues.clearForm.call(centroid);
+                }
+            }
+        ],
+        listeners: {
+            'expand': function() {
+                G.vars.activePanel.setPolygon();
+            },
+            'afterrender': function() {
+                this.layer.widget = this;
+            }
+        }
+    });
+    
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
 		text: G.i18n.map,
@@ -2527,6 +2637,10 @@
                     {
                         title: '<span class="panel-title">Symbol layer legend</span>',
                         contentEl: 'symbollegend'
+                    },
+                    {
+                        title: '<span class="panel-title">Centroid layer legend</span>',
+                        contentEl: 'centroidlegend'
                     }
                 ]
             },
@@ -2549,7 +2663,8 @@
                 items: [
                     choropleth,
                     point,
-                    symbol
+                    symbol,
+                    centroid
                 ]
             },
             {
@@ -2588,12 +2703,15 @@
                 
                 choropleth.prepareMapViewValueType();
                 point.prepareMapViewValueType();
+                centroid.prepareMapViewValueType();
                 
                 choropleth.prepareMapViewDateType();
                 point.prepareMapViewDateType();
+                centroid.prepareMapViewDateType();
                 
                 choropleth.prepareMapViewLegend();
                 point.prepareMapViewLegend();
+                centroid.prepareMapViewLegend();
                 
                 G.vars.map.events.register('addlayer', null, function(e) {
                     var svg = document.getElementsByTagName('svg');
@@ -2630,9 +2748,6 @@
                     }
                 });
                 
-                G.vars.map.getLayersByName('Google Streets')[0].setVisibility(false);
-
-                
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
             }
         }
@@ -2641,8 +2756,8 @@
     G.vars.map.addControl(new OpenLayers.Control.ZoomBox());
 	
 	G.vars.map.addControl(new OpenLayers.Control.MousePosition({
-        displayClass: 'void', 
-        div: $('mouseposition'), 
+        displayClass: 'void',
+        div: $('mouseposition'),
         prefix: '<span style="color:#666">x: &nbsp;</span>',
         separator: '<br/><span style="color:#666">y: &nbsp;</span>'
     }));
@@ -2652,7 +2767,7 @@
         div: $('overviewmap'),
         size: new OpenLayers.Size(188, 97),
         minRectSize: 0,
-        layers: [new OpenLayers.Layer.OSM.Osmarender("OSM Osmarender")]
+        layers: [new OpenLayers.Layer.OSM.Osmarender('OSM Osmarender')]
     }));
     
     G.vars.map.addControl(new OpenLayers.Control.PanPanel({
