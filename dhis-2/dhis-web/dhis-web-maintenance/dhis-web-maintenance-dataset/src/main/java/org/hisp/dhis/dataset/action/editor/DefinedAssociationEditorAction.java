@@ -139,13 +139,13 @@ public class DefinedAssociationEditorAction
         if ( assigned )
         {
             dataSet.getSources().add( source );
-
+            source.getDataSets().add( dataSet );
             title = i18n.getString( "assigned" ) + SEPERATE + title;
         }
         else
         {
             dataSet.getSources().remove( source );
-
+            source.getDataSets().remove( dataSet );
             title = i18n.getString( "unassigned" ) + SEPERATE + title;
         }
 

@@ -35,6 +35,7 @@ import static org.hisp.dhis.system.util.MathUtils.isEqual;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
@@ -53,6 +54,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
+import org.springframework.scheduling.annotation.Async;
 
 /**
  * @author Lars Helge Overland
@@ -116,14 +118,13 @@ public class DefaultIndicatorDataMart
     // -------------------------------------------------------------------------
     // IndicatorDataMart implementation
     // -------------------------------------------------------------------------
-    
-    public int exportIndicatorValues( final Collection<Indicator> indicators, final Collection<Period> periods, 
+
+    @Async
+    public Future<?> exportIndicatorValues( final Collection<Indicator> indicators, final Collection<Period> periods, 
         final Collection<OrganisationUnit> organisationUnits, final Collection<DataElementOperand> operands, String key )
     {
         final BatchHandler<AggregatedIndicatorValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedIndicatorValueBatchHandler.class ).init();
 
-        int count = 0;
-        
         final boolean omitZeroNumerator = (Boolean) systemSettingManager.getSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, false );
         
         final AggregatedIndicatorValue indicatorValue = new AggregatedIndicatorValue();
@@ -173,8 +174,6 @@ public class DefaultIndicatorDataMart
                                 indicatorValue.setDenominatorValue( getRounded( denominatorValue, DECIMALS ) );
                                 
                                 batchHandler.addObject( indicatorValue );
-                                
-                                count++;
                             }
                         }
                     }
@@ -186,7 +185,7 @@ public class DefaultIndicatorDataMart
         
         batchHandler.flush();
         
-        return count;
+        return null;
     }
     
     // -------------------------------------------------------------------------

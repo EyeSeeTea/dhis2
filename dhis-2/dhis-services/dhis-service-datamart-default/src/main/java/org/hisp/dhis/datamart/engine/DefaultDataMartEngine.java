@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.common.ProcessState;
@@ -52,7 +53,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.system.util.Clock;
+import org.hisp.dhis.system.util.ConcurrentUtils;
 import org.hisp.dhis.system.util.ConversionUtils;
+import org.hisp.dhis.system.util.PaginatedList;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -61,6 +64,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultDataMartEngine
     implements DataMartEngine
 {
+    private static final int THREAD_NO = 2;
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -147,11 +152,9 @@ public class DefaultDataMartEngine
     // -------------------------------------------------------------------------
 
     @Transactional
-    public int export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
+    public void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
         Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, boolean useIndexes, ProcessState state )
     {
-        int count = 0;
-
         Clock clock = new Clock().startClock().logTime( "Data mart export process started" );
         
         // ---------------------------------------------------------------------
@@ -178,7 +181,7 @@ public class DefaultDataMartEngine
         // ---------------------------------------------------------------------
         
         Collection<DataElementOperand> dataElementOperands = categoryService.getOperands( dataElements );
-        List<DataElementOperand> indicatorOperands = new ArrayList<DataElementOperand>( categoryService.populateOperands( getOperandsInIndicators( indicators ) ) );
+        List<DataElementOperand> indicatorOperands = new ArrayList<DataElementOperand>( categoryService.populateOperands( expressionService.getOperandsInIndicators( indicators ) ) );
         
         Set<DataElementOperand> allOperands = new HashSet<DataElementOperand>();
         allOperands.addAll( dataElementOperands );
@@ -213,8 +216,6 @@ public class DefaultDataMartEngine
         // Create aggregated data cache
         // ---------------------------------------------------------------------
 
-        DataElementOperandList operandList = new DataElementOperandList( indicatorOperands );
-
         crossTabService.createAggregatedDataCache( indicatorOperands, key );
         
         clock.logTime( "Created aggregated data cache" );
@@ -245,10 +246,19 @@ public class DefaultDataMartEngine
 
         state.setMessage( "exporting_data_for_data_elements" );
 
+        List<List<Period>> periodPages = new PaginatedList<Period>( periods ).setNumberOfPages( THREAD_NO ).getPages();
+        
         if ( allOperands.size() > 0 )
         {
-            count += dataElementDataMart.exportDataValues( allOperands, periods, organisationUnits, operandList, key );
+            List<Future<?>> futures = new ArrayList<Future<?>>();
+            
+            for ( List<Period> periodPage : periodPages )
+            {
+                futures.add( dataElementDataMart.exportDataValues( allOperands, periodPage, organisationUnits, new DataElementOperandList( indicatorOperands ), key ) );
+            }
 
+            ConcurrentUtils.waitForCompletion( futures );
+            
             clock.logTime( "Exported values for data element operands (" + allOperands.size() + ")" );
         }
 
@@ -268,8 +278,15 @@ public class DefaultDataMartEngine
 
         if ( isIndicators )
         {
-            count += indicatorDataMart.exportIndicatorValues( indicators, periods, organisationUnits, indicatorOperands, key );
+            List<Future<?>> futures = new ArrayList<Future<?>>();
 
+            for ( List<Period> periodPage : periodPages )
+            {
+                futures.add( indicatorDataMart.exportIndicatorValues( indicators, periodPage, organisationUnits, indicatorOperands, key ) );
+            }
+
+            ConcurrentUtils.waitForCompletion( futures );
+            
             clock.logTime( "Exported values for indicators (" + indicators.size() + ")" );
         }
 
@@ -295,27 +312,5 @@ public class DefaultDataMartEngine
         aggregationCache.clearCache();
 
         clock.logTime( "Data mart export process completed" );
-
-        return count;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Set<DataElementOperand> getOperandsInIndicators( Collection<Indicator> indicators )
-    {
-        final Set<DataElementOperand> operands = new HashSet<DataElementOperand>();
-        
-        for ( Indicator indicator : indicators )
-        {
-            Set<DataElementOperand> temp = expressionService.getOperandsInExpression( indicator.getExplodedNumerator() );
-            operands.addAll( temp != null ? temp : new HashSet<DataElementOperand>() );
-            
-            temp = expressionService.getOperandsInExpression( indicator.getExplodedDenominator() );            
-            operands.addAll( temp != null ? temp : new HashSet<DataElementOperand>() );
-        }
-        
-        return operands;
     }
 }

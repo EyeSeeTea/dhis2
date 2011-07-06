@@ -33,7 +33,7 @@ import java.util.List;
 
 import org.hisp.dhis.patient.PatientAttributeGroup;
 import org.hisp.dhis.patient.PatientAttributeGroupService;
-import org.hisp.dhis.patient.comparator.PatientAttributeGroupComparator;
+import org.hisp.dhis.patient.comparator.PatientAttributeGroupSortOrderComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -81,7 +81,7 @@ public class GetPatientAttributeGroupListAction
         patientAttributeGroups = new ArrayList<PatientAttributeGroup>( patientAttributeGroupService
             .getAllPatientAttributeGroups() );
 
-        Collections.sort( patientAttributeGroups, new PatientAttributeGroupComparator() );
+        Collections.sort( patientAttributeGroups, new PatientAttributeGroupSortOrderComparator() );
 
         return SUCCESS;
     }

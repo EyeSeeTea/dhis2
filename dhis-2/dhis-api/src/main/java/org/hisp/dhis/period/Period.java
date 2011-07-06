@@ -266,6 +266,5 @@ public class Period
     public void setStartDate( Date startDate )
     {
         this.startDate = startDate;
-    }   
-    
+    }    
 }
