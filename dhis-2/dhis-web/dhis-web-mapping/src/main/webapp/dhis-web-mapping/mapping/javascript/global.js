@@ -39,7 +39,11 @@ G.conf = {
     adminwindow_collapsed: 54,
     adminwindow_expanded_1: Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 121 : 116,
     adminwindow_expanded_2: Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 145 : 143,
-        
+    predefinedmaplegendsetwindow_collapsed: 123,
+    predefinedmaplegendsetwindow_expanded_1: Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 373 : 371,
+    predefinedmaplegendsetwindow_expanded_2: Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 298 : 295,
+    predefinedmaplegendsetwindow_expanded_3: Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 242 : 240,
+    predefinedmaplegendsetwindow_expanded_4: Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 240 : 238,
     
 //  GUI
 

@@ -802,7 +802,7 @@
                                 labelSeparator: G.conf.labelseparator,
                                 editable: false,
                                 valueField: 'id',
-                                displayField: 'type',
+                                displayField: 'symbolizer',
                                 width: G.conf.combo_width_fieldset,
                                 minListWidth: G.conf.combo_width_fieldset,
                                 mode: 'local',
@@ -850,6 +850,7 @@
                                 mode: 'local',
                                 labelSeparator: G.conf.labelseparator,
                                 fieldLabel: G.i18n.image,
+                                hidden: true,
                                 width: 50,
                                 listWidth: 50,
                                 store: G.stores.mapLegendTypeIcon
@@ -964,10 +965,10 @@
                 ],
                 listeners: {
                     expand: function() {
-                        predefinedMapLegendSetWindow.setHeight(Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 348 : 346);
+                        predefinedMapLegendSetWindow.setHeight(G.conf.predefinedmaplegendsetwindow_expanded_1);
                     },
                     collapse: function() {
-                        predefinedMapLegendSetWindow.setHeight(123);
+                        predefinedMapLegendSetWindow.setHeight(G.conf.predefinedmaplegendsetwindow_collapsed);
                     }
                 }
             },
@@ -1132,10 +1133,10 @@
                 ],
                 listeners: {
                     expand: function() {
-                        predefinedMapLegendSetWindow.setHeight((G.util.getMultiSelectHeight() / 2) + (Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 298:295));
+                        predefinedMapLegendSetWindow.setHeight((G.util.getMultiSelectHeight() / 2) + G.conf.predefinedmaplegendsetwindow_expanded_2);
                     },
                     collapse: function() {
-                        predefinedMapLegendSetWindow.setHeight(123);
+                        predefinedMapLegendSetWindow.setHeight(G.conf.predefinedmaplegendsetwindow_collapsed);
                     }
                 }
             },
@@ -1254,14 +1255,14 @@
                 ],
                 listeners: {
                     expand: function() {
-                        predefinedMapLegendSetWindow.setHeight(G.util.getMultiSelectHeight() + (Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 242 : 240));
+                        predefinedMapLegendSetWindow.setHeight(G.util.getMultiSelectHeight() + G.conf.predefinedmaplegendsetwindow_expanded_3);
                         
                         if (!G.stores.indicator.isLoaded) {
                             G.stores.indicator.load();
                         }
                     },
                     collapse: function() {
-                        predefinedMapLegendSetWindow.setHeight(123);
+                        predefinedMapLegendSetWindow.setHeight(G.conf.predefinedmaplegendsetwindow_collapsed);
                     }
                 }
             },
@@ -1380,21 +1381,21 @@
                 ],
                 listeners: {
                     expand: function() {
-                        predefinedMapLegendSetWindow.setHeight(G.util.getMultiSelectHeight() + (Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 240 : 238));
+                        predefinedMapLegendSetWindow.setHeight(G.util.getMultiSelectHeight() + G.conf.predefinedmaplegendsetwindow_expanded_4);
                         
                         if (!G.stores.dataElement.isLoaded) {
                             G.stores.dataElement.load();
                         }
                     },
                     collapse: function() {
-                        predefinedMapLegendSetWindow.setHeight(123);
+                        predefinedMapLegendSetWindow.setHeight(G.conf.predefinedmaplegendsetwindow_collapsed);
                     }
                 }
             }
         ],
         listeners: {
             afterrender: function() {
-                predefinedMapLegendSetWindow.setHeight(Ext.isChrome || (Ext.isWindows && Ext.isGecko) ? 348 : 346);
+                predefinedMapLegendSetWindow.setHeight(G.conf.predefinedmaplegendsetwindow_expanded_1);
             }
         }
     });
