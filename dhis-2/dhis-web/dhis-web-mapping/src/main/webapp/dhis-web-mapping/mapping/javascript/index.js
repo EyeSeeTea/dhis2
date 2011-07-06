@@ -798,7 +798,7 @@
                             {
                                 xtype: 'combo',
                                 id: 'predefinedmaplegendtype_cb',
-                                fieldLabel: G.i18n.legend_type,
+                                fieldLabel: G.i18n.legend_symbolizer,
                                 labelSeparator: G.conf.labelseparator,
                                 editable: false,
                                 valueField: 'id',
@@ -809,9 +809,24 @@
                                 triggerAction: 'all',
                                 value: 'color',
                                 store: new Ext.data.ArrayStore({
-                                    fields: ['id','type'],
-                                    data: [['color', 'Color'], ['image', 'Image']]
-                                })
+                                    fields: ['id','symbolizer'],
+                                    data: [
+                                        [G.conf.map_legend_symbolizer_color, G.i18n.color],
+                                        [G.conf.map_legend_symbolizer_image, G.i18n.image]
+                                    ]
+                                }),
+                                listeners: {
+                                    'select': function(cb) {
+                                        if (cb.getValue() == G.conf.map_legend_symbolizer_color) {
+                                            Ext.getCmp('predefinedmaplegendcolor_cp').showField();
+                                            Ext.getCmp('predefinedmaplegendimage_cb').hideField();
+                                        }
+                                        else if (cb.getValue() == G.conf.map_legend_symbolizer_image) {
+                                            Ext.getCmp('predefinedmaplegendcolor_cp').hideField();
+                                            Ext.getCmp('predefinedmaplegendimage_cb').showField();
+                                        }
+                                    }
+                                }
                             },
                             {
                                 xtype: 'colorfield',

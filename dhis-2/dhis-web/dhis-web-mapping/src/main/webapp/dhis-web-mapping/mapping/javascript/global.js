@@ -57,6 +57,8 @@ G.conf = {
 	map_source_type_shapefile: 'shapefile',
 	map_legend_type_automatic: 'automatic',
 	map_legend_type_predefined: 'predefined',
+	map_legend_symbolizer_color: 'color',
+	map_legend_symbolizer_image: 'image',
     map_layer_type_baselayer: 'baselayer',
     map_layer_type_overlay: 'overlay',
     map_layer_type_thematic: 'thematic',
