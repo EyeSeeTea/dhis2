@@ -79,7 +79,7 @@ mapfish.GeoStat = OpenLayers.Class({
     setUrl: function(url, params) {
         this.url = url;
         if (this.url) {
-            OpenLayers.loadURL(this.url, '', this, this.onSuccess2, this.onFailure);
+            OpenLayers.loadURL(this.url, '', this, this.onSuccess, this.onFailure);
         }
     },
 
