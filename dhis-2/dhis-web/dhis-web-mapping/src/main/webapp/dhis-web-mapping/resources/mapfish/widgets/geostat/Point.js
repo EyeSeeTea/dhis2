@@ -1484,7 +1484,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
 	applyPredefinedLegend: function(isMapView) {
         this.legend.value = G.conf.map_legend_type_predefined;
 		var mls = this.form.findField('maplegendset').getValue();
-		var bounds = [];
 		Ext.Ajax.request({
 			url: G.conf.path_mapping + 'getMapLegendsByMapLegendSet' + G.conf.type,
 			method: 'POST',

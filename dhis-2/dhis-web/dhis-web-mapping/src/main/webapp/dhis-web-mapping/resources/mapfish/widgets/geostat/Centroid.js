@@ -1513,7 +1513,6 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
 	applyPredefinedLegend: function(isMapView) {
         this.legend.value = G.conf.map_legend_type_predefined;
 		var mls = this.form.findField('maplegendset').getValue();
-		var bounds = [];
 		Ext.Ajax.request({
 			url: G.conf.path_mapping + 'getMapLegendsByMapLegendSet' + G.conf.type,
 			method: 'POST',
@@ -1521,32 +1520,19 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
             scope: this,
 			success: function(r) {
 				var mapLegends = Ext.util.JSON.decode(r.responseText).mapLegends;
-mapLegends[0].legendType = 'image';
-mapLegends[1].legendType = 'image';
-mapLegends[2].legendType = 'image';       
-
-                if (mapLegends[0].legendType != 'image') {
-                    var colors = [];
-                    var bounds = [];
-                    for (var i = 0; i < mapLegends.length; i++) {
-                        if (bounds[bounds.length-1] != mapLegends[i].startValue) {
-                            if (bounds.length !== 0) {
-                                colors.push(new mapfish.ColorRgb(240,240,240));
-                            }
-                            bounds.push(mapLegends[i].startValue);
-                        }
-                        colors.push(new mapfish.ColorRgb());
-                        colors[colors.length-1].setFromHex(mapLegends[i].color);
-                        bounds.push(mapLegends[i].endValue);
-                    }
-                }
-                else {
-                    colors = [];
-console.log(colors);      
-      
-}
-				this.colorInterpolation = colors;
-				this.bounds = bounds;
+console.log(mapLegends);                
+				this.symbolizerInterpolation = [];
+				this.bounds = [];
+				for (var i = 0; i < mapLegends.length; i++) {
+					if (bounds[bounds.length-1] != mapLegends[i].startValue) {
+						if (bounds.length !== 0) {
+							images.push('blank');
+						}
+						bounds.push(mapLegends[i].startValue);
+					}
+					images.push(mapLegends[i].imgUrl + '.png');
+					bounds.push(mapLegends[i].endValue);
+				}
                 
                 if (isMapView) {
                     this.setMapViewMap();

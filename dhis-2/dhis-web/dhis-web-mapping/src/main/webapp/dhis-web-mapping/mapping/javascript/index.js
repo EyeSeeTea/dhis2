@@ -818,11 +818,11 @@
                                 listeners: {
                                     'select': function(cb) {
                                         if (cb.getValue() == G.conf.map_legend_symbolizer_color) {
-                                            Ext.getCmp('predefinedmaplegendcolor_cp').showField();
+                                            Ext.getCmp('predefinedmaplegendcolor_cf').showField();
                                             Ext.getCmp('predefinedmaplegendimage_cb').hideField();
                                         }
                                         else if (cb.getValue() == G.conf.map_legend_symbolizer_image) {
-                                            Ext.getCmp('predefinedmaplegendcolor_cp').hideField();
+                                            Ext.getCmp('predefinedmaplegendcolor_cf').hideField();
                                             Ext.getCmp('predefinedmaplegendimage_cb').showField();
                                         }
                                     }
@@ -830,7 +830,7 @@
                             },
                             {
                                 xtype: 'colorfield',
-                                id: 'predefinedmaplegendcolor_cp',
+                                id: 'predefinedmaplegendcolor_cf',
                                 emptyText: G.conf.emptytext,
                                 labelSeparator: G.conf.labelseparator,
                                 fieldLabel: G.i18n.color,
@@ -893,8 +893,10 @@
                                             var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
                                             var mlsv = parseFloat(Ext.getCmp('predefinedmaplegendstartvalue_nf').getValue());
                                             var mlev = parseFloat(Ext.getCmp('predefinedmaplegendendvalue_nf').getValue());
-                                            var mlc = Ext.getCmp('predefinedmaplegendcolor_cp').getValue();
-                                            var mli = Ext.getCmp('predefinedmaplegendimage_cb').getValue();
+                                            var mlc = Ext.getCmp('predefinedmaplegendtype_cb').getValue() == G.conf.map_legend_symbolizer_color ?
+                                                Ext.getCmp('predefinedmaplegendcolor_cf').getValue() : null;
+                                            var mli = Ext.getCmp('predefinedmaplegendtype_cb').getValue() == G.conf.map_legend_symbolizer_image ?
+                                                Ext.getCmp('predefinedmaplegendimage_cb').getRawValue() : null;
                                             
                                             if (!Ext.isNumber(parseFloat(mlsv)) || !Ext.isNumber(mlev)) {
                                                 Ext.message.msg(false, G.i18n.form_is_not_complete);
@@ -919,14 +921,14 @@
                                             Ext.Ajax.request({
                                                 url: G.conf.path_mapping + 'addOrUpdateMapLegend' + G.conf.type,
                                                 method: 'POST',
-                                                params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc, image: mli},
+                                                params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc, imgUrl: mli},
                                                 success: function(r) {
                                                     Ext.message.msg(true, G.i18n.legend + ' <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.was_registered);
                                                     G.stores.predefinedMapLegend.load();
                                                     Ext.getCmp('predefinedmaplegendname_tf').reset();
                                                     Ext.getCmp('predefinedmaplegendstartvalue_nf').reset();
                                                     Ext.getCmp('predefinedmaplegendendvalue_nf').reset();
-                                                    Ext.getCmp('predefinedmaplegendcolor_cp').reset();
+                                                    Ext.getCmp('predefinedmaplegendcolor_cf').reset();
                                                     Ext.getCmp('predefinedmaplegendtype_cb').clearValue();
                                                 }
                                             });
