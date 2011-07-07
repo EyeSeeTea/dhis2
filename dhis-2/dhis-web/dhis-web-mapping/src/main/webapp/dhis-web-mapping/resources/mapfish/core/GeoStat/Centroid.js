@@ -130,7 +130,7 @@ mapfish.GeoStat.Centroid = OpenLayers.Class(mapfish.GeoStat, {
         this.legendDiv.update("");
         for (var i = 0; i < this.classification.bins.length; i++) {
             var element = document.createElement("div");
-            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + this.symbolizerInterpolation + '.png';
+            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + this.symbolizerInterpolation[i];
             element.style.backgroundRepeat = 'no-repeat';
             element.style.width = "25px";
             element.style.height = "18px";

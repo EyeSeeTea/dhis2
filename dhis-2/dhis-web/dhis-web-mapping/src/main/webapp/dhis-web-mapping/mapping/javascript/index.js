@@ -928,8 +928,6 @@
                                                     Ext.getCmp('predefinedmaplegendname_tf').reset();
                                                     Ext.getCmp('predefinedmaplegendstartvalue_nf').reset();
                                                     Ext.getCmp('predefinedmaplegendendvalue_nf').reset();
-                                                    Ext.getCmp('predefinedmaplegendcolor_cf').reset();
-                                                    Ext.getCmp('predefinedmaplegendtype_cb').clearValue();
                                                 }
                                             });
                                         }
@@ -2700,8 +2698,7 @@
             'afterrender': function() {
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_overlay, G.conf.defaultLayerOpacity);
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_thematic, G.conf.defaultLayerOpacity);
-                symbolLayer.setOpacity(1);
-                
+                symbolLayer.setOpacity(1);                
                 
                 var svg = document.getElementsByTagName('svg');
                 
@@ -2720,16 +2717,15 @@
                 Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
                 
                 choropleth.prepareMapViewValueType();
-                point.prepareMapViewValueType();
-                centroid.prepareMapViewValueType();
-                
                 choropleth.prepareMapViewDateType();
-                point.prepareMapViewDateType();
-                centroid.prepareMapViewDateType();
-                
                 choropleth.prepareMapViewLegend();
+                
+                point.prepareMapViewValueType();
+                point.prepareMapViewDateType();
                 point.prepareMapViewLegend();
-                centroid.prepareMapViewLegend();
+                
+                centroid.prepareMapViewValueType();
+                centroid.prepareMapViewDateType();                
                 
                 G.vars.map.events.register('addlayer', null, function(e) {
                     var svg = document.getElementsByTagName('svg');

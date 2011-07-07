@@ -131,10 +131,10 @@ mapfish.GeoStat = OpenLayers.Class({
         this.layer.addFeatures(geo);
         this.requestSuccess(request);
   
-		if (!choropleth.formValidation.validateForm.call(choropleth)) {
+		if (!centroid.formValidation.validateForm.call(centroid)) {
 			G.vars.mask.hide();
 		}
-		choropleth.classify(false);
+		centroid.classify(false);
     },
 
     onFailure: function(request) {
@@ -290,13 +290,10 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
     },
 	
     classify: function(method, nbBins, bounds) {
-        var mlt = G.vars.activePanel.isPolygon() ?
-            choropleth.legend.value : G.vars.activePanel.isPoint() ?
-                point.legend.value : G.conf.map_legend_type_automatic;
-    
-		if (mlt == G.conf.map_legend_type_automatic) {
+		if (G.vars.activeWidget.legend.value == G.conf.map_legend_type_automatic) {
 			if (method == mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
-				var str = G.vars.activePanel.isPolygon() ? choropleth.form.findField('bounds').getValue() : point.form.findField('bounds').getValue();
+				var str = G.vars.activePanel.isPolygon() ?
+                    choropleth.form.findField('bounds').getValue() : point.form.findField('bounds').getValue();
 				
 				for (var i = 0; i < str.length; i++) {
 					str = str.replace(' ','');
@@ -336,26 +333,26 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 				bounds.push(this.maxVal);
 			}
 		}
-		else if (mlt == G.conf.map_legend_type_predefined) {
-			bounds = G.vars.activePanel.isPolygon() ? choropleth.bounds : point.bounds;
+		else if (G.vars.activeWidget.legend.value == G.conf.map_legend_type_predefined) {
+			bounds = G.vars.activeWidget.bounds;
 
 			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);
-                if (G.vars.activePanel.isPolygon()) {
-                    choropleth.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+                if (G.vars.activeWidget == centroid) {
+                    G.vars.activeWidget.symbolizerInterpolation.unshift('blank.png');
                 }
                 else {
-                    point.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+                    G.vars.activeWidget.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
                 }
 			}
 
 			if (bounds[bounds.length-1] < this.maxVal) {
 				bounds.push(this.maxVal);
-                if (G.vars.activePanel.isPolygon()) {
-                    choropleth.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+                if (G.vars.activeWidget == centroid) {
+                    G.vars.activeWidget.symbolizerInterpolation.push('blank.png');
                 }
                 else {
-                    point.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+                    G.vars.activeWidget.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
                 }
 			}
 			

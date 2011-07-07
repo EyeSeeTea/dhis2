@@ -851,6 +851,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 
     applyValues: function() {
 		var options = {indicator: this.form.findField('groupset').getRawValue().toLowerCase()};
+        
+        G.vars.activeWidget = this;
 		this.coreComp.updateOptions(options);
         this.coreComp.applyClassification(this.form);
         this.classificationApplied = true;

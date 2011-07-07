@@ -490,6 +490,8 @@ G.vars = {
         }
     },
     
+    activeWidget: null,
+    
     relocate: {},
     
     mouseMove: {}

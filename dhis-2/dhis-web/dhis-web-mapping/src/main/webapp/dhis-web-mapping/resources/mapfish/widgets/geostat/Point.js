@@ -1776,6 +1776,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             maxSize: parseInt(this.form.findField('radiushigh').getValue())
 		};
         
+        G.vars.activeWidget = this;        
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
