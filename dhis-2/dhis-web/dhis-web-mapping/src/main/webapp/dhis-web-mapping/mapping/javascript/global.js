@@ -17,6 +17,7 @@ G.conf = {
 	thematicMap: 'gisThematicMap',
 	thematicMap2: 'gisThematicMap2',
     thematicMap3: 'gisThematicMap3',
+    thematicMap4: 'gisThematicMap4',
     overlayRegistration: 'gisOverlay',
 	administration: 'gisAdministration',
 	favorites: 'gisFavoriteMapView',
@@ -479,6 +480,9 @@ G.vars = {
         setSymbol: function() {
             this.value = G.conf.thematicMap3;
         },
+        setCentroid: function() {
+            this.value = G.conf.thematicMap4;
+        },
         isPolygon: function() {
             return this.value === G.conf.thematicMap;
         },
@@ -487,6 +491,9 @@ G.vars = {
         },
         isSymbol: function() {
             return this.value === G.conf.thematicMap3;
+        },
+        isCentroid: function() {
+            return this.value === G.conf.thematicMap4;
         }
     },
     

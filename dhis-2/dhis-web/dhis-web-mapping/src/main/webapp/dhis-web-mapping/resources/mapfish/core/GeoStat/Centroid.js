@@ -101,12 +101,11 @@ mapfish.GeoStat.Centroid = OpenLayers.Class(mapfish.GeoStat, {
         
         var boundsArray = this.classification.getBoundsArray();
         var rules = new Array(boundsArray.length-1);
-        for (var i = 0; i < boundsArray.length-1; i++) {
-            
+        for (var i = 0; i < boundsArray.length-1; i++) {            
             var rule = new OpenLayers.Rule({                
                 symbolizer: {
-                    'pointRadius': 8,
-                    'externalGraphic': '../resources/ext-ux/iconcombo/' + this.symbolizerInterpolation[i]
+                    'pointRadius': 16,
+                    'externalGraphic': '../resources/ext-ux/iconcombo/' + this.symbolizerInterpolation[i] + '-map.png'
                 }, 
                 filter: new OpenLayers.Filter.Comparison({
                     type: OpenLayers.Filter.Comparison.BETWEEN,
@@ -130,7 +129,7 @@ mapfish.GeoStat.Centroid = OpenLayers.Class(mapfish.GeoStat, {
         this.legendDiv.update("");
         for (var i = 0; i < this.classification.bins.length; i++) {
             var element = document.createElement("div");
-            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + this.symbolizerInterpolation[i];
+            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + this.symbolizerInterpolation[i] + '.png)';
             element.style.backgroundRepeat = 'no-repeat';
             element.style.width = "25px";
             element.style.height = "18px";

@@ -1532,7 +1532,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
 					colors.push(new mapfish.ColorRgb());
 					colors[colors.length-1].setFromHex(mapLegends[i].color);
 					bounds.push(mapLegends[i].endValue);
-				}
+				}              
 
 				this.colorInterpolation = colors;
 				this.bounds = bounds;
@@ -1714,6 +1714,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.FormPanel, {
     loadGeoJson: function() {
         G.vars.mask.msg = G.i18n.loading_geojson;
         G.vars.mask.show();
+        G.vars.activeWidget = this;
         
         this.setUrl(G.conf.path_mapping + 'getGeoJson.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +

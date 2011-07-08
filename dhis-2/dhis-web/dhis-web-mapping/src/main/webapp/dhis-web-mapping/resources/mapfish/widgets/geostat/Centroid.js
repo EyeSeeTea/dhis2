@@ -121,7 +121,9 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
     },
     
     initProperties: function() {
-        this.legend.value = G.conf.map_legend_type_predefined;
+        this.legend = {
+            value: G.conf.map_legend_type_predefined
+        };
         
         this.organisationUnitSelection = {
             parent: {
@@ -182,16 +184,20 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
         };
         
         this.stores = {
-            infrastructuralDataElementMapValue: new Ext.data.JsonStore({
-                url: G.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + G.conf.type,
-                root: 'mapValues',
-                fields: ['dataElementName', 'value'],
-                sortInfo: {field: 'dataElementName', direction: 'ASC'},
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': G.func.storeLoadListener
-                }
+            mapLegendTypeIcon: new Ext.data.ArrayStore({
+                fields: ['name', 'css'],
+                data: [
+                    ['0','ux-ic-icon-maplegend-type-0'],
+                    ['1','ux-ic-icon-maplegend-type-1'],
+                    ['2','ux-ic-icon-maplegend-type-2'],
+                    ['3','ux-ic-icon-maplegend-type-3'],
+                    ['4','ux-ic-icon-maplegend-type-4'],
+                    ['5','ux-ic-icon-maplegend-type-5'],
+                    ['6','ux-ic-icon-maplegend-type-6'],
+                    ['7','ux-ic-icon-maplegend-type-7'],
+                    ['8','ux-ic-icon-maplegend-type-8'],
+                    ['9','ux-ic-icon-maplegend-type-9']
+                ]
             }),
             indicatorsByGroup: new Ext.data.JsonStore({
                 url: G.conf.path_mapping + 'getIndicatorsByIndicatorGroup' + G.conf.type,
@@ -373,9 +379,10 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         if (G.util.setCurrentValue.call(this, cb, 'mapview')) {
                             return;
-                        }
-                        
+                        }                        
                         this.updateValues = true;
+                        this.classify(false, cb.keepPosition);
+                        G.util.setKeepPosition(cb);
                     }
                 }
             }
@@ -428,42 +435,10 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         if (G.util.setCurrentValue.call(this, cb, 'mapview')) {
                             return;
-                        }
-                        
+                        }                        
                         this.updateValues = true;
-                        Ext.Ajax.request({
-                            url: G.conf.path_mapping + 'getMapLegendSetByDataElement' + G.conf.type,
-                            method: 'POST',
-                            params: {dataElementId: cb.getValue()},
-                            scope: this,
-                            success: function(r) {
-                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-                                if (mapLegendSet.id) {
-                                    this.legend.value = G.conf.map_legend_type_predefined;
-                                    this.prepareMapViewLegend();
-                                    
-                                    function load() {
-                                        this.form.findField('maplegendset').setValue(mapLegendSet.id);
-                                        this.applyPredefinedLegend();
-                                    }
-                                    
-                                    if (!G.stores.predefinedMapLegendSet.isLoaded) {
-                                        G.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                                            load.call(this);
-                                        }});
-                                    }
-                                    else {
-                                        load.call(this);
-                                    }
-                                }
-                                else {
-                                    this.legend.value = G.conf.map_legend_type_automatic;
-                                    this.prepareMapViewLegend();
-                                    this.classify(false, cb.keepPosition);
-                                    G.util.setKeepPosition(cb);
-                                }
-                            }
-                        });
+                        this.classify(false, cb.keepPosition);
+                        G.util.setKeepPosition(cb);
                     }
                 }
             }
@@ -516,8 +491,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
                     fn: function(cb) {
                         if (G.util.setCurrentValue.call(this, cb, 'mapview')) {
                             return;
-                        }
-                        
+                        }                        
                         this.updateValues = true;
                         this.classify(false, cb.keepPosition);                        
                         G.util.setKeepPosition(cb);
@@ -1205,11 +1179,11 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
 				for (var i = 0; i < mapLegends.length; i++) {
 					if (this.bounds[this.bounds.length-1] != mapLegends[i].startValue) {
 						if (this.bounds.length !== 0) {
-							this.symbolizerInterpolation.push('blank.png');
+							this.symbolizerInterpolation.push('blank');
 						}
 						this.bounds.push(mapLegends[i].startValue);
 					}
-					this.symbolizerInterpolation.push(mapLegends[i].imgUrl + '.png');
+					this.symbolizerInterpolation.push(mapLegends[i].imgUrl);
 					this.bounds.push(mapLegends[i].endValue);
 				}
                 
@@ -1351,6 +1325,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
     loadGeoJson: function() {
         G.vars.mask.msg = G.i18n.loading_geojson;
         G.vars.mask.show();
+        G.vars.activeWidget = this;
         
         this.setUrl(G.conf.path_mapping + 'getGeoJson.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +
@@ -1434,7 +1409,8 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
         Ext.getCmp('viewhistory_b').addItem(this);
         
 		var options = {
-            indicator: 'value'
+            indicator: 'value',
+            method: G.conf.classify_by_equal_intervals
         };
         
         G.vars.activeWidget = this;        

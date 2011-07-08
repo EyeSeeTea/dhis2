@@ -79,7 +79,8 @@ mapfish.GeoStat = OpenLayers.Class({
     setUrl: function(url, params) {
         this.url = url;
         if (this.url) {
-            OpenLayers.loadURL(this.url, '', this, this.onSuccess, this.onFailure);
+            var success = G.vars.activeWidget == centroid ? this.onSuccess2 : this.onSuccess;
+            OpenLayers.loadURL(this.url, '', this, success, this.onFailure);
         }
     },
 
@@ -289,7 +290,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         return Math.floor(1 + 3.3 * Math.log(this.nbVal, 10));
     },
 	
-    classify: function(method, nbBins, bounds) {
+    classify: function(method, nbBins, bounds) {    
 		if (G.vars.activeWidget.legend.value == G.conf.map_legend_type_automatic) {
 			if (method == mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
 				var str = G.vars.activePanel.isPolygon() ?
@@ -337,7 +338,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 			bounds = G.vars.activeWidget.bounds;
 
 			if (bounds[0] > this.minVal) {
-				bounds.unshift(this.minVal);
+				bounds.unshift(this.minVal);        
                 if (G.vars.activeWidget == centroid) {
                     G.vars.activeWidget.symbolizerInterpolation.unshift('blank.png');
                 }
@@ -347,7 +348,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 			}
 
 			if (bounds[bounds.length-1] < this.maxVal) {
-				bounds.push(this.maxVal);
+				bounds.push(this.maxVal); 
                 if (G.vars.activeWidget == centroid) {
                     G.vars.activeWidget.symbolizerInterpolation.push('blank.png');
                 }

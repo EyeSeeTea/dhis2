@@ -228,13 +228,7 @@
             ['0','ux-ic-icon-maplegend-type-0'],
             ['1','ux-ic-icon-maplegend-type-1'],
             ['2','ux-ic-icon-maplegend-type-2'],
-            ['3','ux-ic-icon-maplegend-type-3'],
-            ['4','ux-ic-icon-maplegend-type-4'],
-            ['5','ux-ic-icon-maplegend-type-5'],
-            ['6','ux-ic-icon-maplegend-type-6'],
-            ['7','ux-ic-icon-maplegend-type-7'],
-            ['8','ux-ic-icon-maplegend-type-8'],
-            ['9','ux-ic-icon-maplegend-type-9']
+            ['3','ux-ic-icon-maplegend-type-3']
         ]
     });
     
@@ -2298,7 +2292,7 @@
         ],
         listeners: {
             'expand': function() {
-                G.vars.activePanel.setPolygon();
+                G.vars.activePanel.setCentroid();
             },
             'afterrender': function() {
                 this.layer.widget = this;
@@ -2343,6 +2337,16 @@
             else if (G.vars.activePanel.isPoint()) {
                 if (point.layer.getDataExtent()) {
                     G.vars.map.zoomToExtent(point.layer.getDataExtent());
+                }
+            }
+            else if (G.vars.activePanel.isSymbol()) {
+                if (symbol.layer.getDataExtent()) {
+                    G.vars.map.zoomToExtent(symbol.layer.getDataExtent());
+                }
+            }
+            else if (G.vars.activePanel.isCentroid()) {
+                if (centroid.layer.getDataExtent()) {
+                    G.vars.map.zoomToExtent(centroid.layer.getDataExtent());
                 }
             }
         }
@@ -2698,7 +2702,8 @@
             'afterrender': function() {
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_overlay, G.conf.defaultLayerOpacity);
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_thematic, G.conf.defaultLayerOpacity);
-                symbolLayer.setOpacity(1);                
+                symbolLayer.setOpacity(1);
+                centroidLayer.setOpacity(1);
                 
                 var svg = document.getElementsByTagName('svg');
                 

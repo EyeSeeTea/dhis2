@@ -80,7 +80,7 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
         var values = [];
         for (var i = 0; i < this.layer.features.length; i++) {
             values.push(this.layer.features[i].attributes[this.indicator]);
-        }
+        }      
         
         var distOptions = {
             'labelGenerator': this.options.labelGenerator
