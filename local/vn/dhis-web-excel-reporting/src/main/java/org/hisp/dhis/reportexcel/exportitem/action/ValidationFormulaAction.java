@@ -27,74 +27,28 @@ package org.hisp.dhis.reportexcel.exportitem.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportexcel.ExportReportService;
-import org.hisp.dhis.reportexcel.ReportExcel;
-import org.hisp.dhis.reportexcel.ReportExcelItem;
+import static org.hisp.dhis.reportexcel.utils.ExcelUtils.isValidFormula;
+
 import org.hisp.dhis.reportexcel.action.ActionSupport;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id 2010-08-27
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class ValidationExportItemAction
+public class ValidationFormulaAction
     extends ActionSupport
 {
-    // -------------------------------------------------------------------------
-    // Dependency
-    // -------------------------------------------------------------------------
-
-    private ExportReportService exportReportService;
-
-    public void setExportReportService( ExportReportService exportReportService )
-    {
-        this.exportReportService = exportReportService;
-    }
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String formula;
 
-    public void setId( Integer id )
+    public void setFormula( String formula )
     {
-        this.id = id;
+        this.formula = formula;
     }
 
-    private Integer exportReportId;
-
-    public void setExportReportId( Integer exportReportId )
-    {
-        this.exportReportId = exportReportId;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private Integer row;
-
-    public void setRow( Integer row )
-    {
-        this.row = row;
-    };
-
-    private Integer column;
-
-    public void setColumn( Integer column )
-    {
-        this.column = column;
-    };
-
-    private Integer sheetNo;
-
-    public void setSheetNo( Integer sheetNo )
-    {
-        this.sheetNo = sheetNo;
-    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -102,42 +56,14 @@ public class ValidationExportItemAction
 
     public String execute()
         throws Exception
-    {
-        if ( sheetNo == null )
+    {       
+        if ( formula != null && !isValidFormula( formula ) )
         {
-            message = i18n.getString( "please_enter_sheet_no" );
-
+            message = i18n.getString( "formula_is_invalid" );
+            
             return ERROR;
         }
-
-        ReportExcel exportReport = exportReportService.getExportReport( exportReportId );
-
-        ReportExcelItem match = exportReport.getExportItemByName( name, sheetNo );
-
-        if ( match != null && (id == null || match.getId() != id) )
-        {
-            message = i18n.getString( "name_ready_exist_in_sheet" );
-
-            return ERROR;
-        }
-
-        if ( row == null || column == null )
-        {
-            message = i18n.getString( "please_enter_row_and_column_first" );
-
-            return ERROR;
-        }
-
-        match = exportReport.getExportItemBySheetRowColumn( sheetNo, row, column );
-
-        if ( match != null && (id == null || match.getId() != id) )
-        {
-            message = i18n.getString( "cell_exist" );
-
-            return ERROR;
-        }
-
+        
         return SUCCESS;
-
     }
 }
