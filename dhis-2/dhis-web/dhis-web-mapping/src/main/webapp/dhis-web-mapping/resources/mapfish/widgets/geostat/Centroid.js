@@ -274,6 +274,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             emptyText: G.i18n.optional,
             selectOnFocus: true,
+            hidden: true,
             width: G.conf.combo_width,
             store: G.stores.mapView,
             listeners: {
@@ -299,7 +300,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
             }
         },
         
-        { html: '<div class="thematic-br">' },
+        //{ html: '<div class="thematic-br">' },
 		
 		{
             xtype: 'combo',
@@ -786,219 +787,10 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
             }
         };
         
-        var onClickSelect = function onClickSelect(feature) {
-            if (feature.geometry.CLASS_NAME == G.conf.map_feature_type_point_class_name) {
-                if (scope.featureOptions.menu) {
-                    scope.featureOptions.menu.destroy();
-                }
-                
-                scope.featureOptions.menu = new Ext.menu.Menu({
-                    showInfo: function() {
-                        if (scope.featureOptions.info) {
-                            scope.featureOptions.info.destroy();
-                        }
-                        
-                        scope.featureOptions.info = new Ext.Window({
-                            title: '<span class="window-information-title">' + feature.attributes.name + '</span>',
-                            layout: 'table',
-                            width: G.conf.window_width + 178,
-                            height: G.util.getMultiSelectHeight() + 100,
-                            bodyStyle: 'background-color:#fff',
-                            defaults: {
-                                bodyStyle: 'vertical-align:top',
-                                labelSeparator: G.conf.labelseparator,
-                                emptyText: G.conf.emptytext
-                            },
-                            layoutConfig: {
-                                columns: 2
-                            },
-                            items: [
-                                {
-                                    xtype: 'panel',
-                                    layout: 'anchor',
-                                    bodyStyle: 'padding:8px 4px 8px 8px',
-                                    width: 160,
-                                    items: [
-                                        {html: '<div class="window-info">' + G.i18n.type + '<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.code + '<p style="font-weight:normal">' + feature.attributes.code + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.address + '<p style="font-weight:normal">' + feature.attributes.ad + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.contact_person + '<p style="font-weight:normal">' + feature.attributes.cp + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.email + '<p style="font-weight:normal">' + feature.attributes.em + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.phone_number + '<p style="font-weight:normal">' + feature.attributes.pn + '</p></div>'}
-                                    ]
-                                },
-                                {
-                                    xtype: 'form',
-                                    bodyStyle: 'padding:8px 8px 8px 4px',
-                                    width: G.conf.window_width + 20,
-                                    labelWidth: G.conf.label_width,
-                                    items: [
-                                        {html: '<div class="window-info">' + G.i18n.infrastructural_data + '</div>'},
-                                        {
-                                            xtype: 'combo',
-                                            name: 'period',
-                                            fieldLabel: G.i18n.period,
-                                            typeAhead: true,
-                                            editable: false,
-                                            valueField: 'id',
-                                            displayField: 'name',
-                                            mode: 'remote',
-                                            forceSelection: true,
-                                            triggerAction: 'all',
-                                            selectOnFocus: true,
-                                            width: G.conf.combo_width,
-                                            store: G.stores.infrastructuralPeriodsByType,
-                                            keepPosition: false,
-                                            listeners: {
-                                                'select': function(cb) {
-                                                    scope.infrastructuralPeriod = cb.getValue();
-                                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-                                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                                    scope.stores.infrastructuralDataElementMapValue.load();
-                                                }
-                                            }
-                                        },
-                                        {html: '<div style="padding:4px 0 0 0"></div>'},
-                                        {
-                                            xtype: 'grid',
-                                            height: G.util.getMultiSelectHeight(),
-                                            width: 242,
-                                            cm: new Ext.grid.ColumnModel({
-                                                columns: [
-                                                    {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
-                                                    {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
-                                                ]
-                                            }),
-                                            disableSelection: true,
-                                            viewConfig: {forceFit: true},
-                                            store: scope.stores.infrastructuralDataElementMapValue
-                                        }
-                                    ]
-                                }
-                            ]
-                        });
-    
-                        if (scope.infrastructuralPeriod) {
-                            scope.featureOptions.info.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
-                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
-                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                            scope.stores.infrastructuralDataElementMapValue.load();
-                        }
-                        scope.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
-                        scope.featureOptions.info.show();
-                        scope.featureOptions.menu.destroy();
-                    },
-                    showRelocate: function() {
-                        if (scope.featureOptions.coordinate) {
-                            scope.featureOptions.coordinate.destroy();
-                        }
-                        
-                        scope.featureOptions.coordinate = new Ext.Window({
-                            title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
-                            layout: 'fit',
-                            width: G.conf.window_width,
-                            height: 95,
-                            items: [
-                                {
-                                    xtype: 'panel',
-                                    bodyStyle: 'padding:8px',
-                                    items: [
-                                        {html: G.i18n.select_new_location_on_map}
-                                    ]
-                                }
-                            ],
-                            bbar: [
-                                '->',
-                                {
-                                    xtype: 'button',
-                                    iconCls: 'icon-cancel',
-                                    hideLabel: true,
-                                    text: G.i18n.cancel,
-                                    handler: function() {
-                                        G.vars.relocate.active = false;
-                                        scope.featureOptions.coordinate.destroy();
-                                        document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
-                                    }
-                                }
-                            ],
-                            listeners: {
-                                'close': function() {
-                                    G.vars.relocate.active = false;
-                                    document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
-                                }
-                            }
-                        });
-                        scope.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
-                        scope.featureOptions.coordinate.show();                        
-                    },
-                    items: [
-                        {
-                            text: G.i18n.show_information_sheet,
-                            iconCls: 'menu-featureoptions-info',
-                            handler: function(item) {
-                                if (G.stores.infrastructuralPeriodsByType.isLoaded) {
-                                    item.parentMenu.showInfo();
-                                }
-                                else {
-                                    G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
-                                    G.stores.infrastructuralPeriodsByType.load({callback: function() {
-                                        item.parentMenu.showInfo();
-                                    }});
-                                }
-                            }
-                        },
-                        {
-                            text: G.i18n.relocate,
-                            iconCls: 'menu-featureoptions-relocate',
-                            disabled: !G.user.isAdmin,
-                            handler: function(item) {
-                                G.vars.relocate.active = true;
-                                G.vars.relocate.widget = scope;
-                                G.vars.relocate.feature = feature;
-                                document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
-                                item.parentMenu.showRelocate();
-                            }
-                        }
-                    ]
-                });
-                scope.featureOptions.menu.showAt([G.vars.mouseMove.x, G.vars.mouseMove.y]);
-            }
-            else {
-                if (feature.attributes.hasChildrenWithCoordinates) {
-                    if (G.vars.locateFeatureWindow) {
-                        G.vars.locateFeatureWindow.destroy();
-                    }
-                             
-                    scope.updateValues = true;
-                    scope.isDrillDown = true;
-                    
-                    function organisationUnitLevelCallback() {
-                        var names = this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
-                        this.form.findField('boundary').setValue(names[0]);
-                        this.form.findField('level').setValue(names[1]);
-                        this.loadGeoJson();
-                    }
-                    
-                    if (G.stores.organisationUnitLevel.isLoaded) {
-                        organisationUnitLevelCallback.call(scope);
-                    }
-                    else {
-                        G.stores.organisationUnitLevel.load({scope: scope, callback: function() {
-                            organisationUnitLevelCallback.call(this);
-                        }});
-                    }
-                }
-                else {
-                    Ext.message.msg(false, G.i18n.no_coordinates_found);
-                }
-            }
-        };
-        
         this.selectFeatures = new OpenLayers.Control.newSelectFeature(
             this.layer, {
                 onHoverSelect: onHoverSelect,
-                onHoverUnselect: onHoverUnselect,
-                onClickSelect: onClickSelect
+                onHoverUnselect: onHoverUnselect
             }
         );
         

@@ -129,7 +129,7 @@
 	var predefinedMapLegendStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getAllMapLegends' + G.conf.type,
         root: 'mapLegends',
-        fields: ['id', 'name', 'startValue', 'endValue', 'color', 'displayString'],
+        fields: ['id', 'name', 'startValue', 'endValue', 'color', 'imgUrl', 'displayString'],
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -866,7 +866,12 @@
                                 fieldLabel: G.i18n.legend,
                                 width: G.conf.combo_width_fieldset,
                                 minListWidth: G.conf.combo_width_fieldset,
-                                store: G.stores.predefinedMapLegend
+                                store: G.stores.predefinedMapLegend,
+                                listeners: {
+                                    'focus': function(cb) {
+                                        cb.getStore().clearFilter();
+                                    }
+                                }
                             }
                         ]
                     },
@@ -983,6 +988,38 @@
                                 labelSeparator: G.conf.labelseparator,
                                 fieldLabel: G.i18n.display_name,
                                 width: G.conf.combo_width_fieldset
+                            },
+                            {
+                                xtype: 'combo',
+                                id: 'predefinedmaplegendsettype_cb',
+                                fieldLabel: G.i18n.legend_symbolizer,
+                                labelSeparator: G.conf.labelseparator,
+                                editable: false,
+                                valueField: 'id',
+                                displayField: 'symbolizer',
+                                width: G.conf.combo_width_fieldset,
+                                minListWidth: G.conf.combo_width_fieldset,
+                                mode: 'local',
+                                triggerAction: 'all',
+                                store: new Ext.data.ArrayStore({
+                                    fields: ['id','symbolizer'],
+                                    data: [
+                                        [G.conf.map_legend_symbolizer_color, G.i18n.color],
+                                        [G.conf.map_legend_symbolizer_image, G.i18n.image]
+                                    ]
+                                }),
+                                listeners: {
+                                    'select': function(cb) {
+                                        G.stores.predefinedMapLegend.filterBy( function(r, rid) {
+                                            if (cb.getValue() == G.conf.map_legend_symbolizer_color) {
+                                                return r.data.color;
+                                            }
+                                            else if (cb.getValue() == G.conf.map_legend_symbolizer_image) {
+                                                return r.data.imgUrl;
+                                            }
+                                        });
+                                    }
+                                }
                             },
                             {html: '<div class="window-field-label">'+G.i18n.legends+'</div>'},
                             {
@@ -1128,6 +1165,24 @@
                 listeners: {
                     expand: function() {
                         predefinedMapLegendSetWindow.setHeight((G.util.getMultiSelectHeight() / 2) + G.conf.predefinedmaplegendsetwindow_expanded_2);
+                        
+                        var pmlst = Ext.getCmp('predefinedmaplegendsettype_cb');
+                        if (pmlst.getValue()) {
+                            G.stores.predefinedMapLegend.filterBy( function(r, rid) {
+                                if (pmlst.getValue() == G.conf.map_legend_symbolizer_color) {
+                                    return r.data.color;
+                                }
+                                else if (pmlst.getValue() == G.conf.map_legend_symbolizer_image) {
+                                    return r.data.imgUrl;
+                                }
+                            });
+                        }
+                        else {
+                            pmlst.setValue(G.conf.map_legend_symbolizer_color);
+                            G.stores.predefinedMapLegend.filterBy( function(r, rid) {
+                                return r.data.color;
+                            });
+                        }                                                        
                     },
                     collapse: function() {
                         predefinedMapLegendSetWindow.setHeight(G.conf.predefinedmaplegendsetwindow_collapsed);
