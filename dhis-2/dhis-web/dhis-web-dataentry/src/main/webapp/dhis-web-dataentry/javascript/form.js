@@ -234,9 +234,10 @@ function setDisplayModes()
 
 function valueFocus( e )
 {
-    // Retrieve the data element id from the id of the field
+	
     var baseId = e.target.id;
 
+/*
     var opId = baseId;
     var str = baseId;
 
@@ -309,7 +310,7 @@ function valueFocus( e )
     curDeSpan.firstChild.nodeValue = name;
 
     document.getElementById( "currentOptionCombo" ).innerHTML = optionName;
-
+    */
 }
 
 function keyPress( event, field )
