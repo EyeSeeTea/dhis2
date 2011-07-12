@@ -207,11 +207,17 @@ function loadDataValuesAndDisplayModes()
 
 function insertDataValues()
 {
-	$.getJSON( 'getDataValues.action', function( json )
+	// Clear existing values
+	
+	$( '[name="entryfield"]' ).val( '' );
+	
+	// Set new values
+	
+	$.getJSON( 'getDataValues.action', function( json ) 
 	{
 		$.each( json.dataValues, function( i, value )
 		{
-			var fieldId = '#' + value.id;
+			var fieldId = '#' + value.id + '-val';
 			
 			if ( $( fieldId ) )
 			{
