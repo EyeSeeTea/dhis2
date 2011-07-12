@@ -211,10 +211,10 @@ function insertDataValues()
 	
 	$( '[name="entryfield"]' ).val( '' );
 	
-	// Set new values
-	
 	$.getJSON( 'getDataValues.action', function( json ) 
 	{
+		// Set data values
+	
 		$.each( json.dataValues, function( i, value )
 		{
 			var fieldId = '#' + value.id + '-val';
@@ -222,6 +222,24 @@ function insertDataValues()
 			if ( $( fieldId ) )
 			{
 				$( fieldId ).val( value.val );
+			}
+		} );
+		
+		// Set min-max values
+		
+		$.each( json.minMaxDataElements, function( i, value )
+		{
+			var minFieldId = '#' + value.id + '-min';
+			var maxFieldId = '#' + value.id + '-max';
+			
+			if ( $( minFieldId ) )
+			{
+				$( minFieldId ).html( value.min );
+			}
+			
+			if ( $( maxFieldId ) )
+			{
+				$( maxFieldId ).html( value.max );
 			}
 		} );
 	} );
