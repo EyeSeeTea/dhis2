@@ -24,9 +24,14 @@ function insertDataValues()
 {
 	$.getJSON( 'getDataValues.action', function( json )
 	{
-		$.each( json.dataValues, function( i, val )
+		$.each( json.dataValues, function( i, value )
 		{
-			$( '#' + val.id ).val( val.val );
+			var fieldId = '#' + value.id;
+			
+			if ( $( fieldId ) )
+			{
+				$( fieldId ).val( value.val );
+			}
 		} );
 	} );
 }
