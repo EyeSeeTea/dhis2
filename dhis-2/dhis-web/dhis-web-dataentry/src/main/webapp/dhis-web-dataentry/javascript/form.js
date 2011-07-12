@@ -195,7 +195,7 @@ function periodSelected()
     $( '#currentPeriod' ).html( periodName );
 
     var periodIndex = $( '#selectedPeriodIndex' ).val();
-insertDataValues(); //TODO
+    
     if ( periodIndex && periodIndex != -1 )
     {
         showLoader();
