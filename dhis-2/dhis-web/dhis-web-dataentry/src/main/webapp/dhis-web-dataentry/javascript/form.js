@@ -20,6 +20,17 @@ function clearEntryForm()
     $( '#contentDiv' ).html( '' );
 }
 
+function insertDataValues()
+{
+	$.getJSON( 'getDataValues.action', function( json )
+	{
+		$.each( json.dataValues, function( i, val )
+		{
+			$( '#' + val.id ).val( val.val );
+		} );
+	} );
+}
+
 // -----------------------------------------------------------------------------
 // OrganisationUnit Selection
 // -----------------------------------------------------------------------------
@@ -179,7 +190,7 @@ function periodSelected()
     $( '#currentPeriod' ).html( periodName );
 
     var periodIndex = $( '#selectedPeriodIndex' ).val();
-
+insertDataValues(); //TODO
     if ( periodIndex && periodIndex != -1 )
     {
         showLoader();
