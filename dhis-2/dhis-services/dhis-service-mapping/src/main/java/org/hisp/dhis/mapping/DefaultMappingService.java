@@ -415,8 +415,7 @@ public class DefaultMappingService
         mappingStore.updateMapLegendSet( mapLegendSet );
     }
 
-    public void addOrUpdateMapLegendSet( String name, String type, int method, int classes, String colorLow,
-        String colorHigh, Set<MapLegend> mapLegends )
+    public void addOrUpdateMapLegendSet( String name, String type, String legendType, Set<MapLegend> mapLegends )
     {
         MapLegendSet mapLegendSet = getMapLegendSetByName( name );
 
@@ -427,10 +426,7 @@ public class DefaultMappingService
         if ( mapLegendSet != null )
         {
             mapLegendSet.setType( type );
-            mapLegendSet.setMethod( method );
-            mapLegendSet.setClasses( classes );
-            mapLegendSet.setColorLow( colorLow );
-            mapLegendSet.setColorHigh( colorHigh );
+            mapLegendSet.setLegendType( legendType );
             mapLegendSet.setMapLegends( mapLegends );
             mapLegendSet.setIndicators( indicators );
             mapLegendSet.setDataElements( dataElements );
@@ -439,8 +435,7 @@ public class DefaultMappingService
         }
         else
         {
-            mapLegendSet = new MapLegendSet( name, type, method, classes, colorLow, colorHigh, mapLegends, indicators,
-                dataElements );
+            mapLegendSet = new MapLegendSet( name, type, legendType, mapLegends, indicators, dataElements );
 
             this.mappingStore.addMapLegendSet( mapLegendSet );
         }

@@ -141,7 +141,7 @@
         url: G.conf.path_mapping + 'getMapLegendSetsByType' + G.conf.type,
         baseParams: {type: G.conf.map_legend_type_predefined},
         root: 'mapLegendSets',
-        fields: ['id', 'name', 'indicators', 'dataelements'],
+        fields: ['id', 'name', 'legendType', 'indicators', 'dataelements'],
         sortInfo: {field:'name', direction:'ASC'},
         autoLoad: false,
         isLoaded: false,
@@ -228,7 +228,9 @@
             ['0','ux-ic-icon-maplegend-type-0'],
             ['1','ux-ic-icon-maplegend-type-1'],
             ['2','ux-ic-icon-maplegend-type-2'],
-            ['3','ux-ic-icon-maplegend-type-3']
+            ['3','ux-ic-icon-maplegend-type-3'],
+            ['4','ux-ic-icon-maplegend-type-4'],
+            ['5','ux-ic-icon-maplegend-type-5']
         ]
     });
     
@@ -1127,7 +1129,7 @@
                                             Ext.Ajax.request({
                                                 url: G.conf.path_mapping + 'addOrUpdateMapLegendSet.action' + params,
                                                 method: 'POST',
-                                                params: {name: mlsv, type: G.conf.map_legend_type_predefined},
+                                                params: {name: mlsv, type: G.conf.map_legend_type_predefined, legendType: Ext.getCmp('predefinedmaplegendsettype_cb').getValue()},
                                                 success: function(r) {
                                                     Ext.message.msg(true, G.i18n.new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + G.i18n.was_registered);
                                                     G.stores.predefinedMapLegendSet.load();

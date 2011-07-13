@@ -604,10 +604,12 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
             width: G.conf.combo_width,
             store: G.stores.predefinedMapLegendSet,
             listeners: {
+                'focus': function(cb) {
+                    cb.getStore().filter('legendType', G.conf.map_legend_symbolizer_image);
+                },
                 'select': {
                     scope: this,
                     fn: function() {
-                        this.form.findField('mapview').clearValue();
 						this.applyPredefinedLegend();
                     }
                 }

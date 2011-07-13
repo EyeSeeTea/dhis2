@@ -229,14 +229,10 @@ public class MappingServiceTest
         assertNotNull( legendSet );
 
         legendSet.setName( "MapLegendSetB" );
-        legendSet.setColorLow( "ColorLowB" );
-        legendSet.setColorHigh( "ColorHighB" );
 
         mappingService.updateMapLegendSet( legendSet );
 
         assertEquals( "MapLegendSetB", mappingService.getMapLegendSetByName( "MapLegendSetB" ).getName() );
-        assertEquals( "ColorLowB", mappingService.getMapLegendSetByName( "MapLegendSetB" ).getColorLow() );
-        assertEquals( "ColorHighB", mappingService.getMapLegendSetByName( "MapLegendSetB" ).getColorHigh() );
     }
 
     @Test

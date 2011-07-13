@@ -79,8 +79,8 @@ public class GetMapLegendSetsByTypeAction
 
     public String execute()
     {
-        this.object = new ArrayList<MapLegendSet>( this.mappingService.getMapLegendSetsByType( type ) );
+        object = new ArrayList<MapLegendSet>( mappingService.getMapLegendSetsByType( type ) );
 
-        return "success";
+        return SUCCESS;
     }
 }
