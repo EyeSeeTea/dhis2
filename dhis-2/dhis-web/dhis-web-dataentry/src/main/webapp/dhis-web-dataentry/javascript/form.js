@@ -31,6 +31,8 @@ function clearPeriod()
 function clearEntryForm()
 {
     $( '#contentDiv' ).html( '' );
+    
+    dataEntryFormIsLoaded = false;
 }
 
 // -----------------------------------------------------------------------------
@@ -65,20 +67,13 @@ function organisationUnitSelected( orgUnits )
         {
             $( '#selectedDataSetId' ).val( dataSetId );
 
-            if ( json.periodValid )
+            if ( json.periodValid && dataEntryFormIsLoaded )
             {
                 showLoader();
-                
-                if ( dataEntryFormIsLoaded )
-                {
-                	loadDataValues();
-                }
-                else
-                {
-                	$( '#contentDiv' ).load( 'select.action', loadDataValues );
-                }
+                loadDataValues();
             }
-        } else
+        } 
+        else
         {
             clearPeriod();
         }
