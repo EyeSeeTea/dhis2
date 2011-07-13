@@ -47,7 +47,6 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.minmax.MinMaxDataElement;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -231,7 +230,7 @@ public class DefaultDataEntryFormService
     }
 
     public String prepareDataEntryFormForEntry( String htmlCode,
-        Collection<DataValue> dataValues, Map<String, MinMaxDataElement> minMaxMap, String disabled, I18n i18n, DataSet dataSet )
+        Collection<DataValue> dataValues, String disabled, I18n i18n, DataSet dataSet )
     {
         // ---------------------------------------------------------------------
         // Inline javascript/html to add to HTML before output
@@ -302,13 +301,8 @@ public class DefaultDataEntryFormService
                 // Insert title info
                 // -------------------------------------------------------------
 
-                MinMaxDataElement minMaxDataElement = minMaxMap.get( dataElement.getId() + ":" + optionComboId );
-                String minValue = minMaxDataElement != null ? String.valueOf( minMaxDataElement.getMin() ) : "-";
-                String maxValue = minMaxDataElement != null ? String.valueOf( minMaxDataElement.getMax() ) : "-";
-
                 StringBuilder title = new StringBuilder( "title=\"Name: " ).append( dataElement.getName() ).append( " " ).
-                    append( categoryOptionCombo.getName() ).append( " Type: " ).append( dataElement.getType() ).
-                    append( " Min: " ).append( minValue ).append( " Max: " ).append( maxValue ).append( "\"" );
+                    append( categoryOptionCombo.getName() ).append( " Type: " ).append( dataElement.getType() ).append( "\"" );
                 
                 inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, title ) : inputHtml + " " + title;
 
@@ -355,16 +349,6 @@ public class DefaultDataEntryFormService
                     if ( dataElement.getType().equals( VALUE_TYPE_INT ) )
                     {
                         appendCode += historyCode;
-                        
-                        if ( minMaxDataElement != null && !dataElementValue.equals( EMPTY ) )
-                        {
-                            double value = Double.parseDouble( dataElementValue );
-                            
-                            if ( value < minMaxDataElement.getMin() || value > minMaxDataElement.getMax() )
-                            {
-                                backgroundColor = "style=\"background-color:#ff6600;";
-                            }
-                        }
                     }
 
                     appendCode += TAG_CLOSE;

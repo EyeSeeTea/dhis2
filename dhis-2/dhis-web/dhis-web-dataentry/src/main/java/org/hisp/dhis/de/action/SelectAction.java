@@ -60,8 +60,6 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.de.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.minmax.MinMaxDataElement;
-import org.hisp.dhis.minmax.MinMaxDataElementService;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -123,13 +121,6 @@ public class SelectAction
     public void setDataValueService( DataValueService dataValueService )
     {
         this.dataValueService = dataValueService;
-    }
-
-    private MinMaxDataElementService minMaxDataElementService;
-
-    public void setMinMaxDataElementService( MinMaxDataElementService minMaxDataElementService )
-    {
-        this.minMaxDataElementService = minMaxDataElementService;
     }
 
     private DataElementCategoryService categoryService;
@@ -274,13 +265,6 @@ public class SelectAction
     public Map<String, String> getDataElementValueTypeMap()
     {
         return dataElementValueTypeMap;
-    }
-
-    private Map<String, MinMaxDataElement> minMaxMap;
-
-    public Map<String, MinMaxDataElement> getMinMaxMap()
-    {
-        return minMaxMap;
     }
 
     private Integer integer = 0;
@@ -487,21 +471,6 @@ public class SelectAction
         // Get the min/max values
         // ---------------------------------------------------------------------
 
-        Collection<MinMaxDataElement> minMaxDataElements = minMaxDataElementService.getMinMaxDataElements(
-            organisationUnit, dataElements );
-
-        minMaxMap = new HashMap<String, MinMaxDataElement>( minMaxDataElements.size() );
-
-        for ( MinMaxDataElement minMaxDataElement : minMaxDataElements )
-        {
-            minMaxMap.put( minMaxDataElement.getDataElement().getId() + ":"
-                + minMaxDataElement.getOptionCombo().getId(), minMaxDataElement );
-        }
-
-        // ---------------------------------------------------------------------
-        // Get the min/max values
-        // ---------------------------------------------------------------------
-
         orderedDataElements = dataElementService.getGroupedDataElementsByCategoryCombo( dataElements );
 
         orderedCategoryCombos = dataElementService.getDataElementCategoryCombos( dataElements );
@@ -677,7 +646,7 @@ public class SelectAction
         if ( cdeFormExists )
         {
             customDataEntryFormCode = dataEntryFormService.prepareDataEntryFormForEntry( dataEntryForm.getHtmlCode(),
-                dataValues, minMaxMap, disabled, i18n, dataSet );
+                dataValues, disabled, i18n, dataSet );
         }
 
         // ---------------------------------------------------------------------

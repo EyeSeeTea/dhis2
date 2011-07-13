@@ -1,5 +1,7 @@
 
 /**
+ * This file depends on form.js.
+ * 
  * Format for the span/input identifiers for selectors:
  * 
  * {dataelementid}-{optioncomboid}-val // data value
@@ -13,11 +15,6 @@
 // -----------------------------------------------------------------------------
 // Save
 // -----------------------------------------------------------------------------
-
-var COLOR_GREEN = '#b9ffb9';
-var COLOR_YELLOW = '#fffe8c';
-var COLOR_RED = '#ff8a8a';
-var COLOR_ORANGE = '#ff6600';
 
 var FORMULA_PATTERN = /\[.+?\]/g;
 var SEPARATOR = '.';
@@ -140,7 +137,7 @@ function saveVal( dataElementId, optionComboId )
             var minString = $( '#' + dataElementId + '-' + optionComboId + '-min' ).html();
             var maxString = $( '#' + dataElementId + '-' + optionComboId + '-max' ).html();
 
-            if ( minString && maxString )
+            if ( minString && maxString ) // TODO if only one exists?
             {
                 var valueNo = new Number( value );
                 var min = new Number( minString );

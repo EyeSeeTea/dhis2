@@ -1,7 +1,13 @@
-var significantZeros = []; // Identifiers for which zero values are
-// insignificant, also used in entry.js
-var indicatorFormulas = []; // Associative array with [indicator id, expression]
-// for indicators in form, also used in entry.js
+// Identifiers for which zero values are, insignificant, also used in entry.js
+var significantZeros = [];
+
+// Associative array with [indicator id, expression] for indicators in form, also used in entry.js
+var indicatorFormulas = [];
+
+var COLOR_GREEN = '#b9ffb9';
+var COLOR_YELLOW = '#fffe8c';
+var COLOR_RED = '#ff8a8a';
+var COLOR_ORANGE = '#ff6600';
 
 function addEventListeners()
 {
@@ -147,7 +153,8 @@ function dataSetSelected()
                 showLoader();
                 $( '#selectedPeriodIndex' ).val( periodIndex );
                 $( '#contentDiv' ).load( 'select.action', loadDataValuesAndDisplayModes );
-            } else
+            } 
+            else
             {
                 clearEntryForm();
             }
@@ -209,6 +216,8 @@ function insertDataValues()
 {
 	// Clear existing values
 	
+	var valueMap = new Array();
+	
 	$( '[name="entryfield"]' ).val( '' );
 	
 	$.getJSON( 'getDataValues.action', function( json ) 
@@ -223,6 +232,8 @@ function insertDataValues()
 			{
 				$( fieldId ).val( value.val );
 			}
+			
+			valueMap[value.id] = value.val;
 		} );
 		
 		// Set min-max values
@@ -231,6 +242,7 @@ function insertDataValues()
 		{
 			var minFieldId = '#' + value.id + '-min';
 			var maxFieldId = '#' + value.id + '-max';
+			var valFieldId = '#' + value.id + '-val';
 			
 			if ( $( minFieldId ) )
 			{
@@ -240,6 +252,14 @@ function insertDataValues()
 			if ( $( maxFieldId ) )
 			{
 				$( maxFieldId ).html( value.max );
+			}
+			
+			var dataValue = valueMap[value.id];
+			
+			if ( dataValue && ( ( value.min && new Number( dataValue ) < new Number( value.min ) ) 
+				|| ( value.max && new Number( dataValue ) > new Number( value.max ) ) ) )
+			{
+				$( valFieldId ).css( 'background-color', COLOR_ORANGE );
 			}
 		} );
 	} );
@@ -328,7 +348,8 @@ function getNextEntryField( field )
         if ( field.is( ':disabled' ) || field.is( ':hidden' ) )
         {
             field = $( 'input[name="entryfield"][tabindex="' + ( ++index ) + '"]' );
-        } else
+        } 
+        else
         {
             return field;
         }
@@ -346,7 +367,8 @@ function getPreviousEntryField( field )
         if ( field.is( ':disabled' ) || field.is( ':hidden' ) )
         {
             field = $( 'input[name="entryfield"][tabindex="' + ( --index ) + '"]' );
-        } else
+        } 
+        else
         {
             return field;
         }
@@ -389,7 +411,8 @@ function registerCompleteDataSet( json )
 
             alert( i18n_no_response_from_server );
         } );
-    } else
+    } 
+    else
     {
         window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
     }
