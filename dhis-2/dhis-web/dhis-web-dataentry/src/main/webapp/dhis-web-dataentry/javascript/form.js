@@ -222,7 +222,7 @@ function insertDataValues()
 	
 	$.getJSON( 'getDataValues.action', function( json ) 
 	{
-		// Set data values
+		// Set data values, works for select lists too as data value = select value
 	
 		$.each( json.dataValues, function( i, value )
 		{
