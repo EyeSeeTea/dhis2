@@ -29,8 +29,6 @@ package org.hisp.dhis.dataentryform;
 
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
-import static org.hisp.dhis.datavalue.DataValue.FALSE;
-import static org.hisp.dhis.datavalue.DataValue.TRUE;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,7 +41,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
@@ -229,8 +226,7 @@ public class DefaultDataEntryFormService
         return sb.toString();
     }
 
-    public String prepareDataEntryFormForEntry( String htmlCode,
-        Collection<DataValue> dataValues, String disabled, I18n i18n, DataSet dataSet )
+    public String prepareDataEntryFormForEntry( String htmlCode, String disabled, I18n i18n, DataSet dataSet )
     {
         // ---------------------------------------------------------------------
         // Inline javascript/html to add to HTML before output
@@ -285,8 +281,6 @@ public class DefaultDataEntryFormService
 
                 String dataElementValueType = dataElement.getDetailedNumberType();
 
-                String dataElementValue = getValue( dataValues, dataElementId, optionComboId );
-
                 // -------------------------------------------------------------
                 // Insert data value for data element in output code for boolean
                 // -------------------------------------------------------------
@@ -321,25 +315,8 @@ public class DefaultDataEntryFormService
                     appendCode += jsCodeForSelectLists + "tabindex=\"" + i++ + "\">";
 
                     appendCode += "<option value=\"\">" + i18n.getString( "no_value" ) + "</option>";
-
-                    if ( dataElementValue.equals( TRUE ) )
-                    {
-                        appendCode += "<option value=\"true\" selected>" + i18n.getString( "yes" ) + "</option>";
-                    }
-                    else
-                    {
-                        appendCode += "<option value=\"true\">" + i18n.getString( "yes" ) + "</option>";
-                    }
-
-                    if ( dataElementValue.equals( FALSE ) )
-                    {
-                        appendCode += "<option value=\"false\" selected>" + i18n.getString( "no" ) + "</option>";
-                    }
-                    else
-                    {
-                        appendCode += "<option value=\"false\">" + i18n.getString( "no" ) + "</option>";
-                    }
-
+                    appendCode += "<option value=\"true\">" + i18n.getString( "yes" ) + "</option>";
+                    appendCode += "<option value=\"false\">" + i18n.getString( "no" ) + "</option>";
                     appendCode += "</select>";
                 }
                 else
@@ -409,24 +386,6 @@ public class DefaultDataEntryFormService
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Returns the value of the DataValue in the Collection of DataValues with
-     * the given data element identifier and category option combo id.
-     */
-    private String getValue( Collection<DataValue> dataValues, int dataElementId, int categoryOptionComboId )
-    {
-        for ( DataValue dataValue : dataValues )
-        {
-            if ( dataValue.getDataElement().getId() == dataElementId
-                && dataValue.getOptionCombo().getId() == categoryOptionComboId )
-            {
-                return dataValue.getValue();
-            }
-        }
-
-        return EMPTY;
-    }
 
     /**
      * Returns a Map of all DataElements in the given DataSet where the key is

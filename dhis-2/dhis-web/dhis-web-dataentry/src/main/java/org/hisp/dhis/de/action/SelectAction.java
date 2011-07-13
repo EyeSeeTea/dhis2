@@ -57,7 +57,6 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.de.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
@@ -114,13 +113,6 @@ public class SelectAction
     public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
     {
         this.registrationService = registrationService;
-    }
-
-    private DataValueService dataValueService;
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
     }
 
     private DataElementCategoryService categoryService;
@@ -538,23 +530,6 @@ public class SelectAction
         }
 
         // ---------------------------------------------------------------------
-        // Get the DataValues and create a map
-        // ---------------------------------------------------------------------
-
-        Collection<DataValue> dataValues = dataValueService.getDataValues( organisationUnit, period, dataElements,
-            allOptionCombos );
-
-        dataValueMap = new HashMap<String, DataValue>( dataValues.size() );
-
-        for ( DataValue dataValue : dataValues )
-        {
-            Integer deId = dataValue.getDataElement().getId();
-            Integer ocId = dataValue.getOptionCombo().getId();
-
-            dataValueMap.put( deId.toString() + ':' + ocId.toString(), dataValue );
-        }
-
-        // ---------------------------------------------------------------------
         // Make the DataElement types available
         // ---------------------------------------------------------------------
 
@@ -568,13 +543,13 @@ public class SelectAction
         // Get data entry form
         // ---------------------------------------------------------------------
 
-        if( displayMode.equals( SECTION_FORM ) )
+        if ( displayMode.equals( SECTION_FORM ) )
         {
             getSectionForm( dataElements, selectedDataSet );
         }
         else
         {
-            getOtherDataEntryForm( dataElements, selectedDataSet, dataValues );
+            getOtherDataEntryForm( dataElements, selectedDataSet );
         }
 
         return displayMode;
@@ -625,8 +600,7 @@ public class SelectAction
 
     }
 
-    private void getOtherDataEntryForm( List<DataElement> dataElements, DataSet dataSet,
-        Collection<DataValue> dataValues )
+    private void getOtherDataEntryForm( List<DataElement> dataElements, DataSet dataSet )
     {
         DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
 
@@ -645,8 +619,8 @@ public class SelectAction
 
         if ( cdeFormExists )
         {
-            customDataEntryFormCode = dataEntryFormService.prepareDataEntryFormForEntry( dataEntryForm.getHtmlCode(),
-                dataValues, disabled, i18n, dataSet );
+            customDataEntryFormCode = dataEntryFormService.prepareDataEntryFormForEntry( 
+                dataEntryForm.getHtmlCode(), disabled, i18n, dataSet );
         }
 
         // ---------------------------------------------------------------------

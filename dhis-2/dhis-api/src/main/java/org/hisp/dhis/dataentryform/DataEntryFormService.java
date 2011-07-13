@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.i18n.I18n;
 
 /**
@@ -136,8 +135,7 @@ public interface DataEntryFormService
      * @param dataSet the data set associated with this form.
      * @return HTML code for the form.
      */
-    String prepareDataEntryFormForEntry( String htmlCode,
-        Collection<DataValue> dataValues, String disabled, I18n i18n, DataSet dataSet );
+    String prepareDataEntryFormForEntry( String htmlCode, String disabled, I18n i18n, DataSet dataSet );
     
     Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds );
     
