@@ -342,8 +342,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                     mode: 'local',
                     labelStyle: 'color:#000',
                     labelSeparator: G.conf.labelseparator,
-                    width: 50,
-                    listWidth: 50,
+                    width: G.conf.combo_number_width_small,
+                    listWidth: G.conf.combo_number_width_small,
                     store: this.stores.icon,
                     listeners: {
                         'select': {

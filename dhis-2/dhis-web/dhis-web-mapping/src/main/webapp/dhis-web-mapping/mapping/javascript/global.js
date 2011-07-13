@@ -33,7 +33,7 @@ G.conf = {
 	combo_width_fieldset: 127,
 	combo_list_width_fieldset: 127 + 17,
 	combo_number_width: 65,
-	combo_number_width_small: 40,
+	combo_number_width_small: 44,
     window_width: 251,
     window_position_x: 55,
     window_position_y: 41,

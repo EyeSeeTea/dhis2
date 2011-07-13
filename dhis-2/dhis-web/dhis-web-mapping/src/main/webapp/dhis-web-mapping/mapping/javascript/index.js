@@ -845,8 +845,8 @@
                                 labelSeparator: G.conf.labelseparator,
                                 fieldLabel: G.i18n.image,
                                 hidden: true,
-                                width: 50,
-                                listWidth: 50,
+                                width: G.conf.combo_number_width_small,
+                                listWidth: G.conf.combo_number_width_small,
                                 store: G.stores.mapLegendTypeIcon
                             },
                             {html: '<div class="window-p"></div>'},
@@ -1613,8 +1613,8 @@
                         triggerAction: 'all',
                         labelSeparator: G.conf.labelseparator,
                         fieldLabel: G.i18n.fill_opacity,
-                        width: G.conf.combo_number_width,
-                        minListWidth: G.conf.combo_number_width,
+                        width: G.conf.combo_number_width_small,
+                        minListWidth: G.conf.combo_number_width_small,
                         value: 0.5,
                         store: {
                             xtype: 'arraystore',
@@ -1642,8 +1642,8 @@
                         triggerAction: 'all',
                         labelSeparator: G.conf.labelseparator,
                         fieldLabel: G.i18n.stroke_width,
-                        width: G.conf.combo_number_width,
-                        minListWidth: G.conf.combo_number_width,
+                        width: G.conf.combo_number_width_small,
+                        minListWidth: G.conf.combo_number_width_small,
                         value: 2,
                         store: {
                             xtype: 'arraystore',
