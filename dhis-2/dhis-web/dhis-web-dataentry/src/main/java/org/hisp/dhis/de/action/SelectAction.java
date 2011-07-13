@@ -151,6 +151,10 @@ public class SelectAction
         this.displayPropertyHandler = displayPropertyHandler;
     }
 
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
     private Map<DataElementCategoryCombo, List<DataElement>> orderedDataElements = new HashMap<DataElementCategoryCombo, List<DataElement>>();
 
     public Map<DataElementCategoryCombo, List<DataElement>> getOrderedDataElements()
@@ -181,20 +185,12 @@ public class SelectAction
         return this.customDataEntryFormCode;
     }
 
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
     private String displayMode;
 
     public void setDisplayMode( String displayMode )
     {
         this.displayMode = displayMode;
     }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
 
     private OrganisationUnit organisationUnit;
 
@@ -259,7 +255,7 @@ public class SelectAction
         return dataElementValueTypeMap;
     }
 
-    private Integer integer = 0;
+    private Integer integer = 0; // TODO wtf
 
     public Integer getInteger()
     {

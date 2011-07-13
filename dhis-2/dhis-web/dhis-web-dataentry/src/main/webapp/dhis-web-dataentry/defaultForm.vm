@@ -1,5 +1,3 @@
-<input type="hidden" value="$organisationUnit.id" id="organisationUnitId"/>
-
 #set( $tabIndex = 1 )
 #foreach( $categoryCombo in $orderedCategoryCombos )
 <table style="border:1px solid #c0c0c0; padding:10px;">
@@ -43,7 +41,7 @@
     </td>
     #foreach( $optionCombo in $optionCombos )
 	    #set( $dataEntryId = "${dataElement.id}-${optionCombo.id}-val" )
-	    <span id="${dataElement.id}-${optionCombo.id}-min" class="hidden"></span><span id="${dataElement.id}-${optionCombo.id}-max" class="hidden"></span>
+	    <span id="${dataElement.id}-${optionCombo.id}-min" name="min" class="hidden"></span><span id="${dataElement.id}-${optionCombo.id}-max" name="max" class="hidden"></span>
 	    <td>
 	    #if( $dataElement.type == "bool" )
 		    <select name="entryselect" id="$dataEntryId" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue" ) ) onchange="saveBoolean($dataElement.id,$optionCombo.id )"  #else disabled="disabled" #end style="width:100%" tabindex="$tabIndex" #if( $locked ) disabled="disabled"#end>

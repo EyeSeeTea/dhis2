@@ -4,10 +4,17 @@ var significantZeros = [];
 // Associative array with [indicator id, expression] for indicators in form, also used in entry.js
 var indicatorFormulas = [];
 
+// Indicates whether any data entry form has been loaded
+var dataEntryFormIsLoaded = false;
+
+// Currently selected organisation unit identifier
+var currentOrganisationUnitId = null;
+
 var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
 var COLOR_RED = '#ff8a8a';
 var COLOR_ORANGE = '#ff6600';
+var COLOR_WHITE = '#ffffff';
 
 function addEventListeners()
 {
@@ -32,6 +39,8 @@ function clearEntryForm()
 
 function organisationUnitSelected( orgUnits )
 {
+	currentOrganisationUnitId = orgUnits[0];
+	
     $( '#selectedDataSetId' ).removeAttr( 'disabled' );
 
     var dataSetId = $( '#selectedDataSetId' ).val();
@@ -59,7 +68,15 @@ function organisationUnitSelected( orgUnits )
             if ( json.periodValid )
             {
                 showLoader();
-                $( '#contentDiv' ).load( 'select.action', loadDataValues );
+                
+                if ( dataEntryFormIsLoaded )
+                {
+                	loadDataValues();
+                }
+                else
+                {
+                	$( '#contentDiv' ).load( 'select.action', loadDataValues );
+                }
             }
         } else
         {
@@ -190,8 +207,17 @@ function periodSelected()
     if ( periodIndex && periodIndex != -1 )
     {
         showLoader();
-        var url = 'select.action?selectedPeriodIndex=' + periodIndex;
-        $( '#contentDiv' ).load( url, loadDataValuesAndDisplayModes );
+        
+        if ( dataEntryFormIsLoaded )
+        {
+        	loadDataValuesAndDisplayModes();
+        }
+        else
+        {
+        	var url = 'select.action?selectedPeriodIndex=' + periodIndex;
+        	
+        	$( '#contentDiv' ).load( url, loadDataValuesAndDisplayModes );
+        }
     }
 }
 
@@ -214,13 +240,22 @@ function loadDataValuesAndDisplayModes()
 
 function insertDataValues()
 {
-	// Clear existing values
-	
 	var valueMap = new Array();
 	
-	$( '[name="entryfield"]' ).val( '' );
+	var periodIndex = $( '#selectedPeriodIndex' ).val();
 	
-	$.getJSON( 'getDataValues.action', function( json ) 
+	// Clear existing values and colors
+	
+	$( '[name="entryfield"]' ).val( '' );
+	$( '[name="entryselect"]' ).val( '' );
+	
+	$( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
+	$( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
+	
+	$( '[name="min"]' ).html( '' );
+	$( '[name="max"]' ).html( '' );
+	
+	$.getJSON( 'getDataValues.action', { selectedPeriodIndex:periodIndex }, function( json ) 
 	{
 		// Set data values, works for select lists too as data value = select value
 	
@@ -236,7 +271,7 @@ function insertDataValues()
 			valueMap[value.id] = value.val;
 		} );
 		
-		// Set min-max values
+		// Set min-max values and colorize violation fields
 		
 		$.each( json.minMaxDataElements, function( i, value )
 		{
@@ -304,9 +339,10 @@ function setDisplayModes()
 function displayEntryFormCompleted()
 {
     addEventListeners();
-    hideLoader();
     enable( 'validationButton' );
     updateIndicators();
+    dataEntryFormIsLoaded = true;
+    hideLoader();
 }
 
 function valueFocus( e )

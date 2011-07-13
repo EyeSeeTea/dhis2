@@ -240,9 +240,9 @@ public class DefaultDataEntryFormService
         final String historyCode = " ondblclick='javascript:viewHist( $DATAELEMENTID, $OPTIONCOMBOID )' ";
         
         final String metaDataCode = "<span id=\"$DATAELEMENTID-dataelement\" style=\"display:none\">$DATAELEMENTNAME</span>"
-            + "<span id=\"$DATAELEMENTID-type\" style=\"display:none\">$DATAELEMENTTYPE</span>"
-            + "<div id=\"$DATAELEMENTID-$OPTIONCOMBOID-min\" style=\"display:none\"></div>"
-            + "<div id=\"$DATAELEMENTID-$OPTIONCOMBOID-max\" style=\"display:none\"></div>";
+            + "<span id=\"$DATAELEMENTID-type\" class=\"hidden\">$DATAELEMENTTYPE</span>"
+            + "<span id=\"$DATAELEMENTID-$OPTIONCOMBOID-min\" name=\"min\" class=\"hidden\"></span>"
+            + "<span id=\"$DATAELEMENTID-$OPTIONCOMBOID-max\" name=\"max\" class=\"hidden\"></span>";
 
         StringBuffer sb = new StringBuffer();
 
@@ -300,12 +300,6 @@ public class DefaultDataEntryFormService
                 
                 inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, title ) : inputHtml + " " + title;
 
-                // -------------------------------------------------------------
-                // Append Javascript code and meta data (type/min/max) for
-                // persisting to output code, and insert value and type for
-                // fields
-                // -------------------------------------------------------------
-                
                 String backgroundColor = "style=\"";
                 
                 String appendCode = "";
