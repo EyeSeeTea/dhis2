@@ -975,7 +975,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
 						}
 						this.bounds.push(mapLegends[i].startValue);
 					}
-					this.symbolizerInterpolation.push(mapLegends[i].imgUrl);
+					this.symbolizerInterpolation.push(mapLegends[i].image);
 					this.bounds.push(mapLegends[i].endValue);
 				}
                 

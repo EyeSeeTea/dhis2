@@ -101,10 +101,10 @@ mapfish.GeoStat.Centroid = OpenLayers.Class(mapfish.GeoStat, {
         
         var boundsArray = this.classification.getBoundsArray();
         var rules = new Array(boundsArray.length-1);
-        for (var i = 0; i < boundsArray.length-1; i++) {            
+        for (var i = 0; i < boundsArray.length-1; i++) {
             var rule = new OpenLayers.Rule({                
                 symbolizer: {
-                    'pointRadius': 16,
+                    'pointRadius': this.symbolizerInterpolation[i] == 'blank' ? 0 : 16,
                     'externalGraphic': '../resources/ext-ux/iconcombo/' + this.symbolizerInterpolation[i] + '-map.png'
                 }, 
                 filter: new OpenLayers.Filter.Comparison({

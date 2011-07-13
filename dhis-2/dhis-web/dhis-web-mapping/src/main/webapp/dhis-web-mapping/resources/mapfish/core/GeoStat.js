@@ -340,7 +340,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);        
                 if (G.vars.activeWidget == centroid) {
-                    G.vars.activeWidget.symbolizerInterpolation.unshift('blank.png');
+                    G.vars.activeWidget.symbolizerInterpolation.unshift('blank');
                 }
                 else {
                     G.vars.activeWidget.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
@@ -350,7 +350,7 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 			if (bounds[bounds.length-1] < this.maxVal) {
 				bounds.push(this.maxVal); 
                 if (G.vars.activeWidget == centroid) {
-                    G.vars.activeWidget.symbolizerInterpolation.push('blank.png');
+                    G.vars.activeWidget.symbolizerInterpolation.push('blank');
                 }
                 else {
                     G.vars.activeWidget.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
