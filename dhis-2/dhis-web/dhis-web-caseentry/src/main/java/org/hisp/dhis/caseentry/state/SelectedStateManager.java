@@ -30,7 +30,9 @@ package org.hisp.dhis.caseentry.state;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageInstance;
 
 /**
  * @author Abyot Asalefew
@@ -40,11 +42,39 @@ public interface SelectedStateManager
 {
     OrganisationUnit getSelectedOrganisationUnit();
 
+    // -------------------------------------------------------------------------
+    // Patient
+    // -------------------------------------------------------------------------
+
     void setSelectedPatient( Patient patient );
 
     Patient getSelectedPatient();
 
     void clearSelectedPatient();
+
+    // -------------------------------------------------------------------------
+    // Program-instance
+    // -------------------------------------------------------------------------
+
+    void setSelectedProgramInstance( ProgramInstance programInstance );
+
+    ProgramInstance getSelectedProgramInstance();
+
+    void clearSelectedProgramInstance();
+
+    // -------------------------------------------------------------------------
+    // Program-stage-instance
+    // -------------------------------------------------------------------------
+
+    void setSelectedProgramStageInstance( ProgramStageInstance programStageInstance );
+
+    ProgramStageInstance getSelectedProgramStageInstance();
+
+    void clearSelectedProgramStageInstance();
+
+    // -------------------------------------------------------------------------
+    // Progam
+    // -------------------------------------------------------------------------
 
     void setSelectedProgram( Program program );
 
@@ -52,11 +82,19 @@ public interface SelectedStateManager
 
     void clearSelectedProgram();
 
+    // -------------------------------------------------------------------------
+    // Progam-stages
+    // -------------------------------------------------------------------------
+
     void setSelectedProgramStage( ProgramStage programStage );
 
     ProgramStage getSelectedProgramStage();
 
     void clearSelectedProgramStage();
+
+    // -------------------------------------------------------------------------
+    // for searching patients
+    // -------------------------------------------------------------------------
 
     void setListAll( boolean listAll );
 

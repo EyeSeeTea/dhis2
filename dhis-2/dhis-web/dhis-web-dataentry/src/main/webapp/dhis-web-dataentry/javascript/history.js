@@ -35,7 +35,7 @@ function CommentSaver( dataElementId_, optionComboId_, organisationUnitId_, valu
     
     function handleResponse( json )
     {
-    	var code = json.code;
+    	var code = json.c;
     	
         if ( code == 0 )
         {
@@ -75,39 +75,48 @@ function saveMinMaxLimit()
 	var minValue = $( '#minLimit' ).val();
 	var maxValue = $( '#maxLimit' ).val();
 	
-	if ( !minValue || minValue == '' ) {
+	if ( !minValue || minValue == '' ) 
+	{
 		return;
 	}
-	else if ( !isInt( minValue ) ) {
+	else if ( !isInt( minValue ) ) 
+	{
 		$( '#minSpan' ).html( i18n_enter_digits );
 		return;
 	}
-	else {
+	else 
+	{
 		$( '#minSpan' ).html( '' );
 	}
 	
-	if ( !maxValue || maxValue == '' ) {
+	if ( !maxValue || maxValue == '' ) 
+	{
 		return;
 	}
-	else if ( !isInt( maxValue ) ) {
+	else if ( !isInt( maxValue ) ) 
+	{
 		$( '#maxSpan' ).html( i18n_enter_digits );
 		return;
 	}
-	else {
+	else 
+	{
 		$( '#maxSpan' ).html( '' );
 	}
 	
-	if ( eval(minValue) > eval(maxValue) ) {
+	if ( eval(minValue) > eval(maxValue) ) 
+	{
 		$( '#maxSpan' ).html( i18n_max_must_be_greater_than_min );
 		return;
 	}
-	else {
+	else 
+	{
 		$( '#maxSpan' ).html( '' );
 	}
 	
-	if ( window.opener && window.opener.document ) {
-		window.opener.document.getElementById( 'value[' + currentDataElementId + ':' + currentOptionComboId + '].min' ).innerHTML = minValue;
-    	window.opener.document.getElementById( 'value[' + currentDataElementId + ':' + currentOptionComboId + '].max' ).innerHTML = maxValue;
+	if ( window.opener && window.opener.document ) 
+	{
+		window.opener.document.getElementById( currentDataElementId + '-' + currentOptionComboId + '-min' ).innerHTML = minValue;
+    	window.opener.document.getElementById( currentDataElementId + '-' + currentOptionComboId + '-max' ).innerHTML = maxValue;
 	}
 	
     var url = 'saveMinMaxLimits.action?organisationUnitId=' + currentOrganisationUnitId + '&dataElementId=' + currentDataElementId + 

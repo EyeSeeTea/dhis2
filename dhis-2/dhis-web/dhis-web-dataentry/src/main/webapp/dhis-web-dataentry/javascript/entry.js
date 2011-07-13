@@ -1,11 +1,20 @@
+
+/**
+ * This file depends on form.js.
+ * 
+ * Format for the span/input identifiers for selectors:
+ * 
+ * {dataelementid}-{optioncomboid}-val // data value
+ * {dataelementid}-dataelement // name of data element
+ * {optioncomboid}-optioncombo // name of category option combo
+ * {dataelementid}-{optioncomboid}-min // min value for data value
+ * {dataelementid}-{optioncomboid}-max // max value for data value
+ * {dataelementid}-type // data element type
+ */
+
 // -----------------------------------------------------------------------------
 // Save
 // -----------------------------------------------------------------------------
-
-var COLOR_GREEN = '#b9ffb9';
-var COLOR_YELLOW = '#fffe8c';
-var COLOR_RED = '#ff8a8a';
-var COLOR_ORANGE = '#ff6600';
 
 var FORMULA_PATTERN = /\[.+?\]/g;
 var SEPARATOR = '.';
@@ -67,13 +76,11 @@ function generateExpression( expression )
         var dataElementId = operand.substring( 0, operand.indexOf( SEPARATOR ) );
         var categoryOptionComboId = operand.substring( operand.indexOf( SEPARATOR ) + 1, operand.length );
 
-        var entryFieldId = 'value[' + dataElementId + '].value:value[' + categoryOptionComboId + '].value';
-        var entryField = document.getElementById( entryFieldId );
+        var fieldId = '#' + dataElementId + '-' + categoryOptionComboId + '-val';
 
-        var value = entryField && entryField.value ? entryField.value : '0';
+        var value = $( fieldId ) && $( fieldId ).val() ? $( fieldId ).val() : '0';
 
-        expression = expression.replace( match, value ); // TODO signed
-                                                            // numbers
+        expression = expression.replace( match, value ); // TODO signed numbers
     }
 
     return expression;
@@ -84,152 +91,105 @@ function generateExpression( expression )
  */
 function saveVal( dataElementId, optionComboId )
 {
-    var dataElementName = document.getElementById( 'value[' + dataElementId + '].name' ).innerHTML;
+    var dataElementName = $( '#' + dataElementId + '-dataelement' ).html();
 
-    saveValueInternal( dataElementId, optionComboId, dataElementName, null );
-}
+    var fieldId = '#' + dataElementId + '-' + optionComboId + '-val';
+    var value =$( fieldId ).val();
+    var type = $( '#' + dataElementId + '-type' ).html();
 
-/**
- * /* Used by custom forms.
- */
-function saveValue( dataElementId, optionComboId, dataElementName )
-{
-    saveValueInternal( dataElementId, optionComboId, dataElementName );
-    updateIndicators();
-}
+    $( fieldId ).css( 'background-color', COLOR_YELLOW );
 
-function saveValueInternal( dataElementId, optionComboId, dataElementName )
-{
-    var field = document.getElementById( 'value[' + dataElementId + '].value' + ':' + 'value[' + optionComboId
-            + '].value' );
-    var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML;
-    var organisationUnitId = getFieldValue( 'organisationUnitId' );
-
-    field.style.backgroundColor = COLOR_YELLOW;
-
-    if ( field.value && field.value != '' )
+    if ( value )
     {
         if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' )
         {
-            if ( field.value && field.value.length > 255 )
+            if ( value.length > 255 )
             {
-                window.alert( i18n_value_too_long + '\n\n' + dataElementName );
-                return alertField( field );
+                return alertField( fieldId, i18n_value_too_long + '\n\n' + dataElementName );
             }
-            if ( type == 'int' && !isInt( field.value ) )
+            if ( type == 'int' && !isInt( value ) )
             {
-                window.alert( i18n_value_must_integer + '\n\n' + dataElementName );
-                return alertField( field );
+                return alertField( fieldId,  i18n_value_must_integer + '\n\n' + dataElementName );
             }
-            if ( type == 'number' && !isRealNumber( field.value ) )
+            if ( type == 'number' && !isRealNumber( value ) )
             {
-                window.alert( i18n_value_must_number + '\n\n' + dataElementName );
-                return alertField( field );
+                return alertField( fieldId, i18n_value_must_number + '\n\n' + dataElementName );
             }
-            if ( type == 'positiveNumber' && !isPositiveInt( field.value ) )
+            if ( type == 'positiveNumber' && !isPositiveInt( value ) )
             {
-                window.alert( i18n_value_must_positive_integer + '\n\n' + dataElementName );
-                return alertField( field );
+                return alertField( fieldId,  i18n_value_must_positive_integer + '\n\n' + dataElementName );
             }
-            if ( type == 'negativeNumber' && !isNegativeInt( field.value ) )
+            if ( type == 'negativeNumber' && !isNegativeInt( value ) )
             {
-                window.alert( i18n_value_must_negative_integer + '\n\n' + dataElementName );
-                return alertField( field );
+                return alertField( fieldId, i18n_value_must_negative_integer + '\n\n' + dataElementName );
             }
-            if ( isValidZeroNumber( field.value ) )
+            if ( isValidZeroNumber( value ) )
             {
-                // If value is 0 and zero is not significant for data element,
-                // then skip value
+                // If value is 0 and zero is not significant for data element, skip value
                 if ( significantZeros.indexOf( dataElementId ) == -1 )
                 {
-                    field.style.backgroundColor = COLOR_GREEN;
+                    $( fieldId ).css( 'background-color', COLOR_GREEN );
                     return false;
                 }
             }
 
-            var minString = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].min' ).innerHTML;
-            var maxString = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].max' ).innerHTML;
+            var minString = $( '#' + dataElementId + '-' + optionComboId + '-min' ).html();
+            var maxString = $( '#' + dataElementId + '-' + optionComboId + '-max' ).html();
 
-            if ( minString.length != 0 && maxString.length != 0 )
+            if ( minString && maxString ) // TODO if only one exists?
             {
-                var value = new Number( field.value );
+                var valueNo = new Number( value );
                 var min = new Number( minString );
                 var max = new Number( maxString );
 
-                if ( value < min )
+                if ( valueNo < min )
                 {
-                    var valueSaver = new ValueSaver( dataElementId, optionComboId, organisationUnitId, field.value,
-                            COLOR_ORANGE );
+                    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_ORANGE );
                     valueSaver.save();
 
-                    window.alert( i18n_value_of_data_element_less + '\n\n' + dataElementName );
-
+                    window.alert( i18n_value_of_data_element_less + ': ' + min + '\n\n' + dataElementName );
                     return;
                 }
 
-                if ( value > max )
+                if ( valueNo > max )
                 {
-                    var valueSaver = new ValueSaver( dataElementId, optionComboId, organisationUnitId, field.value,
-                            COLOR_ORANGE );
+                    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_ORANGE );
                     valueSaver.save();
 
-                    window.alert( i18n_value_of_data_element_greater + '\n\n' + dataElementName );
-
+                    window.alert( i18n_value_of_data_element_greater + ': ' + max + '\n\n' + dataElementName );
                     return;
                 }
             }
         }
     }
 
-    var valueSaver = new ValueSaver( dataElementId, optionComboId, organisationUnitId, field.value, COLOR_GREEN, '' );
+    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_GREEN );
     valueSaver.save();
+    
+    updateIndicators(); // Update indicators in case of custom form
 }
 
-function saveBoolean( dataElementId, optionComboId, selectedOption )
+function saveBoolean( dataElementId, optionComboId )
 {
-    var select = selectedOption.options[selectedOption.selectedIndex].value
-    var organisationUnitId = getFieldValue( 'organisationUnitId' );
+    var fieldId = '#' + dataElementId + '-' + optionComboId + '-val';
+    var value = $( fieldId + ' option:selected' ).val();
 
-    selectedOption.style.backgroundColor = COLOR_YELLOW;
+    $( fieldId ).css( 'background-color', COLOR_YELLOW );
 
-    var valueSaver = new ValueSaver( dataElementId, optionComboId, organisationUnitId, select, COLOR_GREEN,
-            selectedOption );
+    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_GREEN );
     valueSaver.save();
-}
-
-function saveDate( dataElementId, dataElementName )
-{
-    var field = document.getElementById( 'value[' + dataElementId + '].date' );
-    var type = document.getElementById( 'value[' + dataElementId + '].valueType' ).innerHTML;
-    var organisationUnitId = getFieldValue( 'organisationUnitId' );
-
-    field.style.backgroundColor = COLOR_YELLOW;
-
-    var valueSaver = new ValueSaver( dataElementId, '', organisationUnitId, field.value, COLOR_GREEN, '' );
-    valueSaver.save();
-}
-
-function saveComment( dataElementId, optionComboId, commentValue )
-{
-    var field = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comment' );
-    var select = document.getElementById( 'value[' + dataElementId + ':' + optionComboId + '].comments' );
-    var organisationUnitId = getFieldValue( 'organisationUnitId' );
-
-    field.style.backgroundColor = COLOR_YELLOW;
-    select.style.backgroundColor = COLOR_YELLOW;
-
-    var commentSaver = new CommentSaver( dataElementId, optionComboId, organisationUnitId, commentValue );
-    commentSaver.save();
 }
 
 /**
  * Supportive method.
  */
-function alertField( field )
+function alertField( fieldId, alertMessage )
 {
-    field.style.backgroundColor = COLOR_YELLOW;
-    field.select();
-    field.focus();
+    $( fieldId ).css( fieldId, COLOR_YELLOW );
+    $( fieldId ).select();
+    $( fieldId ).focus();
+    alert( alertMessage );
+
     return false;
 }
 
@@ -237,13 +197,12 @@ function alertField( field )
 // Saver objects
 // -----------------------------------------------------------------------------
 
-function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_, resultColor_, selectedOption_ )
+function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_, resultColor_ )
 {
     var dataElementId = dataElementId_;
     var optionComboId = optionComboId_;
     var value = value_;
     var resultColor = resultColor_;
-    var selectedOption = selectedOption_;
     var organisationUnitId = organisationUnitId_;
 
     this.save = function()
@@ -261,12 +220,13 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
 
     function handleResponse( json )
     {
-        var code = json.code;
+        var code = json.c;
 
         if ( code == 0 )
         {
             markValue( resultColor );
-        } else
+        }
+        else
         {
             markValue( COLOR_RED );
             window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
@@ -281,24 +241,6 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
 
     function markValue( color )
     {
-        var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerText;
-        var element;
-
-        if ( type == 'bool' )
-        {
-            element = document.getElementById( 'value[' + dataElementId + '].boolean' );
-        } else if ( type == 'date' )
-        {
-            element = document.getElementById( 'value[' + dataElementId + '].date' );
-        } else if ( selectedOption )
-        {
-            element = selectedOption;
-        } else
-        {
-            element = document.getElementById( 'value[' + dataElementId + '].value' + ':' + 'value[' + optionComboId
-                    + '].value' );
-        }
-
-        element.style.backgroundColor = color;
+        $( '#' + dataElementId + '-' + optionComboId + '-val' ).css( "background-color", color );
     }
 }

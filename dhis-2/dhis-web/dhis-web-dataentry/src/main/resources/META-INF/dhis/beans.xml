@@ -19,7 +19,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
   </bean>
 
-	<!-- Actions -->
+  <!-- Actions -->
+
+  <bean id="org.hisp.dhis.de.action.GetDataValuesForDataSetAction" class="org.hisp.dhis.de.action.GetDataValuesForDataSetAction"
+	scope="prototype">
+    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
+	<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
+	<property name="minMaxDataElementService" ref="org.hisp.dhis.minmax.MinMaxDataElementService" />
+  </bean>
 
   <bean id="org.hisp.dhis.de.action.LoadOrganisationUnitAction" class="org.hisp.dhis.de.action.LoadOrganisationUnitAction"
     scope="prototype">
@@ -52,8 +59,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="dataSetLockService" ref="org.hisp.dhis.datalock.DataSetLockService" />
     <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
     <property name="registrationService" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
-    <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="minMaxDataElementService" ref="org.hisp.dhis.minmax.MinMaxDataElementService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 

@@ -3,14 +3,6 @@ jQuery(document).ready(	function(){
 	validation( 'programValidationForm', function( form ){			
 		form.submit();
 	});
-	
-	var isSingle = eval(jQuery.getUrlVars('value')['single']);
-	
-	if( isSingle || getFieldValue('rightSide') == '1==1')
-	{
-		hideById('rightSideDiv');
-		setFieldValue('rightSide','1==1');
-	}
 });
 
 // -----------------------------------------------------------------------------
@@ -49,11 +41,40 @@ function removeProgramValidation( programValidationId, name )
 // Insert items data-element
 //-----------------------------------------------------------------
 
-function insertDataElement( element, target )
+function insertDataElement( element, target, decriptionDiv )
 {
-	byId(target).value += " " + element.options[element.selectedIndex].value + " ";
+	var value = " " + element.options[element.selectedIndex].value + " ";
+	
+	insertTextCommon( target, value );
+	
+	getValidationDescription( decriptionDiv, target );
 }
 
+function insertOperator( decriptionDiv, target, value )
+{
+	insertTextCommon( target, ' ' + value + ' ' );
+	
+	getValidationDescription( decriptionDiv, target );
+}
+
+
+function getValidationDescription( decriptionDiv, sideDiv )
+{
+	$.post("getCaseAggregationDescription.action",
+		{
+			condition: getFieldValue( sideDiv )
+		},
+		function (data)
+		{
+			setInnerHTML( decriptionDiv, data );
+		},'html');
+}
+
+function clearValidation( target, decriptionDiv )
+{
+	setFieldValue( target,'' );
+	setInnerHTML( decriptionDiv, '' );
+}
 
 //------------------------------------------------------------------------------
 // Get DataElements of Program-Stage into left-side

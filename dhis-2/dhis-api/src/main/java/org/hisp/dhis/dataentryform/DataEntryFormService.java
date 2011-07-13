@@ -29,13 +29,10 @@ package org.hisp.dhis.dataentryform;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.minmax.MinMaxDataElement;
 
 /**
  * @author Bharath Kumar
@@ -45,7 +42,7 @@ public interface DataEntryFormService
     String ID = DataEntryFormService.class.getName();
 
     final Pattern INPUT_PATTERN = Pattern.compile( "(<input.*?/>)", Pattern.DOTALL );
-    final Pattern IDENTIFIER_PATTERN = Pattern.compile( "value\\[(.*)\\].value:value\\[(.*)\\].value" );
+    final Pattern IDENTIFIER_PATTERN = Pattern.compile( "(\\d+)-(\\d+)-val" );
     final Pattern INDICATOR_PATTERN = Pattern.compile( "indicatorid=\"(.*?)\"" );
     final Pattern VALUE_TAG_PATTERN = Pattern.compile( "value=\"(.*?)\"", Pattern.DOTALL );
     final Pattern TITLE_TAG_PATTERN = Pattern.compile( "title=\"(.*?)\"", Pattern.DOTALL );
@@ -109,7 +106,8 @@ public interface DataEntryFormService
     Collection<DataEntryForm> getDataEntryForms( final Collection<Integer> identifiers );
     
     /**
-     * Prepare DataEntryForm code for persisting.
+     * Prepare DataEntryForm code for save by reversing the effects of
+     * prepareDataEntryFormForEdit().
      * 
      * @return htmlCode the HTML code of the data entry form.
      */
@@ -137,8 +135,7 @@ public interface DataEntryFormService
      * @param dataSet the data set associated with this form.
      * @return HTML code for the form.
      */
-    String prepareDataEntryFormForEntry( String htmlCode,
-        Collection<DataValue> dataValues, Map<String, MinMaxDataElement> minMaxMap, String disabled, I18n i18n, DataSet dataSet );
+    String prepareDataEntryFormForEntry( String htmlCode, String disabled, I18n i18n, DataSet dataSet );
     
     Collection<DataEntryForm> listDisctinctDataEntryFormByProgramStageIds( List<Integer> programStageIds );
     

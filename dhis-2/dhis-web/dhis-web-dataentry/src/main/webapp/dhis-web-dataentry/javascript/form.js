@@ -1,7 +1,20 @@
-var significantZeros = []; // Identifiers for which zero values are
-// insignificant, also used in entry.js
-var indicatorFormulas = []; // Associative array with [indicator id, expression]
-// for indicators in form, also used in entry.js
+// Identifiers for which zero values are, insignificant, also used in entry.js
+var significantZeros = [];
+
+// Associative array with [indicator id, expression] for indicators in form, also used in entry.js
+var indicatorFormulas = [];
+
+// Indicates whether any data entry form has been loaded
+var dataEntryFormIsLoaded = false;
+
+// Currently selected organisation unit identifier
+var currentOrganisationUnitId = null;
+
+var COLOR_GREEN = '#b9ffb9';
+var COLOR_YELLOW = '#fffe8c';
+var COLOR_RED = '#ff8a8a';
+var COLOR_ORANGE = '#ff6600';
+var COLOR_WHITE = '#ffffff';
 
 function addEventListeners()
 {
@@ -18,6 +31,8 @@ function clearPeriod()
 function clearEntryForm()
 {
     $( '#contentDiv' ).html( '' );
+    
+    dataEntryFormIsLoaded = false;
 }
 
 // -----------------------------------------------------------------------------
@@ -26,6 +41,8 @@ function clearEntryForm()
 
 function organisationUnitSelected( orgUnits )
 {
+	currentOrganisationUnitId = orgUnits[0];
+	
     $( '#selectedDataSetId' ).removeAttr( 'disabled' );
 
     var dataSetId = $( '#selectedDataSetId' ).val();
@@ -50,12 +67,13 @@ function organisationUnitSelected( orgUnits )
         {
             $( '#selectedDataSetId' ).val( dataSetId );
 
-            if ( json.periodValid )
+            if ( json.periodValid && dataEntryFormIsLoaded )
             {
                 showLoader();
-                $( '#contentDiv' ).load( 'select.action', displayEntryFormCompleted );
+                loadDataValues();
             }
-        } else
+        } 
+        else
         {
             clearPeriod();
         }
@@ -146,8 +164,9 @@ function dataSetSelected()
             {
                 showLoader();
                 $( '#selectedPeriodIndex' ).val( periodIndex );
-                $( '#contentDiv' ).load( 'select.action', setDisplayModes );
-            } else
+                $( '#contentDiv' ).load( 'select.action', loadDataValuesAndDisplayModes );
+            } 
+            else
             {
                 clearEntryForm();
             }
@@ -165,7 +184,7 @@ function displayModeSelected()
 
     var url = 'select.action?displayMode=' + $( "input[name='displayMode']:checked" ).val();
 
-    $( '#contentDiv' ).load( url, displayEntryFormCompleted );
+    $( '#contentDiv' ).load( url, loadDataValues );
 }
 
 // -----------------------------------------------------------------------------
@@ -179,27 +198,105 @@ function periodSelected()
     $( '#currentPeriod' ).html( periodName );
 
     var periodIndex = $( '#selectedPeriodIndex' ).val();
-
+    
     if ( periodIndex && periodIndex != -1 )
     {
         showLoader();
-        var url = 'select.action?selectedPeriodIndex=' + periodIndex;
-        $( '#contentDiv' ).load( url, setDisplayModes );
+        
+        if ( dataEntryFormIsLoaded )
+        {
+        	loadDataValuesAndDisplayModes();
+        }
+        else
+        {
+        	var url = 'select.action?selectedPeriodIndex=' + periodIndex;
+        	
+        	$( '#contentDiv' ).load( url, loadDataValuesAndDisplayModes );
+        }
     }
 }
 
-function displayEntryFormCompleted()
+// -----------------------------------------------------------------------------
+// Form
+// -----------------------------------------------------------------------------
+
+function loadDataValues()
 {
-    addEventListeners();
-    hideLoader();
-    enable( 'validationButton' );
-    updateIndicators();
+	insertDataValues();
+	displayEntryFormCompleted();
+}
+
+function loadDataValuesAndDisplayModes()
+{
+	insertDataValues();
+	setDisplayModes();
+	displayEntryFormCompleted();
+}
+
+function insertDataValues()
+{
+	var valueMap = new Array();
+	
+	var periodIndex = $( '#selectedPeriodIndex' ).val();
+	
+	// Clear existing values and colors
+	
+	$( '[name="entryfield"]' ).val( '' );
+	$( '[name="entryselect"]' ).val( '' );
+	
+	$( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
+	$( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
+	
+	$( '[name="min"]' ).html( '' );
+	$( '[name="max"]' ).html( '' );
+	
+	$.getJSON( 'getDataValues.action', { selectedPeriodIndex:periodIndex }, function( json ) 
+	{
+		// Set data values, works for select lists too as data value = select value
+	
+		$.each( json.dataValues, function( i, value )
+		{
+			var fieldId = '#' + value.id + '-val';
+			
+			if ( $( fieldId ) )
+			{
+				$( fieldId ).val( value.val );
+			}
+			
+			valueMap[value.id] = value.val;
+		} );
+		
+		// Set min-max values and colorize violation fields
+		
+		$.each( json.minMaxDataElements, function( i, value )
+		{
+			var minFieldId = '#' + value.id + '-min';
+			var maxFieldId = '#' + value.id + '-max';
+			var valFieldId = '#' + value.id + '-val';
+			
+			if ( $( minFieldId ) )
+			{
+				$( minFieldId ).html( value.min );
+			}
+			
+			if ( $( maxFieldId ) )
+			{
+				$( maxFieldId ).html( value.max );
+			}
+			
+			var dataValue = valueMap[value.id];
+			
+			if ( dataValue && ( ( value.min && new Number( dataValue ) < new Number( value.min ) ) 
+				|| ( value.max && new Number( dataValue ) > new Number( value.max ) ) ) )
+			{
+				$( valFieldId ).css( 'background-color', COLOR_ORANGE );
+			}
+		} );
+	} );
 }
 
 function setDisplayModes()
 {
-    displayEntryFormCompleted();
-
     $.getJSON( 'loadDisplayModes.action', function( json )
     {
         $( '#displayModeCustom' ).removeAttr( 'disabled' );
@@ -213,10 +310,12 @@ function setDisplayModes()
         if ( json.displayMode == 'customform' )
         {
             $( '#displayModeCustom' ).attr( 'checked', 'checked' );
-        } else if ( json.displayMode == 'sectionform' )
+        } 
+        else if ( json.displayMode == 'sectionform' )
         {
             $( '#displayModeSection' ).attr( 'checked', 'checked' );
-        } else
+        } 
+        else
         {
             $( '#displayModeDefault' ).attr( 'checked', 'checked' );
         }
@@ -232,84 +331,26 @@ function setDisplayModes()
     } );
 }
 
+function displayEntryFormCompleted()
+{
+    addEventListeners();
+    enable( 'validationButton' );
+    updateIndicators();
+    dataEntryFormIsLoaded = true;
+    hideLoader();
+}
+
 function valueFocus( e )
 {
-    // Retrieve the data element id from the id of the field
-    var baseId = e.target.id;
+	var id = e.target.id;
 
-    var opId = baseId;
-    var str = baseId;
-
-    if ( baseId.indexOf( ':' ) != -1 )
-    {
-        opId = baseId.substr( baseId.indexOf( ':' ) + 1, baseId.length );
-        str = baseId.substr( 0, baseId.indexOf( ':' ) );
-    }
-
-    var match1 = /.*\[(.*)\]/.exec( str ); // value[-dataElementId-]
-    var match2 = /.*\[(.*)\]/.exec( opId ); // value[-optionComboId-]
-
-    if ( !match1 )
-    {
-        return;
-    }
-
-    deId = match1[1];
-    ocId = match2[1];
-
-    var nameContainer = document.getElementById( 'value[' + deId + '].name' );
-    var opCbContainer = document.getElementById( 'value[option' + ocId + '].name' );
-    var minContainer = document.getElementById( 'value[' + deId + ':' + ocId + '].min' );
-    var maxContainer = document.getElementById( 'value[' + deId + ':' + ocId + '].max' );
-
-    if ( !nameContainer )
-    {
-        return;
-    }
-
-    var name = '';
-    var optionName = '';
-
-    var as = nameContainer.getElementsByTagName( 'a' );
-
-    if ( as.length > 0 ) // Admin rights: Name is in a link
-    {
-        name = as[0].firstChild.nodeValue;
-    } else
-    {
-        name = nameContainer.firstChild.nodeValue;
-    }
-
-    if ( opCbContainer )
-    {
-        if ( opCbContainer.firstChild )
-        {
-            optionName = opCbContainer.firstChild.nodeValue;
-        }
-    }
-
-    if ( minContainer )
-    {
-        if ( minContainer.firstChild )
-        {
-            optionName += " - " + minContainer.firstChild.nodeValue;
-        }
-    }
-
-    if ( maxContainer )
-    {
-        if ( maxContainer.firstChild )
-        {
-            optionName += " - " + maxContainer.firstChild.nodeValue;
-        }
-    }
-
-    var curDeSpan = document.getElementById( 'currentDataElement' );
-
-    curDeSpan.firstChild.nodeValue = name;
-
-    document.getElementById( "currentOptionCombo" ).innerHTML = optionName;
-
+	var dataElementId = id.split( '-' )[0];
+	var optionComboId = id.split( '-' )[1];
+	
+	var dataElementName = $( '#' + dataElementId + '-dataelement' ).text();
+	var optionComboName = $( '#' + optionComboId + '-optioncombo' ).text();
+	
+	$( "#currentDataElement" ).html( dataElementName + ' ' + optionComboName );
 }
 
 function keyPress( event, field )
@@ -338,7 +379,8 @@ function getNextEntryField( field )
         if ( field.is( ':disabled' ) || field.is( ':hidden' ) )
         {
             field = $( 'input[name="entryfield"][tabindex="' + ( ++index ) + '"]' );
-        } else
+        } 
+        else
         {
             return field;
         }
@@ -356,7 +398,8 @@ function getPreviousEntryField( field )
         if ( field.is( ':disabled' ) || field.is( ':hidden' ) )
         {
             field = $( 'input[name="entryfield"][tabindex="' + ( --index ) + '"]' );
-        } else
+        } 
+        else
         {
             return field;
         }
@@ -399,7 +442,8 @@ function registerCompleteDataSet( json )
 
             alert( i18n_no_response_from_server );
         } );
-    } else
+    } 
+    else
     {
         window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
     }
