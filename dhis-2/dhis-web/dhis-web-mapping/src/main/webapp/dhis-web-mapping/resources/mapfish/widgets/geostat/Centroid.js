@@ -603,7 +603,6 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             width: G.conf.combo_width,
             store: G.stores.predefinedImageMapLegendSet,
-            isFocused: false,
             listeners: {
                 'select': {
                     scope: this,
