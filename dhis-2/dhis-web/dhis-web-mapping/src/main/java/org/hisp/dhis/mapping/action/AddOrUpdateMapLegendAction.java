@@ -81,11 +81,11 @@ public class AddOrUpdateMapLegendAction
         this.color = color;
     }
 
-    private String imgUrl;
+    private String image;
 
-    public void setImgUrl( String imgUrl )
+    public void setImage( String image )
     {
-        this.imgUrl = imgUrl;
+        this.image = image;
     }
 
     // -------------------------------------------------------------------------
@@ -95,7 +95,7 @@ public class AddOrUpdateMapLegendAction
     public String execute()
     {
         this.mappingService.addOrUpdateMapLegend( name, Double.parseDouble( startValue ),
-            Double.parseDouble( endValue ), color, imgUrl );
+            Double.parseDouble( endValue ), color, image );
 
         return SUCCESS;
     }

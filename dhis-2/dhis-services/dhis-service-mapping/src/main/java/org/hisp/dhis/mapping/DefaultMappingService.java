@@ -359,7 +359,7 @@ public class DefaultMappingService
     // MapLegend
     // -------------------------------------------------------------------------
 
-    public void addOrUpdateMapLegend( String name, Double startValue, Double endValue, String color, String imgUrl )
+    public void addOrUpdateMapLegend( String name, Double startValue, Double endValue, String color, String image )
     {
         MapLegend mapLegend = getMapLegendByName( name );
 
@@ -369,13 +369,13 @@ public class DefaultMappingService
             mapLegend.setStartValue( startValue );
             mapLegend.setEndValue( endValue );
             mapLegend.setColor( color );
-            mapLegend.setImgUrl( imgUrl );
+            mapLegend.setImage( image );
 
             mappingStore.updateMapLegend( mapLegend );
         }
         else
         {
-            mapLegend = new MapLegend( name, startValue, endValue, color, imgUrl );
+            mapLegend = new MapLegend( name, startValue, endValue, color, image );
 
             mappingStore.addMapLegend( mapLegend );
         }

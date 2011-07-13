@@ -43,19 +43,19 @@ public class MapLegend
 
     private String color;
 
-    private String imgUrl;
+    private String image;
 
     public MapLegend()
     {
     }
 
-    public MapLegend( String name, Double startValue, Double endValue, String color, String imgUrl )
+    public MapLegend( String name, Double startValue, Double endValue, String color, String image )
     {
         this.name = name;
         this.startValue = startValue;
         this.endValue = endValue;
         this.color = color;
-        this.imgUrl = imgUrl;
+        this.image = image;
     }
 
     // -------------------------------------------------------------------------
@@ -145,13 +145,13 @@ public class MapLegend
         this.color = color;
     }
 
-    public String getImgUrl()
+    public String getImage()
     {
-        return imgUrl;
+        return image;
     }
 
-    public void setImgUrl( String imgUrl )
+    public void setImage( String image )
     {
-        this.imgUrl = imgUrl;
+        this.image = image;
     }
 }

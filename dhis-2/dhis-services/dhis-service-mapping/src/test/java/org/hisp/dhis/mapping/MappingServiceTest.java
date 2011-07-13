@@ -141,7 +141,7 @@ public class MappingServiceTest
         MapLegend legend = createMapLegend( 'A', 0.1, 0.2 );
 
         mappingService.addOrUpdateMapLegend( legend.getName(), legend.getStartValue(), legend.getEndValue(), legend
-            .getColor(), legend.getImgUrl() );
+            .getColor(), legend.getImage() );
 
         legend = mappingService.getMapLegendByName( legend.getName() );
 
@@ -155,7 +155,7 @@ public class MappingServiceTest
         assertEquals( 0.1, mappingService.getMapLegend( id ).getStartValue() );
         assertEquals( 0.3, mappingService.getMapLegend( id ).getEndValue() );
         assertEquals( "ColorB", mappingService.getMapLegend( id ).getColor() );
-        assertEquals( "img.png", mappingService.getMapLegend( id ).getImgUrl() );
+        assertEquals( "img.png", mappingService.getMapLegend( id ).getImage() );
     }
 
     @Test
@@ -164,7 +164,7 @@ public class MappingServiceTest
         MapLegend legend = createMapLegend( 'A', 0.1, 0.2 );
 
         mappingService.addOrUpdateMapLegend( legend.getName(), legend.getStartValue(), legend.getEndValue(), legend
-            .getColor(), legend.getImgUrl() );
+            .getColor(), legend.getImage() );
 
         legend = mappingService.getMapLegendByName( legend.getName() );
 
@@ -185,9 +185,9 @@ public class MappingServiceTest
         MapLegend legend3 = createMapLegend( 'C', 0.5, 0.6 );
 
         mappingService.addOrUpdateMapLegend( legend1.getName(), legend1.getStartValue(), legend1.getEndValue(), legend1
-            .getColor(), legend1.getImgUrl() );
+            .getColor(), legend1.getImage() );
         mappingService.addOrUpdateMapLegend( legend3.getName(), legend3.getStartValue(), legend3.getEndValue(), legend3
-            .getColor(), legend3.getImgUrl() );
+            .getColor(), legend3.getImage() );
 
         legend1 = mappingService.getMapLegendByName( legend1.getName() );
         legend3 = mappingService.getMapLegendByName( legend3.getName() );

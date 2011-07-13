@@ -129,7 +129,7 @@
 	var predefinedMapLegendStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getAllMapLegends' + G.conf.type,
         root: 'mapLegends',
-        fields: ['id', 'name', 'startValue', 'endValue', 'color', 'imgUrl', 'displayString'],
+        fields: ['id', 'name', 'startValue', 'endValue', 'color', 'image', 'displayString'],
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -892,9 +892,10 @@
                                             var mln = Ext.getCmp('predefinedmaplegendname_tf').getValue();
                                             var mlsv = parseFloat(Ext.getCmp('predefinedmaplegendstartvalue_nf').getValue());
                                             var mlev = parseFloat(Ext.getCmp('predefinedmaplegendendvalue_nf').getValue());
-                                            var mlc = Ext.getCmp('predefinedmaplegendtype_cb').getValue() == G.conf.map_legend_symbolizer_color ?
+                                            var type = Ext.getCmp('predefinedmaplegendtype_cb').getValue();
+                                            var mlc = type == G.conf.map_legend_symbolizer_color ?
                                                 Ext.getCmp('predefinedmaplegendcolor_cf').getValue() : null;
-                                            var mli = Ext.getCmp('predefinedmaplegendtype_cb').getValue() == G.conf.map_legend_symbolizer_image ?
+                                            var mli = type == G.conf.map_legend_symbolizer_image ?
                                                 Ext.getCmp('predefinedmaplegendimage_cb').getRawValue() : null;
                                             
                                             if (!Ext.isNumber(parseFloat(mlsv)) || !Ext.isNumber(mlev)) {
@@ -917,10 +918,21 @@
                                                 return;
                                             }
                                             
+                                            var params = {};
+                                            params.name = mln;
+                                            params.startValue = mlsv;
+                                            params.endValue = mlev;                                            
+                                            if (type == G.conf.map_legend_symbolizer_color) {
+                                                params.color = mlc;
+                                            }
+                                            else if (type == G.conf.map_legend_symbolizer_image) {
+                                                params.image = mli;
+                                            }
+                                            
                                             Ext.Ajax.request({
                                                 url: G.conf.path_mapping + 'addOrUpdateMapLegend' + G.conf.type,
                                                 method: 'POST',
-                                                params: {name: mln, startValue: mlsv, endValue: mlev, color: mlc, imgUrl: mli},
+                                                params: params,
                                                 success: function(r) {
                                                     Ext.message.msg(true, G.i18n.legend + ' <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.was_registered);
                                                     G.stores.predefinedMapLegend.load();
@@ -1015,7 +1027,7 @@
                                                 return r.data.color;
                                             }
                                             else if (cb.getValue() == G.conf.map_legend_symbolizer_image) {
-                                                return r.data.imgUrl;
+                                                return r.data.image;
                                             }
                                         });
                                     }
@@ -1173,7 +1185,7 @@
                                     return r.data.color;
                                 }
                                 else if (pmlst.getValue() == G.conf.map_legend_symbolizer_image) {
-                                    return r.data.imgUrl;
+                                    return r.data.image;
                                 }
                             });
                         }
@@ -2515,7 +2527,7 @@
                 var x = Ext.getCmp('center').x + G.conf.window_position_x;
                 var y = Ext.getCmp('center').y + G.conf.window_position_y;
                 predefinedMapLegendSetWindow.setPosition(x,y);
-				predefinedMapLegendSetWindow.show();
+				predefinedMapLegendSetWindow.show();         
                 if (!G.stores.predefinedMapLegend.isLoaded) {
                     G.stores.predefinedMapLegend.load();
                 }

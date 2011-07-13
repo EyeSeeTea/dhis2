@@ -47,6 +47,10 @@ public interface MappingService
     final String MAP_VALUE_TYPE_INDICATOR = "indicator";
 
     final String MAP_VALUE_TYPE_DATAELEMENT = "dataelement";
+    
+    final String MAP_LEGEND_TYPE_COLOR = "color";
+    
+    final String MAP_LEGEND_TYPE_IMAGE = "image";
 
     final String MAPLEGENDSET_TYPE_AUTOMATIC = "automatic";
 
@@ -86,7 +90,7 @@ public interface MappingService
     // MapLegend
     // -------------------------------------------------------------------------
 
-    void addOrUpdateMapLegend( String name, Double startValue, Double endValue, String color, String imgUrl );
+    void addOrUpdateMapLegend( String name, Double startValue, Double endValue, String color, String image );
 
     void deleteMapLegend( MapLegend legend );
 
