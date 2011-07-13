@@ -48,9 +48,9 @@ public interface MappingService
 
     final String MAP_VALUE_TYPE_DATAELEMENT = "dataelement";
     
-    final String MAP_LEGEND_TYPE_COLOR = "color";
+    final String MAP_LEGEND_SYMBOLIZER_COLOR = "color";
     
-    final String MAP_LEGEND_TYPE_IMAGE = "image";
+    final String MAP_LEGEND_SYMBOLIZER_IMAGE = "image";
 
     final String MAPLEGENDSET_TYPE_AUTOMATIC = "automatic";
 
@@ -108,7 +108,7 @@ public interface MappingService
 
     void updateMapLegendSet( MapLegendSet legendSet );
 
-    void addOrUpdateMapLegendSet( String name, String type, String legendType, Set<MapLegend> mapLegends );
+    void addOrUpdateMapLegendSet( String name, String type, String symbolizer, Set<MapLegend> mapLegends );
 
     void deleteMapLegendSet( MapLegendSet legendSet );
 

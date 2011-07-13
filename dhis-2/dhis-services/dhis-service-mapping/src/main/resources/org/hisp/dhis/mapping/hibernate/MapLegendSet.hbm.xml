@@ -14,7 +14,7 @@
 
     <property name="type" column="type" />
 
-    <property name="legendType" column="legendtype" />
+    <property name="symbolizer" column="symbolizer" />
 
     <set name="mapLegends" table="maplegendsetmaplegend">
       <key column="legendsetid" foreign-key="fk_maplegendsetmaplegend_legendsetid" />

@@ -122,7 +122,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
     
     initProperties: function() {
         this.legend = {
-            value: G.conf.map_legend_type_predefined
+            value: G.conf.map_legendset_type_predefined
         };
         
         this.organisationUnitSelection = {
@@ -602,11 +602,9 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
             fieldLabel: G.i18n.legendset,
             triggerAction: 'all',
             width: G.conf.combo_width,
-            store: G.stores.predefinedMapLegendSet,
+            store: G.stores.predefinedImageMapLegendSet,
+            isFocused: false,
             listeners: {
-                'focus': function(cb) {
-                    cb.getStore().filter('legendType', G.conf.map_legend_symbolizer_image);
-                },
                 'select': {
                     scope: this,
                     fn: function() {
@@ -959,7 +957,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
     },
 	
 	applyPredefinedLegend: function(isMapView) {
-        this.legend.value = G.conf.map_legend_type_predefined;
+        this.legend.value = G.conf.map_legendset_type_predefined;
 		var mls = this.form.findField('maplegendset').getValue();
 		Ext.Ajax.request({
 			url: G.conf.path_mapping + 'getMapLegendsByMapLegendSet' + G.conf.type,

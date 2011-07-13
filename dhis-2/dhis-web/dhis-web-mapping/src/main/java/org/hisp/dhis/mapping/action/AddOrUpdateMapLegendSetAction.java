@@ -72,11 +72,11 @@ public class AddOrUpdateMapLegendSetAction
         this.type = type;
     }
     
-    private String legendType;
+    private String symbolizer;
 
-    public void setLegendType( String legendType )
+    public void setSymbolizer( String symbolizer )
     {
-        this.legendType = legendType;
+        this.symbolizer = symbolizer;
     }
 
     private Collection<String> mapLegends;
@@ -102,7 +102,7 @@ public class AddOrUpdateMapLegendSetAction
             }
         }
 
-        mappingService.addOrUpdateMapLegendSet( name, type, legendType, legends );
+        mappingService.addOrUpdateMapLegendSet( name, type, symbolizer, legends );
 
         return SUCCESS;
     }

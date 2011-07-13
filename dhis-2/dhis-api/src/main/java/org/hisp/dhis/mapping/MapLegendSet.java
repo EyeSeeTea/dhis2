@@ -45,7 +45,7 @@ public class MapLegendSet
 
     private String type;
 
-    private String legendType;
+    private String symbolizer;
 
     private Set<MapLegend> mapLegends = new HashSet<MapLegend>();
 
@@ -57,12 +57,12 @@ public class MapLegendSet
     {
     }
 
-    public MapLegendSet( String name, String type, String legendType, Set<MapLegend> mapLegends,
+    public MapLegendSet( String name, String type, String symbolizer, Set<MapLegend> mapLegends,
         Set<Indicator> indicators, Set<DataElement> dataElements )
     {
         this.name = name;
         this.type = type;
-        this.legendType = legendType;
+        this.symbolizer = symbolizer;
         this.mapLegends = mapLegends;
         this.indicators = indicators;
         this.dataElements = dataElements;
@@ -135,14 +135,14 @@ public class MapLegendSet
         this.type = type;
     }
 
-    public String getLegendType()
+    public String getSymbolizer()
     {
-        return legendType;
+        return symbolizer;
     }
 
-    public void setLegendType( String legendType )
+    public void setSymbolizer( String symbolizer )
     {
-        this.legendType = legendType;
+        this.symbolizer = symbolizer;
     }
 
     public Set<MapLegend> getMapLegends()

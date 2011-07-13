@@ -139,12 +139,41 @@
     
     var predefinedMapLegendSetStore = new Ext.data.JsonStore({
         url: G.conf.path_mapping + 'getMapLegendSetsByType' + G.conf.type,
-        baseParams: {type: G.conf.map_legend_type_predefined},
+        baseParams: {type: G.conf.map_legendset_type_predefined},
         root: 'mapLegendSets',
         fields: ['id', 'name', 'legendType', 'indicators', 'dataelements'],
         sortInfo: {field:'name', direction:'ASC'},
         autoLoad: false,
         isLoaded: false,
+        legendType: null,
+        listeners: {
+            'load': G.func.storeLoadListener
+        }
+    }); 
+    
+    var predefinedColorMapLegendSetStore = new Ext.data.JsonStore({
+        url: G.conf.path_mapping + 'getMapLegendSetsByType' + G.conf.type,
+        baseParams: {type: G.conf.map_legendset_type_predefined, symbolizer: G.conf.map_legend_symbolizer_color},
+        root: 'mapLegendSets',
+        fields: ['id', 'name', 'symbolizer', 'indicators', 'dataelements'],
+        sortInfo: {field:'name', direction:'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        legendType: null,
+        listeners: {
+            'load': G.func.storeLoadListener
+        }
+    }); 
+    
+    var predefinedImageMapLegendSetStore = new Ext.data.JsonStore({
+        url: G.conf.path_mapping + 'getMapLegendSetsByType' + G.conf.type,
+        baseParams: {type: G.conf.map_legendset_type_predefined, symbolizer: G.conf.map_legend_symbolizer_image},
+        root: 'mapLegendSets',
+        fields: ['id', 'name', 'symbolizer', 'indicators', 'dataelements'],
+        sortInfo: {field:'name', direction:'ASC'},
+        autoLoad: false,
+        isLoaded: false,
+        legendType: null,
         listeners: {
             'load': G.func.storeLoadListener
         }
@@ -245,6 +274,8 @@
         infrastructuralPeriodsByType: infrastructuralPeriodsByTypeStore,
         predefinedMapLegend: predefinedMapLegendStore,
         predefinedMapLegendSet: predefinedMapLegendSetStore,
+        predefinedColorMapLegendSet: predefinedColorMapLegendSetStore,
+        predefinedImageMapLegendSet: predefinedImageMapLegendSetStore,
         organisationUnitLevel: organisationUnitLevelStore,
         organisationUnitsAtLevel: organisationUnitsAtLevelStore,
         geojsonFiles: geojsonFilesStore,
@@ -1126,15 +1157,23 @@
                                                 }
                                             }
                                             
+                                            var symbolizer = Ext.getCmp('predefinedmaplegendsettype_cb').getValue();
+                                            
                                             Ext.Ajax.request({
                                                 url: G.conf.path_mapping + 'addOrUpdateMapLegendSet.action' + params,
                                                 method: 'POST',
-                                                params: {name: mlsv, type: G.conf.map_legend_type_predefined, legendType: Ext.getCmp('predefinedmaplegendsettype_cb').getValue()},
+                                                params: {name: mlsv, type: G.conf.map_legendset_type_predefined, symbolizer: symbolizer},
                                                 success: function(r) {
                                                     Ext.message.msg(true, G.i18n.new_legend_set+' <span class="x-msg-hl">' + mlsv + '</span> ' + G.i18n.was_registered);
-                                                    G.stores.predefinedMapLegendSet.load();
                                                     Ext.getCmp('predefinedmaplegendsetname_tf').reset();
-                                                    Ext.getCmp('predefinednewmaplegend_ms').reset();							
+                                                    Ext.getCmp('predefinednewmaplegend_ms').reset();			
+                                                    G.stores.predefinedMapLegendSet.load();
+                                                    if (symbolizer == G.conf.map_legend_symbolizer_color) {
+                                                        G.stores.predefinedColorMapLegendSet.load();
+                                                    }
+                                                    else if (symbolizer == G.conf.map_legend_symbolizer_image) {
+                                                        G.stores.predefinedImageMapLegendSet.load();
+                                                    }
                                                 }
                                             });
                                         }
@@ -1182,7 +1221,7 @@
                         
                         var pmlst = Ext.getCmp('predefinedmaplegendsettype_cb');
                         if (pmlst.getValue()) {
-                            G.stores.predefinedMapLegend.filterBy( function(r, rid) {
+                            G.stores.predefinedMapLegend.filterBy( function(r) {
                                 if (pmlst.getValue() == G.conf.map_legend_symbolizer_color) {
                                     return r.data.color;
                                 }

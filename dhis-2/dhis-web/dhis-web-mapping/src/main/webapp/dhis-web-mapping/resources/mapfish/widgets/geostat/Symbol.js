@@ -120,11 +120,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
     
     initProperties: function() {
         this.legend = {
-            value: G.conf.map_legend_type_automatic,
+            value: G.conf.map_legendset_type_automatic,
             method: G.conf.classify_by_equal_intervals,
             classes: 5,
             reset: function() {
-                this.value = G.conf.map_legend_type_automatic;
+                this.value = G.conf.map_legendset_type_automatic;
                 this.method = G.conf.classify_by_equal_intervals;
                 this.classes = 5;
             }
@@ -786,12 +786,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 				organisationUnitLevel: this.organisationUnitSelection.level.level,
                 organisationUnitLevelName: this.organisationUnitSelection.level.name,
 				mapLegendType: this.form.findField('maplegendtype').getValue(),
-				method: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('method').getValue() : null,
-				classes: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('classes').getValue() : null,
-				bounds: this.legend.value == G.conf.map_legend_type_automatic && this.legend.method == G.conf.classify_with_bounds ? this.form.findField('bounds').getValue() : null,
-				colorLow: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('startcolor').getValue() : null,
-				colorHigh: this.legend.value == G.conf.map_legend_type_automatic ? this.form.findField('endcolor').getValue() : null,
-                mapLegendSetId: this.legend.value == G.conf.map_legend_type_predefined ? this.form.findField('maplegendset').getValue() : null,
+				method: this.legend.value == G.conf.map_legendset_type_automatic ? this.form.findField('method').getValue() : null,
+				classes: this.legend.value == G.conf.map_legendset_type_automatic ? this.form.findField('classes').getValue() : null,
+				bounds: this.legend.value == G.conf.map_legendset_type_automatic && this.legend.method == G.conf.classify_with_bounds ? this.form.findField('bounds').getValue() : null,
+				colorLow: this.legend.value == G.conf.map_legendset_type_automatic ? this.form.findField('startcolor').getValue() : null,
+				colorHigh: this.legend.value == G.conf.map_legendset_type_automatic ? this.form.findField('endcolor').getValue() : null,
+                mapLegendSetId: this.legend.value == G.conf.map_legendset_type_predefined ? this.form.findField('maplegendset').getValue() : null,
 				radiusLow: this.form.findField('radiuslow').getValue(),
 				radiusHigh: this.form.findField('radiushigh').getValue(),
 				longitude: G.vars.map.getCenter().lon,
