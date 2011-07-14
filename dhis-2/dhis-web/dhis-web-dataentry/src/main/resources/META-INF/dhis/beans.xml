@@ -18,16 +18,16 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
   <!-- Actions -->
 
+  <bean id="org.hisp.dhis.de.action.PageInitAction" class="org.hisp.dhis.de.action.PageInitAction"
+    scope="prototype">
+    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
+  </bean>
+
   <bean id="org.hisp.dhis.de.action.GetDataValuesForDataSetAction" class="org.hisp.dhis.de.action.GetDataValuesForDataSetAction"
 	scope="prototype">
     <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
 	<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 	<property name="minMaxDataElementService" ref="org.hisp.dhis.minmax.MinMaxDataElementService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.LoadOrganisationUnitAction" class="org.hisp.dhis.de.action.LoadOrganisationUnitAction"
-    scope="prototype">
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
   </bean>
 
   <bean id="org.hisp.dhis.de.action.LoadDataSetsAction" class="org.hisp.dhis.de.action.LoadDataSetsAction" scope="prototype">

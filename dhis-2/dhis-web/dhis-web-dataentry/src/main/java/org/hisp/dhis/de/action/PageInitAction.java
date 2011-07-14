@@ -34,7 +34,7 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Lars Helge Overland
  */
-public class LoadOrganisationUnitAction
+public class PageInitAction
     implements Action
 {
     // -------------------------------------------------------------------------
