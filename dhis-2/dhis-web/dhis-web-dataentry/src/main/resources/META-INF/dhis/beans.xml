@@ -21,6 +21,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.de.action.PageInitAction" class="org.hisp.dhis.de.action.PageInitAction"
     scope="prototype">
     <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
+    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
   </bean>
 
   <bean id="org.hisp.dhis.de.action.GetDataValuesForDataSetAction" class="org.hisp.dhis.de.action.GetDataValuesForDataSetAction"
