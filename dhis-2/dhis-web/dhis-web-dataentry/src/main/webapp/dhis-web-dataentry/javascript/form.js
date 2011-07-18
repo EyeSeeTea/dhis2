@@ -4,6 +4,9 @@ var significantZeros = [];
 // Associative array with [indicator id, expression] for indicators in form, also used in entry.js
 var indicatorFormulas = [];
 
+// Array with associative arrays for each data set
+var dataSets = [];
+
 // Indicates whether any data entry form has been loaded
 var dataEntryFormIsLoaded = false;
 
@@ -141,6 +144,9 @@ function dataSetSelected()
 
     var dataSetId = $( '#selectedDataSetId' ).val();
     var periodIndex = $( '#selectedPeriodIndex' ).val();
+    var periodType = dataSets[dataSetId].periodType;
+
+	var periods = _periodType.get( periodType ).generatePeriods();
 
     if ( dataSetId && dataSetId != -1 )
     {
@@ -152,9 +158,9 @@ function dataSetSelected()
         {
             addOptionById( 'selectedPeriodIndex', '-1', '[ ' + i18n_select_period + ' ]' );
 
-            for ( i in json.periods )
+            for ( i in periods )
             {
-                addOptionById( 'selectedPeriodIndex', i, json.periods[i].name );
+                addOptionById( 'selectedPeriodIndex', i, periods[i].name );
             }
 
             if ( json.periodValid && periodIndex != null )
