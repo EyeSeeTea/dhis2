@@ -1,5 +1,3 @@
-package org.hisp.dhis.reportexcel.importitem.action;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -26,68 +24,61 @@ package org.hisp.dhis.reportexcel.importitem.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.reportexcel.exportitem.action;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.reportexcel.ExportReportService;
+import org.hisp.dhis.reportexcel.ReportExcel;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
-import org.hisp.dhis.reportexcel.importitem.ExcelItem;
-import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
-import org.hisp.dhis.reportexcel.importitem.ImportItemService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
+ * @author Tran Thanh Tri
  * @version $Id$
  */
 
-public class CopyImportItemAction
+public class CopyExportItemToExportReportAction
     implements Action
 {
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------
+    // -------------------------------------------------------------------------
 
     private ExportReportService exportReportService;
+
+    private StatementManager statementManager;
+
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private Integer exportReportId;
+
+    private Integer sheetNo;
+
+    private List<String> exportItems = new ArrayList<String>();
+
+    // -------------------------------------------------------------------------
+    // Getter & Setter
+    // -------------------------------------------------------------------------
 
     public void setExportReportService( ExportReportService exportReportService )
     {
         this.exportReportService = exportReportService;
     }
 
-    private ImportItemService importItemService;
-
-    public void setImportItemService( ImportItemService importItemService )
-    {
-        this.importItemService = importItemService;
-    }
-
-    private StatementManager statementManager;
-
     public void setStatementManager( StatementManager statementManager )
     {
         this.statementManager = statementManager;
     }
 
-    // -------------------------------------------
-    // Input
-    // -------------------------------------------
-
-    private Integer importReportId;
-
-    private Integer sheetNo;
-
-    private Collection<String> reportItemIds;
-
-    // -------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------
-
-    public void setImportReportId( Integer importReportId )
+    public Integer getExportReportId()
     {
-        this.importReportId = importReportId;
+        return exportReportId;
     }
 
     public Integer getSheetNo()
@@ -95,9 +86,14 @@ public class CopyImportItemAction
         return sheetNo;
     }
 
-    public void setReportItemIds( Collection<String> reportItemIds )
+    public void setExportReportId( Integer exportReportId )
     {
-        this.reportItemIds = reportItemIds;
+        this.exportReportId = exportReportId;
+    }
+
+    public void setExportItems( List<String> exportItems )
+    {
+        this.exportItems = exportItems;
     }
 
     public void setSheetNo( Integer sheetNo )
@@ -105,38 +101,31 @@ public class CopyImportItemAction
         this.sheetNo = sheetNo;
     }
 
-    // -------------------------------------------
-    // Action implementation
-    // -------------------------------------------
-
     public String execute()
         throws Exception
     {
         statementManager.initialise();
 
-        ExcelItemGroup importReport = importItemService.getImportReport( importReportId );
-
-        for ( String itemId : reportItemIds )
+        ReportExcel exportReport = exportReportService.getExportReport( exportReportId );
+        
+        for ( String itemId : this.exportItems )
         {
-            ReportExcelItem itemSource = exportReportService.getExportItem( Integer.parseInt( itemId ) );
+            ReportExcelItem reportItem = exportReportService.getExportItem( Integer.parseInt( itemId ) );
 
-            ExcelItem importItem = new ExcelItem();
-
-            importItem.setName( itemSource.getName() );
-            importItem.setRow( itemSource.getRow() );
-            importItem.setColumn( itemSource.getColumn() );
-            importItem.setExpression( itemSource.getExpression() );
-            importItem.setSheetNo( sheetNo );
-            importItem.setExcelItemGroup( importItemService.getImportReport( importReportId ) );
-
-            importItemService.addImportItem( importItem );
+            ReportExcelItem newReportItem = new ReportExcelItem();
+            newReportItem.setName( reportItem.getName() );
+            newReportItem.setItemType( reportItem.getItemType() );
+            newReportItem.setPeriodType( reportItem.getPeriodType() );
+            newReportItem.setExpression( reportItem.getExpression() );
+            newReportItem.setRow( reportItem.getRow() );
+            newReportItem.setColumn( reportItem.getColumn() );
+            newReportItem.setSheetNo( sheetNo );
+            newReportItem.setReportExcel( exportReport );
+            exportReportService.addExportItem( newReportItem );
         }
-
-        importItemService.updateImportReport( importReport );
 
         statementManager.destroy();
 
         return SUCCESS;
     }
-
 }
