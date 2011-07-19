@@ -13,6 +13,9 @@ var dataEntryFormIsLoaded = false;
 // Currently selected organisation unit identifier
 var currentOrganisationUnitId = null;
 
+// Current offset, next or previous corresponding to increasing or decreasing value with one
+var currentPeriodOffset = 0;
+
 var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
 var COLOR_RED = '#ff8a8a';
@@ -35,6 +38,8 @@ function clearEntryForm()
 {
     $( '#contentDiv' ).html( '' );
     
+	currentPeriodOffset = 0;
+	
     dataEntryFormIsLoaded = false;
 }
 
@@ -91,45 +96,30 @@ selection.setListenerFunction( organisationUnitSelected );
 
 function nextPeriodsSelected()
 {
-    displayPeriodsInternal( true, false );
+    currentPeriodOffset++;
+    displayPeriodsInternal();
 }
 
 function previousPeriodsSelected()
 {
-    displayPeriodsInternal( false, true );
+    currentPeriodOffset--;
+    displayPeriodsInternal();
 }
 
-function displayPeriodsInternal( next, previous )
+function displayPeriodsInternal()
 {
-    disableNextPrevButtons();
+    var dataSetId = $( '#selectedDataSetId' ).val();    
+    var periodType = dataSets[dataSetId].periodType;
+    var periods = _periodType.get( periodType ).generatePeriods( currentPeriodOffset );
 
-    var url = 'loadNextPreviousPeriods.action?next=' + next + '&previous=' + previous;
+	clearListById( 'selectedPeriodIndex' );
 
-    clearListById( 'selectedPeriodIndex' );
+	addOptionById( 'selectedPeriodIndex', '-1', '[ ' + i18n_select_period + ' ]' );
 
-    $.getJSON( url, function( json )
+    for ( i in periods )
     {
-        addOptionById( 'selectedPeriodIndex', '-1', '[ ' + i18n_select_period + ' ]' );
-
-        for ( i in json.periods )
-        {
-            addOptionById( 'selectedPeriodIndex', i, json.periods[i].name );
-        }
-
-        enableNextPrevButtons();
-    } );
-}
-
-function disableNextPrevButtons()
-{
-    $( '#nextButton' ).attr( 'disabled', 'disabled' );
-    $( '#prevButton' ).attr( 'disabled', 'disabled' );
-}
-
-function enableNextPrevButtons()
-{
-    $( '#nextButton' ).removeAttr( 'disabled' );
-    $( '#prevButton' ).removeAttr( 'disabled' );
+        addOptionById( 'selectedPeriodIndex', i, periods[i].name );
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -145,8 +135,7 @@ function dataSetSelected()
     var dataSetId = $( '#selectedDataSetId' ).val();
     var periodIndex = $( '#selectedPeriodIndex' ).val();
     var periodType = dataSets[dataSetId].periodType;
-
-	var periods = _periodType.get( periodType ).generatePeriods();
+	var periods = _periodType.get( periodType ).generatePeriods( currentPeriodOffset );
 
     if ( dataSetId && dataSetId != -1 )
     {

@@ -6,13 +6,16 @@ var _periodType = new PeriodType();
 
 function PeriodType()
 {
+	var dateFormat = 'yyyy-MM-dd';
+	
 	var periodTypes = [];
-	periodTypes['Daily'] = new DailyPeriodType();
-	periodTypes['Weekly'] = new WeeklyPeriodType();
-	periodTypes['Monthly'] = new MonthlyPeriodType();
-	periodTypes['Quarterly'] = new QuarterlyPeriodType();
-	periodTypes['SixMonthly'] = new SixMonthlyPeriodType();
-	periodTypes['Yearly'] = new YearlyPeriodType();
+	periodTypes['Daily'] = new DailyPeriodType( dateFormat );
+	periodTypes['Weekly'] = new WeeklyPeriodType( dateFormat );
+	periodTypes['Monthly'] = new MonthlyPeriodType( dateFormat );
+	periodTypes['Quarterly'] = new QuarterlyPeriodType( dateFormat );
+	periodTypes['SixMonthly'] = new SixMonthlyPeriodType( dateFormat );
+	periodTypes['Yearly'] = new YearlyPeriodType( dateFormat );
+	periodTypes['TwoYearly'] = new TwoYearlyPeriodType( dateFormat );
 	
 	this.get = function( key )
 	{
@@ -32,25 +35,38 @@ function PeriodType()
 		return reversed;
 	}
 	
-	this.dateFormat = function()
+	this.filterFuturePeriods = function( periods )
 	{
-		return 'yyyy-MM-dd';
+		var array = [];
+		var i = 0;
+		
+		var now = new Date().getTime();
+		
+		for ( var j = 0; j < periods.length; j++ )
+		{
+			if ( $.date( periods[j].startDate, dateFormat ).date().getTime() < now )
+			{
+				array[i++] = periods[j];
+			}			
+		}
+		
+		return array;
 	}
 }
 
-function DailyPeriodType()
+function DailyPeriodType( dateFormat )
 {
-	this.generatePeriods = function()
+	this.generatePeriods = function( offset )
 	{
 		var periods = [];
-		var year = new Date().getFullYear();
-		var startDate = $.date( year + '-01-01', _periodType.dateFormat() );
+		var year = new Date().getFullYear() + offset;
+		var startDate = $.date( year + '-01-01', dateFormat );
 		
 		while ( startDate.date().getFullYear() <= year )
 		{
 			var period = [];
-			period['startDate'] = startDate.format( _periodType.dateFormat() );
-			period['name'] = startDate.format( _periodType.dateFormat() );
+			period['startDate'] = startDate.format( dateFormat );
+			period['name'] = startDate.format( dateFormat );
 			periods[i] = period;
 			
 			startDate.adjust( 'D', +1 );
@@ -61,13 +77,13 @@ function DailyPeriodType()
 	}
 }
 
-function WeeklyPeriodType()
+function WeeklyPeriodType( dateFormat )
 {
-	this.generatePeriods = function()
+	this.generatePeriods = function( offset )
 	{
 		var periods = [];
-		var year = new Date().getFullYear();
-		var startDate = $.date( year + '-01-01', _periodType.dateFormat() );		
+		var year = new Date().getFullYear() + offset;
+		var startDate = $.date( year + '-01-01', dateFormat );	
 		var day = startDate.date().getDay();
 		
 		if ( day == 0 ) // Sunday, forward to Monday
@@ -88,8 +104,8 @@ function WeeklyPeriodType()
 		while ( startDate.date().getFullYear() <= year )
 		{
 			var period = [];
-			period['startDate'] = startDate.format( _periodType.dateFormat() );
-			period['name'] = 'W' + ( i + 1 ) + ' - ' + startDate.format( _periodType.dateFormat() );			
+			period['startDate'] = startDate.format( dateFormat );
+			period['name'] = 'W' + ( i + 1 ) + ' - ' + startDate.format( dateFormat );			
 			periods[i] = period;
 			
 			startDate.adjust( 'D', +7 );
@@ -100,19 +116,19 @@ function WeeklyPeriodType()
 	}
 }
 
-function MonthlyPeriodType()
+function MonthlyPeriodType( dateFormat )
 {
-	this.generatePeriods = function()
+	this.generatePeriods = function( offset )
 	{
 		var periods = [];
-		var year = new Date().getFullYear();
-		var startDate = $.date( year + '-01-01', _periodType.dateFormat() );		
+		var year = new Date().getFullYear() + offset;
+		var startDate = $.date( year + '-01-01', dateFormat );		
 		var i = 0;
 				
 		while ( startDate.date().getFullYear() == year )
 		{
 			var period = [];
-			period['startDate'] = startDate.format( _periodType.dateFormat() );
+			period['startDate'] = startDate.format( dateFormat );
 			period['name'] = monthNames[i] + ' ' + year;			
 			periods[i] = period;
 			
@@ -124,20 +140,20 @@ function MonthlyPeriodType()
 	}
 }
 
-function QuarterlyPeriodType()
+function QuarterlyPeriodType( dateFormat )
 {
-	this.generatePeriods = function()
+	this.generatePeriods = function( offset )
 	{
 		var periods = [];
-		var year = new Date().getFullYear();
-		var startDate = $.date( year + '-01-01', _periodType.dateFormat() );
+		var year = new Date().getFullYear() + offset;
+		var startDate = $.date( year + '-01-01', dateFormat );
 		var i = 0;
 		var j = 0;
 		
 		while ( startDate.date().getFullYear() == year )
 		{
 			var period = [];
-			period['startDate'] = startDate.format( _periodType.dateFormat() );
+			period['startDate'] = startDate.format( dateFormat );
 			period['name'] = monthNames[i] + ' - ' + monthNames[i+2] + ' ' + year;
 			periods[j] = period;
 			
@@ -150,20 +166,20 @@ function QuarterlyPeriodType()
 	}
 }
 
-function SixMonthlyPeriodType()
+function SixMonthlyPeriodType( dateFormat )
 {
-	this.generatePeriods = function()
+	this.generatePeriods = function( offset )
 	{
 		var periods = [];
-		var year = new Date().getFullYear();
+		var year = new Date().getFullYear() + offset;
 		
 		var period = [];
-		period['startDate'] = $.date( year + '-01-01', _periodType.dateFormat() );
+		period['startDate'] = $.date( year + '-01-01', dateFormat );
 		period['name'] = monthNames[0] + ' - ' + monthNames[5] + ' ' + year;
 		periods[0] = period;
 		
 		var period = [];
-		period['startDate'] = $.date( year + '-06-01', _periodType.dateFormat() );
+		period['startDate'] = $.date( year + '-06-01', dateFormat );
 		period['name'] = monthNames[6] + ' - ' + monthNames[11] + ' ' + year;
 		periods[1] = period;
 		
@@ -171,18 +187,18 @@ function SixMonthlyPeriodType()
 	}	
 }
 
-function YearlyPeriodType()
+function YearlyPeriodType( dateFormat )
 {	
-	this.generatePeriods = function()
+	this.generatePeriods = function( offset )
 	{
 		var periods = [];
-		var year = new Date().getFullYear() - 5;
-		var startDate = $.date( year + '-01-01', _periodType.dateFormat() ).adjust( 'Y', -5 );
+		var year = new Date().getFullYear() + offset;
+		var startDate = $.date( year + '-01-01', dateFormat ).adjust( 'Y', -5 );
 		
 		for ( var i = 0; i < 11; i++ )
 		{
 			var period = [];
-			period['startDate'] = startDate.format( _periodType.dateFormat() );
+			period['startDate'] = startDate.format( dateFormat );
 			period['name'] = startDate.date().getFullYear();
 			periods[i] = period;
 			
@@ -193,11 +209,25 @@ function YearlyPeriodType()
 	}		
 }
 
-function TwoYearlyPeriodType()
+function TwoYearlyPeriodType( dateFormat )
 {
-	this.generatePeriods = function()
+	this.generatePeriods = function( offset )
 	{
 		var periods = [];
+		var year = new Date().getFullYear();
+		var startDate = $.date( year + '-01-01', dateFormat ).adjust( 'Y', ( year % 2 == 0 ) ? -10 : -9 );
+		
+		for ( var i = 0; i < 11; i++ )
+		{
+			var period = [];
+			var currentYear = startDate.date().getFullYear();
+			period['startDate'] = startDate.format( dateFormat );
+			period['name'] = currentYear + ' - ' + ( currentYear + 1 );
+			periods[i] = period;
+			
+			startDate.adjust( 'Y', +2 );
+		}
+		
 		return periods;
 	}
 }
