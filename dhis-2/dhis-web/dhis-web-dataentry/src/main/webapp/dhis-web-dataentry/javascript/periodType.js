@@ -1,6 +1,4 @@
 
-//TODO filter future periods
-
 function PeriodType()
 {
 	var dateFormat = 'yyyy-MM-dd';
@@ -68,7 +66,8 @@ function DailyPeriodType( dateFormat )
 			var period = [];
 			period['startDate'] = startDate.format( dateFormat );
 			period['name'] = startDate.format( dateFormat );
-			periods[i] = period;
+			period['id'] = 'Daily_' + period['startDate'];
+			periods[i]= period;
 			
 			startDate.adjust( 'D', +1 );
 			i++;
@@ -105,7 +104,8 @@ function WeeklyPeriodType( dateFormat )
 		{
 			var period = [];
 			period['startDate'] = startDate.format( dateFormat );
-			period['name'] = 'W' + ( i + 1 ) + ' - ' + startDate.format( dateFormat );			
+			period['name'] = 'W' + ( i + 1 ) + ' - ' + startDate.format( dateFormat );
+			period['id'] = 'Weekly_' + period['startDate'];
 			periods[i] = period;
 			
 			startDate.adjust( 'D', +7 );
@@ -129,7 +129,8 @@ function MonthlyPeriodType( dateFormat )
 		{
 			var period = [];
 			period['startDate'] = startDate.format( dateFormat );
-			period['name'] = monthNames[i] + ' ' + year;			
+			period['name'] = monthNames[i] + ' ' + year;
+			period['id'] = 'Monthly_' + period['startDate'];
 			periods[i] = period;
 			
 			startDate.adjust( 'M', +1 );
@@ -155,6 +156,7 @@ function QuarterlyPeriodType( dateFormat )
 			var period = [];
 			period['startDate'] = startDate.format( dateFormat );
 			period['name'] = monthNames[i] + ' - ' + monthNames[i+2] + ' ' + year;
+			period['id'] = 'Quarterly_' + period['startDate'];
 			periods[j] = period;
 			
 			startDate.adjust( 'M', +3 );
@@ -173,15 +175,17 @@ function SixMonthlyPeriodType( dateFormat )
 		var periods = [];
 		var year = new Date().getFullYear() + offset;
 		
-		var period1 = [];
-		period1['startDate'] = year + '-01-01';
-		period1['name'] = monthNames[0] + ' - ' + monthNames[5] + ' ' + year;
-		periods[0] = period1;
+		var period = [];
+		period['startDate'] = year + '-01-01';
+		period['name'] = monthNames[0] + ' - ' + monthNames[5] + ' ' + year;
+		period['id'] = 'SixMonthly_' + period['startDate'];
+		periods[0] = period;
 		
-		var period2 = [];
-		period2['startDate'] = year + '-06-01';
-		period2['name'] = monthNames[6] + ' - ' + monthNames[11] + ' ' + year;
-		periods[1] = period2;
+		period = [];
+		period['startDate'] = year + '-06-01';
+		period['name'] = monthNames[6] + ' - ' + monthNames[11] + ' ' + year;
+		period['id'] = 'SixMonthly_' + period['startDate'];
+		periods[1] = period;
 		
 		return periods;
 	}	
@@ -200,7 +204,8 @@ function YearlyPeriodType( dateFormat )
 		{
 			var period = [];
 			period['startDate'] = startDate.format( dateFormat );
-			period['name'] = startDate.date().getFullYear();
+			period['name'] = startDate.date().getFullYear();			
+			period['id'] = 'Yearly_' + period['startDate'];
 			periods[i] = period;
 			
 			startDate.adjust( 'Y', +1 );

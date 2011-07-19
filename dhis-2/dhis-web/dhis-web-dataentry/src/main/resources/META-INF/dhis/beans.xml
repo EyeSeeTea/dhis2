@@ -9,18 +9,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
   </bean>
 
-  <bean id="org.hisp.dhis.de.state.SelectedStateManager" class="org.hisp.dhis.de.state.DefaultSelectedStateManager">
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="selectionManager" ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
-    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-  </bean>
-
   <!-- Actions -->
 
   <bean id="org.hisp.dhis.de.action.PageInitAction" class="org.hisp.dhis.de.action.PageInitAction"
     scope="prototype">
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
 	<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
 	<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
@@ -29,35 +21,24 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
   <bean id="org.hisp.dhis.de.action.GetDataValuesForDataSetAction" class="org.hisp.dhis.de.action.GetDataValuesForDataSetAction"
 	scope="prototype">
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
 	<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 	<property name="minMaxDataElementService" ref="org.hisp.dhis.minmax.MinMaxDataElementService" />
+    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
+    <property name="selectionManager" ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
   </bean>
 
   <bean id="org.hisp.dhis.de.action.LoadDataSetsAction" class="org.hisp.dhis.de.action.LoadDataSetsAction" scope="prototype">
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.LoadPeriodsAction" class="org.hisp.dhis.de.action.LoadPeriodsAction" scope="prototype">
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.LoadNextPreviousPeriodsAction" class="org.hisp.dhis.de.action.LoadNextPreviousPeriodsAction"
-    scope="prototype">
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.LoadDisplayModesAction" class="org.hisp.dhis.de.action.LoadDisplayModesAction"
-    scope="prototype">
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
+    <property name="selectionManager" ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
+	<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+	<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
   </bean>
 
   <bean id="org.hisp.dhis.de.action.LoadFormAction" class="org.hisp.dhis.de.action.LoadFormAction" scope="prototype">
     <property name="dataEntryFormService" ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+	<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="dataSetLockService" ref="org.hisp.dhis.datalock.DataSetLockService" />
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
+    <property name="selectionManager" ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
     <property name="registrationService" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
@@ -66,7 +47,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="selectedStateManager" ref="org.hisp.dhis.de.state.SelectedStateManager" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>

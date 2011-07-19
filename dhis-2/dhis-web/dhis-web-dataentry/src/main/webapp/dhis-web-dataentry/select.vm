@@ -69,8 +69,8 @@ dataSets = {
 		<td><select id="selectedDataSetId" name="selectedDataSetId" style="width:350px" onchange="dataSetSelected()" disabled="disabled"></select></td>
 	</tr>	
 	<tr>
-		<td><label for="selectedPeriodIndex">$i18n.getString( "period" )</label></td>
-		<td><select id="selectedPeriodIndex" name="selectedPeriodIndex" style="width:227px" onchange="periodSelected()" disabled="disabled"></select>
+		<td><label for="selectedPeriodId">$i18n.getString( "period" )</label></td>
+		<td><select id="selectedPeriodId" name="selectedPeriodId" style="width:227px" onchange="periodSelected()" disabled="disabled"></select>
 			<input type="button" id="prevButton" style="width:60px" value="$i18n.getString( 'prev' )" title="$i18n.getString('earlier_periods')" onclick="previousPeriodsSelected()" disabled="disabled"><input 
 				   type="button" id="nextButton" style="width:60px" value="$i18n.getString( 'next' )" title="$i18n.getString('later_periods')" onclick="nextPeriodsSelected()" disabled="disabled">
 		</td>
