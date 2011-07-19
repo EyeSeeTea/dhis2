@@ -1,8 +1,5 @@
 
-//TODO next/previous
 //TODO filter future periods
-
-var _periodType = new PeriodType();
 
 function PeriodType()
 {
@@ -44,7 +41,11 @@ function PeriodType()
 		
 		for ( var j = 0; j < periods.length; j++ )
 		{
-			if ( $.date( periods[j].startDate, dateFormat ).date().getTime() < now )
+			var c = periods[j];
+			var d = periods[j]['startDate'];
+			var e = null;
+			
+			if ( $.date( periods[j]['startDate'], dateFormat ).date().getTime() < now )
 			{
 				array[i++] = periods[j];
 			}			
@@ -60,7 +61,8 @@ function DailyPeriodType( dateFormat )
 	{
 		var periods = [];
 		var year = new Date().getFullYear() + offset;
-		var startDate = $.date( year + '-01-01', dateFormat );
+		var startDate = $.date( year + '-01-01', dateFormat );		
+		var i = 0;
 		
 		while ( startDate.date().getFullYear() <= year )
 		{
@@ -85,6 +87,7 @@ function WeeklyPeriodType( dateFormat )
 		var year = new Date().getFullYear() + offset;
 		var startDate = $.date( year + '-01-01', dateFormat );	
 		var day = startDate.date().getDay();
+		var i = 0;
 		
 		if ( day == 0 ) // Sunday, forward to Monday
 		{
@@ -97,9 +100,7 @@ function WeeklyPeriodType( dateFormat )
 		else // Friday - Saturday, forward to Monday
 		{
 			startDate.adjust( 'D', ( 8 - day ) );
-		}
-		
-		var i = 0;
+		}		
 		
 		while ( startDate.date().getFullYear() <= year )
 		{
@@ -194,6 +195,7 @@ function YearlyPeriodType( dateFormat )
 		var periods = [];
 		var year = new Date().getFullYear() + offset;
 		var startDate = $.date( year + '-01-01', dateFormat ).adjust( 'Y', -5 );
+		var i = 0;
 		
 		for ( var i = 0; i < 11; i++ )
 		{
@@ -207,27 +209,4 @@ function YearlyPeriodType( dateFormat )
 		
 		return periods;
 	}		
-}
-
-function TwoYearlyPeriodType( dateFormat )
-{
-	this.generatePeriods = function( offset )
-	{
-		var periods = [];
-		var year = new Date().getFullYear();
-		var startDate = $.date( year + '-01-01', dateFormat ).adjust( 'Y', ( year % 2 == 0 ) ? -10 : -9 );
-		
-		for ( var i = 0; i < 11; i++ )
-		{
-			var period = [];
-			var currentYear = startDate.date().getFullYear();
-			period['startDate'] = startDate.format( dateFormat );
-			period['name'] = currentYear + ' - ' + ( currentYear + 1 );
-			periods[i] = period;
-			
-			startDate.adjust( 'Y', +2 );
-		}
-		
-		return periods;
-	}
 }

@@ -1,10 +1,10 @@
 // Identifiers for which zero values are, insignificant, also used in entry.js, populated in select.vm
 var significantZeros = [];
 
-// Associative array with [indicator id, expression] for indicators in form, also used in entry.js
+// Associative array with [indicator id, expression] for indicators in form, also used in entry.js, populated in select.vm
 var indicatorFormulas = [];
 
-// Array with associative arrays for each data set
+// Array with associative arrays for each data set, populated in select.vm
 var dataSets = [];
 
 // Indicates whether any data entry form has been loaded
@@ -15,6 +15,9 @@ var currentOrganisationUnitId = null;
 
 // Current offset, next or previous corresponding to increasing or decreasing value with one
 var currentPeriodOffset = 0;
+
+// Period type object
+var periodTypeFactory = new PeriodType();
 
 var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
@@ -110,7 +113,8 @@ function displayPeriodsInternal()
 {
     var dataSetId = $( '#selectedDataSetId' ).val();    
     var periodType = dataSets[dataSetId].periodType;
-    var periods = _periodType.get( periodType ).generatePeriods( currentPeriodOffset );
+    var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
+    periods = periodTypeFactory.filterFuturePeriods( periods );
 
 	clearListById( 'selectedPeriodIndex' );
 
@@ -135,7 +139,8 @@ function dataSetSelected()
     var dataSetId = $( '#selectedDataSetId' ).val();
     var periodIndex = $( '#selectedPeriodIndex' ).val();
     var periodType = dataSets[dataSetId].periodType;
-	var periods = _periodType.get( periodType ).generatePeriods( currentPeriodOffset );
+	var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
+    periods = periodTypeFactory.filterFuturePeriods( periods );
 
     if ( dataSetId && dataSetId != -1 )
     {
