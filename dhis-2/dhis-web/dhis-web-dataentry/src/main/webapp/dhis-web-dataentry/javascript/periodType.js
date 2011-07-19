@@ -12,7 +12,6 @@ function PeriodType()
 	periodTypes['Quarterly'] = new QuarterlyPeriodType( dateFormat );
 	periodTypes['SixMonthly'] = new SixMonthlyPeriodType( dateFormat );
 	periodTypes['Yearly'] = new YearlyPeriodType( dateFormat );
-	periodTypes['TwoYearly'] = new TwoYearlyPeriodType( dateFormat );
 	
 	this.get = function( key )
 	{
@@ -174,15 +173,15 @@ function SixMonthlyPeriodType( dateFormat )
 		var periods = [];
 		var year = new Date().getFullYear() + offset;
 		
-		var period = [];
-		period['startDate'] = $.date( year + '-01-01', dateFormat );
-		period['name'] = monthNames[0] + ' - ' + monthNames[5] + ' ' + year;
-		periods[0] = period;
+		var period1 = [];
+		period1['startDate'] = year + '-01-01';
+		period1['name'] = monthNames[0] + ' - ' + monthNames[5] + ' ' + year;
+		periods[0] = period1;
 		
-		var period = [];
-		period['startDate'] = $.date( year + '-06-01', dateFormat );
-		period['name'] = monthNames[6] + ' - ' + monthNames[11] + ' ' + year;
-		periods[1] = period;
+		var period2 = [];
+		period2['startDate'] = year + '-06-01';
+		period2['name'] = monthNames[6] + ' - ' + monthNames[11] + ' ' + year;
+		periods[1] = period2;
 		
 		return periods;
 	}	
