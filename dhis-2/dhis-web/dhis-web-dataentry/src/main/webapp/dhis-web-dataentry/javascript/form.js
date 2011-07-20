@@ -292,42 +292,6 @@ function insertDataValues()
 	} );
 }
 
-function setDisplayModes()
-{
-    $.getJSON( 'loadDisplayModes.action', function( json )
-    {
-        $( '#displayModeCustom' ).removeAttr( 'disabled' );
-        $( '#displayModeSection' ).removeAttr( 'disabled' );
-        $( '#displayModeDefault' ).removeAttr( 'disabled' );
-
-        $( '#displayModeCustom' ).removeAttr( 'checked' );
-        $( '#displayModeSection' ).removeAttr( 'checked' );
-        $( '#displayModeDefault' ).removeAttr( 'checked' );
-
-        if ( json.displayMode == 'customform' )
-        {
-            $( '#displayModeCustom' ).attr( 'checked', 'checked' );
-        } 
-        else if ( json.displayMode == 'sectionform' )
-        {
-            $( '#displayModeSection' ).attr( 'checked', 'checked' );
-        } 
-        else
-        {
-            $( '#displayModeDefault' ).attr( 'checked', 'checked' );
-        }
-
-        if ( !json.customForm )
-        {
-            $( '#displayModeCustom' ).attr( 'disabled', 'disabled' );
-        }
-        if ( !json.sectionForm )
-        {
-            $( '#displayModeSection' ).attr( 'disabled', 'disabled' );
-        }
-    } );
-}
-
 function displayEntryFormCompleted()
 {
     addEventListeners();

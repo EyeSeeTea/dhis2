@@ -27,9 +27,9 @@
     </action>
 
     <action name="loadForm" class="org.hisp.dhis.de.action.LoadFormAction">
-      <result name="customform" type="velocity">/dhis-web-dataentry/customForm.vm</result>
-      <result name="sectionform" type="velocity">/dhis-web-dataentry/sectionForm.vm</result>
-      <result name="defaultform" type="velocity">/dhis-web-dataentry/defaultForm.vm</result>
+      <result name="custom" type="velocity">/dhis-web-dataentry/customForm.vm</result>
+      <result name="section" type="velocity">/dhis-web-dataentry/sectionForm.vm</result>
+      <result name="default" type="velocity">/dhis-web-dataentry/defaultForm.vm</result>
       <result name="input" type="velocity">/dhis-web-dataentry/responseVoid.vm</result>
     </action>
 

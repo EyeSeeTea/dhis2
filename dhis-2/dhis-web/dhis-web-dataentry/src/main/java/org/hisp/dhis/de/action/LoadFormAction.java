@@ -75,9 +75,6 @@ public class LoadFormAction
 {
     private static final Log log = LogFactory.getLog( LoadFormAction.class );
 
-    private static final String CUSTOM_FORM = "customform";
-    private static final String SECTION_FORM = "sectionform";
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -356,7 +353,7 @@ public class LoadFormAction
         // Get display mode
         // ---------------------------------------------------------------------
 
-        displayMode = displayMode != null ? displayMode : getDisplayMode( dataSet );
+        displayMode = displayMode != null ? displayMode : dataSet.getDataSetType();
         
         // ---------------------------------------------------------------------
         // Get entry form
@@ -445,7 +442,7 @@ public class LoadFormAction
         // Get data entry form
         // ---------------------------------------------------------------------
 
-        if ( displayMode.equals( SECTION_FORM ) )
+        if ( displayMode.equals( DataSet.TYPE_SECTION ) )
         {
             getSectionForm( dataElements, dataSet );
         }
@@ -463,17 +460,9 @@ public class LoadFormAction
 
     private void getSectionForm( Collection<DataElement> dataElements, DataSet dataSet )
     {
-        // ---------------------------------------------------------------------
-        // Order the Sections
-        // ---------------------------------------------------------------------
-
         sections = new ArrayList<Section>( dataSet.getSections() );
 
         Collections.sort( sections, new SectionOrderComparator() );
-
-        // ---------------------------------------------------------------------
-        // Get the category combos for the sections
-        // ---------------------------------------------------------------------
 
         for ( Section section : sections )
         {
@@ -503,10 +492,6 @@ public class LoadFormAction
     {
         String disabled = locked ? "disabled" : "";
 
-        // ---------------------------------------------------------------------
-        // Get the custom data entry form (if any)
-        // ---------------------------------------------------------------------
-
         DataEntryForm dataEntryForm = dataSet.getDataEntryForm();
 
         if ( dataEntryForm != null )
@@ -514,10 +499,6 @@ public class LoadFormAction
             customDataEntryFormCode = dataEntryFormService.prepareDataEntryFormForEntry( 
                 dataEntryForm.getHtmlCode(), disabled, i18n, dataSet );
         }
-
-        // ---------------------------------------------------------------------
-        // Working on the display of data elements
-        // ---------------------------------------------------------------------
 
         List<DataElement> des = new ArrayList<DataElement>();
 
@@ -530,19 +511,5 @@ public class LoadFormAction
 
             orderedDataElements.put( categoryCombo, des );
         }
-    }
-    
-    private String getDisplayMode( DataSet dataSet )
-    {
-        if ( dataSet.hasDataEntryForm() )
-        {
-            return CUSTOM_FORM;
-        }
-        else if ( dataSet.hasSections() )
-        {
-            return SECTION_FORM;
-        }
-        
-        return "defaultform";
     }
 }
