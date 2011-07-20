@@ -412,10 +412,13 @@ function validateCompleteDataSet()
 
     if ( confirmed )
     {
+    	var dataSetId = $( '#selectedDataSetId' ).val();
+		var periodId = $( '#selectedPeriodId' ).val();
+		
         $( '#completeButton' ).attr( 'disabled', 'disabled' );
         $( '#undoButton' ).removeAttr( 'disabled' );
 
-        $.getJSON( 'getValidationViolations.action', registerCompleteDataSet ).error( function()
+        $.getJSON( 'getValidationViolations.action', { periodId:periodId, dataSetId:dataSetId }, registerCompleteDataSet ).error( function()
         {
             $( '#completeButton' ).removeAttr( 'disabled' );
             $( '#undoButton' ).attr( 'disabled', 'disabled' );
@@ -429,7 +432,10 @@ function registerCompleteDataSet( json )
 {
     if ( json.response == 'success' )
     {
-        $.getJSON( 'registerCompleteDataSet.action', function()
+    	var dataSetId = $( '#selectedDataSetId' ).val();
+		var periodId = $( '#selectedPeriodId' ).val();
+		
+        $.getJSON( 'registerCompleteDataSet.action', { periodId:periodId, dataSetId:dataSetId }, function()
         {
         } ).error( function()
         {
@@ -451,10 +457,13 @@ function undoCompleteDataSet()
 
     if ( confirmed )
     {
+    	var dataSetId = $( '#selectedDataSetId' ).val();
+		var periodId = $( '#selectedPeriodId' ).val();
+		
         $( '#completeButton' ).removeAttr( 'disabled' );
         $( '#undoButton' ).attr( 'disabled', 'disabled' );
 
-        $.getJSON( 'undoCompleteDataSet.action', function()
+        $.getJSON( 'undoCompleteDataSet.action', { periodId:periodId, dataSetId:dataSetId }, function()
         {
         } ).error( function()
         {
