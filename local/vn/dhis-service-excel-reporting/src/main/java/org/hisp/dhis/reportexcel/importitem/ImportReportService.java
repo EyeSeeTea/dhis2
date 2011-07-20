@@ -5,9 +5,9 @@ import java.util.Collection;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.reportexcel.DataElementGroupOrder;
 
-public interface ImportItemStore
+public interface ImportReportService
 {
-    String ID = ImportItemStore.class.getName();
+    String ID = ImportReportService.class.getName();
 
     // -------------------------------------------------------------------------
     // Import Report services
@@ -22,13 +22,15 @@ public interface ImportItemStore
     public Collection<ExcelItemGroup> getAllImportReport();
 
     public ExcelItemGroup getImportReport( int id );
-
+    
     public ExcelItemGroup getImportReport( String name );
 
     public Collection<ExcelItemGroup> getImportReports( OrganisationUnit organisationUnit );
 
+    public Collection<ExcelItemGroup> getImportReportsByType( String type );
+    
     // -------------------------------------------------------------------------
-    // Import Item services
+    // Import item services
     // -------------------------------------------------------------------------
 
     public int addImportItem( ExcelItem importItem );
@@ -40,10 +42,10 @@ public interface ImportItemStore
     public Collection<ExcelItem> getAllImportItem();
 
     public ExcelItem getImportItem( int id );
-
+    
     public ExcelItem getImportItem( String name );
     
-    public Collection <Integer> getSheets();
+    public Collection<Integer> getAllSheet();
 
     // -------------------------------------------------------------------------
     // DataElement Order
@@ -54,4 +56,5 @@ public interface ImportItemStore
     public void updateDataElementGroupOrder( DataElementGroupOrder dataElementGroupOrder );
 
     public void deleteDataElementGroupOrder( Integer id );
+
 }

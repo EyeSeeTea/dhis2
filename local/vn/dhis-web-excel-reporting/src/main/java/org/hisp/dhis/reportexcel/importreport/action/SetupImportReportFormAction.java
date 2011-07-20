@@ -33,7 +33,7 @@ import java.util.List;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
-import org.hisp.dhis.reportexcel.importitem.ImportItemService;
+import org.hisp.dhis.reportexcel.importitem.ImportReportService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,18 +41,18 @@ import com.opensymphony.xwork2.Action;
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ShowUpdateImportReportFormAction
+public class SetupImportReportFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ImportItemService importItemService;
+    private ImportReportService importReportService;
 
-    public void setImportItemService( ImportItemService importItemService )
+    public void setImportReportService( ImportReportService importReportService )
     {
-        this.importItemService = importItemService;
+        this.importReportService = importReportService;
     }
 
     private PeriodService periodService;
@@ -66,9 +66,9 @@ public class ShowUpdateImportReportFormAction
     // Input && Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private Integer id;
 
-    public void setId( int id )
+    public void setId( Integer id )
     {
         this.id = id;
     }
@@ -78,6 +78,13 @@ public class ShowUpdateImportReportFormAction
     public ExcelItemGroup getImportReport()
     {
         return importReport;
+    }
+
+    private List<String> importTypes;
+
+    public List<String> getImportTypes()
+    {
+        return importTypes;
     }
 
     private List<PeriodType> periodTypes;
@@ -94,10 +101,16 @@ public class ShowUpdateImportReportFormAction
     public String execute()
         throws Exception
     {
-        importReport = importItemService.getImportReport( id );
+        if ( id != null && id != -1 )
+        {
+            importReport = importReportService.getImportReport( id );
+        }
+
+        importTypes = ExcelItemGroup.TYPE.getImportTypes();
         
         periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
 
         return SUCCESS;
     }
+
 }

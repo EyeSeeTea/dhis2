@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportexcel.exportitem.action;
+
 /*
  * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
@@ -24,63 +26,71 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportexcel.importing.action;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.reportexcel.importitem.ExcelItemGroup;
-import org.hisp.dhis.reportexcel.importitem.ImportReportService;
-import org.hisp.dhis.reportexcel.state.SelectionManager;
+import org.hisp.dhis.reportexcel.ExportReportService;
+import org.hisp.dhis.reportexcel.ReportExcelItem;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * @version $Id
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
 
-public class ViewDataFlowAction
+public class GetExportItemTypesAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ImportReportService importReportService;
+    private ExportReportService exportReportService;
 
-    public void setImportReportService( ImportReportService importReportService )
+    public void setExportReportService( ExportReportService exportReportService )
     {
-        this.importReportService = importReportService;
-    }
-
-    private SelectionManager selectionManager;
-
-    public void setSelectionManager( SelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
+        this.exportReportService = exportReportService;
     }
 
     // -------------------------------------------------------------------------
-    // Inputs && Outputs
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer importReportId;
+    private Integer id;
 
-    public void setImportReportId( Integer importReportId )
+    private List<String> itemTypes = new ArrayList<String>();
+
+    // -------------------------------------------------------------------------
+    // Getters & Setters
+    // -------------------------------------------------------------------------
+
+    public void setId( Integer id )
     {
-        this.importReportId = importReportId;
+        this.id = id;
+    }
+
+    public List<String> getItemTypes()
+    {
+        return itemTypes;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action Implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
         throws Exception
     {
-        selectionManager.setSelectedReportId( importReportId );
+        if ( id == null || id == -1 )
+        {
+            itemTypes = ReportExcelItem.TYPE.getItemTypes();
+        }
+        else
+        {
+            itemTypes = exportReportService.getExportReport( id ).getItemTypes();
+        }
 
-        ExcelItemGroup importReport = importReportService.getImportReport( importReportId );
-
-        return importReport.getType();
+        return SUCCESS;
     }
 }
