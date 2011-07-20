@@ -27,6 +27,17 @@ ${dataElement.id}#if( $velocityCount < $size1 ),#end #end ];
 #foreach( $indicator in $indicators )
 indicatorFormulas['${indicator.id}'] = '($!{indicator.explodedNumerator})/($!{indicator.explodedDenominator})*($!{indicator.indicatorType.factor})';
 #end
+
+dataSets = {
+#set( $size3 = $dataSets.size() )
+#foreach( $dataSet in $dataSets )
+"${dataSet.id}": {
+"id":"${dataSet.id}",
+"name":"$!encoder.jsonEncode( ${dataSet.name} )",
+"periodType":"$!encoder.jsonEncode( ${dataSet.periodType.name} )" 
+}#if( $velocityCount < $size3 ),#end
+#end };
+
 </script>
 
 <h3>$i18n.getString( "data_entry" ) #openHelp( "dataEntry" )</h3>
@@ -58,8 +69,8 @@ indicatorFormulas['${indicator.id}'] = '($!{indicator.explodedNumerator})/($!{in
 		<td><select id="selectedDataSetId" name="selectedDataSetId" style="width:350px" onchange="dataSetSelected()" disabled="disabled"></select></td>
 	</tr>	
 	<tr>
-		<td><label for="selectedPeriodIndex">$i18n.getString( "period" )</label></td>
-		<td><select id="selectedPeriodIndex" name="selectedPeriodIndex" style="width:227px" onchange="periodSelected()" disabled="disabled"></select>
+		<td><label for="selectedPeriodId">$i18n.getString( "period" )</label></td>
+		<td><select id="selectedPeriodId" name="selectedPeriodId" style="width:227px" onchange="periodSelected()" disabled="disabled"></select>
 			<input type="button" id="prevButton" style="width:60px" value="$i18n.getString( 'prev' )" title="$i18n.getString('earlier_periods')" onclick="previousPeriodsSelected()" disabled="disabled"><input 
 				   type="button" id="nextButton" style="width:60px" value="$i18n.getString( 'next' )" title="$i18n.getString('later_periods')" onclick="nextPeriodsSelected()" disabled="disabled">
 		</td>
