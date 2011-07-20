@@ -490,13 +490,10 @@ function validate()
 
 function viewHist( dataElementId, optionComboId )
 {
-    viewHistory( dataElementId, optionComboId, true );
-}
-
-function viewHistory( dataElementId, optionComboId, showComment )
-{
+	var periodId = $( '#selectedPeriodId' ).val();
+	
     window.open( 'viewHistory.action?dataElementId=' + dataElementId + '&optionComboId=' + optionComboId
-            + '&showComment=' + showComment, '_blank', 'width=580,height=710,scrollbars=yes' );
+            + '&periodId=' + periodId + '&showComment=true', '_blank', 'width=580,height=710,scrollbars=yes' );
 }
 
 function closeCurrentSelection()
