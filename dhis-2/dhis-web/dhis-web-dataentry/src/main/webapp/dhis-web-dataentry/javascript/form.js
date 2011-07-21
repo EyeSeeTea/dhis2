@@ -1,4 +1,4 @@
-// Identifiers for which zero values are, insignificant, also used in entry.js, populated in select.vm
+// Identifiers for which zero values are insignificant, also used in entry.js, populated in select.vm
 var significantZeros = [];
 
 // Array with associative arrays for each data element, populated in select.vm
@@ -36,7 +36,26 @@ var COLOR_WHITE = '#ffffff';
 
 function addEventListeners()
 {
-    $( '[name="entryfield"]' ).focus( valueFocus );
+    $( '[name="entryfield"]' ).each( function( i ) 
+    {
+    	var id = $( this ).attr( 'id' );    	
+		var dataElementId = id.split( '-' )[0];
+		var optionComboId = id.split( '-' )[1];	
+    	
+    	$( this ).focus( valueFocus );
+    	
+    	$( this ).change( function() {
+    		saveVal( dataElementId, optionComboId );
+    	} );
+    	
+    	$( this ).dblclick( function() {
+    		viewHist( dataElementId, optionComboId );
+    	} );
+    	
+    	$( this ).css( 'width', '100%' );
+    	$( this ).css( 'text-align', 'center' );
+    } );
+    
     $( '[name="entryselect"]' ).focus( valueFocus );
 }
 
@@ -300,6 +319,7 @@ function insertDataValues()
 function displayEntryFormCompleted()
 {
     addEventListeners();
+    
     $( '#validationButton' ).removeAttr( 'disabled' );
     $( '#defaultForm' ).removeAttr( 'disabled' );
     
