@@ -235,11 +235,11 @@ public class DefaultDataEntryFormService
         int i = 1;
         
         final String jsCodeForInputFields = " name=\"entryfield\" $DISABLED onchange=\"saveVal( $DATAELEMENTID, $OPTIONCOMBOID )\" style=\"text-align:center\" onkeyup=\"return keyPress(event, this)\" ";
-        final String jsCodeForSelectLists = " name=\"entryfield\" $DISABLED onchange=\"saveBoolean( $DATAELEMENTID, $OPTIONCOMBOID )\" onkeyup=\"return keyPress(event, this)\" ";
+        final String jsCodeForSelectLists = " name=\"entryfield\" $DISABLED onchange=\"saveBoolean( $DATAELEMENTID, $OPTIONCOMBOID )\" onkeyup=\"keyPress(event, this)\" ";
         
         final String historyCode = " ondblclick='javascript:viewHist( $DATAELEMENTID, $OPTIONCOMBOID )' ";
         
-        final String metaDataCode = "<span id=\"$DATAELEMENTID-dataelement\" style=\"display:none\">$DATAELEMENTNAME</span>"; //TODO read from js
+        final String metaDataCode = "<span id=\"$DATAELEMENTID-dataelement\" style=\"display:none\">$DATAELEMENTNAME</span>";
 
         StringBuffer sb = new StringBuffer();
 

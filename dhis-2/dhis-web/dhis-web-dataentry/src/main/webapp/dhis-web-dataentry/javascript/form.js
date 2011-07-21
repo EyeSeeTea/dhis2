@@ -331,8 +331,6 @@ function keyPress( event, field )
     {
         focusField.focus();
     }
-
-    return true;
 }
 
 function getNextEntryField( field )
