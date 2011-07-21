@@ -45,7 +45,7 @@
       <option value="false">$i18n.getString( "no" )</option>
     </select>
 	#else
-	<input name="entryfield" id="$dataEntryId" type="text" #if( $auth.hasAccess( "dhis-web-dataentry", "saveValue") ) ondblclick="viewHist(${dataElement.id},${optionCombo.id})" #else disabled="disabled"#end onkeyup="keyPress(event,this)" class="entryField" tabindex="$tabIndex" #if( $locked )disabled="disabled"#end>
+	<input name="entryfield" id="$dataEntryId" type="text" #if( !$auth.hasAccess( "dhis-web-dataentry", "saveValue") )disabled="disabled"#end tabindex="$tabIndex" #if( $locked )disabled="disabled"#end>
 	#end
 	</td>
 	#set( $tabIndex = $tabIndex + 1 )
