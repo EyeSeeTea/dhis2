@@ -64,7 +64,7 @@
         <option value="false">$i18n.getString( "no" )</option>
       </select></td>
       #else
-      <td><input name="entryfield" id="$dataEntryId" type="text" #if( !$auth.hasAccess( "dhis-web-dataentry", "saveValue" ) )disabled="disabled"#end onkeyup="keyPress(event,this)" #if( $locked || $greyedField )class="grey" disabled="disabled"#end tabindex="$tabIndex"></td>
+      <td><input name="entryfield" id="$dataEntryId" type="text" #if( !$auth.hasAccess( "dhis-web-dataentry", "saveValue" ) )disabled="disabled"#end #if( $locked || $greyedField )class="grey" disabled="disabled"#end tabindex="$tabIndex"></td>
       #end
     </td>
     #set( $tabIndex = $tabIndex + 1 )

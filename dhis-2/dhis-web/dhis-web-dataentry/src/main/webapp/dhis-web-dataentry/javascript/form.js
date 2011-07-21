@@ -52,6 +52,10 @@ function addEventListeners()
     		viewHist( dataElementId, optionComboId );
     	} );
     	
+    	$( this ).keyup( function() {
+    		keyPress( event, this );
+    	} );
+    	
     	$( this ).css( 'width', '100%' );
     	$( this ).css( 'text-align', 'center' );
     } );
