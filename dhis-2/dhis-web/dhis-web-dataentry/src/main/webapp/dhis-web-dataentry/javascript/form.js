@@ -60,7 +60,20 @@ function addEventListeners()
     	$( this ).css( 'text-align', 'center' );
     } );
     
-    $( '[name="entryselect"]' ).focus( valueFocus );
+    $( '[name="entryselect"]' ).each( function( i )
+    {
+    	var id = $( this ).attr( 'id' );    	
+		var dataElementId = id.split( '-' )[0];
+		var optionComboId = id.split( '-' )[1];	
+		
+    	$( this ).focus( valueFocus );
+    	
+    	$( this ).change( function() {
+    		saveBoolean( dataElementId, optionComboId );
+    	} );
+    	
+    	$( this ).css( 'width', '100%' );
+    } );
 }
 
 function clearPeriod()
