@@ -239,8 +239,6 @@ public class DefaultDataEntryFormService
         
         final String historyCode = " ondblclick='javascript:viewHist( $DATAELEMENTID, $OPTIONCOMBOID )' ";
         
-        final String metaDataCode = "<span id=\"$DATAELEMENTID-dataelement\" style=\"display:none\">$DATAELEMENTNAME</span>";
-
         StringBuffer sb = new StringBuffer();
 
         Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
@@ -324,7 +322,6 @@ public class DefaultDataEntryFormService
 
                 inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
                 
-                inputHtml += metaDataCode;
                 inputHtml = inputHtml.replace( "$DATAELEMENTID", String.valueOf( dataElementId ) );
                 inputHtml = inputHtml.replace( "$DATAELEMENTNAME", dataElement.getName() );
                 inputHtml = inputHtml.replace( "$DATAELEMENTTYPE", dataElementValueType );

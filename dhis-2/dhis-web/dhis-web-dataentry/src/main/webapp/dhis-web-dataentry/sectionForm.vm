@@ -29,12 +29,12 @@
 	  #set( $categoryOptions = $optionsMap.get( $category.id ) )
       #set( $colCount = $colCount / $categoryOptions.size() )
       <tr colspan="$colCount">
-        <td></td>
+      <td></td>
         #set( $cols = $colRepeat.get( $category.id ) )
         #foreach( $col in $cols )
-          #foreach( $categoryOption in $categoryOptions )
-          <th colspan="$colCount"><div align="center"> #if( $categoryOption.isDefault() )${i18n.getString( "value" )}#else ${encoder.htmlEncode( $categoryOption.name )}#end </div></th>
-          #end
+        #foreach( $categoryOption in $categoryOptions )
+        <th colspan="$colCount"><div align="center">#if( $categoryOption.isDefault() )${i18n.getString( "value" )}#else ${encoder.htmlEncode( $categoryOption.name )}#end</div></th>
+        #end
         #end
       </tr>
       #end
@@ -52,9 +52,7 @@
       #end
       #set( $count = $count + 1 )
       <tr>
-        <td  style="#if( $mark == 1 )background-color:#e0e0e0;#end padding-right:50px;">
-          <span id="${dataElement.id}-dataelement">${encoder.htmlEncode( $dataElement.name )}</span>
-        </td>
+        <td  style="#if( $mark == 1 )background-color:#e0e0e0;#end padding-right:50px;"><span>${encoder.htmlEncode( $dataElement.name )}</span></td>
         #foreach( $optionCombo in $optionCombos )
         #set( $dataEntryId = "${dataElement.id}-${optionCombo.id}-val" )
         #set( $greyedField = false )
