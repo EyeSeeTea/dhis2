@@ -1,4 +1,4 @@
-// Identifiers for which zero values are, insignificant, also used in entry.js, populated in select.vm
+// Identifiers for which zero values are insignificant, also used in entry.js, populated in select.vm
 var significantZeros = [];
 
 // Array with associative arrays for each data element, populated in select.vm
@@ -300,6 +300,7 @@ function insertDataValues()
 function displayEntryFormCompleted()
 {
     addEventListeners();
+    
     $( '#validationButton' ).removeAttr( 'disabled' );
     $( '#defaultForm' ).removeAttr( 'disabled' );
     
