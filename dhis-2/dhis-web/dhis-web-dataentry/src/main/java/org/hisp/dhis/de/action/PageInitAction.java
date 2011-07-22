@@ -27,16 +27,28 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitDataSetAssociationSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 
 import com.opensymphony.xwork2.Action;
 
@@ -46,6 +58,8 @@ import com.opensymphony.xwork2.Action;
 public class PageInitAction
     implements Action
 {
+    private static final Comparator<DataSet> COMPARATOR_DATASET = new DataSetNameComparator();
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -84,6 +98,20 @@ public class PageInitAction
     {
         this.selectionManager = selectionManager;
     }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
 
     // -------------------------------------------------------------------------
     // Output
@@ -116,6 +144,20 @@ public class PageInitAction
     {
         return dataSets;
     }
+    
+    private List<List<DataSet>> dataSetAssociationSets;
+    
+    public List<List<DataSet>> getDataSetAssociationSets()
+    {
+        return dataSetAssociationSets;
+    }
+
+    private Map<OrganisationUnit, Integer> organisationUnitAssociationSetMap;
+
+    public Map<OrganisationUnit, Integer> getOrganisationUnitAssociationSetMap()
+    {
+        return organisationUnitAssociationSetMap;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -133,12 +175,18 @@ public class PageInitAction
         
         dataSets = dataSetService.getAllDataSets();
         
+        OrganisationUnitDataSetAssociationSet organisationUnitSet = organisationUnitService.getOrganisationUnitDataSetAssociationSet();
+        
+        dataSetAssociationSets = organisationUnitSet.getDataSetAssociationSets();
+        
+        organisationUnitAssociationSetMap = organisationUnitSet.getOrganisationUnitAssociationSetMap();
+        
         for ( Indicator indicator : indicators )
         {
             indicator.setExplodedNumerator( expressionService.explodeExpression( indicator.getNumerator() ) );
             indicator.setExplodedDenominator( expressionService.explodeExpression( indicator.getDenominator() ) );
         }
-        
+
         return SUCCESS;
     }
 }

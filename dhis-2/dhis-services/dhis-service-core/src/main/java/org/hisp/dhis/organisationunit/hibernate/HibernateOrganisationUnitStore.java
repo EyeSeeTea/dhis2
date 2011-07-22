@@ -156,6 +156,18 @@ public class HibernateOrganisationUnitStore
 
         return query.list();
     }
+    
+    /**
+     * Using distinct root entity to avoid duplicates from join. Can not be cached
+     * since joined data sets will be lost.
+     */
+    @SuppressWarnings("unchecked")
+    public Collection<OrganisationUnit> getAllOrganisationUnitsEagerFetchDataSets()
+    {
+        String hql = "from OrganisationUnit o left join fetch o.dataSets";
+        
+        return sessionFactory.getCurrentSession().createQuery( hql ).setResultTransformer( Criteria.DISTINCT_ROOT_ENTITY ).list();
+    }
 
     // -------------------------------------------------------------------------
     // OrganisationUnitHierarchy

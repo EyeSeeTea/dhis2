@@ -91,6 +91,13 @@ public interface OrganisationUnitStore
      */
     void updateOrganisationUnitParent( int organisationUnitId, int parentId );
     
+    /**
+     * Gets all OrganiastionUnits and eager fetches the DataSets associated with
+     * each of them.
+     * @return a collection of OrganisationUnits.
+     */
+    Collection<OrganisationUnit> getAllOrganisationUnitsEagerFetchDataSets();
+    
     // -------------------------------------------------------------------------
     // OrganisationUnitLevel
     // -------------------------------------------------------------------------

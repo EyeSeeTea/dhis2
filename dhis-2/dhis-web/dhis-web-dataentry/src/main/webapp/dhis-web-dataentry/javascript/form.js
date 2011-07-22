@@ -10,6 +10,10 @@ var indicatorFormulas = [];
 // Array with associative arrays for each data set, populated in select.vm
 var dataSets = [];
 
+var dataSetAssociationSets = [];
+
+var organisationUnitAssociationSetMap = [];
+
 // Array with keys on form {dataelementid}-{optioncomboid}-min/max with min/max values
 var currentMinMaxValueMap = [];
 
