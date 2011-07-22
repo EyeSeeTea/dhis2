@@ -56,6 +56,12 @@ ${dataSet.id}#if( $velocityCount < $size6 ),#end
 #end ]#if( $velocityCount < $size5 ),#end
 #end };
 
+organisationUnitAssociationSetMap = {
+#set( $size7 = $organisationUnitAssociationSetMap.size() )
+#foreach( $orgUnit in $organisationUnitAssociationSetMap.keySet() )
+"${orgUnit}":"$organisationUnitAssociationSetMap.get( ${orgUnit} )"#if( $velocityCount < $size7 ),#end
+#end };
+
 </script>
 
 <h3>$i18n.getString( "data_entry" ) #openHelp( "dataEntry" )</h3>

@@ -11,7 +11,7 @@ public class OrganisationUnitDataSetAssociationSet
 {
     private List<List<DataSet>> dataSetAssociationSets = new ArrayList<List<DataSet>>();
     
-    private Map<OrganisationUnit, Integer> organisationUnitAssociationSetMap = new HashMap<OrganisationUnit, Integer>();
+    private Map<Integer, Integer> organisationUnitAssociationSetMap = new HashMap<Integer, Integer>();
 
     public OrganisationUnitDataSetAssociationSet()
     {
@@ -27,12 +27,12 @@ public class OrganisationUnitDataSetAssociationSet
         this.dataSetAssociationSets = dataSetAssociationSets;
     }
 
-    public Map<OrganisationUnit, Integer> getOrganisationUnitAssociationSetMap()
+    public Map<Integer, Integer> getOrganisationUnitAssociationSetMap()
     {
         return organisationUnitAssociationSetMap;
     }
 
-    public void setOrganisationUnitAssociationSetMap( Map<OrganisationUnit, Integer> organisationUnitAssociationSetMap )
+    public void setOrganisationUnitAssociationSetMap( Map<Integer, Integer> organisationUnitAssociationSetMap )
     {
         this.organisationUnitAssociationSetMap = organisationUnitAssociationSetMap;
     }

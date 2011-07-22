@@ -425,6 +425,8 @@ public class DefaultOrganisationUnitService
     
     public OrganisationUnitDataSetAssociationSet getOrganisationUnitDataSetAssociationSet()
     {
+        //TODO hierarchy 
+        
         Collection<OrganisationUnit> units = organisationUnitStore.getAllOrganisationUnitsEagerFetchDataSets();
         
         sortOrganisationUnitDataSets( units );
@@ -442,7 +444,7 @@ public class DefaultOrganisationUnitService
                 set.getDataSetAssociationSets().add( unit.getSortedDataSets() );
             }
             
-            set.getOrganisationUnitAssociationSetMap().put( unit, index );
+            set.getOrganisationUnitAssociationSetMap().put( unit.getId(), index );
         }
         
         return set;
