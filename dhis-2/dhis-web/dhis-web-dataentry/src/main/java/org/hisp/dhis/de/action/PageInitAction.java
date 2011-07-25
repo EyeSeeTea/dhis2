@@ -28,6 +28,8 @@ package org.hisp.dhis.de.action;
  */
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -36,6 +38,8 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.organisationunit.OrganisationUnitDataSetAssociationSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 
 import com.opensymphony.xwork2.Action;
@@ -84,6 +88,13 @@ public class PageInitAction
     {
         this.selectionManager = selectionManager;
     }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
 
     // -------------------------------------------------------------------------
     // Output
@@ -116,6 +127,20 @@ public class PageInitAction
     {
         return dataSets;
     }
+    
+    private List<List<DataSet>> dataSetAssociationSets;
+    
+    public List<List<DataSet>> getDataSetAssociationSets()
+    {
+        return dataSetAssociationSets;
+    }
+
+    private Map<Integer, Integer> organisationUnitAssociationSetMap;
+
+    public Map<Integer, Integer> getOrganisationUnitAssociationSetMap()
+    {
+        return organisationUnitAssociationSetMap;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -133,12 +158,18 @@ public class PageInitAction
         
         dataSets = dataSetService.getAllDataSets();
         
+        OrganisationUnitDataSetAssociationSet organisationUnitSet = organisationUnitService.getOrganisationUnitDataSetAssociationSet();
+        
+        dataSetAssociationSets = organisationUnitSet.getDataSetAssociationSets();
+        
+        organisationUnitAssociationSetMap = organisationUnitSet.getOrganisationUnitAssociationSetMap();
+        
         for ( Indicator indicator : indicators )
         {
             indicator.setExplodedNumerator( expressionService.explodeExpression( indicator.getNumerator() ) );
             indicator.setExplodedDenominator( expressionService.explodeExpression( indicator.getDenominator() ) );
         }
-        
+
         return SUCCESS;
     }
 }

@@ -30,6 +30,7 @@ package org.hisp.dhis.organisationunit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,13 +41,17 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitLevelComparator;
 import org.hisp.dhis.system.util.AuditLogUtil;
+import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -59,6 +64,7 @@ public class DefaultOrganisationUnitService
     implements OrganisationUnitService
 {
     private static final String LEVEL_PREFIX = "Level ";
+    private static final Comparator<DataSet> COMPARATOR_DATASET = new DataSetNameComparator();
 
     private static final Log log = LogFactory.getLog( DefaultOrganisationUnitService.class );
 
@@ -416,6 +422,62 @@ public class DefaultOrganisationUnitService
         List<OrganisationUnit> intersection = new ArrayList<OrganisationUnit>( CollectionUtils.intersection( subTree, result ) );
 
         return limit && intersection != null && intersection.size() > MAX_LIMIT ? intersection.subList( 0, MAX_LIMIT ) : intersection;   
+    }
+    
+    public OrganisationUnitDataSetAssociationSet getOrganisationUnitDataSetAssociationSet()
+    {
+        //TODO hierarchy
+        Clock c = new Clock().startClock();
+        
+        Collection<OrganisationUnit> units = organisationUnitStore.getAllOrganisationUnitsEagerFetchDataSets();
+        c.logTime( "all" );
+        
+        sortOrganisationUnitDataSets( units );
+        c.logTime( "sorted" );
+        filterOrganisationUnitSortedDataSets( units );
+        c.logTime( "filtered" );
+        
+        OrganisationUnitDataSetAssociationSet set = new OrganisationUnitDataSetAssociationSet();
+                
+        for ( OrganisationUnit unit : units )
+        {
+            int index = set.getDataSetAssociationSets().indexOf( unit.getSortedDataSets() );
+            
+            if ( index == -1 ) // Association set does not exist, add new
+            {
+                index = set.getDataSetAssociationSets().size();                
+                set.getDataSetAssociationSets().add( unit.getSortedDataSets() );
+            }
+            
+            set.getOrganisationUnitAssociationSetMap().put( unit.getId(), index );
+        }
+        c.logTime( "done" ).stop();
+        return set;
+    }
+    
+    private void sortOrganisationUnitDataSets( Collection<OrganisationUnit> units )
+    {
+        for ( OrganisationUnit unit : units )
+        {
+            List<DataSet> dataSets =  new ArrayList<DataSet>( unit.getDataSets() );
+            Collections.sort( dataSets, COMPARATOR_DATASET );
+            unit.setSortedDataSets( dataSets );
+        }
+    }
+    
+    private void filterOrganisationUnitSortedDataSets( Collection<OrganisationUnit> units )
+    {
+        User currentUser = currentUserService.getCurrentUser();
+        
+        if ( currentUser != null && !currentUser.getUserCredentials().isSuper() )
+        {
+            Set<DataSet> userDataSets = currentUser.getUserCredentials().getAllDataSets();
+            
+            for ( OrganisationUnit unit : units )
+            {
+                unit.getSortedDataSets().retainAll( userDataSets );
+            }
+        }
     }
     
     // -------------------------------------------------------------------------

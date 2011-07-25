@@ -104,13 +104,15 @@ public class OrganisationUnit
     
     private String phoneNumber;
 
+    private Boolean hasPatients;
+    
     private transient int level;
     
     private transient boolean currentParent;
     
     private transient String type;
     
-    private Boolean hasPatients;
+    private transient List<DataSet> sortedDataSets = new ArrayList<DataSet>();
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -721,4 +723,13 @@ public class OrganisationUnit
         this.type = type;
     }
 
+    public List<DataSet> getSortedDataSets()
+    {
+        return sortedDataSets;
+    }
+
+    public void setSortedDataSets( List<DataSet> sortedDataSets )
+    {
+        this.sortedDataSets = sortedDataSets;
+    }
 }
