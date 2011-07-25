@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.hisp.dhis.dataset.DataSet;
+import java.util.Set;
 
 public class OrganisationUnitDataSetAssociationSet
 {
-    private List<List<DataSet>> dataSetAssociationSets = new ArrayList<List<DataSet>>();
+    private List<Set<Integer>> dataSetAssociationSets = new ArrayList<Set<Integer>>();
     
     private Map<Integer, Integer> organisationUnitAssociationSetMap = new HashMap<Integer, Integer>();
 
@@ -17,12 +16,12 @@ public class OrganisationUnitDataSetAssociationSet
     {
     }
 
-    public List<List<DataSet>> getDataSetAssociationSets()
+    public List<Set<Integer>> getDataSetAssociationSets()
     {
         return dataSetAssociationSets;
     }
 
-    public void setDataSetAssociationSets( List<List<DataSet>> dataSetAssociationSets )
+    public void setDataSetAssociationSets( List<Set<Integer>> dataSetAssociationSets )
     {
         this.dataSetAssociationSets = dataSetAssociationSets;
     }

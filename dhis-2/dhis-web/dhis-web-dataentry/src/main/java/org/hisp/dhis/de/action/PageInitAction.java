@@ -30,6 +30,7 @@ package org.hisp.dhis.de.action;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -128,9 +129,9 @@ public class PageInitAction
         return dataSets;
     }
     
-    private List<List<DataSet>> dataSetAssociationSets;
+    private List<Set<Integer>> dataSetAssociationSets;
     
-    public List<List<DataSet>> getDataSetAssociationSets()
+    public List<Set<Integer>> getDataSetAssociationSets()
     {
         return dataSetAssociationSets;
     }

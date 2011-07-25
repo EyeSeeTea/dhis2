@@ -48,11 +48,13 @@ dataSets = {
 
 dataSetAssociationSets = {
 #set( $size5 = $dataSetAssociationSets.size() )
+#set( $index = 0 )
 #foreach( $associationSet in $dataSetAssociationSets )
-"${velocityCount}": [
+"${index}": [
+#set( $index = $index + 1 )
 #set( $size6 = $associationSet.size() )
-#foreach( $dataSet in $associationSet )
-${dataSet.id}#if( $velocityCount < $size6 ),#end
+#foreach( $id in $associationSet )
+${id}#if( $velocityCount < $size6 ),#end
 #end ]#if( $velocityCount < $size5 ),#end
 #end };
 

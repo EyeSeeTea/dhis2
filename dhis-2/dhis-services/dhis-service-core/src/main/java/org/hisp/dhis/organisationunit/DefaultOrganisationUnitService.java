@@ -30,7 +30,6 @@ package org.hisp.dhis.organisationunit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,11 +41,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitLevelComparator;
 import org.hisp.dhis.system.util.AuditLogUtil;
 import org.hisp.dhis.system.util.Clock;
+import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
@@ -64,7 +63,6 @@ public class DefaultOrganisationUnitService
     implements OrganisationUnitService
 {
     private static final String LEVEL_PREFIX = "Level ";
-    private static final Comparator<DataSet> COMPARATOR_DATASET = new DataSetNameComparator();
 
     private static final Log log = LogFactory.getLog( DefaultOrganisationUnitService.class );
 
@@ -429,53 +427,41 @@ public class DefaultOrganisationUnitService
         //TODO hierarchy
         Clock c = new Clock().startClock();
         
-        Collection<OrganisationUnit> units = organisationUnitStore.getAllOrganisationUnitsEagerFetchDataSets();
+        Map<Integer, Set<Integer>> associationSet = organisationUnitStore.getOrganisationUnitDataSetAssocationMap();
         c.logTime( "all" );
         
-        sortOrganisationUnitDataSets( units );
-        c.logTime( "sorted" );
-        filterOrganisationUnitSortedDataSets( units );
+        filterOrganisationUnitSortedDataSets( associationSet );
         c.logTime( "filtered" );
         
         OrganisationUnitDataSetAssociationSet set = new OrganisationUnitDataSetAssociationSet();
-                
-        for ( OrganisationUnit unit : units )
+        
+        for ( Map.Entry<Integer, Set<Integer>> entry : associationSet.entrySet() )
         {
-            int index = set.getDataSetAssociationSets().indexOf( unit.getSortedDataSets() );
+            int index = set.getDataSetAssociationSets().indexOf( entry.getValue() );
             
             if ( index == -1 ) // Association set does not exist, add new
             {
-                index = set.getDataSetAssociationSets().size();                
-                set.getDataSetAssociationSets().add( unit.getSortedDataSets() );
+                index = set.getDataSetAssociationSets().size();
+                set.getDataSetAssociationSets().add( entry.getValue() );
             }
             
-            set.getOrganisationUnitAssociationSetMap().put( unit.getId(), index );
+            set.getOrganisationUnitAssociationSetMap().put( entry.getKey(), index );
         }
         c.logTime( "done" ).stop();
         return set;
     }
     
-    private void sortOrganisationUnitDataSets( Collection<OrganisationUnit> units )
-    {
-        for ( OrganisationUnit unit : units )
-        {
-            List<DataSet> dataSets =  new ArrayList<DataSet>( unit.getDataSets() );
-            Collections.sort( dataSets, COMPARATOR_DATASET );
-            unit.setSortedDataSets( dataSets );
-        }
-    }
-    
-    private void filterOrganisationUnitSortedDataSets( Collection<OrganisationUnit> units )
+    private void filterOrganisationUnitSortedDataSets( Map<Integer, Set<Integer>> associationMap )
     {
         User currentUser = currentUserService.getCurrentUser();
         
         if ( currentUser != null && !currentUser.getUserCredentials().isSuper() )
         {
-            Set<DataSet> userDataSets = currentUser.getUserCredentials().getAllDataSets();
+            Collection<Integer> userDataSets = ConversionUtils.getIdentifiers( DataSet.class, currentUser.getUserCredentials().getAllDataSets() );
             
-            for ( OrganisationUnit unit : units )
+            for ( Set<Integer> dataSets : associationMap.values() )
             {
-                unit.getSortedDataSets().retainAll( userDataSets );
+                dataSets.retainAll( userDataSets );
             }
         }
     }

@@ -112,8 +112,6 @@ public class OrganisationUnit
     
     private transient String type;
     
-    private transient List<DataSet> sortedDataSets = new ArrayList<DataSet>();
-    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -721,15 +719,5 @@ public class OrganisationUnit
     public void setType( String type )
     {
         this.type = type;
-    }
-
-    public List<DataSet> getSortedDataSets()
-    {
-        return sortedDataSets;
-    }
-
-    public void setSortedDataSets( List<DataSet> sortedDataSets )
-    {
-        this.sortedDataSets = sortedDataSets;
     }
 }
