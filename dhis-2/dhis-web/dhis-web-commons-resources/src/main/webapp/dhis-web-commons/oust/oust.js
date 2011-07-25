@@ -47,34 +47,31 @@ function SelectionTreeSelection()
         {
             onSelectFunction();
         }
-        
-        var request = new Request();
-        request.setCallbackSuccess( responseReceived );
-        request.setResponseTypeXML( 'selected' );
-        
+		
         var unitTag = document.getElementById( getTagId( unitId ));
-        var linkTags = unitTag.getElementsByTagName( 'a' );
+        var linkTags = $(unitTag).find( 'a' );
 
         if ( linkTags[0].className == 'selected' )
         {
-            request.send( selectionTreePath + 'removeorgunit.action?id=' + unitId );
+			$.post( selectionTreePath + 'removeorgunit.action', { id:unitId }, responseReceived );
+				
             linkTags[0].className = '';			
         }
         else
         {			
-			
             if ( multipleSelectionAllowed )
             {
-                request.send( selectionTreePath + 'addorgunit.action?id=' + unitId );
-                linkTags[0].className = 'selected';
+                $.post( selectionTreePath + 'addorgunit.action', { id:unitId }, responseReceived );
+				
+				linkTags[0].className = 'selected';
             }
             else
             {
-                request.send( selectionTreePath + 'setorgunit.action?id=' + unitId );
-                    
+                $.post( selectionTreePath + 'setorgunit.action', { id:unitId }, responseReceived );
+				
                 // Remove all select marks
                 var treeTag = document.getElementById( 'selectionTree' );
-                var linkTags = treeTag.getElementsByTagName( 'a' );
+                var linkTags = $(treeTag).find( 'a' );
 
                 for ( var i = 0, linkTag; ( linkTag = linkTags[i] ); ++i )
                 {
@@ -83,31 +80,29 @@ function SelectionTreeSelection()
 
                 // Set new select mark
                 var unitTag = document.getElementById( getTagId( unitId ));
-                linkTags = unitTag.getElementsByTagName( 'a' );
+                linkTags = $(unitTag).find( 'a' );
                 linkTags[0].className = 'selected';
             }
         }
     };
 
-    function responseReceived( rootElement )
+    function responseReceived( json )
     {
-		selectedOrganisationUnit = new Array();
-	
-		var unitIds = new Array();
-
-        var unitIdElements = rootElement.getElementsByTagName( 'unitId' );
-        
-        for ( var i = 0, unitIdElement; ( unitIdElement = unitIdElements[i] ); ++i )
-        {
-            unitIds[i] = unitIdElement.firstChild.nodeValue;
-			selectedOrganisationUnit.push( unitIds[i] );	
-        }
-		
         if ( !listenerFunction )
         {
             return;
         }       
         
+		selectedOrganisationUnit = new Array();
+	
+		var unitIds = new Array();
+
+        for ( i in json.selectedUnits )
+        {
+            unitIds[i] = json.selectedUnits[i].id;
+			selectedOrganisationUnit.push( unitIds[i] );	
+        }
+		
         listenerFunction( unitIds );
     }
 
@@ -139,7 +134,7 @@ function SelectionTree()
     this.toggle = function( unitId )
     {
         var parentTag = document.getElementById( getTagId( unitId ));
-        var children = parentTag.getElementsByTagName( 'ul' );
+        var children = $(parentTag).find( 'ul' );
 
         var request = new Request();
         request.setResponseTypeXML( 'units' );
@@ -164,27 +159,29 @@ function SelectionTree()
         
         setLoadingMessage( treeTag );
         
-        var children = treeTag.getElementsByTagName( 'ul' );
+        var children = $(treeTag).find( 'ul' );
         if ( children.length > 0 )
         {
             treeTag.removeChild( children[0] );
         }
-
-        var request = new Request();
-        request.setResponseTypeXML( 'units' );
-        request.setCallbackSuccess( treeReceived );
-        request.send( selectionTreePath + 'getExpandedTree.action' );
+		
+		$.ajax({
+			url: selectionTreePath + 'getExpandedTree.action',
+			cache: false,
+			dataType: "xml",
+			success: treeReceived
+		});
     };
 
     function processExpand( rootElement )
     {
-        var parentElements = rootElement.getElementsByTagName( 'parent' );
+        var parentElements = $(rootElement).find( 'parent' );
 
         for ( var i = 0, parentElement; ( parentElement = parentElements[i] ); ++i )
         {
             var parentId = parentElement.getAttribute( 'parentId' );
             var parentTag = document.getElementById( getTagId( parentId ));
-            var children = parentTag.getElementsByTagName( 'ul' );
+            var children = $(parentTag).find( 'ul' );
 
             if ( children.length < 1 )
             {
@@ -200,8 +197,8 @@ function SelectionTree()
 
     function treeReceived( rootElement )
     {
-        var rootsElement = rootElement.getElementsByTagName( 'roots' )[0];
-        var unitElements = rootsElement.getElementsByTagName( 'unit' );
+		var rootsElement = $(rootElement).find( 'roots' ).first();
+        var unitElements = $(rootElement).find( 'unit' );
         
         var treeTag = document.getElementById( 'selectionTree' );
         var rootsTag = document.createElement( 'ul' );
@@ -215,8 +212,8 @@ function SelectionTree()
 
         treeTag.appendChild( rootsTag );
 
-        var childrenElement = rootElement.getElementsByTagName( 'children' )[0];
-        var parentElements = childrenElement.getElementsByTagName( 'parent' );
+        var childrenElement = $(rootElement).find( 'children' ).first();
+        var parentElements = $(childrenElement).find( 'parent' );
 
         for ( var i = 0, parentElement; ( parentElement = parentElements[i] ); ++i )
         {
@@ -231,7 +228,7 @@ function SelectionTree()
 
     function createChildren( parentTag, parentElement )
     {
-        var children = parentElement.getElementsByTagName( 'child' );
+        var children = $(parentElement).find( 'child' );
         var childrenTag = document.createElement( 'ul' );
 
         for ( var i = 0, child; ( child = children[i] ); ++i )
@@ -292,7 +289,7 @@ function SelectionTree()
 
     function setToggle( unitTag, expanded )
     {
-        var spans = unitTag.getElementsByTagName( 'span' );
+        var spans = $(unitTag).find( 'span' );
         var toggleTag = spans[0];
         var toggleImg = expanded ? getToggleCollapse() : getToggleExpand();
 

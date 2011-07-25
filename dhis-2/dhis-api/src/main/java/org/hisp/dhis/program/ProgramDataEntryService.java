@@ -42,12 +42,10 @@ import org.hisp.dhis.patientdatavalue.PatientDataValue;
 public interface ProgramDataEntryService
 {
     final Pattern INPUT_PATTERN = Pattern.compile( "(<input.*?)[/]?>", Pattern.DOTALL );
-    final Pattern SELECT_PATTERN = Pattern.compile( "(<select.*?)[/]?</select>", Pattern.DOTALL );
-    final Pattern IDENTIFIER_PATTERN_TEXTBOX = Pattern.compile( "\"value\\[([\\p{Digit}.]*)\\].value:value\\[([\\p{Digit}.]*)\\].value:value\\[([\\p{Digit}.]*)\\].value\"" );
-    final Pattern IDENTIFIER_PATTERN_BOOLEAN = Pattern.compile( "value\\[(.*)\\].boolean:value\\[(.*)\\].boolean" );
-    final Pattern IDENTIFIER_PATTERN_COMBO = Pattern.compile( "\"value\\[([\\p{Digit}.]*)\\].combo:value\\[([\\p{Digit}.]*)\\].combo\"" );
-    final Pattern IDENTIFIER_PATTERN_DATE = Pattern.compile( "\"value\\[([\\p{Digit}.]*)\\].date:value\\[([\\p{Digit}.]*)\\].date\"" );
-
+    
+    final Pattern IDENTIFIER_PATTERN_TEXTBOX = Pattern.compile( "id=\"(\\d+)-(\\d+)-(\\d+)-val\"" );
+    final Pattern IDENTIFIER_PATTERN_OTHERS = Pattern.compile( "id=\"(\\d+)-(\\d+)-val\"" );
+    
     //--------------------------------------------------------------------------
     // ProgramDataEntryService
     //--------------------------------------------------------------------------

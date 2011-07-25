@@ -26,10 +26,6 @@
         ../dhis-web-commons/javascripts/date.js</param>
     </action>
 
-    <action name="searchform" class="org.hisp.dhis.caseentry.action.caseentry.GetSelectedOrgunitAction">
-      <result name="success" type="velocity-xml">/dhis-web-caseentry/responseOrgUnit.vm</result>
-    </action>
-
     <action name="validateSearch" class="org.hisp.dhis.caseentry.action.caseentry.ValidateSearchAction">
       <result name="success" type="velocity-xml">/dhis-web-caseentry/responseSuccess.vm</result>
       <result name="error" type="velocity-xml">/dhis-web-caseentry/responseError.vm</result>
@@ -129,6 +125,12 @@
       <param name="page">/dhis-web-caseentry/programStageDataEntryForm.vm</param>
       <param name="javascripts">javascript/dataEntry.js,../dhis-web-commons/javascripts/date.js</param>
     </action>
+    
+     <action name="loadProgramStageRecords" class="org.hisp.dhis.caseentry.action.caseentry.ProgramStageCustomDataEntryAction">
+      <result name="success" type="velocity">/content.vm</result>
+      <param name="page">/dhis-web-caseentry/dataEntryForm.vm</param>
+      <param name="javascripts">javascript/dataEntry.js,../dhis-web-commons/javascripts/date.js</param>
+    </action>
 
     <action name="completeProgramStageDataEntry" class="org.hisp.dhis.caseentry.action.caseentry.CompleteDataEntryAction">
       <result name="success" type="redirect">getDataRecords.action?programId=${programId}</result>
@@ -153,6 +155,14 @@
     
     <!-- Report -->
 
+ 	<action name="reportSelect" class="org.hisp.dhis.caseentry.action.report.ReportSelectAction">
+      <interceptor-ref name="organisationUnitTreeStack" />
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-caseentry/reportSelect.vm</param>
+      <param name="menu">/dhis-web-caseentry/reportsMenu.vm</param>
+      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/report.js</param>
+    </action>
+    
     <action name="reportSelect" class="org.hisp.dhis.caseentry.action.report.ReportSelectAction">
       <interceptor-ref name="organisationUnitTreeStack" />
       <result name="success" type="velocity">/main.vm</result>
@@ -169,10 +179,9 @@
     </action>
 
     <action name="generateReport" class="org.hisp.dhis.caseentry.action.report.GenerateReportAction">
-      <interceptor-ref name="organisationUnitTreeStack" />
       <result name="success" type="velocity">/content.vm</result>
       <param name="page">/dhis-web-caseentry/report.vm</param>
-      <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/report.js</param>
+      <param name="javascripts">javascript/report.js</param>
       <param name="stylesheets">../dhis-web-commons/paging/paging.css</param>
     </action>
 
@@ -208,7 +217,7 @@
     <action name="caseAggregationResult" class="org.hisp.dhis.caseentry.action.caseaggregation.CaseAggregationResultAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/caseAggregationResult.vm</param>
-      <param name="menu">/dhis-web-caseentry/menu.vm</param>
+      <param name="menu">/dhis-web-caseentry/caseAggregationMenu.vm</param>
       <param name="javascripts">javascript/caseagg.js,javascript/date.js,javascript/caseAggregationForm.js</param>
     </action>
 

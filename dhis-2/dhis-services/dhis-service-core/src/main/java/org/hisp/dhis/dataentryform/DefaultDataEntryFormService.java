@@ -28,7 +28,6 @@ package org.hisp.dhis.dataentryform;
  */
 
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -127,7 +126,7 @@ public class DefaultDataEntryFormService
     {
         return dataEntryFormStore.getAllDataEntryForms();
     }
-
+    
     public String prepareDataEntryFormForSave( String htmlCode )
     {
         StringBuffer sb = new StringBuffer();
@@ -234,16 +233,9 @@ public class DefaultDataEntryFormService
         
         int i = 1;
         
-        final String jsCodeForInputFields = " name=\"entryfield\" $DISABLED onchange=\"saveVal( $DATAELEMENTID, $OPTIONCOMBOID )\" style=\"text-align:center\" onkeyup=\"return keyPress(event, this)\" ";
-        final String jsCodeForSelectLists = " name=\"entryfield\" $DISABLED onchange=\"saveBoolean( $DATAELEMENTID, $OPTIONCOMBOID )\" onkeyup=\"return keyPress(event, this)\" ";
+        final String jsCodeForInputFields = " name=\"entryfield\" $DISABLED ";
+        final String jsCodeForSelectLists = " name=\"entryfield\" $DISABLED ";
         
-        final String historyCode = " ondblclick='javascript:viewHist( $DATAELEMENTID, $OPTIONCOMBOID )' ";
-        
-        final String metaDataCode = "<span id=\"$DATAELEMENTID-dataelement\" style=\"display:none\">$DATAELEMENTNAME</span>"
-            + "<span id=\"$DATAELEMENTID-type\" class=\"hidden\">$DATAELEMENTTYPE</span>"
-            + "<span id=\"$DATAELEMENTID-$OPTIONCOMBOID-min\" name=\"min\" class=\"hidden\"></span>"
-            + "<span id=\"$DATAELEMENTID-$OPTIONCOMBOID-max\" name=\"max\" class=\"hidden\"></span>";
-
         StringBuffer sb = new StringBuffer();
 
         Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
@@ -279,12 +271,6 @@ public class DefaultDataEntryFormService
                     return "Category option combo with id: " + optionComboId + " does not exist";
                 }
 
-                String dataElementValueType = dataElement.getDetailedNumberType();
-
-                // -------------------------------------------------------------
-                // Insert data value for data element in output code for boolean
-                // -------------------------------------------------------------
-
                 if ( dataElement.getType().equals( DataElement.VALUE_TYPE_BOOL ) )
                 {
                     inputHtml = inputHtml.replace( "input", "select" );
@@ -315,23 +301,11 @@ public class DefaultDataEntryFormService
                 }
                 else
                 {
-                    appendCode += jsCodeForInputFields + "tabindex=\"" + i++ + "\"";
-
-                    if ( dataElement.getType().equals( VALUE_TYPE_INT ) )
-                    {
-                        appendCode += historyCode;
-                    }
-
-                    appendCode += TAG_CLOSE;
+                    appendCode += jsCodeForInputFields + "tabindex=\"" + i++ + "\"" + TAG_CLOSE;
                 }
 
                 inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
                 
-                inputHtml += metaDataCode;
-                inputHtml = inputHtml.replace( "$DATAELEMENTID", String.valueOf( dataElementId ) );
-                inputHtml = inputHtml.replace( "$DATAELEMENTNAME", dataElement.getName() );
-                inputHtml = inputHtml.replace( "$DATAELEMENTTYPE", dataElementValueType );
-                inputHtml = inputHtml.replace( "$OPTIONCOMBOID", String.valueOf( optionComboId ) );
                 inputHtml = inputHtml.replace( "$DISABLED", disabled );
                 inputHtml = inputHtml.replace( STYLE_TAG, backgroundColor );
 

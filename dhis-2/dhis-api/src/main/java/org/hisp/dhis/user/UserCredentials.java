@@ -33,6 +33,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hisp.dhis.dataset.DataSet;
+
 /**
  * @author Nguyen Hong Duc
  * @version $Id: UserCredentials.java 2869 2007-02-20 14:26:09Z andegje $
@@ -84,6 +86,40 @@ public class UserCredentials
         }
         
         return authorities;
+    }
+    
+    /**
+     * Indicates whether this user credentials is a super user, implying that the
+     * ALL authority is present in at least one of the user authority groups of
+     * this user credentials.
+     */
+    public boolean isSuper()
+    {
+        for ( UserAuthorityGroup group : userAuthorityGroups )
+        {
+            if ( group.getAuthorities().contains( UserAuthorityGroup.AUTHORITY_ALL ) )
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Returns a set of the aggregated data sets for all user authority groups
+     * of this user credentials.
+     */
+    public Set<DataSet> getAllDataSets()
+    {
+        Set<DataSet> dataSets = new HashSet<DataSet>();
+        
+        for ( UserAuthorityGroup group : userAuthorityGroups )
+        {
+            dataSets.addAll( group.getDataSets() );
+        }
+        
+        return dataSets;
     }
     
     /**

@@ -50,7 +50,7 @@
 </script>
 
 <h3>$i18n.getString( "update_patient" )</h3>
-<p><input type="button" value="$i18n.getString( 'back_to_search' )" onclick="onClickBackBtn();" style="width:10em"/></p>
+<p><input type="button" value="$i18n.getString( 'back_to_search' )" onclick="loadPatientList();" style="width:10em"/></p>
 
 <form id="updatePatientForm" name="updatePatientForm" action="updatePatient.action" method="post" >
 <input type="hidden" id="representativeId" name="representativeId"/> 
@@ -64,12 +64,11 @@
 	<tr><td></td><td>$!systemIdentifier</td></tr>
 	<tr><td>&nbsp;</td></tr>	
 	<tr>
+		<th colspan="2" class="heading-column">$i18n.getString( "demographics" )</th>
+	</tr>
+	<tr>
 		<td><label for="fullName">$i18n.getString( "full_name" )</label></td>
 		<td class="input-column" ><input type="text" id="fullName" name="fullName" value="$encoder.htmlEncode( $patient.getFullName() )" style="width:30em" class="required_group {validate:{required_group:true, unicodechars:true, rangelength:[7,50]}}"></td>
-	</tr>
-	<tr><td>&nbsp;</td></tr>	
-	<tr>
-		<th colspan="2" class="heading-column">$i18n.getString( "demographics" )</th>
 	</tr>
 	<tr>
 		<td><label for="gender">$i18n.getString( "gender" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>

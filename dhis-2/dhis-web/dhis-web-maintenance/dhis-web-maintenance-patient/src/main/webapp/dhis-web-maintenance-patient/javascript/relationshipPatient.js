@@ -3,7 +3,7 @@
 // Add Relationship Patient
 // -----------------------------------------------------------------------------
 
-function showAddRelationshipPatient( patientId )
+function showAddRelationshipPatient( patientId, isShowPatientList )
 {
 	hideById( 'selectDiv' );
 	hideById( 'searchPatientDiv' );
@@ -17,6 +17,7 @@ function showAddRelationshipPatient( patientId )
 		}, function()
 		{
 			showById('addRelationshipDiv');
+			setFieldValue( 'isShowPatientList', isShowPatientList );
 			jQuery('#loaderDiv').hide();
 		});
 }
@@ -44,11 +45,11 @@ function addRelationshipPatientCompleted( messageElement )
     }
     else if ( type == 'error' )
     {
-        window.alert( i18n_adding_patient_failed + ':' + '\n' + message );
+        showErrorMessage( i18n_adding_patient_failed + ':' + '\n' + message );
     }
     else if ( type == 'input' )
     {
-        setHeaderMessage( message );
+        showWarningMessage( message );
     }
     else if( type == 'duplicate' )
     {
@@ -72,6 +73,14 @@ function addRelationshipPatient()
 		showById('searchPatientDiv');
 		showById('listPatientDiv');
 		jQuery('#loaderDiv').hide();
+		
+		if( getFieldValue( 'isShowPatientList' ) == 'false' )
+		{
+			showRelationshipList( getFieldValue('id') );
+		}else
+		{
+			loadPatientList();
+		}
       }
      });
     return false;

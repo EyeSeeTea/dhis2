@@ -43,7 +43,10 @@ import org.hisp.dhis.reportexcel.DataElementGroupOrder;
 import org.hisp.dhis.reportexcel.ExportReportStore;
 import org.hisp.dhis.reportexcel.PeriodColumn;
 import org.hisp.dhis.reportexcel.ReportExcel;
+import org.hisp.dhis.reportexcel.ReportExcelCategory;
 import org.hisp.dhis.reportexcel.ReportExcelItem;
+import org.hisp.dhis.reportexcel.ReportExcelNormal;
+import org.hisp.dhis.reportexcel.ReportExcelOganiztionGroupListing;
 import org.hisp.dhis.reportexcel.status.DataEntryStatus;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +55,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Tran Thanh Tri
  * @version $Id$
  */
+
+@Transactional
 public class HibernateExportReportStore
     implements ExportReportStore
 {
@@ -178,6 +183,33 @@ public class HibernateExportReportStore
     }
 
     @SuppressWarnings( "unchecked" )
+    public Collection<ReportExcel> getExportReportsByClazz( Class<?> clazz )
+    {
+        return sessionFactory.getCurrentSession().createCriteria( clazz ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ReportExcel> getExportReportsByReportType( String reportType )
+    {
+        Class<?> clazz = null;
+
+        if ( reportType.equals( ReportExcel.TYPE.NORMAL ) )
+        {
+            clazz = ReportExcelNormal.class;
+        }
+        else if ( reportType.equals( ReportExcel.TYPE.CATEGORY ) )
+        {
+            clazz = ReportExcelCategory.class;
+        }
+        else if ( reportType.equals( ReportExcel.TYPE.ORGANIZATION_GROUP_LISTING ) )
+        {
+            clazz = ReportExcelOganiztionGroupListing.class;
+        }
+
+        return getExportReportsByClazz( clazz );
+    }
+
+    @SuppressWarnings( "unchecked" )
     public Collection<String> getAllExportReportTemplates()
     {
         Session session = sessionFactory.getCurrentSession();
@@ -250,7 +282,6 @@ public class HibernateExportReportStore
         return sqlQuery.list();
     }
 
-    @Override
     public void deleteMultiExportItem( Collection<Integer> ids )
     {
         String sql = "delete ReportExcelItem d where d.id in (:ids)";
@@ -291,29 +322,23 @@ public class HibernateExportReportStore
     {
         Session session = sessionFactory.getCurrentSession();
 
-        String sql = "select count(*) from datavalue where sourceid=" + organisationUnit.getId()
-            + " and dataelementid in (";
-
-        int i = 0;
+        Collection<Integer> deIds = new HashSet<Integer>();
 
         for ( DataElement element : dataSet.getDataElements() )
         {
-            sql += element.getId();
-
-            if ( i++ < dataSet.getDataElements().size() - 1 )
-            {
-                sql += ",";
-            }
+            deIds.add( element.getId() );
         }
 
-        sql += ") and periodid=" + period.getId();
+        String sql = "select count(*) from DataValue where sourceid=" + organisationUnit.getId();
+        sql += " and periodid=" + period.getId();
+        sql += " and dataelementid in (:deIds)";
 
         Query query = session.createQuery( sql );
+        query.setParameterList( "deIds", deIds );
 
         Number nr = (Number) query.uniqueResult();
 
         return nr == null ? 0 : nr.intValue();
-
     }
 
     public void deleteDataEntryStatus( int id )
@@ -379,21 +404,18 @@ public class HibernateExportReportStore
         session.update( arg0 );
     }
 
-    @Override
     public PeriodColumn getPeriodColumn( Integer id )
     {
         Session session = sessionFactory.getCurrentSession();
         return (PeriodColumn) session.get( PeriodColumn.class, id );
     }
 
-    @Override
     public void updatePeriodColumn( PeriodColumn periodColumn )
     {
         Session session = sessionFactory.getCurrentSession();
         session.update( periodColumn );
     }
 
-    @Transactional
     public void updateReportWithExcelTemplate( String curTemplateName, String newTemplateName )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -405,7 +427,5 @@ public class HibernateExportReportStore
         query.setString( "newName", newTemplateName ).setString( "curName", curTemplateName );
 
         query.executeUpdate();
-
     }
-
 }

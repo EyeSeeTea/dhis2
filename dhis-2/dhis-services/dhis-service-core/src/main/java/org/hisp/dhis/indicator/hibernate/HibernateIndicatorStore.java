@@ -147,7 +147,7 @@ public class HibernateIndicatorStore
     {
         final String hql = "from Indicator d where d.groupSets.size > 0";
 
-        return sessionFactory.getCurrentSession().createQuery( hql ).list();
+        return getQuery( hql ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -155,7 +155,15 @@ public class HibernateIndicatorStore
     {
         final String hql = "from Indicator d where d.groups.size = 0";
 
-        return sessionFactory.getCurrentSession().createQuery( hql ).list();
+        return getQuery( hql ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<Indicator> getIndicatorsWithDataSets()
+    {
+        final String hql = "from Indicator d where d.dataSets.size > 0";
+
+        return getQuery( hql ).list();
     }
 
     public int getIndicatorCount()

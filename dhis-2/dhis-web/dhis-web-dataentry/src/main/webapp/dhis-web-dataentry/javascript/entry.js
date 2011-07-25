@@ -9,7 +9,6 @@
  * {optioncomboid}-optioncombo // name of category option combo
  * {dataelementid}-{optioncomboid}-min // min value for data value
  * {dataelementid}-{optioncomboid}-max // max value for data value
- * {dataelementid}-type // data element type
  */
 
 // -----------------------------------------------------------------------------
@@ -91,14 +90,15 @@ function generateExpression( expression )
  */
 function saveVal( dataElementId, optionComboId )
 {
-    var dataElementName = $( '#' + dataElementId + '-dataelement' ).html();
-
+    var dataElementName = dataElements[dataElementId].name;
     var fieldId = '#' + dataElementId + '-' + optionComboId + '-val';
     var value =$( fieldId ).val();
-    var type = $( '#' + dataElementId + '-type' ).html();
+    var type = dataElements[dataElementId].type;
 
     $( fieldId ).css( 'background-color', COLOR_YELLOW );
 
+	var periodId = $( '#selectedPeriodId' ).val();
+        
     if ( value )
     {
         if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' )
@@ -133,8 +133,8 @@ function saveVal( dataElementId, optionComboId )
                 }
             }
 
-            var minString = $( '#' + dataElementId + '-' + optionComboId + '-min' ).html();
-            var maxString = $( '#' + dataElementId + '-' + optionComboId + '-max' ).html();
+            var minString = currentMinMaxValueMap[dataElementId + '-' + optionComboId + '-min'];
+            var maxString = currentMinMaxValueMap[dataElementId + '-' + optionComboId + '-max'];
 
             if ( minString && maxString ) // TODO if only one exists?
             {
@@ -144,7 +144,7 @@ function saveVal( dataElementId, optionComboId )
 
                 if ( valueNo < min )
                 {
-                    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_ORANGE );
+                    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, periodId, value, COLOR_ORANGE );
                     valueSaver.save();
 
                     window.alert( i18n_value_of_data_element_less + ': ' + min + '\n\n' + dataElementName );
@@ -153,7 +153,7 @@ function saveVal( dataElementId, optionComboId )
 
                 if ( valueNo > max )
                 {
-                    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_ORANGE );
+                    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, periodId, value, COLOR_ORANGE );
                     valueSaver.save();
 
                     window.alert( i18n_value_of_data_element_greater + ': ' + max + '\n\n' + dataElementName );
@@ -161,12 +161,12 @@ function saveVal( dataElementId, optionComboId )
                 }
             }
         }
+        
+	    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, periodId, value, COLOR_GREEN );
+	    valueSaver.save();
+	    
+	    updateIndicators(); // Update indicators in case of custom form
     }
-
-    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_GREEN );
-    valueSaver.save();
-    
-    updateIndicators(); // Update indicators in case of custom form
 }
 
 function saveBoolean( dataElementId, optionComboId )
@@ -176,7 +176,9 @@ function saveBoolean( dataElementId, optionComboId )
 
     $( fieldId ).css( 'background-color', COLOR_YELLOW );
 
-    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, value, COLOR_GREEN );
+	var periodId = $( '#selectedPeriodId' ).val();
+        
+    var valueSaver = new ValueSaver( dataElementId, optionComboId, currentOrganisationUnitId, periodId, value, COLOR_GREEN );
     valueSaver.save();
 }
 
@@ -197,18 +199,19 @@ function alertField( fieldId, alertMessage )
 // Saver objects
 // -----------------------------------------------------------------------------
 
-function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_, resultColor_ )
+function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, periodId_, value_, resultColor_ )
 {
     var dataElementId = dataElementId_;
     var optionComboId = optionComboId_;
     var value = value_;
     var resultColor = resultColor_;
     var organisationUnitId = organisationUnitId_;
+    var periodId = periodId_;
 
     this.save = function()
     {
         var url = 'saveValue.action?organisationUnitId=' + organisationUnitId + '&dataElementId=' + dataElementId
-                + '&optionComboId=' + optionComboId + '&value=' + value;
+                + '&optionComboId=' + optionComboId + '&periodId=' + periodId + '&value=' + value;
 
         $.ajax( {
             url : url,
@@ -241,6 +244,6 @@ function ValueSaver( dataElementId_, optionComboId_, organisationUnitId_, value_
 
     function markValue( color )
     {
-        $( '#' + dataElementId + '-' + optionComboId + '-val' ).css( "background-color", color );
+        $( '#' + dataElementId + '-' + optionComboId + '-val' ).css( 'background-color', color );
     }
 }

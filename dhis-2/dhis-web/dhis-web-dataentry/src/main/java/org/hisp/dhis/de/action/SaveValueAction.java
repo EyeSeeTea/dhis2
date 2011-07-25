@@ -35,17 +35,16 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
-import org.hisp.dhis.de.state.SelectedStateManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
 public class SaveValueAction
     implements Action
@@ -75,13 +74,6 @@ public class SaveValueAction
         this.dataValueService = dataValueService;
     }
 
-    private SelectedStateManager selectedStateManager;
-
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
-    {
-        this.selectedStateManager = selectedStateManager;
-    }
-
     private DataElementCategoryService categoryService;
 
     public void setCategoryService( DataElementCategoryService categoryService )
@@ -97,7 +89,7 @@ public class SaveValueAction
     }
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input
     // -------------------------------------------------------------------------
 
     private String value;
@@ -114,11 +106,6 @@ public class SaveValueAction
         this.dataElementId = dataElementId;
     }
 
-    public int getDataElementId()
-    {
-        return dataElementId;
-    }
-
     private int organisationUnitId;
 
     public void setOrganisationUnitId( int organisationUnitId )
@@ -132,29 +119,23 @@ public class SaveValueAction
     {
         this.optionComboId = optionComboId;
     }
+    
+    private String periodId;
 
-    public int getOptionComboId()
+    public void setPeriodId( String periodId )
     {
-        return optionComboId;
+        this.periodId = periodId;
     }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
     private int statusCode = 0;
 
     public int getStatusCode()
     {
         return statusCode;
-    }
-
-    private String inputId;
-
-    public String getInputId()
-    {
-        return inputId;
-    }
-
-    public void setInputId( String inputId )
-    {
-        this.inputId = inputId;
     }
 
     // -------------------------------------------------------------------------
@@ -165,7 +146,7 @@ public class SaveValueAction
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
 
-        Period period = selectedStateManager.getSelectedPeriod();
+        Period period = PeriodType.createPeriodExternalId( periodId );
 
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
 

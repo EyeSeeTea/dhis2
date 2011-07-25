@@ -1,7 +1,7 @@
 package org.hisp.dhis.report;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,9 @@ package org.hisp.dhis.report;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 import org.hisp.dhis.reporttable.ReportTable;
 
@@ -43,19 +46,21 @@ public class Report
     private static final long serialVersionUID = 7880117720157807526L;
 
     public static final String TEMPLATE_DIR = "templates";
-    
+
     private String designContent;
-         
+
     private ReportTable reportTable;
-    
+
+    private Set<ReportGroup> groups = new HashSet<ReportGroup>();
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public Report()
-    {   
+    {
     }
-    
+
     public Report( String name, String designContent, ReportTable reportTable )
     {
         this.name = name;
@@ -67,11 +72,39 @@ public class Report
     // Logic
     // -------------------------------------------------------------------------
 
+    public void addReportGroup( ReportGroup group )
+    {
+        groups.add( group );
+        group.getMembers().add( this );
+    }
+
+    public void removeReportGroup( ReportGroup group )
+    {
+        groups.remove( group );
+        group.getMembers().remove( this );
+    }
+
+    public void updateReportGroups( Set<ReportGroup> updates )
+    {
+        for ( ReportGroup group : new HashSet<ReportGroup>( groups ) )
+        {
+            if ( !updates.contains( group ) )
+            {
+                removeReportGroup( group );
+            }
+        }
+
+        for ( ReportGroup group : updates )
+        {
+            addReportGroup( group );
+        }
+    }
+
     public boolean hasReportTable()
     {
         return reportTable != null;
     }
-        
+
     // -------------------------------------------------------------------------
     // Equals and hashCode
     // -------------------------------------------------------------------------
@@ -80,11 +113,11 @@ public class Report
     public int hashCode()
     {
         final int prime = 31;
-        
+
         int result = 1;
-        
-        result = prime * result + ( ( name == null ) ? 0 : name.hashCode() );
-        
+
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+
         return result;
     }
 
@@ -95,21 +128,21 @@ public class Report
         {
             return true;
         }
-        
+
         if ( object == null )
         {
             return false;
         }
-        
+
         if ( getClass() != object.getClass() )
         {
             return false;
         }
-        
+
         final Report other = (Report) object;
-        
+
         return this.name.equals( other.getName() );
-    }    
+    }
 
     // -------------------------------------------------------------------------
     // Getters and setters
@@ -133,5 +166,15 @@ public class Report
     public void setReportTable( ReportTable reportTable )
     {
         this.reportTable = reportTable;
+    }
+
+    public Set<ReportGroup> getGroups()
+    {
+        return groups;
+    }
+
+    public void setGroups( Set<ReportGroup> groups )
+    {
+        this.groups = groups;
     }
 }

@@ -1,14 +1,38 @@
-// Identifiers for which zero values are, insignificant, also used in entry.js
+// Identifiers for which zero values are insignificant, also used in entry.js, populated in select.vm
 var significantZeros = [];
 
-// Associative array with [indicator id, expression] for indicators in form, also used in entry.js
+// Array with associative arrays for each data element, populated in select.vm
+var dataElements = [];
+
+// Associative array with [indicator id, expression] for indicators in form, also used in entry.js, populated in select.vm
 var indicatorFormulas = [];
+
+// Array with associative arrays for each data set, populated in select.vm
+var dataSets = [];
+
+// Associative array with identifier and array of assigned data sets, populated in select.vm
+var dataSetAssociationSets = [];
+
+// Associate array with mapping between organisation unit identifier and data set association set identifier, populated in select.vm
+var organisationUnitAssociationSetMap = [];
+
+// Array with keys on form {dataelementid}-{optioncomboid}-min/max with min/max values
+var currentMinMaxValueMap = [];
 
 // Indicates whether any data entry form has been loaded
 var dataEntryFormIsLoaded = false;
 
 // Currently selected organisation unit identifier
 var currentOrganisationUnitId = null;
+
+// Currently selected data set identifier
+var currentDataSetId = null;
+
+// Current offset, next or previous corresponding to increasing or decreasing value with one
+var currentPeriodOffset = 0;
+
+// Period type object
+var periodTypeFactory = new PeriodType();
 
 var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
@@ -18,13 +42,55 @@ var COLOR_WHITE = '#ffffff';
 
 function addEventListeners()
 {
-    $( '[name="entryfield"]' ).focus( valueFocus );
-    $( '[name="entryselect"]' ).focus( valueFocus );
+    $( '[name="entryfield"]' ).each( function( i ) 
+    {
+    	var id = $( this ).attr( 'id' );    	
+		var dataElementId = id.split( '-' )[0];
+		var optionComboId = id.split( '-' )[1];
+		var type = dataElements[dataElementId].type;
+    	
+    	$( this ).focus( valueFocus );
+    	
+    	$( this ).change( function() {
+    		saveVal( dataElementId, optionComboId );
+    	} );
+    	
+    	$( this ).dblclick( function() {
+    		viewHist( dataElementId, optionComboId );
+    	} );
+    	
+    	$( this ).keyup( function() {
+    		keyPress( event, this );
+    	} );
+    	
+    	$( this ).css( 'width', '100%' );
+    	$( this ).css( 'text-align', 'center' );
+    	
+    	if ( type == 'date' ) {
+    		$( this ).css( 'width', '80%' );    		
+    		datePicker( id );
+    	}
+    } );
+    
+    $( '[name="entryselect"]' ).each( function( i )
+    {
+    	var id = $( this ).attr( 'id' );    	
+		var dataElementId = id.split( '-' )[0];
+		var optionComboId = id.split( '-' )[1];	
+		
+    	$( this ).focus( valueFocus );
+    	
+    	$( this ).change( function() {
+    		saveBoolean( dataElementId, optionComboId );
+    	} );
+    	
+    	$( this ).css( 'width', '100%' );
+    } );
 }
 
 function clearPeriod()
 {
-    clearListById( 'selectedPeriodIndex' );
+    clearListById( 'selectedPeriodId' );
     clearEntryForm();
 }
 
@@ -32,52 +98,106 @@ function clearEntryForm()
 {
     $( '#contentDiv' ).html( '' );
     
+	currentPeriodOffset = 0;
+	
     dataEntryFormIsLoaded = false;
+}
+
+function loadForm( periodId, dataSetId )
+{
+	var defaultForm = $( '#defaultForm' ).is( ':checked' );
+	
+	$( '#contentDiv' ).load( 'loadForm.action', { periodId:periodId, dataSetId:dataSetId, defaultForm:defaultForm }, loadDataValues );
+}
+
+function loadDefaultForm()
+{
+    var dataSetId = $( '#selectedDataSetId' ).val();
+    var periodId = $( '#selectedPeriodId' ).val();
+
+	loadForm( periodId, dataSetId );
 }
 
 // -----------------------------------------------------------------------------
 // OrganisationUnit Selection
 // -----------------------------------------------------------------------------
 
-function organisationUnitSelected( orgUnits )
+/**
+ * Returns an array containing associative array elements with id and name 
+ * properties. The array is sorted on the element name property.
+ */
+function getSortedDataSetList()
+{
+	var associationSet = organisationUnitAssociationSetMap[currentOrganisationUnitId];
+	var orgUnitDataSets = dataSetAssociationSets[associationSet];
+	
+	var dataSetList = [];
+	
+	for ( i in orgUnitDataSets )
+	{
+		var dataSetId = orgUnitDataSets[i];
+		var dataSetName = dataSets[dataSetId].name;
+		
+		var row = [];
+		row['id'] = dataSetId;
+		row['name'] = dataSetName;
+		dataSetList[i] = row;		
+	}
+	
+	dataSetList.sort( function( a, b ) {
+		return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
+	} );
+	
+	return dataSetList;	
+}
+
+function organisationUnitSelected( orgUnits, orgUnitNames )
 {
 	currentOrganisationUnitId = orgUnits[0];
+	var organisationUnitName = orgUnitNames[0];
 	
     $( '#selectedDataSetId' ).removeAttr( 'disabled' );
 
     var dataSetId = $( '#selectedDataSetId' ).val();
+    var periodId = $( '#selectedPeriodId' ).val();
 
     var url = 'loadDataSets.action';
 
+	$( '#selectedOrganisationUnit' ).val( organisationUnitName );
+	$( '#currentOrganisationUnit' ).html( organisationUnitName );
+
     clearListById( 'selectedDataSetId' );
 
-    $.getJSON( url, function( json )
+	addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
+	
+	var dataSetList = getSortedDataSetList();
+	
+	var dataSetValid = false;
+	
+	for ( i in dataSetList )
     {
-        $( '#selectedOrganisationUnit' ).val( json.organisationUnit.name );
-        $( '#currentOrganisationUnit' ).html( json.organisationUnit.name );
-
-        addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
-
-        for ( i in json.dataSets )
+        addOptionById( 'selectedDataSetId', dataSetList[i].id, dataSetList[i].name );
+        
+        if ( dataSetId == dataSetList[i].id )
         {
-            addOptionById( 'selectedDataSetId', json.dataSets[i].id, json.dataSets[i].name );
+        	dataSetValid = true;
         }
+    }
 
-        if ( json.dataSetValid && dataSetId != null )
-        {
-            $( '#selectedDataSetId' ).val( dataSetId );
+	if ( dataSetValid && dataSetId != null )
+	{
+		$( '#selectedDataSetId' ).val( dataSetId );
 
-            if ( json.periodValid && dataEntryFormIsLoaded )
-            {
-                showLoader();
-                loadDataValues();
-            }
-        } 
-        else
+        if ( periodId && periodId != -1 && dataEntryFormIsLoaded ) //TODO if period valid
         {
-            clearPeriod();
+            showLoader();
+            loadDataValues();
         }
-    } );
+    } 
+    else
+    {
+        clearPeriod();
+    }
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -88,45 +208,34 @@ selection.setListenerFunction( organisationUnitSelected );
 
 function nextPeriodsSelected()
 {
-    displayPeriodsInternal( true, false );
+	if ( currentPeriodOffset < 0 ) // Cannot display future periods
+	{
+    	currentPeriodOffset++;
+    	displayPeriodsInternal();
+	}
 }
 
 function previousPeriodsSelected()
 {
-    displayPeriodsInternal( false, true );
+    currentPeriodOffset--;
+    displayPeriodsInternal();
 }
 
-function displayPeriodsInternal( next, previous )
+function displayPeriodsInternal()
 {
-    disableNextPrevButtons();
+    var dataSetId = $( '#selectedDataSetId' ).val();    
+    var periodType = dataSets[dataSetId].periodType;
+    var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
+    periods = periodTypeFactory.filterFuturePeriods( periods );
 
-    var url = 'loadNextPreviousPeriods.action?next=' + next + '&previous=' + previous;
+	clearListById( 'selectedPeriodId' );
 
-    clearListById( 'selectedPeriodIndex' );
+	addOptionById( 'selectedPeriodId', '-1', '[ ' + i18n_select_period + ' ]' );
 
-    $.getJSON( url, function( json )
+    for ( i in periods )
     {
-        addOptionById( 'selectedPeriodIndex', '-1', '[ ' + i18n_select_period + ' ]' );
-
-        for ( i in json.periods )
-        {
-            addOptionById( 'selectedPeriodIndex', i, json.periods[i].name );
-        }
-
-        enableNextPrevButtons();
-    } );
-}
-
-function disableNextPrevButtons()
-{
-    $( '#nextButton' ).attr( 'disabled', 'disabled' );
-    $( '#prevButton' ).attr( 'disabled', 'disabled' );
-}
-
-function enableNextPrevButtons()
-{
-    $( '#nextButton' ).removeAttr( 'disabled' );
-    $( '#prevButton' ).removeAttr( 'disabled' );
+        addOptionById( 'selectedPeriodId', periods[i].id, periods[i].name );
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -135,56 +244,42 @@ function enableNextPrevButtons()
 
 function dataSetSelected()
 {
-    $( '#selectedPeriodIndex' ).removeAttr( 'disabled' );
+    $( '#selectedPeriodId' ).removeAttr( 'disabled' );
     $( '#prevButton' ).removeAttr( 'disabled' );
     $( '#nextButton' ).removeAttr( 'disabled' );
 
     var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodIndex = $( '#selectedPeriodIndex' ).val();
+    var periodId = $( '#selectedPeriodId' ).val();
+    var periodType = dataSets[dataSetId].periodType;
+	var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
+    periods = periodTypeFactory.filterFuturePeriods( periods );
 
     if ( dataSetId && dataSetId != -1 )
     {
-        var url = 'loadPeriods.action?dataSetId=' + dataSetId;
+        clearListById( 'selectedPeriodId' );
 
-        clearListById( 'selectedPeriodIndex' );
+        addOptionById( 'selectedPeriodId', '-1', '[ ' + i18n_select_period + ' ]' );
 
-        $.getJSON( url, function( json )
+        for ( i in periods )
         {
-            significantZeros = json.significantZeros;
-            indicatorFormulas = json.indicatorFormulas;
+            addOptionById( 'selectedPeriodId', periods[i].id, periods[i].name );
+        }
+        
+        var previousPeriodType = currentDataSetId ? dataSets[currentDataSetId].periodType : null;
 
-            addOptionById( 'selectedPeriodIndex', '-1', '[ ' + i18n_select_period + ' ]' );
-
-            for ( i in json.periods )
-            {
-                addOptionById( 'selectedPeriodIndex', i, json.periods[i].name );
-            }
-
-            if ( json.periodValid && periodIndex != null )
-            {
-                showLoader();
-                $( '#selectedPeriodIndex' ).val( periodIndex );
-                $( '#contentDiv' ).load( 'select.action', loadDataValuesAndDisplayModes );
-            } 
-            else
-            {
-                clearEntryForm();
-            }
-        } );
+        if ( periodId && periodId != -1 && previousPeriodType && previousPeriodType == periodType )
+        {
+            showLoader();
+            $( '#selectedPeriodId' ).val( periodId );
+            loadForm( periodId, dataSetId );
+        } 
+        else
+        {
+            clearEntryForm();
+        }
+        
+    	currentDataSetId = dataSetId;
     }
-}
-
-// -----------------------------------------------------------------------------
-// DisplayMode Selection
-// -----------------------------------------------------------------------------
-
-function displayModeSelected()
-{
-    showLoader();
-
-    var url = 'select.action?displayMode=' + $( "input[name='displayMode']:checked" ).val();
-
-    $( '#contentDiv' ).load( url, loadDataValues );
 }
 
 // -----------------------------------------------------------------------------
@@ -193,25 +288,24 @@ function displayModeSelected()
 
 function periodSelected()
 {
-    var periodName = $( '#selectedPeriodIndex :selected' ).text();
+    var periodName = $( '#selectedPeriodId :selected' ).text();
+    var dataSetId = $( '#selectedDataSetId' ).val();
 
     $( '#currentPeriod' ).html( periodName );
 
-    var periodIndex = $( '#selectedPeriodIndex' ).val();
+    var periodId = $( '#selectedPeriodId' ).val();
     
-    if ( periodIndex && periodIndex != -1 )
+    if ( periodId && periodId != -1 )
     {
         showLoader();
         
         if ( dataEntryFormIsLoaded )
         {
-        	loadDataValuesAndDisplayModes();
+        	loadDataValues();
         }
         else
         {
-        	var url = 'select.action?selectedPeriodIndex=' + periodIndex;
-        	
-        	$( '#contentDiv' ).load( url, loadDataValuesAndDisplayModes );
+        	loadForm( periodId, dataSetId );
         }
     }
 }
@@ -226,18 +320,12 @@ function loadDataValues()
 	displayEntryFormCompleted();
 }
 
-function loadDataValuesAndDisplayModes()
-{
-	insertDataValues();
-	setDisplayModes();
-	displayEntryFormCompleted();
-}
-
 function insertDataValues()
 {
-	var valueMap = new Array();
+	var dataValueMap = new Array();
 	
-	var periodIndex = $( '#selectedPeriodIndex' ).val();
+	var periodId = $( '#selectedPeriodId' ).val();
+    var dataSetId = $( '#selectedDataSetId' ).val();
 	
 	// Clear existing values and colors
 	
@@ -250,7 +338,7 @@ function insertDataValues()
 	$( '[name="min"]' ).html( '' );
 	$( '[name="max"]' ).html( '' );
 	
-	$.getJSON( 'getDataValues.action', { selectedPeriodIndex:periodIndex }, function( json ) 
+	$.getJSON( 'getDataValues.action', { periodId:periodId, dataSetId:dataSetId }, function( json ) 
 	{
 		// Set data values, works for select lists too as data value = select value
 	
@@ -263,79 +351,43 @@ function insertDataValues()
 				$( fieldId ).val( value.val );
 			}
 			
-			valueMap[value.id] = value.val;
+			dataValueMap[value.id] = value.val;
 		} );
 		
 		// Set min-max values and colorize violation fields
 		
 		$.each( json.minMaxDataElements, function( i, value )
 		{
-			var minFieldId = '#' + value.id + '-min';
-			var maxFieldId = '#' + value.id + '-max';
+			var minId = value.id + '-min';
+			var maxId = value.id + '-max';
+			
 			var valFieldId = '#' + value.id + '-val';
 			
-			if ( $( minFieldId ) )
-			{
-				$( minFieldId ).html( value.min );
-			}
-			
-			if ( $( maxFieldId ) )
-			{
-				$( maxFieldId ).html( value.max );
-			}
-			
-			var dataValue = valueMap[value.id];
+			var dataValue = dataValueMap[value.id];
 			
 			if ( dataValue && ( ( value.min && new Number( dataValue ) < new Number( value.min ) ) 
 				|| ( value.max && new Number( dataValue ) > new Number( value.max ) ) ) )
 			{
 				$( valFieldId ).css( 'background-color', COLOR_ORANGE );
 			}
+			
+			currentMinMaxValueMap[minId] = value.min;
+			currentMinMaxValueMap[maxId] = value.max;
 		} );
+		
+		// Update indicator values in form
+		
+		updateIndicators();
 	} );
-}
-
-function setDisplayModes()
-{
-    $.getJSON( 'loadDisplayModes.action', function( json )
-    {
-        $( '#displayModeCustom' ).removeAttr( 'disabled' );
-        $( '#displayModeSection' ).removeAttr( 'disabled' );
-        $( '#displayModeDefault' ).removeAttr( 'disabled' );
-
-        $( '#displayModeCustom' ).removeAttr( 'checked' );
-        $( '#displayModeSection' ).removeAttr( 'checked' );
-        $( '#displayModeDefault' ).removeAttr( 'checked' );
-
-        if ( json.displayMode == 'customform' )
-        {
-            $( '#displayModeCustom' ).attr( 'checked', 'checked' );
-        } 
-        else if ( json.displayMode == 'sectionform' )
-        {
-            $( '#displayModeSection' ).attr( 'checked', 'checked' );
-        } 
-        else
-        {
-            $( '#displayModeDefault' ).attr( 'checked', 'checked' );
-        }
-
-        if ( !json.customForm )
-        {
-            $( '#displayModeCustom' ).attr( 'disabled', 'disabled' );
-        }
-        if ( !json.sectionForm )
-        {
-            $( '#displayModeSection' ).attr( 'disabled', 'disabled' );
-        }
-    } );
 }
 
 function displayEntryFormCompleted()
 {
     addEventListeners();
-    enable( 'validationButton' );
-    updateIndicators();
+    
+    $( '#validationButton' ).removeAttr( 'disabled' );
+    $( '#defaultForm' ).removeAttr( 'disabled' );
+    
     dataEntryFormIsLoaded = true;
     hideLoader();
 }
@@ -347,7 +399,7 @@ function valueFocus( e )
 	var dataElementId = id.split( '-' )[0];
 	var optionComboId = id.split( '-' )[1];
 	
-	var dataElementName = $( '#' + dataElementId + '-dataelement' ).text();
+	var dataElementName = dataElements[dataElementId].name;
 	var optionComboName = $( '#' + optionComboId + '-optioncombo' ).text();
 	
 	$( "#currentDataElement" ).html( dataElementName + ' ' + optionComboName );
@@ -364,8 +416,6 @@ function keyPress( event, field )
     {
         focusField.focus();
     }
-
-    return true;
 }
 
 function getNextEntryField( field )
@@ -416,10 +466,13 @@ function validateCompleteDataSet()
 
     if ( confirmed )
     {
+		var periodId = $( '#selectedPeriodId' ).val();
+    	var dataSetId = $( '#selectedDataSetId' ).val();
+		
         $( '#completeButton' ).attr( 'disabled', 'disabled' );
         $( '#undoButton' ).removeAttr( 'disabled' );
 
-        $.getJSON( 'getValidationViolations.action', registerCompleteDataSet ).error( function()
+        $.getJSON( 'getValidationViolations.action', { periodId:periodId, dataSetId:dataSetId }, registerCompleteDataSet ).error( function()
         {
             $( '#completeButton' ).removeAttr( 'disabled' );
             $( '#undoButton' ).attr( 'disabled', 'disabled' );
@@ -431,9 +484,12 @@ function validateCompleteDataSet()
 
 function registerCompleteDataSet( json )
 {
+	var periodId = $( '#selectedPeriodId' ).val();
+    var dataSetId = $( '#selectedDataSetId' ).val();
+		
     if ( json.response == 'success' )
     {
-        $.getJSON( 'registerCompleteDataSet.action', function()
+        $.getJSON( 'registerCompleteDataSet.action', { periodId:periodId, dataSetId:dataSetId }, function()
         {
         } ).error( function()
         {
@@ -445,7 +501,9 @@ function registerCompleteDataSet( json )
     } 
     else
     {
-        window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
+    	var url = 'validate.action?periodId=' + periodId + '&dataSetId=' + dataSetId;
+    	
+        window.open( url, '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
     }
 }
 
@@ -455,10 +513,13 @@ function undoCompleteDataSet()
 
     if ( confirmed )
     {
+		var periodId = $( '#selectedPeriodId' ).val();
+    	var dataSetId = $( '#selectedDataSetId' ).val();
+		
         $( '#completeButton' ).removeAttr( 'disabled' );
         $( '#undoButton' ).attr( 'disabled', 'disabled' );
 
-        $.getJSON( 'undoCompleteDataSet.action', function()
+        $.getJSON( 'undoCompleteDataSet.action', { periodId:periodId, dataSetId:dataSetId }, function()
         {
         } ).error( function()
         {
@@ -476,7 +537,12 @@ function undoCompleteDataSet()
 
 function validate()
 {
-    window.open( 'validate.action', '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
+	var periodId = $( '#selectedPeriodId' ).val();
+    var dataSetId = $( '#selectedDataSetId' ).val();
+		
+	var url = 'validate.action?periodId=' + periodId + '&dataSetId=' + dataSetId;
+	
+    window.open( url, '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
 }
 
 // -----------------------------------------------------------------------------
@@ -485,13 +551,10 @@ function validate()
 
 function viewHist( dataElementId, optionComboId )
 {
-    viewHistory( dataElementId, optionComboId, true );
-}
-
-function viewHistory( dataElementId, optionComboId, showComment )
-{
+	var periodId = $( '#selectedPeriodId' ).val();
+	
     window.open( 'viewHistory.action?dataElementId=' + dataElementId + '&optionComboId=' + optionComboId
-            + '&showComment=' + showComment, '_blank', 'width=580,height=710,scrollbars=yes' );
+            + '&periodId=' + periodId + '&showComment=true', '_blank', 'width=580,height=710,scrollbars=yes' );
 }
 
 function closeCurrentSelection()

@@ -1,8 +1,5 @@
-
 // -----------------------------------------------------------------------------
 // Author:   Torgeir Lorange Ostby
-// Version:  $Id: ouwt.js 3457 2007-07-11 12:34:24Z torgeilo $
-// Version:  $Id: ouwt.js 3457 2007-07-11 12:34:24Z torgeilo $
 // -----------------------------------------------------------------------------
 
 /*
@@ -40,106 +37,87 @@ function Selection()
     {
         multipleSelectionAllowed = allowed;
     };
-    
+
     this.setUnselectAllowed = function( allowed )
     {
-    	unselectAllowed = allowed;
+        unselectAllowed = allowed;
     }
 
     this.select = function( unitId )
     {
-        var unitTag = document.getElementById( getTagId( unitId ));
-		
-		var linkTags = unitTag.getElementsByTagName( 'a' );
+        var $linkTag = $( "#" + getTagId( unitId ) ).find( "a" ).eq( 0 );
 
-        if ( linkTags[0].className == 'selected' && unselectAllowed )
+        if ( $linkTag.hasClass( "selected" ) && unselectAllowed )
         {
-			$.post(organisationUnitTreePath + "removeorgunit.action",{
-				id:unitId
-			}, function (data){
-				responseReceived(data.firstChild);
-			},'xml');
-			
-            linkTags[0].className = '';
-        }
-        else
+            $.post( organisationUnitTreePath + "removeorgunit.action", { id : unitId }, responseReceived );
+            
+            $linkTag.removeClass( "selected" );
+        } else
         {
             if ( multipleSelectionAllowed )
             {
-				$.post(organisationUnitTreePath + "addorgunit.action",{
-					id:unitId
-				}, function (data){
-					responseReceived(data.firstChild);
-				},'xml');
-				
-                linkTags[0].className = 'selected';
-            }
-            else
+                $.post( organisationUnitTreePath + "addorgunit.action", { id : unitId }, responseReceived );
+
+                $linkTag.addClass( "selected" );
+            } else
             {
-				$.post(organisationUnitTreePath + "setorgunit.action",{
-					id:unitId
-				}, function (data){
-					responseReceived(data.firstChild);
-				},'xml');	
-				
-                // Remove all select marks
-                var treeTag = document.getElementById( 'orgUnitTree' );
-                var linkTags = treeTag.getElementsByTagName( 'a' );
+                $.post( organisationUnitTreePath + "setorgunit.action", { id : unitId }, responseReceived );
 
-                for ( var i = 0, linkTag; ( linkTag = linkTags[i] ); ++i )
-                {
-                    linkTag.className = '';
-                }
-
-                // Set new select mark
-                var unitTag = document.getElementById( getTagId( unitId ));
-                linkTags = unitTag.getElementsByTagName( 'a' );
-                linkTags[0].className = 'selected';
+                $( "#orgUnitTree" ).find( "a" ).removeClass( "selected" );
+                $linkTag.addClass( "selected" );
             }
         }
     };
 
-    function responseReceived( rootElement )
+    function responseReceived( json )
     {
         if ( !listenerFunction )
         {
             return;
         }
 
-        var unitIds = new Array();
-        
-        var unitIdElements = rootElement.getElementsByTagName( 'unitId' );
-        for ( var i = 0, unitIdElement; ( unitIdElement = unitIdElements[i] ); ++i )
+        var unitIds = [];
+        var unitNames = [];
+
+        for ( i in json.selectedUnits )
         {
-            unitIds[i] = unitIdElement.firstChild.nodeValue;
+            unitIds[i] = json.selectedUnits[i].id;
+            unitNames[i] = json.selectedUnits[i].name;
         }
         
-        listenerFunction( unitIds );
+        listenerFunction( unitIds, unitNames );
     }
 
     function getTagId( unitId )
     {
         return 'orgUnit' + unitId;
     }
-    
-	this.findByCode = function()
-	{
-		$.getJSON( organisationUnitTreePath + 'getOrganisationUnitByCode.action?code=' + encodeURI( $( '#searchField' ).val() ), function ( data ) {
-			var unitId = data.message;
-			if ( data.response == "success" ) {
-				$( '#orgUnitTreeContainer' ).load( organisationUnitTreePath + 'loadOrganisationUnitTree.action', function() {					
-					
-					if ( !listenerFunction ) {
-						return false;
-					}					
-					var unitIds = [unitId];					
-					listenerFunction( unitIds ); 
-				} );			
-			} else {
-				$( '#searchField' ).css( 'background-color', '#ffc5c5' );
-			}
-		} );
-	}
+
+    this.findByCode = function()
+    {
+        $.getJSON( organisationUnitTreePath + 'getOrganisationUnitByCode.action?code='
+                + encodeURI( $( '#searchField' ).val() ), function( data )
+        {
+            var unitId = data.message;
+            if ( data.response == "success" )
+            {
+                $( '#orgUnitTreeContainer' ).load( organisationUnitTreePath + 'loadOrganisationUnitTree.action',
+                        function()
+                        {
+
+                            if ( !listenerFunction )
+                            {
+                                return false;
+                            }
+                            var unitIds = [ unitId ];
+                            listenerFunction( unitIds );
+                        } );
+            } else
+            {
+                $( '#searchField' ).css( 'background-color', '#ffc5c5' );
+            }
+        } );
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -150,222 +128,194 @@ function Subtree()
 {
     this.toggle = function( unitId )
     {
-        var parentTag = document.getElementById( getTagId( unitId ));
-        var children = parentTag.getElementsByTagName( 'ul' );
+        var children = $( "#" + getTagId( unitId ) ).find( "ul" );
 
-        var request = new Request();
-        request.setResponseTypeXML( 'units' );
-
-        if ( children.length < 1 || !isVisible( children[0] ))
+        if ( children.length < 1 || !isVisible( children[0] ) )
         {
-            request.setCallbackSuccess( processExpand );
-            request.send( organisationUnitTreePath + 'expandSubtree.action?parentId=' + unitId );
-        }
-        else
+            $.ajax( {
+                url : organisationUnitTreePath + 'expandSubtree.action',
+                data : {
+                    'parentId' : unitId
+                },
+                success : processExpand
+            } );
+        } else
         {
-            request.setCallbackSuccess( processCollapse );
-            request.send( organisationUnitTreePath + 'collapseSubtree.action?parentId=' + unitId );
+            $.ajax( {
+                url : organisationUnitTreePath + 'collapseSubtree.action',
+                data : {
+                    'parentId' : unitId
+                },
+                success : processCollapse
+            } );
         }
     };
 
     this.refreshTree = function()
     {
-        var treeTag = document.getElementById( 'orgUnitTree' );
+        var $treeTag = $( "#orgUnitTree" );
+        $treeTag.children().eq( 0 ).remove();
 
-        var children = treeTag.getElementsByTagName( 'ul' );
-        treeTag.removeChild( children[0] );
-
-        var request = new Request();
-        request.setResponseTypeXML( 'units' );
-        request.setCallbackSuccess( treeReceived );
-        request.send( organisationUnitTreePath + 'getExpandedTree.action' );
+        $.get( organisationUnitTreePath + "getExpandedTree.action", treeReceived );
     };
 
     function processCollapse( rootElement )
     {
-        var unitElements = rootElement.getElementsByTagName( 'unit' );
-        
-        for ( var i = 0, unitElement; ( unitElement = unitElements[i] ); ++i )
+        $( rootElement ).find( "unit" ).each( function( i, item )
         {
-            var parentId = unitElement.firstChild.nodeValue;
-            var parentTag = document.getElementById( getTagId( parentId ));
-            var children = parentTag.getElementsByTagName( 'ul' );
-            
-            setVisible( children[0], false );
-            setToggle( parentTag, false );
-        }
+            var parentId = $( item ).eq( 0 ).text();
+            var $parentTag = $( "#" + getTagId( parentId ) );
+            var child = $parentTag.find( "ul" ).eq( 0 );
+
+            setVisible( child, false );
+            setToggle( $parentTag, false );
+        } );
     }
-    
+
     function processExpand( rootElement )
     {
-        var parentElements = rootElement.getElementsByTagName( 'parent' );
-
-        for ( var i = 0, parentElement; ( parentElement = parentElements[i] ); ++i )
+        $( rootElement ).find( "parent" ).each( function( i, item )
         {
-            var parentId = parentElement.getAttribute( 'parentId' );
-            var parentTag = document.getElementById( getTagId( parentId ));
-            var children = parentTag.getElementsByTagName( 'ul' );
+            var parentId = $( item ).attr( "parentId" );
+            var $parentTag = $( "#" + getTagId( parentId ) );
+            var $children = $parentTag.find( "ul" );
 
-            if ( children.length < 1 )
+            if ( $children.length < 1 )
             {
-                createChildren( parentTag, parentElement );
-            }
-            else
+                createChildren( $parentTag, item );
+            } else
             {
-                setVisible( children[0], true );
-                setToggle( parentTag, true );
+                setVisible( $children.eq( 0 ), true );
+                setToggle( $parentTag, true );
             }
-        }
+        } );
     }
 
     function treeReceived( rootElement )
     {
-        var rootsElement = rootElement.getElementsByTagName( 'roots' )[0];
-        var unitElements = rootsElement.getElementsByTagName( 'unit' );
-        
-        var treeTag = document.getElementById( 'orgUnitTree' );
-        var rootsTag = document.createElement( 'ul' );
+        var $treeTag = $( "#orgUnitTree" );
+        var $rootsTag = $( "<ul/>" );
 
-        for ( var i = 0; i < unitElements.length; ++i )
+        $( rootElement ).find( "roots > unit" ).each( function( i, item )
         {
-            var unitTag = createTreeElementTag( unitElements[i] );
-            
-            rootsTag.appendChild( unitTag );
-        }
+            $rootsTag.append( createTreeElementTag( item ) );
+        } );
 
-        treeTag.appendChild( rootsTag );
+        $treeTag.append( $rootsTag );
 
-        var childrenElement = rootElement.getElementsByTagName( 'children' )[0];
-        var parentElements = childrenElement.getElementsByTagName( 'parent' );
-
-        for ( var i = 0, parentElement; ( parentElement = parentElements[i] ); ++i )
+        $( rootElement ).find( "children > parent" ).each( function( i, item )
         {
-            var parentId = parentElement.getAttribute( 'parentId' );
-            var parentTag = document.getElementById( getTagId( parentId ));
+            var parentId = $( item ).attr( "parentId" );
+            var $parentTag = $( "#" + getTagId( parentId ) );
 
-            createChildren( parentTag, parentElement );
-        }
+            createChildren( $parentTag, item );
+        } );
     }
 
     function createChildren( parentTag, parentElement )
     {
-        var children = parentElement.getElementsByTagName( 'child' );
-        var childrenTag = document.createElement( 'ul' );
+        var $childrenTag = $( "<ul/>" );
 
-        for ( var i = 0, child; ( child = children[i] ); ++i )
+        $( parentElement ).find( "child" ).each( function( i, item )
         {
-            var childTag = createTreeElementTag( child );
+            $childrenTag.append( createTreeElementTag( item ) );
+        } )
 
-            childrenTag.appendChild( childTag );
-        }
-
-        setVisible( childrenTag, true );
+        setVisible( $childrenTag, true );
         setToggle( parentTag, true );
 
-        parentTag.appendChild( childrenTag );
+        $( parentTag ).append( $childrenTag );
     }
 
     function createTreeElementTag( child )
     {
-        var childId = child.getAttribute( 'id' );
-        var hasChildren = child.getAttribute( 'hasChildren' ) != '0';
+        var $child = $( child );
+        var childId = $child.attr( "id" );
+        var hasChildren = $child.attr( "hasChildren" ) != 0;
 
-        var toggleTag = document.createElement( 'span' );
-        toggleTag.className = 'toggle';
+        var $toggleTag = $( "<span/>" );
+        $toggleTag.addClass( "toggle" );
 
         if ( hasChildren )
         {
-            toggleTag.onclick = new Function( 'subtree.toggle( ' + childId + ' )' );
-            toggleTag.appendChild( getToggleExpand() );
-        }
-        else
+            $toggleTag.bind( "click", new Function( 'subtree.toggle( ' + childId + ' )' ) );
+            $toggleTag.append( getToggleExpand() );
+        } else
         {
-            toggleTag.appendChild( getToggleBlank() );
+            $toggleTag.append( getToggleBlank() );
         }
 
-        var linkTag = document.createElement( 'a' );
-        linkTag.href = 'javascript:void selection.select( ' + childId + ' )';
-        linkTag.appendChild( document.createTextNode( child.firstChild.nodeValue ));
+        var $linkTag = $( "<a/>" );
+        $linkTag.attr( "href", "javascript:void selection.select( " + childId + ")" );
+        $linkTag.append( $child.eq( 0 ).text() );
 
-        if ( child.getAttribute( 'selected' ) == 'true' )
+        if ( $child.attr( "select" ) )
         {
-            linkTag.className = 'selected';
+            $linkTag.addClass( "selected" );
         }
 
-        var childTag = document.createElement( 'li' );
-        childTag.id = getTagId( childId );
-        childTag.appendChild( document.createTextNode( ' ' ));
-        childTag.appendChild( toggleTag );
-        childTag.appendChild( document.createTextNode( ' ' ));
-        childTag.appendChild( linkTag );
-        
-        return childTag;
+        var $childTag = $( "<li/>" );
+        $childTag.attr( "id", getTagId( childId ) );
+        $childTag.append( " " );
+        $childTag.append( $toggleTag )
+        $childTag.append( " " );
+        $childTag.append( $linkTag )
+
+        return $childTag;
     }
 
     function setToggle( unitTag, expanded )
     {
-        var spans = unitTag.getElementsByTagName( 'span' );
-        var toggleTag = spans[0];
+        var $toggleTag = $( unitTag ).find( "span" );
         var toggleImg = expanded ? getToggleCollapse() : getToggleExpand();
 
-        if ( toggleTag.firstChild )
+        if ( $toggleTag.children().eq( 0 ) )
         {
-        	toggleTag.replaceChild( toggleImg, toggleTag.firstChild );
-		}
-		else
-		{
-			toggleTag.appendChild( toggleImg );
-		}
+            $toggleTag.children().eq( 0 ).replaceWith( toggleImg );
+        } else
+        {
+            $toggleTag.append( toggleImg );
+        }
     }
 
     function setVisible( tag, visible )
     {
-        tag.style.display = visible ? 'block' : 'none';
+        if ( visible )
+        {
+            $( tag ).show();
+        } else
+        {
+            $( tag ).hide();
+        }
     }
 
     function isVisible( tag )
     {
-        return tag.style.display != 'none';
+        return $( tag ).is( ":visible" );
     }
 
     function getTagId( unitId )
     {
         return 'orgUnit' + unitId;
     }
-    
+
     function getToggleExpand()
     {
-        var imgTag = getToggleImage();
-        imgTag.src = '../images/colapse.png';
-        imgTag.alt = '[+]';
-        return imgTag;
-    }
-    
-    function getToggleCollapse()
-    {
-        var imgTag = getToggleImage();
-        imgTag.src = '../images/expand.png';
-		imgTag.width = '9';
-        imgTag.height = '9';
-        imgTag.alt = '[-]';
-        return imgTag;
+        return getToggleImage().attr( "src", "../images/colapse.png" ).attr( "alt", "[+]" );
     }
 
-	function getToggleBlank()
-	{
-		var imgTag = getToggleImage();
-		imgTag.src = '../images/transparent.gif';
-		imgTag.width = '9';
-        imgTag.height = '9';
-		imgTag.alt = '';
-		return imgTag;
-	}
-    
+    function getToggleCollapse()
+    {
+        return getToggleImage().attr( "src", "../images/expand.png" ).attr( "alt", "[-]" );
+    }
+
+    function getToggleBlank()
+    {
+        return getToggleImage().attr( "src", "../images/transparent.gif" ).removeAttr( "alt" );
+    }
+
     function getToggleImage()
     {
-        var imgTag = document.createElement( 'img' );
-        imgTag.width = '9';
-        imgTag.height = '9';
-        return imgTag;
+        return $( "<img/>" ).attr( "width", 9 ).attr( "height", 9 );
     }
 }

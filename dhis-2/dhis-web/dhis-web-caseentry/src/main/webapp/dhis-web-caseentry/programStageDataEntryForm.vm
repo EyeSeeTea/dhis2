@@ -4,15 +4,13 @@ jQuery("#entryFormContainer").ready(function(){
 });
 </script>
 
-
-<form id="dataEntryFormDiv" name="dataEntryFormDiv" method="post" action="selectDataRecording.action">
-
 <table class="mainPageTable"> 
     <tr>            
         <td>
             <strong>$i18n.getString( "full_name" ):</strong>$encoder.htmlEncode( $patient.getFullName() )<br>
             <strong>$i18n.getString( "gender" ):</strong>$encoder.htmlEncode( $patient.gender )<br>
-            <strong>$i18n.getString( "date_of_birth" ):</strong>$format.formatDate( $patient.birthDate )<br>
+            <strong>$i18n.getString( "date_of_birth" ):</strong>
+			$format.formatDate( $patient.birthDate )<br>
             <strong>$i18n.getString( "age" ):</strong>$encoder.htmlEncode( $patient.getAge() )
         </td>
 	</tr>
@@ -35,7 +33,8 @@ jQuery("#entryFormContainer").ready(function(){
     <tr>
         <td><label for="programStageId">$i18n.getString( "program_stage" )</label></td>
         <td>
-			<input id="programStageId" name="programStageId" type="text" readonly="readonly" value="$encoder.htmlEncode( $programStage.name )" style="min-width:350px">            
+			<input id="programStageId" name="programStageId" type="hidden" value="$programStage.id" style="min-width:350px">            
+			<input type="text" readonly="readonly" value="$encoder.htmlEncode( $programStage.name )" style="min-width:350px">            
         </td>        
         #if( $programStageInstance )
             <td><label for="executionDate">$i18n.getString( "report_date" ) </label></td>
@@ -50,28 +49,33 @@ jQuery("#entryFormContainer").ready(function(){
 		<td><input type="button" id="completeBtn" value="$i18n.getString('complete')" onClick="doComplete()" #if($programStageInstance.executionDate) #else disabled #end>
 			<input type="button" id="validationBtn" value="$i18n.getString('validation')" onClick="javascript: runValidation();" style="width:12em " #if($programStageInstance.executionDate) #else disabled #end>
 		</td>
-		<td>&nbsp;</td>
-		<td>
-			<div id="actions" style="float:left">
-				<input type="checkbox" id="useDefaultForm" name="useDefaultForm"
-					#if( $useDefaultForm  ) 
-						checked="checked"
-					#end
-					onchange="selectDefaultForm();">
-				<label>$i18n.getString( "use_default_form" )</label><br>    
-			</div>			
-		</td>
+		<td></td>
+		<td></td>
     </tr>
+	
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td>
+			<input type="radio" id="useDefaultForm" name="useDefaultForm" value="true" onclick="loadProgramStageRecords($programStageInstance.id);" /><label>$i18n.getString( "use_default_form" )</label><br>	
+			<input type="radio" id="useDefaultForm" name="useDefaultForm" value="false" onclick="loadProgramStageRecords($programStageInstance.id);" checked='true' /><label>$i18n.getString( "use_custom_form" )</label>
+		</td>
+	</tr>
 </table>
 
 </form>
+
+#parse( "dhis-web-commons/loader/loader.vm" )
+
+<div id="dataEntryFormDiv" name="dataEntryFormDiv" method="post" action="selectDataRecording.action">
 
 <hr style="clear:both">
 
 <div id="dragDiv">
     <table id="listInfo">
-        <tr><td style="text-align:left"><strong>$i18n.getString("org_unit_name") :</strong></td> <td id="orgUnitNameField" style="text-align:right"></td></tr>
-        <tr><td style="text-align:left"><strong>$i18n.getString("program_stage_name") :</strong></td> <td  id="programStageName" style="text-align:right"></td></tr>
+        <tr><td style="text-align:left"><strong>$i18n.getString("org_unit_name") :</strong></td> <td style="text-align:right">$!patient.organisationUnit.name</td></tr>
+        <tr><td style="text-align:left"><strong>$i18n.getString("program_stage_name") :</strong></td> <td style="text-align:right">$!programStageInstance.programStage.name</td></tr>
         <tr><td style="text-align:left"><strong>$i18n.getString("datae_element_name") :</strong></td> <td id="dataelementName" style="text-align:right"></td></tr>
     </table>
 </div>
@@ -80,7 +84,7 @@ jQuery("#entryFormContainer").ready(function(){
 	#if( $programStageInstance.executionDate ) #else $i18n.getString( "report_date_warning" ) #end
 </span>
 
-<div id="entryFormContainer" >
+<div id="entryFormContainer" #if( $programStageInstance.executionDate ) #else style='display:none;' #end>
 
 	<div id="customEntryScreenContainer">
 			#if( $customDataEntryFormCode ) 

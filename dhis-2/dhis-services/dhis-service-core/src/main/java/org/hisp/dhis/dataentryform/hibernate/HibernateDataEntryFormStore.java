@@ -143,5 +143,4 @@ public class HibernateDataEntryFormStore
 
         return criteria.list();
     }
-
 }

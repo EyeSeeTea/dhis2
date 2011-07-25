@@ -1,29 +1,34 @@
 
-function organisationUnitSelected( orgUnits )
+function organisationUnitSelected( orgUnits, orgUnitNames )
 {
-	showLoader();
 	setInnerHTML( 'contentDiv', '' );
+	setFieldValue( 'orgunitName', orgUnitNames[0] );
+	
 	hideById('dataEntryFormDiv');
 	hideById('dataRecordingSelectDiv');
 	showById('searchPatientDiv');
-			
-	jQuery.post("searchform.action",
-		{
-		},
-		function (data)
-		{
-			enable('listPatientBtn');
-			enable('searchingAttributeId');
-			enable('searchBtn');
-			jQuery('#searchText').removeAttr( 'readonly' );
-			
-			setFieldValue( 'orgunitName', data.getElementsByTagName( "name" )[0].firstChild.nodeValue );
-		
-			hideLoader();
-		},'xml');
+	
+	enable('searchingAttributeId');
+	enable('searchText');
+	enable('searchBtn');	
+	enable('listPatientBtn');
 }
 
 selection.setListenerFunction( organisationUnitSelected );
+
+function selectDefaultForm()
+{
+    if( byId('useDefaultForm').checked  )
+	{
+		hideById('customEntryScreenContainer');
+		showById('defaultEntryScreenContainer');
+	}
+	else
+	{
+		hideById('defaultEntryScreenContainer');
+		showById('customEntryScreenContainer');
+	}
+}
 
 //--------------------------------------------------------------------------------------------
 // Show search-form
@@ -44,7 +49,8 @@ function showSearchForm()
 isAjax = true;
 function listAllPatient()
 {
-	jQuery('#contentDiv').load( 'listAllPatients.action',
+	showLoader();
+	jQuery('#contentDiv').load( 'listAllPatients.action',{},
 		function()
 		{
 			hideById('dataRecordingSelectDiv');
@@ -125,25 +131,27 @@ function loadProgramStages()
 
 function loadDataEntry()
 {
-	hideById('dataEntryFormDiv');
-	if( getFieldValue('programStageId') == '0' )
+	setInnerHTML('dataEntryFormDiv', '');
+	showById('dataEntryFormDiv')
+	setFieldValue( 'dueDate', '' );
+	setFieldValue( 'executionDate', '' );
+	
+	if( getFieldValue('programStageId') == null
+		|| getFieldValue('programStageId') == 0 )
 	{
 		disable('validationBtn');
 		disable('completeBtn');
 		return;
 	}
 	
-	// Load data-entry form
 	showLoader();
-	var useDefaultForm = jQuery("#useDefaultForm").attr('checked') ? true : false;
-	jQuery('#dataEntryFormDiv').load("dataentryform.action",
-		{
-			programStageId:getFieldValue('programStageId'),
-			useDefaultForm : useDefaultForm
-		}, 
-		function( )
-		{
-		}).slideDown('fast', function()
+	var useDefaultForm = jQuery("input[id='useDefaultForm']:checked").val();
+	
+	$( '#dataEntryFormDiv' ).load( "dataentryform.action", 
+		{ 
+			programStageId:getFieldValue('programStageId'), 
+			useDefaultForm:useDefaultForm
+		},function( )
 		{
 			enable('validationBtn');
 			enable('completeBtn');
@@ -151,22 +159,37 @@ function loadDataEntry()
 			
 			hideLoader();
 			hideById('contentDiv'); 
-		});
+		} );
 }
 
 //-----------------------------------------------------------------------------
 // Search Patient
 //-----------------------------------------------------------------------------
 
-function validateSearch()
-{	
-    var request = new Request();
-    request.setResponseTypeXML( 'message' );
-    request.setCallbackSuccess( searchValidationCompleted );
-	request.sendAsPost('searchText=' + getFieldValue( 'searchText' ));
-    request.send( 'validateSearch.action' );
+function searchPatientsOnKeyUp( event )
+{
+	var key = getKeyCode( event );
+	
+	if ( key==13 )// Enter
+	{
+		validateSearch();
+	}
+}
 
-    return false;
+function getKeyCode(e)
+{
+	 if (window.event)
+		return window.event.keyCode;
+	 return (e)? e.which : null;
+}
+ 
+function validateSearch( event )
+{	
+	var request = new Request();
+	request.setResponseTypeXML( 'message' );
+	request.setCallbackSuccess( searchValidationCompleted );
+	request.sendAsPost('searchText=' + getFieldValue( 'searchText' ));
+	request.send( 'validateSearch.action' );
 }
 
 function searchValidationCompleted( messageElement )
@@ -192,11 +215,11 @@ function searchValidationCompleted( messageElement )
     }
     else if ( type == 'error' )
     {
-        window.alert( i18n_searching_patient_failed + ':' + '\n' + message );
+        showErrorMessage( i18n_searching_patient_failed + ':' + '\n' + message );
     }
     else if ( type == 'input' )
     {
-        setMessage( message );
+        showWarningMessage( message );
     }
 }
 
@@ -206,10 +229,12 @@ function searchValidationCompleted( messageElement )
 
 function showPatientDetails( patientId )
 {
-    var request = new Request();
-    request.setResponseTypeXML( 'patient' );
-    request.setCallbackSuccess( patientReceived );
-    request.send( 'getPatient.action?id=' + patientId );
+	$.ajax({
+		url: 'getPatient.action?id=' + patientId,
+		cache: false,
+		dataType: "xml",
+		success: patientReceived
+	});
 }
 
 function patientReceived( patientElement )
@@ -218,12 +243,12 @@ function patientReceived( patientElement )
 	// Get common-information
     // ----------------------------------------------------------------------------
 	
-	var id = patientElement.getElementsByTagName( "id" )[0].firstChild.nodeValue;
-	var fullName = patientElement.getElementsByTagName( "fullName" )[0].firstChild.nodeValue;   
-	var gender = patientElement.getElementsByTagName( "gender" )[0].firstChild.nodeValue;   
-	var dobType = patientElement.getElementsByTagName( "dobType" )[0].firstChild.nodeValue;   
-	var birthDate = patientElement.getElementsByTagName( "dateOfBirth" )[0].firstChild.nodeValue;   
-	var bloodGroup= patientElement.getElementsByTagName( "bloodGroup" )[0].firstChild.nodeValue;   
+	var id = jQuery(patientElement).find( "id" ).text();
+	var fullName = jQuery(patientElement).find( "fullName" ).text();
+	var gender = jQuery(patientElement).find( "gender" ).text();
+	var dobType = jQuery(patientElement).find( "dobType" ).text();
+	var birthDate = jQuery(patientElement).find( "dateOfBirth" ).text();
+	var bloodGroup= jQuery(patientElement).find( "bloodGroup" ).text();
     
 	var commonInfo =  '<strong>'  + i18n_id + ':</strong> ' + id + "<br>" 
 					+ '<strong>' + i18n_full_name + ':</strong> ' + fullName + "<br>" 
@@ -238,29 +263,29 @@ function patientReceived( patientElement )
 	// Get identifier
     // ----------------------------------------------------------------------------
 	
-	var identifiers = patientElement.getElementsByTagName( "identifier" );   
-    
+	var identifiers = jQuery(patientElement).find( "identifier" );   
     var identifierText = '';
 	
-	for ( var i = 0; i < identifiers.length; i++ )
-	{		
-		identifierText = identifierText + identifiers[ i ].getElementsByTagName( "identifierText" )[0].firstChild.nodeValue + '<br>';		
-	}
+	$( identifiers ).each( function( i, item )
+	{
+		identifierText += $( item ).text() + '<br>';
+	});
 	
+	identifiers = ( identifiers.length == 0 ) ? i18n_none : identifiers;
 	setInnerHTML( 'identifierField', identifierText );
 	
 	// ----------------------------------------------------------------------------
 	// Get attribute
     // ----------------------------------------------------------------------------
 	
-	var attributes = patientElement.getElementsByTagName( "attribute" );   
-    
+	var attributes = jQuery(patientElement).find( "attribute" );   
     var attributeValues = '';
 	
-	for ( var i = 0; i < attributes.length; i++ )
-	{	
-		attributeValues = attributeValues + '<strong>' + attributes[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue  + ':  </strong>' + attributes[ i ].getElementsByTagName( "value" )[0].firstChild.nodeValue + '<br>';		
-	}
+	$( attributes ).each( function( i, item )
+	{
+		attributeValues += '<strong>' + $(item).find("name").text()+ ':  </strong>' + $(item).find("value").text() + '<br>';
+	});
+	
 	attributeValues = ( attributeValues.length == 0 ) ? i18n_none : attributeValues;
 	setInnerHTML( 'attributeField', attributeValues );
     
@@ -268,14 +293,13 @@ function patientReceived( patientElement )
 	// Get programs
     // ----------------------------------------------------------------------------
 	
-    var programs = patientElement.getElementsByTagName( "program" );   
-    
+	var programs = jQuery(patientElement).find( "program" );   
     var programName = '';
 	
-	for ( var i = 0; i < programs.length; i++ )
-	{		
-		programName = programName + programs[ i ].getElementsByTagName( "name" )[0].firstChild.nodeValue + '<br>';		
-	}
+	$( programs ).each( function( i, item )
+	{
+		programName += $(item).text() + '<br>';
+	});
 	
 	programName = ( programName.length == 0 ) ? i18n_none : programName;
 	setInnerHTML( 'programField', programName );
@@ -288,8 +312,143 @@ function patientReceived( patientElement )
 }
 
 //------------------------------------------------------------------------------
-// Save Execution Date
+//Save value
 //------------------------------------------------------------------------------
+
+function saveVal( dataElementId, optionComboId )
+{
+	var programStageId = byId('programStageId').value;
+	var fieldId = programStageId + '-' + dataElementId + '-' + optionComboId + '-val';
+	var data = jQuery( "#" + fieldId ).metadata({
+        type:'attr',
+        name:'data'
+    });
+	var field = byId( fieldId ); 
+	var dataElementName = data.deName; 
+    var type = data.deType;
+    var providedByAnotherFacility = document.getElementById( programStageId + '_' + dataElementId + '_facility' ).checked;
+ 
+	field.style.backgroundColor = '#ffffcc';
+    
+    if( field.value != '' )
+    {
+        if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' )
+        {
+            if (  type == 'int' && !isInt( field.value ))
+            {
+                field.style.backgroundColor = '#ffcc00';
+
+                window.alert( i18n_value_must_integer + '\n\n' + dataElementName );
+
+                field.select();
+                field.focus();
+
+                return;
+            }
+			else if ( type == 'number' && !isRealNumber( field.value ) )
+            {
+                field.style.backgroundColor = '#ffcc00';
+                window.alert( i18n_value_must_number + '\n\n' + dataElementName );
+                field.select();
+                field.focus();
+
+                return;
+            } 
+			else if ( type == 'positiveNumber' && !isPositiveInt( field.value ) )
+            {
+                field.style.backgroundColor = '#ffcc00';
+                window.alert( i18n_value_must_positive_integer + '\n\n' + dataElementName );
+                field.select();
+                field.focus();
+
+                return;
+            } 
+			else if ( type == 'negativeNumber' && !isNegativeInt( field.value ) )
+            {
+                field.style.backgroundColor = '#ffcc00';
+                window.alert( i18n_value_must_negative_integer + '\n\n' + dataElementName );
+                field.select();
+                field.focus();
+
+                return;
+            }
+        }
+    	
+    }
+    
+	var valueSaver = new ValueSaver( dataElementId, optionComboId,  field.value, providedByAnotherFacility, type, '#ccffcc'  );
+    valueSaver.save();
+}
+
+function saveDate( dataElementId )
+{	
+	var programStageId = byId('programStageId').value;
+	var fieldId = programStageId + '-' + dataElementId + '-val';
+	var field = jQuery( "#" + fieldId ); 
+	var fieldValue = field.val();
+	var data = field.metadata({
+        type:'attr',
+        name:'data'
+    });
+	
+    var providedByAnotherFacility = document.getElementById( programStageId + '_' + dataElementId + '_facility' ).checked;
+ 
+	if( fieldValue !="")
+    { 
+		var d2 = new Date( fieldValue );
+        if( d2 == 'Invalid Date' )
+        {
+            field.css({
+                "background-color":"#ffcc00"
+            });
+            window.alert('Incorrect format for date value. The correct format should be ' + dateFormat.replace('yy', 'yyyy') +' \n\n ' + data.deName );
+		  
+            field.focus();
+
+            return;
+        }
+    }
+	
+	var dueDate = new Date( jQuery('#dueDate').val() );
+	var inputtedDate = new Date( fieldValue );
+	if( inputtedDate < dueDate )
+	{
+		field.css({
+                "background-color":"#ffcc00"
+            });
+            window.alert( i18n_date_is_greater_then_or_equals_due_date );
+		  
+            field.focus();
+
+            return;
+	}
+	
+    var dateSaver = new DateSaver( dataElementId, fieldValue, providedByAnotherFacility, '#ccffcc' );
+    dateSaver.save();
+}
+
+function saveOpt( dataElementId )
+{
+	var programStageId = byId('programStageId').value;
+	var field = byId( programStageId + '-' + dataElementId + '-val' );
+	
+	field.style.backgroundColor = '#ffffcc';
+	var providedByAnotherFacility = document.getElementById( programStageId + '_' + dataElementId + '_facility' ).checked;
+ 
+	var valueSaver = new ValueSaver( dataElementId, 0, field.options[field.selectedIndex].value, providedByAnotherFacility, 'bool', '#ccffcc' );
+    valueSaver.save();
+}
+
+function updateProvidingFacility( dataElementId, checkedBox )
+{
+	var programStageId = byId( 'programStageId' ).value;
+    checkedBox.style.backgroundColor = '#ffffcc';
+    var providedByAnotherFacility = document.getElementById( programStageId + '_' + dataElementId + '_facility' ).checked;
+ 
+    var facilitySaver = new FacilitySaver( dataElementId, providedByAnotherFacility, '#ccffcc' );
+    facilitySaver.save();
+    
+}
 
 function saveExecutionDate( programStageInstanceId, programStageInstanceName )
 {
@@ -306,28 +465,156 @@ function saveExecutionDate( programStageInstanceId, programStageInstanceName )
     }
 }
 
-//-----------------------------------------------------------------------------
-// Date Saver objects
-//-----------------------------------------------------------------------------
+/**
+* Display data element name in selection display when a value field recieves
+* focus.
+* XXX May want to move this to a separate function, called by valueFocus.
+* @param e focus event
+* @author Hans S. Tommerholt
+*/
+function valueFocus(e) 
+{
+    //Retrieve the data element id from the id of the field
+    var str = e.target.id;
+	
+    var match = /.*\[(.*)\]/.exec( str ); //value[-dataElementId-]
+	
+    if ( ! match )
+    {
+        return;
+    }
 
-function ExecutionDateSaver( programStageInstanceId_, executionDate_, resultColor_ )
+    var deId = match[1];
+	
+    //Get the data element name
+    var nameContainer = document.getElementById('value[' + deId + '].name');
+	
+    if ( ! nameContainer )
+    {
+        return;
+    }
+
+    var name = '';
+	
+	
+    var as = nameContainer.getElementsByTagName('a');
+
+    if ( as.length > 0 )	//Admin rights: Name is in a link
+    {
+        name = as[0].firstChild.nodeValue;
+    }
+    else
+    {
+        name = nameContainer.firstChild.nodeValue;
+    }
+	
+}
+
+function keyPress( event, field )
+{
+    var key = 0;
+    if ( event.charCode )
+    {
+        key = event.charCode; /* Safari2 (Mac) (and probably Konqueror on Linux, untested) */
+    }
+    else
+    {
+        if ( event.keyCode )
+        {
+            key = event.keyCode; /* Firefox1.5 (Mac/Win), Opera9 (Mac/Win), IE6, IE7Beta2, Netscape7.2 (Mac) */
+        }
+        else
+        {
+            if ( event.which )
+            {
+                key = event.which; /* Older Netscape? (No browsers triggered yet) */
+            }
+        }
+    }
+   
+    if ( key == 13 ) /* CR */
+    { alert(key);
+        nextField = getNextEntryField( field );
+        if ( nextField )
+        {
+            nextField.focus(); /* Does not seem to actually work in Safari, unless you also have an Alert in between */
+        }
+        return true;
+    }
+    
+    /* Illegal characters can be removed with a new if-block and return false */
+    return true;
+}
+
+function getNextEntryField( field )
+{
+    var inputs = document.getElementsByName( "entryfield" );
+    
+    // Simple bubble sort
+    for ( i = 0; i < inputs.length - 1; ++i )
+    {
+        for ( j = i + 1; j < inputs.length; ++j )
+        {
+            if ( inputs[i].tabIndex > inputs[j].tabIndex )
+            {
+                tmp = inputs[i];
+                inputs[i] = inputs[j];
+                inputs[j] = tmp;
+            }
+        }
+    }
+    
+    i = 0;
+    for ( ; i < inputs.length; ++i )
+    {
+        if ( inputs[i] == field )
+        {
+            break;
+        }
+    }
+    
+    if ( i == inputs.length - 1 )
+    {
+        // No more fields after this:
+        return false;
+    }
+    else
+    {
+        return inputs[i + 1];
+    }
+}
+
+//-----------------------------------------------------------------
+// Save value for dataElement of type text, number, boolean, combo
+//-----------------------------------------------------------------
+
+function ValueSaver( dataElementId_, selectedOption_, value_, providedByAnotherFacility_, dataElementType_, resultColor_  )
 {
     var SUCCESS = '#ccffcc';
-    var ERROR = '#ffcc00';
+    var ERROR = '#ccccff';
 	
-    var programStageInstanceId = programStageInstanceId_;
-    var executionDate = executionDate_;
+    var dataElementId = dataElementId_;
+    var selectedOption = selectedOption_;
+	var value = value_;
+    var providedByAnotherFacility = providedByAnotherFacility_;
+	var type = dataElementType_;
     var resultColor = resultColor_;
-
+	
     this.save = function()
     {
+		var params = 'dataElementId=' + dataElementId;
+			params += '&optionComboId=' + selectedOption;
+			params += '&value=' + value;
+			params += '&providedByAnotherFacility=' + providedByAnotherFacility;
+			
         var request = new Request();
         request.setCallbackSuccess( handleResponse );
         request.setCallbackError( handleHttpError );
         request.setResponseTypeXML( 'status' );
-        request.send( 'saveExecutionDate.action?executionDate=' + executionDate );
+		request.sendAsPost( params );
+        request.send( 'saveValue.action');
     };
-
+ 
     function handleResponse( rootElement )
     {
         var codeElement = rootElement.getElementsByTagName( 'code' )[0];
@@ -335,56 +622,44 @@ function ExecutionDateSaver( programStageInstanceId_, executionDate_, resultColo
         if ( code == 0 )
         {
             markValue( resultColor );
-			showById('dataEntryFormDiv');
-			showById('entryForm');
         }
         else
         {
-            if( executionDate != "")
+            if(value!="")
             {
                 markValue( ERROR );
-                window.alert( i18n_invalid_date );
+                window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
             }
             else
             {
                 markValue( resultColor );
             }
-			hideById('dataEntryFormDiv');
         }
     }
-
+ 
     function handleHttpError( errorCode )
     {
         markValue( ERROR );
         window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
     }
-
+ 
     function markValue( color )
     {
-   
-        var element = document.getElementById( 'executionDate' );
-           
+		var programStageId = getFieldValue('programStageId');
+        var element;
+     
+        if( selectedOption )
+        {
+            element = byId( programStageId + "-" + dataElementId + "-" + selectedOption +'-val' );
+        }
+        else
+        {
+            element = byId( programStageId + "-" + dataElementId + '-val' );
+        }
+             
         element.style.backgroundColor = color;
     }
 }
-
-//------------------------------------------------------------------------------
-//Save Execution Date
-//------------------------------------------------------------------------------
-
-function saveDateValue( dataElementId, dataElementName )
-{
-    var field = document.getElementById( 'value[' + dataElementId + '].date' );
-    var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
- 
-    var dateSaver = new DateSaver( dataElementId, field.value, providedByAnotherFacility, '#ccffcc' );
-    dateSaver.save();
-	
-}
-
-//-----------------------------------------------------------------------------
-//Date Saver objects
-//-----------------------------------------------------------------------------
 
 function DateSaver( dataElementId_, value_, providedByAnotherFacility_, resultColor_ )
 {
@@ -465,148 +740,14 @@ function DateSaver( dataElementId_, value_, providedByAnotherFacility_, resultCo
 
     function markValue( color )
     {
-        var element = document.getElementById( 'value[' + dataElementId + '].date' );
+		var programStageId = byId('programStageId').value;
+        var element = byId(  programStageId + "-" + dataElementId + '-val' );
         
         element.style.backgroundColor = color;
     }
 }
 
-function DateSaverCustom( programStageId, dataElementId_, value_, providedByAnotherFacility_, resultColor_ )
-{
-    var SUCCESS = '#ccffcc';
-    var ERROR = '#ffcc00';
-	
-    var dataElementId = dataElementId_;
-    var value = value_;
-    var providedByAnotherFacility = providedByAnotherFacility_;
-    var resultColor = resultColor_;
-
-    this.save = function()
-    {
-		var params = 'dataElementId=' + dataElementId 
-			params +=  '&value=' + value 
-			params +=  '&providedByAnotherFacility=' + providedByAnotherFacility;
-		
-        var request = new Request();
-        request.setCallbackSuccess( handleResponse );
-        request.setCallbackError( handleHttpError );
-        request.setResponseTypeXML( 'status' );
-		request.sendAsPost( params );
-        request.send( 'saveDateValue.action');
-    };
-
-    function handleResponse( rootElement )
-    {
-        var codeElement = rootElement.getElementsByTagName( 'code' )[0];
-        var code = parseInt( codeElement.firstChild.nodeValue );
-        if ( code == 0 )
-        {
-            markValue( resultColor );
-        }
-        else
-        {
-            if(value != "")
-            {
-                markValue( ERROR );
-                window.alert( i18n_invalid_date );
-            }
-            else
-            {
-                markValue( resultColor );
-            }
-        }
-    }
-
-    function handleHttpError( errorCode )
-    {
-        markValue( ERROR );
-        window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
-    }
-
-    function markValue( color )
-    {
-        var element = document.getElementById( 'value[' + programStageId + '].date.value[' + dataElementId + '].date' );
-        
-        element.style.backgroundColor = color;
-    }
-}
-
-//------------------------------------------------------------------------------
-//Save providing facility
-//------------------------------------------------------------------------------
-
-function updateProvidingFacility( dataElementId, checkedBox )
-{
-    checkedBox.style.backgroundColor = '#ffffcc';
-    var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
-	
-    var checkBoxSaver = new CheckBoxSaver( dataElementId, providedByAnotherFacility, '#ccffcc' );
-    checkBoxSaver.save();
-    
-}
-
-function updateProvidingFacilityCustom( programStageId, dataElementId, checkedBox )
-{
-    var providedByAnotherFacility = checkedBox.checked;
-    var checkBoxSaver = new CustomCheckBoxSaver( programStageId, dataElementId, providedByAnotherFacility, '#ccffcc' );
-    checkBoxSaver.save();
-    
-}
-
-
-//-----------------------------------------------------------------------------
-//Saver objects - checkbox
-//-----------------------------------------------------------------------------
-
-function CheckBoxSaver( dataElementId_, providedByAnotherFacility_, resultColor_ )
-{
-    var SUCCESS = '#ccffcc';
-    var ERROR = '#ccccff';
-	
-    var dataElementId = dataElementId_;
-    var providedByAnotherFacility = providedByAnotherFacility_;
-    var resultColor = resultColor_;
-
-    this.save = function()
-    {
-        var request = new Request();
-        request.setCallbackSuccess( handleResponseCheckBox );
-        request.setCallbackError( handleHttpErrorCheckBox );
-        request.setResponseTypeXML( 'status' );
-        request.send( 'saveProvidingFacility.action?dataElementId=' + dataElementId 
-				+ '&providedByAnotherFacility=' + providedByAnotherFacility );
-    };
-
-    function handleResponseCheckBox( rootElement )
-    {
-        var codeElement = rootElement.getElementsByTagName( 'code' )[0];
-        var code = parseInt( codeElement.firstChild.nodeValue );
-   
-        if ( code == 0 )
-        {
-            markValue( resultColor );
-        }
-        else
-        {
-            markValue( ERROR );
-            window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
-        }
-    }
-
-    function handleHttpErrorCheckBox( errorCode )
-    {
-        markValue( ERROR );
-        window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
-    }
-
-    function markValue( color )
-    {
-        var element = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' );
-        element.style.backgroundColor = color; //need to find another option as it is difficult to set background color for checkbox
-    }
-}
-
-function CustomCheckBoxSaver( programStageId, dataElementId_, providedByAnotherFacility_, resultColor_ )
+function FacilitySaver( dataElementId_, providedByAnotherFacility_, resultColor_ )
 {
     var SUCCESS = 'success';
     var ERROR = '#error';
@@ -648,6 +789,7 @@ function CustomCheckBoxSaver( programStageId, dataElementId_, providedByAnotherF
 
     function markValue( result )
     {
+		var programStageId = byId( 'programStageId' ).value;
         if( result == SUCCESS )
         {
             jQuery('label[for="'+programStageId+'_'+dataElementId+'_facility"]').toggleClass('checked');
@@ -660,162 +802,24 @@ function CustomCheckBoxSaver( programStageId, dataElementId_, providedByAnotherF
     }
 }
 
-//------------------------------------------------------------------------------
-//Save
-//------------------------------------------------------------------------------
-
-function saveValue( dataElementId, dataElementName )
-{
-    var field = document.getElementById( 'value[' + dataElementId + '].value' );
-    var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML;
-    var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
-    
-    field.style.backgroundColor = '#ffffcc';
-    
-    if( field.value != '' )
-    {
-        if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' )
-        {
-            if (  type == 'int' && !isInt( field.value ))
-            {
-                field.style.backgroundColor = '#ffcc00';
-
-                window.alert( i18n_value_must_integer + '\n\n' + dataElementName );
-
-                field.select();
-                field.focus();
-
-                return;
-            }
-			else if (  type == 'number' && !isRealNumber( field.value ))
-            {
-                field.style.backgroundColor = '#ffcc00';
-                window.alert( i18n_value_must_number + '\n\n' + dataElementName );
-                field.select();
-                field.focus();
-
-                return;
-            } 
-			else if (  type == 'positiveNumber' && !isPositiveInt( field.value ))
-            {
-                field.style.backgroundColor = '#ffcc00';
-                window.alert( i18n_value_must_positive_integer + '\n\n' + dataElementName );
-                field.select();
-                field.focus();
-
-                return;
-            } 
-			else if (  type == 'negativeNumber' && !isNegativeInt( field.value ))
-            {
-                field.style.backgroundColor = '#ffcc00';
-                window.alert( i18n_value_must_negative_integer + '\n\n' + dataElementName );
-                field.select();
-                field.focus();
-
-                return;
-            }
-        }
-    	
-    }
-    
-    var valueSaver = new ValueSaver( dataElementId, field.value, providedByAnotherFacility, '#ccffcc', '' );
-    valueSaver.save();
-    
-}
-
-function saveValueCustom( this_ )
-{
-    var data = jQuery( this_ ).metadata({
-        type:'attr',
-        name:'data'
-    });
-	
-    var providedByAnotherFacility = jQuery('input#'+data.programStageId+'_'+data.dataElementId).attr("checked");
-    
-    this_.style.backgroundColor = '#ffffcc';
-    
-    if( this_.value != '' )
-    {
-        if( data.dataElementType == 'int' )
-        {
-            if ( !isInt( this_.value ))
-            {
-                this_.style.backgroundColor = '#ffcc00';
-
-                window.alert( i18n_value_must_integer + '\n\n' + data.dataElementName );
-
-                this_.select();
-                this_.focus();
-
-                return;
-            }
-        }
-    	
-    }
-    
-    var valueSaver = new CustomValueSaver( data.dataElementId, this_.value, providedByAnotherFacility, '#ccffcc', '' );
-    valueSaver.setProgramStageId( data.programStageId );
-    valueSaver.setOptionComboId(data.optionComboId);
-    valueSaver.setType(data.dataElementType);
-    valueSaver.save();
-    
-}
-
-function saveChoice( dataElementId, selectedOption )
-{
-    selectedOption.style.backgroundColor = '#ffffcc';
-	
-    var providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
- 
-    var valueSaver = new ValueSaver( dataElementId, selectedOption.options[selectedOption.selectedIndex].value, providedByAnotherFacility, '#ccffcc', selectedOption );
-    valueSaver.save();
-}
-function saveChoiceCustom( programStageId, dataElementId, selectedOption )
-{
-    selectedOption.style.backgroundColor = '#ffffcc';
-	
-    var providedByAnotherFacility = document.getElementById( programStageId+'_'+dataElementId+'_facility' ).checked;
- 
-    var valueSaver = new CustomValueSaver( dataElementId, selectedOption.options[selectedOption.selectedIndex].value, providedByAnotherFacility, '#ccffcc', selectedOption );
-    valueSaver.setProgramStageId( programStageId );
-    valueSaver.setType(jQuery(selectedOption).metadata({
-        type:"attr",
-        name:"data"
-    }).dataElementType);
-    valueSaver.save();
-}
-
-
-//-----------------------------------------------------------------------------
-//Saver objects
-//-----------------------------------------------------------------------------
-
-function ValueSaver( dataElementId_, value_, providedByAnotherFacility_, resultColor_, selectedOption_ )
+function ExecutionDateSaver( programStageInstanceId_, executionDate_, resultColor_ )
 {
     var SUCCESS = '#ccffcc';
-    var ERROR = '#ccccff';
+    var ERROR = '#ffcc00';
 	
-    var dataElementId = dataElementId_;
-    var value = value_;
-    var providedByAnotherFacility = providedByAnotherFacility_;
+    var programStageInstanceId = programStageInstanceId_;
+    var executionDate = executionDate_;
     var resultColor = resultColor_;
-    var selectedOption = selectedOption_;
-	
-	
+
     this.save = function()
     {
-		var params = 'dataElementId=' + dataElementId;
-			params += '&value=' + value;
-			params += '&providedByAnotherFacility=' + providedByAnotherFacility;
-			
         var request = new Request();
         request.setCallbackSuccess( handleResponse );
         request.setCallbackError( handleHttpError );
         request.setResponseTypeXML( 'status' );
-		request.sendAsPost( params );
-        request.send( 'saveValue.action');
+        request.send( 'saveExecutionDate.action?executionDate=' + executionDate );
     };
- 
+
     function handleResponse( rootElement )
     {
         var codeElement = rootElement.getElementsByTagName( 'code' )[0];
@@ -823,421 +827,45 @@ function ValueSaver( dataElementId_, value_, providedByAnotherFacility_, resultC
         if ( code == 0 )
         {
             markValue( resultColor );
+			showById('entryFormContainer');
+			showById('dataEntryFormDiv');
+			showById('entryForm');
         }
         else
         {
-            if(value!="")
+            if( executionDate != "")
             {
                 markValue( ERROR );
-                window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
+                window.alert( i18n_invalid_date );
             }
             else
             {
                 markValue( resultColor );
             }
+			hideById('dataEntryFormDiv');
         }
     }
- 
+
     function handleHttpError( errorCode )
     {
         markValue( ERROR );
         window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
     }
- 
+
     function markValue( color )
     {
-		
-        var type = document.getElementById( 'value[' + dataElementId + '].type' ).innerHTML;
-		
-        var element;
-     
-        if ( type == 'bool' )
-        {
-            element = document.getElementById( 'value[' + dataElementId + '].boolean' );
-        }
-        else if( type == 'date' )
-        {
-            element = document.getElementById( 'value[' + dataElementId + '].date' );
-        }
-        else if( selectedOption )
-        {
-            element = selectedOption;
-        }
-        else
-        {
-            element = document.getElementById( 'value[' + dataElementId + '].value' );
-        }
-             
+   
+        var element = document.getElementById( 'executionDate' );
+           
         element.style.backgroundColor = color;
     }
 }
 
-function CustomValueSaver( dataElementId_, value_, providedByAnotherFacility_, resultColor_, selectedOption_ )
-{
-    var SUCCESS = '#ccffcc';
-    var ERROR = '#ccccff';
-	
-    var dataElementId = dataElementId_;
-    var value = value_;
-    var providedByAnotherFacility = providedByAnotherFacility_;
-    var resultColor = resultColor_;
-    var selectedOption = selectedOption_;
-    var optionComboId ;
-    var programStageId;
-    var type;
-	
-    this.setType = function( type_ )
-    {
-        type = type_;
-    }
-	
-    this.setOptionComboId =  function( optionComboId_ )
-    {
-        optionComboId = optionComboId_;
-    }
-	
-    this.setProgramStageId = function( programStageId_ )
-    {
-        programStageId = programStageId_;
-    }
-	
-    this.save = function()
-    {
-        var request = new Request();
-        request.setCallbackSuccess( handleResponse );
-        request.setCallbackError( handleHttpError );
-        request.setResponseTypeXML( 'status' );
-		
-        if( optionComboId )
-        {
-			var params = 'dataElementId=' + dataElementId;
-				params += '&optionComboId=' + optionComboId;
-				params += '&value=' + value;
-				params += '&providedByAnotherFacility=' + providedByAnotherFacility;
-			
-			request.sendAsPost( params ); 
-			
-			if( type == 'date' ) request.send( 'saveDateValue.action' );
-			else request.send( 'saveValue.action' );
-        }
-        else
-        {	
-			var params = 'dataElementId=' + dataElementId;
-				params += '&value=' + value;
-				params += '&providedByAnotherFacility=' + providedByAnotherFacility;
-				
-			request.sendAsPost( params );
-			if( type == 'date' ) request.send( 'saveDateValue.action' );
-			else request.send( 'saveValue.action' );
-        }
-		
-		
-    };
- 
-    function handleResponse( rootElement )
-    {
-        var codeElement = rootElement.getElementsByTagName( 'code' )[0];
-        var code = parseInt( codeElement.firstChild.nodeValue );
-        if ( code == 0 )
-        {
-            markValue( resultColor );
-        }
-        else
-        {
-            if(value!="")
-            {
-                markValue( ERROR );
-                window.alert( rootElement.getElementsByTagName( "message" )[0].firstChild.nodeValue );
-            }
-            else
-            {
-                markValue( resultColor );
-            }
-        }
-    }
- 
-    function handleHttpError( errorCode )
-    {
-        markValue( ERROR );
-        window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
-    }
- 
-    function markValue( color )
-    {
-		
-        var element;
-     
-        if ( type == 'bool' )
-        {
-            element = document.getElementById( 'value[' + programStageId + '].boolean:value[' + dataElementId + '].boolean' );
-        }
-        else if( type == 'date' )
-        {
-            element = document.getElementById( 'value[' + programStageId + '].date:value[' + dataElementId + '].date' );
-        }
-        else if( selectedOption )
-        {
-            element = selectedOption;
-        }
-        else if ( optionComboId )
-        {
-            element = document.getElementById( 'value[' + programStageId + '].value:value[' + dataElementId + '].value:value[' + optionComboId + '].value');
-        }
-        else
-        {
-            element = document.getElementById( 'value[' + programStageId + '].value:value[' + dataElementId + '].value' );
-        }
-             
-        element.style.backgroundColor = color;
-    }
-}
+//-----------------------------------------------------------------
+//
+//-----------------------------------------------------------------
 
-/**
-* Display data element name in selection display when a value field recieves
-* focus.
-* XXX May want to move this to a separate function, called by valueFocus.
-* @param e focus event
-* @author Hans S. Tommerholt
-*/
-function valueFocus(e) 
-{
-    //Retrieve the data element id from the id of the field
-    var str = e.target.id;
-	
-    var match = /.*\[(.*)\]/.exec( str ); //value[-dataElementId-]
-	
-    if ( ! match )
-    {
-        return;
-    }
 
-    var deId = match[1];
-	
-    //Get the data element name
-    var nameContainer = document.getElementById('value[' + deId + '].name');
-	
-    if ( ! nameContainer )
-    {
-        return;
-    }
-
-    var name = '';
-	
-	
-    var as = nameContainer.getElementsByTagName('a');
-
-    if ( as.length > 0 )	//Admin rights: Name is in a link
-    {
-        name = as[0].firstChild.nodeValue;
-    }
-    else
-    {
-        name = nameContainer.firstChild.nodeValue;
-    }
-	
-}
-
-function keyPress( event, field )
-{
-    var key = 0;
-    if ( event.charCode )
-    {
-        key = event.charCode; /* Safari2 (Mac) (and probably Konqueror on Linux, untested) */
-    }
-    else
-    {
-        if ( event.keyCode )
-        {
-            key = event.keyCode; /* Firefox1.5 (Mac/Win), Opera9 (Mac/Win), IE6, IE7Beta2, Netscape7.2 (Mac) */
-        }
-        else
-        {
-            if ( event.which )
-            {
-                key = event.which; /* Older Netscape? (No browsers triggered yet) */
-            }
-        }
-    }
-    
-    if ( key == 13 ) /* CR */
-    {
-        nextField = getNextEntryField( field );
-        if ( nextField )
-        {
-            nextField.focus(); /* Does not seem to actually work in Safari, unless you also have an Alert in between */
-        }
-        return true;
-    }
-    
-    /* Illegal characters can be removed with a new if-block and return false */
-    return true;
-}
-
-function getNextEntryField( field )
-{
-    var inputs = document.getElementsByName( "entryfield" );
-    
-    // Simple bubble sort
-    for ( i = 0; i < inputs.length - 1; ++i )
-    {
-        for ( j = i + 1; j < inputs.length; ++j )
-        {
-            if ( inputs[i].tabIndex > inputs[j].tabIndex )
-            {
-                tmp = inputs[i];
-                inputs[i] = inputs[j];
-                inputs[j] = tmp;
-            }
-        }
-    }
-    
-    i = 0;
-    for ( ; i < inputs.length; ++i )
-    {
-        if ( inputs[i] == field )
-        {
-            break;
-        }
-    }
-    
-    if ( i == inputs.length - 1 )
-    {
-        // No more fields after this:
-        return false;
-    }
-    else
-    {
-        return inputs[i + 1];
-    }
-}
-
-//------------------------------------------------------
-// Save value for dataElement of type date in entryscreen
-//------------------------------------------------------
-
-function saveDate( dataElementId , dataElementName )
-{
-    var providedByAnotherFacility ;
-	
-    if( document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ) )
-        providedByAnotherFacility = document.getElementById( 'value[' + dataElementId + '].providedByAnotherFacility' ).checked;
-	
-    var field = document.getElementById('value['+dataElementId+'].date');
-	
-    field.style.backgroundColor = '#ffffcc';
-	
-    if( !isValidDate( field.value ) )
-    {
-        field.style.backgroundColor = '#ffcc00';
-        window.alert('Incorrect format for date value. The correct format should be ' + dateFormat.replace('yy', 'yyyy') + '\n\n '+dataElementName );
-		  
-        field.select();
-        field.focus();
-
-        return;
-    }
-	
-    var valueSaver = new ValueSaver( dataElementId, field.value, providedByAnotherFacility, '#ccffcc', '' );
-    valueSaver.save();
-	
-}
-function saveDateCustom(  this_ )
-{
-    jQuery(this_).css({
-        "background-color":"#ffffcc"
-    });
-
-    var data = jQuery(this_).metadata({
-        type:"attr",
-        name:"data"
-    });
-    var providedByAnotherFacility = document.getElementById( data.programStageId+'_'+data.dataElementId+'_facility' ).checked;
-
-    if(jQuery(this_).val()!="")
-    { 
-		var d2 = new Date(jQuery(this_).val() );
-        if( d2 == 'Invalid Date' )
-        {
-            jQuery(this_).css({
-                "background-color":"#ffcc00"
-            });
-            window.alert('Incorrect format for date value. The correct format should be ' + dateFormat.replace('yy', 'yyyy') +' \n\n ' + data.dataElementName );
-		  
-            jQuery(this_).focus();
-
-            return;
-        }
-    }
-	
-	var dueDate = new Date( jQuery('#dueDate').val() );
-	
-	var inputtedDate = new Date(jQuery(this_).val());
-	if( inputtedDate < dueDate )
-	{
-		jQuery(this_).css({
-                "background-color":"#ffcc00"
-            });
-            window.alert( i18n_date_is_greater_then_or_equals_due_date );
-		  
-            jQuery(this_).focus();
-
-            return;
-	}
-	
-    var valueSaver = new CustomValueSaver( data.dataElementId, jQuery(this_).val(), providedByAnotherFacility, '#ccffcc', '' );
-    valueSaver.setProgramStageId( data.programStageId );
-    valueSaver.setType(data.dataElementType);
-    valueSaver.save();
-	
-}
-
-function selectDefaultForm()
-{
-    if( byId('useDefaultForm').checked  )
-	{
-		hideById('customEntryScreenContainer');
-		showById('defaultEntryScreenContainer');
-	}
-	else
-	{
-		hideById('defaultEntryScreenContainer');
-		showById('customEntryScreenContainer');
-	}
-}
-
-function saveValueWithOptionComboId( this_ )
-{
-    var data = jQuery( this_ ).metadata({
-        type:'attr',
-        name:'data'
-    });
-	
-    var providedByAnotherFacility = document.getElementById( 'value[' + data.programStageId + '].facility:value[' + data.dataElementId + '].facility' ).checked;
-    
-    this_.style.backgroundColor = '#ffffcc';
-    
-    if( this_.value != '' )
-    {
-        if( data.dataElementType == 'int' )
-        {
-            if ( !isInt( this_.value ))
-            {
-                this_.style.backgroundColor = '#ffcc00';
-
-                window.alert( i18n_value_must_integer + '\n\n' + data.dataElementName );
-
-                this_.select();
-                this_.focus();
-
-                return;
-            }
-        }
-    }
-    var valueSaver = new CustomValueSaver( dataElementId, field.value, providedByAnotherFacility, '#ccffcc', '' );
-    valueSaver.setOptionComboId( data.optionComboId );
-    valueSaver.setProgramStageId( data.programStageId );
-    valueSaver.save();
-}
 function initCustomCheckboxes()
 {
     jQuery('input[type=checkbox][name="providedByAnotherFacility"]').prettyCheckboxes();
@@ -1259,9 +887,7 @@ DRAG_DIV = {
 		
     showData : function(data)
     {
-        jQuery("#orgUnitNameField").text(data.orgUnitName);
-        jQuery("#programStageName").text(data.programStageName);
-        jQuery("#dataelementName").text(data.dataElementName);
+        jQuery("#dataelementName").text(data.deName);
     },
 		
     resetData : function()
@@ -1369,7 +995,6 @@ function runValidation()
 	window.open( 'validateProgram.action' );
 }
 
-
 //------------------------------------------------------
 // Multi Data-entry
 //------------------------------------------------------
@@ -1426,17 +1051,35 @@ function selectProgram()
 
 function viewPrgramStageRecords( programStageInstanceId ) 
 {
-	var url = 'viewProgramStageRecords.action?programStageInstanceId=' + programStageInstanceId;
 	$('#contentDataRecord').dialog('destroy').remove();
-    $('<div id="contentDataRecord">' ).load(url).dialog({
-        title: 'ProgramStage',
-		maximize: true, 
-		closable: true,
-		modal:true,
-		overlay:{background:'#000000', opacity:0.1},
-		width: 800,
-        height: 400
-    });
+    $('<div id="contentDataRecord">' ).load("viewProgramStageRecords.action",
+		{
+			programStageInstanceId: programStageInstanceId
+			
+		}).dialog(
+		{
+			title: 'ProgramStage',
+			maximize: true, 
+			closable: true,
+			modal:true,
+			overlay:{background:'#000000', opacity:0.1},
+			width: 800,
+			height: 400
+		});
+}
+
+function loadProgramStageRecords( programStageInstanceId ) 
+{
+	setInnerHTML('dataEntryFormDiv', '');
+	showLoader();
+	var useDefaultForm = jQuery("#useDefaultForm").attr('checked') ? true : false;
+    $('#dataEntryFormDiv' ).load("loadProgramStageRecords.action",
+		{
+			programStageInstanceId: programStageInstanceId,
+			useDefaultForm:useDefaultForm
+		}, function() {
+			hideLoader();
+		});
 }
 
 function entryFormContainerOnReady()
