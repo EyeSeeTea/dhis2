@@ -122,6 +122,35 @@ function loadDefaultForm()
 // OrganisationUnit Selection
 // -----------------------------------------------------------------------------
 
+/**
+ * Returns an array containing associative array elements with id and name 
+ * properties. The array is sorted on the element name property.
+ */
+function getSortedDataSetList()
+{
+	var associationSet = organisationUnitAssociationSetMap[currentOrganisationUnitId];
+	var orgUnitDataSets = dataSetAssociationSets[associationSet];
+	
+	var dataSetList = [];
+	
+	for ( i in orgUnitDataSets )
+	{
+		var dataSetId = orgUnitDataSets[i];
+		var dataSetName = dataSets[dataSetId].name;
+		
+		var row = [];
+		row['id'] = dataSetId;
+		row['name'] = dataSetName;
+		dataSetList[i] = row;		
+	}
+	
+	dataSetList.sort( function( a, b ) {
+		return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
+	} );
+	
+	return dataSetList;	
+}
+
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {
 	currentOrganisationUnitId = orgUnits[0];
@@ -141,19 +170,15 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
 	addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
 	
-	var associationSet = organisationUnitAssociationSetMap[currentOrganisationUnitId];
-	var orgUnitDataSets = dataSetAssociationSets[associationSet];
-
+	var dataSetList = getSortedDataSetList();
+	
 	var dataSetValid = false;
 	
-	for ( i in orgUnitDataSets )
+	for ( i in dataSetList )
     {
-    	var id = orgUnitDataSets[i];
-    	var dataSetName = dataSets[id].name;
-    	
-        addOptionById( 'selectedDataSetId', id, dataSetName );
+        addOptionById( 'selectedDataSetId', dataSetList[i].id, dataSetList[i].name );
         
-        if ( dataSetId == id )
+        if ( dataSetId == dataSetList[i].id )
         {
         	dataSetValid = true;
         }
