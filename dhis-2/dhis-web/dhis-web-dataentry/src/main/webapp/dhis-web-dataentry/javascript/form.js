@@ -10,6 +10,12 @@ var indicatorFormulas = [];
 // Array with associative arrays for each data set, populated in select.vm
 var dataSets = [];
 
+// Associative array with identifier and array of assigned data sets, populated in select.vm
+var dataSetAssociationSets = [];
+
+// Associate array with mapping between organisation unit identifier and data set association set identifier, populated in select.vm
+var organisationUnitAssociationSetMap = [];
+
 // Array with keys on form {dataelementid}-{optioncomboid}-min/max with min/max values
 var currentMinMaxValueMap = [];
 
@@ -128,35 +134,45 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
     var url = 'loadDataSets.action';
 
+	$( '#selectedOrganisationUnit' ).val( organisationUnitName );
+	$( '#currentOrganisationUnit' ).html( organisationUnitName );
+
     clearListById( 'selectedDataSetId' );
 
-    $.getJSON( url, { dataSetId:dataSetId },  function( json )
+	addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
+	
+	var associationSet = organisationUnitAssociationSetMap[currentOrganisationUnitId];
+	var orgUnitDataSets = dataSetAssociationSets[associationSet];
+
+	var dataSetValid = false;
+	
+	for ( i in orgUnitDataSets )
     {
-        $( '#selectedOrganisationUnit' ).val( organisationUnitName );
-        $( '#currentOrganisationUnit' ).html( organisationUnitName );
-
-        addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
-
-        for ( i in json.dataSets )
+    	var id = orgUnitDataSets[i];
+    	var dataSetName = dataSets[id].name;
+    	
+        addOptionById( 'selectedDataSetId', id, dataSetName );
+        
+        if ( dataSetId == id )
         {
-            addOptionById( 'selectedDataSetId', json.dataSets[i].id, json.dataSets[i].name );
+        	dataSetValid = true;
         }
+    }
 
-        if ( json.dataSetValid && dataSetId != null )
-        {
-            $( '#selectedDataSetId' ).val( dataSetId );
+	if ( dataSetValid && dataSetId != null )
+	{
+		$( '#selectedDataSetId' ).val( dataSetId );
 
-            if ( periodId && periodId != -1 && dataEntryFormIsLoaded ) //TODO if period valid
-            {
-                showLoader();
-                loadDataValues();
-            }
-        } 
-        else
+        if ( periodId && periodId != -1 && dataEntryFormIsLoaded ) //TODO if period valid
         {
-            clearPeriod();
+            showLoader();
+            loadDataValues();
         }
-    } );
+    } 
+    else
+    {
+        clearPeriod();
+    }
 }
 
 selection.setListenerFunction( organisationUnitSelected );
