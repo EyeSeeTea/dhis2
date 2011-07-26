@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportexcel.dataentrystatus.action;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,17 +41,27 @@ public class UpdateDataEntryStatusAction
     implements Action
 {
 
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependency
-    // -------------------------------------------------
-
-    private ExportReportService exportReportService;
+    // -------------------------------------------------------------------------
 
     private DataSetService dataSetService;
 
-    // -------------------------------------------------
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
+
+    private ExportReportService exportReportService;
+
+    public void setExportReportService( ExportReportService exportReportService )
+    {
+        this.exportReportService = exportReportService;
+    }
+
+    // -------------------------------------------------------------------------
     // Input
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
 
     private Integer dataSetId;
 
@@ -59,23 +69,13 @@ public class UpdateDataEntryStatusAction
 
     private Integer dataStatusId;
 
-    // -------------------------------------------------
+    // -------------------------------------------------------------------------
     // Getter & Setter
-    // -------------------------------------------------
-
-    public void setExportReportService( ExportReportService exportReportService )
-    {
-        this.exportReportService = exportReportService;
-    }
+    // -------------------------------------------------------------------------
 
     public void setDataStatusId( Integer dataStatusId )
     {
         this.dataStatusId = dataStatusId;
-    }
-
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
     }
 
     public void setDataSetId( Integer dataSetId )
@@ -87,6 +87,10 @@ public class UpdateDataEntryStatusAction
     {
         this.makeDefault = makeDefault;
     }
+    
+    // -------------------------------------------------------------------------
+    // Method implementation
+    // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception

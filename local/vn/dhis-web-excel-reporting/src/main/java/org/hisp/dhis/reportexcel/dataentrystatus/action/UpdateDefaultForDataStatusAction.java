@@ -1,7 +1,7 @@
-package org.hisp.dhis.reportexcel.action;
+package org.hisp.dhis.reportexcel.dataentrystatus.action;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,67 @@ package org.hisp.dhis.reportexcel.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import org.hisp.dhis.reportexcel.ExportReportService;
+import org.hisp.dhis.reportexcel.status.DataEntryStatus;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class NoAction
+public class UpdateDefaultForDataStatusAction
     implements Action
 {
-    // TODO remove not required with struts2
-
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private String backUrl;
+    private ExportReportService exportReportService;
 
-    public String getBackUrl()
+    public void setExportReportService( ExportReportService exportReportService )
     {
-        return backUrl;
-    }
-
-    public void setBackUrl( String backUrl )
-    {
-        this.backUrl = backUrl;
+        this.exportReportService = exportReportService;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Getter & Setter
     // -------------------------------------------------------------------------
-    
+
+    private Integer dataStatusId;
+
+    public void setDataStatusId( Integer dataStatusId )
+    {
+        this.dataStatusId = dataStatusId;
+    }
+
+    private boolean makeDefault;
+
+    public void setMakeDefault( boolean makeDefault )
+    {
+        this.makeDefault = makeDefault;
+    }
+
+    private DataEntryStatus dataStatus;
+
+    public DataEntryStatus getDataStatus()
+    {
+        return dataStatus;
+    }
+
+    // -------------------------------------------------------------------------
+    // Method implementation
+    // -------------------------------------------------------------------------
+
     public String execute()
+        throws Exception
     {
+        dataStatus = exportReportService.getDataEntryStatus( dataStatusId );
+
+        dataStatus.setMakeDefault( makeDefault );
+
+        exportReportService.updateDataEntryStatus( dataStatus );
+
         return SUCCESS;
     }
-
 }
