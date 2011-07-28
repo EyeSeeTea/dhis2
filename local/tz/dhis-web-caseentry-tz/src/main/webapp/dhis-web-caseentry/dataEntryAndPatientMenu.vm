@@ -6,5 +6,3 @@
 </ul>
 
 <br/>
-
-#parse( "/dhis-web-commons/ouwt/orgunittree.vm" )
