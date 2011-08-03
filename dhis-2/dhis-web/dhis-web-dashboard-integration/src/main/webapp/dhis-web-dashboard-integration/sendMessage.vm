@@ -25,7 +25,7 @@
 <tr>
 <td></td>
 <td><input type="submit" value="$i18n.getString( 'send' )" style="width:120px">
-<input type="button" value="$i18n.getString( 'cancel' )"  style="width:120px" onclick="window.location.href='message.action'"></td>
+<input type="button" value="$i18n.getString( 'discard' )"  style="width:120px" onclick="window.location.href='message.action'"></td>
 </tr>
 
 </table>
