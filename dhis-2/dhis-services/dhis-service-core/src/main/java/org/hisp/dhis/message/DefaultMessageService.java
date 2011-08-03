@@ -27,11 +27,11 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
@@ -49,18 +49,11 @@ public class DefaultMessageService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericStore<Message> messageStore;
-    
-    public void setMessageStore( GenericStore<Message> messageStore )
+    private MessageStore messageStore;
+
+    public void setMessageStore( MessageStore messageStore )
     {
         this.messageStore = messageStore;
-    }
-
-    private UserMessageStore userMessageStore;
-
-    public void setUserMessageStore( UserMessageStore userMessageStore )
-    {
-        this.userMessageStore = userMessageStore;
     }
 
     private CurrentUserService currentUserService;
@@ -81,32 +74,51 @@ public class DefaultMessageService
     // MessageService implementation
     // -------------------------------------------------------------------------
 
-    public int sendMessage( Message message, Set<User> users )
+    public int sendMessage( String subject, String text, Set<User> users )
     {
-        Set<UserMessage> userMessages = new HashSet<UserMessage>();
+        // ---------------------------------------------------------------------
+        // Add feedback recipients to users if they are not there
+        // ---------------------------------------------------------------------
+
+        UserGroup userGroup = configurationService.getConfiguration().getFeedbackRecipients();
+
+        if ( userGroup != null && userGroup.getMembers().size() > 0 )
+        {
+            users.addAll( userGroup.getMembers() );
+        }
+
+        // ---------------------------------------------------------------------
+        // Instantiate message, content and user messages
+        // ---------------------------------------------------------------------
+
+        Message message = new Message( subject );
+        
+        message.addMessageContent( new MessageContent( text, currentUserService.getCurrentUser() ) );
         
         for ( User user : users )
         {
-            userMessages.add( new UserMessage( user, message ) );        
+            message.addUserMessage( new UserMessage( user ) );        
         }
-        
-        message.setUserMessages( userMessages );
         
         return saveMessage( message );
     }
 
-    public int sendFeedback( Message message )
+    public int sendFeedback( String subject, String text )
     {
-        UserGroup userGroup = configurationService.getConfiguration().getFeedbackRecipients();
+        return sendMessage( subject, text, new HashSet<User>() );
+    }
+    
+    public void sendReply( Message message, String text )
+    {
+        User sender = currentUserService.getCurrentUser();
         
-        int r = 0;
+        MessageContent content = new MessageContent( text, sender );
         
-        if ( userGroup != null && userGroup.getMembers().size() > 0 )
-        {
-            r = sendMessage( message, userGroup.getMembers() );
-        }
+        message.addMessageContent( content );
+        message.markUnread( sender );
+        message.setLastUpdated( new Date() );
         
-        return r;
+        updateMessage( message );        
     }
         
     public int saveMessage( Message message )
@@ -114,45 +126,28 @@ public class DefaultMessageService
         return messageStore.save( message );
     }
     
+    public void updateMessage( Message message )
+    {
+        messageStore.update( message );
+    }
+    
     public Message getMessage( int id )
     {
         return messageStore.get( id );
     }
-    
-    public UserMessage getUserMessage( int id )
-    {
-        return userMessageStore.get( id );
-    }
-    
-    public void updateUserMessage( UserMessage userMessage )
-    {
-        userMessageStore.update( userMessage );
-    }
-    
-    public void deleteUserMessage( UserMessage userMessage )
-    {
-        Message message = userMessage.getMessage();
-        message.getUserMessages().remove( userMessage );
-        userMessageStore.delete( userMessage );
-    }
-    
-    public List<UserMessage> getUserMessages( int first, int max )
-    {
-        return userMessageStore.getUserMessages( currentUserService.getCurrentUser(), first, max );
-    }
-
-    public List<UserMessage> getUserMessages( User user, int first, int max )
-    {
-        return userMessageStore.getUserMessages( user, first, max );
-    }
-    
+        
     public long getUnreadMessageCount()
     {
-        return userMessageStore.getUnreadUserMessageCount( currentUserService.getCurrentUser() );
+        return messageStore.getUnreadUserMessageCount( currentUserService.getCurrentUser() );
     }
     
     public long getUnreadMessageCount( User user )
     {
-        return userMessageStore.getUnreadUserMessageCount( user );
+        return messageStore.getUnreadUserMessageCount( user );
+    }
+    
+    public List<Message> getMessages( int first, int max )
+    {
+        return messageStore.getMessages( currentUserService.getCurrentUser(), first, max );
     }
 }

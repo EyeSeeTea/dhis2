@@ -14,16 +14,20 @@
 
     <property name="key" column="messagekey" not-null="true" />
     <property name="subject" column="messagesubject" not-null="true" />
-    <property name="text" column="messagetext" type="text" />
+	<property name="lastUpdated"/>
 
-    <many-to-one name="sender" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_message_user"
-      not-null="true" />
-
-    <set name="userMessages" table="message_usermessages" cascade="save-update">
+    <set name="userMessages" table="message_usermessages" cascade="all,delete-orphan">
       <key column="messageid" foreign-key="fk_message_usermessages_messageid" />
-      <many-to-many class="org.hisp.dhis.message.UserMessage" column="usermessageid" unique="true"
-        foreign-key="fk_message_usermessages" />
+      <many-to-many class="org.hisp.dhis.message.UserMessage" column="usermessageid" 
+		unique="true" foreign-key="fk_message_usermessages_usermessageid" />
     </set>
-
+	
+	<list name="contents" table="message_messagecontents" cascade="all">
+	  <key column="messageid" foreign-key="fk_message_messagecontents_messageid" />
+	  <list-index column="sort_order" base="1" />
+	  <many-to-many class="org.hisp.dhis.message.MessageContent" column="messagecontentid"
+		unique="true" foreign-key="fk_message_usermessages_usercontentid" />
+	</list>
+	
   </class>
 </hibernate-mapping>

@@ -1,4 +1,4 @@
-package org.hisp.dhis.message;
+package org.hisp.dhis.message.hibernate;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -28,32 +28,40 @@ package org.hisp.dhis.message;
  */
 
 import java.util.List;
-import java.util.Set;
 
+import org.hibernate.Query;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.message.Message;
+import org.hisp.dhis.message.MessageStore;
 import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  */
-public interface MessageService
+public class HibernateMessageStore
+    extends HibernateGenericStore<Message> implements MessageStore
 {
-    final String ID = MessageService.class.getName();
+    @SuppressWarnings("unchecked")
+    public List<Message> getMessages( User user, int first, int max )
+    {
+        String hql = "select distinct m from Message m join m.userMessages u where u.user = :user order by m.lastUpdated desc";
+        
+        Query query = getQuery( hql );
+        query.setEntity( "user", user );
+        query.setFirstResult( first );
+        query.setMaxResults( max );
+        
+        return query.list();
+    }
     
-    int sendMessage( String subject, String text, Set<User> users );
-    
-    int sendFeedback( String subject, String text );
-    
-    void sendReply( Message message, String text );
-    
-    int saveMessage( Message message );
-    
-    void updateMessage( Message message );
-    
-    Message getMessage( int id );
-    
-    long getUnreadMessageCount();
-    
-    long getUnreadMessageCount( User user );
-    
-    public List<Message> getMessages( int first, int max );
+    public long getUnreadUserMessageCount( User user )
+    {
+        String hql = "select count(*) from Message m join m.userMessages u where u.user = :user and u.read = false";
+        
+        Query query = getQuery( hql );
+        query.setEntity( "user", user );
+        query.setCacheable( true );
+        
+        return (Long) query.uniqueResult();
+    }
 }

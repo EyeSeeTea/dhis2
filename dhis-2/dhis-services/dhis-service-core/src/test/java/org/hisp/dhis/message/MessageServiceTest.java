@@ -28,12 +28,10 @@ package org.hisp.dhis.message;
  */
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
@@ -51,13 +49,7 @@ public class MessageServiceTest
     private User userA;
     private User userB;
 
-    private Message messageA;
-    private Message messageB;
-    
-    private UserMessage userMessageA;
-    private UserMessage userMessageB;
-    private UserMessage userMessageC;
-    private UserMessage userMessageD;
+    private Set<User> users;
 
     // -------------------------------------------------------------------------
     // Fixture
@@ -69,131 +61,109 @@ public class MessageServiceTest
         userService = (UserService) getBean( UserService.ID );
         messageService = (MessageService) getBean( MessageService.ID );
         
-        sender = createUser( 'S');
+        sender = createUser( 'S' );
         userA = createUser( 'A' );
         userB = createUser( 'B' );
 
         userService.addUser( sender );
         userService.addUser( userA );
         userService.addUser( userB );
-
-        messageA = new Message( "SubjectA", "TextA", sender );
-        messageB = new Message( "SubjectB", "TextB", sender );
         
-        userMessageA = new UserMessage( userA, messageA );
-        userMessageB = new UserMessage( userB, messageA );
-        userMessageC = new UserMessage( userA, messageB );
-        userMessageD = new UserMessage( userB, messageB );
-        
-        messageA.getUserMessages().add( userMessageA );
-        messageA.getUserMessages().add( userMessageB );
-        messageB.getUserMessages().add( userMessageC );
-        messageB.getUserMessages().add( userMessageD );
+        users = new HashSet<User>();
+        users.add( userA );
+        users.add( userB );        
     }
-    
+
+    @Test
+    public void testSaveMessageA()
+    {
+        Message messageA = new Message( "SubjectA" );
+        Message messageB = new Message( "SubjectB" );
+        
+        int idA = messageService.saveMessage( messageA );
+        int idB = messageService.saveMessage( messageB );
+        
+        messageA = messageService.getMessage( idA );
+        messageB = messageService.getMessage( idB );
+        
+        assertNotNull( messageA );
+        assertEquals( "SubjectA", messageA.getSubject() );
+
+        assertNotNull( messageB );
+        assertEquals( "SubjectB", messageB.getSubject() );
+    }
+
+    @Test
+    public void testSaveMessageB()
+    {
+        Message message = new Message( "Subject" );
+        
+        UserMessage userMessageA = new UserMessage( userA );
+        UserMessage userMessageB = new UserMessage( userB );
+        
+        message.addUserMessage( userMessageA );
+        message.addUserMessage( userMessageB );
+        
+        MessageContent contentA = new MessageContent( "TextA", sender );
+        MessageContent contentB = new MessageContent( "TextB", sender );
+        
+        message.addMessageContent( contentA );
+        message.addMessageContent( contentB );
+        
+        int id = messageService.saveMessage( message );
+        
+        message = messageService.getMessage( id );
+        
+        assertNotNull( message );
+        assertEquals( "Subject", message.getSubject() );
+        assertEquals( 2, message.getUserMessages().size() );
+        assertTrue( message.getUserMessages().contains( userMessageA ) );
+        assertTrue( message.getUserMessages().contains( userMessageB ) );
+        assertEquals( 2, message.getContents().size() );
+        assertTrue( message.getContents().contains( contentA ) );
+        assertTrue( message.getContents().contains( contentB ) );
+    }
+
     @Test
     public void testSendMessage()
     {
-        messageA = new Message( "SubjectA", "TextA", sender );
+        int id = messageService.sendMessage( "Subject", "Text", users );
         
-        Set<User> users = new HashSet<User>();
-        users.add( userA );
-        users.add( userB );
+        Message message = messageService.getMessage( id );
         
-        int idA = messageService.sendMessage( messageA, users );
-
-        messageA = messageService.getMessage( idA );
-        
-        assertNotNull( messageA );
-        assertEquals( "SubjectA", messageA.getSubject() );
-        assertEquals( "TextA", messageA.getText() );
-        assertEquals( 2, messageA.getUserMessages().size() );        
+        assertNotNull( message );
+        assertEquals( "Subject", message.getSubject() );
+        assertEquals( 2, message.getUserMessages().size() );
+        assertEquals( 1, message.getContents().size() );
+        assertTrue( message.getContents().iterator().next().getText().equals( "Text" ) );
     }
     
     @Test
-    public void testSaveMessage()
+    public void testSendFeedback()
     {
-        int idA = messageService.saveMessage( messageA );
+        int id = messageService.sendFeedback( "Subject", "Text" );
         
-        messageA = messageService.getMessage( idA );
+        Message message = messageService.getMessage( id );
         
-        assertNotNull( messageA );
-        assertEquals( "SubjectA", messageA.getSubject() );
-        assertEquals( "TextA", messageA.getText() );
-        assertEquals( 2, messageA.getUserMessages().size() );
-        assertTrue( messageA.getUserMessages().contains( userMessageA ) );
-        assertTrue( messageA.getUserMessages().contains( userMessageB ) );
-    }
-
-    @Test
-    public void testGetUserMessages()
-    {
-        messageService.saveMessage( messageA );
-        messageService.saveMessage( messageB );
-        
-        List<UserMessage> userMessages = messageService.getUserMessages( userA, 0, 10 );
-        
-        assertNotNull( userMessages );
-        assertEquals( 2, userMessages.size() );
-        assertTrue( userMessages.contains( userMessageA ) );
-        assertTrue( userMessages.contains( userMessageC ) );
-    }
-
-    @Test
-    public void testUpdateUserMessage()
-    {
-        messageService.saveMessage( messageA );
-        
-        assertNotNull( userMessageA );
-        assertFalse( userMessageA.isRead() );
-        
-        userMessageA.setRead( true );
-        
-        int idA = userMessageA.getId();
-        
-        messageService.updateUserMessage( userMessageA );
-        
-        userMessageA = messageService.getUserMessage( idA );
-        
-        assertNotNull( userMessageA );
-        assertTrue( userMessageA.isRead() );
+        assertNotNull( message );
+        assertEquals( "Subject", message.getSubject() );
+        assertEquals( 1, message.getContents().size() );
+        assertTrue( message.getContents().iterator().next().getText().equals( "Text" ) );
     }
     
     @Test
-    public void testDeleteUserMessage()
+    public void testSendReply()
     {
-        messageService.saveMessage( messageA );
-
-        assertEquals( 2, messageA.getUserMessages().size() );
-        assertTrue( messageA.getUserMessages().contains( userMessageA ) );
-        assertTrue( messageA.getUserMessages().contains( userMessageB ) );
+        Message message = new Message( "Subject" );
+        message.addMessageContent( new MessageContent( "TextA", sender ) );
+        int id = messageService.saveMessage( message );
         
-        messageService.deleteUserMessage( userMessageB );
-
-        assertEquals( 1, messageA.getUserMessages().size() );
-        assertTrue( messageA.getUserMessages().contains( userMessageA ) );
+        messageService.sendReply( message, "TextB" );
         
-        messageService.deleteUserMessage( userMessageA );
-
-        assertEquals( 0, messageA.getUserMessages().size() );
-    }
-    
-    @Test
-    public void testGetUserMessagesCount()
-    {
-        messageService.saveMessage( messageA );
-        messageService.saveMessage( messageB );
-     
-        long count = messageService.getUnreadMessageCount( userA );
+        message = messageService.getMessage( id );
         
-        assertEquals( 2, count );
-        
-        userMessageA.setRead( true );
-        
-        messageService.updateUserMessage( userMessageA );
-        
-        count = messageService.getUnreadMessageCount( userA );
-        
-        assertEquals( 1, count );
+        assertNotNull( message );
+        assertEquals( "Subject", message.getSubject() );
+        assertEquals( 2, message.getContents().size() );       
     }
 }

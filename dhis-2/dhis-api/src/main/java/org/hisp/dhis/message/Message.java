@@ -27,7 +27,10 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,24 +46,45 @@ public class Message
     private String key;
     
     private String subject;
-    
-    private String text;
 
-    private User sender;
+    private Date lastUpdated;
     
     private Set<UserMessage> userMessages = new HashSet<UserMessage>();
+    
+    private List<MessageContent> contents = new ArrayList<MessageContent>();
     
     public Message()
     {
         this.key = UUID.randomUUID().toString();
+        this.lastUpdated = new Date();
     }
     
-    public Message( String subject, String text, User sender )
+    public Message( String subject )
     {
         this.key = UUID.randomUUID().toString();
         this.subject = subject;
-        this.text = text;
-        this.sender = sender;
+        this.lastUpdated = new Date();
+    }
+    
+    public void addUserMessage( UserMessage userMessage )
+    {
+        this.userMessages.add( userMessage );
+    }
+    
+    public void addMessageContent( MessageContent content )
+    {
+        this.contents.add( content );
+    }
+    
+    public void markUnread( User sender )
+    {
+        for ( UserMessage userMessage : userMessages )
+        {
+            if ( userMessage.getUser() != null && !userMessage.getUser().equals( sender ) )
+            {
+                userMessage.setRead( false );
+            }
+        }
     }
         
     public int getId()
@@ -93,24 +117,14 @@ public class Message
         this.subject = subject;
     }
 
-    public String getText()
+    public Date getLastUpdated()
     {
-        return text;
+        return lastUpdated;
     }
 
-    public void setText( String text )
+    public void setLastUpdated( Date lastUpdated )
     {
-        this.text = text;
-    }
-
-    public User getSender()
-    {
-        return sender;
-    }
-
-    public void setSender( User sender )
-    {
-        this.sender = sender;
+        this.lastUpdated = lastUpdated;
     }
 
     public Set<UserMessage> getUserMessages()
@@ -121,6 +135,16 @@ public class Message
     public void setUserMessages( Set<UserMessage> userMessages )
     {
         this.userMessages = userMessages;
+    }
+
+    public List<MessageContent> getContents()
+    {
+        return contents;
+    }
+
+    public void setContents( List<MessageContent> contents )
+    {
+        this.contents = contents;
     }
 
     @Override
@@ -155,6 +179,6 @@ public class Message
     @Override
     public String toString()
     {
-        return "[Subject: " + subject + ", text: " + text + "]";
+        return "[" + subject + "]";
     }
 }

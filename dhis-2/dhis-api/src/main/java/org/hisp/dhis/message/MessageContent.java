@@ -27,18 +27,72 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.UUID;
 
-import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  */
-public interface UserMessageStore
-    extends GenericStore<UserMessage>
+public class MessageContent
 {
-    List<UserMessage> getUserMessages( User user, int first, int max );
+    private int id;
+
+    private String key;
     
-    long getUnreadUserMessageCount( User user );
+    private String text;
+
+    private User sender;
+
+    public MessageContent()
+    {
+        this.key = UUID.randomUUID().toString();
+    }
+    
+    public MessageContent( String text, User sender )
+    {
+        this.key = UUID.randomUUID().toString();
+        this.text = text;
+        this.sender = sender;
+    }
+    
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public String getKey()
+    {
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
+    public String getText()
+    {
+        return text;
+    }
+
+    public void setText( String text )
+    {
+        this.text = text;
+    }
+
+    public User getSender()
+    {
+        return sender;
+    }
+
+    public void setSender( User sender )
+    {
+        this.sender = sender;
+    }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.message.hibernate;
+package org.hisp.dhis.message;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -29,42 +29,16 @@ package org.hisp.dhis.message.hibernate;
 
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hisp.dhis.message.UserMessage;
-import org.hisp.dhis.message.UserMessageStore;
+import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  */
-public class HibernateUserMessageStore
-    extends HibernateGenericStore<UserMessage> implements UserMessageStore 
+public interface MessageStore
+    extends GenericStore<Message>
 {
-    @SuppressWarnings("unchecked")
-    public List<UserMessage> getUserMessages( User user, int first, int max )
-    {
-        Criteria criteria = getCriteria( Restrictions.eq( "user", user ) );
-        
-        criteria.setFirstResult( first );
-        criteria.setMaxResults( max );
-        criteria.addOrder( Order.desc( "messageDate" ) );
-        //TODO eager-fetch message
-        
-        return criteria.list();
-    }
+    List<Message> getMessages( User user, int first, int max );
     
-    public long getUnreadUserMessageCount( User user )
-    {
-        String hql = "select count(*) from UserMessage where user = :user and read = false";
-        
-        Query query = getQuery( hql );
-        query.setEntity( "user", user );
-        query.setCacheable( true );
-        
-        return (Long) query.uniqueResult();
-    }
+    long getUnreadUserMessageCount( User user );
 }
