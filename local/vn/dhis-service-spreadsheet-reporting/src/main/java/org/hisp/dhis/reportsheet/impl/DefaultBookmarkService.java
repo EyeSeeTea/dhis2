@@ -1,7 +1,7 @@
-package org.hisp.dhis.reportsheet;
+package org.hisp.dhis.reportsheet.impl;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,9 @@ package org.hisp.dhis.reportsheet;
 
 import java.util.Collection;
 
+import org.hisp.dhis.reportsheet.Bookmark;
+import org.hisp.dhis.reportsheet.BookmarkService;
+import org.hisp.dhis.reportsheet.BookmarkStore;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
 

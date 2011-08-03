@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet;
+
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,58 +26,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.exportreport.category.action;
-
-import org.hisp.dhis.reportsheet.DataElementGroupOrder;
-import org.hisp.dhis.reportsheet.ExportReportService;
-
-import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GetDataElementOrderAction
-    implements Action
+public interface DataElementGroupOrderService
 {
-    // -------------------------------------------
-    // Dependency
-    // -------------------------------------------
+    String ID = DataElementGroupOrderService.class.getName();
 
-    private ExportReportService exportReportService;
+    // -------------------------------------------------------------------------
+    // Data Element Group Order
+    // -------------------------------------------------------------------------
 
-    // -------------------------------------------
-    // Input & Output
-    // -------------------------------------------
+    public DataElementGroupOrder getDataElementGroupOrder( Integer id );
+    
+    public DataElementGroupOrder getDataElementGroupOrder( String name, String clazzName, Integer reportId );
 
-    private Integer id;
+    public void updateDataElementGroupOrder( DataElementGroupOrder dataElementGroupOrder );
 
-    private DataElementGroupOrder dataElementGroupOrder;
+    public void deleteDataElementGroupOrder( Integer id );
 
-    // -------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------
-
-    public void setExportReportService( ExportReportService exportReportService )
-    {
-        this.exportReportService = exportReportService;
-    }
-
-    public DataElementGroupOrder getDataElementGroupOrder()
-    {
-        return dataElementGroupOrder;
-    }
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    public String execute()
-        throws Exception
-    {
-        dataElementGroupOrder = exportReportService.getDataElementGroupOrder( id );
-
-        return SUCCESS;
-    }
 }

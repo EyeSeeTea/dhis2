@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet.degroup.action;
+
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,8 +27,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.reportsheet.importreport.degroup.action;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,27 +34,21 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.reportsheet.DataElementGroupOrder;
-import org.hisp.dhis.reportsheet.importitem.ImportReportService;
+import org.hisp.dhis.reportsheet.DataElementGroupOrderService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
+ * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateSortedDataElementForCategoryAction
+public class UpdateSortedDataElementAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
-
-    private ImportReportService importReportService;
-
-    public void setImportReportService( ImportReportService importReportService )
-    {
-        this.importReportService = importReportService;
-    }
 
     private DataElementService dataElementService;
 
@@ -63,11 +57,25 @@ public class UpdateSortedDataElementForCategoryAction
         this.dataElementService = dataElementService;
     }
 
+    private DataElementGroupOrderService dataElementGroupOrderService;
+
+    public void setDataElementGroupOrderService( DataElementGroupOrderService dataElementGroupOrderService )
+    {
+        this.dataElementGroupOrderService = dataElementGroupOrderService;
+    }
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
     private Integer id;
+
+    private Integer reportId;
 
     private List<String> dataElementIds = new ArrayList<String>();
 
@@ -84,19 +92,29 @@ public class UpdateSortedDataElementForCategoryAction
         return message;
     }
 
+    public void setReportId( Integer reportId )
+    {
+        this.reportId = reportId;
+    }
+
+    public Integer getReportId()
+    {
+        return reportId;
+    }
+
     public void setId( Integer id )
     {
         this.id = id;
     }
 
+    public Integer getId()
+    {
+        return id;
+    }
+
     public void setDataElementIds( List<String> dataElementIds )
     {
         this.dataElementIds = dataElementIds;
-    }
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -106,7 +124,7 @@ public class UpdateSortedDataElementForCategoryAction
     public String execute()
         throws Exception
     {
-        DataElementGroupOrder dataElementGroupOrder = importReportService.getDataElementGroupOrder( id.intValue() );
+        DataElementGroupOrder dataElementGroupOrder = dataElementGroupOrderService.getDataElementGroupOrder( id );
 
         List<DataElement> dataElements = new ArrayList<DataElement>();
 
@@ -118,9 +136,9 @@ public class UpdateSortedDataElementForCategoryAction
 
         dataElementGroupOrder.setDataElements( dataElements );
 
-        this.message = i18n.getString( "update_sort_dataelement_success" );
+        message = i18n.getString( "update_sort_dataelement_success" );
 
-        importReportService.updateDataElementGroupOrder( dataElementGroupOrder );
+        dataElementGroupOrderService.updateDataElementGroupOrder( dataElementGroupOrder );
 
         return SUCCESS;
     }

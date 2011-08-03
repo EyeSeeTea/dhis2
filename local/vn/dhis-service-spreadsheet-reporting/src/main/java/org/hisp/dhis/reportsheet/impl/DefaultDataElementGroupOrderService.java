@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet.impl;
+
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,58 +26,52 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.exportreport.category.action;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.reportsheet.DataElementGroupOrder;
+import org.hisp.dhis.reportsheet.DataElementGroupOrderService;
+import org.hisp.dhis.reportsheet.DataElementGroupOrderStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GetAllDataElementGroupsAction
-    implements Action
+@Transactional
+public class DefaultDataElementGroupOrderService
+    implements DataElementGroupOrderService
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private DataElementService dataElementService;
+    private DataElementGroupOrderStore dataElementGroupOrderStore;
 
-    private List<DataElementGroup> dataElementGroups;
-
-    // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
-
-    public List<DataElementGroup> getDataElementGroups()
+    public void setDataElementGroupOrderStore( DataElementGroupOrderStore dataElementGroupOrderStore )
     {
-        return dataElementGroups;
-    }
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
+        this.dataElementGroupOrderStore = dataElementGroupOrderStore;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Data Element Group Order
     // -------------------------------------------------------------------------
 
-    public String execute()
-        throws Exception
+    public DataElementGroupOrder getDataElementGroupOrder( Integer id )
     {
-        dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
+        return dataElementGroupOrderStore.getDataElementGroupOrder( id );
+    }
 
-        Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
+    public void updateDataElementGroupOrder( DataElementGroupOrder dataElementGroupOrder )
+    {
+        dataElementGroupOrderStore.updateDataElementGroupOrder( dataElementGroupOrder );
+    }
 
-        return SUCCESS;
+    public void deleteDataElementGroupOrder( Integer id )
+    {
+        dataElementGroupOrderStore.deleteDataElementGroupOrder( id );
+    }
+
+    public DataElementGroupOrder getDataElementGroupOrder( String name, String clazzName, Integer reportId )
+    {
+        return dataElementGroupOrderStore.getDataElementGroupOrder( name, clazzName, reportId );
     }
 }

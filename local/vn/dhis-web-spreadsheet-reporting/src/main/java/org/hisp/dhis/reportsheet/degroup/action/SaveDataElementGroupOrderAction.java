@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.exportreport.category.action;
+package org.hisp.dhis.reportsheet.degroup.action;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +32,17 @@ import java.util.List;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.reportsheet.DataElementGroupOrder;
+import org.hisp.dhis.reportsheet.ExportReport;
 import org.hisp.dhis.reportsheet.ExportReportService;
 import org.hisp.dhis.reportsheet.ExportReportCategory;
+import org.hisp.dhis.reportsheet.importitem.ImportReport;
+import org.hisp.dhis.reportsheet.importitem.ImportReportService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
 
@@ -49,9 +53,26 @@ public class SaveDataElementGroupOrderAction
     // Dependency
     // -------------------------------------------------------------------------
 
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+
     private ExportReportService exportReportService;
 
-    private DataElementService dataElementService;
+    public void setExportReportService( ExportReportService exportReportService )
+    {
+        this.exportReportService = exportReportService;
+    }
+
+    private ImportReportService importReportService;
+
+    public void setImportReportService( ImportReportService importReportService )
+    {
+        this.importReportService = importReportService;
+    }
 
     // -------------------------------------------------------------------------
     // Input
@@ -63,21 +84,13 @@ public class SaveDataElementGroupOrderAction
 
     private String code;
 
+    private String clazzName;
+
     private List<String> dataElementIds = new ArrayList<String>();
 
     // -------------------------------------------------------------------------
     // Getter & Setter
     // -------------------------------------------------------------------------
-
-    public void setExportReportService( ExportReportService exportReportService )
-    {
-        this.exportReportService = exportReportService;
-    }
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
 
     public void setName( String name )
     {
@@ -104,6 +117,11 @@ public class SaveDataElementGroupOrderAction
         this.code = code;
     }
 
+    public void setClazzName( String clazzName )
+    {
+        this.clazzName = clazzName;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -111,8 +129,6 @@ public class SaveDataElementGroupOrderAction
     public String execute()
         throws Exception
     {
-        ExportReportCategory exportReportCategory = (ExportReportCategory) exportReportService.getExportReport( id );
-
         DataElementGroupOrder dataElementGroupOrder = new DataElementGroupOrder();
         dataElementGroupOrder.setName( name );
         dataElementGroupOrder.setCode( code );
@@ -128,13 +144,30 @@ public class SaveDataElementGroupOrderAction
 
         dataElementGroupOrder.setDataElements( dataElements );
 
-        List<DataElementGroupOrder> dataElementGroupOrders = exportReportCategory.getDataElementOrders();
+        if ( clazzName.equals( ExportReport.class.getSimpleName() ) )
+        {
+            ExportReportCategory exportReportCategory = (ExportReportCategory) exportReportService.getExportReport( id );
 
-        dataElementGroupOrders.add( dataElementGroupOrder );
+            List<DataElementGroupOrder> dataElementGroupOrders = exportReportCategory.getDataElementOrders();
 
-        exportReportCategory.setDataElementOrders( dataElementGroupOrders );
+            dataElementGroupOrders.add( dataElementGroupOrder );
 
-        exportReportService.updateExportReport( exportReportCategory );
+            exportReportCategory.setDataElementOrders( dataElementGroupOrders );
+
+            exportReportService.updateExportReport( exportReportCategory );
+        }
+        else
+        {
+            ImportReport importReportCategory = (ImportReport) importReportService.getImportReport( id );
+
+            List<DataElementGroupOrder> dataElementGroupOrders = importReportCategory.getDataElementOrders();
+
+            dataElementGroupOrders.add( dataElementGroupOrder );
+
+            importReportCategory.setDataElementOrders( dataElementGroupOrders );
+
+            importReportService.updateImportReport( importReportCategory );
+        }
 
         return SUCCESS;
     }

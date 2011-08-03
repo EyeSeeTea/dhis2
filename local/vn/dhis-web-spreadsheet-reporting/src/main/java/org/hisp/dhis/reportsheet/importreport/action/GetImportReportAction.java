@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet.importreport.action;
+
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,23 +26,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.importreport.degroup.action;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.reportsheet.DataElementGroupOrder;
+import org.hisp.dhis.reportsheet.importitem.ImportReport;
 import org.hisp.dhis.reportsheet.importitem.ImportReportService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateDataElementGroupOrderForCategoryAction
+public class GetImportReportAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -54,59 +51,27 @@ public class UpdateDataElementGroupOrderForCategoryAction
         this.importReportService = importReportService;
     }
 
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
-
     // -------------------------------------------------------------------------
-    // Input
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private int id;
 
-    private Integer dataElementGroupOrderId;
-
-    private String name;
-
-    private String code;
-
-    private List<String> dataElementIds = new ArrayList<String>();
-
-    // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
-
-    public void setDataElementGroupOrderId( Integer dataElementGroupOrderId )
-    {
-        this.dataElementGroupOrderId = dataElementGroupOrderId;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public void setDataElementIds( List<String> dataElementIds )
-    {
-        this.dataElementIds = dataElementIds;
-    }
-
-    public Integer getId()
-    {
-        return id;
-    }
-
-    public void setId( Integer id )
+    public void setId( int id )
     {
         this.id = id;
     }
 
-    public void setCode( String code )
+    private ImportReport report;
+
+    public ImportReport getReport()
     {
-        this.code = code;
+        return report;
+    }
+
+    public String getClazzSimpleName()
+    {
+        return ImportReport.class.getSimpleName();
     }
 
     // -------------------------------------------------------------------------
@@ -116,23 +81,7 @@ public class UpdateDataElementGroupOrderForCategoryAction
     public String execute()
         throws Exception
     {
-        DataElementGroupOrder dataElementGroupOrder = importReportService
-            .getDataElementGroupOrder( dataElementGroupOrderId );
-
-        List<DataElement> dataElements = new ArrayList<DataElement>();
-
-        for ( String id : dataElementIds )
-        {
-            DataElement dataElement = dataElementService.getDataElement( Integer.parseInt( id ) );
-
-            dataElements.add( dataElement );
-        }
-
-        dataElementGroupOrder.setDataElements( dataElements );
-        dataElementGroupOrder.setName( name );
-        dataElementGroupOrder.setCode( code );
-
-        importReportService.updateDataElementGroupOrder( dataElementGroupOrder );
+        report = importReportService.getImportReport( id );
 
         return SUCCESS;
     }

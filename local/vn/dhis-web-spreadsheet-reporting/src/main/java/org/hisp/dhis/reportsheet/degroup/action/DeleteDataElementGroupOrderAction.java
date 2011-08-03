@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet.degroup.action;
+
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,33 +26,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.importreport.degroup.action;
 
-import org.hisp.dhis.reportsheet.DataElementGroupOrder;
-import org.hisp.dhis.reportsheet.importitem.ImportReportService;
+import org.hisp.dhis.reportsheet.DataElementGroupOrderService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
+ * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GetDataElementGroupOrderForCategoryAction
+public class DeleteDataElementGroupOrderAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ImportReportService importReportService;
+    private DataElementGroupOrderService dataElementGroupOrderService;
 
-    public void setImportReportService( ImportReportService importReportService )
+    public void setDataElementGroupOrderService( DataElementGroupOrderService dataElementGroupOrderService )
     {
-        this.importReportService = importReportService;
+        this.dataElementGroupOrderService = dataElementGroupOrderService;
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Input & Ouput
     // -------------------------------------------------------------------------
 
     private Integer id;
@@ -60,13 +61,6 @@ public class GetDataElementGroupOrderForCategoryAction
         this.id = id;
     }
 
-    private DataElementGroupOrder dataElementGroupOrder;
-
-    public DataElementGroupOrder getDataElementGroupOrder()
-    {
-        return dataElementGroupOrder;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -74,7 +68,7 @@ public class GetDataElementGroupOrderForCategoryAction
     public String execute()
         throws Exception
     {
-        dataElementGroupOrder = importReportService.getDataElementGroupOrder( id.intValue() );
+        dataElementGroupOrderService.deleteDataElementGroupOrder( id );
 
         return SUCCESS;
     }

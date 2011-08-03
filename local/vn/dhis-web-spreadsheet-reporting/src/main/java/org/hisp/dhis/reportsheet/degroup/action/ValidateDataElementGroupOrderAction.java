@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet.degroup.action;
+
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,87 +26,78 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.exportreport.category.action;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.hisp.dhis.reportsheet.DataElementGroupOrder;
-import org.hisp.dhis.reportsheet.ExportReportService;
-import org.hisp.dhis.reportsheet.ExportReportCategory;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.reportsheet.DataElementGroupOrderService;
+import org.hisp.dhis.reportsheet.action.ActionSupport;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateSortedDataElementGroupOrderAction
-    implements Action
+public class ValidateDataElementGroupOrderAction
+    extends ActionSupport
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ExportReportService exportReportService;
+    private DataElementGroupOrderService dataElementGroupOrderService;
+
+    public void setDataElementGroupOrderService( DataElementGroupOrderService dataElementGroupOrderService )
+    {
+        this.dataElementGroupOrderService = dataElementGroupOrderService;
+    }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer exportReportId;
+    private Integer id;
 
-    private List<String> dataElementGroupOrderId = new ArrayList<String>();
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    private Integer reportId;
+
+    public void setReportId( Integer reportId )
+    {
+        this.reportId = reportId;
+    }
+
+    private String clazzName;
+
+    public void setClazzName( String clazzName )
+    {
+        this.clazzName = clazzName;
+    }
+
+    private String name;
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
 
     // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
-
-    public void setExportReportService( ExportReportService exportReportService )
-    {
-        this.exportReportService = exportReportService;
-    }
-
-    public Integer getExportReportId()
-    {
-        return exportReportId;
-    }
-
-    public void setExportReportId( Integer exportReportId )
-    {
-        this.exportReportId = exportReportId;
-    }
-
-    public void setDataElementGroupOrderId( List<String> dataElementGroupOrderId )
-    {
-        this.dataElementGroupOrderId = dataElementGroupOrderId;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
+    // Input & Output
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        ExportReportCategory exportReportCategory = (ExportReportCategory) exportReportService
-            .getExportReport( exportReportId );
-
-        List<DataElementGroupOrder> dataElementGroupOrders = new ArrayList<DataElementGroupOrder>();
-
-        for ( String id : this.dataElementGroupOrderId )
+        DataElementGroupOrder groupOrder = dataElementGroupOrderService.getDataElementGroupOrder( name, clazzName,
+            reportId );
+        
+        if ( groupOrder != null && (this.id == null || groupOrder.getId() != this.id) )
         {
-            DataElementGroupOrder daElementGroupOrder = exportReportService.getDataElementGroupOrder( Integer
-                .parseInt( id ) );
+            message = i18n.getString( "name_ready_exist" );
 
-            dataElementGroupOrders.add( daElementGroupOrder );
+            return ERROR;
         }
-
-        exportReportCategory.setDataElementOrders( dataElementGroupOrders );
-
-        exportReportService.updateExportReport( exportReportCategory );
 
         return SUCCESS;
     }
-
 }

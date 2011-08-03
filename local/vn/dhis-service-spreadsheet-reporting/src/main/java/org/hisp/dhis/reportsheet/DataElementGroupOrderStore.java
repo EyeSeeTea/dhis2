@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportsheet.importreport.action;
+package org.hisp.dhis.reportsheet;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,56 +27,24 @@ package org.hisp.dhis.reportsheet.importreport.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportsheet.importitem.ImportReport;
-import org.hisp.dhis.reportsheet.importitem.ImportReportService;
-
-import com.opensymphony.xwork2.Action;
-
 /**
- * @author Chau Thu Tran
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GetImportReportByIdAction
-    implements Action
+public interface DataElementGroupOrderStore
 {
-    // -------------------------------------------------------------------------
-    // Dependency
-    // -------------------------------------------------------------------------
-
-    private ImportReportService importReportService;
-
-    public void setImportReportService( ImportReportService importReportService )
-    {
-        this.importReportService = importReportService;
-    }
+    String ID = DataElementGroupOrderStore.class.getName();
 
     // -------------------------------------------------------------------------
-    // Input && Output
+    // Data Element Group Order
     // -------------------------------------------------------------------------
 
-    private int id;
+    public DataElementGroupOrder getDataElementGroupOrder( Integer id );
 
-    public void setId( int id )
-    {
-        this.id = id;
-    }
+    public DataElementGroupOrder getDataElementGroupOrder( String name, String clazzName, Integer reportId );
 
-    private ImportReport importReport;
+    public void updateDataElementGroupOrder( DataElementGroupOrder dataElementGroupOrder );
 
-    public ImportReport getImportReport()
-    {
-        return importReport;
-    }
+    public void deleteDataElementGroupOrder( Integer id );
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        importReport = importReportService.getImportReport( id );
-
-        return SUCCESS;
-    }
 }
