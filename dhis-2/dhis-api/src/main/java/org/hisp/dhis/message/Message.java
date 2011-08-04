@@ -27,6 +27,7 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.hisp.dhis.user.User;
@@ -43,10 +44,13 @@ public class Message
     private String text;
 
     private User sender;
+    
+    private Date sentDate;
 
     public Message()
     {
         this.key = UUID.randomUUID().toString();
+        this.sentDate = new Date();
     }
     
     public Message( String text, User sender )
@@ -54,6 +58,7 @@ public class Message
         this.key = UUID.randomUUID().toString();
         this.text = text;
         this.sender = sender;
+        this.sentDate = new Date();
     }
     
     public int getId()
@@ -94,5 +99,15 @@ public class Message
     public void setSender( User sender )
     {
         this.sender = sender;
+    }
+
+    public Date getSentDate()
+    {
+        return sentDate;
+    }
+
+    public void setSentDate( Date sentDate )
+    {
+        this.sentDate = sentDate;
     }
 }

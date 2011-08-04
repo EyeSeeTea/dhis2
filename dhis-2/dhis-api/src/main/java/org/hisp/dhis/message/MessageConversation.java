@@ -48,11 +48,11 @@ public class MessageConversation
     
     private String subject;
 
-    private Date lastUpdated;
-    
     private Set<UserMessage> userMessages = new HashSet<UserMessage>();
     
     private List<Message> messages = new ArrayList<Message>();
+
+    private Date lastUpdated;
     
     private User lastSender;
     
@@ -162,16 +162,6 @@ public class MessageConversation
         this.subject = subject;
     }
 
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated( Date lastUpdated )
-    {
-        this.lastUpdated = lastUpdated;
-    }
-
     public Set<UserMessage> getUserMessages()
     {
         return userMessages;
@@ -190,6 +180,16 @@ public class MessageConversation
     public void setMessages( List<Message> messages )
     {
         this.messages = messages;
+    }
+
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
     }
 
     public User getLastSender()
