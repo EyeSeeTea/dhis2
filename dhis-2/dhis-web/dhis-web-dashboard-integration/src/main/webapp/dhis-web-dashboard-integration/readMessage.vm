@@ -1,4 +1,22 @@
 
+<div id="senderInfo" style="display:none" class="page">
+<h3><span id="senderName"></span></h3>
+<table>
+<tr>
+<td><label>$i18n.getString( "email" ):</label></td>
+<td><span id="senderEmail"></span></td>
+</tr>
+<tr>
+<td><label>$i18n.getString( "phone_number" ):</label></td>
+<td><span id="senderPhoneNumber"></span></td>
+</tr>
+<tr>
+<td><label>$i18n.getString( "organisation_units" ):</label></td>
+<td><span id="senderOrganisationUnits"></span></td>
+</tr>
+</table>
+</div>
+
 <div class="messageDiv">
 <input type="button" value="$i18n.getString( 'mark_unread' )" onclick="window.location.href='unreadMessage.action?id=${conversation.id}'" style="width:120px">
 <input type="button" value="$i18n.getString( 'remove' )" onclick="window.location.href='removeMessageRedirect.action?id=${conversation.id}'" style="width:120px">
