@@ -1,7 +1,7 @@
 
 <div class="messageDiv">
-<input type="button" value="$i18n.getString( 'mark_unread' )" onclick="window.location.href='unreadMessage.action?id=${message.id}'" style="width:120px">
-<input type="button" value="$i18n.getString( 'remove' )" onclick="window.location.href='removeMessageRedirect.action?id=${message.id}'" style="width:120px">
+<input type="button" value="$i18n.getString( 'mark_unread' )" onclick="window.location.href='unreadMessage.action?id=${conversation.id}'" style="width:120px">
+<input type="button" value="$i18n.getString( 'remove' )" onclick="window.location.href='removeMessageRedirect.action?id=${conversation.id}'" style="width:120px">
 <input type="button" value="$i18n.getString( 'back' )" onclick="window.location.href='message.action'" style="width:120px">
 </div>
 

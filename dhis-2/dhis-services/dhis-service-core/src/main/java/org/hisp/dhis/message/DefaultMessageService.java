@@ -27,7 +27,6 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,10 +115,7 @@ public class DefaultMessageService
         
         Message message = new Message( text, sender );
         
-        conversation.addMessage( message );
-        conversation.markUnread( sender );
-        conversation.setLastUpdated( new Date() );        
-        conversation.setLastSender( sender );
+        conversation.markReplied( sender, message );
         
         updateMessageConversation( conversation );        
     }

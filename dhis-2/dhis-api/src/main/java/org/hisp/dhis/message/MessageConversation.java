@@ -98,9 +98,22 @@ public class MessageConversation
             }
         }
     }
-    
-    public void markUnread( User sender )
+
+    public void markUnread( User user )
     {
+        for ( UserMessage userMessage : userMessages )
+        {
+            if ( userMessage.getUser() != null && userMessage.getUser().equals( user ) )
+            {
+                userMessage.setRead( false );
+                
+                return;
+            }
+        }
+    }
+    
+    public void markReplied( User sender, Message message )
+    {   
         for ( UserMessage userMessage : userMessages )
         {
             if ( userMessage.getUser() != null && !userMessage.getUser().equals( sender ) )
@@ -108,6 +121,11 @@ public class MessageConversation
                 userMessage.setRead( false );
             }
         }
+        
+        addMessage( message );
+        
+        this.lastUpdated = new Date();
+        this.lastSender = sender;
     }
     
     public void remove( User user )
