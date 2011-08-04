@@ -29,5 +29,8 @@
 		unique="true" foreign-key="fk_messageconversation_messages_messageid" />
 	</list>
 	
+    <many-to-one name="lastSender" class="org.hisp.dhis.user.User" column="lastsenderid" 
+	  foreign-key="fk_messageconversation_userid" />
+	
   </class>
 </hibernate-mapping>

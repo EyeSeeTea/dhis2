@@ -1,6 +1,6 @@
 
 <div id="senderInfo" style="display:none" class="page">
-<h3>$message.message.sender.name</h3>
+<h3>$conversation.subject</h3>
 <table>
 <tr>
 <td><label>$i18n.getString( "email" ):</label></td>

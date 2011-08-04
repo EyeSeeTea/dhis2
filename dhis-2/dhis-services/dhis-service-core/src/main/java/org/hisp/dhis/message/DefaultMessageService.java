@@ -91,9 +91,11 @@ public class DefaultMessageService
         // Instantiate message, content and user messages
         // ---------------------------------------------------------------------
 
-        MessageConversation conversation = new MessageConversation( subject );
+        User sender = currentUserService.getCurrentUser();
         
-        conversation.addMessage( new Message( text, currentUserService.getCurrentUser() ) );
+        MessageConversation conversation = new MessageConversation( subject, sender );
+        
+        conversation.addMessage( new Message( text, sender ) );
         
         for ( User user : users )
         {
@@ -116,7 +118,8 @@ public class DefaultMessageService
         
         conversation.addMessage( message );
         conversation.markUnread( sender );
-        conversation.setLastUpdated( new Date() );
+        conversation.setLastUpdated( new Date() );        
+        conversation.setLastSender( sender );
         
         updateMessageConversation( conversation );        
     }

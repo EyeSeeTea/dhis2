@@ -30,6 +30,7 @@ package org.hisp.dhis.message;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -53,17 +54,26 @@ public class MessageConversation
     
     private List<Message> messages = new ArrayList<Message>();
     
+    private User lastSender;
+    
+    private transient boolean read;
+    
+    private transient String lastSenderSurname;
+    
+    private transient String lastSenderFirstname;
+    
     public MessageConversation()
     {
         this.key = UUID.randomUUID().toString();
         this.lastUpdated = new Date();
     }
     
-    public MessageConversation( String subject )
+    public MessageConversation( String subject, User lastSender )
     {
         this.key = UUID.randomUUID().toString();
         this.subject = subject;
         this.lastUpdated = new Date();
+        this.lastSender = lastSender;
     }
     
     public void addUserMessage( UserMessage userMessage )
@@ -76,6 +86,19 @@ public class MessageConversation
         this.messages.add( message );
     }
     
+    public void markRead( User user )
+    {
+        for ( UserMessage userMessage : userMessages )
+        {
+            if ( userMessage.getUser() != null && userMessage.getUser().equals( user ) )
+            {
+                userMessage.setRead( true );
+                
+                return;
+            }
+        }
+    }
+    
     public void markUnread( User sender )
     {
         for ( UserMessage userMessage : userMessages )
@@ -85,6 +108,28 @@ public class MessageConversation
                 userMessage.setRead( false );
             }
         }
+    }
+    
+    public void remove( User user )
+    {
+        Iterator<UserMessage> iterator = userMessages.iterator();
+        
+        while ( iterator.hasNext() )
+        {
+            UserMessage userMessage = iterator.next();
+            
+            if ( userMessage.getUser() != null && userMessage.getUser().equals( user ) )
+            {
+                iterator.remove();
+                
+                return;
+            }
+        }
+    }
+    
+    public String getLastSenderName()
+    {
+        return lastSenderFirstname + " " + lastSenderSurname;
     }
         
     public int getId()
@@ -145,6 +190,46 @@ public class MessageConversation
     public void setMessages( List<Message> messages )
     {
         this.messages = messages;
+    }
+
+    public User getLastSender()
+    {
+        return lastSender;
+    }
+
+    public void setLastSender( User lastSender )
+    {
+        this.lastSender = lastSender;
+    }
+
+    public boolean isRead()
+    {
+        return read;
+    }
+
+    public void setRead( boolean read )
+    {
+        this.read = read;
+    }
+
+    public String getLastSenderSurname()
+    {
+        return lastSenderSurname;
+    }
+
+    public void setLastSenderSurname( String lastSenderSurname )
+    {
+        this.lastSenderSurname = lastSenderSurname;
+    }
+
+    public String getLastSenderFirstname()
+    {
+        return lastSenderFirstname;
+    }
+
+    public void setLastSenderFirstname( String lastSenderFirstname )
+    {
+        this.lastSenderFirstname = lastSenderFirstname;
     }
 
     @Override

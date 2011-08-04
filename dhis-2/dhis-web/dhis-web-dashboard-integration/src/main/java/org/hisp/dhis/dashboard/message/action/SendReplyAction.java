@@ -27,20 +27,15 @@ package org.hisp.dhis.dashboard.message.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
+import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
-import org.hisp.dhis.user.User;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
  */
-public class SendMessageAction
+public class SendReplyAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -54,22 +49,15 @@ public class SendMessageAction
         this.messageService = messageService;
     }
 
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String subject;
+    private Integer id;
     
-    public void setSubject( String subject )
+    public void setId( Integer id )
     {
-        this.subject = subject;
+        this.id = id;
     }
 
     private String text;
@@ -78,21 +66,16 @@ public class SendMessageAction
     {
         this.text = text;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        Set<User> users = new HashSet<User>();
+        MessageConversation conversation = messageService.getMessageConversation( id );
         
-        for ( OrganisationUnit unit : selectionTreeManager.getReloadedSelectedOrganisationUnits() )
-        {
-            users.addAll( unit.getUsers() );
-        }
-        
-        messageService.sendMessage( subject, text, users );
+        messageService.sendReply( conversation, text );
         
         return SUCCESS;
     }

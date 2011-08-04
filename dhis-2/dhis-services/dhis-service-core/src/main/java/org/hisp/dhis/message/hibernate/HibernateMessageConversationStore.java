@@ -27,6 +27,8 @@ package org.hisp.dhis.message.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -34,6 +36,7 @@ import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageConversationStore;
 import org.hisp.dhis.user.User;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
  * @author Lars Helge Overland
@@ -41,17 +44,40 @@ import org.hisp.dhis.user.User;
 public class HibernateMessageConversationStore
     extends HibernateGenericStore<MessageConversation> implements MessageConversationStore
 {
-    @SuppressWarnings("unchecked")
     public List<MessageConversation> getMessageConversations( User user, int first, int max )
     {
-        String hql = "select distinct m from MessageConversation m join m.userMessages u where u.user = :user order by m.lastUpdated desc";
+        final String sql = 
+            "select mc.messageconversationid, mc.messageconversationkey, mc.subject, mc.lastupdated, ui.surname, ui.firstname, ( " +
+                "select isread from usermessage " +
+                "where usermessage.usermessageid=mu.usermessageid " +
+                "and mu.messageconversationid=mc.messageconversationid ) as isread " +
+            "from messageconversation mc " +
+            "left join messageconversation_usermessages mu on mc.messageconversationid=mu.messageconversationid " +
+            "left join usermessage um on mu.usermessageid=um.usermessageid " +
+            "left join userinfo ui on mc.lastsenderid=ui.userinfoid " +
+            "where um.userid=" + user.getId() + " " +
+            "order by mc.lastupdated desc " +
+            "limit " + max;
         
-        Query query = getQuery( hql );
-        query.setEntity( "user", user );
-        query.setFirstResult( first );
-        query.setMaxResults( max );
+        final List<MessageConversation> conversations = jdbcTemplate.query( sql, new RowMapper<MessageConversation>()
+        {
+            public MessageConversation mapRow( ResultSet resultSet, int count ) throws SQLException
+            {
+                MessageConversation conversation = new MessageConversation();
+                
+                conversation.setId( resultSet.getInt( 1 ) );
+                conversation.setKey( resultSet.getString( 2 ) );
+                conversation.setSubject( resultSet.getString( 3 ) );
+                conversation.setLastUpdated( resultSet.getDate( 4 ) );
+                conversation.setLastSenderSurname( resultSet.getString( 5 ) );
+                conversation.setLastSenderFirstname( resultSet.getString( 6 ) );                
+                conversation.setRead( resultSet.getBoolean( 7 ) );
+                
+                return conversation;
+            }            
+        } );
         
-        return query.list();
+        return conversations;
     }
     
     public long getUnreadUserMessageConversationCount( User user )

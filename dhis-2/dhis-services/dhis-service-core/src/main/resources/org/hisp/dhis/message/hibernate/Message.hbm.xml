@@ -13,10 +13,10 @@
     </id>
 	
 	<property name="key" column="messagekey" not-null="true"/>
-	<property name="text"/>
+	<property name="text" column="messagetext"/>
 	
     <many-to-one name="sender" class="org.hisp.dhis.user.User" column="userid" 
-	  foreign-key="fk_messagecontent_userid" />
+	  foreign-key="fk_message_userid" />
 	  
   </class>
 </hibernate-mapping>

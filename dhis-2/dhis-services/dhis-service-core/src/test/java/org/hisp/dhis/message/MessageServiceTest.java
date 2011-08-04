@@ -77,8 +77,8 @@ public class MessageServiceTest
     @Test
     public void testSaveMessageConversationA()
     {
-        MessageConversation conversationA = new MessageConversation( "SubjectA" );
-        MessageConversation conversationB = new MessageConversation( "SubjectB" );
+        MessageConversation conversationA = new MessageConversation( "SubjectA", sender );
+        MessageConversation conversationB = new MessageConversation( "SubjectB", sender );
         
         int idA = messageService.saveMessageConversation( conversationA );
         int idB = messageService.saveMessageConversation( conversationB );
@@ -96,7 +96,7 @@ public class MessageServiceTest
     @Test
     public void testSaveMessageB()
     {
-        MessageConversation conversation = new MessageConversation( "Subject" );
+        MessageConversation conversation = new MessageConversation( "Subject", sender );
         
         UserMessage userMessageA = new UserMessage( userA );
         UserMessage userMessageB = new UserMessage( userB );
@@ -154,7 +154,7 @@ public class MessageServiceTest
     @Test
     public void testSendReply()
     {
-        MessageConversation message = new MessageConversation( "Subject" );
+        MessageConversation message = new MessageConversation( "Subject", sender );
         message.addMessage( new Message( "TextA", sender ) );
         int id = messageService.saveMessageConversation( message );
         
