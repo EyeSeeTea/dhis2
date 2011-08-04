@@ -218,7 +218,7 @@
         url: G.conf.path_mapping + 'getMapLayersByType' + G.conf.type,
         baseParams: {type: G.conf.map_layer_type_baselayer},
         root: 'mapLayers',
-        fields: ['id', 'name', 'mapSource', 'layer'],
+        fields: ['id', 'name', 'url', 'layers'],
         sortInfo: {field: 'name', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
@@ -231,7 +231,7 @@
         url: G.conf.path_mapping + 'getMapLayersByType' + G.conf.type,
         baseParams: {type: G.conf.map_layer_type_overlay},
         root: 'mapLayers',
-        fields: ['id', 'name', 'type', 'mapSource', 'layer', 'fillColor', 'fillOpacity', 'strokeColor', 'strokeWidth'],
+        fields: ['id', 'name', 'type', 'url', 'fillColor', 'fillOpacity', 'strokeColor', 'strokeWidth'],
         sortInfo: {field: 'name', direction: 'ASC'},
         autoLoad: false,
         isLoaded: false,
@@ -404,7 +404,7 @@
                 for (var i = 0; i < r.length; i++) {
                     var overlay = G.util.createOverlay(
                         r[i].data.name, r[i].data.fillColor, 1, r[i].data.strokeColor, parseFloat(r[i].data.strokeWidth),
-                        G.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + r[i].data.mapSource
+                        G.conf.path_mapping + 'getGeoJsonFromFile.action?name=' + r[i].data.url
                     );
                     
                     overlay.layerType = G.conf.map_layer_type_overlay;
@@ -1690,7 +1690,7 @@
                     Ext.Ajax.request({
                         url: G.conf.path_mapping + 'addOrUpdateMapLayer' + G.conf.type,
                         method: 'POST',
-                        params: {name: bln, type: G.conf.map_layer_type_baselayer, mapSource: blu, layer: bll},
+                        params: {name: bln, type: G.conf.map_layer_type_baselayer, url: blu, layers: bll},
                         success: function(r) {
                             Ext.message.msg(true, G.i18n.baselayer + ' <span class="x-msg-hl">' + bln + '</span> ' + G.i18n.registered);
                             G.stores.baseLayer.load();
@@ -1881,7 +1881,7 @@
                     Ext.Ajax.request({
                         url: G.conf.path_mapping + 'addOrUpdateMapLayer' + G.conf.type,
                         method: 'POST',
-                        params: {name: mln, type: 'overlay', mapSource: mlmsf, fillColor: mlfc, fillOpacity: 1, strokeColor: mlsc, strokeWidth: mlsw},
+                        params: {name: mln, type: 'overlay', url: mlmsf, fillColor: mlfc, fillOpacity: 1, strokeColor: mlsc, strokeWidth: mlsw},
                         success: function(r) {
                             Ext.message.msg(true, 'Overlay <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.registered);
                             G.stores.overlay.load();
