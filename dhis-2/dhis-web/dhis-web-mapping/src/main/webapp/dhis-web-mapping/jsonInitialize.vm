@@ -42,7 +42,7 @@
     "infrastructuralPeriodType": "$!{infrastructuralPeriodType.name}"
   },
   "baseLayers": [
-#foreach( $baseLayer in $baseLayer )
+#foreach( $baseLayer in $baseLayers )
     {
       "data": {
         "id": "$!{baseLayer.id}",

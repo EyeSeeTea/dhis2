@@ -412,7 +412,7 @@
         }
         
         if (init) {
-            add(G.user.initOverlays);
+            add(G.user.initBaseLayers);
         }
         else {
             G.stores.baseLayer.load({callback: function(r) {
@@ -420,7 +420,7 @@
             }});
         }
 	}
-	addOverlaysToMap(true);
+	addBaseLayersToMap(true);
     
     /* Init overlays */
 	function addOverlaysToMap(init) {
@@ -1638,7 +1638,7 @@
     /* Section: base layers */
 	var baseLayersWindow = new Ext.Window({
         id: 'baselayers_w',
-        title: '<span id="window-maplayer-title">' + G.i18n.baselayers + '</span>',
+        title: '<span id="window-baselayer-title">' + G.i18n.baselayers + '</span>',
 		layout: 'fit',
         closeAction: 'hide',
         height: 230,
@@ -2428,7 +2428,7 @@
                 xtype: 'button',
                 id: 'baselayers_b',
                 text: G.i18n.baselayers,
-                iconCls: 'icon-overlay',
+                iconCls: 'icon-baselayer',
                 handler: function() {
                     Ext.getCmp('baselayers_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
                     Ext.getCmp('baselayers_w').show();
