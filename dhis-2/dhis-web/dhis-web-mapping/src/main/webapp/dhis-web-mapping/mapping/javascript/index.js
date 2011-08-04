@@ -19,6 +19,7 @@
         success: function(r) {
             var init = Ext.util.JSON.decode(r.responseText);
             G.vars.parameter.mapView = init.mapView;
+            G.user.initBaseLayers = init.baseLayers;
             G.user.initOverlays = init.overlays;
             G.user.isAdmin = init.security.isAdmin;
             G.system.aggregationStrategy = init.systemSettings.aggregationStrategy;
@@ -396,6 +397,30 @@
     var osm = new OpenLayers.Layer.OSM.Osmarender("OpenStreetMap");
     osm.layerType = G.conf.map_layer_type_baselayer;
     G.vars.map.addLayer(osm);
+    
+    /* Init base layers */
+	function addBaseLayersToMap(init) {
+        function add(r) {
+            if (r.length) {                
+                for (var i = 0; i < r.length; i++) {
+                    var baseLayer = G.util.createBaseLayer(r[i].data.name, r[i].data.url, r[i].data.layers);                    
+                    baseLayer.layerType = G.conf.map_layer_type_baselayer;
+                    
+                    G.vars.map.addLayer(baseLayer);
+                }
+            }
+        }
+        
+        if (init) {
+            add(G.user.initOverlays);
+        }
+        else {
+            G.stores.baseLayer.load({callback: function(r) {
+                add(r);
+            }});
+        }
+	}
+	addOverlaysToMap(true);
     
     /* Init overlays */
 	function addOverlaysToMap(init) {
@@ -1699,9 +1724,7 @@
                                 G.vars.map.getLayersByName(bln)[0].destroy();
                             }
                             
-                            var baselayer = G.util.createBaseLayer(bln, blu, bll);                                
-                            baselayer.events.register('loadstart', null, G.func.loadStart);
-                            baselayer.events.register('loadend', null, G.func.loadEnd);
+                            var baselayer = G.util.createBaseLayer(bln, blu, bll);  
                             baselayer.layerType = G.conf.map_layer_type_baselayer;
                             
                             G.vars.map.addLayer(baselayer);
