@@ -1,4 +1,4 @@
-package org.hisp.dhis.message;
+package org.hisp.dhis.message.hibernate;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -29,16 +29,39 @@ package org.hisp.dhis.message;
 
 import java.util.List;
 
-import org.hisp.dhis.common.GenericStore;
+import org.hibernate.Query;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.message.MessageConversation;
+import org.hisp.dhis.message.MessageConversationStore;
 import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  */
-public interface MessageStore
-    extends GenericStore<Message>
+public class HibernateMessageConversationStore
+    extends HibernateGenericStore<MessageConversation> implements MessageConversationStore
 {
-    List<Message> getMessages( User user, int first, int max );
+    @SuppressWarnings("unchecked")
+    public List<MessageConversation> getMessageConversations( User user, int first, int max )
+    {
+        String hql = "select distinct m from MessageConversation m join m.userMessages u where u.user = :user order by m.lastUpdated desc";
+        
+        Query query = getQuery( hql );
+        query.setEntity( "user", user );
+        query.setFirstResult( first );
+        query.setMaxResults( max );
+        
+        return query.list();
+    }
     
-    long getUnreadUserMessageCount( User user );
+    public long getUnreadUserMessageConversationCount( User user )
+    {
+        String hql = "select count(*) from MessageConversation m join m.userMessages u where u.user = :user and u.read = false";
+        
+        Query query = getQuery( hql );
+        query.setEntity( "user", user );
+        query.setCacheable( true );
+        
+        return (Long) query.uniqueResult();
+    }
 }

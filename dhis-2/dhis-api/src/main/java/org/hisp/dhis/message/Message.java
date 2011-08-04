@@ -27,11 +27,6 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.hisp.dhis.user.User;
@@ -42,51 +37,25 @@ import org.hisp.dhis.user.User;
 public class Message
 {
     private int id;
-    
+
     private String key;
     
-    private String subject;
+    private String text;
 
-    private Date lastUpdated;
-    
-    private Set<UserMessage> userMessages = new HashSet<UserMessage>();
-    
-    private List<MessageContent> contents = new ArrayList<MessageContent>();
-    
+    private User sender;
+
     public Message()
     {
         this.key = UUID.randomUUID().toString();
-        this.lastUpdated = new Date();
     }
     
-    public Message( String subject )
+    public Message( String text, User sender )
     {
         this.key = UUID.randomUUID().toString();
-        this.subject = subject;
-        this.lastUpdated = new Date();
+        this.text = text;
+        this.sender = sender;
     }
     
-    public void addUserMessage( UserMessage userMessage )
-    {
-        this.userMessages.add( userMessage );
-    }
-    
-    public void addMessageContent( MessageContent content )
-    {
-        this.contents.add( content );
-    }
-    
-    public void markUnread( User sender )
-    {
-        for ( UserMessage userMessage : userMessages )
-        {
-            if ( userMessage.getUser() != null && !userMessage.getUser().equals( sender ) )
-            {
-                userMessage.setRead( false );
-            }
-        }
-    }
-        
     public int getId()
     {
         return id;
@@ -107,78 +76,23 @@ public class Message
         this.key = key;
     }
 
-    public String getSubject()
+    public String getText()
     {
-        return subject;
+        return text;
     }
 
-    public void setSubject( String subject )
+    public void setText( String text )
     {
-        this.subject = subject;
+        this.text = text;
     }
 
-    public Date getLastUpdated()
+    public User getSender()
     {
-        return lastUpdated;
+        return sender;
     }
 
-    public void setLastUpdated( Date lastUpdated )
+    public void setSender( User sender )
     {
-        this.lastUpdated = lastUpdated;
-    }
-
-    public Set<UserMessage> getUserMessages()
-    {
-        return userMessages;
-    }
-
-    public void setUserMessages( Set<UserMessage> userMessages )
-    {
-        this.userMessages = userMessages;
-    }
-
-    public List<MessageContent> getContents()
-    {
-        return contents;
-    }
-
-    public void setContents( List<MessageContent> contents )
-    {
-        this.contents = contents;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return key.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-        
-        if ( object == null )
-        {
-            return false;
-        }
-        
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-        
-        final Message other = (Message) object;
-        
-        return key.equals( other.key );
-    }
-    
-    @Override
-    public String toString()
-    {
-        return "[" + subject + "]";
+        this.sender = sender;
     }
 }

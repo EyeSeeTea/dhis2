@@ -49,11 +49,11 @@ public class DefaultMessageService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private MessageStore messageStore;
+    private MessageConversationStore messageConversationStore;
 
-    public void setMessageStore( MessageStore messageStore )
+    public void setMessageConversationStore( MessageConversationStore messageConversationStore )
     {
-        this.messageStore = messageStore;
+        this.messageConversationStore = messageConversationStore;
     }
 
     private CurrentUserService currentUserService;
@@ -91,16 +91,16 @@ public class DefaultMessageService
         // Instantiate message, content and user messages
         // ---------------------------------------------------------------------
 
-        Message message = new Message( subject );
+        MessageConversation conversation = new MessageConversation( subject );
         
-        message.addMessageContent( new MessageContent( text, currentUserService.getCurrentUser() ) );
+        conversation.addMessage( new Message( text, currentUserService.getCurrentUser() ) );
         
         for ( User user : users )
         {
-            message.addUserMessage( new UserMessage( user ) );        
+            conversation.addUserMessage( new UserMessage( user ) );        
         }
         
-        return saveMessage( message );
+        return saveMessageConversation( conversation );
     }
 
     public int sendFeedback( String subject, String text )
@@ -108,46 +108,46 @@ public class DefaultMessageService
         return sendMessage( subject, text, new HashSet<User>() );
     }
     
-    public void sendReply( Message message, String text )
+    public void sendReply( MessageConversation conversation, String text )
     {
         User sender = currentUserService.getCurrentUser();
         
-        MessageContent content = new MessageContent( text, sender );
+        Message message = new Message( text, sender );
         
-        message.addMessageContent( content );
-        message.markUnread( sender );
-        message.setLastUpdated( new Date() );
+        conversation.addMessage( message );
+        conversation.markUnread( sender );
+        conversation.setLastUpdated( new Date() );
         
-        updateMessage( message );        
-    }
-        
-    public int saveMessage( Message message )
-    {
-        return messageStore.save( message );
-    }
-    
-    public void updateMessage( Message message )
-    {
-        messageStore.update( message );
-    }
-    
-    public Message getMessage( int id )
-    {
-        return messageStore.get( id );
+        updateMessageConversation( conversation );        
     }
         
-    public long getUnreadMessageCount()
+    public int saveMessageConversation( MessageConversation conversation )
     {
-        return messageStore.getUnreadUserMessageCount( currentUserService.getCurrentUser() );
+        return messageConversationStore.save( conversation );
     }
     
-    public long getUnreadMessageCount( User user )
+    public void updateMessageConversation( MessageConversation conversation )
     {
-        return messageStore.getUnreadUserMessageCount( user );
+        messageConversationStore.update( conversation );
     }
     
-    public List<Message> getMessages( int first, int max )
+    public MessageConversation getMessageConversation( int id )
     {
-        return messageStore.getMessages( currentUserService.getCurrentUser(), first, max );
+        return messageConversationStore.get( id );
+    }
+        
+    public long getUnreadMessageConversationCount()
+    {
+        return messageConversationStore.getUnreadUserMessageConversationCount( currentUserService.getCurrentUser() );
+    }
+    
+    public long getUnreadMessageConversationCount( User user )
+    {
+        return messageConversationStore.getUnreadUserMessageConversationCount( user );
+    }
+    
+    public List<MessageConversation> getMessageConversations( int first, int max )
+    {
+        return messageConversationStore.getMessageConversations( currentUserService.getCurrentUser(), first, max );
     }
 }

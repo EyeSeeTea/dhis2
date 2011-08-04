@@ -43,17 +43,17 @@ public interface MessageService
     
     int sendFeedback( String subject, String text );
     
-    void sendReply( Message message, String text );
+    void sendReply( MessageConversation conversation, String text );
     
-    int saveMessage( Message message );
+    int saveMessageConversation( MessageConversation conversation );
     
-    void updateMessage( Message message );
+    void updateMessageConversation( MessageConversation conversation );
     
-    Message getMessage( int id );
+    MessageConversation getMessageConversation( int id );
     
-    long getUnreadMessageCount();
+    long getUnreadMessageConversationCount();
     
-    long getUnreadMessageCount( User user );
+    long getUnreadMessageConversationCount( User user );
     
-    public List<Message> getMessages( int first, int max );
+    public List<MessageConversation> getMessageConversations( int first, int max );
 }

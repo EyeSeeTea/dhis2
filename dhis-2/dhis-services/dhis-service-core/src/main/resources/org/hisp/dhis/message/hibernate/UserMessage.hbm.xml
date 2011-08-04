@@ -12,7 +12,7 @@
       <generator class="native" />
     </id>
 
-    <property name="key"/>
+    <property name="key" column="usermessagekey"/>
 
     <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" 
 	  foreign-key="fk_usermessage_user" not-null="true" />

@@ -75,53 +75,53 @@ public class MessageServiceTest
     }
 
     @Test
-    public void testSaveMessageA()
+    public void testSaveMessageConversationA()
     {
-        Message messageA = new Message( "SubjectA" );
-        Message messageB = new Message( "SubjectB" );
+        MessageConversation conversationA = new MessageConversation( "SubjectA" );
+        MessageConversation conversationB = new MessageConversation( "SubjectB" );
         
-        int idA = messageService.saveMessage( messageA );
-        int idB = messageService.saveMessage( messageB );
+        int idA = messageService.saveMessageConversation( conversationA );
+        int idB = messageService.saveMessageConversation( conversationB );
         
-        messageA = messageService.getMessage( idA );
-        messageB = messageService.getMessage( idB );
+        conversationA = messageService.getMessageConversation( idA );
+        conversationB = messageService.getMessageConversation( idB );
         
-        assertNotNull( messageA );
-        assertEquals( "SubjectA", messageA.getSubject() );
+        assertNotNull( conversationA );
+        assertEquals( "SubjectA", conversationA.getSubject() );
 
-        assertNotNull( messageB );
-        assertEquals( "SubjectB", messageB.getSubject() );
+        assertNotNull( conversationB );
+        assertEquals( "SubjectB", conversationB.getSubject() );
     }
 
     @Test
     public void testSaveMessageB()
     {
-        Message message = new Message( "Subject" );
+        MessageConversation conversation = new MessageConversation( "Subject" );
         
         UserMessage userMessageA = new UserMessage( userA );
         UserMessage userMessageB = new UserMessage( userB );
         
-        message.addUserMessage( userMessageA );
-        message.addUserMessage( userMessageB );
+        conversation.addUserMessage( userMessageA );
+        conversation.addUserMessage( userMessageB );
         
-        MessageContent contentA = new MessageContent( "TextA", sender );
-        MessageContent contentB = new MessageContent( "TextB", sender );
+        Message contentA = new Message( "TextA", sender );
+        Message contentB = new Message( "TextB", sender );
         
-        message.addMessageContent( contentA );
-        message.addMessageContent( contentB );
+        conversation.addMessage( contentA );
+        conversation.addMessage( contentB );
         
-        int id = messageService.saveMessage( message );
+        int id = messageService.saveMessageConversation( conversation );
         
-        message = messageService.getMessage( id );
+        conversation = messageService.getMessageConversation( id );
         
-        assertNotNull( message );
-        assertEquals( "Subject", message.getSubject() );
-        assertEquals( 2, message.getUserMessages().size() );
-        assertTrue( message.getUserMessages().contains( userMessageA ) );
-        assertTrue( message.getUserMessages().contains( userMessageB ) );
-        assertEquals( 2, message.getContents().size() );
-        assertTrue( message.getContents().contains( contentA ) );
-        assertTrue( message.getContents().contains( contentB ) );
+        assertNotNull( conversation );
+        assertEquals( "Subject", conversation.getSubject() );
+        assertEquals( 2, conversation.getUserMessages().size() );
+        assertTrue( conversation.getUserMessages().contains( userMessageA ) );
+        assertTrue( conversation.getUserMessages().contains( userMessageB ) );
+        assertEquals( 2, conversation.getMessages().size() );
+        assertTrue( conversation.getMessages().contains( contentA ) );
+        assertTrue( conversation.getMessages().contains( contentB ) );
     }
 
     @Test
@@ -129,13 +129,13 @@ public class MessageServiceTest
     {
         int id = messageService.sendMessage( "Subject", "Text", users );
         
-        Message message = messageService.getMessage( id );
+        MessageConversation conversation = messageService.getMessageConversation( id );
         
-        assertNotNull( message );
-        assertEquals( "Subject", message.getSubject() );
-        assertEquals( 2, message.getUserMessages().size() );
-        assertEquals( 1, message.getContents().size() );
-        assertTrue( message.getContents().iterator().next().getText().equals( "Text" ) );
+        assertNotNull( conversation );
+        assertEquals( "Subject", conversation.getSubject() );
+        assertEquals( 2, conversation.getUserMessages().size() );
+        assertEquals( 1, conversation.getMessages().size() );
+        assertTrue( conversation.getMessages().iterator().next().getText().equals( "Text" ) );
     }
     
     @Test
@@ -143,27 +143,27 @@ public class MessageServiceTest
     {
         int id = messageService.sendFeedback( "Subject", "Text" );
         
-        Message message = messageService.getMessage( id );
+        MessageConversation conversation = messageService.getMessageConversation( id );
         
-        assertNotNull( message );
-        assertEquals( "Subject", message.getSubject() );
-        assertEquals( 1, message.getContents().size() );
-        assertTrue( message.getContents().iterator().next().getText().equals( "Text" ) );
+        assertNotNull( conversation );
+        assertEquals( "Subject", conversation.getSubject() );
+        assertEquals( 1, conversation.getMessages().size() );
+        assertTrue( conversation.getMessages().iterator().next().getText().equals( "Text" ) );
     }
     
     @Test
     public void testSendReply()
     {
-        Message message = new Message( "Subject" );
-        message.addMessageContent( new MessageContent( "TextA", sender ) );
-        int id = messageService.saveMessage( message );
+        MessageConversation message = new MessageConversation( "Subject" );
+        message.addMessage( new Message( "TextA", sender ) );
+        int id = messageService.saveMessageConversation( message );
         
         messageService.sendReply( message, "TextB" );
         
-        message = messageService.getMessage( id );
+        message = messageService.getMessageConversation( id );
         
         assertNotNull( message );
         assertEquals( "Subject", message.getSubject() );
-        assertEquals( 2, message.getContents().size() );       
+        assertEquals( 2, message.getMessages().size() );       
     }
 }
