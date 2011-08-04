@@ -51,6 +51,8 @@ function addEventListeners()
     	
     	$( this ).focus( valueFocus );
     	
+    	$( this ).blur( valueBlur );
+    	
     	$( this ).change( function() {
     		saveVal( dataElementId, optionComboId );
     	} );
@@ -402,12 +404,23 @@ function valueFocus( e )
 	var dataElementName = dataElements[dataElementId].name;
 	var optionComboName = $( '#' + optionComboId + '-optioncombo' ).text();
 	
-	$( "#currentDataElement" ).html( dataElementName + ' ' + optionComboName );
+	$( '#currentDataElement' ).html( dataElementName + ' ' + optionComboName );
+	
+	$( '#' + dataElementId + '-cell' ).addClass( 'currentRow' );
+}
+
+function valueBlur( e )
+{
+	var id = e.target.id;
+
+	var dataElementId = id.split( '-' )[0];
+	
+	$( '#' + dataElementId + '-cell' ).removeClass( 'currentRow' );
 }
 
 function keyPress( event, field )
 {
-    var key = event.keyCode || event.charCode || event.which;
+    var key = event.keyCoe || event.charCode || event.which;
 
     var focusField = ( key == 13 || key == 40 ) ? getNextEntryField( field )
             : ( key == 38 ) ? getPreviousEntryField( field ) : false;
@@ -501,9 +514,7 @@ function registerCompleteDataSet( json )
     } 
     else
     {
-    	var url = 'validate.action?periodId=' + periodId + '&dataSetId=' + dataSetId;
-    	
-        window.open( url, '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
+    	validate();
     }
 }
 
@@ -535,26 +546,54 @@ function undoCompleteDataSet()
 // Validation
 // -----------------------------------------------------------------------------
 
+function displayValidationDialog()
+{
+	$( '#validationDiv' ).dialog( {
+	    modal: true,
+	   	title: 'Validation',
+	   	width: 800,
+	   	height: 400
+	} );
+}
+
 function validate()
 {
 	var periodId = $( '#selectedPeriodId' ).val();
     var dataSetId = $( '#selectedDataSetId' ).val();
-		
-	var url = 'validate.action?periodId=' + periodId + '&dataSetId=' + dataSetId;
 	
-    window.open( url, '_blank', 'width=800, height=400, scrollbars=yes, resizable=yes' );
+	$( '#validationDiv' ).load( 'validate.action', {
+		periodId: periodId, dataSetId: dataSetId },	
+		displayValidationDialog
+	);
 }
 
 // -----------------------------------------------------------------------------
 // History
 // -----------------------------------------------------------------------------
 
+function displayHistoryDialog( operandName )
+{
+	$( '#historyDiv' ).dialog( {
+	    modal: true,
+	   	title: operandName,
+	   	width: 580,
+	   	height: 710
+	} );
+}
+
 function viewHist( dataElementId, optionComboId )
 {
 	var periodId = $( '#selectedPeriodId' ).val();
 	
-    window.open( 'viewHistory.action?dataElementId=' + dataElementId + '&optionComboId=' + optionComboId
-            + '&periodId=' + periodId + '&showComment=true', '_blank', 'width=580,height=710,scrollbars=yes' );
+	var dataElementName = dataElements[dataElementId].name;
+	var optionComboName = $( '#' + optionComboId + '-optioncombo' ).html();
+	var operandName = dataElementName + ' ' + optionComboName;
+	
+    $( '#historyDiv' ).load( 'viewHistory.action', {
+    	dataElementId: dataElementId, optionComboId: optionComboId, periodId: periodId }, function() {
+    		displayHistoryDialog( operandName );
+    	}
+    );
 }
 
 function closeCurrentSelection()

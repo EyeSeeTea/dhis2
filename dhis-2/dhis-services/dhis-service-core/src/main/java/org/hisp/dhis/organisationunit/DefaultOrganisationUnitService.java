@@ -423,11 +423,10 @@ public class DefaultOrganisationUnitService
     
     public OrganisationUnitDataSetAssociationSet getOrganisationUnitDataSetAssociationSet()
     {
-        //TODO hierarchy ?
-        
         Map<Integer, Set<Integer>> associationSet = organisationUnitStore.getOrganisationUnitDataSetAssocationMap();
         
-        filterOrganisationUnitSortedDataSets( associationSet );
+        filterUserDataSets( associationSet );
+        filterChildOrganisationUnits( associationSet );
         
         OrganisationUnitDataSetAssociationSet set = new OrganisationUnitDataSetAssociationSet();
         
@@ -447,7 +446,7 @@ public class DefaultOrganisationUnitService
         return set;
     }
     
-    private void filterOrganisationUnitSortedDataSets( Map<Integer, Set<Integer>> associationMap )
+    private void filterUserDataSets( Map<Integer, Set<Integer>> associationMap )
     {
         User currentUser = currentUserService.getCurrentUser();
         
@@ -459,6 +458,20 @@ public class DefaultOrganisationUnitService
             {
                 dataSets.retainAll( userDataSets );
             }
+        }
+    }
+    
+    private void filterChildOrganisationUnits( Map<Integer, Set<Integer>> associatonMap )
+    {
+        User currentUser = currentUserService.getCurrentUser();
+        
+        if ( currentUser != null )
+        {
+            Collection<Integer> parentIds = ConversionUtils.getIdentifiers( OrganisationUnit.class, currentUser.getOrganisationUnits() );
+            
+            Collection<Integer> children = getOrganisationUnitHierarchy().getChildren( parentIds );
+        
+            associatonMap.keySet().retainAll( children );
         }
     }
     

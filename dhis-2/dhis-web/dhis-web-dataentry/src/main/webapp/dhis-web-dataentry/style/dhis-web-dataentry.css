@@ -3,7 +3,7 @@
 {
   color: black;
   padding: 6px;
-  background-color: #D5FFC5;
+  background-color: #d5ffc5;
   border: 1px solid black;
   font-size: 14px;
   text-align: right;
@@ -49,32 +49,13 @@
   padding-right: 50px;
 }
 
+.currentRow
+{
+  background-color: #d5ffc5;
+  padding-right: 50px;
+}
+
 .cent
 {
   text-align: center;
-}
-
-@media print 
-{
-  #mainHeader, #topMenu, #leftBar, #currentSelection, #actions, input[type=button] 
-  {
-    display: none;
-  }
-  
-  input, select 
-  {
-    border: 0;
-    background-color: inherit;
-  }
-  
-  a 
-  {
-    text-decoration: none;
-    color: black;
-  }
-  
-  #typeCol, #minCol, #maxCol, #commentCol  
-  {
-    visibility: collapse;
-  } 
 }

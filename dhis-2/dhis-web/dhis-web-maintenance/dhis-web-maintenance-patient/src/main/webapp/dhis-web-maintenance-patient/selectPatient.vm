@@ -1,8 +1,8 @@
 <div id='selectDiv'>
+	
+	<h3>$i18n.getString( "patient_management" ) #openHelp( "patient" )</h3>
+	
 	<input type="hidden" id="isShowPatientList" name="isShowPatientList" />
-
-	<h3>$i18n.getString( "patient_management" )</h3>
-
 	<table>
 		
 		<tr>
@@ -23,46 +23,38 @@
 </div>
 
 <div id='searchPatientDiv' style='display:none'>
-	<table>	
-		<tr>	       
-			<td>
-			  <select id="searchingAttributeId" name="searchingAttributeId" style="min-width:20.2em"  #if( $patientAttributes.size() == 0 ) disabled="disabled" #end onchange="searchingAttributeOnChange()">
-				<option value="">$i18n.getString( "search_by_name_identifier" )</option>
-				<option value="0">$i18n.getString( "search_by_program" )</option>
-					#foreach( $attribute in $patientAttributes )
-						<option value="$attribute.id" >$encoder.htmlEncode( $attribute.name )</option>
-					#end
-			  </select> 
-			  <em title="$i18n.getString( "required" )" class="required">*</em></label>
-			</td>		
-			<td>
-				<input type="text" id="searchText" name="searchText" maxlength="30" style="width:20em" value="$!searchText" onkeyup='searchPatientsOnKeyUp( event );'>
-				<select id="programId" name='programId' style="display:none; width:20.2em" ></select>
-			</td>		
-			<td><input type="button" value='$i18n.getString( "search" )' onclick='searchPatients();'></td>
-			<td>&nbsp;</td>
-			<td><input type="button" value='$i18n.getString( "add_new" )' onclick="showAddPatientForm();"></td>
-			
-		</tr>
-		
-		<tr>
-			<td></td>
-			<td>
-			<select id="sortPatientAttributeId" name="sortPatientAttributeId" maxlength="30" style="width:20.2em" onchange="sortPatients();">
-					<option value="" selected >[ $i18n.getString( "sort_by" ) ]</option>
-					#foreach( $patientAttribute in $patientAttributes )
-						<option value="$patientAttribute.id" >$encoder.htmlEncode( $patientAttribute.name )</option>
-					#end
-				</select>
-			</td>
-		</tr>
+	<table id='advancedSearchTB'>	
+		<tbody>
+			<tr id='advSearchBox0'>	       
+				<td id='searchingAttributeIdTD'>
+				  <select id="searchingAttributeId" name="searchingAttributeId" style="width:20.2em"  #if( $patientAttributes.size() == 0 ) disabled="disabled" #end onchange="searchingAttributeOnChange(this)">
+					<option value="">$i18n.getString( "search_by_name_identifier" )</option>
+					<option value="0">$i18n.getString( "search_by_program" )</option>
+						#foreach( $attribute in $patientAttributes )
+							<option value="$attribute.id" >$encoder.htmlEncode( $attribute.name )</option>
+						#end
+				  </select> 
+				  <em title="$i18n.getString( "required" )" class="required">*</em></label>
+				</td>		
+				<td>
+					<input type="text" id="searchText" name="searchText" maxlength="30" style="width:20em" value="$!searchText" onkeyup='searchPatientsOnKeyUp( event );'>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</td>	
+				<td></td>
+				<td><input type="button" value='+' onclick='addAttributeOption();'>
+					<input type="button" value='$i18n.getString( "search" )' onclick='searchPatients();'>
+				</td>
+				<td>&nbsp;</td>
+				<td><input type="button" value='$i18n.getString( "add_new" )' onclick="showAddPatientForm();"></td>
+			</tr>
+		</tbody>
 	</table>
 </div>
 
 <div id='listPatientDiv'></div> <!-- List searching patients -->
 <div id='addPatientDiv'></div> <!-- Add Patient Form -->
 <div id='updatePatientDiv'></div> <!-- Update Patient Form -->
-<div id='searchPatientsByNameDiv'></div> <!-- List searching patients by name -->
+<div id='resultSearchDiv' style='font-size:13px'></div> <!-- List searching patients -->
 <div id='enrollmentDiv'></div> <!-- Program Enrollment Form -->
 <div id='listRelationshipDiv'></div> <!-- List relationship -->
 <div id='addRelationshipDiv'></div> <!-- Add relationship -->
@@ -73,12 +65,15 @@
 	var i18n_none = '$encoder.jsEscape( $i18n.getString( "none" ) , "'")';
 	var i18n_can_not_register_patient_for_orgunit = '$encoder.jsEscape( $i18n.getString( "can_not_register_patient_for_orgunit" ), "'")';	
 	var i18n_please_select_village = '[' + '$encoder.jsEscape( $i18n.getString( "please_select_village" ), "'")' + ']';
-	var i18n_specify_a_search_criteria = '$encoder.jsEscape( $i18n.getString( "specify_a_search_criteria" ) , "'")';
+	var i18n_specify_search_criteria = '$encoder.jsEscape( $i18n.getString( "specify_search_criteria" ) , "'")';
 	var i18n_select_program = '[' + '$encoder.jsEscape( $i18n.getString( "select_program" ), "'")' + ']';
 	var i18n_save_success = '$encoder.jsEscape( $i18n.getString( "save_success" ) , "'")';
 	var i18n_list_all_patient = '$encoder.jsEscape( $i18n.getString( "list_all_patient" ) , "'")';
 	var i18n_enrol_success = '$encoder.jsEscape( $i18n.getString( "enrol_success" ) , "'")';
-	
+	var i18n_list_patients_by_program = '$encoder.jsEscape( $i18n.getString( "list_patients_by_program" ) , "'" )';
+	var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete_patient" ) , "'" )';
+	var i18n_adding_patient_failed = '$encoder.jsEscape( $i18n.getString( "adding_patient_failed" ), "'")';
+	var i18n_updating_patient_failed = '$encoder.jsEscape( $i18n.getString( "updating_patient_failed" ), "'")';	
 	var i18n_program_enrollment_failed = '$encoder.jsEscape( $i18n.getString( "program_enrollment_failed" ) , "'")';
     var i18n_saving_value_failed_status_code = '$encoder.jsEscape( $i18n.getString( "saving_value_failed_status_code" ) , "'")';
     var i18n_saving_value_failed_error_code = '$encoder.jsEscape( $i18n.getString( "saving_value_failed_error_code" ) , "'")';
@@ -87,24 +82,37 @@
 	var i18n_date_less_incident = '$encoder.jsEscape( $i18n.getString( "date_less_incident" ) , "'")';
 	var i18n_enroll = '$encoder.jsEscape( $i18n.getString( "enroll" ) , "'")';
 	var i18n_update = '$encoder.jsEscape( $i18n.getString( "update" ) , "'")';
-
+	var i18n_oucode_must_have_9_digits = '$encoder.jsEscape( $i18n.getString( "oucode_must_be_valid" ) , "'")';
 	var i18n_patient_identifiers = '$encoder.jsEscape( $i18n.getString( "patient_identifiers" ) , "'")';
 	var i18n_patient_attributes = '$encoder.jsEscape( $i18n.getString( "patient_attributes" ) , "'")';
-	var i18n_patient_fullName = '$encoder.jsEscape( $i18n.getString( "full_name" ) , "'")';
+	var i18n_patient_id = '$encoder.jsEscape( $i18n.getString( "id" ) , "'")';
+	var i18n_patient_full_name = '$encoder.jsEscape( $i18n.getString( "full_name" ) , "'")';
 	var i18n_patient_demographics = '$encoder.jsEscape( $i18n.getString( "demographics" ) , "'")';
 	var i18n_patient_gender = '$encoder.jsEscape( $i18n.getString( "gender" ) , "'")';
 	var i18n_patient_date_of_birth = '$encoder.jsEscape( $i18n.getString( "date_of_birth" ) , "'")';
+	var i18n_patient_dob_type = '$encoder.jsEscape( $i18n.getString( "dob_type" ), "'")';
 	var i18n_patient_age = '$encoder.jsEscape( $i18n.getString( "age" ) , "'")';
 	var i18n_patient_blood_group = '$encoder.jsEscape( $i18n.getString( "blood_group" ) , "'")';
 	var i18n_edit_this_patient = '$encoder.jsEscape( $i18n.getString( "edit_this_patient" ) , "'")';
 	var i18n_no_duplicate_found = '$encoder.jsEscape( $i18n.getString( "no_duplicate_found" ) , "'")';
 	var i18n_patient_system_id = '$encoder.jsEscape( $i18n.getString( "patient_system_id" ) , "'")';
 	var i18n_child_representative = '$encoder.jsEscape( $i18n.getString( "child_representative" ) , "'")';
-    var i18n_oucode_must_have_9_digits = '$encoder.jsEscape( $i18n.getString( "oucode_must_be_valid" ) , "'")';
 	var i18n_no_patients_found = '$encoder.jsEscape( $i18n.getString( "no_patients_found" ) , "'")';
 	var i18n_search_result = '$encoder.jsEscape( $i18n.getString( "search_result" ) , "'")';
-	var checkedDuplicate = false;
+	var i18n_duplicated_patient_list = '$encoder.jsEscape( $i18n.getString( "duplicated_patient_list" ) , "'")';
+	var i18n_duplicate_warning = '$encoder.jsEscape( $i18n.getString( "duplicate_warning" ) , "'")';
+	var i18n_search_by_name_identifier = '$encoder.jsEscape( $i18n.getString( "search_by_name_identifier" ) , "'")';
+	var i18n_search_by_program = '$encoder.jsEscape( $i18n.getString( "search_by_program" ) , "'")';
 	
+	var checkedDuplicate = false;
+	// -1: no search anything
+	//  0: show list all patient
+	//  1: search with conditions
+	var statusSearching = -1;
 	isAjax = true;
 	contentDiv = '';
+	
+	var programComboBox = '';
+	var searchTextBox = '<input type="text" id="searchText" name="searchText" maxlength="30" style="width:20em" onkeyup="searchPatientsOnKeyUp( event );">';
+	
 </script>

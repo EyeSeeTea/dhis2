@@ -27,6 +27,7 @@
 package org.hisp.dhis.patientattributevalue.hibernate;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
@@ -132,9 +133,9 @@ public class HibernatePatientAttributeValueStore
     public Collection<Patient> searchPatients( PatientAttribute patientAttribute, String searchText, int min, int max )
     {
         return getCriteria( Restrictions.eq( "patientAttribute", patientAttribute ),
-            Restrictions.ilike( "value", "%" + searchText + "%" ) )
-            .setProjection(Projections.distinct(Projections.property( "patient") ))
-            .setFirstResult( min ).setMaxResults( max ).list();
+            Restrictions.ilike( "value", "%" + searchText + "%" ) ).setProjection(
+            Projections.distinct( Projections.property( "patient" ) ) ).setFirstResult( min ).setMaxResults( max )
+            .list();
 
     }
 
@@ -148,5 +149,133 @@ public class HibernatePatientAttributeValueStore
         query.setEntity( "patientAttribute", patientAttribute );
 
         return query.list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<Patient> searchPatients( List<Integer> patientAttributeIds, List<String> searchTexts, int min,
+        int max )
+    {
+        String hql = "SELECT DISTINCT pav.patient FROM PatientAttributeValue as pav WHERE pav.patient in ";
+        String end = "";
+
+        int index = 0;
+        for ( Integer patientAttributeId : patientAttributeIds )
+        {
+            end += ")";
+
+            hql += createHQL( patientAttributeId, searchTexts.get( index ), index, patientAttributeIds.size() );
+
+            index++;
+        }
+
+        hql += " ORDER BY pav.value ASC";
+
+        Query query = getQuery( hql + end ).setFirstResult( min ).setMaxResults( max );
+
+        return query.list();
+    }
+
+    public int countSearchPatients( List<Integer> patientAttributeIds, List<String> searchTexts )
+    {
+        String hql = "SELECT COUNT( DISTINCT pav.patient ) FROM PatientAttributeValue as pav WHERE pav.patient in ";
+        String end = "";
+
+        int index = 0;
+        for ( Integer patientAttributeId : patientAttributeIds )
+        {
+            end += ")";
+
+            hql += createHQL( patientAttributeId, searchTexts.get( index ), index, patientAttributeIds.size() );
+
+            index++;
+        }
+
+        Query query = getQuery( hql + end );
+
+        Number rs = (Number) query.uniqueResult();
+
+        return (rs != null) ? rs.intValue() : 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private String createHQL( Integer patientAttributeId, String searchText, int index, int noCondition )
+    {
+        String hql = "";
+        searchText = searchText.trim();
+        boolean isSearchByAttribute = true;
+
+        // ---------------------------------------------------------------------
+        // search patients by name or identifier
+        // ---------------------------------------------------------------------
+        if ( patientAttributeId == null )
+        {
+            int startIndex = searchText.indexOf( ' ' );
+            int endIndex = searchText.lastIndexOf( ' ' );
+
+            String firstName = searchText.toString();
+            String middleName = "";
+            String lastName = "";
+
+            if ( searchText.indexOf( ' ' ) != -1 )
+            {
+                firstName = searchText.substring( 0, startIndex );
+                if ( startIndex == endIndex )
+                {
+                    middleName = "";
+                    lastName = searchText.substring( startIndex + 1, searchText.length() );
+                }
+                else
+                {
+                    middleName = searchText.substring( startIndex + 1, endIndex );
+                    lastName = searchText.substring( endIndex + 1, searchText.length() );
+                }
+            }
+
+            hql += " ( SELECT p" + index + " FROM Patient as p" + index + " JOIN p" + index
+                + ".identifiers as identifier" + index + " " + "WHERE  lower(identifier" + index
+                + ".identifier) LIKE lower('%" + searchText + "%') " + "OR (lower(p" + index
+                + ".firstName) LIKE lower('%" + firstName + "%') " + "AND lower(p" + index + ".middleName) = lower('"
+                + middleName + "') " + "AND lower(p" + index + ".lastName) LIKE lower('%" + lastName + "%')) ";
+
+            isSearchByAttribute = false;
+        }
+        // -----------------------------------------------------------------
+        // search patients by program
+        // -----------------------------------------------------------------
+        else if ( patientAttributeId == 0 )
+        {
+            hql += " ( SELECT p" + index + " FROM Patient AS p" + index + " " + " JOIN p" + index
+                + ".programs AS program" + index + " WHERE program" + index + ".id=" + searchText;
+
+            isSearchByAttribute = false;
+        }
+        // -----------------------------------------------------------------
+        // search patients by attribute
+        // -----------------------------------------------------------------
+        else
+        {
+            hql += " ( SELECT pav" + index + ".patient FROM PatientAttributeValue as pav" + index + " " + "WHERE pav"
+                + index + ".patientAttribute.id=" + patientAttributeId + " AND lower(pav" + index
+                + ".value) LIKE lower('%" + searchText + "%') ";
+        }
+
+        if ( index < noCondition - 1 )
+        {
+
+            if ( isSearchByAttribute )
+            {
+                hql += " AND pav" + index + ".patient in ";
+            }
+            else
+            {
+                hql += " AND p" + index + " in ";
+            }
+        }
+
+        return hql;
+
     }
 }

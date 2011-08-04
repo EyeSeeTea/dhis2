@@ -29,6 +29,7 @@ package org.hisp.dhis.patientattributevalue;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -164,6 +165,27 @@ public class DefaultPatientAttributeValueService
         return patentAttributeValueMap;
     }
 
+    public Map<Integer, PatientAttributeValue> getPatientAttributeValueMapForPatients( Collection<Patient> patients,
+        PatientAttribute patientAttribute )
+    {
+        Map<Integer, PatientAttributeValue> attributeValueMap = new HashMap<Integer, PatientAttributeValue>();
+
+        Collection<PatientAttributeValue> patientAttributeValues = getPatientAttributeValues( patients );
+
+        if ( patientAttributeValues != null )
+        {
+            for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
+            {
+                if ( patientAttributeValue.getPatientAttribute() == patientAttribute )
+                {
+                    attributeValueMap.put( patientAttributeValue.getPatient().getId(), patientAttributeValue );
+                }
+            }
+        }
+
+        return attributeValueMap;
+    }
+
     public Collection<PatientAttributeValue> searchPatientAttributeValue( PatientAttribute patientAttribute,
         String searchText )
     {
@@ -206,5 +228,16 @@ public class DefaultPatientAttributeValueService
     public Collection<Patient> searchPatients( PatientAttribute patientAttribute, String searchText )
     {
         return patientAttributeValueStore.searchPatients( patientAttribute, searchText );
+    }
+
+    public Collection<Patient> searchPatients( List<Integer> patientAttributeIds, List<String> searchTexts, int min,
+        int max )
+    {
+        return patientAttributeValueStore.searchPatients( patientAttributeIds, searchTexts, min, max );
+    }
+
+    public int countSearchPatients( List<Integer> patientAttributeIds, List<String> searchTexts )
+    {
+        return patientAttributeValueStore.countSearchPatients( patientAttributeIds, searchTexts );
     }
 }
