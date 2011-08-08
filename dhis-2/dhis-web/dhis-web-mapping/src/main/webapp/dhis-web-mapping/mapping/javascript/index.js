@@ -6,7 +6,9 @@
     
 	G.vars.map = new OpenLayers.Map({
         controls: [new OpenLayers.Control.MouseToolbar()],
-        displayProjection: new OpenLayers.Projection("EPSG:4326")
+        projection: 'EPSG:900913',
+        displayProjection: new OpenLayers.Projection("EPSG:4326"),
+        maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
     G.vars.mask = new Ext.LoadMask(Ext.getBody(),{msg:G.i18n.loading,msgCls:'x-mask-loading2'});
