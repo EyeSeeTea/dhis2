@@ -6,7 +6,6 @@
     
 	G.vars.map = new OpenLayers.Map({
         controls: [new OpenLayers.Control.MouseToolbar()],
-        projection: 'EPSG:900913',
         displayProjection: new OpenLayers.Projection("EPSG:4326"),
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
@@ -405,9 +404,9 @@
         function add(r) {
             if (r.length) {                
                 for (var i = 0; i < r.length; i++) {
-                    var baseLayer = G.util.createBaseLayer(r[i].data.name, r[i].data.url, r[i].data.layers);                    
+                    var baseLayer = G.util.createWMSLayer(r[i].data.name, r[i].data.url, r[i].data.layers);                    
                     baseLayer.layerType = G.conf.map_layer_type_baselayer;
-                    
+                    baseLayer.setVisibility(false);                    
                     G.vars.map.addLayer(baseLayer);
                 }
             }
@@ -1626,7 +1625,7 @@
                     },
                     {
                         id: 'help5',
-                        title: '<span class="panel-tab-title">' + G.i18n.overlays + '</span>'
+                        title: '<span class="panel-tab-title">' + G.i18n.overlays_ + '</span>'
                     },
                     {
                         id: 'help6',
@@ -1640,7 +1639,7 @@
     /* Section: base layers */
 	var baseLayersWindow = new Ext.Window({
         id: 'baselayers_w',
-        title: '<span id="window-baselayer-title">' + G.i18n.baselayers + '</span>',
+        title: '<span id="window-baselayer-title">WMS ' + G.i18n.overlays + '</span>',
 		layout: 'fit',
         closeAction: 'hide',
         height: 230,
@@ -1726,9 +1725,9 @@
                                 G.vars.map.getLayersByName(bln)[0].destroy();
                             }
                             
-                            var baselayer = G.util.createBaseLayer(bln, blu, bll);  
+                            var baselayer = G.util.createWMSLayer(bln, blu, bll);  
                             baselayer.layerType = G.conf.map_layer_type_baselayer;
-                            
+                            baselayer.setVisibility(false);                            
                             G.vars.map.addLayer(baselayer);
                             
                             Ext.getCmp('baselayername_tf').reset();
@@ -1770,7 +1769,7 @@
     /* Section: overlays */
 	var overlaysWindow = new Ext.Window({
         id: 'overlays_w',
-        title: '<span id="window-maplayer-title">' + G.i18n.overlays + '</span>',
+        title: '<span id="window-maplayer-title">Vector ' + G.i18n.overlays + '</span>',
 		layout: 'fit',
         closeAction: 'hide',
         height: 307,
@@ -2429,7 +2428,7 @@
             {
                 xtype: 'button',
                 id: 'baselayers_b',
-                text: G.i18n.baselayers,
+                text: 'WMS ' + G.i18n.overlay,
                 iconCls: 'icon-baselayer',
                 handler: function() {
                     Ext.getCmp('baselayers_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
@@ -2439,7 +2438,7 @@
             {
                 xtype: 'button',
                 id: 'overlays_b',
-                text: G.i18n.overlays,
+                text: 'Vector ' + G.i18n.overlay,
                 iconCls: 'icon-overlay',
                 handler: function() {
                     Ext.getCmp('overlays_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
