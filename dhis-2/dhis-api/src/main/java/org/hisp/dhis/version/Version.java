@@ -1,3 +1,5 @@
+package org.hisp.dhis.version;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -25,22 +27,83 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dhis2.util.namespace( 'dhis2.array' );
-
 /**
- * Remove part of an array.
- * 
- * @param array {Array} Array to remove from
- * @param from {Number} Start index
- * @param to {Number} End index
- * 
- * @returns {Array} Array without the removed parts
+ * @author mortenoh
  */
-dhis2.array.remove = function( array, from, to )
+public class Version
 {
-    // Array Remove - By John Resig (MIT Licensed)
-    var rest = array.slice( ( to || from ) + 1 || array.length );
-    array.length = from < 0 ? array.length + from : from;
+    private int id;
 
-    return array.push.apply( array, rest );
-};
+    private String key;
+
+    private String value;
+
+    @Override
+    public int hashCode()
+    {
+        return key.hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[" + key + "]";
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o )
+        {
+            return true;
+        }
+
+        if ( o == null )
+        {
+            return false;
+        }
+
+        if ( !(o instanceof Version) )
+        {
+            return false;
+        }
+
+        final Version other = (Version) o;
+
+        return key.equals( other.getKey() );
+    }
+
+    // -------------------------------------------------------------------------
+    // Getter & Setter
+    // -------------------------------------------------------------------------
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public String getKey()
+    {
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
+    }
+}

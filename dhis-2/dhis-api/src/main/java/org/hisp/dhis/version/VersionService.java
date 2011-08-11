@@ -1,3 +1,5 @@
+package org.hisp.dhis.version;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -25,22 +27,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dhis2.util.namespace( 'dhis2.array' );
+import java.util.Collection;
 
 /**
- * Remove part of an array.
- * 
- * @param array {Array} Array to remove from
- * @param from {Number} Start index
- * @param to {Number} End index
- * 
- * @returns {Array} Array without the removed parts
+ * @author mortenoh
  */
-dhis2.array.remove = function( array, from, to )
+public interface VersionService
 {
-    // Array Remove - By John Resig (MIT Licensed)
-    var rest = array.slice( ( to || from ) + 1 || array.length );
-    array.length = from < 0 ? array.length + from : from;
+    public final String ORGANISATIONUNIT_VERSION = "organisationUnit";
 
-    return array.push.apply( array, rest );
-};
+    String ID = VersionService.class.getName();
+
+    /**
+     * @param version Version object to add.
+     * @return ID of the saved version object.
+     */
+    int addVersion( Version version );
+
+    /**
+     * @param version Version object to update.
+     */
+    void updateVersion( Version version );
+
+    /**
+     * @param key
+     * @param value
+     */
+    void updateVersion( String key, String value );
+
+    /**
+     * @param version Version object to delete.
+     */
+    void deleteVersion( Version version );
+
+    /**
+     * @param id Get Version with this ID.
+     * @return Version that matched ID, or null if there was no match.
+     */
+    Version getVersion( int id );
+
+    /**
+     * @param key Key to lookup the value with.
+     * @return Version that matched key, or null if there was no match.
+     */
+    Version getVersionByKey( String key );
+
+    /**
+     * @return Collection of all version objects.
+     */
+    Collection<Version> getAllVersions();
+}

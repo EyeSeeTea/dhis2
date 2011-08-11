@@ -1689,7 +1689,7 @@
                         triggerAction: 'all',
                         emptytext: G.conf.emptytext,
                         labelSeparator: G.conf.labelseparator,
-                        fieldLabel: G.i18n.baselayer,
+                        fieldLabel: G.i18n.overlay_,
                         width: G.conf.combo_width_fieldset,                
                         store: G.stores.baseLayer
                     }
@@ -1875,7 +1875,7 @@
                         triggerAction: 'all',
                         emptytext: G.conf.emptytext,
                         labelSeparator: G.conf.labelseparator,
-                        fieldLabel: G.i18n.overlays,
+                        fieldLabel: G.i18n.overlay_,
                         width: G.conf.combo_width_fieldset,                
                         store: G.stores.overlay
                     }

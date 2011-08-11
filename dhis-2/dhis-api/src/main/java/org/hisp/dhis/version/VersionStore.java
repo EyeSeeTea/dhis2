@@ -1,3 +1,5 @@
+package org.hisp.dhis.version;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -25,22 +27,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dhis2.util.namespace( 'dhis2.array' );
+import org.hisp.dhis.common.GenericStore;
 
 /**
- * Remove part of an array.
- * 
- * @param array {Array} Array to remove from
- * @param from {Number} Start index
- * @param to {Number} End index
- * 
- * @returns {Array} Array without the removed parts
+ * @author mortenoh
  */
-dhis2.array.remove = function( array, from, to )
+public interface VersionStore
+    extends GenericStore<Version>
 {
-    // Array Remove - By John Resig (MIT Licensed)
-    var rest = array.slice( ( to || from ) + 1 || array.length );
-    array.length = from < 0 ? array.length + from : from;
+    String ID = VersionStore.class.getName();
 
-    return array.push.apply( array, rest );
-};
+    /**
+     * @param key Key to lookup.
+     * @return Value that matched key, or null if there was no match.
+     */
+    Version getVersionByKey( String key );
+}
