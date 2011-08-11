@@ -1677,7 +1677,7 @@
                         width: G.conf.combo_width_fieldset
                     },
                     {html: '<div class="window-p"></div>'},
-                    {html: '<div class="window-info">Delete base layer</div>'},
+                    {html: '<div class="window-info">' + G.i18n.delete_ + ' WMS ' + G.i18n.overlay + '</div>'},
                     {
                         xtype: 'combo',
                         id: 'baselayer_cb',
@@ -1863,7 +1863,7 @@
                         }
                     },
                     {html: '<div class="window-p"></div>'},
-                    {html: '<div class="window-info">Delete overlay</div>'},
+                    {html: '<div class="window-info">' + G.i18n.delete_ + ' vector ' + G.i18n.overlay + '</div>'},
                     {
                         xtype: 'combo',
                         id: 'maplayer_cb',
