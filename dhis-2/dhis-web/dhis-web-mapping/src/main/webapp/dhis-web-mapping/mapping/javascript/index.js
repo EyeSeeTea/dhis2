@@ -1650,7 +1650,7 @@
                 bodyStyle: 'padding:8px',
                 labelWidth: G.conf.label_width,
                 items: [
-                    {html: '<div class="window-info">Register new WMS base layer</div>'},
+                    {html: '<div class="window-info">' + G.i18n.register_new_wms_overlay + '</div>'},
                     {
                         xtype: 'textfield',
                         id: 'baselayername_tf',
@@ -1718,7 +1718,7 @@
                         method: 'POST',
                         params: {name: bln, type: G.conf.map_layer_type_baselayer, url: blu, layers: bll},
                         success: function(r) {
-                            Ext.message.msg(true, G.i18n.baselayer + ' <span class="x-msg-hl">' + bln + '</span> ' + G.i18n.registered);
+                            Ext.message.msg(true, 'WMS ' + G.i18n.overlay + ' <span class="x-msg-hl">' + bln + '</span> ' + G.i18n.registered);
                             G.stores.baseLayer.load();
                             
                             if (G.vars.map.getLayersByName(bln).length) {
@@ -1754,7 +1754,7 @@
                         method: 'POST',
                         params: {id: bl},
                         success: function(r) {
-                            Ext.message.msg(true, G.conf.map_layer_type_baselayer + ' <span class="x-msg-hl">' + bln + '</span> '+ G.i18n.deleted);
+                            Ext.message.msg(true, 'WMS ' + G.i18n.overlay + ' <span class="x-msg-hl">' + bln + '</span> '+ G.i18n.deleted);
                             G.stores.baseLayer.load();
                             Ext.getCmp('baselayer_cb').clearValue();
                         }
@@ -1780,7 +1780,7 @@
                 bodyStyle: 'padding:8px',
                 labelWidth: G.conf.label_width,
                 items: [
-                    {html: '<div class="window-info">Register new overlay</div>'},
+                    {html: '<div class="window-info">' + G.i18n.register_new_vector_overlay + '</div>'},
                     {
                         xtype: 'textfield',
                         id: 'maplayername_tf',
@@ -1907,7 +1907,7 @@
                         method: 'POST',
                         params: {name: mln, type: 'overlay', url: mlmsf, fillColor: mlfc, fillOpacity: 1, strokeColor: mlsc, strokeWidth: mlsw},
                         success: function(r) {
-                            Ext.message.msg(true, 'Overlay <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.registered);
+                            Ext.message.msg(true, 'Vector ' + G.i18n.overlay + ' <span class="x-msg-hl">' + mln + '</span> ' + G.i18n.registered);
                             G.stores.overlay.load();
                             
                             if (G.vars.map.getLayersByName(mln).length) {
@@ -1950,7 +1950,7 @@
                         method: 'POST',
                         params: {id: ml},
                         success: function(r) {
-                            Ext.message.msg(true, 'Overlay <span class="x-msg-hl">' + mln + '</span> '+ G.i18n.deleted);
+                            Ext.message.msg(true, 'Vector ' + G.i18n.overlay + ' <span class="x-msg-hl">' + mln + '</span> '+ G.i18n.deleted);
                             G.stores.overlay.load();
                             Ext.getCmp('maplayer_cb').clearValue();
                         }
