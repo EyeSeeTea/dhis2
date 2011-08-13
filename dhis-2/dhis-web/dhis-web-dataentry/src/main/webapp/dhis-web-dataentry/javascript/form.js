@@ -374,7 +374,8 @@ function insertDataValues()
 
     $.getJSON( 'getDataValues.action', {
             periodId : periodId,
-        	dataSetId : dataSetId
+        	dataSetId : dataSetId,
+        	organisationUnitId: currentOrganisationUnitId
         },
         function( json )
         {
@@ -404,9 +405,9 @@ function insertDataValues()
 
                 var dataValue = dataValueMap[value.id];
 
-                if ( dataValue
-                        && ( ( value.min && new Number( dataValue ) < new Number( value.min ) ) || ( value.max && new Number(
-                                dataValue ) > new Number( value.max ) ) ) )
+                if ( dataValue && 
+                	( ( value.min && new Number( dataValue ) < new Number( value.min ) ) 
+                	|| ( value.max && new Number( dataValue ) > new Number( value.max ) ) ) )
                 {
                     $( valFieldId ).css( 'background-color', COLOR_ORANGE );
                 }
