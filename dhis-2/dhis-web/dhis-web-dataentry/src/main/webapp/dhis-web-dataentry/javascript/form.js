@@ -57,7 +57,7 @@ $( document ).ready( function()
 
 function addEventListeners()
 {
-    $( '[name="entryfield"]' ).each( function( i )
+    $( '[name="ef"]' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
         var dataElementId = id.split( '-' )[0];
@@ -99,7 +99,7 @@ function addEventListeners()
         }
     } );
 
-    $( '[name="entryselect"]' ).each( function( i )
+    $( '[name="es"]' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
         var dataElementId = id.split( '-' )[0];
@@ -363,11 +363,11 @@ function insertDataValues()
 
     // Clear existing values and colors
 
-    $( '[name="entryfield"]' ).val( '' );
-    $( '[name="entryselect"]' ).val( '' );
+    $( '[name="ef"]' ).val( '' );
+    $( '[name="es"]' ).val( '' );
 
-    $( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
-    $( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
+    $( '[name="ef"]' ).css( 'background-color', COLOR_WHITE );
+    $( '[name="es"]' ).css( 'background-color', COLOR_WHITE );
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
@@ -432,6 +432,8 @@ function insertDataValues()
             	$( '#completeButton' ).removeAttr( 'disabled' );
             	$( '#undoButton' ).attr( 'disabled', 'disabled' );
             }
+            
+            // TODO locking
         } );
 }
 
@@ -487,13 +489,13 @@ function getNextEntryField( field )
 {
     var index = field.getAttribute( 'tabindex' );
 
-    field = $( 'input[name="entryfield"][tabindex="' + ( ++index ) + '"]' );
+    field = $( 'input[name="ef"][tabindex="' + ( ++index ) + '"]' );
 
     while ( field )
     {
         if ( field.is( ':disabled' ) || field.is( ':hidden' ) )
         {
-            field = $( 'input[name="entryfield"][tabindex="' + ( ++index ) + '"]' );
+            field = $( 'input[name="ef"][tabindex="' + ( ++index ) + '"]' );
         }
         else
         {
@@ -506,13 +508,13 @@ function getPreviousEntryField( field )
 {
     var index = field.getAttribute( 'tabindex' );
 
-    field = $( 'input[name="entryfield"][tabindex="' + ( --index ) + '"]' );
+    field = $( 'input[name="ef"][tabindex="' + ( --index ) + '"]' );
 
     while ( field )
     {
         if ( field.is( ':disabled' ) || field.is( ':hidden' ) )
         {
-            field = $( 'input[name="entryfield"][tabindex="' + ( --index ) + '"]' );
+            field = $( 'input[name="ef"][tabindex="' + ( --index ) + '"]' );
         }
         else
         {

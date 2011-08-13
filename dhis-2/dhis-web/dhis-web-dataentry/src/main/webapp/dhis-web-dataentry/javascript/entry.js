@@ -49,7 +49,7 @@ function getEntryFieldValues()
 {
     var entryFieldValues = new Array();
 
-    $( 'input[name="entryfield"]' ).each( function( index )
+    $( 'input[name="ef"]' ).each( function( index )
     {
         entryFieldValues[$( this ).attr( 'id' )] = $( this ).attr( 'value' );
     } );
