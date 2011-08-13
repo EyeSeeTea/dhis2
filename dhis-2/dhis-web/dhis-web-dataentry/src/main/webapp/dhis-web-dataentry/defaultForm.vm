@@ -58,5 +58,3 @@
 <br>
 <br>
 #end
-
-#parse( "/dhis-web-dataentry/completeRegistration.vm" )

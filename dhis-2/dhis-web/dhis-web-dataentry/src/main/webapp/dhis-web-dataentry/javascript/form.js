@@ -446,6 +446,8 @@ function displayEntryFormCompleted()
 
     dataEntryFormIsLoaded = true;
     hideLoader();
+    
+    $( '#completenessDiv' ).css( 'display', 'block' );
 }
 
 function valueFocus( e )
