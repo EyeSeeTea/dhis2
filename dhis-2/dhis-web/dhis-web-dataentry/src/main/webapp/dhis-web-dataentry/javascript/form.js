@@ -543,7 +543,8 @@ function validateCompleteDataSet()
 
         $.getJSON( 'getValidationViolations.action', {
             periodId : periodId,
-            dataSetId : dataSetId
+            dataSetId : dataSetId,
+            organisationUnitId: currentOrganisationUnitId
         }, registerCompleteDataSet ).error( function()
         {
             $( '#completeButton' ).removeAttr( 'disabled' );
@@ -563,7 +564,8 @@ function registerCompleteDataSet( json )
     {
         $.getJSON( 'registerCompleteDataSet.action', {
             periodId : periodId,
-            dataSetId : dataSetId
+            dataSetId : dataSetId,
+            organisationUnitId: currentOrganisationUnitId
         }, function()
         {
         } ).error( function()
@@ -594,7 +596,8 @@ function undoCompleteDataSet()
 
         $.getJSON( 'undoCompleteDataSet.action', {
             periodId : periodId,
-            dataSetId : dataSetId
+            dataSetId : dataSetId,
+            organisationUnitId: currentOrganisationUnitId
         }, function()
         {
         } ).error( function()
@@ -628,7 +631,8 @@ function validate()
 
     $( '#validationDiv' ).load( 'validate.action', {
         periodId : periodId,
-        dataSetId : dataSetId
+        dataSetId : dataSetId,
+        organisationUnitId: currentOrganisationUnitId
     }, displayValidationDialog );
 }
 
