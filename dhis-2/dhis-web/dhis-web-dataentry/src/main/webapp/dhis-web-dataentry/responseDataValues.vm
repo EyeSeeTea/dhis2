@@ -15,6 +15,6 @@
     "max":"${element.max}"
   }#if( $velocityCount < $size2 ),#end
   #end ],
-  "locked":"${locked}",
-  "complete":"${complete}"
+  "locked":${locked},
+  "complete":${complete}
  }

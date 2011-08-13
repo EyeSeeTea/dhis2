@@ -419,6 +419,19 @@ function insertDataValues()
             // Update indicator values in form
 
             updateIndicators();
+            
+            // Set completeness button
+            
+            if ( json.complete )
+            {
+            	$( '#completeButton' ).attr( 'disabled', 'disabled' );
+            	$( '#undoButton' ).removeAttr( 'disabled' );
+            }
+            else
+            {
+            	$( '#completeButton' ).removeAttr( 'disabled' );
+            	$( '#undoButton' ).attr( 'disabled', 'disabled' );
+            }
         } );
 }
 
