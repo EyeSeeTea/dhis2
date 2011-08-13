@@ -8,6 +8,8 @@
  * combo {dataelementid}-cell // table cell for data element name
  * {dataelementid}-{optioncomboid}-min // min value for data value
  * {dataelementid}-{optioncomboid}-max // max value for data value
+ * 
+ * Class "ef" means "entry field", class "es" means "entry select".
  */
 
 // -----------------------------------------------------------------------------
