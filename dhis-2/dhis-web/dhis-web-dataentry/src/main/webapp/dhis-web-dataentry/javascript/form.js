@@ -655,9 +655,10 @@ function viewHist( dataElementId, optionComboId )
     var operandName = dataElementName + ' ' + optionComboName;
 
     $( '#historyDiv' ).load( 'viewHistory.action', {
-        dataElementId : dataElementId,
-        optionComboId : optionComboId,
-        periodId : periodId
+        dataElementId: dataElementId,
+        optionComboId: optionComboId,
+        periodId: periodId,
+        organisationUnitId: currentOrganisationUnitId 
     }, function()
     {
         displayHistoryDialog( operandName );
