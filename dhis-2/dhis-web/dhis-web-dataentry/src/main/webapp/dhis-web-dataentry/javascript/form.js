@@ -57,73 +57,6 @@ $( document ).ready( function()
     updateForms();
 } );
 
-function updateForms()
-{
-	purgeLocalForms();
-	console.log( 'Purged local forms' );
-	
-	updateExistingLocalForms();
-	console.log( 'Updated existing local forms' );
-	
-	downloadRemoteForms();
-	console.log( 'Downloaded remote forms' );
-}
-
-function purgeLocalForms()
-{
-	var formIds = storageManager.getAllForms();
-	
-	for ( i in formIds )
-	{
-		var localId = formIds[i];
-		
-		var existsOnServer = false;
-		
-		for ( remoteId in dataSets )
-		{
-			if ( localId == remoteId )
-			{
-				existsOnServer = true;
-				continue;
-			}
-		}
-		
-		if ( existsOnServer == false )
-		{
-			storageManager.deleteForm( localId );
-		}
-	}
-}
-
-function updateExistingLocalForms()
-{
-	var formIds = storageManager.getAllForms();
-	
-	for ( i in formIds )
-	{
-		var dataSetId = formIds[i];
-		
-		var remoteVersion = dataSets[dataSetId].version;
-		var localVersion = storageManager.getFormVersion( dataSetId );
-		
-		if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
-		{
-			storageManager.downloadForm( dataSetId );
-		}
-	}
-}
-
-function downloadRemoteForms()
-{
-	for ( dataSetId in dataSets )
-	{
-		if ( !storageManager.formExists( dataSetId ) )
-		{
-			storageManager.downloadForm( dataSetId );
-		}
-	}
-}
-
 function addEventListeners()
 {
     $( '[name="ef"]' ).each( function( i )
@@ -755,6 +688,81 @@ function closeCurrentSelection()
 {
     $( '#currentSelection' ).fadeOut();
 }
+
+// -----------------------------------------------------------------------------
+// Local storage of forms
+// -----------------------------------------------------------------------------
+
+function updateForms()
+{
+	purgeLocalForms();
+	console.log( 'Purged local forms' );
+	
+	updateExistingLocalForms();
+	console.log( 'Updated existing local forms' );
+	
+	downloadRemoteForms();
+	console.log( 'Downloaded remote forms' );
+}
+
+function purgeLocalForms()
+{
+	var formIds = storageManager.getAllForms();
+	
+	for ( i in formIds )
+	{
+		var localId = formIds[i];
+		
+		var existsOnServer = false;
+		
+		for ( remoteId in dataSets )
+		{
+			if ( localId == remoteId )
+			{
+				existsOnServer = true;
+				continue;
+			}
+		}
+		
+		if ( existsOnServer == false )
+		{
+			storageManager.deleteForm( localId );
+		}
+	}
+}
+
+function updateExistingLocalForms()
+{
+	var formIds = storageManager.getAllForms();
+	
+	for ( i in formIds )
+	{
+		var dataSetId = formIds[i];
+		
+		var remoteVersion = dataSets[dataSetId].version;
+		var localVersion = storageManager.getFormVersion( dataSetId );
+		
+		if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
+		{
+			storageManager.downloadForm( dataSetId );
+		}
+	}
+}
+
+function downloadRemoteForms()
+{
+	for ( dataSetId in dataSets )
+	{
+		if ( !storageManager.formExists( dataSetId ) )
+		{
+			storageManager.downloadForm( dataSetId );
+		}
+	}
+}
+
+// -----------------------------------------------------------------------------
+// StorageManager
+// -----------------------------------------------------------------------------
 
 /**
  * This object provides utility methods for localStorage and manages data entry
