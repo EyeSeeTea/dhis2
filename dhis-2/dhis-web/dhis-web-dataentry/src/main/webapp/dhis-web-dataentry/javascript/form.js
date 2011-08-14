@@ -117,7 +117,7 @@ function downloadRemoteForms()
 {
 	for ( dataSetId in dataSets )
 	{
-		if ( storageManager.getForm( dataSetId ) == null )
+		if ( !storageManager.formExists( dataSetId ) )
 		{
 			storageManager.downloadForm( dataSetId );
 		}
@@ -205,12 +205,27 @@ function clearEntryForm()
 
 function loadForm( dataSetId )
 {
-    var defaultForm = $( '#defaultForm' ).is( ':checked' );
-
-    $( '#contentDiv' ).load( 'loadForm.action', {
-        dataSetId : dataSetId,
-        defaultForm : defaultForm
-    }, loadDataValues );
+	if ( storageManager.formExists( dataSetId ) )
+	{
+		console.log( 'Loading form locally' );
+		
+		var html = storageManager.getForm( dataSetId );
+		
+		$( '#contentDiv' ).html( html );
+		
+		loadDataValues();
+	}
+	else
+	{	
+		console.log( 'Loading form remotely' );
+		
+	    var defaultForm = $( '#defaultForm' ).is( ':checked' );
+	
+	    $( '#contentDiv' ).load( 'loadForm.action', {
+	        dataSetId : dataSetId,
+	        defaultForm : defaultForm
+	    }, loadDataValues );
+	}
 }
 
 function loadDefaultForm()
@@ -895,6 +910,39 @@ function StorageManager()
 	}
 	
 	/**
+	 * Indicates whether a form exists.
+	 * 
+	 * @param dataSetId the identifier of the data set of the form.
+	 * @return true if a form exists, false otherwise. 
+	 */
+	this.formExists = function( dataSetId )
+	{
+		var id = KEY_FORM_PREFIX + dataSetId;
+		
+		return localStorage[id] != null;
+	}
+	
+	/**
+	 * Downloads the form for the data set with the given identifier from the 
+	 * remote server and saves the form locally. Potential existing forms with
+	 * the same identifier will be overwritten. Method is synchronous.
+	 * 
+	 * @param dataSetId the identifier of the data set of the form.
+	 */
+	this.downloadForm = function( dataSetId )
+	{
+		$.ajax( {
+			url: 'loadForm.action',
+			data: { dataSetId: dataSetId },
+			dataType: 'text',
+			async: false,
+			success: function( data, textStatus, jqXHR ) {					
+				storageManager.saveForm( dataSetId, data );
+			}
+		} );
+	}
+	
+	/**
 	 * Saves a version for a form.
 	 * 
 	 * @param the identifier of the data set of the form.
@@ -939,26 +987,6 @@ function StorageManager()
 		}
 		
 		return null;
-	}
-	
-	/**
-	 * Downloads the form for the data set with the given identifier from the 
-	 * remote server and saves the form locally. Potential existing forms with
-	 * the same identifier will be overwritten. Method is synchronous.
-	 * 
-	 * @param dataSetId the identifier of the data set of the form.
-	 */
-	this.downloadForm = function( dataSetId )
-	{
-		$.ajax( {
-			url: 'loadForm.action',
-			data: { dataSetId: dataSetId },
-			dataType: 'text',
-			async: false,
-			success: function( data, textStatus, jqXHR ) {					
-				storageManager.saveForm( dataSetId, data );
-			}
-		} );
 	}
 	
 	/**
