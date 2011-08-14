@@ -140,7 +140,7 @@ function loadForm( dataSetId )
 {
 	if ( storageManager.formExists( dataSetId ) )
 	{
-		console.log( 'Loading form locally' );
+		console.log( 'Loading form locally: ' + dataSetId );
 		
 		var html = storageManager.getForm( dataSetId );
 		
@@ -150,7 +150,7 @@ function loadForm( dataSetId )
 	}
 	else
 	{	
-		console.log( 'Loading form remotely' );
+		console.log( 'Loading form remotely: ' + dataSetId );
 		
 	    var defaultForm = $( '#defaultForm' ).is( ':checked' );
 	
@@ -726,8 +726,7 @@ function purgeLocalForms()
 		
 		if ( existsOnServer == false )
 		{
-			storageManager.deleteForm( localId );
-			
+			storageManager.deleteForm( localId );			
 			console.log( 'Deleted locally stored form: ' + localId );
 		}
 	}
@@ -746,7 +745,7 @@ function updateExistingLocalForms()
 		
 		if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
 		{
-			storageManager.downloadForm( dataSetId );
+			storageManager.downloadForm( dataSetId, remoteVersion );
 		}
 	}
 }
@@ -755,9 +754,11 @@ function downloadRemoteForms()
 {
 	for ( dataSetId in dataSets )
 	{
+		var remoteVersion = dataSets[dataSetId].version;
+		
 		if ( !storageManager.formExists( dataSetId ) )
 		{
-			storageManager.downloadForm( dataSetId );
+			storageManager.downloadForm( dataSetId, remoteVersion );
 		}
 	}
 }
@@ -935,11 +936,13 @@ function StorageManager()
 	/**
 	 * Downloads the form for the data set with the given identifier from the 
 	 * remote server and saves the form locally. Potential existing forms with
-	 * the same identifier will be overwritten. Method is synchronous.
+	 * the same identifier will be overwritten. Updates the form version. Method 
+	 * is synchronous.
 	 * 
 	 * @param dataSetId the identifier of the data set of the form.
+	 * @param formVersion the version of the form of the remote data set.
 	 */
-	this.downloadForm = function( dataSetId )
+	this.downloadForm = function( dataSetId, formVersion )
 	{
 		$.ajax( {
 			url: 'loadForm.action',
@@ -948,6 +951,7 @@ function StorageManager()
 			async: false,
 			success: function( data, textStatus, jqXHR ) {					
 				storageManager.saveForm( dataSetId, data );
+				storageManager.saveFormVersion( dataSetId, formVersion );
 			}
 		} );
 	}
