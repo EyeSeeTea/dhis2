@@ -713,20 +713,9 @@ function purgeLocalForms()
 	{
 		var localId = formIds[i];
 		
-		var existsOnServer = false;
-		
-		for ( remoteId in dataSets )
+		if ( dataSets[localId] == null )
 		{
-			if ( localId == remoteId )
-			{
-				existsOnServer = true;
-				continue;
-			}
-		}
-		
-		if ( existsOnServer == false )
-		{
-			storageManager.deleteForm( localId );			
+			storageManager.deleteForm( localId );
 			console.log( 'Deleted locally stored form: ' + localId );
 		}
 	}
@@ -734,18 +723,19 @@ function purgeLocalForms()
 
 function updateExistingLocalForms()
 {
-	var formIds = storageManager.getAllForms();
+	var formIds = storageManager.getAllForms();	
+	var formVersions = storageManager.getAllFormVersions();
 	
 	for ( i in formIds )
 	{
 		var dataSetId = formIds[i];
 		
 		var remoteVersion = dataSets[dataSetId].version;
-		var localVersion = storageManager.getFormVersion( dataSetId );
+		var localVersion = formVersions[dataSetId];
 		
 		if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
 		{
-			storageManager.downloadForm( dataSetId, remoteVersion );
+			storageManager.downloadForm( dataSetId, remoteVersion ); 
 		}
 	}
 }
@@ -762,6 +752,8 @@ function downloadRemoteForms()
 		}
 	}
 }
+
+// TODO break if local storage is full
 
 // -----------------------------------------------------------------------------
 // StorageManager
@@ -1001,6 +993,11 @@ function StorageManager()
 		}
 		
 		return null;
+	}
+	
+	this.getAllFormVersions = function()
+	{
+		return localStorage[KEY_FORM_VERSIONS] != null ?  JSON.parse( localStorage[KEY_FORM_VERSIONS] ) : null;
 	}
 	
 	/**
