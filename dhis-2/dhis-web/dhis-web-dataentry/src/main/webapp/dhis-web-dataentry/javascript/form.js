@@ -53,7 +53,76 @@ var COLOR_WHITE = '#ffffff';
 $( document ).ready( function()
 {
     selection.setListenerFunction( organisationUnitSelected );
+    
+    updateForms();
 } );
+
+function updateForms()
+{
+	purgeLocalForms();
+	console.log( 'Purged local forms' );
+	
+	updateExistingLocalForms();
+	console.log( 'Updated existing local forms' );
+	
+	downloadRemoteForms();
+	console.log( 'Downloaded remote forms' );
+}
+
+function purgeLocalForms()
+{
+	var formIds = storageManager.getAllForms();
+	
+	for ( i in formIds )
+	{
+		var localId = formIds[i];
+		
+		var existsOnServer = false;
+		
+		for ( remoteId in dataSets )
+		{
+			if ( localId == remoteId )
+			{
+				existsOnServer = true;
+				continue;
+			}
+		}
+		
+		if ( existsOnServer == false )
+		{
+			storageManager.deleteForm( localId );
+		}
+	}
+}
+
+function updateExistingLocalForms()
+{
+	var formIds = storageManager.getAllForms();
+	
+	for ( i in formIds )
+	{
+		var dataSetId = formIds[i];
+		
+		var remoteVersion = dataSets[dataSetId].version;
+		var localVersion = storageManager.getFormVersion( dataSetId );
+		
+		if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
+		{
+			storageManager.downloadForm( dataSetId );
+		}
+	}
+}
+
+function downloadRemoteForms()
+{
+	for ( dataSetId in dataSets )
+	{
+		if ( storageManager.getForm( dataSetId ) == null )
+		{
+			storageManager.downloadForm( dataSetId );
+		}
+	}
+}
 
 function addEventListeners()
 {
@@ -134,12 +203,11 @@ function clearEntryForm()
     dataEntryFormIsLoaded = false;
 }
 
-function loadForm( periodId, dataSetId )
+function loadForm( dataSetId )
 {
     var defaultForm = $( '#defaultForm' ).is( ':checked' );
 
     $( '#contentDiv' ).load( 'loadForm.action', {
-        periodId : periodId,
         dataSetId : dataSetId,
         defaultForm : defaultForm
     }, loadDataValues );
@@ -148,9 +216,8 @@ function loadForm( periodId, dataSetId )
 function loadDefaultForm()
 {
     var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodId = $( '#selectedPeriodId' ).val();
 
-    loadForm( periodId, dataSetId );
+    loadForm( dataSetId );
 }
 
 // -----------------------------------------------------------------------------
@@ -305,7 +372,7 @@ function dataSetSelected()
         {
             showLoader();
             $( '#selectedPeriodId' ).val( periodId );
-            loadForm( periodId, dataSetId );
+            loadForm( dataSetId );
         }
         else
         {
@@ -339,7 +406,7 @@ function periodSelected()
         }
         else
         {
-            loadForm( periodId, dataSetId );
+            loadForm( dataSetId );
         }
     }
 }
@@ -759,10 +826,12 @@ function StorageManager()
 		try
 		{
 			localStorage[id] = html;
+			
+			console.log( 'Successfully stored form: ' + dataSetId );
 		}
 		catch ( e )
 		{
-			console.log( "Max local storage quota reached, ignored form: " + dataSetId );			
+			console.log( 'Max local storage quota reached, ignored form: ' + dataSetId );			
 			return false;
 		}
 		
@@ -770,7 +839,7 @@ function StorageManager()
 		{
 			this.deleteForm( dataSetId );
 			
-			console.log( "Max local storage quota for forms reached, ignored form: " + dataSetId );
+			console.log( 'Max local storage quota for forms reached, ignored form: ' + dataSetId );
 			return false;
 		}
 		
@@ -801,6 +870,31 @@ function StorageManager()
 	}
 	
 	/**
+	 * Returns an array of the identifiers of all forms.
+	 * 
+	 * @return array with form identifiers.
+	 */
+	this.getAllForms = function()
+	{
+		var formIds = [];
+		var i = 0;
+		
+		for ( var i = 0; i < localStorage.length; i++ )
+		{
+			var key = localStorage.key(i);
+			
+			if ( key.substring( 0, KEY_FORM_PREFIX.length ) == KEY_FORM_PREFIX )
+			{
+				var id = key.split( '-' )[1];
+				
+				formIds[i++] = id;
+			}
+		}
+		
+		return formIds;
+	}
+	
+	/**
 	 * Saves a version for a form.
 	 * 
 	 * @param the identifier of the data set of the form.
@@ -820,10 +914,12 @@ function StorageManager()
 		try
 		{
 			localStorage[KEY_FORM_VERSIONS] = JSON.stringify( formVersions );
+			
+			console.log( 'Successfully stored form version: ' + dataSetId );
 		}
 		catch ( e )
 		{
-			console.log( "Max local storage quota reached, ignored form version " + e );
+			console.log( 'Max local storage quota reached, ignored form version: ' + dataSetId );
 		}
 	}
 	
@@ -843,6 +939,26 @@ function StorageManager()
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Downloads the form for the data set with the given identifier from the 
+	 * remote server and saves the form locally. Potential existing forms with
+	 * the same identifier will be overwritten. Method is synchronous.
+	 * 
+	 * @param dataSetId the identifier of the data set of the form.
+	 */
+	this.downloadForm = function( dataSetId )
+	{
+		$.ajax( {
+			url: 'loadForm.action',
+			data: { dataSetId: dataSetId },
+			dataType: 'text',
+			async: false,
+			success: function( data, textStatus, jqXHR ) {					
+				storageManager.saveForm( dataSetId, data );
+			}
+		} );
 	}
 	
 	/**
@@ -870,10 +986,12 @@ function StorageManager()
 		try
 		{
 			localStorage[KEY_DATAVALUES] = JSON.stringify( dataValues );
+			
+			console.log( 'Successfully stored data value' );
 		}
 		catch ( e )
 		{
-			console.log( "Max local storage quota reached, ignored data value " + e );
+			console.log( 'Max local storage quota reached, ignored data value' );
 		}
 	}
 	
