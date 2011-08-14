@@ -727,6 +727,8 @@ function purgeLocalForms()
 		if ( existsOnServer == false )
 		{
 			storageManager.deleteForm( localId );
+			
+			console.log( 'Deleted locally stored form: ' + localId );
 		}
 	}
 }
