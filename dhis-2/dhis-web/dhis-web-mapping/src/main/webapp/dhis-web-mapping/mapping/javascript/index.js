@@ -6,7 +6,7 @@
     
 	G.vars.map = new OpenLayers.Map({
         controls: [new OpenLayers.Control.MouseToolbar()],
-        displayProjection: new OpenLayers.Projection("EPSG:4326"),
+        displayProjection: new OpenLayers.Projection('EPSG:4326'),
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
@@ -28,6 +28,7 @@
             G.system.infrastructuralPeriodType = init.systemSettings.infrastructuralPeriodType;
             G.system.mapDateType.value = G.system.aggregationStrategy == G.conf.aggregation_strategy_batch ?
 				G.conf.map_date_type_fixed : init.userSettings.mapDateType;
+            G.system.rootNode = init.rootNode;
 
     /* Section: stores */
     var mapViewStore = new Ext.data.JsonStore({
@@ -308,7 +309,7 @@
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
+                    {'fillOpacity': 1, 'strokeColor': '#fff', 'strokeWidth': 1, 'pointRadius': 5},
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
@@ -327,7 +328,7 @@
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
+                    {'fillOpacity': 1, 'strokeColor': '#fff', 'strokeWidth': 1, 'pointRadius': 5},
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
@@ -346,7 +347,7 @@
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#222222', 'strokeWidth': 1, 'pointRadius': 5},
+                    {'fillOpacity': 1, 'strokeColor': '#fff', 'strokeWidth': 1, 'pointRadius': 5},
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
@@ -2451,29 +2452,11 @@
     /* Section: widgets */
     choropleth = new mapfish.widgets.geostat.Choropleth({
         id: 'choropleth',
-		title: '<span class="panel-title">Thematic layer 1</span>',
         map: G.vars.map,
         layer: polygonLayer,
         featureSelection: false,
         legendDiv: 'polygonlegend',
         defaults: {width: 130},
-        tools: [
-            {
-                id: 'refresh',
-                qtip: 'Refresh layer',
-                handler: function() {
-                    choropleth.updateValues = true;
-                    choropleth.classify();
-                }
-            },
-            {
-                id: 'close',
-                qtip: 'Clear layer',
-                handler: function() {
-                    choropleth.formValues.clearForm.call(choropleth);
-                }
-            }
-        ],
         listeners: {
             'expand': function() {
                 G.vars.activePanel.setPolygon();
@@ -2483,6 +2466,49 @@
             }
         }
     });
+    
+    choroplethWindow = new Ext.Window({
+        title: '<span class="panel-title">Thematic layer 1</span>',
+        layout: 'fit',
+        bodyStyle: 'padding:10px 8px 0px 8px; background-color:#fff',
+        closeAction: 'hide',
+        width: 575,
+        height: 477,
+        items: choropleth,
+        bbar: [
+            '->',
+            {
+                xtype: 'button',
+                text: G.i18n.apply,
+                iconCls: 'icon-assign',
+                scope: choropleth,
+                handler: function() {       
+                    if (!this.formValidation.validateForm.apply(this)) {
+                        return;
+                    }
+                    var node = this.cmp.parentorgunit.getSelectionModel().getSelectedNode();
+                    if (!node || !this.cmp.level.getValue()) {
+                        return;
+                    }
+                    if (this.cmp.parentorgunit.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                        Ext.message.msg(false, 'Level is higher than boundary level');
+                        return;
+                    }
+                    
+                    this.cmp.mapview.clearValue();
+                    this.updateValues = true;
+                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
+                        this.cmp.level.getValue(), this.cmp.level.getRawValue());
+                    
+                    choroplethWindow.hide();									
+                    this.loadGeoJson();
+                }
+            }
+        ]
+    });
+    
+    choroplethWindow.setPosition(400,50);
+    choroplethWindow.show();
 
     point = new mapfish.widgets.geostat.Point({
         id: 'point',
@@ -2574,7 +2600,7 @@
                 id: 'close',
                 qtip: 'Clear layer',
                 handler: function() {
-                    choropleth.formValues.clearForm.call(centroid);
+                    centroid.formValues.clearForm.call(centroid);
                 }
             }
         ],
@@ -2592,6 +2618,15 @@
 	var mapLabel = new Ext.form.Label({
 		text: G.i18n.map,
 		style: 'font:bold 11px arial; color:#333;'
+	});
+	
+	var choroplethButton = new Ext.Button({
+		iconCls: 'icon-choropleth',
+		tooltip: G.i18n.thematic_layer + ' 1',
+        style: 'margin-top:1px',
+		handler: function() {
+			G.vars.map.zoomIn();
+		}
 	});
 	
 	var zoomInButton = new Ext.Button({
@@ -2910,6 +2945,7 @@
             {
                 region: 'east',
                 id: 'east',
+                layout: 'anchor',
                 collapsible: true,
 				header: false,
                 margins: '0 5px 0 5px',
@@ -2918,7 +2954,6 @@
                     frame: true,
                     collapsible: true
                 },
-                layout: 'anchor',
                 items:
                 [
                     layerTree,
@@ -2969,7 +3004,6 @@
                     frame: true
                 },
                 items: [
-                    choropleth,
                     point,
                     symbol,
                     centroid

@@ -312,7 +312,7 @@ G.util = {
         }
         else {
             cb.currentValue = cb.getValue();
-            this.form.findField(mv).clearValue();
+            mv.clearValue();
             return false;
         }
     },
@@ -541,7 +541,9 @@ G.system = {
         }
     },
     
-    infrastructuralPeriodType: null
+    infrastructuralPeriodType: null,
+    
+    rootNode: null
 };
 
 G.func = {
