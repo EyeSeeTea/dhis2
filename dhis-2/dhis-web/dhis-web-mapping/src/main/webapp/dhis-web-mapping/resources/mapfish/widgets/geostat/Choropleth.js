@@ -1883,14 +1883,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.cmp.startdate.reset();
             this.cmp.enddate.reset();
             
-            var boundary = this.form.find('name','boundary')
-            var level = this.form.find('name','level');
-            boundary.reset();
-            level.reset();
-            if (boundary.treePanel && level.levelComboBox) {
-                boundary.treePanel.selectPath(boundary.treePanel.getRootNode().getPath());
-                level.levelComboBox.clearValue();
+            if (this.cmp.parentorgunit.getSelectionModel().getSelectedNode()) {
+                this.cmp.parentorgunit.getSelectionModel().getSelectedNode().unselect();
+                this.cmp.parentorgunit.collapseAll();
+                this.cmp.parentorgunit.getRootNode().expand();
             }
+            this.cmp.level.clearValue();
             
             this.legend.reset();
             this.prepareMapViewLegend();

@@ -333,7 +333,7 @@
                 )
             ),
             'select': new OpenLayers.Style(
-                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+                {'strokeColor': '#555', 'strokeWidth': 2, 'cursor': 'pointer'}
             )
         })
     });
@@ -352,7 +352,7 @@
                 )
             ),
             'select': new OpenLayers.Style(
-                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+                {'strokeColor': '#555', 'strokeWidth': 2, 'cursor': 'pointer'}
             )
         })
     });
@@ -2468,7 +2468,7 @@
     });
     
     choroplethWindow = new Ext.Window({
-        title: '<span class="panel-title">Thematic layer 1</span>',
+        title: '<span id="window-thematic1-title">Thematic layer 1</span>',
         layout: 'fit',
         bodyStyle: 'padding:10px 8px 0px 8px; background-color:#fff',
         closeAction: 'hide',
@@ -2506,9 +2506,7 @@
             }
         ]
     });
-    
     choroplethWindow.setPosition(400,50);
-    choroplethWindow.show();
 
     point = new mapfish.widgets.geostat.Point({
         id: 'point',
@@ -2621,12 +2619,35 @@
 	});
 	
 	var choroplethButton = new Ext.Button({
-		iconCls: 'icon-choropleth',
+		iconCls: 'icon-thematic1',
 		tooltip: G.i18n.thematic_layer + ' 1',
         style: 'margin-top:1px',
-		handler: function() {
-			G.vars.map.zoomIn();
-		}
+        menu: new Ext.menu.Menu({
+            items: [
+                {
+                    text: 'Edit layer..',
+                    iconCls: 'menu-layeroptions-locate',
+                    handler: function() {
+                        choroplethWindow.show();
+                    }
+                },
+                {
+                    text: 'Refresh layer',
+                    iconCls: 'menu-layeroptions-locate',
+                    handler: function() {
+                        choropleth.updateValues = true;
+                        choropleth.classify();
+                    }
+                },
+                {
+                    text: 'Clear layer',
+                    iconCls: 'menu-layeroptions-locate',
+                    handler: function() {
+                        choropleth.formValues.clearForm.call(choropleth);
+                    }
+                }
+            ]
+        })
 	});
 	
 	var zoomInButton = new Ext.Button({
@@ -2911,7 +2932,9 @@
 			' ',' ',' ',' ',
 			mapLabel,
 			' ',' ',' ',' ',' ',
-			zoomInButton,
+			choroplethButton,
+			'-',
+            zoomInButton,
 			zoomOutButton,
 			zoomToVisibleExtentButton,
 			viewHistoryButton,

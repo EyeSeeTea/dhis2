@@ -1105,6 +1105,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
                 boundary.treePanel.selectPath(boundary.treePanel.getRootNode().getPath());
                 level.levelComboBox.clearValue();
             }
+            this.form.findField('maplegendset').clearValue();
             
             document.getElementById(this.legendDiv).innerHTML = '';
             
