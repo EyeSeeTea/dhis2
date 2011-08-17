@@ -221,7 +221,7 @@ G.util = {
                     OpenLayers.Util.applyDefaults({
                         'fillOpacity': 1,
                         'strokeWidth': 1,
-                        'strokeColor': '#222222',
+                        'strokeColor': '#fff',
                         'label': '${labelString}',
                         'fontFamily': 'arial,lucida sans unicode',
                         'fontSize': fsize ? fsize : 13,
@@ -243,7 +243,7 @@ G.util = {
                 'default': new OpenLayers.Style(
                     OpenLayers.Util.applyDefaults({
                         'fillOpacity': 1,
-                        'strokeColor': '#222222',
+                        'strokeColor': '#fff',
                         'strokeWidth': 1
                     },
                     OpenLayers.Feature.Vector.style['default'])
