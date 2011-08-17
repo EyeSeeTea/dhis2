@@ -2473,7 +2473,7 @@
         bodyStyle: 'padding:10px 8px 0px 8px; background-color:#fff',
         closeAction: 'hide',
         width: 575,
-        height: 477,
+        height: 478,
         items: choropleth,
         bbar: [
             '->',
@@ -2486,11 +2486,11 @@
                     if (!this.formValidation.validateForm.apply(this)) {
                         return;
                     }
-                    var node = this.cmp.parentorgunit.getSelectionModel().getSelectedNode();
+                    var node = this.cmp.parent.getSelectionModel().getSelectedNode();
                     if (!node || !this.cmp.level.getValue()) {
                         return;
                     }
-                    if (this.cmp.parentorgunit.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                    if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
                         Ext.message.msg(false, 'Level is higher than boundary level');
                         return;
                     }
@@ -2962,7 +2962,11 @@
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
 		handler: function() {
-console.log(polygonLayer);            
+            
+            
+choropleth.cmp.parent.getNodeById(264).expand();
+choropleth.cmp.parent.getNodeById(539).select();
+
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }

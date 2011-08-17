@@ -812,6 +812,56 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 }
             }
         });
+        
+        this.cmp.level = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.level,
+            editable: false,
+            valueField: 'level',
+            displayField: 'name',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            selectOnFocus: true,
+            fieldLabel: G.i18n.level,
+            width: G.conf.combo_width,
+            store: G.stores.organisationUnitLevel,
+            listeners: {
+                'afterrender': {
+                    scope: this,
+                    fn: function(cb) {
+                    }
+                }
+            }
+        });
+        
+        this.cmp.parent = new Ext.tree.TreePanel({
+            bodyStyle: 'background-color:#fff',
+            height: 315,
+            width: 257,
+            autoScroll: true,
+            lines: false,
+            loader: new Ext.tree.TreeLoader({
+                dataUrl: G.conf.path_mapping + 'getOrganisationUnitChildren' + G.conf.type
+            }),
+            root: {
+                id: G.system.rootNode.id,
+                text: G.system.rootNode.name,
+                level: G.system.rootNode.level,
+                hasChildrenWithCoordinates: G.system.rootNode.hasChildrenWithCoordinates,
+                nodeType: 'async',
+                draggable: false,
+                expanded: true
+            },
+            clickedNode: null,
+            listeners: {
+                'click': {
+                    scope: this,
+                    fn: function(n) {
+                        this.cmp.parent.selectedNode = n;
+                    }
+                }
+            }
+        });
     },
     
     addItems: function() {    
@@ -877,242 +927,30 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     },
                     {
                         xtype: 'panel',
-                        width: 280,
+                        width: 270,
                         bodyStyle: 'padding:0 0 0 8px;',
                         items: [
-                            {
-                                html: '<div class="window-info">' + G.i18n.organisation_unit_level + '</div>'
-                            },
+                            { html: '<div class="window-info">' + G.i18n.organisation_unit_level + '</div>' },
+                            
                             {
                                 xtype: 'panel',
                                 layout: 'form',
                                 items: [
-                                    {
-                                        xtype: 'combo',
-                                        name: 'level',
-                                        fieldLabel: G.i18n.level,
-                                        editable: false,
-                                        valueField: 'level',
-                                        displayField: 'name',
-                                        mode: 'remote',
-                                        forceSelection: true,
-                                        triggerAction: 'all',
-                                        selectOnFocus: true,
-                                        fieldLabel: G.i18n.level,
-                                        width: G.conf.combo_width,
-                                        style: 'margin-left:5px',
-                                        store: G.stores.organisationUnitLevel,
-                                        listeners: {
-                                            'afterrender': {
-                                                scope: this,
-                                                fn: function(cb) {
-                                                }
-                                            },
-                                            'render': {
-                                                scope: this,
-                                                fn: function(cmp) {
-                                                    this.cmp[cmp.name] = cmp;
-                                                }
-                                            }
-                                        }
-                                    }
+                                    this.cmp.level
                                 ]
                             },
                             
-                            { html: '<div class="thematic-br">' },
+                            { html: '<div class="thematic-br"></div><div class="thematic-br"></div>' },
                             
-                            { html: '<div class="thematic-br">' },
-                            {
-                                html: '<div class="window-info">Parent organisation unit</div>'
-                            },
-                            {
-                                xtype: 'treepanel',
-                                name: 'parentorgunit',
-                                bodyStyle: 'background-color:#fff',
-                                height: 315,
-                                width: 262,
-                                autoScroll: true,
-                                lines: false,
-                                loader: new Ext.tree.TreeLoader({
-                                    dataUrl: G.conf.path_mapping + 'getOrganisationUnitChildren' + G.conf.type
-                                }),
-                                root: {
-                                    id: G.system.rootNode.id,
-                                    text: G.system.rootNode.name,
-                                    level: G.system.rootNode.level,
-                                    hasChildrenWithCoordinates: G.system.rootNode.hasChildrenWithCoordinates,
-                                    nodeType: 'async',
-                                    draggable: false,
-                                    expanded: true
-                                },
-                                clickedNode: null,
-                                listeners: {
-                                    'click': {
-                                        scope: this,
-                                        fn: function(n) {
-                                            this.cmp.parentorgunit.selectedNode = n;
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            }
+                            { html: '<div class="window-info">Parent organisation unit</div>' },
+                            
+                            this.cmp.parent
                         ]
                     }
                 ]
             }
         ];
     },
-    
-    createSingletonCmp: {
-		treeWindow: function() {
-			Ext.Ajax.request({
-				url: G.conf.path_commons + 'getOrganisationUnits' + G.conf.type,
-				params: {level: 1},
-				method: 'POST',
-				scope: this,
-				success: function(r) {
-					var rootNode = Ext.util.JSON.decode(r.responseText).organisationUnits[0];
-                    var rootUnit = {
-						id: rootNode.id,
-						name: rootNode.name,
-                        level: 1,
-						hasChildrenWithCoordinates: rootNode.hasChildrenWithCoordinates
-					};
-					
-					var w = new Ext.Window({
-						title: 'Boundary and level',
-						closeAction: 'hide',
-						autoScroll: true,
-						height: 'auto',
-						autoHeight: true,
-						width: G.conf.window_width,
-						items: [
-							{
-								xtype: 'panel',
-								bodyStyle: 'padding:8px; background-color:#ffffff',
-								items: [
-									{html: '<div class="window-info">' + G.i18n.select_outer_boundary + '</div>'},
-									{
-										xtype: 'treepanel',
-										bodyStyle: 'background-color:#ffffff',
-										height: screen.height / 3,
-										autoScroll: true,
-										lines: false,
-										loader: new Ext.tree.TreeLoader({
-											dataUrl: G.conf.path_mapping + 'getOrganisationUnitChildren' + G.conf.type
-										}),
-										root: {
-											id: rootUnit.id,
-											text: rootUnit.name,
-                                            level: rootUnit.level,
-											hasChildrenWithCoordinates: rootUnit.hasChildrenWithCoordinates,
-											nodeType: 'async',
-											draggable: false,
-											expanded: true
-										},
-										clickedNode: null,
-										listeners: {
-											'click': {
-												scope: this,
-												fn: function(n) {
-													//this.cmp.parentorgunit.selectedNode = n;
-												}
-											},
-                                            'afterrender': {
-                                                scope: this,
-                                                fn: function(tp) {
-                                                    //this.cmp.parentorgunit.treePanel = tp;
-                                                }
-                                            }
-										}
-									}
-								]
-							},
-							{
-								xtype: 'panel',
-								layout: 'form',
-								bodyStyle: 'padding:8px; background-color:#ffffff',
-                                labelWidth: G.conf.label_width,
-								items: [
-									{html: '<div class="window-info">' + G.i18n.select_organisation_unit_level + '</div>'},
-									{
-										xtype: 'combo',
-										fieldLabel: G.i18n.level,
-										editable: false,
-										valueField: 'level',
-										displayField: 'name',
-										mode: 'remote',
-										forceSelection: true,
-										triggerAction: 'all',
-										selectOnFocus: true,
-										emptyText: G.conf.emptytext,
-										labelSeparator: G.conf.labelseparator,
-										fieldLabel: G.i18n.level,
-										width: G.conf.combo_width_fieldset,
-										minListWidth: G.conf.combo_width_fieldset,
-										store: G.stores.organisationUnitLevel,
-										listeners: {
-											'afterrender': {
-												scope: this,
-												fn: function(cb) {
-													this.cmp.level.levelComboBox = cb;
-												}
-											}
-										}
-									}
-								]
-							}
-						],
-						bbar: [
-							'->',
-							{
-								xtype: 'button',
-								text: G.i18n.apply,
-								iconCls: 'icon-assign',
-								scope: this,
-								handler: function() {
-									var node = this.cmp.parentorgunit.selectedNode;
-									if (!node || !this.cmp.level.levelComboBox.getValue()) {
-										return;
-									}
-									if (node.attributes.level > this.cmp.level.levelComboBox.getValue()) {
-										Ext.message.msg(false, 'Level is higher than boundary level');
-										return;
-									}
-                                    
-                                    if (Ext.getCmp('locatefeature_w')) {
-										Ext.getCmp('locatefeature_w').destroy();
-									}
-									
-									this.cmp.mapview.clearValue();
-									this.updateValues = true;
-									this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
-										this.cmp.level.levelComboBox.getValue(), this.cmp.level.levelComboBox.getRawValue());
-										
-									this.cmp.parentorgunit.setValue(node.attributes.text);
-									this.cmp.level.setValue(this.cmp.level.levelComboBox.getRawValue());
-									
-									this.cmp.parentorgunit.treeWindow.hide();									
-									this.loadGeoJson();
-								}
-							}
-						]
-					});
-					
-					var x = Ext.getCmp('center').x + G.conf.window_position_x;
-					var y = Ext.getCmp('center').y + G.conf.window_position_y;
-					w.setPosition(x,y);
-					w.show();
-					this.cmp.parentorgunit.treeWindow = w;
-				}
-			});
-		}
-	},
     
     createSelectFeatures: function() {
         var scope = this;
@@ -1327,15 +1165,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     function organisationUnitLevelCallback() {
                         this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
                         
-                        this.cmp.parentorgunit.selectedNode = {attributes: {
+                        this.cmp.parent.selectedNode = {attributes: {
                             id: this.organisationUnitSelection.parent.id,
                             text: this.organisationUnitSelection.parent.name,
                             level: this.organisationUnitSelection.parent.level
                         }};
-                        if (this.cmp.parentorgunit.getSelectionModel().getSelectedNode()) {
-                            this.cmp.parentorgunit.getSelectionModel().getSelectedNode().unselect();
-                            this.cmp.parentorgunit.collapseAll();
-                            this.cmp.parentorgunit.getRootNode().expand();
+                        if (this.cmp.parent.getSelectionModel().getSelectedNode()) {
+                            this.cmp.parent.getSelectionModel().getSelectedNode().unselect();
+                            this.cmp.parent.collapseAll();
+                            this.cmp.parent.getRootNode().expand();
                         }
                         this.cmp.level.setValue(this.organisationUnitSelection.level.level);
                         this.loadGeoJson();
@@ -1569,15 +1407,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
         
         G.stores.organisationUnitLevel.load();
-        this.cmp.parentorgunit.selectedNode = {attributes: {
+        this.cmp.parent.selectedNode = {attributes: {
             id: this.mapView.parentOrganisationUnitId,
             text: this.mapView.parentOrganisationUnitName,
             level: this.mapView.parentOrganisationUnitLevel
         }};
-        if (this.cmp.parentorgunit.getSelectionModel().getSelectedNode()) {
-            this.cmp.parentorgunit.getSelectionModel().getSelectedNode().unselect();
-            this.cmp.parentorgunit.collapseAll();
-            this.cmp.parentorgunit.getRootNode().expand();
+        if (this.cmp.parent.getSelectionModel().getSelectedNode()) {
+            this.cmp.parent.getSelectionModel().getSelectedNode().unselect();
+            this.cmp.parent.collapseAll();
+            this.cmp.parent.getRootNode().expand();
         }
         this.cmp.level.setValue(this.mapView.organisationUnitLevelName);
         
@@ -1658,7 +1496,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 }
             }
 
-            if (!this.cmp.parentorgunit.selectedNode || !this.cmp.level.getValue()) {
+            if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
                 if (exception) {
                     Ext.message.msg(false, G.i18n.form_is_not_complete);
                 }
@@ -1758,10 +1596,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.cmp.startDate.reset();
             this.cmp.endDate.reset();
             
-            if (this.cmp.parentorgunit.getSelectionModel().getSelectedNode()) {
-                this.cmp.parentorgunit.getSelectionModel().getSelectedNode().unselect();
-                this.cmp.parentorgunit.collapseAll();
-                this.cmp.parentorgunit.getRootNode().expand();
+            if (this.cmp.parent.getSelectionModel().getSelectedNode()) {
+                this.cmp.parent.getSelectionModel().getSelectedNode().unselect();
+                this.cmp.parent.collapseAll();
+                this.cmp.parent.getRootNode().expand();
             }
             this.cmp.level.clearValue();
             
