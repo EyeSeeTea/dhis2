@@ -321,6 +321,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.valueType.value = this.mapView.mapValueType;
                         this.cmp.mapValueType.setValue(this.valueType.value);
                         this.setMapView();
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -349,6 +351,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.valueType.value = cb.getValue();
                         this.prepareMapViewValueType();
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -373,6 +377,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.cmp.indicator.clearValue();
                         this.stores.indicatorsByGroup.setBaseParam('indicatorGroupId', cb.getValue());
                         this.stores.indicatorsByGroup.load();
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -434,6 +440,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                                 }
                             }
                         });
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -458,6 +466,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.cmp.dataElement.clearValue();
                         this.stores.dataElementsByGroup.setBaseParam('dataElementGroupId', cb.getValue());
                         this.stores.dataElementsByGroup.load();
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -518,6 +528,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                                 }
                             }
                         });
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -542,6 +554,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.cmp.period.clearValue();
                         this.stores.periodsByType.setBaseParam('name', cb.getValue());
                         this.stores.periodsByType.load();
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -571,6 +585,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.updateValues = true;
                         this.classify(false, cb.keepPosition);                        
                         G.util.setKeepPosition(cb);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -589,6 +605,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.updateValues = true;
                         this.cmp.endDate.setMinValue(date);
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -607,6 +625,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         this.updateValues = true;
                         this.cmp.startDate.setMaxValue(date);
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -645,6 +665,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                             this.prepareMapViewLegend();                            
                             this.classify(false, true);
                         }
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -666,6 +688,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     fn: function() {
                         this.cmp.mapview.clearValue();
                         this.applyPredefinedLegend();
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -702,6 +726,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                             this.prepareMapViewLegend();
                             this.classify(false, true);
                         }
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -716,6 +742,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function() {
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }  
             }
@@ -744,6 +772,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                             this.legend.classes = cb.getValue();
                             this.classify(false, true);
                         }
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -759,6 +789,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function() {
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -774,6 +806,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function() {
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -791,6 +825,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function() {
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -808,6 +844,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function() {
                         this.classify(false, true);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -835,6 +873,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function() {
                         this.formValidation.validateForm.call(this);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -867,6 +907,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 this.collapseAll();
                 this.getRootNode().expand();
                 this.isSelected = false;
+console.log(this.widget);                
                 this.widget.window.cmp.apply.disable();
             },
             listeners: {
@@ -875,7 +916,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     fn: function(n) {
                         this.cmp.parent.selectedNode = n;
                         this.cmp.parent.isSelected = true;
-                        this.formValidation.validateForm.call(this);                     
+                        this.formValidation.validateForm.call(this);
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }

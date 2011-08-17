@@ -2113,22 +2113,6 @@
                 }
             ]
         }),
-        contextMenuVector: new Ext.menu.Menu({
-            items: [
-                {
-                    text: 'Opacity',
-                    iconCls: 'menu-layeroptions-opacity',
-                    menu: { 
-                        items: G.conf.opacityItems,
-                        listeners: {
-                            'itemclick': function(item) {
-                                item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
-                            }
-                        }
-                    }
-                }
-            ]
-        }),
         clickEventFn: function(node, e) {
             if (node.attributes.text != 'Base layers' && node.attributes.text != 'Overlays') {
                 node.select();
@@ -2210,6 +2194,7 @@
         width: 575,
         height: 478,
         items: choropleth,
+        cmp: {},
         bbar: [
             '->',
             {
@@ -2244,9 +2229,7 @@
                     'render': {
                         scope: choropleth,
                         fn: function(b) {
-                            this.window.cmp = {
-                                apply: b
-                            };
+                            this.window.cmp.apply = b;
                         }
                     }
                 }
@@ -2254,15 +2237,26 @@
             ' ',
             {
                 xtype: 'button',
+                name: 'reset',
                 text: 'Reset',
                 iconCls: 'icon-cancel',
+                disabled: true,
                 scope: choropleth,
                 handler: function() {
                     this.formValues.clearForm.call(this, false);
+                    this.window.cmp.reset.disable();
+                },
+                listeners: {
+                    'render': {
+                        scope: choropleth,
+                        fn: function(b) {
+                            this.window.cmp.reset = b;
+                        }
+                    }
                 }
             }
         ]
-    });
+    });    
     choropleth.window.setPosition(340,45);
 
     point = new mapfish.widgets.geostat.Point({
@@ -2669,6 +2663,7 @@
                                 items: G.conf.opacityItems,
                                 listeners: {
                                     'itemclick': function(item) {
+                                        polygonLayer.setOpacity(item.text);
                                     }
                                 }
                             }
@@ -2970,7 +2965,7 @@
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
-		handler: function() {
+		handler: function() {            
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }
