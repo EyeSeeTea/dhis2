@@ -2185,7 +2185,7 @@
         layout: 'fit',
         bodyStyle: 'padding:8px 8px 0px 8px; background-color:#fff',
         closeAction: 'hide',
-        width: 575,
+        width: 570,
         height: 478,
         items: choropleth,
         cmp: {},
@@ -2411,6 +2411,14 @@
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
 		text: G.i18n.map,
+		style: 'font:bold 11px arial; color:#333;'
+	});
+	var l_l = new Ext.form.Label({
+		text: 'Layers',
+		style: 'font:bold 11px arial; color:#333;'
+	});
+	var t_l = new Ext.form.Label({
+		text: 'Tools',
 		style: 'font:bold 11px arial; color:#333;'
 	});
 	
@@ -3391,19 +3399,25 @@
 	var mapToolbar = new Ext.Toolbar({
 		id: 'map_tb',
 		items: [
+			' ',' ',' ',' ',' ',' ',
+			l_l,
 			' ',' ',' ',' ',
-			mapLabel,
-			' ',' ',' ',' ',' ',
 			choroplethButton,
             pointButton,
             symbolButton,
             centroidButton,
 			'-',
+			' ',' ',' ',
+			mapLabel,
+			' ',' ',' ',
             zoomInButton,
 			zoomOutButton,
 			zoomToVisibleExtentButton,
 			viewHistoryButton,
 			'-',
+			' ',' ',' ',
+			t_l,
+			' ',' ',' ',
 			favoritesButton,
             predefinedMapLegendSetButton,
 			exportImageButton,

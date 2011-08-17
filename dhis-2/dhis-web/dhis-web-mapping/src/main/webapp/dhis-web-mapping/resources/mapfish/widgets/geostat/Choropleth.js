@@ -881,9 +881,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         });
         
         this.cmp.parent = new Ext.tree.TreePanel({
-            bodyStyle: 'background-color:#fff',
+            bodyStyle: 'padding-left:2px; background-color:#fff',
             height: 315,
-            width: 257,
+            width: 255,
             autoScroll: true,
             lines: false,
             loader: new Ext.tree.TreeLoader({
@@ -930,7 +930,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             {
                 xtype: 'panel',
                 layout: 'column',
-                width: 575,
+                width: 570,
                 items: [
                     {
                         xtype: 'form',
@@ -1643,6 +1643,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.cmp.radiusHigh.reset();
             
             this.window.cmp.apply.disable();
+            this.window.cmp.reset.disable();
             
             if (clearLayer) {            
                 document.getElementById(this.legendDiv).innerHTML = '';                
