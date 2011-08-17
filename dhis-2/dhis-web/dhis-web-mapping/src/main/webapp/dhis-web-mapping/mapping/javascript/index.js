@@ -2627,7 +2627,7 @@
                 this.menu = new Ext.menu.Menu({
                     items: [
                         {
-                            text: 'Edit..',
+                            text: 'Edit layer..',
                             iconCls: 'menu-layeroptions-edit',
                             handler: function() {
                                 choroplethWindow.show();

@@ -775,12 +775,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     fn: function() {
                         this.classify(false, true);
                     }
-                },
-                'render': {
-                    scope: this,
-                    fn: function(cmp) {
-                        this.cmp[cmp.name] = cmp;
-                    }
                 }
             }
         });
@@ -814,12 +808,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function() {
                         this.classify(false, true);
-                    }
-                },
-                'render': {
-                    scope: this,
-                    fn: function(cmp) {
-                        this.cmp[cmp.name] = cmp;
                     }
                 }
             }
@@ -885,15 +873,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                             this.cmp.radiusLow,
                             
                             this.cmp.radiusHigh
-                        ],
-                        listeners: {
-                            'render': {
-                                scope: this,
-                                fn: function(form) {
-                                    this.form = form;
-                                }
-                            }
-                        }
+                        ]
                     },
                     {
                         xtype: 'panel',
